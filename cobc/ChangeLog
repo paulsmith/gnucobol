@@ -3728,14 +3728,19 @@
 	* parser.y, typeck.c, cobc.h: bug #135 - give correct error position
 	  (cb_source_file + new cb_exp_line) for expression errors
 
-2015-04-14  Ron Norman <rjn@inglenet.com>
+2015-04-27  Ron Norman
 
-	* cobc.c codegen.c common.h tree.h parser.y typeck.c:
-	  updated to include support REPORT COLUMN LEFT/RIGHT/CENTER
-	  Also REPORT: PLUS, STEP on OCCURS and multi COLUMN numbers
-	NOTE (Simon): -fibmcomp is deactivated for now
-	* cobc.c, flag.def: added -fibmcomp: Handle COMP fields like MF IBMCOMP
-	  (binary-size: 1--8 & synchronized-clause: ignore)
+	* cobc.c codegen.c common.h typeck.c
+	  updated to handle more options for support of Micro Focus
+	  format files. New compile option -fmf-files sets all
+	  sequential/relative files to be MF compatible
+	  REWRITE is now allowed for LINE SEQUENTIAL files although
+	  a status of 44 may happen if the new record will not
+	  fit in the original record slot on disk.
+	  New compile option -fibmcomp effectively sets:
+	     binary-size: 2-4-8 & synchronized-clause: ok
+	  And compile option -fno-ibmcomp effectively sets:
+	     binary-size: 1--8 & synchronized-clause: ignore
 
 2015-04-28  Ron Norman <rjn@inglenet.com>
 
@@ -3759,6 +3764,15 @@
 	  style EXTFH interface, see NEWS
 	* tree.c, tree.h (struct cb_file): added extfh parameter
 	* typeck.c: generate call to EXTFH depending on cb_file->extfh
+
+2015-04-14  Ron Norman <rjn@inglenet.com>
+
+	* cobc.c codegen.c common.h tree.h parser.y typeck.c:
+	  updated to include support REPORT COLUMN LEFT/RIGHT/CENTER
+	  Also REPORT: PLUS, STEP on OCCURS and multi COLUMN numbers
+	NOTE (Simon): -fibmcomp is deactivated for now
+	* cobc.c, flag.def: added -fibmcomp: Handle COMP fields like MF IBMCOMP
+	  (binary-size: 1--8 & synchronized-clause: ignore)
 
 2015-04-12  Simon Sobisch <simonsobisch@gnu.org>
 

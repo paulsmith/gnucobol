@@ -312,8 +312,19 @@ static struct config_enum lwrupr[] = {{"LOWER", "1"}, {"UPPER", "2"}, {"not set"
 static struct config_enum beepopts[] = {{"FLASH", "1"}, {"SPEAKER", "2"}, {"FALSE", "9"}, {"BEEP", "0"}, {NULL, NULL}};
 static struct config_enum timeopts[] = {{"0", "1000"}, {"1", "100"}, {"2", "10"}, {"3", "1"}, {NULL, NULL}};
 static struct config_enum syncopts[] = {{"P", "1"}, {NULL, NULL}};
-static struct config_enum varseqopts[] = {{"0", "0"}, {"1", "1"}, {"2", "2"}, {"3", "3"}, {NULL, NULL}};
+static struct config_enum varseqopts[] = {{"0", "0"}, {"1", "1"}, {"2", "2"}, {"3", "3"},
+					  {"mf","11"},{"gc","10"},
+					  {"b4","4"},{"b32","4"},
+					  {"l4","6"},{"l32","6"},
+					  {NULL, NULL}};
+/* Make sure the values here match up with those defined in common.h */
+static struct config_enum relopts[]	= {{"0","0"},{"gc","10"},{"mf","11"},
+					   {"b4","4"},{"b32","4"},{"b8","5"},{"b64","5"},
+					   {"l4","6"},{"l32","6"},{"l8","7"},{"l64","7"},
+					   {NULL,NULL}};
 static char	varseq_dflt[8] = "0";
+static char	varrel_dflt[8] = "gc";	/* Default Variable length Relative file format */
+static char	fixrel_dflt[8] = "gc";	/* Default Fixed length Relative file format */
 static char min_conf_length = 0;
 static const char *not_set;
 
@@ -6003,13 +6014,30 @@ set_config_val (char *value, int pos)
 		}
 		set_value (data, data_len, numval);
 
-	} else if ((data_type & ENV_BOOL)) {	/* Boolean: Yes/No, True/False,... */
-		numval = translate_boolean_to_int (ptr);
-
-		if (numval != 1
-		 && numval != 0) {
-			conf_runtime_error_value (ptr, pos);
-			conf_runtime_error (1, _("should be one of the following values: %s"), "true, false");
+	} else if((data_type & ENV_BOOL)) {	/* Boolean: Yes/No,True/False,... */
+		numval = -1;
+		switch(toupper((unsigned char)*ptr)) {
+		case 'T':	/* True */
+		case 'Y':	/* Yes */
+		case '1':
+			numval = 1;
+			break;
+		case 'O':	/* ON / OFF */
+			if(toupper((unsigned char)ptr[1]) == 'N')	/* ON */
+				numval = 1;
+			else if(toupper((unsigned char)ptr[1]) == 'F') /* OFF */
+				numval = 0;
+			break;
+		case 'F':	/* False */
+		case 'N':	/* No */
+		case '0':
+			numval = 0;
+			break;
+		default:
+			break;
+		}
+		if(numval == -1) {
+			cob_runtime_error (_("%s should be 'true' or 'false'; '%s' is invalid"),gc_conf[pos].env_name,ptr); 
 			return 1;
 		} else {
 			if ((data_type & ENV_NOT)) {	/* Negate logic for actual setting */

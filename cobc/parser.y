@@ -6882,7 +6882,9 @@ _left_or_right:
 | LEFT
 | RIGHT
   {
-	CB_PENDING ("SYNCHRONIZED RIGHT");
+	/* Stay quiet on this
+	PENDING ("SYNCHRONIZED RIGHT");
+	*/
   }
 ;
 

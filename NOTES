@@ -19,10 +19,34 @@ C    libcob/common.c  merged
 C    libcob/common.h  declined
 C    libcob/fileio.c  declined
 
-
-
-
 r575
+--- Merging r575 into '.':
+   C cobc/parser.c
+   C tests/testsuite
+C    ChangeLog	      merged
+C    cobc/ChangeLog   merged
+U    cobc/codegen.c   ok
+C    cobc/config.c    merged
+C    cobc/flag.def    declined
+C    cobc/parser.y    accepted
+C    cobc/typeck.c    declined
+C    config/runtime.cfg	accepted & re-corrected "preceeds"
+C    libcob/ChangeLog 	merged
+U    libcob/coblocal.h	ok
+C    libcob/common.c	merged
+C    libcob/common.h	conflicts resolved in favor of trunk
+C    libcob/fileio.c	merged
+C    tests/ChangeLog	merged
+C    tests/testsuite.src/run_file.at declined
+C    tests/testsuite.src/run_misc.at
+Summary of conflicts:
+  Text conflicts: 14
+  Tree conflicts: 2
+
+
+
+
+
 r576
 r577
 r585

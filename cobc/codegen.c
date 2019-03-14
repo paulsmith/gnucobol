@@ -8230,6 +8230,22 @@ output_file_initialization (struct cb_file *f)
 	}
 	output_line ("%s%s->flag_select_features = %d;", CB_PREFIX_FILE, f->cname,
 		     features);
+
+	/* These may get set with values via some compile option in the future */
+	static const int cb_mf_files = 0;
+	if (cb_mf_files) {
+		output_line ("%s%s->file_format = COB_FILE_IS_MF;", CB_PREFIX_FILE, f->cname);
+		if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
+			output_line ("%s%s->file_features = COB_FILE_LS_NULLS;", CB_PREFIX_FILE, f->cname);
+		} else {
+			output_line ("%s%s->file_features = 0;", CB_PREFIX_FILE, f->cname);
+		}
+	} else {
+		output_line ("%s%s->file_format = 255;", CB_PREFIX_FILE, f->cname);
+		output_line ("%s%s->file_features = 0;", CB_PREFIX_FILE, f->cname);
+	}
+	/**********************************************************************/
+
 	if (f->flag_external) {
 		output_indent ("}");
 	}

@@ -235,10 +235,15 @@ typedef struct __cob_settings {
 	/* fileio.c */
 	unsigned int	cob_unix_lf;		/* Use POSIX LF */
 	unsigned int	cob_do_sync;
-	unsigned int	cob_ls_uses_cr;
-	unsigned int	cob_ls_nulls;
-	unsigned int	cob_ls_fixed;
-	unsigned int	cob_varseq_type;
+	unsigned int	cob_ls_uses_cr;		/* Line Sequential uses CR LF */
+	unsigned int	cob_ls_nulls;		/* NUL insert to Line Sequential */
+	unsigned int	cob_ls_fixed;		/* Line Sequential is fixed length */
+	unsigned int	cob_ls_validate;	/* Validate data in Line Sequential */
+	unsigned int	cob_varseq_type;	/* Variable Sequential Default file format */
+	unsigned int	cob_varrel_type;	/* Variable Relative default file format */
+	unsigned int	cob_fixrel_type;	/* Fixed Relative default file format */
+	unsigned int	cob_mf_files;		/* If TRUE, use Micro Focus file formats */
+	unsigned int	cob_gc_files;		/* If TRUE, revert back to old GNU Cobol file formats */
 	char 		*cob_file_path;
 	char		*bdb_home;
 	size_t		cob_sort_memory;

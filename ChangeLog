@@ -347,6 +347,14 @@
 	* configure.ac: added COB_DASH, COB_DASH_NAME, COB_DASH_OUT
 	  to support compile from stdin
 
+2015-04-27  Ron Norman
+
+	* Added support for Micro Focus format sequential and relative
+	  files. New compiler directive -fmf-files sets all sequential
+	  and relative files to match what Micro Focus would create
+	  Numerous runtime.cfg settings added for selecting file
+	  format.
+	
 2015-07-10  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: moved additional build-scripts to build_aux,

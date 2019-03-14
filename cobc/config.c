@@ -190,50 +190,113 @@ split_and_iterate_on_comma_separated_str (
 	const char *val, const char *fname, const int line)
 {
 	unsigned int	i;
-	unsigned int	j = 0;
-	char	word_buff[COB_MINI_BUFF];
 
-	for (i = 0; val[i] && j < COB_MINI_MAX; i++) {
-		/* note: we actually want spaces in,
-		   especially for mnemonics "SWITCH A" and registers "LENGTH OF"
-		*/
-		switch (val[i]) {
-		case ' ':
-			/* Remove spaces if not escaped, especially needed for
-			   mnemonics "SWITCH A" and registers "LENGTH OF" */
-			if (j > 0 && word_buff[j - 1] == '\\') {
-				word_buff[j - 1] = ' ';
-			}
-			break;
-		case '\t':
-			/* Tabs are always removed. */
-			break;
-		case ',':
-			word_buff[j] = 0;
-			(*func) (word_buff, fname, line);
-			memset (word_buff, 0, COB_MINI_BUFF);
-			j = 0;
-			break;
-		case ':':
-			if (replace_colons) {
-				word_buff[j++] = '=';
-				break;
-			}
-		default:
-			if (transform_case == 1) {
-				word_buff[j++] = (char)toupper ((int)val[i]);
-			} else if (transform_case == 2) {
-				word_buff[j++] = (char)tolower ((int)val[i]);
-			} else {;
-				word_buff[j++] = val[i];
-			}
+	/* Get tag */
+	char *s = strpbrk (val, " \t:=");
+	if (!s) {
+		configuration_error (fname, line, 1, 
+			_("Invalid configuration '%s'"), val);
+		return;
+	}
+	*s = 0;
+	
+	/* Find entry */
+	for (i = 0; i < CB_CONFIG_SIZE; i++) {
+		if (strcmp (val, config_table[i].name) == 0) {
 			break;
 		}
 	}
-	word_buff[j] = 0;
+	if (i == CB_CONFIG_SIZE) {
+		configuration_error (fname, line, 1, _("Unknown configuration tag '%s'"), val);
+		return;
+	}
 
-	if (j != 0) {
+	/* Get value */
+	/* Move pointer to beginning of value */
+	for (s++; *s && strchr (" \t:=", *s); s++) {
+		;
+	}
+	/* Set end pointer to first # (comment) or end of value */
+	char *e;
+	for (e = s + 1; *e && !strchr ("#", *e); e++) {
+		;
+	}
+	/* Remove trailing white-spaces */
+	for (--e; e >= s && strchr (" \t\r\n", *e); e--) {
+		;
+	}
+	e[1] = 0;
+
+	/* Set value */
+	const char *name = config_table[i].name;
+	val = s;
+	switch (config_table[i].type) {
+	case CB_INT:
+	case CB_STRING:
+	case CB_BOOLEAN:
+	case CB_SUPPORT:
+		cb_error_always("unhandled config type %d", config_table[i].type);
+		break;
+	case CB_ANY:
+		if (strcmp (name, "assign-clause") == 0) {
+			if (strcmp (val, "cobol2002") == 0) {
+				unsupported_value (fname, line, name, val);
+				return;
+			} else if (strcmp (val, "mf") == 0) {
+				cb_assign_clause = CB_ASSIGN_MF;
+			} else if (strcmp (val, "ibm") == 0) {
+				cb_assign_clause = CB_ASSIGN_IBM;
+			} else {
+				invalid_value (fname, line, name, val, NULL, 0, 0);
+				return;
+			}
+		} else if (strcmp (name, "binary-size") == 0) {
+			if (strcmp (val, "2-4-8") == 0) {
+				cb_binary_size = CB_BINARY_SIZE_2_4_8;
+			} else if (strcmp (val, "1-2-4-8") == 0) {
+				cb_binary_size = CB_BINARY_SIZE_1_2_4_8;
+			} else if (strcmp (val, "1--8") == 0) {
+				cb_binary_size = CB_BINARY_SIZE_1__8;
+			} else {
+				invalid_value (fname, line, name, val, NULL, 0, 0);
+				return;
+			}
+		} else if (strcmp (name, "binary-byteorder") == 0) {
+			if (strcmp (val, "native") == 0) {
+				cb_binary_byteorder = CB_BYTEORDER_NATIVE;
+			} else if (strcmp (val, "big-endian") == 0) {
+				cb_binary_byteorder = CB_BYTEORDER_BIG_ENDIAN;
+			} else {
+				invalid_value (fname, line, name, val, NULL, 0, 0);
+				return;
+			}
+		}
+		break;
+#if 0 && reportwriter //// these are invalid enum values for cb_config_type
+	case '\t':
+		/* Tabs are always removed. */
+		break;
+	case ',':
+		word_buff[j] = 0;
 		(*func) (word_buff, fname, line);
+		memset (word_buff, 0, COB_MINI_BUFF);
+		j = 0;
+		break;
+	case ':':
+		if (replace_colons) {
+			word_buff[j++] = '=';
+			break;
+		}
+	default:
+		if (transform_case == 1) {
+			word_buff[j++] = (char)toupper ((int)val[i]);
+		} else if (transform_case == 2) {
+			word_buff[j++] = (char)tolower ((int)val[i]);
+		} else {;
+			word_buff[j++] = val[i];
+		}
+		break;
+#endif
 	}
 }
 

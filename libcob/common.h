@@ -22,6 +22,9 @@
 #ifndef COB_COMMON_H
 #define COB_COMMON_H
 
+// needed for off_t 
+#include <sys/types.h>
+
 /* General type defines */
 #define	cob_c8_t		char
 #define	cob_s8_t		signed char
@@ -875,6 +878,26 @@ enum cob_exception_id {
 
 #define COB_FILE_EXCLUSIVE	(COB_LOCK_EXCLUSIVE | COB_LOCK_OPEN_EXCLUSIVE)
 
+/* File: 'file_format' as stored on disk */
+#define COB_FILE_IS_GCVS0	0	/* GNUCobol VarSeq 0 */
+#define COB_FILE_IS_GCVS1	1	/* GNUCobol VarSeq 1 */
+#define COB_FILE_IS_GCVS2	2	/* GNUCobol VarSeq 2 */
+#define COB_FILE_IS_GCVS3	3	/* GNUCobol VarSeq 3 */
+#define COB_FILE_IS_B32		4	/* 32-bit BigEndian record prefix */
+#define COB_FILE_IS_B64		5	/* 64-bit BigEndian record prefix */
+#define COB_FILE_IS_L32		6	/* 32-bit LittleEndian record prefix */
+#define COB_FILE_IS_L64		7	/* 64-bit LittleEndian record prefix */
+#define COB_FILE_IS_GC		10	/* GNUCobol default format */
+#define COB_FILE_IS_MF		11	/* Micro Focus format */
+
+/* File: 'file_features' file processing features */
+#define COB_FILE_SYNC		(1 << 0)/* sync writes to disk */
+#define COB_FILE_LS_VALIDATE	(1 << 1)/* Validate LINE SEQUENTIAL data */
+#define COB_FILE_LS_NULLS	(1 << 2)/* Do NUL insertion for LINE SEQUENTIAL */
+#define COB_FILE_LS_FIXED	(1 << 3)/* Do NUL insertion for LINE SEQUENTIAL */
+#define COB_FILE_LS_CRLF	(1 << 4)/* End LINE SEQUENTIAL records with CR LF */
+#define COB_FILE_LS_LF		(1 << 5)/* End LINE SEQUENTIAL records with LF */
+
 /* Open mode */
 
 #define COB_OPEN_CLOSED		0
@@ -1312,6 +1335,15 @@ typedef struct __cob_file_key {
  *       need to change COB_FILE_VERSION
  */
 typedef struct __cob_file {
+	unsigned char		file_version;		/* File handler version */
+	unsigned char		organization;		/* ORGANIZATION */
+	unsigned char		access_mode;		/* ACCESS MODE */
+	unsigned char		flag_line_adv;		/* LINE ADVANCING */
+	unsigned char		flag_optional;		/* OPTIONAL */
+	unsigned char		flag_select_features;	/* SELECT features */
+	unsigned char		file_format;		/* File I/O format: 255 means unspecified */
+	unsigned char		file_features;		/* File I/O features: 0 means unspecified */
+
 	const char		*select_name;		/* Name in SELECT */
 	unsigned char		*file_status;		/* FILE STATUS */
 	cob_field		*assign;		/* ASSIGN TO */
@@ -1325,28 +1357,23 @@ typedef struct __cob_file {
 	size_t			record_min;		/* Record min size */
 	size_t			record_max;		/* Record max size */
 	size_t			nkeys;			/* Number of keys */
+	off_t			record_off;		/* Starting position of last record read/written */
 	int			fd;			/* File descriptor */
+	int			record_slot;		/* Record size on disk including prefix/suffix */
+	int			record_prefix;		/* Size of record prefix */
+	int			file_header;		/* Size of file header record on disk */
 
-	unsigned char		organization;		/* ORGANIZATION */
-	unsigned char		access_mode;		/* ACCESS MODE */
 	unsigned char		lock_mode;		/* LOCK MODE */
 	unsigned char		open_mode;		/* OPEN MODE */
-	unsigned char		flag_optional;		/* OPTIONAL */
 	unsigned char		last_open_mode;		/* Mode given by OPEN */
 	unsigned char		flag_operation;		/* File type specific */
 	unsigned char		flag_nonexistent;	/* Nonexistent file */
-
 	unsigned char		flag_end_of_file;	/* Reached end of file */
 	unsigned char		flag_begin_of_file;	/* Reached start of file */
 	unsigned char		flag_first_read;	/* OPEN/START read flag */
 	unsigned char		flag_read_done;		/* READ successful */
-	unsigned char		flag_select_features;	/* SELECT features */
 	unsigned char		flag_needs_nl;		/* Needs NL at close */
 	unsigned char		flag_needs_top;		/* Linage needs top */
-	unsigned char		file_version;		/* File I/O version */
-
-	unsigned char		flag_line_adv;		/* LINE ADVANCING */
-
 } cob_file;
 
 

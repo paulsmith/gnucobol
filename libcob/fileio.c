@@ -449,13 +449,13 @@ static cob_settings	*cobsetptr = NULL;
 
 static unsigned int	eop_status = 0;
 static unsigned int	check_eop_status = 0;
-static int		cob_vsq_len = 0;
 
 static struct file_list	*file_cache = NULL;
 
 static char		*file_open_env = NULL;
 static char		*file_open_name = NULL;
 static char		*file_open_buff = NULL;
+static char		*file_open_io_env = NULL;	/* IO_filename env value */
 
 static char		*runtime_buffer = NULL;
 
@@ -476,7 +476,6 @@ static const char	* const prefix[] = { "DD_", "dd_", "" };
 #define NUM_PREFIX	sizeof (prefix) / sizeof (char *)
 
 static int dummy_delete		(cob_file *);
-static int dummy_rnxt_rewrite	(cob_file *, const int);
 static int dummy_read		(cob_file *, cob_field *, const int);
 static int dummy_start		(cob_file *, const int, cob_field *);
 
@@ -489,6 +488,7 @@ static int sequential_write	(cob_file *, const int);
 static int sequential_rewrite	(cob_file *, const int);
 static int lineseq_read		(cob_file *, const int);
 static int lineseq_write	(cob_file *, const int);
+static int lineseq_rewrite	(cob_file *, const int);
 static int relative_start	(cob_file *, const int, cob_field *);
 static int relative_read	(cob_file *, cob_field *, const int);
 static int relative_read_next	(cob_file *, const int);
@@ -534,7 +534,7 @@ static const struct cob_fileio_funcs lineseq_funcs = {
 	dummy_read,
 	lineseq_read,
 	lineseq_write,
-	dummy_rnxt_rewrite,
+	lineseq_rewrite,
 	dummy_delete
 };
 
@@ -812,15 +812,6 @@ dummy_delete (cob_file *f)
 }
 
 static int
-dummy_rnxt_rewrite (cob_file *f, const int opt)
-{
-	COB_UNUSED (f);
-	COB_UNUSED (opt);
-
-	return COB_STATUS_91_NOT_AVAILABLE;
-}
-
-static int
 dummy_read (cob_file *f, cob_field *key, const int read_opts)
 {
 	COB_UNUSED (f);
@@ -846,12 +837,12 @@ cob_chk_file_env (const char *src)
 	char		*p;
 	char		*q;
 	char		*s;
-	size_t		i;
+	int		i;
 
 	if (unlikely (cobsetptr->cob_env_mangle)) {
 		q = cob_strdup (src);
 		s = q;
-		for (i = 0; i < strlen (s); ++i) {
+		for (i = 0; s[i] != 0; ++i) {
 			if (!isalnum ((int)s[i])) {
 				s[i] = '_';
 			}
@@ -860,14 +851,36 @@ cob_chk_file_env (const char *src)
 		q = NULL;
 		s = (char *)src;
 	}
+
+	/* Check for IO_filename with file specific options */
+	file_open_io_env = NULL;
+	snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s%s", "IO_", s);
+	if ((file_open_io_env = getenv (file_open_env)) == NULL) {
+		snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s%s", "io_", s);
+		if ((file_open_io_env = getenv (file_open_env)) == NULL) {
+			for (i = 0; file_open_env[i] != 0; ++i) {	/* Try all Upper Case */
+				if(islower(file_open_env[i]))
+					file_open_env[i] = toupper(file_open_env[i]);
+			}
+			file_open_io_env = getenv (file_open_env);
+		}
+	}
+
 	p = NULL;
 	for (i = 0; i < NUM_PREFIX; ++i) {
-		snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s%s",
-			  prefix[i], s);
-		file_open_env[COB_FILE_MAX] = 0;
-		p = getenv (file_open_env);
-		if (p) {
+		snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s%s", prefix[i], s);
+		if((p = getenv (file_open_env)) != NULL)
 			break;
+	}
+	if (p == NULL) {		/* Try all Upper case env var name */
+		for (i = 0; i < NUM_PREFIX; ++i) {
+			snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s%s", prefix[i], s);
+			for (i = 0; file_open_env[i] != 0; ++i) {
+				if(islower(file_open_env[i]))
+					file_open_env[i] = toupper(file_open_env[i]);
+			}
+			if((p = getenv (file_open_env)) != NULL)
+				break;
 		}
 	}
 	if (unlikely (q)) {
@@ -1038,6 +1051,291 @@ cob_cache_file (cob_file *f)
 	l->file = f;
 	l->next = file_cache;
 	file_cache = l;
+}
+
+/*
+ * Set file format baed on defaults, runtime.cfg and IO_filename options
+ */
+
+static void
+set_file_format(cob_file *f)
+{
+	int	i,j,settrue;
+	char	option[32],value[30];
+
+	if (f->file_format == 255) {	/* File type not set by compiler; Set default */
+		if(cobsetptr->cob_do_sync)
+			f->file_features |= COB_FILE_SYNC;
+		else
+			f->file_features &= ~COB_FILE_SYNC;
+		if (f->organization == COB_ORG_SEQUENTIAL) {
+			if (f->record_min != f->record_max) {
+				f->file_format = cobsetptr->cob_varseq_type;
+			} else {
+				f->file_format = 0;
+			}
+		} else
+		if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
+			f->file_format = COB_FILE_IS_GC;
+			if(cobsetptr->cob_ls_nulls)
+				f->file_features |= COB_FILE_LS_NULLS;
+			else
+				f->file_features &= ~COB_FILE_LS_NULLS;
+			if(cobsetptr->cob_ls_fixed)
+				f->file_features |= COB_FILE_LS_FIXED;
+			else
+				f->file_features &= ~COB_FILE_LS_FIXED;
+			if(cobsetptr->cob_ls_validate)
+				f->file_features |= COB_FILE_LS_VALIDATE;
+			else
+				f->file_features &= ~COB_FILE_LS_VALIDATE;
+#ifdef	_WIN32
+			if(cobsetptr->cob_unix_lf)
+				f->file_features |= COB_FILE_LS_LF;
+			else
+				f->file_features |= COB_FILE_LS_CRLF;
+#else
+			f->file_features |= COB_FILE_LS_LF;
+#endif
+			if(cobsetptr->cob_ls_uses_cr)
+				f->file_features |= COB_FILE_LS_CRLF;
+		} else
+		if (f->organization == COB_ORG_RELATIVE) {
+			if (f->record_min != f->record_max) {
+				f->file_format = cobsetptr->cob_varrel_type;
+			} else {
+				f->file_format = cobsetptr->cob_fixrel_type;
+			}
+		}
+	}
+
+	/*
+	 * IO_filename was found
+	*/
+	if(file_open_io_env != NULL) {		/* Special options for just this file */
+		for(i=0; file_open_io_env[i] != 0; ) {
+			while(isspace(file_open_io_env[i])	/* Skip option separators */
+			|| file_open_io_env[i] == ','
+			|| file_open_io_env[i] == ';') i++;
+			if(file_open_io_env[i] == 0)
+				break;
+			for(j=0; j < 30 && !isspace(file_open_io_env[i])
+				&& file_open_io_env[i] != ','
+				&& file_open_io_env[i] != ';'
+				&& file_open_io_env[i] != '='
+				&& file_open_io_env[i] != 0; ) {	/* Collect one option */
+				option[j++] = file_open_io_env[i++];
+			}
+			option[j] = 0;
+			value[0] = 0;
+			settrue = 1;
+			if(strncasecmp(option,"no-",3) == 0) {
+				memmove(option,&option[3],j);
+				settrue = 0;
+			} else
+			if(strncasecmp(option,"no_",3) == 0) {
+				memmove(option,&option[3],j);
+				settrue = 0;
+			} else
+			if(strncasecmp(option,"no",2) == 0) {
+				memmove(option,&option[2],j);
+				settrue = 0;
+			}
+			if(file_open_io_env[i] == '=') {
+				i++;
+				for(j=0; j < 30 && !isspace(file_open_io_env[i])
+					&& file_open_io_env[i] != ','
+					&& file_open_io_env[i] != ';'
+					&& file_open_io_env[i] != 0; ) {	/* Collect one option */
+					value[j++] = file_open_io_env[i++];
+				}
+				value[j] = 0;
+				if(value[0] == '1'
+				|| toupper(value[0]) == 'T')
+					settrue = 1;
+				if(value[0] == '0'
+				|| toupper(value[0]) == 'F')
+					settrue = 0;
+			}
+			if(strcasecmp(option,"sync") == 0) {
+				if(settrue)
+					f->file_features |= COB_FILE_SYNC;
+				else
+					f->file_features &= ~COB_FILE_SYNC;
+				continue;
+			}
+			if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
+				if(strcasecmp(option,"ls_nulls") == 0) {
+					if(settrue)
+						f->file_features |= COB_FILE_LS_NULLS;
+					else
+						f->file_features &= ~COB_FILE_LS_NULLS;
+					continue;
+				}
+				if(strcasecmp(option,"ls_fixed") == 0) {
+					if(settrue)
+						f->file_features |= COB_FILE_LS_FIXED;
+					else
+						f->file_features &= ~COB_FILE_LS_FIXED;
+					continue;
+				}
+				if(strcasecmp(option,"ls_validate") == 0) {
+					if(settrue)
+						f->file_features |= COB_FILE_LS_VALIDATE;
+					else
+						f->file_features &= ~COB_FILE_LS_VALIDATE;
+					continue;
+				}
+				if(strcasecmp(option,"crlf") == 0) {
+					if(settrue)
+						f->file_features |= COB_FILE_LS_CRLF;
+					else
+						f->file_features &= ~COB_FILE_LS_CRLF;
+					continue;
+				}
+				if(strcasecmp(option,"lf") == 0) {
+					if(settrue)
+						f->file_features |= COB_FILE_LS_LF;
+					else
+						f->file_features &= ~COB_FILE_LS_LF;
+					continue;
+				}
+				if(strcasecmp(option,"mf") == 0) {	/* LS file like MF would do */
+					f->file_features &= ~COB_FILE_LS_FIXED;
+					f->file_features |= COB_FILE_LS_NULLS;
+					f->file_features &= ~COB_FILE_LS_VALIDATE;
+#ifdef	_WIN32
+					f->file_features |= COB_FILE_LS_CRLF;
+#else
+					f->file_features |= COB_FILE_LS_LF;
+#endif
+				}
+				if(strcasecmp(option,"gc") == 0) {	/* LS file like GNUCobol used to do */
+					f->file_features &= ~COB_FILE_LS_FIXED;
+					f->file_features &= ~COB_FILE_LS_NULLS;
+					f->file_features &= ~COB_FILE_LS_VALIDATE;
+#ifdef	_WIN32
+					f->file_features |= COB_FILE_LS_CRLF;
+#else
+					f->file_features |= COB_FILE_LS_LF;
+#endif
+				}
+			}
+			if(strcasecmp(option,"mf") == 0) {
+				if(settrue) {
+					f->file_format = COB_FILE_IS_MF;
+					continue;
+				}
+				continue;
+			}
+			if(strcasecmp(option,"gc") == 0) {
+				if(settrue) {
+					f->file_format = COB_FILE_IS_GC;
+					continue;
+				}
+				continue;
+			}
+			if (f->organization == COB_ORG_SEQUENTIAL
+			&&  f->record_min != f->record_max) {		/* Variable length Sequential */
+				if(strcasecmp(option,"0") == 0) {
+					f->file_format = COB_FILE_IS_GCVS0;
+				} else
+				if(strcasecmp(option,"1") == 0) {
+					f->file_format = COB_FILE_IS_GCVS1;
+				} else
+				if(strcasecmp(option,"2") == 0) {
+					f->file_format = COB_FILE_IS_GCVS2;
+				} else
+				if(strcasecmp(option,"3") == 0) {
+					f->file_format = COB_FILE_IS_GCVS3;
+				} else
+				if(strcasecmp(option,"b4") == 0
+				|| strcasecmp(option,"b32") == 0) {
+					f->file_format = COB_FILE_IS_B32;
+				} else
+				if(strcasecmp(option,"l4") == 0
+				|| strcasecmp(option,"l32") == 0) {
+					f->file_format = COB_FILE_IS_L32;
+				}
+			}
+			if (f->organization == COB_ORG_RELATIVE) {	/* Relative format */
+				if(strcasecmp(option,"b4") == 0
+				|| strcasecmp(option,"b32") == 0) {
+					f->file_format = COB_FILE_IS_B32;
+				} else
+				if(strcasecmp(option,"l4") == 0
+				|| strcasecmp(option,"l32") == 0) {
+					f->file_format = COB_FILE_IS_L32;
+				} else
+				if(strcasecmp(option,"b8") == 0
+				|| strcasecmp(option,"b64") == 0) {
+					f->file_format = COB_FILE_IS_B64;
+				} else
+				if(strcasecmp(option,"l8") == 0
+				|| strcasecmp(option,"l64") == 0) {
+					f->file_format = COB_FILE_IS_L64;
+				}
+			}
+		}
+	}
+
+	f->record_off = -1;
+	f->flag_begin_of_file = 1;
+	f->record_prefix = 0;
+	f->file_header = 0;
+	/* Set File type specific values */
+	if (f->organization == COB_ORG_SEQUENTIAL) {
+		if(f->record_min != f->record_max) {
+			if(f->file_format == COB_FILE_IS_GCVS0
+			|| f->file_format == COB_FILE_IS_GCVS1
+			|| f->file_format == COB_FILE_IS_GCVS2) {
+				f->record_prefix = 4;
+			} else 
+			if(f->file_format == COB_FILE_IS_GCVS3) {
+				f->record_prefix = 2;
+			} else
+			if(f->file_format == COB_FILE_IS_L32
+			|| f->file_format == COB_FILE_IS_B32) {
+				f->record_prefix = 4;
+			} else
+			if(f->file_format == COB_FILE_IS_MF) {
+				f->record_prefix = 4;
+				f->file_header = 128;
+				f->record_slot = f->record_max + f->record_prefix + 1;
+			} else {
+				f->record_prefix = 4;
+			} 
+		}
+		f->record_slot = f->record_max + f->record_prefix;
+	} else
+	if (f->organization == COB_ORG_RELATIVE) {
+		f->record_prefix = sizeof(size_t);
+		f->record_slot = f->record_max + f->record_prefix;
+		if(f->file_format == COB_FILE_IS_B32
+		|| f->file_format == COB_FILE_IS_L32) {
+			f->record_prefix = 4;
+			f->record_slot = f->record_max + f->record_prefix;
+		} else 
+		if(f->file_format == COB_FILE_IS_B64
+		|| f->file_format == COB_FILE_IS_L64) {
+			f->record_prefix = 8;
+			f->record_slot = f->record_max + f->record_prefix;
+		} else 
+		if(f->file_format == COB_FILE_IS_MF) {
+			if(f->record_min != f->record_max) {	/* Variable length Relative */
+				if(f->record_max < 4096) {
+					f->record_prefix = 2;
+				} else {
+					f->record_prefix = 4;
+				}
+				f->file_header = 128;
+				f->record_slot = f->record_max + f->record_prefix + 1;
+			} else {
+				f->record_prefix = 0;
+				f->record_slot = f->record_max + 1;
+			}
+		} 
+	}
 }
 
 static void
@@ -1264,6 +1562,131 @@ cob_file_write_opt (cob_file *f, const int opt)
 	return 0;
 }
 
+/* 
+ * Check if input file is Micro Focus variable length format
+ *         (Refer to Micro Focus file format documentation for details)
+ */
+static unsigned char mfhdrmark2[4] = {0x30,0x7E,0x00,0x00};
+static unsigned char mfhdrmark4[4] = {0x30,0x00,0x00,0x7C};
+static int
+check_mf_format(cob_file *f, char *filename)
+{
+	FILE	*fd;
+	int	ln,minrcsz,maxrcsz;
+	unsigned char mfhdr[128];
+
+	fd = fopen(filename,"r");
+	if(fd == NULL) {
+		return 0;
+	}
+
+	memset(mfhdr,0,sizeof(mfhdr));
+	ln = fread(mfhdr,1,sizeof(mfhdr),fd);
+	minrcsz = LDCOMPX4(((unsigned char *)&mfhdr[58]));
+	maxrcsz = LDCOMPX4(((unsigned char *)&mfhdr[54]));
+
+	/* Check for file header markers and sanity checks on record size info */
+	if(ln == sizeof(mfhdr)
+	&& (memcmp(mfhdr,mfhdrmark2,4) == 0 || memcmp(mfhdr,mfhdrmark4,4) == 0)
+	&& mfhdr[36] == 0x00
+	&& mfhdr[37] == 0x3E
+	&& (mfhdr[39] == 0x01 || mfhdr[39] == 0x03)
+	&& (mfhdr[48] == 0x01 || mfhdr[48] == 0x00)
+	&& minrcsz > 0
+	&& maxrcsz < (60*1024*1024)
+	&& minrcsz <= maxrcsz) {
+		if(f->organization == COB_ORG_RELATIVE
+		&& mfhdr[39] != 0x03) {
+			DEBUG_LOG("io",("File %s is not RELATIVE on disk\n",f->select_name));
+		} else
+		if(f->organization == COB_ORG_SEQUENTIAL
+		&& mfhdr[39] != 0x01) {
+			DEBUG_LOG("io",("File %s is not SEQUENTIAL on disk\n",f->select_name));
+		}
+
+		if(memcmp(mfhdr,mfhdrmark4,4) == 0) {
+			f->record_prefix  = 4;
+		} else {
+			f->record_prefix  = 2;
+		}
+		if(maxrcsz > f->record_max) {
+			cob_runtime_error (_("ERROR FILE %s has record size %d exceeds %d in program"),
+							f->select_name,maxrcsz,(int)f->record_max);
+		} else {
+			f->record_min  = minrcsz;
+			f->record_max  = maxrcsz;
+		}
+		f->file_header = 128;
+		f->record_off  = -1;		/* At start of file */
+		f->file_format = COB_FILE_IS_MF;
+		if(mfhdr[39] == 0x03) {		/* Relative format */
+			f->record_slot = f->record_max + 1 + f->record_prefix;
+		} else {
+			f->record_slot = 0;	/* Unused for sequential format */
+		}
+	} else {
+		fclose(fd);
+		return 0;
+	}
+	fclose(fd);
+	return 1;
+}
+
+/*
+ * Write the MF style file header for variable sequential & relative files
+ */
+static int			/* Return -1 on error, else 0 */
+write_mf_header(cob_file *f, char *filename)
+{
+	FILE	*fd;
+	int	k;
+	char	wrk[16];
+	unsigned char mfhdr[128];
+	time_t	nowis;
+	struct tm *lclNow;
+
+	fd = fopen(filename,"w");
+	if(fd == NULL) {
+		return -1;
+	}
+	memset(mfhdr,0,sizeof(mfhdr));
+	if(f->record_max < 4096) {
+		memcpy(mfhdr,mfhdrmark2,4);
+		f->record_prefix = 2;
+	} else {
+		memcpy(mfhdr,mfhdrmark4,4);
+		f->record_prefix = 4;
+	}
+	time(&nowis);
+	lclNow = localtime(&nowis);
+	strftime(wrk,sizeof(wrk),"%y%m%d%H%M%S00",lclNow);
+	memcpy(&mfhdr[8],wrk,14);
+	memcpy(&mfhdr[22],wrk,14);
+	mfhdr[37] = 0x3E;
+	if(f->organization == COB_ORG_RELATIVE)
+		mfhdr[39] = 3;
+	else
+	if(f->organization == COB_ORG_SEQUENTIAL)
+		mfhdr[39] = 1;
+	if(f->record_min != f->record_max)
+		mfhdr[48] = 1;
+	else
+		mfhdr[48] = 0;
+	STCOMPX4(f->record_max,LSUCHAR(&mfhdr[54]));
+	STCOMPX4(f->record_min,LSUCHAR(&mfhdr[58]));
+	k = fwrite(mfhdr, sizeof(mfhdr), 1, fd);
+	fclose(fd);
+	if(k != 1)
+		return -1;
+	f->file_header = 128;
+	f->record_off  = -1;		/* At start of file */
+	return 0;
+}
+
+/*
+ * Open (record) Sequential and Relative files
+ *  with just an 'fd' (No FILE *)
+ */
 static int
 cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 {
@@ -1286,6 +1709,30 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 			return COB_STATUS_35_NOT_EXISTS;
 		}
 		nonexistent = 1;
+	}
+
+	set_file_format(f);		/* Set file format */
+
+	if ((f->organization == COB_ORG_RELATIVE || f->organization == COB_ORG_SEQUENTIAL)
+	&&  nonexistent == 0
+	&&  (mode == COB_OPEN_INPUT || mode == COB_OPEN_I_O || mode == COB_OPEN_EXTEND) ) {
+		if(f->file_format == COB_FILE_IS_MF
+		&& f->record_min == f->record_max) {
+			/* Fixed size records so Not file header to check */
+		} else
+		if(f->file_format == COB_FILE_IS_MF
+		&& !check_mf_format(f, filename)) {
+			DEBUG_LOG("io",("File %s is not in MF format\n",f->select_name));
+			f->file_format = COB_FILE_IS_GCVS0;	/* Try GNU Cobol format */
+			f->record_prefix = 4;
+			f->file_header = 0;
+			set_file_format(f);			/* Reset file format options */
+		} else
+		if(f->file_format != COB_FILE_IS_MF
+		&& check_mf_format(f, filename)) {
+			DEBUG_LOG("io",("File %s detected to be MF format\n",f->select_name));
+			f->file_format = COB_FILE_IS_MF;	/* Use Micro Focus format */
+		}
 	}
 
 	fdmode = O_BINARY;
@@ -1364,6 +1811,26 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	default:
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
+	if ((mode == COB_OPEN_OUTPUT || (mode == COB_OPEN_I_O && nonexistent))
+	&&  f->file_format == COB_FILE_IS_MF) {	/* Write MF file header */
+		if(f->record_min != f->record_max) {
+			write_mf_header(f, filename);
+			f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);
+		} else {
+			f->record_prefix = 0;
+		}
+	} else
+	if ((f->organization == COB_ORG_RELATIVE || f->organization == COB_ORG_SEQUENTIAL)
+	&&  f->file_format == COB_FILE_IS_MF
+	&&  (mode == COB_OPEN_INPUT || mode == COB_OPEN_I_O || mode == COB_OPEN_EXTEND) ) {
+		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);
+	}
+	if (f->access_mode == COB_ACCESS_SEQUENTIAL
+	&&  f->organization == COB_ORG_RELATIVE
+	&&  f->keys[0].field) {
+		cob_set_int (f->keys[0].field, 0);
+	}
+	f->record_off = -1;
 
 #ifdef	HAVE_FCNTL
 	/* Lock the file */
@@ -1484,7 +1951,8 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 		}
 		break;
 	case COB_OPEN_I_O:
-		return COB_STATUS_37_PERMISSION_DENIED;
+		fmode = "r+";
+		break;
 	case COB_OPEN_EXTEND:
 		/* Problem on WIN32 (tested _MSC_VER 1500 and GCC build) if file isn't there: */
 		/* Both modes create the file and return a bad pointer */
@@ -1559,6 +2027,7 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 		lingptr = f->linorkeyptr;
 		cob_set_int (lingptr->linage_ctr, 1);
 	}
+	set_file_format(f);		/* Set file format */
 
 #ifdef	HAVE_FCNTL
 	/* Lock the file */
@@ -1667,7 +2136,7 @@ cob_file_close (cob_file *f, const int opt)
 static int
 sequential_read (cob_file *f, const int read_opts)
 {
-	int	bytesread;
+	int	bytesread,padlen;
 	union {
 		unsigned char	sbuff[4];
 		unsigned short	sshort[2];
@@ -1687,26 +2156,49 @@ sequential_read (cob_file *f, const int read_opts)
 
 	if (unlikely (f->flag_operation != 0)) {
 		f->flag_operation = 0;
-		lseek (f->fd, (off_t)0, SEEK_CUR);
+	}
+	if(f->record_off == -1) {
+		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);	/* Set current file position */
+	} else {
+		f->record_off = lseek (f->fd, (off_t)0, SEEK_CUR);	/* Get current file position */
 	}
 
 	if (unlikely (f->record_min != f->record_max)) {
 		/* Read record size */
 
-		bytesread = read (f->fd, recsize.sbuff, cob_vsq_len);
-		if (unlikely (bytesread != cob_vsq_len)) {
+		bytesread = read (f->fd, recsize.sbuff, f->record_prefix);
+		if (unlikely (bytesread != (int)f->record_prefix)) {
 			if (bytesread == 0) {
 				return COB_STATUS_10_END_OF_FILE;
 			} else {
 				return COB_STATUS_30_PERMANENT_ERROR;
 			}
 		}
-		switch (cobsetptr->cob_varseq_type) {
+		switch (f->file_format) {
+		case COB_FILE_IS_GC:
+		case 0:
+		case 3:
+			f->record->size = COB_MAYSWAP_16 (recsize.sshort[0]);
+			break;
 		case 1:
 			f->record->size = COB_MAYSWAP_32 (recsize.sint);
 			break;
 		case 2:
 			f->record->size = recsize.sint;
+			break;
+		case COB_FILE_IS_B32:		/* Was varseq 2 on Big Endian system */
+			f->record->size = LDCOMPX4(recsize.sbuff);
+			break;
+		case COB_FILE_IS_L32:		/* Was varseq 2 on Little Endian system */
+			f->record->size = LDBINLE4(recsize.sbuff);
+			break;
+		case COB_FILE_IS_MF:
+			if(f->record_prefix == 2) {
+				f->record->size = ((recsize.sbuff[0] & 0x0F) << 8) + recsize.sbuff[1];
+			} else {
+				f->record->size = ((recsize.sbuff[0] & 0x0F) << 24) + (recsize.sbuff[1] << 16) 
+						+ (recsize.sbuff[2] << 8) + recsize.sbuff[3];
+			}
 			break;
 		default:
 			f->record->size = COB_MAYSWAP_16 (recsize.sshort[0]);
@@ -1716,7 +2208,13 @@ sequential_read (cob_file *f, const int read_opts)
 
 	/* Read record */
 	bytesread = read (f->fd, f->record->data, f->record->size);
-	if (unlikely (bytesread != (int)f->record->size)) {
+	if (f->record_min != f->record_max
+	&&  f->file_format == COB_FILE_IS_MF) {
+		padlen = ((f->record->size + f->record_prefix + 3) / 4 * 4) - (f->record->size + f->record_prefix);
+		if(padlen > 0)
+			read(f->fd, recsize.sbuff, padlen);	/* Read past padding chars */
+	}
+	if (unlikely(bytesread != (int)f->record->size)) {
 		if (bytesread == 0) {
 			return COB_STATUS_10_END_OF_FILE;
 		/* LCOV_EXCL_START */
@@ -1739,6 +2237,7 @@ sequential_write (cob_file *f, const int opt)
 		unsigned short	sshort[2];
 		unsigned int	sint;
 	} recsize;
+	int	padlen;
 
 #ifdef	WITH_SEQRA_EXTFH
 	int	extfh_ret;
@@ -1751,7 +2250,6 @@ sequential_write (cob_file *f, const int opt)
 
 	if (unlikely (f->flag_operation == 0)) {
 		f->flag_operation = 1;
-		lseek (f->fd, (off_t)0, SEEK_CUR);
 	}
 
 	/* WRITE AFTER */
@@ -1762,26 +2260,56 @@ sequential_write (cob_file *f, const int opt)
 		f->flag_needs_nl = 1;
 	}
 
-	if (unlikely (f->record_min != f->record_max)) {
+	if(f->record_off == -1) {
+		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);	/* Set current file position */
+	} else {
+		f->record_off = lseek (f->fd, (off_t)0, SEEK_CUR);	/* Get current file position */
+	}
+	if (unlikely(f->record_min != f->record_max)) {
 		/* Write record size */
 
-		switch (cobsetptr->cob_varseq_type) {
+		recsize.sint = 0;
+		switch (f->file_format) {
 		case 1:
 			recsize.sint = COB_MAYSWAP_32 (f->record->size);
 			break;
 		case 2:
 			recsize.sint = f->record->size;
 			break;
+		case COB_FILE_IS_B32:		/* Was varseq 2 on Big Endian system */
+			STCOMPX4(f->record->size, recsize.sbuff);
+			break;
+		case COB_FILE_IS_L32:		/* Was varseq 2 on Little Endian system */
+			STBINLE4(f->record->size, recsize.sbuff);
+			break;
+		case COB_FILE_IS_MF:
+			if(f->record_prefix == 2) {
+				STCOMPX2(f->record->size, recsize.sbuff);
+			} else {
+				STCOMPX4(f->record->size, recsize.sbuff);
+			}
+			recsize.sbuff[0] |= 0x40;
+			break;
 		default:
-			recsize.sint = 0;
 			recsize.sshort[0] = COB_MAYSWAP_16 (f->record->size);
 			break;
 		}
-		COB_CHECKED_WRITE (f->fd, recsize.sbuff, cob_vsq_len);
+
+		if (unlikely(write (f->fd, recsize.sbuff, f->record_prefix) !=
+			     (int)f->record_prefix)) {
+			return COB_STATUS_30_PERMANENT_ERROR;
+		}
 	}
 
 	/* Write record */
 	COB_CHECKED_WRITE (f->fd, f->record->data, f->record->size);
+
+	if (f->record_min != f->record_max
+	&&  f->file_format == COB_FILE_IS_MF) {
+		padlen = ((f->record->size + f->record_prefix + 3) / 4 * 4) - (f->record->size + f->record_prefix);
+		while(padlen-- > 0)
+			write(f->fd, " ",1);
+	}
 
 	/* WRITE BEFORE */
 	if (unlikely (opt & COB_WRITE_BEFORE)) {
@@ -1797,7 +2325,12 @@ sequential_write (cob_file *f, const int opt)
 static int
 sequential_rewrite (cob_file *f, const int opt)
 {
-	size_t	ret;
+	union {
+		unsigned char	sbuff[4];
+		unsigned short	sshort[2];
+		unsigned int	sint;
+	} recsize;
+	int	bytesread, rcsz, padlen;
 #ifdef	WITH_SEQRA_EXTFH
 	int	extfh_ret;
 
@@ -1809,10 +2342,70 @@ sequential_rewrite (cob_file *f, const int opt)
 	COB_UNUSED (opt);
 #endif
 	f->flag_operation = 1;
-	if (lseek (f->fd, -(off_t) f->record->size, SEEK_CUR) == (off_t)-1) {
+	if (f->record_off != (off_t)-1) {
+		if (lseek (f->fd, f->record_off, SEEK_SET) == (off_t)-1) {
+			return COB_STATUS_30_PERMANENT_ERROR;
+		}
+	} else
+	if (lseek (f->fd, -(off_t) f->record->size, SEEK_CUR) == (off_t)-1) {	/* Not used! */
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
-	COB_CHECKED_WRITE (f->fd, f->record->data, f->record->size);
+	rcsz = f->record->size;
+	padlen = 0;
+	if (f->record_min != f->record_max
+	&& f->record_prefix > 0) {
+		bytesread = read (f->fd, recsize.sbuff, f->record_prefix);
+		if (unlikely (bytesread != (int)f->record_prefix)) {
+			if (bytesread == 0) {
+				return COB_STATUS_10_END_OF_FILE;
+			} else {
+				return COB_STATUS_30_PERMANENT_ERROR;
+			}
+		}
+		switch (f->file_format) {
+		case COB_FILE_IS_GC:
+		case 0:
+		case 3:
+			rcsz = COB_MAYSWAP_16 (recsize.sshort[0]);
+			break;
+		case 1:
+			rcsz = COB_MAYSWAP_32 (recsize.sint);
+			break;
+		case 2:
+			rcsz = recsize.sint;
+			break;
+		case COB_FILE_IS_B32:		/* Was varseq 2 on Big Endian system */
+			rcsz = LDCOMPX4(recsize.sbuff);
+			break;
+		case COB_FILE_IS_L32:		/* Was varseq 2 on Little Endian system */
+			rcsz = LDBINLE4(recsize.sbuff);
+			break;
+		case COB_FILE_IS_MF:
+			if(f->record_prefix == 2) {
+				rcsz = ((recsize.sbuff[0] & 0x0F) << 8) + recsize.sbuff[1];
+			} else {
+				rcsz = ((recsize.sbuff[0] & 0x0F) << 24) + (recsize.sbuff[1] << 16) 
+					+ (recsize.sbuff[2] << 8) + recsize.sbuff[3];
+			}
+			padlen = ((rcsz + f->record_prefix + 3) / 4 * 4) - (rcsz + f->record_prefix);
+			break;
+		default:
+			rcsz = COB_MAYSWAP_16 (recsize.sshort[0]);
+			break;
+		}
+		if((rcsz + padlen) < f->record->size)
+			return COB_STATUS_30_PERMANENT_ERROR;
+	}
+	if(rcsz > f->record_max)
+		return COB_STATUS_30_PERMANENT_ERROR;
+	if (write (f->fd, f->record->data, (size_t)rcsz) != (int)rcsz) {
+		return COB_STATUS_30_PERMANENT_ERROR;
+	}
+	if (f->record_min != f->record_max
+	&&  f->file_format == COB_FILE_IS_MF) {
+		while(padlen-- > 0)
+			write(f->fd, " ",1);
+	}
 	return COB_STATUS_00_SUCCESS;
 }
 
@@ -1837,6 +2430,7 @@ lineseq_read (cob_file *f, const int read_opts)
 #endif
 
 	dataptr = f->record->data;
+	f->record_off = ftell ((FILE *)f->file);	/* Save file position at start of line */
 	for (; ;) {
 		n = getc ((FILE *)f->file);
 		if (unlikely (n == EOF)) {
@@ -1846,10 +2440,15 @@ lineseq_read (cob_file *f, const int read_opts)
 				break;
 			}
 		}
-		if (unlikely (n == 0 && cobsetptr->cob_ls_nulls != 0)) {
+		if (unlikely(n == 0)
+		&& (f->file_features & COB_FILE_LS_NULLS)) {
 			n = getc ((FILE *)f->file);
 			/* LCOV_EXCL_START */
 			if (n == EOF) {
+				return COB_STATUS_30_PERMANENT_ERROR;
+			}
+			if ((f->file_features & COB_FILE_LS_VALIDATE)
+			&& (unsigned char)n > 0x1f) {		/* Should be less than a space */
 				return COB_STATUS_30_PERMANENT_ERROR;
 			}
 			/* LCOV_EXCL_STOP */
@@ -1881,7 +2480,7 @@ lineseq_write (cob_file *f, const int opt)
 	unsigned char		*p;
 	cob_linage		*lingptr;
 	size_t			size;
-	int			i;
+	int			i,j;
 	int			ret;
 
 #ifdef	WITH_SEQRA_EXTFH
@@ -1894,7 +2493,7 @@ lineseq_write (cob_file *f, const int opt)
 #endif
 
 	/* Determine the size to be written */
-	if (unlikely (cobsetptr->cob_ls_fixed != 0)) {
+	if ((f->file_features & COB_FILE_LS_FIXED)) {
 		size = f->record->size;
 	} else {
 		for (i = (int)f->record->size - 1; i >= 0; --i) {
@@ -1923,29 +2522,46 @@ lineseq_write (cob_file *f, const int opt)
 		f->flag_needs_nl = 1;
 	}
 
+	f->record_off = ftell ((FILE *)f->file);	/* Save file position at start of line */
 	/* Write to the file */
 	if (size) {
-		if (unlikely (cobsetptr->cob_ls_nulls != 0)) {
+		if ((f->file_features & COB_FILE_LS_NULLS)) {
 			p = f->record->data;
-			for (i = 0; i < (int)size; ++i, ++p) {
-				if (*p < ' ') {
-					COB_CHECKED_PUTC (0, (FILE *)f->file);
+			for(i=j=0; j < (int)size; j++) {
+				if(p[j] <= 0x1f) {
+					if(j-i > 0) {
+						if(fwrite(&p[i],j-i,1,(FILE*)f->file) <= 0)
+							return COB_STATUS_30_PERMANENT_ERROR;
+					}
+					i = j + 1;
+					fputc(0x00, (FILE*)f->file);
+					fputc(p[j], (FILE*)f->file);
 				}
-				COB_CHECKED_PUTC ((*p), (FILE *)f->file);
+			}
+			if(i < (int)size) {
+				if(fwrite(&p[i],(int)size-i,1,(FILE*)f->file) <= 0)
+					return COB_STATUS_30_PERMANENT_ERROR;
 			}
 		} else {
-			ret = fwrite (f->record->data, size, (size_t)1, (FILE *)f->file);
-			/* LCOV_EXCL_START */
-			if (unlikely (ret != 1)) {
-				return errno_cob_sts (COB_STATUS_30_PERMANENT_ERROR);
-			};
+			if ((f->file_features & COB_FILE_LS_VALIDATE)) {
+				p = f->record->data;
+				for (i = 0; i < (int)size; ++i, ++p) {
+					if (*p <= 0x1F) 
+						return COB_STATUS_30_PERMANENT_ERROR;
+				}
+			}
+			if (unlikely(fwrite (f->record->data, size, (size_t)1,
+				     (FILE *)f->file) != 1)) {
+				return COB_STATUS_30_PERMANENT_ERROR;
+			}
 			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (unlikely (f->flag_select_features & COB_SELECT_LINAGE)) {
 		putc ('\n', (FILE *)f->file);
-	} else if (cobsetptr->cob_ls_uses_cr) {
+	} else 
+	if ((f->file_features & COB_FILE_LS_CRLF)) {
 		if ((opt & COB_WRITE_PAGE)
 		 || (opt & COB_WRITE_BEFORE && f->flag_needs_nl)) {
 			COB_CHECKED_PUTC ('\r', (FILE *)f->file);
@@ -1978,8 +2594,185 @@ lineseq_write (cob_file *f, const int opt)
 	return COB_STATUS_00_SUCCESS;
 }
 
-/* RELATIVE */
+static int
+lineseq_rewrite (cob_file *f, const int opt)
+{
+	unsigned char		*p;
+	size_t			size,psize;
+	int			i,j,slotlen;
+	int			ret;
+	off_t			curroff;
 
+#ifdef	WITH_SEQRA_EXTFH
+	int		extfh_ret;
+
+	extfh_ret = extfh_sequential_rewrite (f, opt);
+	if (extfh_ret != COB_NOT_CONFIGURED) {
+		return extfh_ret;
+	}
+#endif
+
+	curroff = ftell ((FILE *)f->file);	/* Current file position */
+	/* Determine the size to be written */
+	if ((f->file_features & COB_FILE_LS_FIXED)) {
+		size = f->record->size;
+	} else {
+		for (i = (int)f->record->size - 1; i >= 0; --i) {
+			if (f->record->data[i] != ' ') {
+				break;
+			}
+		}
+		size = i + 1;
+	}
+
+	p = f->record->data;
+	psize = size;
+	if ((f->file_features & COB_FILE_LS_NULLS)) {
+		for(j=0; j < (int)size; j++) {
+			if(p[j] <= 0x1f) {
+				psize++;
+			}
+		}
+	}
+	slotlen = curroff - f->record_off - 1;
+
+	if(psize > slotlen)
+		return COB_STATUS_44_RECORD_OVERFLOW;
+
+	if (fseek((FILE*)f->file, f->record_off, SEEK_SET) != 0)
+		return COB_STATUS_30_PERMANENT_ERROR;
+
+	/* Write to the file */
+	if (size) {
+		if ((f->file_features & COB_FILE_LS_NULLS)) {
+			p = f->record->data;
+			for(i=j=0; j < (int)size; j++) {
+				if(p[j] <= 0x1f) {
+					if(j-i > 0) {
+						if(fwrite(&p[i],j-i,1,(FILE*)f->file) <= 0)
+							return COB_STATUS_30_PERMANENT_ERROR;
+					}
+					i = j + 1;
+					fputc(0x00, (FILE*)f->file);
+					fputc(p[j], (FILE*)f->file);
+				}
+			}
+			if(i < (int)size) {
+				if(fwrite(&p[i],(int)size-i,1,(FILE*)f->file) <= 0)
+					return COB_STATUS_30_PERMANENT_ERROR;
+			}
+		} else {
+			if ((f->file_features & COB_FILE_LS_VALIDATE)) {
+				p = f->record->data;
+				for (i = 0; i < (int)size; ++i, ++p) {
+					if (*p <= 0x1F) 
+						return COB_STATUS_30_PERMANENT_ERROR;
+				}
+			}
+			if (unlikely(fwrite (f->record->data, size, (size_t)1,
+				     (FILE *)f->file) != 1)) {
+				return COB_STATUS_30_PERMANENT_ERROR;
+			}
+		}
+		for(i= psize; i < slotlen; i++)		/* In case new record was shorter, pad with spaces */
+			fputc(' ', (FILE*)f->file);
+	}
+
+	if (unlikely(f->flag_select_features & COB_SELECT_LINAGE)) {
+		putc ('\n', (FILE *)f->file);
+	} else 
+	if ((f->file_features & COB_FILE_LS_CRLF)) {
+		if (opt & COB_WRITE_PAGE) {
+			putc ('\r', (FILE *)f->file);
+		} else if ((opt & COB_WRITE_BEFORE) && f->flag_needs_nl) {
+			putc ('\r', (FILE *)f->file);
+		}
+	} else {
+		putc ('\n', (FILE *)f->file);
+	}
+
+	/* WRITE BEFORE */
+	if (opt & COB_WRITE_BEFORE) {
+		ret = cob_file_write_opt (f, opt);
+		if (ret) {
+			return ret;
+		}
+		f->flag_needs_nl = 0;
+	}
+
+	return COB_STATUS_00_SUCCESS;
+}
+
+/* RELATIVE */
+/*
+ * Return size of relative record at given offset
+ */
+static int
+relative_read_size (cob_file *f, off_t off, int *isdeleted)
+{
+	int	relsize = 0;
+	unsigned char rechdr[8];
+
+	*isdeleted = 0;
+	if (lseek (f->fd, off, SEEK_SET) == (off_t)-1 ) {
+		return -1;
+	}
+	if (f->record_prefix > 0) {
+		memset(rechdr,0,sizeof(rechdr));
+		if (read (f->fd, rechdr, f->record_prefix) != f->record_prefix) {
+			return -1;
+		}
+		switch (f->file_format) {
+		case COB_FILE_IS_B32:		/* Was 32bit Big Endian system */
+			relsize = LDCOMPX4(rechdr);
+			break;
+		case COB_FILE_IS_B64:		/* Was 64bit Big Endian system */
+			relsize = LDCOMPX4(((unsigned char *)&rechdr[4]));
+			break;
+		case COB_FILE_IS_L32:		/* Was 32bit Little Endian system */
+			relsize = LDBINLE4(rechdr);
+			break;
+		case COB_FILE_IS_L64:		/* Was 64bit Little Endian system */
+			relsize = LDBINLE4(rechdr);
+			break;
+		case COB_FILE_IS_MF:
+			if(f->record_prefix == 2) {
+				relsize = ((rechdr[0] & 0x0F) << 8) + rechdr[1];
+			} else {
+				relsize = ((rechdr[0] & 0x0F) << 24) + (rechdr[1] << 16) 
+					+ (rechdr[2] << 8) + rechdr[3];
+			}
+			if((rechdr[0] & 0x20)) {
+				relsize = 0;	/* Deleted record */
+			}
+			break;
+		default:
+			memcpy(&relsize, rechdr, sizeof(relsize));	/* Local native 'size_t' */
+			break;
+		}
+		if(relsize <= 0)
+			*isdeleted = 1;
+		return (int)relsize;
+	} else
+	if (f->file_format == COB_FILE_IS_MF) {
+		if (lseek (f->fd, off + f->record_slot - 1, SEEK_SET) == (off_t)-1 ) {
+			return -1;
+		}
+		rechdr[0] = 0;
+		read (f->fd, rechdr, 1);	/* 0x00 means deleted record */
+		lseek (f->fd, off, SEEK_SET);
+		if(rechdr[0] == 0) {
+			*isdeleted = 1;
+			return 0;
+		} else {
+			return (int)f->record_max;
+		}
+	}
+	return 0;
+}
+
+
+/* RELATIVE  START */
 static int
 relative_start (cob_file *f, const int cond, cob_field *k)
 {
@@ -1987,7 +2780,7 @@ relative_start (cob_file *f, const int cond, cob_field *k)
 	size_t		relsize;
 	int		kindex;
 	int		ksindex;
-	int		kcond;
+	int		kcond, isdeleted;
 	struct stat	st;
 
 #ifdef	WITH_SEQRA_EXTFH
@@ -2003,32 +2796,26 @@ relative_start (cob_file *f, const int cond, cob_field *k)
 		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
 
-	relsize = f->record_max + sizeof (f->record->size);
-
 	/* Get the index */
+	f->flag_first_read = 0;
 	switch (cond) {
 	case COB_FI:
 		kcond = COB_GE;
 		kindex = 0;
+		f->flag_first_read = 1;
 		break;
 	case COB_LA:
 		kcond = COB_LE;
-		kindex = st.st_size / relsize;
-		kindex--;
+		kindex = (st.st_size - f->file_header) / f->record_slot - 1;
 		break;
 	case COB_LT:
 	case COB_LE:
 		kcond = cond;
 		kindex = cob_get_int (k) - 1;
 		/* Check against current file size */
-		ksindex = st.st_size / relsize;
-		ksindex--;
+		ksindex = (st.st_size - f->file_header) / f->record_slot - 1;
 		if (kindex > ksindex) {
-			kindex = ksindex;
-			if (cond == COB_LT) {
-				/* Cater for decrement below */
-				kindex++;
-			}
+			kindex = ksindex + 1;
 		}
 		break;
 	default:
@@ -2068,21 +2855,21 @@ relative_start (cob_file *f, const int cond, cob_field *k)
 		if (kindex < 0) {
 			break;
 		}
-		off = (off_t)kindex * relsize;
+		off = kindex * f->record_slot + f->file_header;
 		if (off >= st.st_size) {
 			break;
 		}
-		if (lseek (f->fd, off, SEEK_SET) == (off_t)-1) {
-			break;
-		}
+		relsize = relative_read_size(f, off, &isdeleted);
 
 		/* Check if a valid record */
-		if (read (f->fd, &f->record->size, sizeof (f->record->size))
-		    == sizeof (f->record->size) && f->record->size > 0) {
-#if	0	/* RXWRXW - Set key - COBOL standards */
-			cob_set_int (k, kindex + 1);
-#endif
-			lseek (f->fd, off, SEEK_SET);
+		if (relsize > 0 && !isdeleted) {
+			f->record_off = off;
+			lseek (f->fd, off, SEEK_SET);	/* Set file position to start of record */
+			if (f->access_mode == COB_ACCESS_SEQUENTIAL
+			&&  f->keys[0].field) {
+				kindex = (int)(((off - f->file_header) / f->record_slot) + 1);
+				cob_set_int (f->keys[0].field, kindex);
+			}
 			return COB_STATUS_00_SUCCESS;
 		}
 
@@ -2102,12 +2889,65 @@ relative_start (cob_file *f, const int cond, cob_field *k)
 	return COB_STATUS_23_KEY_NOT_EXISTS;
 }
 
+/*
+ * Read relative record at given offset
+ */
+static int
+relative_read_off (cob_file *f, off_t off)
+{
+	unsigned char recmark[2];
+	int	relsize = 0;
+	int	relnum,isdeleted=0;
+
+	relsize = relative_read_size(f, off, &isdeleted);
+	if(relsize < 0) {
+		return COB_STATUS_30_PERMANENT_ERROR;
+	}
+
+	if (relsize == 0 || isdeleted) {
+		f->record->size = 0;
+		lseek (f->fd, off, SEEK_SET);
+		return COB_STATUS_23_KEY_NOT_EXISTS;
+	}
+
+	if (relsize > f->record_max) {
+		return COB_STATUS_30_PERMANENT_ERROR;
+	}
+
+	if (read (f->fd, f->record->data, relsize) != (int)relsize) {
+		return COB_STATUS_30_PERMANENT_ERROR;
+	}
+	f->record->size = relsize;
+	f->record_off = off;
+
+	if (f->keys[0].field) {
+		relnum = (int)(((off - f->file_header) / f->record_slot) + 1);
+		cob_set_int (f->keys[0].field, 0);
+		if (cob_add_int (f->keys[0].field, relnum, COB_STORE_KEEP_ON_OVERFLOW) != 0) {
+			lseek (f->fd, off, SEEK_SET);
+			return COB_STATUS_14_OUT_OF_KEY_RANGE;
+		}
+	}
+	if (f->file_format == COB_FILE_IS_MF) {
+		if(f->record_min != f->record_max) {
+			lseek (f->fd, off + f->record_slot - 1, SEEK_SET);
+		}
+		read (f->fd, recmark, 1);	/* Active Record marker */
+		if (recmark[0] == 0x00) {	/* Flagged Deleted */
+			f->record->size = 0;
+			lseek (f->fd, off, SEEK_SET);
+			return COB_STATUS_23_KEY_NOT_EXISTS;
+		}
+	}
+	return COB_STATUS_00_SUCCESS;
+}
+
 static int
 relative_read (cob_file *f, cob_field *k, const int read_opts)
 {
 	off_t	off;
-	size_t	relsize;
 	int	relnum;
+	struct stat	st;
 #ifdef	WITH_SEQRA_EXTFH
 	int	extfh_ret;
 
@@ -2121,39 +2961,27 @@ relative_read (cob_file *f, cob_field *k, const int read_opts)
 
 	if (unlikely (f->flag_operation != 0)) {
 		f->flag_operation = 0;
-		lseek (f->fd, (off_t)0, SEEK_CUR);
 	}
 
 	relnum = cob_get_int (k) - 1;
 	if (relnum < 0) {
 		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
-	relsize = f->record_max + sizeof (f->record->size);
-	off = (off_t)relnum * relsize;
-	if (lseek (f->fd, off, SEEK_SET) == (off_t)-1 ||
-	    read (f->fd, &f->record->size, sizeof (f->record->size))
-		   != sizeof (f->record->size)) {
-			return COB_STATUS_23_KEY_NOT_EXISTS;
-	}
+	off = relnum * f->record_slot + f->file_header;
 
-	if (f->record->size == 0) {
-		lseek (f->fd, off, SEEK_SET);
+	if (fstat (f->fd, &st) != 0 || st.st_size == 0) {
+		return COB_STATUS_10_END_OF_FILE;
+	}
+	if(off >= st.st_size)
 		return COB_STATUS_23_KEY_NOT_EXISTS;
-	}
-
-	if (read (f->fd, f->record->data, f->record_max) != (int)f->record_max) {
-		return COB_STATUS_30_PERMANENT_ERROR;
-	}
-	return COB_STATUS_00_SUCCESS;
+	return relative_read_off(f, off);
 }
 
 static int
 relative_read_next (cob_file *f, const int read_opts)
 {
 	off_t		curroff;
-	cob_s64_t	relsize;
-	int		relnum;
-	int		bytesread;
+	int		sts;
 	cob_u32_t	moveback;
 	struct stat	st;
 
@@ -2181,24 +3009,29 @@ relative_read_next (cob_file *f, const int read_opts)
 	}
 	/* LCOV_EXCL_STOP */
 
-	curroff = lseek (f->fd, (off_t)0, SEEK_CUR);
+	if(f->record_off == (off_t)-1) {
+		curroff = lseek (f->fd, (off_t)f->file_header, SEEK_SET);	/* Set current file position */
+	} else {
+		curroff = lseek (f->fd, (off_t)0, SEEK_CUR);	/* Get current file position */
+	}
+	if (unlikely(f->flag_operation != 0)) {
+		f->flag_operation = 0;
+	}
 	moveback = 0;
 
 	switch (read_opts & COB_READ_MASK) {
 	case COB_READ_FIRST:
-		curroff = lseek (f->fd, (off_t)0, SEEK_SET);
+		curroff = f->file_header;
 		break;
 	case COB_READ_LAST:
-		curroff = st.st_size - relsize;
-		curroff = lseek (f->fd, curroff, SEEK_SET);
+		curroff = st.st_size - f->record_slot;
 		moveback = 1;
 		break;
 	case COB_READ_PREVIOUS:
 		if (f->flag_first_read) {
 			break;
-		} else if (curroff > relsize) {
-			curroff -= (relsize * 2);
-			curroff = lseek (f->fd, curroff, SEEK_SET);
+		} else if (curroff > (f->record_slot + f->file_header)) {
+			curroff -= (f->record_slot * 2);
 		} else {
 			return COB_STATUS_10_END_OF_FILE;
 		}
@@ -2210,56 +3043,101 @@ relative_read_next (cob_file *f, const int read_opts)
 	}
 
 	for (;;) {
-		bytesread = read (f->fd, &f->record->size, sizeof (f->record->size));
-		if (bytesread != sizeof (f->record->size)) {
-			if (bytesread != 0) {
-				return COB_STATUS_30_PERMANENT_ERROR;
-			} else {
-				break;
-			}
-		}
+		if(st.st_size <= curroff)
+			break;
+		sts = relative_read_off (f, curroff);
 
-		if (f->record->size > 0) {
-			if (read (f->fd, f->record->data, f->record_max) != (int)f->record_max) {
-				return COB_STATUS_30_PERMANENT_ERROR;
-			}
-			if (f->keys[0].field) {
-				relnum = (int)((curroff / relsize) + 1);
-				cob_set_int (f->keys[0].field, 0);
-				if (cob_add_int (f->keys[0].field, relnum,
-						 COB_STORE_KEEP_ON_OVERFLOW) != 0) {
-					lseek (f->fd, curroff, SEEK_SET);
-					return COB_STATUS_14_OUT_OF_KEY_RANGE;
-				}
-			}
-			if (moveback) {
-				curroff -= relsize;
-				curroff = lseek (f->fd, curroff, SEEK_SET);
-			}
+		if (sts == COB_STATUS_00_SUCCESS) {
+			lseek (f->fd, (off_t)curroff + f->record_slot, SEEK_SET);
 			return COB_STATUS_00_SUCCESS;
 		}
+		if (sts == COB_STATUS_30_PERMANENT_ERROR
+		||  sts == COB_STATUS_10_END_OF_FILE
+		||  sts == COB_STATUS_14_OUT_OF_KEY_RANGE) {
+			return sts;
+		}
 		if (moveback) {
-			if (curroff > relsize) {
-				curroff -= (relsize * 2);
-				curroff = lseek (f->fd, curroff, SEEK_SET);
+			if (curroff > (f->record_slot + f->file_header)) {
+				curroff -= (f->record_slot * 2);
 			} else {
 				break;
 			}
 		} else {
-			curroff = lseek (f->fd, (off_t) f->record_max, SEEK_CUR);
+			curroff += f->record_slot;
 		}
 	}
 	return COB_STATUS_10_END_OF_FILE;
+}
+
+/*
+ * Write Relative record prefix
+ */
+static int
+relative_write_size (cob_file *f, off_t off, int recsize)
+{
+	size_t	relsize = 0;
+	unsigned char rechdr[8];
+
+	if (lseek (f->fd, off, SEEK_SET) == (off_t)-1 ) {
+		return -1;
+	}
+	f->record_off = off;
+	if (f->record_prefix > 0) {
+		memset(rechdr,0,sizeof(rechdr));
+		switch (f->file_format) {
+		case COB_FILE_IS_B32:		/* Was 32bit Big Endian system */
+			STCOMPX4(recsize, rechdr);
+			break;
+		case COB_FILE_IS_B64:		/* Was 64bit Big Endian system */
+			STCOMPX4(recsize,((unsigned char *)&rechdr[4]));
+			break;
+		case COB_FILE_IS_L32:		/* Was 32bit Little Endian system */
+			STBINLE4(recsize, rechdr);
+			break;
+		case COB_FILE_IS_L64:		/* Was 64bit Little Endian system */
+			STBINLE4(recsize, rechdr);
+			break;
+		case COB_FILE_IS_MF:
+			if(f->record_prefix == 2) {
+				STCOMPX2(recsize, rechdr);
+			} else {
+				STCOMPX4(recsize, rechdr);
+			}
+			rechdr[0] |= 0x40;
+			break;
+		default:
+			relsize = recsize;
+			memcpy(rechdr, &relsize, sizeof(relsize));	/* Local native 'size_t' */
+			break;
+		}
+		if (write (f->fd, rechdr, f->record_prefix) != f->record_prefix) {
+			return -1;
+		}
+	}
+	return recsize;
+}
+
+static void
+relative_padout(cob_file *f, char pad, int len)
+{
+	unsigned char wrk[32];
+	memset(wrk, pad, sizeof(wrk));
+	while(len > sizeof(wrk)) {
+		write (f->fd, wrk, sizeof(wrk));	/* Pad out record on disk */
+		len -= sizeof(wrk);
+	}
+	if(len > 0)
+		write (f->fd, wrk, len);
 }
 
 static int
 relative_write (cob_file *f, const int opt)
 {
 	off_t	off;
-	size_t	size;
 	size_t	relsize, ret;
-	int	i;
-	int	kindex;
+	int	i,isdeleted=0;
+	int	kindex,rcsz;
+	struct stat	st;
 #ifdef	WITH_SEQRA_EXTFH
 	int	extfh_ret;
 
@@ -2271,39 +3149,67 @@ relative_write (cob_file *f, const int opt)
 	COB_UNUSED (opt);
 #endif
 
-	if (unlikely (f->flag_operation == 0)) {
+	rcsz = (int)f->record->size;
+	if (unlikely(f->flag_operation == 0)) {
 		f->flag_operation = 1;
-		lseek (f->fd, (off_t)0, SEEK_CUR);
 	}
 
-	relsize = f->record_max + sizeof (f->record->size);
 	if (f->access_mode != COB_ACCESS_SEQUENTIAL) {
 		kindex = cob_get_int (f->keys[0].field) - 1;
 		if (kindex < 0) {
 			return COB_STATUS_24_KEY_BOUNDARY;
 		}
-		off = ((off_t)relsize * kindex);
-		if (lseek (f->fd, off, SEEK_SET) == (off_t)-1) {
-			return COB_STATUS_24_KEY_BOUNDARY;
+		off = (off_t) (f->file_header + f->record_slot * kindex);
+		if (fstat (f->fd, &st) != 0) {
+			return COB_STATUS_10_END_OF_FILE;
 		}
-		if (read (f->fd, &size, sizeof (size)) > 0) {
-			if (size > 0) {
+		if(off < st.st_size) {
+			relsize = relative_read_size(f, off, &isdeleted);
+			if ((long)relsize < 0)
+				return COB_STATUS_30_PERMANENT_ERROR;
+			if ((long)relsize > 0) {
 				return COB_STATUS_22_KEY_EXISTS;
 			}
+		} else {
+			off = lseek (f->fd, off, SEEK_SET);	/* Set current file position */
 		}
 	} else {
-		off = lseek (f->fd, (off_t)0, SEEK_CUR);
+		if(f->record_off == -1) {
+			off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);	/* Set current file position */
+		} else {
+			off = lseek (f->fd, (off_t)0, SEEK_CUR);	/* Get current file position */
+		}
 	}
-	lseek (f->fd, off, SEEK_SET);
 
-	COB_CHECKED_WRITE (f->fd, &f->record->size, sizeof (f->record->size));
-	COB_CHECKED_WRITE (f->fd, f->record->data, f->record_max);
+	if (f->variable_record) {
+		f->record->size = (size_t)cob_get_int (f->variable_record);
+		if (unlikely(f->record->size > rcsz)) {
+			f->record->size = rcsz;
+		}
+	} else {
+		f->record->size = rcsz;
+	}
+
+	relsize = relative_write_size(f, off, f->record->size);
+	if (relsize < 0) {
+		return COB_STATUS_30_PERMANENT_ERROR;
+	}
+	if (write (f->fd, f->record->data, f->record->size) != (int)f->record->size) {
+		return COB_STATUS_30_PERMANENT_ERROR;
+	}
+	relative_padout(f, ' ', f->record_max - f->record->size); /* Pad out with NULs */
+
+	if (f->file_format == COB_FILE_IS_MF) {
+		if ((f->file_features & COB_FILE_LS_CRLF)) {	/* Windows format */
+			write (f->fd, "\r", 1);
+		}
+		write (f->fd, "\n", 1);
+	}
 
 	/* Update RELATIVE KEY */
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
 		if (f->keys[0].field) {
-			off += relsize;
-			i = (int)(off / relsize);
+			i = (int)((off + f->record_slot - f->file_header) / f->record_slot);
 			cob_set_int (f->keys[0].field, i);
 		}
 	}
@@ -2316,7 +3222,7 @@ relative_rewrite (cob_file *f, const int opt)
 {
 	off_t	off;
 	size_t	relsize, ret;
-	int	relnum;
+	int	relnum,isdeleted=0;
 #ifdef	WITH_SEQRA_EXTFH
 	int	extfh_ret;
 
@@ -2330,23 +3236,46 @@ relative_rewrite (cob_file *f, const int opt)
 
 	f->flag_operation = 1;
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
-		lseek (f->fd, -(off_t) f->record_max, SEEK_CUR);
+		off = f->record_off;
 	} else {
-		relsize = f->record_max + sizeof (f->record->size);
 		relnum = cob_get_int (f->keys[0].field) - 1;
 		if (relnum < 0) {
 			return COB_STATUS_24_KEY_BOUNDARY;
 		}
-		off = (off_t)relnum * relsize;
-		if (lseek (f->fd, off, SEEK_SET) == (off_t)-1 ||
-		    read (f->fd, &f->record->size, sizeof (f->record->size))
-			   != sizeof (f->record->size)) {
-				return COB_STATUS_23_KEY_NOT_EXISTS;
-		}
-		lseek (f->fd, (off_t)0, SEEK_CUR);
+		off = f->file_header + relnum * f->record_slot;
+	}
+	relsize = relative_read_size(f, off, &isdeleted);
+	if (relsize < 0)
+		return COB_STATUS_30_PERMANENT_ERROR;
+	if (relsize == 0 || isdeleted) {
+		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
 
-	COB_CHECKED_WRITE (f->fd, f->record->data, f->record_max);
+	if (f->variable_record) {
+		f->record->size = (size_t)cob_get_int (f->variable_record);
+		if (unlikely(f->record->size > f->record_max)) {
+			f->record->size = f->record_max;
+		}
+	}
+	relsize = relative_write_size(f, off, f->record->size);
+	if (relsize < 0) {
+		return COB_STATUS_30_PERMANENT_ERROR;
+	}
+	if (write (f->fd, f->record->data, f->record->size) != (int)f->record->size) {
+		return COB_STATUS_30_PERMANENT_ERROR;
+	}
+	relative_padout(f, ' ', f->record_max - f->record->size); /* Pad out with NULs */
+
+	if (f->file_format == COB_FILE_IS_MF) {
+		if(f->record_min == f->record_max) {	/* Fixed size */
+			write (f->fd, "\n", 1);
+		} else {
+			lseek (f->fd, (off_t)off + f->record_slot, SEEK_SET);
+		}
+	}
+	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
+		f->record_off = lseek (f->fd, (off_t)0, SEEK_CUR);	/* Save current file position */
+	}
 	return COB_STATUS_00_SUCCESS;
 }
 
@@ -2355,7 +3284,8 @@ relative_delete (cob_file *f)
 {
 	off_t	off;
 	size_t	relsize, ret;
-	int	relnum;
+	unsigned char rechdr[8];
+	int	relnum,isdeleted;
 #ifdef	WITH_SEQRA_EXTFH
 	int	extfh_ret;
 
@@ -2370,18 +3300,65 @@ relative_delete (cob_file *f)
 	if (relnum < 0) {
 		return COB_STATUS_24_KEY_BOUNDARY;
 	}
-	relsize = f->record_max + sizeof (f->record->size);
-	off = (off_t)relnum * relsize;
-	if (lseek (f->fd, off, SEEK_SET) == (off_t)-1
-	 || read (f->fd, &f->record->size, sizeof (f->record->size))
-		 != sizeof (f->record->size)) {
-			return COB_STATUS_23_KEY_NOT_EXISTS;
+	off = f->file_header + relnum * f->record_slot;
+	relsize = relative_read_size(f, off, &isdeleted);
+	if (relsize < 0)
+		return COB_STATUS_30_PERMANENT_ERROR;
+	if (relsize == 0 || isdeleted) {
+		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
-	lseek (f->fd, off, SEEK_SET);
 
-	f->record->size = 0;
-	COB_CHECKED_WRITE (f->fd, &f->record->size, sizeof (f->record->size));
-	lseek (f->fd, (off_t) f->record_max, SEEK_CUR);
+	if (lseek (f->fd, off, SEEK_SET) == (off_t)-1 ) {
+		return -1;
+	}
+	f->record_off = off;
+	if (f->record_prefix > 0) {
+		memset(rechdr,0,sizeof(rechdr));
+		switch (f->file_format) {
+		case COB_FILE_IS_B32:		/* Was 32bit Big Endian system */
+			STCOMPX4(0, rechdr);
+			break;
+		case COB_FILE_IS_B64:		/* Was 64bit Big Endian system */
+			STCOMPX4(0,((unsigned char *)&rechdr[4]));
+			break;
+		case COB_FILE_IS_L32:		/* Was 32bit Little Endian system */
+			STBINLE4(0, rechdr);
+			break;
+		case COB_FILE_IS_L64:		/* Was 64bit Little Endian system */
+			STBINLE4(0, rechdr);
+			break;
+		case COB_FILE_IS_MF:
+			if(f->record_prefix == 2) {
+				STCOMPX2(relsize, rechdr);
+			} else {
+				STCOMPX4(relsize, rechdr);
+			}
+			rechdr[0] |= 0x20;
+			break;
+		default:
+			relsize = 0;
+			memcpy(rechdr, &relsize, sizeof(relsize));	/* Local native 'size_t' */
+			break;
+		}
+		if (write (f->fd, rechdr, f->record_prefix) != f->record_prefix) {
+			return -1;
+		}
+		if (f->file_format == COB_FILE_IS_MF) {
+			if (lseek (f->fd, off + f->record_slot - 1, SEEK_SET) == (off_t)-1 ) {
+				return COB_STATUS_30_PERMANENT_ERROR;
+			}
+			rechdr[0] = 0;
+			write (f->fd, rechdr, 1);	/* 0x00 means deleted record */
+		}
+	} else
+	if (f->file_format == COB_FILE_IS_MF) {
+		if (lseek (f->fd, off + f->record_max, SEEK_SET) == (off_t)-1 ) {
+			return COB_STATUS_30_PERMANENT_ERROR;
+		}
+		rechdr[0] = 0;
+		write (f->fd, rechdr, 1);	/* 0x00 means deleted record */
+	}
+	lseek (f->fd, (off_t) f->record_off, SEEK_SET);
 	return COB_STATUS_00_SUCCESS;
 }
 
@@ -3142,12 +4119,17 @@ indexed_file_delete (cob_file *f, const char *filename)
 {
 #ifdef	WITH_ANY_ISAM
 	COB_UNUSED (f);
+	struct stat	st;
 
 	snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s.idx", filename);
 	file_open_buff[COB_FILE_MAX] = 0;
 	unlink (file_open_buff);
 	snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s.dat", filename);
-	file_open_buff[COB_FILE_MAX] = 0;
+#if defined(WITH_DISAM)
+	if (stat(file_open_buff, &st) != 0) {	/* Micro Focus naming style has no .dat */
+		snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s", filename);
+	}
+#endif
 	unlink (file_open_buff);
 #elif	defined(WITH_DB)
 	size_t	i;
@@ -3240,8 +4222,7 @@ indexed_open (cob_file *f, char *filename, const int mode, const int sharing)
 	file_open_buff[COB_FILE_MAX] = 0;
 	errno = 0;
 	if (access (file_open_buff, checkvalue)) {
-		if (!(errno == ENOENT &&
-		      (mode == COB_OPEN_OUTPUT || f->flag_optional == 1))) {
+		if (!(errno == ENOENT && (mode == COB_OPEN_OUTPUT || f->flag_optional == 1))) {
 			switch (errno) {
 			case ENOENT:
 				return COB_STATUS_35_NOT_EXISTS;
@@ -3256,9 +4237,15 @@ indexed_open (cob_file *f, char *filename, const int mode, const int sharing)
 	snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s.dat", filename);
 	file_open_buff[COB_FILE_MAX] = 0;
 	errno = 0;
+#if defined(WITH_DISAM)
+	if (access (file_open_buff, checkvalue)
+	&& (errno == ENOENT) ) {	/* D-ISAM will handle files with Micro Focus naming style */
+		errno = 0;
+		snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s", filename);
+	}
+#endif
 	if (access (file_open_buff, checkvalue)) {
-		if (!(errno == ENOENT &&
-		      (mode == COB_OPEN_OUTPUT || f->flag_optional == 1))) {
+		if (!(errno == ENOENT && (mode == COB_OPEN_OUTPUT || f->flag_optional == 1))) {
 			switch (errno) {
 			case ENOENT:
 				return COB_STATUS_35_NOT_EXISTS;
@@ -5016,6 +6003,12 @@ cob_unlock_file (cob_file *f, cob_field *fnstatus)
 void
 cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 {
+	if (f->file_version != COB_FILE_VERSION) {
+		cob_runtime_error (_("ERROR FILE %s does not match current version; Recompile the program"),
+							f->select_name);
+		cob_stop_run (1);
+	}
+
 	f->flag_read_done = 0;
 
 	/* File was previously closed with lock */
@@ -5038,6 +6031,7 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 	f->flag_operation = 0;
 	f->lock_mode &= ~COB_LOCK_OPEN_EXCLUSIVE;
 	f->lock_mode |= sharing;
+	f->record_off = 0;
 
 	if (unlikely (COB_FILE_STDIN (f))) {
 		if (mode != COB_OPEN_INPUT) {
@@ -5097,6 +6091,7 @@ cob_close (cob_file *f, cob_field *fnstatus, const int opt, const int remfil)
 
 	f->flag_read_done = 0;
 	f->flag_operation = 0;
+	f->record_off = 0;
 
 	f->lock_mode &= ~COB_LOCK_OPEN_EXCLUSIVE;
 
@@ -5385,6 +6380,7 @@ cob_write (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus,
 	check_eop_status = check_eop;
 	save_status (f, fnstatus,
 		     fileio_funcs[(int)f->organization]->write (f, opt));
+	f->flag_begin_of_file = 0;
 }
 
 void
@@ -7016,10 +8012,26 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 		cobsetptr->cob_sort_chunk = cobsetptr->cob_sort_memory / 2;
 	}
 
-	if (cobsetptr->cob_varseq_type == 3) {
-		cob_vsq_len = 2;
-	} else {
-		cob_vsq_len = 4;
+	if(cobsetptr->cob_mf_files) {	/* Just use all MF format files */
+		cobsetptr->cob_ls_nulls = 1;
+		cobsetptr->cob_ls_validate = 0;
+		if(cobsetptr->cob_varseq_type == COB_FILE_IS_GC
+		|| cobsetptr->cob_varseq_type == 0)
+			cobsetptr->cob_varseq_type = COB_FILE_IS_MF;
+		if(cobsetptr->cob_varrel_type == COB_FILE_IS_GC)
+			cobsetptr->cob_varrel_type = COB_FILE_IS_MF;
+		if(cobsetptr->cob_fixrel_type == COB_FILE_IS_GC)
+			cobsetptr->cob_fixrel_type = COB_FILE_IS_MF;
+	}
+	if(cobsetptr->cob_gc_files) {	/* Just use all GNUCobol format files */
+		cobsetptr->cob_ls_nulls = 0;
+		cobsetptr->cob_ls_validate = 0;
+		if(cobsetptr->cob_varseq_type == COB_FILE_IS_MF)
+			cobsetptr->cob_varseq_type = COB_FILE_IS_GC;
+		if(cobsetptr->cob_varrel_type == COB_FILE_IS_MF)
+			cobsetptr->cob_varrel_type = COB_FILE_IS_GC;
+		if(cobsetptr->cob_fixrel_type == COB_FILE_IS_MF)
+			cobsetptr->cob_fixrel_type = COB_FILE_IS_GC;
 	}
 
 	runtime_buffer = cob_fast_malloc ((size_t)(4 * COB_FILE_BUFF));
@@ -7083,12 +8095,8 @@ update_file_to_fcd (cob_file *f, FCD3 *fcd, unsigned char *fnstatus)
 	else if (f->open_mode == COB_OPEN_EXTEND)
 		fcd->openMode = OPEN_EXTEND;
 	STCOMPX4(f->record_min,fcd->minRecLen);
-	if (f->record) {
-		STCOMPX4(f->record->size, fcd->curRecLen);
-	} else {	/* CHECKME: is this correct? */
-		STCOMPX4(f->record_min, fcd->curRecLen);
-	}
-	STCOMPX4(f->record_max, fcd->maxRecLen);
+	STCOMPX4(f->record->size,fcd->curRecLen);
+	STCOMPX4(f->record_max,fcd->maxRecLen);
 }
 
 /*
@@ -7257,6 +8265,7 @@ update_fcd_to_file (FCD3* fcd, cob_file *f, cob_field *fnstatus, int wasOpen)
 	}
 	f->record_min = LDCOMPX4(fcd->minRecLen);
 	f->record_max = LDCOMPX4(fcd->maxRecLen);
+	f->record->size = LDCOMPX4(fcd->curRecLen);
 }
 
 /*
@@ -7758,6 +8767,13 @@ cob_extfh_rewrite (
 		recn = cob_get_int (f->keys[0].field);
 		STCOMPX4 (recn, LSUCHAR (fcd->relKey + 4));
 	}
+	STCOMPX4(rec->size,fcd->curRecLen);
+	fcd->recPtr = rec->data;
+	if(f->organization == COB_ORG_RELATIVE) {
+		memset(fcd->relKey,0,sizeof(fcd->relKey));
+		recn = cob_get_int(f->keys[0].field);
+		STCOMPX4(recn, LSUCHAR(fcd->relKey+4));
+	}
 
 	(void)callfh (opcode, fcd);
 	update_fcd_to_file (fcd, f, fnstatus, 0);
@@ -7781,6 +8797,11 @@ cob_extfh_delete (
 		memset (fcd->relKey, 0, sizeof(fcd->relKey));
 		recn = cob_get_int (f->keys[0].field);
 		STCOMPX4 (recn, LSUCHAR(fcd->relKey + 4));
+	}
+	if(f->organization == COB_ORG_RELATIVE) {
+		memset(fcd->relKey,0,sizeof(fcd->relKey));
+		recn = cob_get_int(f->keys[0].field);
+		STCOMPX4(recn, LSUCHAR(fcd->relKey+4));
 	}
 
 	(void)callfh (opcode, fcd);

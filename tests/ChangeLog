@@ -476,6 +476,9 @@
 
 	* testsuite.src/run_functions.at : revised all tests from ACOS to LENGTH
 
+2015-04-28  Ron Norman
+	* Added a few more test programs to run_file.at and run_misc.at
+
 2015-04-27  Simon Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_file.at : (new) moved testsuite entries for
