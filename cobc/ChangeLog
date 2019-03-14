@@ -3728,6 +3728,11 @@
 	* parser.y, typeck.c, cobc.h: bug #135 - give correct error position
 	  (cb_source_file + new cb_exp_line) for expression errors
 
+2015-04-30  Ron Norman
+	* common.h, change cob_file record_off to type cob_s64_t (from off_t)
+	  so that the size does not change depending on C comppiler
+	  This is most likely the cause of the previous issue.
+
 2015-04-27  Ron Norman
 
 	* cobc.c codegen.c common.h typeck.c

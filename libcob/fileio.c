@@ -2158,7 +2158,7 @@ sequential_read (cob_file *f, const int read_opts)
 		f->flag_operation = 0;
 	}
 	if(f->record_off == -1) {
-		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);	/* Set current file position */
+		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);/* Set current file position */
 	} else {
 		f->record_off = lseek (f->fd, (off_t)0, SEEK_CUR);	/* Get current file position */
 	}
@@ -2261,7 +2261,7 @@ sequential_write (cob_file *f, const int opt)
 	}
 
 	if(f->record_off == -1) {
-		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);	/* Set current file position */
+		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);/* Set current file position */
 	} else {
 		f->record_off = lseek (f->fd, (off_t)0, SEEK_CUR);	/* Get current file position */
 	}
@@ -2342,7 +2342,7 @@ sequential_rewrite (cob_file *f, const int opt)
 	COB_UNUSED (opt);
 #endif
 	f->flag_operation = 1;
-	if (f->record_off != (off_t)-1) {
+	if (f->record_off != -1) {
 		if (lseek (f->fd, f->record_off, SEEK_SET) == (off_t)-1) {
 			return COB_STATUS_30_PERMANENT_ERROR;
 		}
@@ -2639,7 +2639,7 @@ lineseq_rewrite (cob_file *f, const int opt)
 	if(psize > slotlen)
 		return COB_STATUS_44_RECORD_OVERFLOW;
 
-	if (fseek((FILE*)f->file, f->record_off, SEEK_SET) != 0)
+	if (fseek((FILE*)f->file, (off_t)f->record_off, SEEK_SET) != 0)
 		return COB_STATUS_30_PERMANENT_ERROR;
 
 	/* Write to the file */
@@ -3009,7 +3009,7 @@ relative_read_next (cob_file *f, const int read_opts)
 	}
 	/* LCOV_EXCL_STOP */
 
-	if(f->record_off == (off_t)-1) {
+	if(f->record_off == -1) {
 		curroff = lseek (f->fd, (off_t)f->file_header, SEEK_SET);	/* Set current file position */
 	} else {
 		curroff = lseek (f->fd, (off_t)0, SEEK_CUR);	/* Get current file position */
@@ -3236,7 +3236,7 @@ relative_rewrite (cob_file *f, const int opt)
 
 	f->flag_operation = 1;
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
-		off = f->record_off;
+		off = (off_t)f->record_off;
 	} else {
 		relnum = cob_get_int (f->keys[0].field) - 1;
 		if (relnum < 0) {

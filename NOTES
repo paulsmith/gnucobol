@@ -61,12 +61,30 @@ U    libcob/fileio.c
 U    tests/testsuite.src/run_file.at
 U    tests/testsuite.src/syn_definition.at
 
-
-
-
+with 577, the compiler builds but does not run: 
+configuration error:
+/home/jklowden/projects/3rd/cobol/branches/pangaea/build.db/../config/default.conf:244: Invalid configuration 'TERMINAL'
+Invalid configuration 'TERMINAL'
+Invalid configuration 'TERMINAL'
+Invalid configuration 'TERMINAL'
+/home/jklowden/projects/3rd/cobol/branches/pangaea/build.db/../config/default.conf:248: Unknown configuration tag 'AUTO-SKIP'
+/home/jklowden/projects/3rd/cobol/branches/pangaea/build.db/../config/default.conf:249: Unknown configuration tag 'AUTOTERMINATE'
+et cetera.  
 
 r585
+--- Merging r585 into '.':
+C    cobc/codegen.c accepted
+
 r587
+--- Merging r587 into '.':
+C    cobc/ChangeLog merged
+U    libcob/common.h
+U    libcob/fileio.c
+
+
+
+
+
 r614
 r801
 r805
