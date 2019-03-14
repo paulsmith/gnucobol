@@ -1,5 +1,16 @@
 
+2019-03-14  Simon Sobisch <simonsobisch@gnu.org>
+
+	* config.c: hand-merged change 2015-04-27 with an option to go back,
+	  see COBC_STORES_CONFIG_VALUES
+
 2019-03-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (cobc_print_info): changed msgid for "file handler" and
+	  already output if RTD-version of VB-ISAM is used (even if this
+	  wouldn't work currently), partially after Ron Norman
+
+2019-03-11  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (cobc_print_info): changed msgid for "file handler" and
 	  already output if RTD-version of VB-ISAM is used (even if this
@@ -3728,6 +3739,10 @@
 	* parser.y, typeck.c, cobc.h: bug #135 - give correct error position
 	  (cb_source_file + new cb_exp_line) for expression errors
 
+2015-04-27  Ron Norman <rjn@inglenet.com>
+
+	* config.c: don't store configuration values additional to the setting
+	
 2015-04-14  Ron Norman <rjn@inglenet.com>
 
 	* cobc.c codegen.c common.h tree.h parser.y typeck.c:
