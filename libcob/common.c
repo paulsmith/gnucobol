@@ -1449,9 +1449,10 @@ cob_rescan_env_vals (void)
 	cob_source_line = 0;
 
 	/* Check for possible environment variables */
-	for (i = 0; i < NUM_CONFIG; i++) {
-		if (gc_conf[i].env_name
-		    && (env = getenv (gc_conf[i].env_name)) != NULL) {
+	for (i=0; i < NUM_CONFIG; i++) {
+		if(gc_conf[i].env_name
+		&& (env = getenv(gc_conf[i].env_name)) != NULL
+		&& *env != 0) {
 			old_type = gc_conf[i].data_type;
 			gc_conf[i].data_type |= STS_ENVSET;
 

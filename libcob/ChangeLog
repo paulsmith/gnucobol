@@ -1171,6 +1171,10 @@
 	* common.c (cob_set_location, cob_trace_section, cob_exit_common): fix for
 	  bug #216 - store a duplicate of cob_last_sfile for tracing, free on exit
 
+2016-04-16 Ron Norman <rjn@inglenet.com>
+
+	* common.c report error for undefined environment variables
+
 2016-03-15  Ron Norman <rjn@inglenet.com>
 
 	* common.c: display COB_PRE_LOAD as set and as evaluated

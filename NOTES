@@ -111,11 +111,15 @@ r835
 C    libcob/coblocal.h	declined: use new date struct
 U    libcob/fileio.c	declined: environment strings are signed char
 
-
-
-
-
 r839
+--- Merging r837 through r839 into '.':
+C    libcob/ChangeLog	 merged
+C    libcob/common.c	 merged
+
+
+
+
+
 r931
 r935
 r936
