@@ -373,11 +373,15 @@ r1686
 U    cobc/tree.h
 U    libcob/coblocal.h
 
-
-
-
-
 r1726
+--- Merging r1698 through r1726 into '.':
+C    cobc/ChangeLog	  merged
+U    cobc/codegen.c
+
+
+
+
+
 r1727
 r1728
 r1739
