@@ -248,11 +248,22 @@ r1410
 C    cobc/ChangeLog    declined, already represented
 C    cobc/codegen.c    combined
 
-
-
-
-
 r1411
+--- Merging r1411 into '.':
+   C tests/testsuite	reverted
+U    config/runtime.cfg	ok
+C    libcob/ChangeLog	merged
+U    libcob/coblocal.h	ok
+C    libcob/common.c	merged, kept trace_io env var
+C    libcob/common.h	accepted
+C    libcob/fileio.c	accepted except some casts
+U    libcob/termio.c	ok
+C    tests/testsuite.src/run_misc.at	merged but commented out
+
+
+
+
+
 r1417
 r1418
 r1419

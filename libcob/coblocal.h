@@ -246,6 +246,7 @@ typedef struct __cob_settings {
 	unsigned int	cob_gc_files;		/* If TRUE, revert back to old GNU Cobol file formats */
 	unsigned int	cob_retry_times;	/* Default: RETRY n TIMES value */
 	unsigned int	cob_retry_seconds;	/* Default: RETRY n SECONDS value */
+	unsigned int	cob_trace_io;		/* If TRACE READY, also dump File/Record/Status */
 	char 		*cob_file_path;
 	char		*bdb_home;
 	size_t		cob_sort_memory;

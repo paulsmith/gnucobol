@@ -1427,6 +1427,22 @@ typedef struct __cob_file {
 	int			dflt_seconds;		/* Default SECONDS for RETRY */
 	unsigned int		prev_lock;		/* Last record locked */
 
+	unsigned int		trace_io:1;		/* Display I/O record when TRACE READY */
+	unsigned int		io_stats:1;		/* Report I/O statistics for this file */
+	unsigned int		unused_bits:30;
+
+	cob_field		*last_key;		/* Last field used as 'key' for I/O */
+	unsigned char		last_operation;		/* Most recent I/O operation */
+#define COB_LAST_OPEN		1
+#define COB_LAST_CLOSE		2
+#define COB_LAST_START		3
+#define COB_LAST_READ_SEQ	4
+#define COB_LAST_READ		5
+#define COB_LAST_WRITE		6
+#define COB_LAST_REWRITE	7
+#define COB_LAST_DELETE		8
+#define COB_LAST_DELETE_FILE	9
+
 } cob_file;
 
 
@@ -2391,9 +2407,10 @@ typedef struct {
 /*******************************/
 /* Functions in termio.c */
 
-COB_EXPIMP void cob_display	(const int, const int, const int, ...);
-COB_EXPIMP void cob_dump_field	(const int, const char *, cob_field *, const int, const int, ...);
-COB_EXPIMP void cob_accept	(cob_field *);
+COB_EXPIMP void cob_display(const int, const int, const int, ...);
+COB_EXPIMP void cob_dump_field (const int, const char *, cob_field *, const int, const int, ...);
+COB_EXPIMP void cob_print_field (FILE *, cob_field *, int, int );
+COB_EXPIMP void cob_accept(cob_field *);
 
 /*******************************/
 /* Functions in fileio.c */
