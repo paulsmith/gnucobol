@@ -32,6 +32,8 @@ AM_CPPFLAGS = -I$(top_srcdir)
 AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)
 cobcrun_LDADD = $(top_builddir)/lib/libsupport.a $(top_builddir)/libcob/libcob.la \
 	$(CODE_COVERAGE_LIBS)
+gcdiff_CFLAGS = $(AM_CFLAGS) -I$(top_srcdir)
+gcdiff_LDADD = $(top_builddir)/lib/libsupport.a $(top_builddir)/libcob/libcob.la
 
 # Add rules for code-coverage testing, as provided AX_CODE_COVERAGE
 @CODE_COVERAGE_RULES@
