@@ -5310,7 +5310,7 @@ indexed_open (cob_file *f, char *filename, const int mode, const int sharing)
 
 #elif	defined(WITH_ANY_ISAM)
 
-	struct indexfile	*fh;
+	struct indexfile	*fh, *fh2;
 	size_t		k;
 	int			ret,len,j;
 	int			omode;
@@ -5496,8 +5496,12 @@ dobuild:
 				ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
 			} else if (fh->nkeys > f->nkeys) {
 				/* More keys in file than COBOL has defined */
-				fh = realloc (fh, sizeof(struct indexfile) +
+				fh2 = cob_malloc (sizeof(struct indexfile) +
 						 ((sizeof (struct keydesc)) * (fh->nkeys + 1)));
+				memcpy (fh2, fh, sizeof(struct indexfile) +
+						((sizeof (struct keydesc)) * (f->nkeys + 1)));
+				cob_free (fh);
+				fh = fh2;
 			}
 			if (f->record_max != di.di_recsize) {
 				ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
@@ -5509,10 +5513,6 @@ dobuild:
 					isindexinfo (isfd, &fh->key[k], (int)(k+1));
 					if (fh->lenkey < indexed_keylen(fh, k)) {
 						fh->lenkey = indexed_keylen(fh, k);
-					}
-					len = indexed_keydesc(f, &kd, &f->keys[k]);
-					if (fh->lenkey < len) {
-						fh->lenkey = len;
 					}
 				}
 				/* Verify that COBOL keys defined match some real ISAM key */

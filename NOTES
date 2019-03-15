@@ -342,11 +342,15 @@ C    libcob/common.c	reverted
 U    libcob/common.h	ok
 C    libcob/fileio.c	accepted
 
-
-
-
-
 r1566
+--- Merging r1566 into '.':
+U    libcob/fileio.c	ok
+C    tests/testsuite.src/run_file.at accepted
+
+
+
+
+
 r1605
 r1623
 r1624
