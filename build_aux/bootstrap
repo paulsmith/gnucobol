@@ -24,7 +24,7 @@
 me=bootstrap
 
 echo "start to bootstrap GnuCOBOL"
-# get path to GnuCOBOL main directory, possible set with GCMAINPATH
+# get path to GnuCOBOL main directory, possibly set with GCMAINPATH
 if test -z "$GCMAINPATH"; then
   if test "$0" = "./$me"; then
     MAINPATH=..
@@ -35,7 +35,7 @@ else
   MAINPATH=$GCMAINPATH
 fi
 if test ! -f $MAINPATH/build_aux/$me; then
-  echo; echo "ERROR - cannot set main directory - aborting $me" && exit 1
+  echo; echo "ERROR - cannot set main directory [checked $MAINPATH/build_aux/$me] - aborting $me" && exit 1
 fi
 
 echo

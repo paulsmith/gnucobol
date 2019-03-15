@@ -1,4 +1,8 @@
 
+2019-03-15  Simon Sobisch <simonsobisch@gnu.org>
+
+	* autogen.sh: fixed to work correctly when called as "./autogen.sh"
+
 2019-02-18  Simon Sobisch <simonsobisch@gnu.org>
 
 	* autogen.sh: new, wrapper for build_aux/bootstrap
