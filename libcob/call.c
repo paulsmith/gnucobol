@@ -994,6 +994,7 @@ cob_call_field (const cob_field *f, const struct cob_call_struct *cs,
 	}
 
 	entry = cob_chk_call_path (buff, &dirent);
+	cobglobptr->cob_call_name_hash = cob_get_name_hash (entry);
 
 	/* Check if system routine */
 	for (psyst = system_tab; psyst->syst_name; ++psyst) {
@@ -1131,6 +1132,8 @@ cob_call (const char *name, const int argc, void **argv)
 	pargv = cob_malloc (MAX_CALL_FIELD_PARAMS * sizeof(void *));
 	/* Set number of parameters */
 	cobglobptr->cob_call_params = argc;
+	cobglobptr->cob_call_from_c = 1;
+	cobglobptr->cob_call_name_hash = 0;
 	for (i = 0; i < argc; ++i) {
 		pargv[i] = argv[i];
 	}

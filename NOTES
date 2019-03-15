@@ -310,11 +310,26 @@ U    libcob/fileio.c	ok
 C    libcob/move.c	declined: already done differently
 C    libcob/screenio.c	merged
 
-
-
-
-
 r1547
+--- Merging r1547 into '.':
+C    cobc/ChangeLog	merged
+C    cobc/codegen.c	merged, massive, likely not working 
+U    cobc/tree.h	ok
+C    libcob/ChangeLog	merged
+C    libcob/call.c	declined
+C    libcob/common.c	merged
+C    libcob/common.h	merged
+U    libcob/move.c	ok
+C    tests/testsuite.src/run_misc.at	merged
+
+codegen merge was screwy; try_get_by_value_parameter_type()
+looks incomplete in reportwriter, too.
+
+Hoping for luck later on. 
+
+
+
+
 r1560
 r1565
 r1566

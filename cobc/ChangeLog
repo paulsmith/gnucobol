@@ -1856,6 +1856,21 @@
 	  flexx, moved hack for _MSC_VER to ../create_win_dist.sh
 
 2017-04-27  Ron Norman <rjn@inglenet.com>
+	* tree.h: replaced 'flag_anylen_done' with 'flag_data_set'
+	* codegen.c: enhancements to handle ENTRY USING BY VALUE/CONTENT
+	Emit code to check if being called from COBOL or C by checking
+	'cob_glob_ptr->cob_call_name_hash' for a has value from the
+	subroutine name. If a match then the CALL came from COBOL,
+	else it was called from C.
+	When called from COBOL, the parameters are picked up using
+	'cob_procedure_params' field descriptions
+	If called from C, ANY LENGTH gets set via 'strlen'
+	Use of COB_SET_DATA is reduced when field was setup on
+	subroutine entry
+
+	* field.c: Specific error messages for ANY NUMERIC
+
+2017-04-27  Ron Norman <rjn@inglenet.com>
 
 	* field.c: Specific error messages for ANY NUMERIC
 

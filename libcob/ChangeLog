@@ -769,6 +769,13 @@
 	* common.c (set_value, get_value): using correcting format modifier
 	  for cob_s64_t (CB_FMT_LLD)
 
+2017-04-27 Ron Norman <rjn@inglenet.com>
+	* move.c: added 'cob_alloc_move' used to copy data for BY VALUE params
+	* common.c,common.h: added 'cob_get_hase_name' used to create has value
+	  added 'cob_alloc_attr' to create working 'cob_field_attr'
+	* call.c: set 'cobglobptr->cob_call_from_c' &
+	  'cobglobptr->cob_call_name_hash' as required
+
 2017-04-27  Sergey Kashyrin <ska@kiska.net>
 
 	* common.c (set_value, get_value): changed type long to cob_s64_t

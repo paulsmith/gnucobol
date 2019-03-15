@@ -819,7 +819,7 @@ struct cb_field {
 	unsigned int flag_invalid	: 1;	/* Is broken */
 	unsigned int flag_field		: 1;	/* Has been internally cached */
 	unsigned int flag_chained	: 1;	/* CHAINING item */
-	unsigned int flag_anylen_done	: 1;	/* ANY LENGTH is set up */
+	unsigned int flag_data_set	: 1;	/* The data address was set in entry code */
 	unsigned int flag_is_verified	: 1;	/* Has been verified */
 	unsigned int flag_is_c_long	: 1;	/* Is BINARY-C-LONG */
 	unsigned int flag_is_pdiv_parm	: 1;	/* Is PROC DIV USING */

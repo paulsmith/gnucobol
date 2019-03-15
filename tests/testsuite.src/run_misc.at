@@ -10139,6 +10139,7 @@ B JUNK                           is invalid.
 AT_CLEANUP
 
 
+
 AT_SETUP([ZERO unsigned and negative binary subscript])
 AT_KEYWORDS([runmisc])
 
@@ -22374,3 +22375,171 @@ AT_CLEANUP
 #### jkl, r1411 AT_CLEANUP
 #### jkl, r1411 
 #### jkl, r1411
+
+#### jkl: added for 1547:
+
+AT_SETUP([Test COBOL-C interface])
+AT_KEYWORDS([CALL])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  SUB-NAME PIC X(10) VALUE "SUB2".
+       01  FLT9  USAGE COMP-1 VALUE 9.0.
+       01  NUMPI PIC 9(6) VALUE 314.
+       01  NUM5  PIC 9(5) VALUE 12345.
+       01  NUM9  PIC 9(7)V99 VALUE 1234567.88.
+       01  NUMED PIC Z(5)9.99CR.
+       PROCEDURE DIVISION.
+           CALL "SUB" USING BY VALUE 1, 
+                            BY REFERENCE "Fun and games for you".
+           CALL "SUB" USING BY VALUE 2, 
+                            BY REFERENCE "More Fun and games for all".
+           CALL "SUB2"   USING "Fun and games", BY VALUE 3.
+           CALL SUB-NAME USING "More Fun and games ....", BY VALUE 4.
+           CALL "SUB3" .
+           CALL "COBCSUB" USING BY VALUE 6, 
+                            BY REFERENCE "Hi to C Code...".
+           CALL "COBCSUB" USING BY VALUE NUMPI, 
+                            BY REFERENCE "Pass PI to C...".
+           CALL "COBCSUB" USING BY VALUE NUM9, 
+                            BY REFERENCE "Pass V99 to C...".
+           CALL "CSUB4" USING FLT9, "Hi from COBOL!.".
+           ADD 1.4 TO FLT9.
+           CALL "CSUB5" USING FLT9, "Called from COBOL instead of C!.".
+           CALL "SUB6" USING NUM5.
+           CALL "SUB6" USING NUM9.
+           CALL "SUB6" USING NUMPI.
+           CALL "SUB6" USING FLT9.
+           CALL "SUB6" USING "31415926".
+           MOVE 10.50 TO NUMED.
+           CALL "SUB6" USING NUMED.
+           MOVE -4510.66 TO NUMED.
+           CALL "SUB6" USING NUMED.
+           STOP RUN.
+           END PROGRAM prog.
+       
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. SUB.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  xn PIC 9(8) BINARY VALUE 99.
+       01  xx PIC X(13) VALUE '"x" was NULL!'.
+       01  yy PIC X(8)  VALUE "Garbage!".
+       LINKAGE SECTION.
+       01  n PIC 9(8).
+       01  x PIC X ANY LENGTH.
+       01  y PIC X ANY LENGTH.
+       01  z PIC X ANY LENGTH.
+       01  num PIC 9 ANY NUMERIC.
+       01  cn PIC 9(9) COMP-5.
+       01  flt1 USAGE COMP-1.
+       01  cx PIC X(15).
+       PROCEDURE DIVISION USING BY VALUE n, x, BY REFERENCE y.
+           DISPLAY n " '" x "'".
+           EXIT PROGRAM.
+       ENTRY "SUB2" USING z, BY VALUE n.
+           DISPLAY n " '" z "' via SUB2".
+           EXIT PROGRAM.
+       ENTRY "SUB3".
+           IF ADDRESS OF n = NULL
+              SET ADDRESS OF n TO ADDRESS OF xn.
+           IF ADDRESS OF x = NULL
+              SET ADDRESS OF x TO ADDRESS OF xx.
+           DISPLAY n " '" x "' via SUB3".
+           EXIT PROGRAM.
+       ENTRY "CSUB4" USING BY VALUE cn, BY REFERENCE cx.
+           DISPLAY cn " '" cx "' via CSUB4".
+           EXIT PROGRAM.
+       ENTRY "CSUB5" USING BY VALUE cn, BY REFERENCE z.
+           DISPLAY cn " '" z "' via CSUB5".
+           EXIT PROGRAM.
+       ENTRY "SUB6" USING num.
+           DISPLAY 'ANY NUMERIC is ' num ' Length ' LENGTH OF num.
+           EXIT PROGRAM.
+       ENTRY "CSUB7" USING VALUE flt1.
+           DISPLAY 'Float value is ' flt1 ' via CSUB7'.
+           EXIT PROGRAM.
+       ENTRY "CSUB8" USING flt1.
+           DISPLAY 'Float reference is ' flt1 ' via CSUB8'.
+           EXIT PROGRAM.
+       END PROGRAM SUB.
+])
+
+AT_DATA([cmod.c], [[
+#include <stdio.h>
+#include <stdio.h>
+extern int CSUB4();
+extern int CSUB5();
+extern int SUB6();
+extern int CSUB7(float f);
+extern int CSUB8(float *f);
+int
+COBCSUB(int y, unsigned char x[15])
+{
+   float flt1;
+   printf("C routine passed: Y is %d; X is '%.15s'\n",y,x);
+   CSUB4(y, x);
+   CSUB4(y+1, "A C-String is being passed");
+   CSUB5(y+2, "A much longer C-String is being passed");
+   SUB6("314159265358");
+   SUB6("31415926");
+   SUB6("000314");
+   flt1 = 3.1415926;
+   CSUB7(flt1);
+   flt1 = 2.71828;
+   CSUB8(&flt1);
+   return 0;
+}                           
+
+]])
+
+AT_CHECK([cobc -x -std=ibm -debug -Wall prog.cob cmod.c], [0], [], [])
+
+AT_CHECK([./prog], [0], [00000001 'Fun and games for you'
+00000002 'More Fun and games for all'
+00000003 'Fun and games' via SUB2
+00000004 'More Fun and games ....' via SUB2
+00000004 'More Fun and games for all' via SUB3
+C routine passed: Y is 6; X is 'Hi to C Code...'
+0000000006 'Hi to C Code...' via CSUB4
+0000000007 'A C-String is b' via CSUB4
+0000000008 'A much longer C-String is being passed' via CSUB5
+ANY NUMERIC is 314159265358 Length 0000000012
+ANY NUMERIC is 31415926 Length 0000000008
+ANY NUMERIC is 000314 Length 0000000006
+Float value is 3.1415925 via CSUB7
+Float reference is 2.7182801 via CSUB8
+C routine passed: Y is 314; X is 'Pass PI to C...'
+0000000314 'Pass PI to C...' via CSUB4
+0000000315 'A C-String is b' via CSUB4
+0000000316 'A much longer C-String is being passed' via CSUB5
+ANY NUMERIC is 314159265358 Length 0000000012
+ANY NUMERIC is 31415926 Length 0000000008
+ANY NUMERIC is 000314 Length 0000000006
+Float value is 3.1415925 via CSUB7
+Float reference is 2.7182801 via CSUB8
+C routine passed: Y is 1234567; X is 'Pass V99 to C..'
+0001234567 'Pass V99 to C..' via CSUB4
+0001234568 'A C-String is b' via CSUB4
+0001234569 'A much longer C-String is being passed' via CSUB5
+ANY NUMERIC is 314159265358 Length 0000000012
+ANY NUMERIC is 31415926 Length 0000000008
+ANY NUMERIC is 000314 Length 0000000006
+Float value is 3.1415925 via CSUB7
+Float reference is 2.7182801 via CSUB8
+0000000009 'Hi from COBOL!.' via CSUB4
+0000000010 'Called from COBOL instead of C!.' via CSUB5
+ANY NUMERIC is 12345 Length 0000000005
+ANY NUMERIC is 123456788 Length 0000000009
+ANY NUMERIC is 000314 Length 0000000006
+ANY NUMERIC is 10.4 Length 0000000004
+ANY NUMERIC is 31415926 Length 0000000008
+ANY NUMERIC is     10.50   Length 0000000011
+ANY NUMERIC is   4510.66CR Length 0000000011
+], [])
+
+AT_CLEANUP
+

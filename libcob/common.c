@@ -255,7 +255,14 @@ static unsigned int	conf_runtime_error_displayed = 0;
 static unsigned int	last_runtime_error_line = 0;
 static const char	*last_runtime_error_file = NULL;
 
-#if	defined (HAVE_SIGNAL_H) && defined (HAVE_SIG_ATOMIC_T)
+/* List of dynamically allocated field attributes */
+static struct dyn_attr {
+	struct dyn_attr	*next;
+	cob_field_attr	attr;
+} *dyn_attr_list = NULL;
+
+
+#if	defined(HAVE_SIGNAL_H) && defined(HAVE_SIG_ATOMIC_T)
 static volatile sig_atomic_t	sig_is_handled = 0;
 #endif
 
@@ -504,6 +511,7 @@ cob_exit_common (void)
 		cob_free (y->cob_pointer);
 		cob_free (y);
 	}
+	dyn_attr_list = NULL;
 
 	/* Free last stuff */
 	if (cob_last_sfile) {
@@ -2318,6 +2326,8 @@ cob_module_leave (cob_module *module)
 	COB_UNUSED (module);
 	/* Pop module pointer */
 	COB_MODULE_PTR = COB_MODULE_PTR->next;
+	cobglobptr->cob_call_name_hash = 0;
+	cobglobptr->cob_call_from_c = 0;
 }
 
 void
@@ -7976,6 +7986,26 @@ cob_init (const int argc, char **argv)
 	/* from certain ifdef's */
 }
 
+/* Compute a hash value based on the string given */
+unsigned int
+cob_get_name_hash (const char *name)
+{
+	unsigned int hash;
+	int	i, ch;
+	hash = 0x074FADE1;		/* Seed value to agitate the bits */
+	for (i=0; name[i] != 0; i++) {
+		if(islower(name[i]))
+			ch = toupper(name[i]);
+		else
+			ch = name[i];
+		hash = (hash << 5) | (hash >> 27);
+		hash = hash + ((ch & 0x7F) * (i + 3));
+	}
+	if (hash == 0)
+		hash = 1;
+	return hash;
+}
+
 /*
  * Set special runtime options:
  * Currently this is only FILE * for trace and printer output
@@ -8136,6 +8166,31 @@ cob_get_runtime_option (enum cob_runtime_option_switch opt)
 			"cob_get_runtime_option", opt);
 	}
 	return NULL;
+}
+
+/*
+ * Allocate field attribute; 
+ * Used by subroutine entry when called by C code
+ */
+cob_field_attr *
+cob_alloc_attr(int type, int digits, int scale, int flags)
+{
+	struct dyn_attr	*da;
+	for (da = dyn_attr_list; da; da = da-> next) {
+		if (da->attr.type == type
+		&& da->attr.digits == digits
+		&& da->attr.scale == scale
+		&& da->attr.flags == flags)
+			return &da->attr;
+	}
+	da = cob_cache_malloc (sizeof(struct dyn_attr));
+	da->next = dyn_attr_list;
+	dyn_attr_list = da;
+	da->attr.type   = type;
+	da->attr.digits = digits;
+	da->attr.scale  = scale;
+	da->attr.flags  = flags;
+	return &da->attr;
 }
 
 #ifdef COB_DEBUG_LOG

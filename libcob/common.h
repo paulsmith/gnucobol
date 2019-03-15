@@ -659,6 +659,9 @@ only usable with COB_USE_VC2013_OR_GREATER */
 /* TODO: add compiler configuration for limiting this */
 #define	MAX_FD_RECORD_IDX	65535
 
+/* Maximum number of parameters */
+#define	COB_MAX_FIELD_PARAMS	36
+
 /* Maximum number of field digits */
 #define	COB_MAX_DIGITS		38
 
@@ -1315,6 +1318,14 @@ typedef struct __cob_module {
 	unsigned int		module_stmt;		/* Last statement executed */
 	const char		**module_sources;	/* Source module names compiled */
 
+	//// r1547:
+	unsigned int		param_buf_size;		/* Size of 'param_buf' */
+	unsigned int		param_buf_used;		/* amount used from 'param_buf' */
+	unsigned char		*param_buf;		/* BY VALUE parameters */
+	unsigned int		param_num;		/* entries in 'param_field' */
+	unsigned int		param_max;		/* Max entries in 'param_field' */
+	cob_field		**param_field;		
+
 	cob_field		*xml_code;		/* XML-CODE */
 	cob_field		*xml_event;		/* XML-EVENT */
 	cob_field		*xml_information;	/* XML-INFORMATION */
@@ -1329,6 +1340,12 @@ typedef struct __cob_module {
 	cob_field		*json_status;		/* JSON-STATUS */
 } cob_module;
 
+/* For 'module_type'
+ * Values identical to CB_PROGRAM_TYPE & CB_FUNCTION_TYPE in tree.h 
+ */
+#define COB_MODULE_PROGRAM	0
+#define COB_MODULE_FUNCTION	1
+#define COB_MODULE_C		2
 
 /* User function structure */
 
@@ -1638,12 +1655,14 @@ typedef struct __cob_global {
 	unsigned int		cob_got_exception;	/* Exception active (see last_exception) */
 	unsigned int		cob_screen_initialized;	/* Screen initialized */
 	unsigned int		cob_physical_cancel;	/* Unloading of modules */
-												/* screenio / termio */
+							/* screenio / termio */
 	unsigned char		*cob_term_buff;		/* Screen I/O buffer */
 	int			cob_accept_status;	/* ACCEPT STATUS */
 
 	int			cob_max_y;		/* Screen max y */
 	int			cob_max_x;		/* Screen max x */
+	int			cob_call_from_c;	/* Recent CALL was via cob_call & not COBOL */
+	unsigned int		cob_call_name_hash;	/* Hash of subroutine name being CALLed */
 
 	unsigned int		cob_stmt_exception;	/* Statement has 'On Exception' */
 
@@ -1681,6 +1700,7 @@ COB_EXPIMP void		print_info	(void);
 COB_EXPIMP void		print_version	(void);
 COB_EXPIMP int		cob_load_config	(void);
 COB_EXPIMP void		print_runtime_conf	(void);
+COB_EXPIMP cob_field_attr *cob_alloc_attr(int type, int digits, int scale, int flags);
 
 COB_EXPIMP void		cob_set_exception	(const int);
 COB_EXPIMP int		cob_last_exception_is	(const int);
@@ -1942,6 +1962,7 @@ COB_EXPIMP void		cob_move_ibm	(void *, void *, const int);
 COB_EXPIMP void		cob_set_int	(cob_field *, const int);
 COB_EXPIMP int		cob_get_int	(cob_field *);
 COB_EXPIMP cob_s64_t	cob_get_llint	(cob_field *);
+COB_EXPIMP void		cob_alloc_move(cob_field *, cob_field *, const int);
 /**************************************************/
 /* Functions in move.c for C access to COBOL data */
 /**************************************************/
@@ -2024,6 +2045,7 @@ COB_EXPIMP void	cob_gmp_free		(void *);
 
 DECLNORET COB_EXPIMP void	cob_call_error		(void) COB_A_NORETURN;
 COB_EXPIMP void		cob_field_constant (cob_field *f, cob_field *t, cob_field_attr *a, void *d);
+COB_EXPIMP unsigned int	cob_get_name_hash (const char *name);
 
 COB_EXPIMP void		cob_set_cancel		(cob_module *);
 COB_EXPIMP void		*cob_resolve		(const char *);
