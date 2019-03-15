@@ -64,6 +64,9 @@
 #define CB_PREFIX_REPORT_REF	"rr_"	/* Report CONTROL reference (cob_report_control_ref) */
 #define CB_PREFIX_REPORT_SUM_CTR "rsc_"	/* Report SUM COUNTER */
 
+#define CB_PROGRAM_TYPE		0
+#define CB_FUNCTION_TYPE	1
+
 #define CB_CALL_BY_REFERENCE	1
 #define CB_CALL_BY_CONTENT	2
 #define CB_CALL_BY_VALUE	3

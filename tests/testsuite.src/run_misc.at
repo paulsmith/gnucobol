@@ -6119,6 +6119,9 @@ AT_CHECK([COB_EXIT_WAIT=0 ./prog], [0], ignore, [])
 AT_CLEANUP
 
 
+AT_SETUP([DISPLAY UPON])
+AT_KEYWORDS([DISPLAY])
+
 AT_SETUP([SET LAST EXCEPTION TO OFF])
 AT_KEYWORDS([runmisc exceptions EXCEPTION-STATUS EXCEPTION-LOCATION])
 
@@ -6149,14 +6152,39 @@ prog; ; 10
 EC-SIZE-OVERFLOW
 prog; ; 10
 
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[This is sent to CONSOLE
+This is sent to PRINTER
+This is also sent to CONSOLE
+This is also sent to PRINTER
+],
+[This is sent to SYSERR
+This is also sent to SYSERR
+])
 
+AT_CHECK([COB_DISPLAY_PRINT_PIPE='cat >>prt.log' \
+$COBCRUN_DIRECT ./prog], [0],
+[This is sent to CONSOLE
+This is also sent to CONSOLE
+],
+[This is sent to SYSERR
+This is also sent to SYSERR
 ])
 AT_CLEANUP
 
+AT_CHECK([COB_DISPLAY_PRINT_FILE='prt.log' \
+$COBCRUN_DIRECT ./prog], [0],
+[This is sent to CONSOLE
+This is also sent to CONSOLE
+],
+[This is sent to SYSERR
+This is also sent to SYSERR
+])
 
 # PROCEDURE DIVISION RETURNING OMITTED
 AT_SETUP([void PROCEDURE])
 AT_KEYWORDS([runmisc])
+
 
 AT_DATA([callee.cob], [
        IDENTIFICATION   DIVISION.
@@ -6165,6 +6193,12 @@ AT_DATA([callee.cob], [
        PROCEDURE        DIVISION RETURNING OMITTED.
            MOVE 42 TO RETURN-CODE
            EXIT PROGRAM.
+#### r2322, looks wrong: 
+AT_DATA([reference],
+[This is sent to PRINTER
+This is also sent to PRINTER
+This is sent to PRINTER
+This is also sent to PRINTER
 ])
 
 AT_DATA([caller.cob], [
@@ -6184,7 +6218,7 @@ AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [+000000000], [])
 AT_CLEANUP
 
 
-AT_SETUP([Figurative constants to numeric field])
+AT_SETUP([REDEFINES with VALUE relaxed])
 AT_KEYWORDS([Numeric])
 
 AT_DATA([prog.cob], [

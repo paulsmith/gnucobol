@@ -11202,11 +11202,12 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		output_line ("/* Function return */");
 		output_prefix ();
-		output ("return ");
+		output ("return cob_function_return (");
 		output_line ("/* Function return */");
 		output_prefix ();
 		output ("return ");
 		output_param (prog->returning, -1);
+		output (")");
 	} else {
 		output_line ("/* Program return */");
 		if (prog->returning && prog->cb_return_code) {
@@ -11520,7 +11521,11 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_indent_level -= 2;
 		output_line ("}");
 	}
-	output_line ("return 0;");
+	if (prog->prog_type == CB_FUNCTION_TYPE) {
+		output_line ("  return NULL;");
+	} else {
+		output_line ("  return 0;");
+	}
 	output_newline ();
 
 	/* Set up CANCEL callback code */
@@ -11840,8 +11845,10 @@ try_get_by_value_parameter_type (const enum cb_usage usage,
 		//// contributed by r2221
 		output (");\n");
 
-		output ("  **cob_fret = *floc->ret_fld;\n");
-		output ("  ret = *cob_fret;\n");
+		output ("  if (floc->ret_fld != NULL) {\n");
+		output ("      **cob_fret = *floc->ret_fld;\n");
+		output ("      ret = *cob_fret;\n");
+		output ("  }\n");
 		output ("  /* Restore environment */\n");
 		output ("  cob_restore_func (floc);\n");
 		output ("  return ret;\n}\n\n");

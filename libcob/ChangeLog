@@ -404,6 +404,11 @@
 
 	* termio.c: standardize display of -NaN and NaN for float/double
 
+2018-01-03 Ron Norman <rjn@inglenet.com>
+	* common.c,common.h: Add cob_function_return routine to
+	  copy a FUNCTION's RETURNING cob_field to 'cob_module' 
+	  save area and return address of that
+
 2018-01-03  Simon Sobisch <simonsobisch@gnu.org>
 
 	* numeric.c [WIN32]: fix missing definition of isnan / isinf

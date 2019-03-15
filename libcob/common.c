@@ -2425,6 +2425,18 @@ cob_restore_func (struct cob_func_loc *fl)
 	cob_free (fl);
 }
 
+/*
+ * Copy the returning 'cob_field' and return address of the copy
+ * This is done to avoid passing back a point to data on the C stack
+ * for a function which has returned
+*/
+cob_field *
+cob_function_return (cob_field *rtn)
+{
+	COB_MODULE_PTR->function_return = *rtn;
+	return &COB_MODULE_PTR->function_return;
+}
+
 void
 cob_check_version (const char *prog, const char *packver_prog, const int patchlev_prog)
 {

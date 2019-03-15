@@ -848,6 +848,11 @@
 	* typeck.c, parser.y, tree.h: adjusted (cb_build_program_id) to directly
 	  get the external name passed, removing duplicated code
 
+2018-01-03  Ron Norman <rjn@inglenet.com>
+	* codegen.c: For FUNCTION-ID copy RETURNING 'cob_field'
+	  so as to avoid passing pointer to data in C stack
+	  after 'return'; This should avoid a MS C compiler warning
+
 2018-01-03  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c (cb_build_move_literal): fixed bug #486, where literals moved

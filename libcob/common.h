@@ -1342,6 +1342,7 @@ typedef struct __cob_module {
 
 	cob_field		*json_code;		/* JSON-CODE */
 	cob_field		*json_status;		/* JSON-STATUS */
+	cob_field		function_return;	/* Copy of RETURNING field */
 } cob_module;
 
 /* For 'module_type'
@@ -1745,6 +1746,7 @@ COB_EXPIMP void	cob_set_locale			(cob_field *, const int);
 COB_EXPIMP int 	cob_setenv	(const char *, const char *, int);
 COB_EXPIMP int 	cob_unsetenv	(const char *);
 COB_EXPIMP char	*cob_expand_env_string	(char *);
+COB_EXPIMP cob_field	*cob_function_return (cob_field *);
 
 COB_EXPIMP void	cob_check_version		(const char *, const char *,
 						 const int);

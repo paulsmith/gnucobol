@@ -469,9 +469,50 @@ unmerged revisions
 C    cobc/ChangeLog	  merged
 C    cobc/codegen.c	  declined, still messy
 
+Hit big tree conflict on dry run for 2364:
+--- Merging r2320 through r2322 into 'cobc/cobc.c':
+ G   cobc/cobc.c
+--- Merging r2320 through r2322 into 'cobc/field.c':
+ G   cobc/field.c
+--- Merging r2320 through r2322 into 'doc/Makefile.am':
+ G   doc/Makefile.am
+--- Merging r2320 through r2322 into 'tests':
+   C tests/package.m4
+ U   tests/atlocal.in
+ G   tests/testsuite.at
+ G   tests/testsuite.src/run_file.at
+ G   tests/testsuite.src/used_binaries.at
+--- Merging r2320 through r2322 into 'libcob/common.h':
+CG   libcob/common.h	  declined
+--- Merging r2320 through r2322 into 'tests':
+CG   tests/testsuite.src/run_misc.at merged
+ C   tests
+Summary of conflicts:
+  Text conflicts: 2
+  Property conflicts: 1
+  Tree conflicts: 1
+svn: E155015: One or more conflicts were produced while merging r2319:2322 into
+'/home/jklowden/projects/3rd/cobol/branches/pangaea' --
+resolve all conflicts and rerun the merge to apply the remaining
+unmerged revisions
 
+2nd try:
+--- Merging r2358 through r2364 into '.':
+C    cobc/ChangeLog	  merged
+C    cobc/codegen.c	  declined, still a mess
+C    libcob/ChangeLog	  merged
+U    libcob/common.c	ok
+U    libcob/common.h	ok
+--- Recording mergeinfo for merge of r497 through r2364 into '.':
+ G   .
+--- Recording mergeinfo for merge of r497 through r2364 into 'libcob/common.h':
+ G   libcob/common.h
+also added 
 
+#define CB_PROGRAM_TYPE		0
+#define CB_FUNCTION_TYPE	1
 
+to libcob/tree.h
 
 
 r2364
