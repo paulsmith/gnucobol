@@ -6815,7 +6815,10 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 			}
 			continue;
 		}
-		if (CB_CONST_P (x) && x != cb_null) {
+		if (CB_CONST_P (x) 
+		 && x != cb_null
+		 && x != cb_space
+		 && x != cb_zero) {
 			if (x == cb_space ||
 				x == cb_norm_low ||
 				x == cb_norm_high||

@@ -6014,6 +6014,16 @@ output_call (struct cb_call *p)
 				break;
 			}
 			break;
+		case CB_TAG_CONST:
+			if (CB_PURPOSE_INT (l) == CB_CALL_BY_CONTENT
+			 || CB_PURPOSE_INT (l) == CB_CALL_BY_VALUE) {
+				output ("&content_%s%u", CB_PREFIX_FIELD, n + 1);
+				break;
+			}
+			if (x == cb_null) {
+				output ("NULL /*OMITTED*/");	
+				break;
+			}
 		default:
 			output ("NULL");
 			break;

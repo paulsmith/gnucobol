@@ -1839,6 +1839,10 @@
 	* parser.y, typeck.c, tree.h: Implement arithmetic-osvs for conditions;
 	  compute intermediate results to precision of variables used in expression
 
+2017-04-30  Ron Norman <rjn@inglenet.com>
+	* codegen.c,typeck.c: Update to handle figurative constants on CALL;
+	   CALL xyz USING BY CONTENT ZERO and SPACES
+
 2017-04-30  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, error.c, flag.def: added -fmax-errors / cb_max_errors

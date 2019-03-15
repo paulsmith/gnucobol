@@ -327,10 +327,16 @@ looks incomplete in reportwriter, too.
 
 Hoping for luck later on. 
 
-
-
-
 r1560
+--- Merging r1548 through r1560 into '.':
+C    cobc/ChangeLog	  merged
+U    cobc/codegen.c
+U    cobc/typeck.c
+
+
+
+
+
 r1565
 r1566
 r1605
