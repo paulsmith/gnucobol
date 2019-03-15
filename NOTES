@@ -362,17 +362,21 @@ U    tests/testsuite.src/run_file.at
 
 r1685
 --- Merging r1677 through r1685 into '.':
-C    ChangeLog
+C    ChangeLog	  	  merged
 Skipped 'config.h.in'
 Skipped 'configure'
 U    configure.ac
+U    libcob/coblocal.h
+
+r1686
+--- Merging r1686 into '.':
+U    cobc/tree.h
 U    libcob/coblocal.h
 
 
 
 
 
-r1686
 r1726
 r1727
 r1728

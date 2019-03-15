@@ -38,13 +38,17 @@
 
 #ifndef HAVE_ATOLL
 #ifdef  HAVE_STRTOLL
+#ifndef atoll
 #define atoll(x) strtoll(x, NULL, 10)
+#endif
 #endif
 #endif
 
 #ifndef HAVE_ATOL
 #ifdef  HAVE_STRTOL
+#ifndef atol
 #define atol(x) strtol(x, NULL, 10)
+#endif
 #endif
 #endif
 
