@@ -4317,3 +4317,69 @@ Return value '5'], [])
 
 AT_CLEANUP
 
+AT_SETUP([FUNCTION Recursion])
+AT_KEYWORDS([FUNCTIONS])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION foo.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 num PIC 9 VALUE 1.
+
+       PROCEDURE DIVISION.
+            DISPLAY "Begin recursive function test".
+            DISPLAY "Return value '" FUNCTION foo (num) "'".
+            DISPLAY "End of test".
+           END PROGRAM prog.
+
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. foo.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION foo.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  ttl  PIC 9 VALUE 1.
+
+       LOCAL-STORAGE SECTION.
+       01  num  PIC 9.
+
+       LINKAGE SECTION.
+       01  arg PIC 9.
+       01  ret PIC 9.
+
+       PROCEDURE DIVISION USING arg RETURNING ret.
+           IF arg < 5
+               ADD 1 TO arg GIVING num
+               MOVE FUNCTION foo (num) TO ret
+           ELSE
+               MOVE arg TO ret
+           END-IF.
+           DISPLAY "Step: " ttl ", Arg: " arg ", '" ret "'".
+           ADD 1 to ttl.
+       END FUNCTION foo.
+])
+
+AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [Begin recursive function test
+Step: 1, Arg: 5, '5'
+Step: 2, Arg: 4, '5'
+Step: 3, Arg: 3, '5'
+Step: 4, Arg: 2, '5'
+Step: 5, Arg: 1, '5'
+Return value '5'
+End of test
+], [])
+
+AT_CLEANUP
+

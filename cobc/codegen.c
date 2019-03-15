@@ -11203,6 +11203,9 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("/* Function return */");
 		output_prefix ();
 		output ("return ");
+		output_line ("/* Function return */");
+		output_prefix ();
+		output ("return ");
 		output_param (prog->returning, -1);
 	} else {
 		output_line ("/* Program return */");
@@ -11834,6 +11837,14 @@ try_get_by_value_parameter_type (const enum cb_usage usage,
 		default:
 			break;
 		}
+		//// contributed by r2221
+		output (");\n");
+
+		output ("  **cob_fret = *floc->ret_fld;\n");
+		output ("  /* Restore environment */\n");
+		output ("  cob_restore_func (floc);\n");
+		output ("  return *cob_fret;\n}\n\n");
+		return; //// end r2221
 	}
 	
 
@@ -12562,15 +12573,27 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	if (local_field_cache) {
 		/* Switch to local storage file */
 		output_target = current_prog->local_include->local_fp;
-		output_local ("\n/* Local Fields */\n");
+		if (prog->flag_recursive) {
+			output_local ("\n/* Local Fields for recursive routine */\n");
+		} else {
+			output_local ("\n/* Local Fields */\n");
+		}
 		local_field_cache = list_cache_sort (local_field_cache,
 						     &field_cache_cmp);
 		for (struct field_list* k = local_field_cache; k; k = k->next) {
-			output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD,
-				k->f->id);
 			if (!k->f->flag_local) {
+				if (prog->flag_recursive
+				&& !k->f->flag_filler) {
+					output ("/* %s is not local */\n", k->f->name);
+				}
+				output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD, k->f->id);
 				output_field (k->x);
 			} else {
+				if (prog->flag_recursive) {
+					output ("\tcob_field %s%d\t= ", CB_PREFIX_FIELD, k->f->id);
+				} else {
+					output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD, k->f->id);
+				}
 				output ("{");
 				output_size (k->x);
 				output (", NULL, ");
