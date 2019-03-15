@@ -210,12 +210,14 @@ r1396
 --- Merging r1396 into '.':
 A    bin/gcdiff.c      ok
 
-
-
-
-
-
 r1398
+--- Merging r1398 into '.':
+C    libcob/call.c     declined, already done differently
+
+
+
+
+
 r1401
 r1402
 r1404
