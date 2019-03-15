@@ -201,11 +201,15 @@ C    tests/ChangeLog	merged
 C    tests/cobol85/report.pl	declined
 U    tests/testsuite.src/run_file.at	ok
 
-
-
-
-
 r1395
+--- Merging r1392 through r1395 into '.':
+C    bin/ChangeLog
+C    bin/Makefile.am
+
+
+
+
+
 r1396
 r1398
 r1401
