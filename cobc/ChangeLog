@@ -1618,6 +1618,13 @@
 	* parser.y (terminator_warning, terminator_error): don't warn/error
 	  for missing terminators that don't exist in the current dialect
 
+2017-06-24  Ron Norman <rjn@inglenet.com>
+
+	* field.c,tree.h: Fixed to carry USAGE, SYNC, SIGN LEADING/TRAILING
+	  attributes from group item to elementary data field
+	  Fixed SYNC so it aligns the same as Micro Focus on 2 or 4 byte
+	  boundary only.
+
 2017-06-22  Ron Norman <rjn@inglenet.com>
 
 	* codgen.c: emit dummy reference to 'frame_overflow' to avoid

@@ -378,11 +378,17 @@ r1726
 C    cobc/ChangeLog	  merged
 U    cobc/codegen.c
 
-
-
-
-
 r1727
+--- Merging r1727 into '.':
+C    cobc/ChangeLog    merged
+C    cobc/field.c      merged
+C    cobc/tree.h       merged
+C    tests/testsuite.src/run_misc.at	merged
+
+
+
+
+
 r1728
 r1739
 r1870

@@ -549,7 +549,7 @@ same_level:
 
 	/* Inherit parents properties */
 	if (f->parent) {
-		f->usage = f->parent->usage;
+		f->usage = CB_USAGE_DISPLAY;	/* Default to DISPLAY data */
 		f->indexes = f->parent->indexes;
 		f->flag_sign_leading = f->parent->flag_sign_leading;
 		f->flag_sign_separate = f->parent->flag_sign_separate;
@@ -663,6 +663,7 @@ create_implicit_picture (struct cb_field *f)
 	cb_tree			first_value;
 	char			*pp;
 	struct cb_literal	*lp;
+	struct cb_field		*p;
 	int			size_implied = 1;
 	int			is_numeric;
 	int			ret;
@@ -781,6 +782,17 @@ create_implicit_picture (struct cb_field *f)
 			f->usage = CB_USAGE_DISPLAY;
 		}
 		return 0;
+	}
+
+	if (f->usage == CB_USAGE_DISPLAY) {
+		for (p = f->parent; p; p = p->parent) {
+			if (p->usage == CB_USAGE_FLOAT
+			 || p->usage == CB_USAGE_DOUBLE
+			 || p->usage == CB_USAGE_INDEX) {
+				f->usage = p->usage;	/* Propogate group USAGE to elementary field */
+				return 0;
+			}
+		}
 	}
 
 	ret = 0;
@@ -1066,6 +1078,60 @@ validate_pic (struct cb_field *f)
 	if (f->flag_comp_1 && cb_binary_comp_1) {
 		return 0;
 	}
+
+	/* Check for Group attributes to be carried to elementary field */
+	if (!f->flag_validated
+	 && !f->children) {
+		if (f->usage == CB_USAGE_DISPLAY
+		 && f->pic
+		 && f->pic->category == CB_CATEGORY_NUMERIC) {
+			for (struct cb_field *p = f->parent; p; p = p->parent) {
+				if (p->usage != CB_USAGE_DISPLAY) {
+					f->usage = p->usage;
+					break;
+				}
+			}
+		}
+		if ( !f->flag_synchronized
+		 && ( f->usage == CB_USAGE_BINARY
+		    || f->usage == CB_USAGE_FLOAT
+		    || f->usage == CB_USAGE_DOUBLE
+		    || f->usage == CB_USAGE_UNSIGNED_SHORT
+		    || f->usage == CB_USAGE_SIGNED_SHORT
+		    || f->usage == CB_USAGE_UNSIGNED_INT
+		    || f->usage == CB_USAGE_SIGNED_INT
+		    || f->usage == CB_USAGE_UNSIGNED_LONG
+		    || f->usage == CB_USAGE_SIGNED_LONG
+		    || f->usage == CB_USAGE_COMP_5
+		    || f->usage == CB_USAGE_COMP_6
+		    || f->usage == CB_USAGE_FP_DEC64
+		    || f->usage == CB_USAGE_FP_DEC128
+		    || f->usage == CB_USAGE_FP_BIN32
+		    || f->usage == CB_USAGE_FP_BIN64
+		    || f->usage == CB_USAGE_FP_BIN128
+		    || f->usage == CB_USAGE_LONG_DOUBLE)) {
+			for (struct cb_field *p = f->parent; p; p = p->parent) {
+				if (p->flag_synchronized) {
+					f->flag_synchronized = 1;
+					break;
+				}
+			}
+		}
+		if (f->pic
+		&&  f->pic->category == CB_CATEGORY_NUMERIC
+		&&  f->flag_sign_separate == 0
+		&&  f->flag_sign_leading == 0) {
+			for (struct cb_field *p = f->parent; p; p = p->parent) {
+				if (p->flag_sign_separate
+				 || p->flag_sign_leading) {
+					f->flag_sign_separate = p->flag_sign_separate;
+					f->flag_sign_leading  = p->flag_sign_leading;
+					break;
+				}
+			}
+		}
+	}
+	f->flag_validated = 1;
 
 	/* if picture is not needed it is an error to specify it
 	   note: we may have set the picture internal */

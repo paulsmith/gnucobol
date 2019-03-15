@@ -859,6 +859,7 @@ struct cb_field {
 	unsigned int flag_internal_constant	: 1;	/* Is an internally generated CONSTANT */
 	unsigned int flag_comp_1	: 1;	/* Is USAGE COMP-1 */
 	unsigned int flag_volatile	: 1;	/* VOLATILE */
+	unsigned int flag_validated	: 1;	/* 'usage' was validated */
 };
 
 #define CB_FIELD(x)		(CB_TREE_CAST (CB_TAG_FIELD, struct cb_field, x))

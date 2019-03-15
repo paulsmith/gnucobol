@@ -11258,6 +11258,7 @@ E: OK OTHER option taken
 
 AT_CLEANUP
 
+
 AT_SETUP([PERFORM VARYING Float])
 AT_KEYWORDS([Perform])
 
@@ -22150,3 +22151,542 @@ ANY NUMERIC is   4510.66CR Length 0000000011
 
 AT_CLEANUP
 
+#### reportwriter r1727
+AT_SETUP([COBOL2002 SYNC])
+AT_KEYWORDS([Numeric])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       FILE SECTION.
+      
+       WORKING-STORAGE SECTION.
+      
+       77  VLEN                   PIC 99 VALUE 1.
+       01  TSTREC1.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD1          PICTURE S9(2) COMP-4. 
+           10  FILLER             PICTURE X(5).
+      
+       01  TSTREC2.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD2          PICTURE S9(4) COMP-4 SYNC . 
+           10  FILLER             PICTURE X(5).
+      
+       01  TSTREC3.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD3          PICTURE S9(6) COMP-4 SYNC. 
+           10  FILLER             PICTURE X(5).
+      
+       01  TSTRECL.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLDL          PICTURE S9(2) COMP-4 SYNC LEFT. 
+           10  FILLER             PICTURE X(5).
+      
+       01  TSTRECR.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLDR          PICTURE S9(2) COMP-4 SYNC RIGHT. 
+           10  FILLER             PICTURE X(5).
+      
+       01  TSTRECS.
+           10  FILLER             PICTURE X(5). 
+           10  FILLER OCCURS 3 TIMES.
+               15  FILLER         PICTURE X(2).
+               15  COMP-FLDS      PICTURE S9(4) COMP-4 SYNC . 
+               15  FILLER         PICTURE X(1).
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTRECO.
+           10  FILLER             PICTURE X(5). 
+           10  FILLER OCCURS 3 TIMES.
+               15  FILLER         PICTURE X(2).
+               15  COMP-FLDO      PICTURE S9(4) COMP-4 . 
+               15  FILLER         PICTURE X(1).
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRP SYNC COMP-4.
+         05  GRP1.
+           10  FILLER             PICTURE X(5). 
+           10  COM1-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM1-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(3). 
+           10  COM1-FLD3          PICTURE S9(18). 
+
+       01  TSTGRP2 SIGN LEADING SEPARATE.
+         05  GRP2-1.
+           10  FILLER             PICTURE X(5). 
+           10  COM2-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM2-FLD2          PICTURE S9(6) SIGN TRAILING SEPARATE. 
+           10  FILLER             PICTURE X(3). 
+           10  COM2-FLD3          PICTURE S9(7). 
+
+       01  TSTGRP3 COMP-3.
+         05  GRP3-1.
+           10  FILLER             PICTURE X(5). 
+      * Following is not allowed by Micro Focus
+      *    10  COM3-FLD1          PICTURE S9(4) COMP-4. 
+           10  COM3-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM3-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(3). 
+         05  GRP3-2.
+           10  COM3-FLD3          PICTURE S9(13). 
+
+       01  TSTGRP4 COMP-4.
+         05  GRP4-1 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD2          PICTURE S9(7). 
+           10  FILLER             PICTURE X(1). 
+         05  GRP4-2.
+           10  COM4-FLD3          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD4          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRP5 COMP-4.
+           10  FILLER             PICTURE X(1). 
+           10  COM5-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM5-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRP5S COMP-4 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD1         PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD2         PICTURE S9(7). 
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRP6 COMP-3.
+           10  FILLER             PICTURE X(1). 
+           10  COM6-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM6-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRP7 COMP-1.
+           10  COM7-FLD1          .
+           10  COM7-FLD2          .
+
+       01  TSTGRP8 COMP-2.
+           10  COM8-FLD1          .
+           10  COM8-FLD2          .
+
+       01  TSTGRP9.
+         05  GRP9-1 SIGN LEADING SEPARATE.
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD1          PICTURE S9(2). 
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD2          PICTURE S9(2) SIGN TRAILING SEPARATE. 
+           10  FILLER             PICTURE X(1). 
+         05  GRP9-2 SIGN TRAILING SEPARATE.
+           10  COM9-FLD3          PICTURE S9(2) SIGN LEADING SEPARATE. 
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD4          PICTURE S9(2). 
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRPX.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-FLD1          PICTURE X(3) COMP-X SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-FLD2          PICTURE X(3) COMP-X.
+           10  FILLER             PICTURE X(1). 
+
+       PROCEDURE DIVISION.
+
+           MOVE ALL "x"    TO TSTREC1.
+           MOVE LENGTH OF COMP-FLD1 TO VLEN.
+           MOVE "11"       TO COMP-FLD1 (1:VLEN).
+           IF VLEN = 1
+               DISPLAY "NOIBMCOMP: " TSTREC1
+           ELSE
+               DISPLAY "IBMCOMP  : " TSTREC1.
+           MOVE ALL "x"    TO TSTREC2.
+           MOVE LENGTH OF COMP-FLD2 TO VLEN.
+           MOVE "22"       TO COMP-FLD2 (1:VLEN).
+           DISPLAY "      " VLEN " : " TSTREC2.
+           MOVE ALL "x"    TO TSTRECO.
+           MOVE '----:'    TO TSTRECO (1:5).
+           MOVE "11"       TO COMP-FLDO (1) (1:2)
+           MOVE "22"       TO COMP-FLDO (2) (1:2)
+           MOVE "33"       TO COMP-FLDO (3) (1:2)
+           MOVE LENGTH OF COMP-FLDO (1) TO VLEN.
+           DISPLAY "      " VLEN " : " TSTRECO.
+           MOVE ALL "x"    TO TSTRECS.
+           MOVE '----:'    TO TSTRECS (1:5).
+           MOVE "11"       TO COMP-FLDS (1) (1:2)
+           MOVE "22"       TO COMP-FLDS (2) (1:2)
+           MOVE "33"       TO COMP-FLDS (3) (1:2)
+           MOVE LENGTH OF COMP-FLDS (1) TO VLEN.
+           DISPLAY "      " VLEN " : " TSTRECS.
+           MOVE ALL "x"    TO TSTREC3.
+           MOVE LENGTH OF COMP-FLD3 TO VLEN.
+           MOVE "1234678"  TO TSTREC3 (6:VLEN).
+           DISPLAY "      " VLEN " : " TSTREC3.
+           MOVE ALL "x"    TO TSTRECL.
+           MOVE LENGTH OF COMP-FLDL TO VLEN.
+           MOVE "12345678" TO TSTRECL (6:VLEN).
+           DISPLAY "      " VLEN " : " TSTRECL.
+           MOVE ALL "x"    TO TSTRECR.
+           MOVE LENGTH OF COMP-FLDR TO VLEN.
+           MOVE "12345678" TO TSTRECR (6:VLEN).
+           DISPLAY "      " VLEN " : " TSTRECR.
+           MOVE ALL "x"    TO TSTGRP.
+           MOVE "12345678" TO COM1-FLD1 (1:).
+           MOVE "12345678" TO COM1-FLD2 (1:).
+           MOVE "12345678" TO COM1-FLD3 (1:).
+           MOVE LENGTH OF COM1-FLD2 TO VLEN.
+           DISPLAY "      " VLEN " : " TSTGRP.
+           MOVE ALL "x"    TO TSTGRP2.
+           MOVE "12345678" TO COM2-FLD1 (1:).
+           MOVE "12345678" TO COM2-FLD2 (1:).
+           MOVE "12345678" TO COM2-FLD3 (1:).
+           MOVE LENGTH OF COM2-FLD2 TO VLEN.
+           DISPLAY "      " VLEN " : " TSTGRP2.
+           MOVE ALL "x"    TO TSTGRP3.
+           MOVE "12345678" TO COM3-FLD1 (1:).
+           MOVE "12345678" TO COM3-FLD2 (1:).
+           MOVE "12345678" TO COM3-FLD3 (1:).
+           MOVE LENGTH OF COM3-FLD2 TO VLEN.
+           DISPLAY "      " VLEN " : " TSTGRP3.
+           MOVE ALL "x"    TO TSTGRP4.
+           MOVE "12345678" TO COM4-FLD1 (1:).
+           MOVE "12345678" TO COM4-FLD2 (1:).
+           MOVE "12345678" TO COM4-FLD3 (1:).
+           MOVE "12345678" TO COM4-FLD4 (1:).
+           MOVE LENGTH OF COM4-FLD2 TO VLEN.
+           DISPLAY "      " VLEN " : " TSTGRP4.
+           MOVE ALL "x"    TO TSTGRP5.
+           MOVE "12345678" TO COM5-FLD1 (1:).
+           MOVE "12345678" TO COM5-FLD2 (1:).
+           DISPLAY "NOSYNC   : " TSTGRP5.
+           MOVE ALL "x"    TO TSTGRP5S.
+           MOVE "12345678" TO COM5S-FLD1 (1:).
+           MOVE "12345678" TO COM5S-FLD2 (1:).
+           DISPLAY "SYNC     : " TSTGRP5S.
+           MOVE ALL "x"    TO TSTGRP6.
+           MOVE "12345678" TO COM6-FLD1 (1:).
+           MOVE "12345678" TO COM6-FLD2 (1:).
+           DISPLAY "COMP-3   : " TSTGRP6.
+           MOVE ALL "x"    TO TSTGRP7.
+           MOVE "12345678" TO COM7-FLD1 (1:).
+           MOVE "12345678" TO COM7-FLD2 (1:).
+           DISPLAY "COMP-1   : " TSTGRP7.
+           MOVE ALL "x"    TO TSTGRP8.
+           MOVE "12345678" TO COM8-FLD1 (1:).
+           MOVE "12345678" TO COM8-FLD2 (1:).
+           DISPLAY "COMP-2   : " TSTGRP8.
+           MOVE ALL "x"    TO TSTGRP9.
+           MOVE -1 TO COM9-FLD1 .
+           MOVE -2 TO COM9-FLD2 .
+           MOVE -3 TO COM9-FLD3 .
+           MOVE -4 TO COM9-FLD4 .
+           DISPLAY "SIGN L/T : " TSTGRP9.
+           MOVE ALL "x"    TO TSTGRPX.
+           MOVE "12345678" TO COMX-FLD1 (1:).
+           MOVE "12345678" TO COMX-FLD2 (1:).
+           DISPLAY "COMP-X   : " TSTGRPX.
+           STOP RUN.
+])
+
+AT_CHECK([cobc -x -std=cobol2002 -w -fno-ibmcomp prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [NOIBMCOMP: xxxxx1xxxxx
+      02 : xxxxx22xxxxx
+      02 : ----:xx11xxx22xxx33xx
+      02 : ----:xx11xxx22xxx33xx
+      03 : xxxxx123xxxxx
+      01 : xxxxx1xxxxx
+      01 : xxxxx1xxxxx
+      03 : xxxxx12xxx123xxx12345678
+      07 : xxxxx12345xxx1234567xxx12345678
+      04 : xxxxx123xxx1234xxx1234567
+      04 : x123456x1234x123456x123x
+NOSYNC   : x123456x123x
+SYNC     : x123456x1234x
+COMP-3   : x1234567x1234x
+COMP-1   : 12341234
+COMP-2   : 1234567812345678
+SIGN L/T : x-01x02-x-03x04-x
+COMP-X   : x123x123x
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([MF SYNC])
+AT_KEYWORDS([Numeric])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       FILE SECTION.
+      
+       WORKING-STORAGE SECTION.
+      
+       77  VLEN                   PIC 99 VALUE 1.
+       01  TSTREC1.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD1          PICTURE S9(2) COMP-4. 
+           10  FILLER             PICTURE X(5).
+      
+       01  TSTREC2.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD2          PICTURE S9(4) COMP-4 SYNC . 
+           10  FILLER             PICTURE X(5).
+      
+       01  TSTREC3.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD3          PICTURE S9(6) COMP-4 SYNC. 
+           10  FILLER             PICTURE X(5).
+      
+       01  TSTRECL.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLDL          PICTURE S9(2) COMP-4 SYNC LEFT. 
+           10  FILLER             PICTURE X(5).
+      
+       01  TSTRECR.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLDR          PICTURE S9(2) COMP-4 SYNC RIGHT. 
+           10  FILLER             PICTURE X(5).
+      
+       01  TSTRECS.
+           10  FILLER             PICTURE X(5). 
+           10  FILLER OCCURS 3 TIMES.
+               15  FILLER         PICTURE X(2).
+               15  COMP-FLDS      PICTURE S9(4) COMP-4 SYNC . 
+               15  FILLER         PICTURE X(1).
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTRECO.
+           10  FILLER             PICTURE X(5). 
+           10  FILLER OCCURS 3 TIMES.
+               15  FILLER         PICTURE X(2).
+               15  COMP-FLDO      PICTURE S9(4) COMP-4 . 
+               15  FILLER         PICTURE X(1).
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRP SYNC COMP-4.
+         05  GRP1.
+           10  FILLER             PICTURE X(5). 
+           10  COM1-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM1-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(3). 
+           10  COM1-FLD3          PICTURE S9(18). 
+
+       01  TSTGRP2 SIGN LEADING SEPARATE.
+         05  GRP2-1.
+           10  FILLER             PICTURE X(5). 
+           10  COM2-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM2-FLD2          PICTURE S9(6) SIGN TRAILING SEPARATE. 
+           10  FILLER             PICTURE X(3). 
+           10  COM2-FLD3          PICTURE S9(7). 
+
+       01  TSTGRP3 COMP-3.
+         05  GRP3-1.
+           10  FILLER             PICTURE X(5). 
+      * Following is not allowed by Micro Focus
+      *    10  COM3-FLD1          PICTURE S9(4) COMP-4. 
+           10  COM3-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM3-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(3). 
+         05  GRP3-2.
+           10  COM3-FLD3          PICTURE S9(13). 
+
+       01  TSTGRP4 COMP-4.
+         05  GRP4-1 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD2          PICTURE S9(7). 
+           10  FILLER             PICTURE X(1). 
+         05  GRP4-2.
+           10  COM4-FLD3          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD4          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRP5 COMP-4.
+           10  FILLER             PICTURE X(1). 
+           10  COM5-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM5-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRP5S COMP-4 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD1         PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD2         PICTURE S9(7). 
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRP6 COMP-3.
+           10  FILLER             PICTURE X(1). 
+           10  COM6-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM6-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRP7 COMP-1.
+           10  COM7-FLD1          .
+           10  COM7-FLD2          .
+
+       01  TSTGRP8 COMP-2.
+           10  COM8-FLD1          .
+           10  COM8-FLD2          .
+
+       01  TSTGRP9.
+         05  GRP9-1 SIGN LEADING SEPARATE.
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD1          PICTURE S9(2). 
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD2          PICTURE S9(2) SIGN TRAILING SEPARATE. 
+           10  FILLER             PICTURE X(1). 
+         05  GRP9-2 SIGN TRAILING SEPARATE.
+           10  COM9-FLD3          PICTURE S9(2) SIGN LEADING SEPARATE. 
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD4          PICTURE S9(2). 
+           10  FILLER             PICTURE X(1). 
+
+       01  TSTGRPX.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-FLD1          PICTURE X(3) COMP-X SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-FLD2          PICTURE X(3) COMP-X.
+           10  FILLER             PICTURE X(1). 
+
+       PROCEDURE DIVISION.
+
+           MOVE ALL "x"    TO TSTREC1.
+           MOVE LENGTH OF COMP-FLD1 TO VLEN.
+           MOVE "11"       TO COMP-FLD1 (1:VLEN).
+           IF VLEN = 1
+               DISPLAY "NOIBMCOMP: " TSTREC1
+           ELSE
+               DISPLAY "IBMCOMP  : " TSTREC1.
+           MOVE ALL "x"    TO TSTREC2.
+           MOVE LENGTH OF COMP-FLD2 TO VLEN.
+           MOVE "22"       TO COMP-FLD2 (1:VLEN).
+           DISPLAY "      " VLEN " : " TSTREC2.
+           MOVE ALL "x"    TO TSTRECO.
+           MOVE '----:'    TO TSTRECO (1:5).
+           MOVE "11"       TO COMP-FLDO (1) (1:2)
+           MOVE "22"       TO COMP-FLDO (2) (1:2)
+           MOVE "33"       TO COMP-FLDO (3) (1:2)
+           MOVE LENGTH OF COMP-FLDO (1) TO VLEN.
+           DISPLAY "      " VLEN " : " TSTRECO.
+           MOVE ALL "x"    TO TSTRECS.
+           MOVE '----:'    TO TSTRECS (1:5).
+           MOVE "11"       TO COMP-FLDS (1) (1:2)
+           MOVE "22"       TO COMP-FLDS (2) (1:2)
+           MOVE "33"       TO COMP-FLDS (3) (1:2)
+           MOVE LENGTH OF COMP-FLDS (1) TO VLEN.
+           DISPLAY "      " VLEN " : " TSTRECS.
+           MOVE ALL "x"    TO TSTREC3.
+           MOVE LENGTH OF COMP-FLD3 TO VLEN.
+           MOVE "1234678"  TO TSTREC3 (6:VLEN).
+           DISPLAY "      " VLEN " : " TSTREC3.
+           MOVE ALL "x"    TO TSTRECL.
+           MOVE LENGTH OF COMP-FLDL TO VLEN.
+           MOVE "12345678" TO TSTRECL (6:VLEN).
+           DISPLAY "      " VLEN " : " TSTRECL.
+           MOVE ALL "x"    TO TSTRECR.
+           MOVE LENGTH OF COMP-FLDR TO VLEN.
+           MOVE "12345678" TO TSTRECR (6:VLEN).
+           DISPLAY "      " VLEN " : " TSTRECR.
+           MOVE ALL "x"    TO TSTGRP.
+           MOVE "12345678" TO COM1-FLD1 (1:).
+           MOVE "12345678" TO COM1-FLD2 (1:).
+           MOVE "12345678" TO COM1-FLD3 (1:).
+           MOVE LENGTH OF COM1-FLD2 TO VLEN.
+           DISPLAY "      " VLEN " : " TSTGRP.
+           MOVE ALL "x"    TO TSTGRP2.
+           MOVE "12345678" TO COM2-FLD1 (1:).
+           MOVE "12345678" TO COM2-FLD2 (1:).
+           MOVE "12345678" TO COM2-FLD3 (1:).
+           MOVE LENGTH OF COM2-FLD2 TO VLEN.
+           DISPLAY "      " VLEN " : " TSTGRP2.
+           MOVE ALL "x"    TO TSTGRP3.
+           MOVE "12345678" TO COM3-FLD1 (1:).
+           MOVE "12345678" TO COM3-FLD2 (1:).
+           MOVE "12345678" TO COM3-FLD3 (1:).
+           MOVE LENGTH OF COM3-FLD2 TO VLEN.
+           DISPLAY "      " VLEN " : " TSTGRP3.
+           MOVE ALL "x"    TO TSTGRP4.
+           MOVE "12345678" TO COM4-FLD1 (1:).
+           MOVE "12345678" TO COM4-FLD2 (1:).
+           MOVE "12345678" TO COM4-FLD3 (1:).
+           MOVE "12345678" TO COM4-FLD4 (1:).
+           MOVE LENGTH OF COM4-FLD2 TO VLEN.
+           DISPLAY "      " VLEN " : " TSTGRP4.
+           MOVE ALL "x"    TO TSTGRP5.
+           MOVE "12345678" TO COM5-FLD1 (1:).
+           MOVE "12345678" TO COM5-FLD2 (1:).
+           DISPLAY "NOSYNC   : " TSTGRP5.
+           MOVE ALL "x"    TO TSTGRP5S.
+           MOVE "12345678" TO COM5S-FLD1 (1:).
+           MOVE "12345678" TO COM5S-FLD2 (1:).
+           DISPLAY "SYNC     : " TSTGRP5S.
+           MOVE ALL "x"    TO TSTGRP6.
+           MOVE "12345678" TO COM6-FLD1 (1:).
+           MOVE "12345678" TO COM6-FLD2 (1:).
+           DISPLAY "COMP-3   : " TSTGRP6.
+           MOVE ALL "x"    TO TSTGRP7.
+           MOVE "12345678" TO COM7-FLD1 (1:).
+           MOVE "12345678" TO COM7-FLD2 (1:).
+           DISPLAY "COMP-1   : " TSTGRP7.
+           MOVE ALL "x"    TO TSTGRP8.
+           MOVE "12345678" TO COM8-FLD1 (1:).
+           MOVE "12345678" TO COM8-FLD2 (1:).
+           DISPLAY "COMP-2   : " TSTGRP8.
+           MOVE ALL "x"    TO TSTGRP9.
+           MOVE -1 TO COM9-FLD1 .
+           MOVE -2 TO COM9-FLD2 .
+           MOVE -3 TO COM9-FLD3 .
+           MOVE -4 TO COM9-FLD4 .
+           DISPLAY "SIGN L/T : " TSTGRP9.
+           MOVE ALL "x"    TO TSTGRPX.
+           MOVE "12345678" TO COMX-FLD1 (1:).
+           MOVE "12345678" TO COMX-FLD2 (1:).
+           DISPLAY "COMP-X   : " TSTGRPX.
+           STOP RUN.
+])
+
+AT_CHECK([cobc -x -std=mf -w -fibmcomp prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [IBMCOMP  : xxxxx11xxxxx
+      02 : xxxxxx22xxxxx
+      02 : ----:xx11xxx22xxx33xx
+      02 : ----:xxx11xxxx22xxxx33xx
+      04 : xxxxx1234xxxxxxxx
+      02 : xxxxx12xxxxxx
+      02 : xxxxx12xxxxxx
+      04 : xxxxxx12xxxx1234xxxx12345678
+      07 : xxxxx12345xxx1234567xxx12345678
+      04 : xxxxx123xxx1234xxx1234567
+      04 : xxxx12345678xxxx1234x12345678x1234x
+NOSYNC   : x12345678x1234x
+SYNC     : xxxx12345678xxxx1234x
+COMP-3   : x1234567x1234x
+COMP-1   : 12341234
+COMP-2   : 1234567812345678
+SIGN L/T : x-01x02-x-03x04-x
+COMP-X   : x123x123x
+], [])
+
+AT_CLEANUP
+
+#### end r1727
