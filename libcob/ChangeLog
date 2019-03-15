@@ -786,6 +786,12 @@
 	* fileio.c: for the callable EXTFH interface, set f->file_version
 	  to COB_FILE_VERSION
 
+2017-04-18 Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: relative_read_size returns an 'int' and not 'size_t'
+	* screenio.c: add (int) casts
+	* move.c: use 'int' instead of 'size_t' as it needs to be signed
+
 2017-04-18  Ron Norman <rjn@inglenet.com>
 
 	* numeric.c, common.c, coblocal.h: define ISFINITE depending on
@@ -793,7 +799,7 @@
 
 2017-04-12 Ron Norman <rjn@inglenet.com>
 
-	* fileio.c,common.c: 
+	* fileio.c,common.c:
 	 Routines which implement functions defined via 'system.def'
 	 have been enhanced to use the C API functions to access
 	 parameter fields passed on the CALL statement in the COBOL

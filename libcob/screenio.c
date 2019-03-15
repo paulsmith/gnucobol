@@ -2922,13 +2922,8 @@ cob_display_formatted_text (const char *fmt, ...)
 	size = vsnprintf (buff, COB_NORMAL_BUFF, fmt, ap);
 	va_end (ap);
 
-	if (size < 0) {
-		return -1;
-	}
-
-	if (buff[0] == 0) {
-		return 0;
-	}
+	if ((int)(field.size) < 0) return -1; /* jkl: why cast size_t to test for < 0? */
+	if (buff[0] == 0)          return  0;
 
 	field.size = cob_min_int (size, COB_NORMAL_MAX);
 	field.data = (unsigned char *)&buff;

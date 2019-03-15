@@ -303,11 +303,17 @@ C    libcob/ChangeLog	  merged
 C    libcob/common.c	  merged
 C    libcob/fileio.c	  declined
 
-
-
-
-
 r1520
+--- Merging r1517 through r1520 into '.':
+C    libcob/ChangeLog	merged
+U    libcob/fileio.c	ok
+C    libcob/move.c	declined: already done differently
+C    libcob/screenio.c	merged
+
+
+
+
+
 r1547
 r1560
 r1565
