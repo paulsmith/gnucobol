@@ -333,11 +333,19 @@ C    cobc/ChangeLog	  merged
 U    cobc/codegen.c
 U    cobc/typeck.c
 
-
-
-
-
 r1565
+--- Merging r1563 through r1565 into '.':
+U    config/runtime.cfg	ok
+C    libcob/ChangeLog	merged
+U    libcob/coblocal.h	ok
+C    libcob/common.c	reverted
+U    libcob/common.h	ok
+C    libcob/fileio.c	accepted
+
+
+
+
+
 r1566
 r1605
 r1623

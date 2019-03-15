@@ -1450,6 +1450,7 @@ typedef struct __cob_file {
 
 	unsigned int		trace_io:1;		/* Display I/O record when TRACE READY */
 	unsigned int		io_stats:1;		/* Report I/O statistics for this file */
+	unsigned int		flag_keycheck:1;	/* INDEXED file keys must match */
 	unsigned int		unused_bits:30;
 
 	cob_field		*last_key;		/* Last field used as 'key' for I/O */

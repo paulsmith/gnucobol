@@ -252,6 +252,7 @@ typedef struct __cob_settings {
 	unsigned int	cob_stats_record;	/* If record I/O statics */
 	unsigned int	cob_share_mode;		/* Default file share mode */
 	unsigned int	cob_retry_mode;		/* Default file retry mode */
+	unsigned int	cob_keycheck;		/* Default KEYCHECK mode */
 	char		*cob_stats_filename;	/* Place to write I/O stats */
 	char 		*cob_file_path;
 	char		*bdb_home;

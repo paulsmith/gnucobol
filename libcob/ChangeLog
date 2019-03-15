@@ -759,6 +759,13 @@
 	* screenio.c (screen_display): FR #191 set flag pending_accept
 	  for DISPLAY screen, too
 
+2017-05-02 Ron Norman <rjn@inglenet.com>
+	* common.c,coblocal.h: added 'cob_keycheck' to indicate if INDEXED file
+	  keys must match exactly. Default is TRUE
+	* fileio.c: 
+	  Add code to handle 'keycheck' in IO_filename env var.
+	  Added code to indexed_open for C|D|VB-ISAM files to handle keycheck
+
 2017-05-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_sig_handler, cob_set_signal): added code for SIGBUS

@@ -172,10 +172,10 @@ static	vb_rtd_t *vbisam_rtd = NULL;
 /* Isam File handler packet */
 
 struct indexfile {
-	char		*filename;	/* ISAM data file name */
-	char		*savekey;	/* Area to save last primary key read */
-	char		*recwrk;	/* Record work/save area */
-	size_t		nkeys;		/* Actual keys in file */
+	char	*filename;	/* ISAM data file name */
+	char	*savekey;	/* Area to save last primary key read */
+	char	*recwrk;	/* Record work/save area */
+	size_t	nkeys;		/* Actual keys in file */
 	int		isfd;		/* ISAM file number */
 	int		recnum;		/* Last record number read */
 	int		saverecnum;	/* isrecnum of next record to process */
@@ -1182,6 +1182,7 @@ set_file_format(cob_file *f)
 
 	f->trace_io = cobsetptr->cob_trace_io ? 1 : 0;
 	f->io_stats = cobsetptr->cob_stats_record ? 1 : 0;
+	f->flag_keycheck = cobsetptr->cob_keycheck ? 1 : 0;
 	if(cobsetptr->cob_do_sync)
 		f->file_features |= COB_FILE_SYNC;
 	else
@@ -1300,10 +1301,12 @@ set_file_format(cob_file *f)
 				}
 				value[j] = 0;
 				if(value[0] == '1'
-				|| toupper((unsigned char)value[0]) == 'T')
+				|| toupper((unsigned char)value[0]) == 'T'
+				|| strcasecmp(value,"on") == 0)
 					settrue = 1;
 				if(value[0] == '0'
-				|| toupper((unsigned char)value[0]) == 'F')
+				|| toupper((unsigned char)value[0]) == 'F'
+				|| strcasecmp(value,"off") == 0)
 					settrue = 0;
 			}
 			if(strcasecmp(option,"sync") == 0) {
@@ -1319,6 +1322,10 @@ set_file_format(cob_file *f)
 			}
 			if(strcasecmp(option,"stats") == 0) {
 				f->io_stats = settrue ? 1 : 0;
+				continue;
+			}
+			if(strcasecmp(option,"keycheck") == 0) {
+				f->flag_keycheck = settrue ? 1 : 0;
 				continue;
 			}
 			if(strcasecmp(option,"retry_times") == 0) {
@@ -5304,8 +5311,8 @@ indexed_open (cob_file *f, char *filename, const int mode, const int sharing)
 #elif	defined(WITH_ANY_ISAM)
 
 	struct indexfile	*fh;
-	size_t			k;
-	int			ret,len;
+	size_t		k;
+	int			ret,len,j;
 	int			omode;
 	int			lmode;
 	int			vmode;
@@ -5484,26 +5491,58 @@ dobuild:
 			isindexinfo (isfd, (void *)&di, 0);
 			/* Mask off ISVARLEN */
 			fh->nkeys = di.di_nkeys & 0x7F;
-			if (fh->nkeys != f->nkeys) {
+			if (fh->nkeys != f->nkeys
+			 && f->flag_keycheck) {
 				ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+			} else if (fh->nkeys > f->nkeys) {
+				/* More keys in file than COBOL has defined */
+				fh = realloc (fh, sizeof(struct indexfile) +
+						 ((sizeof (struct keydesc)) * (fh->nkeys + 1)));
 			}
 			if (f->record_max != di.di_recsize) {
 				ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
 			}
-			for (k = 0; k < fh->nkeys && !ret; ++k) {
-				memset (&fh->key[k], 0, sizeof (struct keydesc));
-				isindexinfo (isfd, &fh->key[k], (int)(k+1));
-				if (fh->lenkey < indexed_keylen(fh, k)) {
-					fh->lenkey = indexed_keylen(fh, k);
+			if (!f->flag_keycheck) {
+				/* Copy real ISAM file key information */
+				for (k = 0; k < fh->nkeys && !ret; ++k) {
+					memset (&fh->key[k], 0, sizeof(struct keydesc));
+					isindexinfo (isfd, &fh->key[k], (int)(k+1));
+					if (fh->lenkey < indexed_keylen(fh, k)) {
+						fh->lenkey = indexed_keylen(fh, k);
+					}
+					len = indexed_keydesc(f, &kd, &f->keys[k]);
+					if (fh->lenkey < len) {
+						fh->lenkey = len;
+					}
 				}
-				/* Verify that COBOL keys match real ISAM keys */
-				len = indexed_keydesc(f, &kd, &f->keys[k]);
-				if (fh->lenkey < len) {
-					fh->lenkey = len;
+				/* Verify that COBOL keys defined match some real ISAM key */
+				for (j = 0; j < f->nkeys && !ret; ++j) {
+					indexed_keydesc(f, &kd, &f->keys[j]);
+					for (k = 0; k < fh->nkeys; ++k) {
+						if (indexed_keycmp(&kd, &fh->key[k]) == 0) {
+							break;
+						}
+					}
+					if (k >= fh->nkeys) {
+							ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+					}
 				}
-				if(indexed_keycmp(&kd, &fh->key[k]) != 0) {
-					ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
-					break;
+			} else {
+				for (k = 0; k < fh->nkeys && !ret; ++k) {
+					memset (&fh->key[k], 0, sizeof(struct keydesc));
+					isindexinfo (isfd, &fh->key[k], (int)(k+1));
+					if (fh->lenkey < indexed_keylen(fh, k)) {
+						fh->lenkey = indexed_keylen(fh, k);
+					}
+					/* Verify that COBOL keys match exactly to real ISAM keys */
+					len = indexed_keydesc(f, &kd, &f->keys[k]);
+					if (fh->lenkey < len) {
+						fh->lenkey = len;
+					}
+					if (indexed_keycmp(&kd, &fh->key[k]) != 0) {
+						ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+						break;
+					}
 				}
 			}
 		}
