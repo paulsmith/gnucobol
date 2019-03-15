@@ -1008,7 +1008,7 @@ AT_DATA([prog.cob], [
                             UPON CONSOLE.
       
            OPEN OUTPUT TSPFILE
-           IF CUST-STAT NOT = "00"
+           IF NOT (CUST-STAT = "00" or "05")
                DIVIDE STAT-1 BY 256 GIVING BYTE-1 REMAINDER BYTE-2
                DISPLAY "Error " CUST-STAT " " BYTE-1 " " BYTE-2
                " opening 'testisam' file"
@@ -1240,11 +1240,11 @@ AT_DATA([prog.cob], [
            REWRITE TSPFL-RECORD 
            IF  CUST-STAT NOT = "02"
            AND CUST-STAT NOT = "00"
-               DISPLAY "Error " CUST-STAT " instead of 02"
+               DISPLAY "Error " CUST-STAT " instead of 00/02"
                                 UPON CONSOLE
            ELSE
-               DISPLAY "ReWrite: " CM-CUST-NUM " got "
-                         CUST-STAT " as expected"
+               DISPLAY "ReWrite: " CM-CUST-NUM " got 00/02"
+                         " as expected"
                          UPON CONSOLE
            END-IF.
            MOVE DATA-CUST-NUM      (6)       TO CM-CUST-NUM.
@@ -1255,11 +1255,11 @@ AT_DATA([prog.cob], [
            REWRITE TSPFL-RECORD 
            IF  CUST-STAT NOT = "02"
            AND CUST-STAT NOT = "00"
-               DISPLAY "Error " CUST-STAT " instead of 02"
+               DISPLAY "Error " CUST-STAT " instead of 00/02"
                                 UPON CONSOLE
            ELSE
-               DISPLAY "ReWrite: " CM-CUST-NUM " got "
-                         CUST-STAT " as expected"
+               DISPLAY "ReWrite: " CM-CUST-NUM " got 00/02"
+                         " as expected"
                          UPON CONSOLE
            END-IF.
            CLOSE TSPFILE.
@@ -1312,8 +1312,8 @@ Ky2: GIB00000 is GIBRALTER LIFE INSURANCE  Mach=UNI-80/6
    Read: GAM00000 got 00 as expected 00075 terminals
 ReWrite: GAM00000 got 00 as expected 00080 terminals
    Read: BET00000 got 00 as expected 00034 terminals
-ReWrite: GAM00000 got 02 as expected
-ReWrite: FOR00000 got 02 as expected
+ReWrite: GAM00000 got 00/02 as expected
+ReWrite: FOR00000 got 00/02 as expected
 Expected ERROR 39 opening TSTFILE, Record size different
 Expected ERROR 39 opening BADFILE, Index mismatch
 Expected open BADFILE, with Index mismatch
