@@ -415,11 +415,23 @@ svn: E155015: One or more conflicts were produced while merging r2003:2004 into
 resolve all conflicts and rerun the merge to apply the remaining
 unmerged revisions
 
-
-
-
-
 r2110
+--- Merging r2026 through r2092 into '.':
+C    cobc/ChangeLog	  merged
+C    cobc/flag.def	  merged
+C    cobc/tree.c	  merged
+U    tests/testsuite.src/run_functions.at
+Summary of conflicts:
+  Text conflicts: 3
+svn: E155015: One or more conflicts were produced while merging r2025:2092 into
+'/home/jklowden/projects/3rd/cobol/branches/pangaea' --
+resolve all conflicts and rerun the merge to apply the remaining
+unmerged revisions
+
+
+
+
+
 r2166
 r2221
 r2278

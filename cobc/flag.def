@@ -116,9 +116,13 @@ CB_FLAG (cb_flag_stack_on_heap, 0, "stack-on-heap",
 	_("  -fstack-on-heap       PERFORM stack allocated on heap"))
 
 /* Normal flags */
+
 CB_FLAG_ON (cb_flag_remove_unreachable, 1, "remove-unreachable",
 	_("  -fno-remove-unreachable\tdisable remove of unreachable code\n"
 	  "                        * turned off by -g"))
+
+CB_FLAG_ON (cb_flag_inline_intrinsic, 1, "inline-intrinsic",
+	_("when possible resolve intrinsic FUNCTIONs at compile time"))
 
 CB_FLAG (cb_flag_trace, 1, "trace",
 	_("  -ftrace               generate trace code\n"
