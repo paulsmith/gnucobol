@@ -10672,6 +10672,12 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 				     cb_stack_size);
 		}
 	}
+
+	/* To Avoid C compiler warning: -Wunused-but-set-variable */
+	if (cb_flag_stack_check) {	
+		output_line ("if (frame_ptr == frame_overflow) {}");
+	}
+
 	output_newline ();
 
 	/* Set up LOCAL-STORAGE size */
