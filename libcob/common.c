@@ -360,6 +360,8 @@ static struct config_tbl gc_conf[] = {
 	{"COB_TRACE_IO","trace_io",		NULL,	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_trace_io)},
 	{"COB_DUMP_FILE", "dump_file",		NULL,	NULL, GRP_MISC, ENV_FILE, SETPOS (cob_dump_filename)},
 	{"COB_DUMP_WIDTH", "dump_width",		"100",	NULL, GRP_MISC, ENV_INT, SETPOS (cob_dump_width)},
+	{"COB_STATS_RECORD","stats_record",	NULL,	NULL,GRP_MISC,ENV_BOOL,SETPOS(cob_stats_record)},
+	{"COB_STATS_FILE","stats_file",		NULL,	NULL,GRP_MISC,ENV_FILE,SETPOS(cob_stats_filename)},
 #ifdef  _WIN32
 	/* checked before configuration load if set from environment in cob_init() */
 	{"COB_UNIX_LF", "unix_lf", 		"0", 	NULL, GRP_FILE, ENV_BOOL, SETPOS (cob_unix_lf)},

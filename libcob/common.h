@@ -1360,6 +1360,10 @@ typedef struct __cob_file_key {
 	cob_field	*component[COB_MAX_KEYCOMP];	/* key-components iff split-key   */
 } cob_file_key;
 
+typedef struct cob_io_stat_s {
+	unsigned int	rqst_io;
+	unsigned int	fail_io;
+} cob_io_stats;
 
 /* File version (likely can be removed from cob_file in the future) */
 #define	COB_FILE_VERSION	1
@@ -1433,15 +1437,17 @@ typedef struct __cob_file {
 
 	cob_field		*last_key;		/* Last field used as 'key' for I/O */
 	unsigned char		last_operation;		/* Most recent I/O operation */
-#define COB_LAST_OPEN		1
-#define COB_LAST_CLOSE		2
-#define COB_LAST_START		3
-#define COB_LAST_READ_SEQ	4
-#define COB_LAST_READ		5
-#define COB_LAST_WRITE		6
-#define COB_LAST_REWRITE	7
-#define COB_LAST_DELETE		8
+#define COB_LAST_START		1
+#define COB_LAST_READ_SEQ	2
+#define COB_LAST_READ		3
+#define COB_LAST_WRITE		4
+#define COB_LAST_REWRITE	5
+#define COB_LAST_DELETE		6
+
+#define COB_LAST_OPEN		7
+#define COB_LAST_CLOSE		8
 #define COB_LAST_DELETE_FILE	9
+	cob_io_stats		stats[6];		/* I/O Counts by 'operation' type */
 
 } cob_file;
 

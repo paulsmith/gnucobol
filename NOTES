@@ -260,11 +260,20 @@ C    libcob/fileio.c	accepted except some casts
 U    libcob/termio.c	ok
 C    tests/testsuite.src/run_misc.at	merged but commented out
 
-
-
-
-
 r1417
+--- Merging r1417 into '.':
+U    config/runtime.cfg	ok
+U    libcob/ChangeLog	ok
+U    libcob/coblocal.h	ok
+U    libcob/common.c	ok
+U    libcob/common.h	ok
+U    libcob/fileio.c	ok
+C    tests/testsuite.src/run_misc.at	declined
+
+
+
+
+
 r1418
 r1419
 r1491

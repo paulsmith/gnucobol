@@ -1155,15 +1155,14 @@ set_file_format(cob_file *f)
 	int	i,j,settrue;
 	char	option[32],value[30];
 
-	if(cobsetptr->cob_trace_io)
-		f->trace_io = 1;
+	f->trace_io = cobsetptr->cob_trace_io ? 1 : 0;
+	f->io_stats = cobsetptr->cob_stats_record ? 1 : 0;
+	if(cobsetptr->cob_do_sync)
+		f->file_features |= COB_FILE_SYNC;
 	else
-		f->trace_io = 0;
+		f->file_features &= ~COB_FILE_SYNC;
+
 	if (f->file_format == 255) {	/* File type not set by compiler; Set default */
-		if(cobsetptr->cob_do_sync)
-			f->file_features |= COB_FILE_SYNC;
-		else
-			f->file_features &= ~COB_FILE_SYNC;
 		if (f->organization == COB_ORG_SEQUENTIAL) {
 			if (f->record_min != f->record_max) {
 				f->file_format = cobsetptr->cob_varseq_type;
@@ -1266,10 +1265,11 @@ set_file_format(cob_file *f)
 				continue;
 			}
 			if(strcasecmp(option,"trace") == 0) {
-				if(settrue)
-					f->trace_io = 1;
-				else
-					f->trace_io = 0;
+				f->trace_io = settrue ? 1 : 0;
+				continue;
+			}
+			if(strcasecmp(option,"stats") == 0) {
+				f->io_stats = settrue ? 1 : 0;
 				continue;
 			}
 			if(strcasecmp(option,"retry_times") == 0) {
@@ -1844,7 +1844,13 @@ set_lock_opts(cob_file *f, unsigned int read_opts)
 static void
 save_status (cob_file *f, cob_field *fnstatus, const int status)
 {
-	int	indent = 15;
+	int	k, indent = 15;
+	struct stat	st;
+	FILE	*fo;
+	char	prcoma[6];
+	const char	*iotype[11];
+	struct cob_time tod;
+
 	cobglobptr->cob_error_file = f;
 	if (likely(status == 0)) {
 		memset (f->file_status, '0', (size_t)2);
@@ -1935,11 +1941,6 @@ save_status (cob_file *f, cob_field *fnstatus, const int status)
 			fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
 			cob_print_field(cobsetptr->cob_trace_file,f->record, 
 						indent+3, cobsetptr->cob_dump_width);
-			if (f->last_key) {
-				fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Key");
-				cob_print_field(cobsetptr->cob_trace_file,f->last_key, 
-							indent+3, cobsetptr->cob_dump_width);
-			}
 			break;
 		case COB_LAST_REWRITE:
 			fprintf(cobsetptr->cob_trace_file,"REWRITE %s Status: %.2s\n",
@@ -1947,12 +1948,88 @@ save_status (cob_file *f, cob_field *fnstatus, const int status)
 			fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
 			cob_print_field(cobsetptr->cob_trace_file,f->record, 
 						indent+3, cobsetptr->cob_dump_width);
-			if (f->last_key) {
-				fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Key");
-				cob_print_field(cobsetptr->cob_trace_file,f->last_key, 
-							indent+3, cobsetptr->cob_dump_width);
-			}
 			break;
+		case COB_LAST_DELETE:
+			fprintf(cobsetptr->cob_trace_file,"DELETE %s Status: %.2s\n",
+								f->select_name,f->file_status);
+			fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
+			cob_print_field(cobsetptr->cob_trace_file,f->record, 
+						indent+3, cobsetptr->cob_dump_width);
+			break;
+		}
+	}
+
+	if (f->io_stats
+	 && cobsetptr->cob_stats_filename) {
+		if (f->last_operation > 0
+		 && f->last_operation <= 6) {
+			f->stats[f->last_operation-1].rqst_io++;
+			if (status != 0
+			 && status != 2) {
+				f->stats[f->last_operation-1].fail_io++;
+			}
+		}
+		if (f->last_operation == COB_LAST_CLOSE) {	/* Write stats out on FILE Close */
+			fo = NULL;
+			if (stat(cobsetptr->cob_stats_filename, &st) == -1) {
+				iotype[COB_LAST_READ]	= "READ";
+				iotype[COB_LAST_WRITE]	= "WRITE";
+				iotype[COB_LAST_REWRITE] = "REWRITE";
+				iotype[COB_LAST_DELETE] = "DELETE";
+				iotype[COB_LAST_START]	= "START";
+				iotype[COB_LAST_READ_SEQ]= "READ_SEQ";
+				fo = fopen(cobsetptr->cob_stats_filename, "w");
+				if (fo) {
+					fprintf(fo,"%19s,","Time");
+					fprintf(fo,"%s"," Source, FDSelect, ");
+					strcpy(prcoma,"");
+					for (k=1; k <= 6; k++) {
+						fprintf(fo,"%s%s",prcoma,iotype[k]);
+						strcpy(prcoma,",");
+					}
+					strcpy(prcoma,"");
+					fprintf(fo,", ");
+					for (k=1; k <= 6; k++) {
+						fprintf(fo,"%sX%s",prcoma,iotype[k]);
+						strcpy(prcoma,",");
+					}
+					fprintf(fo,"\n");
+					fclose(fo);
+					fo = NULL;
+				}
+			}
+			if (fo == NULL) {
+				fo = fopen(cobsetptr->cob_stats_filename, "a");
+			}
+			if (fo) {
+				tod = cob_get_current_date_and_time ();
+				fprintf(fo,"%04d/%02d/%02d %02d:%02d:%02d,",
+						tod.year,tod.month,tod.day_of_month,
+						tod.hour,tod.minute,tod.second);
+				if (COB_MODULE_PTR
+				 && COB_MODULE_PTR->module_source)
+					fprintf(fo,"%s",COB_MODULE_PTR->module_source);
+				else
+					fprintf(fo,"%s","Unknown");
+				fprintf(fo,",%s, ",f->select_name);
+				strcpy(prcoma,"");
+				for (k=0; k <= 5; k++) {
+					fprintf(fo,"%s%d",prcoma,f->stats[k].rqst_io);
+					strcpy(prcoma,",");
+				}
+				fprintf(fo,", ");
+				strcpy(prcoma,"");
+				for (k=0; k <= 5; k++) {
+					fprintf(fo,"%s%d",prcoma,f->stats[k].fail_io);
+					strcpy(prcoma,",");
+				}
+				fprintf(fo,"\n");
+				fclose(fo);
+			}
+			for (k=0; k <= 5; k++) {		/* Reset counts on CLOSE */
+				f->stats[k].rqst_io = 0;
+				f->stats[k].fail_io = 0;
+			}
 		}
 	}
 }
@@ -7346,6 +7423,7 @@ cob_write (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus,
 	   const unsigned int check_eop)
 {
 	f->last_operation = COB_LAST_WRITE;
+	f->last_key = NULL;
 	f->flag_read_done = 0;
 
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
@@ -7390,6 +7468,7 @@ cob_rewrite (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus)
 	read_done = f->flag_read_done;
 	f->flag_read_done = 0;
 	f->last_operation = COB_LAST_REWRITE;
+	f->last_key = NULL;
 
 	if (unlikely (f->open_mode != COB_OPEN_I_O)) {
 		save_status (f, fnstatus, COB_STATUS_49_I_O_DENIED);
