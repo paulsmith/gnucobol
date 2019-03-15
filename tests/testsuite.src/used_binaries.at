@@ -1,4 +1,4 @@
-## Copyright (C) 2014-2018 Free Software Foundation, Inc.
+## Copyright (C) 2014-2019 Free Software Foundation, Inc.
 ## Written by Simon Sobisch, Brian Tiffin
 ##
 ## This file is part of GnuCOBOL.
@@ -186,7 +186,11 @@ AT_CLEANUP
 
 
 AT_SETUP([Temporary path invalid])
-AT_KEYWORDS([runmisc])
+AT_KEYWORDS([cobc runmisc])
+
+# Note: may be either removed completely as there was a report about
+#       this test "failing" - or skipped as this very often fails for
+#       WIN32 builds
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
