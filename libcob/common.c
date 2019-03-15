@@ -4300,16 +4300,79 @@ cob_putenv (char *name)
 	}
 	return -1;
 }
+#if 0 /* debug only */
+void print_stat (const char *filename, struct stat sb)
+{
+	printf("File name:                ");
+	if (filename) {
+		printf ("%s\n", filename);
+	} else {
+		printf("- unknown -\n");
+	}
+	printf("File type:                ");
 
-#define check_valid_dir(x)	\
-	(   strlen (x) > COB_NORMAL_MAX \
-	 || stat (x, &st) != 0 || !(S_ISDIR (st.st_mode)))
+	switch (sb.st_mode & S_IFMT) {
+#ifdef S_IFBLK
+	case S_IFBLK:  printf("block device\n");            break;
+#endif
+#ifdef S_IFCHR
+	case S_IFCHR:  printf("character device\n");        break;
+#endif
+	case S_IFDIR:  printf("directory\n");               break;
+#ifdef S_IFIFO
+	case S_IFIFO:  printf("FIFO/pipe\n");               break;
+#endif
+#ifdef S_IFLNK
+	case S_IFLNK:  printf("symlink\n");                 break;
+#endif
+	case S_IFREG:  printf("regular file\n");            break;
+#ifdef S_IFSOCK
+	case S_IFSOCK: printf("socket\n");                  break;
+#endif
+	default:       printf("unknown?\n");                break;
+	}
+
+	printf("I-node number:            %ld\n", (long)sb.st_ino);
+
+	printf("Mode:                     %lo (octal)\n",
+		(unsigned long)sb.st_mode);
+
+	printf("Link count:               %ld\n", (long)sb.st_nlink);
+	printf("Ownership:                UID=%ld   GID=%ld\n",
+		(long)sb.st_uid, (long)sb.st_gid);
+	printf("File size:                %lld bytes\n",
+		(long long)sb.st_size);
+#if 0
+	printf("Preferred I/O block size: %ld bytes\n",
+		(long)sb.st_blksize);
+	printf("Blocks allocated:         %lld\n",
+		(long long)sb.st_blocks);
+#endif
+
+	printf("Last status change:       %s", ctime(&sb.st_ctime));
+	printf("Last file access:         %s", ctime(&sb.st_atime));
+	printf("Last file modification:   %s", ctime(&sb.st_mtime));
+}
+#endif
+
+COB_INLINE int
+check_valid_dir (const char *dir)
+{
+	struct stat		sb;
+	if (strlen (dir) > COB_NORMAL_MAX) return 1;
+	if (stat (dir, &sb) || !(S_ISDIR (sb.st_mode))) return 1;
+
+#if 0
+	print_stat (dir, sb);
+#endif
+	
+	return 0;
+}
 
 static const char *
 check_valid_env_tmpdir (const char * envname)
 {
 	const char *dir;
-	struct stat		st;
 
 	dir = getenv (envname);
 	if (!dir || !dir[0]) {
@@ -4338,7 +4401,6 @@ cob_gettmpdir (void)
 #else
 		if ((tmpdir = check_valid_env_tmpdir ("TMP")) == NULL
 			&& (tmpdir = check_valid_env_tmpdir ("TEMP")) == NULL) {
-			struct stat		st;
 			if (!check_valid_dir ("/tmp")) {
 				tmp = cob_fast_malloc (5U);
 				strcpy (tmp, "/tmp");

@@ -1,4 +1,9 @@
 
+2019-03-15  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (check_valid_dir): converted from define to inline function
+	* common.c (print_stat): not-active debug function (grabbed from manpage)
+
 2019-03-12  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (print_info): changed msgid for "file handler" and
