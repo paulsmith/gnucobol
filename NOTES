@@ -282,11 +282,16 @@ U    libcob/common.c	ok
 C    libcob/common.h	accepted but #if 0'd out
 C    libcob/fileio.c	merged
 
-
-
-
-
 r1491
+--- Merging r1490 through r1491 into '.':
+C    cobc/ChangeLog	merged
+C    cobc/codegen.c	combined
+C    tests/testsuite.src/run_misc.at	declined, don't know what to do
+
+
+
+
+
 r1497
 r1508
 r1520

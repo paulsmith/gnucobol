@@ -1922,6 +1922,13 @@
 	  frees in listing code, SORT of table with OCCURS DEPENDING 0 TO n
 	  and when aborting compilation in the lexer.
 
+2017-04-04  Ron Norman <rjn@inglenet.com>
+	* codegen.c:
+	  For LENGTH OF passed as parameter on CALL, build temporary
+	  field so that the internal field is passed as S9(9) COMP-4
+	  This is to be consistent with other numeric literals as
+	  CALL parameters.
+
 2017-03-31  Ron Norman <rjn@inglenet.com>
 
 	* parser.y: allow ASCENDING/DESCENING and INDEXED BY to follow OCCURS
@@ -1931,6 +1938,11 @@
 
 	* typeck.c (cb_emit_set_to): added error when trying to set address of a
 	  non-01/77-level linkage item. Also improved error messages.
+
+2017-03-30  Ron Norman <rjn@inglenet.com>
+	* parser.y:
+	  Fixed to allow ASCENDING/DESCENING and INDEXED BY
+	  to follow OCCURS in any order with -frelax-syntax
 
 2017-03-30  Edward Hart <edward.dan.hart@gmail.com>
 

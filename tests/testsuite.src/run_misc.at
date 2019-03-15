@@ -6711,6 +6711,13 @@ Program-Id:  caller
 Program-Id:  caller                      CANCEL                          Line:     17
 Program-Id:  caller                      MOVE                            Line:     18
 Program-Id:  caller                      STOP RUN                        Line:     19
+libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 4
+libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 21
+libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 7
+libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 17
+libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 7
+libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 13
+libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 7
 ])
 
 AT_CLEANUP
