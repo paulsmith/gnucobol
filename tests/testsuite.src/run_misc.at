@@ -6830,6 +6830,13 @@ AT_DATA([prog.cob], [
            10  C2-NO-TERMINALS                 PICTURE 9(4) COMP-4.
            10  C2-PK-DATE                      PICTURE S9(14) COMP-3.
 
+       01  TSP2-RECORD.
+           10  C2-CUST-NUM                     PICTURE X(8). 
+           10  C2-COMPANY                      PICTURE X(25). 
+           10  C2-DISK                         PICTURE X(8). 
+           10  C2-NO-TERMINALS                 PICTURE 9(4) COMP-4. 
+           10  C2-PK-DATE                      PICTURE S9(14) COMP-3.
+
        WORKING-STORAGE SECTION.
 
        01  CUST-STAT.
@@ -7069,17 +7076,17 @@ AT_DATA([prog.cob], [
 
            PERFORM LOADFILE.
            PERFORM LISTFILE.
-
-
-
-          *> check that multiple empty lines are handled correctly
-
-
-
-
-
-
-
+           OPEN INPUT TSTFILE
+           IF CUST-STAT NOT = "00"
+               DISPLAY "Expected ERROR " CUST-STAT
+                       " opening TSTFILE, Record size different"
+                       UPON CONSOLE
+           ELSE
+               DISPLAY "Un-Expected open TSTFILE, Record size different"
+                       UPON CONSOLE
+               CLOSE TSTFILE
+           END-IF.
+           PERFORM LOADFLAT.
            STOP RUN.
 
        LOADFILE.
@@ -7274,8 +7281,9 @@ AT_DATA([prog.cob], [
                          UPON CONSOLE.
            ADD 5 TO CM-NO-TERMINALS
            REWRITE TSPFL-RECORD
-           IF  CUST-STAT NOT = "00"
-               DISPLAY "Error " CUST-STAT " instead of 00"
+           IF  CUST-STAT NOT = "02"
+           AND CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " instead of 02"
                                 UPON CONSOLE
            ELSE
 
@@ -7319,6 +7327,7 @@ AT_DATA([prog.cob], [
                        UPON CONSOLE
            END-IF
            DELETE TSPFILE
+           DELETE TSPFILE.
            CLOSE TSPFILE.
 
        LOADFLAT.
@@ -7350,11 +7359,172 @@ AT_DATA([prog.cob], [
            WRITE TSP2-RECORD.
 ])
 
-AT_CHECK([$COMPILE -ftraceall prog.cob], [0], [], [])
+AT_DATA([cmod.c], [[
+/******************************************************************************
+*     2017, Ron Norman                                                        *
+*  Source for a Micro Focus COBOL External File Handler.                      *
+*                                                                             *
+* For GnuCOBOL add  -fcallfh=TSTFH              as a compile option           *
+*                                                                             *
+* This is a sample module for GnuCOBOL, but it does not do very much          *
+******************************************************************************/
+
+#include <string.h>
+#include <stdlib.h>
+#include <libcob.h>
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+#define MIN(a,b) (a < b ? a : b)
+
+static char *txtOpCode(int opCode);
+
+/*************************************************************************
+   Replace filename with environment variable value, then open the file
+   This is required as MF Cobol seems to have pre-read the ENV Variables 
+*************************************************************************/
+static int
+doOpenFile(
+   unsigned char  *opCodep, 
+   FCD3  *fcd,
+   char  *opmsg) 
+{
+   int      sts,oldlen,j,k;
+   char  *oldFptr,*env,wrk[64];
+   unsigned char  svOther;
+   unsigned int   opCode;
+
+   oldFptr = fcd->fnamePtr;            /* Save values */
+   oldlen  = LDCOMPX2(fcd->fnameLen); 
+   fcd->otherFlags &= ~OTH_DOLSREAD;
+   svOther = fcd->otherFlags;
+
+   return EXTFH( opCodep, fcd );          /* No DD_, so use normal MF File Open */
+}
+
+/*********************************************************
+ *  TSTFH - External File Handler entry point.
+*********************************************************/
+int   
+TSTFH( unsigned char *opCodep, FCD3 *fcd) 
+{
+   unsigned int   opCode;
+   char  *fname;
+   int      sts, ky, j, k;
+
+   if(*opCodep == 0xfa)
+      opCode = 0xfa00 + opCodep[1];
+   else
+      opCode = opCodep[1];
+
+   if(fcd->fileOrg == ORG_LINE_SEQ
+   || fcd->fileOrg == ORG_SEQ
+   || fcd->fileOrg == ORG_INDEXED
+   || fcd->fileOrg == ORG_RELATIVE) {
+      switch (opCode) {
+      case OP_OPEN_OUTPUT:
+      case OP_OPEN_IO:
+      case OP_OPEN_EXTEND:
+      case OP_OPEN_OUTPUT_NOREWIND:
+         return doOpenFile( opCodep, fcd, txtOpCode(opCode));
+         break;
+
+      case OP_OPEN_INPUT:
+      case OP_OPEN_INPUT_NOREWIND:
+      case OP_OPEN_INPUT_REVERSED:
+         return doOpenFile( opCodep, fcd, txtOpCode(opCode));
+         break;
+
+      default:
+         break;
+      }
+
+   }
+
+   if(opCode == OP_CLOSE
+   && (fcd->openMode & OPEN_NOT_OPEN) ) {
+      return 0;
+   }
+
+   sts = EXTFH( opCodep, fcd );
+   return sts;
+}
+
+static char *           /* Return Text name of function */
+txtOpCode(int opCode)
+{
+   static char tmp[32];
+   switch (opCode) {
+   case OP_OPEN_INPUT:     return "OPEN_IN";
+   case OP_OPEN_OUTPUT:       return "OPEN_OUT";
+   case OP_OPEN_IO:     return "OPEN_IO";
+   case OP_OPEN_EXTEND:       return "OPEN_EXT";
+   case OP_OPEN_INPUT_NOREWIND:  return "OPEN_IN_NOREW";
+   case OP_OPEN_OUTPUT_NOREWIND: return "OPEN_OUT_NOREW";
+   case OP_OPEN_INPUT_REVERSED:  return "OPEN_IN_REV";
+   case OP_CLOSE:          return "CLOSE";
+   case OP_CLOSE_LOCK:     return "CLOSE_LOCK";
+   case OP_CLOSE_NOREWIND:    return "CLOSE_NORED";
+   case OP_CLOSE_REEL:     return "CLOSE_REEL";
+   case OP_CLOSE_REMOVE:      return "CLOSE_REMOVE";
+   case OP_CLOSE_NO_REWIND:   return "CLOSE_NO_REW";
+   case OP_START_EQ:       return "START_EQ";
+   case OP_START_EQ_ANY:      return "START_EQ_ANY";
+   case OP_START_GT:       return "START_GT";
+   case OP_START_GE:       return "START_GE";
+   case OP_START_LT:       return "START_LT";
+   case OP_START_LE:       return "START_LE";
+   case OP_READ_SEQ_NO_LOCK:  return "READ_SEQ_NO_LK";
+   case OP_READ_SEQ:       return "READ_SEQ";
+   case OP_READ_SEQ_LOCK:     return "READ_SEQ_LK";
+   case OP_READ_SEQ_KEPT_LOCK:   return "READ_SEQ_KEPT_LK";
+   case OP_READ_PREV_NO_LOCK:    return "READ_PREV_NO_LK";
+   case OP_READ_PREV:      return "READ_PREV";
+   case OP_READ_PREV_LOCK:    return "READ_PREV_LK";
+   case OP_READ_PREV_KEPT_LOCK:  return "READ_PREV_KEPT_LK";
+   case OP_READ_RAN:       return "READ_RAN";
+   case OP_READ_RAN_NO_LOCK:  return "READ_RAN_NO_LK";
+   case OP_READ_RAN_KEPT_LOCK:   return "READ_RAN_KEPT_LK";
+   case OP_READ_RAN_LOCK:     return "READ_RAN_LK";
+   case OP_READ_DIR:       return "READ_DIR";
+   case OP_READ_DIR_NO_LOCK:  return "READ_DIR_NO_LK";
+   case OP_READ_DIR_KEPT_LOCK:   return "READ_DIR_KEPT_LK";
+   case OP_READ_DIR_LOCK:     return "READ_DIR_LK";
+   case OP_READ_POSITION:     return "READ_POSITION";
+   case OP_WRITE:          return "WRITE";
+   case OP_REWRITE:     return "REWRITE";
+   case OP_DELETE:      return "DELETE";
+   case OP_DELETE_FILE:       return "DELETE_FILE";
+   case OP_UNLOCK:      return "UNLOCK";
+   case OP_ROLLBACK:       return "ROLLBACK";
+   case OP_COMMIT:      return "COMMIT";
+   case OP_WRITE_BEFORE:      return "WRITE_BEFORE";
+   case OP_WRITE_BEFORE_TAB:  return "WRITE_BEFORE_TAB";
+   case OP_WRITE_BEFORE_PAGE:    return "WRITE_BEFORE_PAGE";
+   case OP_WRITE_AFTER:       return "WRITE_AFTER";
+   case OP_WRITE_AFTER_TAB:   return "WRITE_AFTER_TAB";
+   case OP_WRITE_AFTER_PAGE:  return "WRITE_AFTER_PAGE";
+   }
+   sprintf(tmp,"Func 0x%02X:",opCode);
+   return tmp;
+}
+]])
+
+AT_CHECK([$COMPILE -fcallfh=TSTFH -ftraceall prog.cob cmod.c], [0], [], [])
 
 # first run without runtime tracing
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[OK: Operations on empty file
+#### superseded by 1418: AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+AT_CHECK([export COB_TRACE_FILE=trace.txt
+export COB_TRACE_IO=Y
+export COB_SET_TRACE=Y
+export COB_TRACE_FORMAT=%L%S
+export IO_TSPFILE=trace
+export IO_TSTFILE=no-trace
+./prog], [0], [OK: Operations on empty file
 Loading sample data file.
 Sample data file load complete.
 LIST SAMPLE FILE

@@ -270,11 +270,15 @@ U    libcob/common.h	ok
 U    libcob/fileio.c	ok
 C    tests/testsuite.src/run_misc.at	declined
 
-
-
-
-
 r1418
+--- Merging r1418 into '.':
+A    tests/testsuite	ok
+C    tests/testsuite.src/run_misc.at	merged
+
+
+
+
+
 r1419
 r1491
 r1497
