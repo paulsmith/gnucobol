@@ -238,11 +238,20 @@ C    bin/ChangeLog
 U    bin/gcdiff.c
 dry-run produced above output, but actual merge showed no conflict. 
 
-
-
-
 r1405
+--- Merging r1404 through r1405 into '.':
+C    bin/ChangeLog	  merged
+U    bin/gcdiff.c	  ok
+
 r1410
+--- Merging r1410 into '.':
+C    cobc/ChangeLog    declined, already represented
+C    cobc/codegen.c    combined
+
+
+
+
+
 r1411
 r1417
 r1418

@@ -161,6 +161,7 @@ static const char		*excp_current_program_id = NULL;
 static const char		*excp_current_section = NULL;
 static const char		*excp_current_paragraph = NULL;
 static struct cb_program	*current_prog = NULL;
+static struct cb_program	*recent_prog = NULL;
 
 static struct cb_label		*last_section = NULL;
 static unsigned char		*litbuff = NULL;
@@ -5946,6 +5947,15 @@ output_call (struct cb_call *p)
 	/* Set number of parameters */
 	output_prefix ();
 	output ("cob_glob_ptr->cob_call_params = %u;\n", n);
+	if (recent_prog != NULL
+	 && recent_prog->max_call_param > n) {
+		if ((recent_prog->max_call_param - n) > 1) {
+			output_line ("memset(&cob_procedure_params[%d],0,sizeof(cob_procedure_params[0])*%d);",
+								n, (recent_prog->max_call_param - n));
+		} else {
+			output_line ("cob_procedure_params[%u] = NULL;", n);
+		}
+	}
 
 	/* pass information about available ON EXCEPTION */
 	output_prefix ();
@@ -9707,6 +9717,7 @@ output_error_handler (struct cb_program *prog)
 	size_t			seen;
 	unsigned int	parameter_count, pcounter, hcounter;
 
+	recent_prog = prog;
 	output_newline ();
 	seen = 0;
 	for (hcounter = COB_OPEN_INPUT; hcounter <= COB_OPEN_EXTEND; hcounter++) {
@@ -9820,6 +9831,7 @@ output_module_init (struct cb_program *prog)
 	output ("/* Flag main program, Fold call, Exit after CALL */\n\n");
 #endif
 
+	recent_prog = prog;
 	/* Do not initialize next pointer, parameter list pointer + count */
 	output_line ("/* Initialize module structure */");
 	output_line ("module->module_name = \"%s\";", prog->orig_program_id);
@@ -9954,6 +9966,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	int			seen;
 	int			anyseen;
 
+	recent_prog = prog;
 	/* Program function */
 #if	0	/* RXWRXW USERFUNC */
 	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
@@ -11249,6 +11262,7 @@ output_function_entry_function (struct cb_program *prog, cb_tree entry,
 	cob_u32_t	n;
 	cb_tree		l;
 
+	recent_prog = prog;
 	entry_name = CB_LABEL (CB_PURPOSE (entry))->name;
 	using_list = CB_VALUE (CB_VALUE (entry));
 
