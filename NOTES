@@ -405,11 +405,20 @@ r1991
 --- Merging r1981 through r1991 into '.':
  C   bin resolved: used union of svn:ignore 
 
-
-
-
-
 r2092
+--- Merging r2004 into 'cobc/cobc.c':
+C    cobc/cobc.c  declined
+Summary of conflicts:
+  Text conflicts: 1
+svn: E155015: One or more conflicts were produced while merging r2003:2004 into
+'/home/jklowden/projects/3rd/cobol/branches/pangaea' --
+resolve all conflicts and rerun the merge to apply the remaining
+unmerged revisions
+
+
+
+
+
 r2110
 r2166
 r2221
