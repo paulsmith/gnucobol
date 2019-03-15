@@ -22298,6 +22298,10 @@ AT_DATA([prog.cob], [
            10  FILLER             PICTURE X(1). 
            10  COMX-FLD2          PICTURE X(3) COMP-X.
            10  FILLER             PICTURE X(1). 
+           10  COMX-FLT           COMP-1 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-DBL           COMP-2 SYNC.
+           10  FILLER             PICTURE X(1). 
 
        PROCEDURE DIVISION.
 
@@ -22392,6 +22396,8 @@ AT_DATA([prog.cob], [
            MOVE ALL "x"    TO TSTGRPX.
            MOVE "12345678" TO COMX-FLD1 (1:).
            MOVE "12345678" TO COMX-FLD2 (1:).
+           MOVE "12345678" TO COMX-FLT (1:).
+           MOVE "12345678" TO COMX-DBL (1:).
            DISPLAY "COMP-X   : " TSTGRPX.
            STOP RUN.
 ])
@@ -22415,7 +22421,7 @@ COMP-3   : x1234567x1234x
 COMP-1   : 12341234
 COMP-2   : 1234567812345678
 SIGN L/T : x-01x02-x-03x04-x
-COMP-X   : x123x123x
+COMP-X   : x123x123x1234x12345678x
 ], [])
 
 AT_CLEANUP
@@ -22567,6 +22573,10 @@ AT_DATA([prog.cob], [
            10  FILLER             PICTURE X(1). 
            10  COMX-FLD2          PICTURE X(3) COMP-X.
            10  FILLER             PICTURE X(1). 
+           10  COMX-FLT           COMP-1 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-DBL           COMP-2 SYNC.
+           10  FILLER             PICTURE X(1). 
 
        PROCEDURE DIVISION.
 
@@ -22661,6 +22671,8 @@ AT_DATA([prog.cob], [
            MOVE ALL "x"    TO TSTGRPX.
            MOVE "12345678" TO COMX-FLD1 (1:).
            MOVE "12345678" TO COMX-FLD2 (1:).
+           MOVE "12345678" TO COMX-FLT (1:).
+           MOVE "12345678" TO COMX-DBL (1:).
            DISPLAY "COMP-X   : " TSTGRPX.
            STOP RUN.
 ])
@@ -22684,7 +22696,7 @@ COMP-3   : x1234567x1234x
 COMP-1   : 12341234
 COMP-2   : 1234567812345678
 SIGN L/T : x-01x02-x-03x04-x
-COMP-X   : x123x123x
+COMP-X   : x123x123xxxx1234xxxxxxxx12345678x
 ], [])
 
 AT_CLEANUP

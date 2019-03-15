@@ -2253,6 +2253,14 @@ unbounded_again:
 					case CB_USAGE_COMP_X:
 					case CB_USAGE_COMP_N:
 					case CB_USAGE_FLOAT:
+						if (c->size == 2) {
+							align_size = 2;
+						} else if (c->size == 4 
+							|| c->size == 8 
+							|| c->size == 16) {
+							align_size = 4;
+						}
+						break;
 					case CB_USAGE_DOUBLE:
 					case CB_USAGE_LONG_DOUBLE:
 					case CB_USAGE_FP_BIN32:
