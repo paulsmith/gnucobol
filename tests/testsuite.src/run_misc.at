@@ -8558,6 +8558,7 @@ Program-Id: prog
             CLOSE FLATFILE Status: 00
  Line:    331             STOP RUN                       
 ])
+# " <-- comment for fixing syntax highlighting
 
 #### jkl, removed for 1623: # AT_DATA workaround via sed:
 #### jkl, removed for 1623: AT_CAPTURE_FILE(./trace_append.txt)
@@ -8719,8 +8720,109 @@ AT_DATA([prog.cob], [
        01  HEXV PIC X  COMP-X.
        01  HEXC REDEFINES HEXV PIC X.
 
-       01 TEST-BASED BASED.
-          05 TEST-BASED-SUB PIC X(00000100000).
+           OPEN I-O TSPFILE.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE DATA-CUST-NUM      (2)       TO CM-CUST-NUM.
+           MOVE 'X'                          TO CM-CUST-NUM (5:1).
+           READ TSPFILE KEY IS CM-CUST-NUM
+           IF  CUST-STAT NOT = "23"
+               DISPLAY "Error " CUST-STAT " instead of 23."
+                                UPON CONSOLE
+           END-IF.
+           MOVE DATA-CUST-NUM      (2)       TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (2)       TO CM-COMPANY.
+           READ TSPFILE KEY IS CM-CUST-NUM
+           IF  CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " on primary read ."
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "Got: " CM-CUST-NUM " is " CM-COMPANY
+                        " Disk=" CM-DISK "."
+                         UPON CONSOLE
+           END-IF.
+           READ TSPFILE NEXT RECORD
+           IF  CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " on next read"
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "Nxt: " CM-CUST-NUM " is " CM-COMPANY
+                        " Disk=" CM-DISK "."
+                         UPON CONSOLE
+           END-IF.
+           MOVE DATA-TELEPHONE     (7)       TO CM-TELEPHONE.
+           MOVE DATA-MACHINE       (7)       TO CM-MACHINE.
+           READ TSPFILE KEY IS CM-TELEPHONE
+           IF  CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " instead of 23"
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "Ky2: " CM-CUST-NUM " is " CM-COMPANY
+                        " Mach=" CM-MACHINE "."
+                         UPON CONSOLE
+           END-IF.
+           WRITE TSPFL-RECORD
+           IF  CUST-STAT NOT = "22"
+               DISPLAY "Error " CUST-STAT " instead of 22"
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "  Write: " CM-CUST-NUM " got 22 as expected"
+                         UPON CONSOLE
+           END-IF.
+           MOVE DATA-CUST-NUM      (3)       TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (3)       TO CM-COMPANY.
+           READ TSPFILE KEY IS CM-CUST-NUM
+           DISPLAY "   Read: " CM-CUST-NUM " got "
+                         CUST-STAT " as expected "
+                         CM-NO-TERMINALS " terminals"
+                         UPON CONSOLE.
+           ADD 5 TO CM-NO-TERMINALS
+           REWRITE TSPFL-RECORD
+           IF  CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT
+                       " instead of 00"
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "ReWrite: " CM-CUST-NUM " got "
+                       CUST-STAT " as expected "
+                         CM-NO-TERMINALS " terminals"
+                         UPON CONSOLE
+           END-IF.
+           MOVE DATA-CUST-NUM      (2)       TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (2)       TO CM-COMPANY.
+           READ TSPFILE KEY IS CM-CUST-NUM
+           DISPLAY "   Read: " CM-CUST-NUM " got "
+                         CUST-STAT " as expected "
+                         CM-NO-TERMINALS " terminals"
+                         UPON CONSOLE.
+           MOVE DATA-CUST-NUM      (3)       TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (3)       TO CM-COMPANY.
+           REWRITE TSPFL-RECORD
+           IF  CUST-STAT NOT = "02"
+           AND CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " instead of 00/02"
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "ReWrite: " CM-CUST-NUM " got "
+                        "00/02 as expected"
+                         UPON CONSOLE
+           END-IF.
+           MOVE DATA-CUST-NUM      (6)       TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (6)       TO CM-COMPANY.
+           READ TSPFILE KEY IS CM-CUST-NUM
+           MOVE DATA-TELEPHONE     (7)       TO CM-TELEPHONE.
+           MOVE DATA-MACHINE       (7)       TO CM-MACHINE.
+           REWRITE TSPFL-RECORD
+           IF  CUST-STAT NOT = "02"
+           AND CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " instead of 00/02"
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "ReWrite: " CM-CUST-NUM " got "
+                       "00/02 as expected"
+                         UPON CONSOLE
+           END-IF.
+           DELETE TSPFILE.
+           CLOSE TSPFILE.
 
        01 TEST-ALLOCED BASED.
           05 TEST-ALLOCED-SUB1 PIC X(010).
@@ -8863,6 +8965,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fdump=ALL prog.cob], [0], [], [])
+
 
 AT_CHECK([COB_DUMP_FILE=tstdump.txt \
 $COBCRUN_DIRECT ./prog], [1],
@@ -9154,6 +9257,53 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 The date is 0000*08*21 INITIALIZE
 The date is 0000 08 21 WITH FILLER
 The date is 2017-08-21 ALL TO VALUE
+
+#### r2273
+AT_CHECK([COB_TRACE_FILE=trace.txt \
+COB_TRACE_IO=Y                     \
+COB_SET_TRACE=Y                    \
+COB_TRACE_FORMAT=%L%S              \
+IO_TSPFILE=trace                   \
+IO_TSTFILE=no-trace                \
+./prog], [0],
+[OK: Operations on empty file
+Loading sample data file.
+Sample data file load complete.
+LIST SAMPLE FILE
+Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=8417    .
+Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
+Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
+Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
+Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=8470    .
+Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
+Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
+Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
+Key: LEW00000 is LEWISTON GRAPHICS LTD.    Disk=8470    .
+Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=8470    .
+Key: NEW00000 is NEW WAVE SURF SHOPS INC.  Disk=8470    .
+Stop read after: 11
+LIST SAMPLE FILE DESCENDING
+Key: NEW00000 is NEW WAVE SURF SHOPS INC.  Disk=8470    .
+Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=8470    .
+Key: LEW00000 is LEWISTON GRAPHICS LTD.    Disk=8470    .
+Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
+Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
+Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
+Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=8470    .
+Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
+Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
+Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
+Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=8417    .
+Got: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
+Nxt: DEL00000 is DELTA LUGGAGE REPAIRS     Disk=8470    .
+Ky2: GIB00000 is GIBRALTER LIFE INSURANCE  Mach=UNI-80/6.
+  Write: GIB00000 got 22 as expected
+   Read: GAM00000 got 00 as expected 00075 terminals
+ReWrite: GAM00000 got 00 as expected 00080 terminals
+   Read: BET00000 got 00 as expected 00034 terminals
+ReWrite: GAM00000 got 00/02 as expected
+ReWrite: FOR00000 got 00/02 as expected
+Expected ERROR 39 opening TSTFILE, Record size different
 ], [])
 
 AT_CLEANUP
@@ -9178,6 +9328,7 @@ AT_DATA([prog.cob], [
            .
        END PROGRAM prog.
 ])
+# " <-- comment for fixing syntax highlighting
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob:11: warning: expression '16' NOT EQUAL '16' is always FALSE

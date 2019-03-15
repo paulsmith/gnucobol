@@ -11841,9 +11841,10 @@ try_get_by_value_parameter_type (const enum cb_usage usage,
 		output (");\n");
 
 		output ("  **cob_fret = *floc->ret_fld;\n");
+		output ("  ret = *cob_fret;\n");
 		output ("  /* Restore environment */\n");
 		output ("  cob_restore_func (floc);\n");
-		output ("  return *cob_fret;\n}\n\n");
+		output ("  return ret;\n}\n\n");
 		return; //// end r2221
 	}
 	

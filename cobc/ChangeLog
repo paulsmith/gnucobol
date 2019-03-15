@@ -938,6 +938,14 @@
 
 	* cobc.c: fix --list-registers to list these, not mnemonics...
 
+2017-12-11  Ron Norman <rjn@inglenet.com>
+	* codegen.c: For FUNCTION-ID and RECURSIVE, generate all LINKAGE
+	  and LOCAL-STORAGE fields with the 'cob_field' on the function
+	  stack instead of making them 'static'. If static then the fields
+	  end up as a side effect with the same memory address which is 
+	  not correct. Additional change for C compiler issue of returning
+	  a local variable.
+
 2017-12-11  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: set RW VARYING clause as PENDING

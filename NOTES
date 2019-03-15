@@ -454,11 +454,26 @@ C    cobc/ChangeLog	  merged
 C    cobc/codegen.c	  merged
 C    tests/testsuite.src/run_functions.at	accepted
 
-
-
-
-
 r2278
+--- Merging r2273 into 'tests':
+C    tests/testsuite.src/run_misc.at
+Summary of conflicts:
+  Text conflicts: 1
+svn: E155015: One or more conflicts were produced while merging r2272:2273 into
+'/home/jklowden/projects/3rd/cobol/branches/pangaea' --
+resolve all conflicts and rerun the merge to apply the remaining
+unmerged revisions
+
+2nd try:
+--- Merging r2274 through r2278 into '.':
+C    cobc/ChangeLog	  merged
+C    cobc/codegen.c	  declined, still messy
+
+
+
+
+
+
 r2364
 r2379
 r2468
