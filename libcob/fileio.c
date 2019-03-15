@@ -1878,91 +1878,127 @@ save_status (cob_file *f, cob_field *fnstatus, const int status)
 
 	if (cobsetptr->cob_line_trace
 	 && f->trace_io
-	 && cobsetptr->cob_trace_file) {
-		fprintf(cobsetptr->cob_trace_file,"%*s",indent-3,"");
-		switch (f->last_operation) {
-		default:
-			fprintf(cobsetptr->cob_trace_file,"Unknown I/O on %s Status: %.2s\n",
-								f->select_name,f->file_status);
-			break;
-		case COB_LAST_CLOSE:
-			fprintf(cobsetptr->cob_trace_file,"CLOSE %s Status: %.2s\n",
-								f->select_name,f->file_status);
-			break;
-		case COB_LAST_OPEN:
-			fprintf(cobsetptr->cob_trace_file,"OPEN %s %s -> '%s' Status: %.2s\n",
-					f->open_mode == COB_OPEN_INPUT ? "INPUT" :
-					f->open_mode == COB_OPEN_OUTPUT ? "OUTPUT" :
-					f->open_mode == COB_OPEN_I_O ? "I_O" :
-					f->open_mode == COB_OPEN_EXTEND ? "EXTEND" : "", 
-					f->select_name, 
-					file_open_name?file_open_name:"",
-					f->file_status);
-			break;
-		case COB_LAST_DELETE_FILE:
-			fprintf(cobsetptr->cob_trace_file,"DELETE FILE %s Status: %.2s\n",
-								f->select_name,f->file_status);
-			break;
-		case COB_LAST_READ:
-			fprintf(cobsetptr->cob_trace_file,"READ %s Status: %.2s\n",
-								f->select_name,f->file_status);
-			if (status == 0) {
-				fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
-				cob_print_field(cobsetptr->cob_trace_file,f->record, 
-							indent+3, cobsetptr->cob_dump_width);
+	 && f->last_operation > 0) {
+		if (cobsetptr->cob_trace_file == NULL
+		 && cobsetptr->cob_trace_filename != NULL) {
+			/* Open so that I/O can be traced by itself */
+			cobsetptr->cob_trace_file = fopen (cobsetptr->cob_trace_filename, "w");
+			if (!cobsetptr->cob_trace_file) {
+				cobsetptr->cob_trace_file = stderr;
 			}
-			if (f->last_key) {
-				fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Key");
-				cob_print_field(cobsetptr->cob_trace_file,f->last_key, 
-							indent+3, cobsetptr->cob_dump_width);
-			}
-			break;
-		case COB_LAST_START:
-			fprintf(cobsetptr->cob_trace_file,"START %s Status: %.2s\n",
-								f->select_name,f->file_status);
-			if (f->last_key) {
-				fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Key");
-				cob_print_field(cobsetptr->cob_trace_file,f->last_key, 
-							indent+3, cobsetptr->cob_dump_width);
-			}
-			break;
-		case COB_LAST_READ_SEQ:
-			fprintf(cobsetptr->cob_trace_file,"READ Sequential %s Status: %.2s\n",
-								f->select_name,f->file_status);
-			if (status == 0) {
-				fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
-				cob_print_field(cobsetptr->cob_trace_file,f->record, 
-							indent+3, cobsetptr->cob_dump_width);
-			}
-			break;
-		case COB_LAST_WRITE:
-			fprintf(cobsetptr->cob_trace_file,"WRITE %s Status: %.2s\n",
-								f->select_name,f->file_status);
-			fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
-			cob_print_field(cobsetptr->cob_trace_file,f->record, 
-						indent+3, cobsetptr->cob_dump_width);
-			break;
-		case COB_LAST_REWRITE:
-			fprintf(cobsetptr->cob_trace_file,"REWRITE %s Status: %.2s\n",
-								f->select_name,f->file_status);
-			fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
-			cob_print_field(cobsetptr->cob_trace_file,f->record, 
-						indent+3, cobsetptr->cob_dump_width);
-			break;
-		case COB_LAST_DELETE:
-			fprintf(cobsetptr->cob_trace_file,"DELETE %s Status: %.2s\n",
-								f->select_name,f->file_status);
-			fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
-			cob_print_field(cobsetptr->cob_trace_file,f->record, 
-						indent+3, cobsetptr->cob_dump_width);
-			break;
 		}
+		if (cobsetptr->cob_trace_file) {
+			fprintf(cobsetptr->cob_trace_file,"%*s",indent-3,"");
+			switch (f->last_operation) {
+			default:
+				fprintf(cobsetptr->cob_trace_file,"Unknown I/O on %s Status: %.2s\n",
+									f->select_name,f->file_status);
+				break;
+			case COB_LAST_CLOSE:
+				fprintf(cobsetptr->cob_trace_file,"CLOSE %s Status: %.2s\n",
+									f->select_name,f->file_status);
+				break;
+			case COB_LAST_OPEN:
+				fprintf(cobsetptr->cob_trace_file,"OPEN %s %s -> '%s' Status: %.2s\n",
+						f->open_mode == COB_OPEN_INPUT ? "INPUT" :
+						f->open_mode == COB_OPEN_OUTPUT ? "OUTPUT" :
+						f->open_mode == COB_OPEN_I_O ? "I_O" :
+						f->open_mode == COB_OPEN_EXTEND ? "EXTEND" : "", 
+						f->select_name, 
+						file_open_name?file_open_name:"",
+						f->file_status);
+				break;
+			case COB_LAST_DELETE_FILE:
+				fprintf(cobsetptr->cob_trace_file,"DELETE FILE %s Status: %.2s\n",
+									f->select_name,f->file_status);
+				break;
+			case COB_LAST_READ:
+				fprintf(cobsetptr->cob_trace_file,"READ %s Status: %.2s\n",
+									f->select_name,f->file_status);
+				if (status == 0) {
+					fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
+					cob_print_field(cobsetptr->cob_trace_file,f->record, 
+								indent+3, cobsetptr->cob_dump_width);
+				}
+				if (f->last_key) {
+					fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,
+						f->organization == COB_ORG_RELATIVE ? "Record#":"Key");
+					cob_print_field(cobsetptr->cob_trace_file,f->last_key, 
+								indent+3, cobsetptr->cob_dump_width);
+				}
+				break;
+			case COB_LAST_START:
+				fprintf(cobsetptr->cob_trace_file,"START %s Status: %.2s\n",
+									f->select_name,f->file_status);
+				if (f->last_key) {
+					fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,
+						f->organization == COB_ORG_RELATIVE ? "Record#":"Key");
+					cob_print_field(cobsetptr->cob_trace_file,f->last_key, 
+								indent+3, cobsetptr->cob_dump_width);
+				}
+				break;
+			case COB_LAST_READ_SEQ:
+				fprintf(cobsetptr->cob_trace_file,"READ Sequential %s Status: %.2s\n",
+									f->select_name,f->file_status);
+				if (status == 0) {
+					fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
+					cob_print_field(cobsetptr->cob_trace_file,f->record, 
+								indent+3, cobsetptr->cob_dump_width);
+				}
+				if (f->last_key
+				 && f->organization == COB_ORG_RELATIVE) {
+					fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record#");
+					cob_print_field(cobsetptr->cob_trace_file,f->last_key, 
+								indent+3, cobsetptr->cob_dump_width);
+				}
+				break;
+			case COB_LAST_WRITE:
+				fprintf(cobsetptr->cob_trace_file,"WRITE %s Status: %.2s\n",
+									f->select_name,f->file_status);
+				fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
+				cob_print_field(cobsetptr->cob_trace_file,f->record, 
+							indent+3, cobsetptr->cob_dump_width);
+				if (f->last_key
+				 && f->organization == COB_ORG_RELATIVE) {
+					fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record#");
+					cob_print_field(cobsetptr->cob_trace_file,f->last_key, 
+								indent+3, cobsetptr->cob_dump_width);
+				}
+				break;
+			case COB_LAST_REWRITE:
+				fprintf(cobsetptr->cob_trace_file,"REWRITE %s Status: %.2s\n",
+									f->select_name,f->file_status);
+				fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
+				cob_print_field(cobsetptr->cob_trace_file,f->record, 
+							indent+3, cobsetptr->cob_dump_width);
+				if (f->last_key
+				 && f->organization == COB_ORG_RELATIVE) {
+					fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record#");
+					cob_print_field(cobsetptr->cob_trace_file,f->last_key, 
+								indent+3, cobsetptr->cob_dump_width);
+				}
+				break;
+			case COB_LAST_DELETE:
+				fprintf(cobsetptr->cob_trace_file,"DELETE %s Status: %.2s\n",
+									f->select_name,f->file_status);
+				fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record");
+				cob_print_field(cobsetptr->cob_trace_file,f->record, 
+							indent+3, cobsetptr->cob_dump_width);
+				if (f->last_key
+				 && f->organization == COB_ORG_RELATIVE) {
+					fprintf(cobsetptr->cob_trace_file,"%*s : ",indent,"Record#");
+					cob_print_field(cobsetptr->cob_trace_file,f->last_key, 
+								indent+3, cobsetptr->cob_dump_width);
+				}
+				break;
+			}
+		 }
 	}
 
 	if (f->io_stats
-	 && cobsetptr->cob_stats_filename) {
-		if (f->last_operation > 0
-		 && f->last_operation <= 6) {
+	 && cobsetptr->cob_stats_filename
+	 && f->last_operation > 0) {
+		if (f->last_operation <= 6) {
 			f->stats[f->last_operation-1].rqst_io++;
 			if (status != 0
 			 && status != 2) {
@@ -2032,6 +2068,7 @@ save_status (cob_file *f, cob_field *fnstatus, const int status)
 			}
 		}
 	}
+	f->last_operation = 0;				/* Avoid double count/trace */
 }
 
 /* Regular file */
@@ -3873,6 +3910,7 @@ relative_write (cob_file *f, const int opt)
 		f->flag_operation = 1;
 	}
 
+	f->last_key = f->keys[0].field;
 	if (f->access_mode != COB_ACCESS_SEQUENTIAL) {
 		kindex = cob_get_int (f->keys[0].field) - 1;
 		if (kindex < 0) {
@@ -3952,6 +3990,7 @@ relative_rewrite (cob_file *f, const int opt)
 #endif
 
 	f->flag_operation = 1;
+	f->last_key = f->keys[0].field;
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
 		off = (off_t)f->record_off;
 		relnum = (off - f->file_header) / f->record_slot;
@@ -9229,6 +9268,14 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 	STCOMPX2(sizeof(FCD3),fcd->fcdLen);
 	fcd->fcdVer = FCD_VER_64Bit;
 	fcd->gcFlags |= MF_CALLFH_GNUCOBOL;
+	if (f->trace_io)
+		fcd->gcFlags |= MF_CALLFH_TRACE;
+	else
+		fcd->gcFlags &= ~MF_CALLFH_TRACE;
+	if (f->io_stats)
+		fcd->gcFlags |= MF_CALLFH_STATS;
+	else
+		fcd->gcFlags &= ~MF_CALLFH_STATS;
 	if(f->record_min != f->record_max)
 		fcd->recordMode = REC_MODE_VARIABLE;
 	else
@@ -9335,6 +9382,8 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 static void
 update_fcd_to_file (FCD3* fcd, cob_file *f, cob_field *fnstatus, int wasOpen)
 {
+	int status;
+
 	cobglobptr->cob_error_file = f;
 	if (isdigit(fcd->fileStatus[0])) {
 		cob_set_exception (status_exception[(fcd->fileStatus[0] - '0')]);
@@ -9362,6 +9411,16 @@ update_fcd_to_file (FCD3* fcd, cob_file *f, cob_field *fnstatus, int wasOpen)
 	f->record_min = LDCOMPX4(fcd->minRecLen);
 	f->record_max = LDCOMPX4(fcd->maxRecLen);
 	f->record->size = LDCOMPX4(fcd->curRecLen);
+	status = 0;
+	if(isdigit(fcd->fileStatus[0])) {
+		status = fcd->fileStatus[0] - '0';
+	}
+	status = status * 10;
+	if(isdigit(fcd->fileStatus[1]))
+		status += (fcd->fileStatus[1] - '0');
+
+	/* Call save_status to get trace & stats done */
+	save_status (f, fnstatus, status);
 }
 
 /*
@@ -9503,6 +9562,14 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 			f->keys = cob_malloc(sizeof(cob_file_key));
 		}
 	}
+	if (fcd->gcFlags & MF_CALLFH_TRACE)
+		f->trace_io = 1;
+	else
+		f->trace_io = 0;
+	if (fcd->gcFlags & MF_CALLFH_STATS)
+		f->io_stats = 1;
+	else
+		f->io_stats = 0;
 	update_fcd_to_file (fcd, f, NULL, 0);
 }
 
@@ -9619,6 +9686,7 @@ cob_extfh_open (
 	FCD3	*fcd;
 	int	sts;
 
+	f->last_operation = COB_LAST_OPEN;
 	fcd = find_fcd(f);
 	f->share_mode = sharing;
 	f->last_open_mode = mode;
@@ -9659,6 +9727,7 @@ cob_extfh_close (
 
 	COB_UNUSED (remfil);
 
+	f->last_operation = COB_LAST_CLOSE;
 	fcd = find_fcd(f);
 	STCOMPX4(opt, fcd->opt);
 	STCOMPX2(OP_CLOSE, opcode);
@@ -9698,6 +9767,7 @@ cob_extfh_start (
 	int	recn;
 	int	keyn,keylen,partlen;
 
+	f->last_operation = COB_LAST_START;
 	fcd = find_fcd(f);
 	if (f->organization == COB_ORG_INDEXED) {
 		keyn = cob_findkey(f,key,&keylen,&partlen);
@@ -9743,9 +9813,11 @@ cob_extfh_read (
 	int	recn;
 	int	keyn,keylen,partlen;
 
+	f->last_operation = COB_LAST_READ;
 	fcd = find_fcd(f);
 	STCOMPX4 (read_opts, fcd->opt);
 	if(key == NULL) {
+		f->last_operation = COB_LAST_READ_SEQ;
 		if((read_opts & COB_READ_PREVIOUS)) {
 			STCOMPX2(OP_READ_PREV, opcode);
 		} else {
@@ -9788,6 +9860,7 @@ cob_extfh_read_next (
 	FCD3	*fcd;
 	int	recn;
 
+	f->last_operation = COB_LAST_READ_SEQ;
 	fcd = find_fcd(f);
 	STCOMPX4(read_opts, fcd->opt);
 	if((read_opts & COB_READ_PREVIOUS)) {
@@ -9816,6 +9889,7 @@ cob_extfh_write (
 	FCD3	*fcd;
 	int	recn;
 
+	f->last_operation = COB_LAST_WRITE;
 	fcd = find_fcd(f);
 	STCOMPX2(OP_WRITE, opcode);
 	STCOMPX2(check_eop, fcd->eop);
@@ -9852,6 +9926,7 @@ cob_extfh_rewrite (
 	FCD3	*fcd;
 	int	recn;
 
+	f->last_operation = COB_LAST_REWRITE;
 	fcd = find_fcd(f);
 	STCOMPX2 (OP_REWRITE, opcode);
 	STCOMPX4 (rec->size, fcd->curRecLen);
@@ -9886,6 +9961,7 @@ cob_extfh_delete (
 	FCD3	*fcd;
 	int	recn;
 
+	f->last_operation = COB_LAST_DELETE;
 	fcd = find_fcd (f);
 	STCOMPX2 (OP_DELETE, opcode);
 	if (f->organization == COB_ORG_RELATIVE) {

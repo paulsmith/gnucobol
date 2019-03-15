@@ -275,11 +275,17 @@ r1418
 A    tests/testsuite	ok
 C    tests/testsuite.src/run_misc.at	merged
 
-
-
-
-
 r1419
+--- Merging r1419 into '.':
+C    libcob/ChangeLog	merged
+U    libcob/common.c	ok
+C    libcob/common.h	accepted but #if 0'd out
+C    libcob/fileio.c	merged
+
+
+
+
+
 r1491
 r1497
 r1508
