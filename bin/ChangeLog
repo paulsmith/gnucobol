@@ -72,7 +72,12 @@
 	* cobcrun.c: don't print runtime env when program name > max length,
 	  surrounded exception ABORTs that cannot be tested by LCOV_EXCP markers
 
-2017-02-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net> 
+2017-02-05  Ron Norman <rjn@inglenet.com>
+
+	* gcdiff.c: Updates to handle time compares and look for run options
+	  in gcdiff.conf in current directory, started unified diff
+
+2017-02-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* gcdiff.c: added option to read files from stdin (GCD_DASH)
 	* gcdiff.c: added NLS and locale, changed fprintf calls to puts/printf,
@@ -99,7 +104,7 @@
 	* cobcrun.c: added option --brief (-q) to remove the path to cobcrun
 	  in argv[0]
 
-2016-06-29  Simon Sobisch <simonsobisch@gnu.org> 
+2016-06-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c (cobcrun_initial_module) [_WIN32]: fixed setting of
 	  COB_PRE_LOAD and COB_LIBRARY_PATH to use PATHSEP_CHAR
@@ -119,16 +124,16 @@
 	  if module (no slash) found, prepend to COB_PRE_LOAD
 	  may set both.
 
-2016-01-30  Simon Sobisch <simonsobisch@gnu.org> 
+2016-01-30  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c (cobcrun_print_version): changed generation of build stamp
 
-2015-03-06  Simon Sobisch <simonsobisch@gnu.org> 
+2015-03-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c : new option --config=<file> / -c <file> for setting the
 	  runtime configuration file to be loaded during initialisation
 
-2014-08-25  Simon Sobisch <simonsobisch@gnu.org> 
+2014-08-25  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c : Changed output of --help for help2man
 	* Makefile.am : Added manpage generation + install
@@ -139,7 +144,7 @@
 	  --version shows both version numbers of cobcrun (new) and libcob.;
 	  moved print_info (along with print_var) to libcob/common.c
 
-2014-02-17  Simon Sobisch <simonsobisch@gnu.org> 
+2014-02-17  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c : Tweaked --info for showing current settings (environment) along
 	  with settings hard-wired during build (COB_xyz),
