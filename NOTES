@@ -297,11 +297,16 @@ C    libcob/coblocal.h	  declined: copyright more recent in trunk
 C    libcob/common.c	  merged
 C    libcob/fileio.c	  accepted
 
-
-
-
-
 r1508
+--- Merging r1505 through r1508 into '.':
+C    libcob/ChangeLog	  merged
+C    libcob/common.c	  merged
+C    libcob/fileio.c	  declined
+
+
+
+
+
 r1520
 r1547
 r1560

@@ -7695,60 +7695,27 @@ cob_delete_file (cob_file *f, cob_field *fnstatus)
 /* System routines */
 
 static void *
-cob_str_from_fld (const cob_field *f)
+cob_param_no_quotes (int n)
 {
-	void		*mptr;
-	unsigned char	*s;
-	int		i;
-	int		n;
-	int		j;
-#if	0	/* Quotes in file */
-	int		quote_switch;
+	int		i, j;
+	char	*s;
 
-	quote_switch = 0;
-#endif
-
-	if (!f) {
-		return cob_malloc ((size_t)1);
-	}
-	for (i = (int) f->size - 1; i >= 0; --i) {
-		if (f->data[i] != ' ' && f->data[i] != 0) {
-			break;
-		}
-	}
-	i++;
-	/* i is 0 or > 0 */
-	mptr = cob_malloc ((size_t)(i + 1));
-	s = mptr;
-	j = 0;
-	for (n = 0; n < i; ++n) {
-		if (f->data[n] == '"') {
+	s = cob_get_picx_param (n, NULL, 0);
+	if (s == NULL)
+		return NULL;
+	for (i = j = 0; s[j] != 0; j++) {
+		if (s[j] == '"') {
 			continue;
 		}
-		s[j++] = f->data[n];
-#if	0	/* Quotes in file */
-		if (f->data[n] == '"') {
-			quote_switch = !quote_switch;
-			continue;
-		}
-		s[j] = f->data[n];
-		if (quote_switch) {
-			j++;
-			continue;
-		}
-		if (s[j] == ' ' || s[j] == 0) {
-			s[j] = 0;
-			break;
-		}
-		j++;
-#endif
+		s[i++] = s[j];
 	}
-	return mptr;
+	s[i] = 0;
+	return (void*)s;
 }
 
 static int
-open_cbl_file (unsigned char *file_name, unsigned char *file_access,
-	       unsigned char *file_handle, const int file_flags)
+open_cbl_file (cob_u8_ptr file_name, int file_access,
+	       	cob_u8_ptr file_handle, const int file_flags)
 {
 	char	*fn;
 	int	flag = O_BINARY;
@@ -7756,12 +7723,13 @@ open_cbl_file (unsigned char *file_name, unsigned char *file_access,
 
 	COB_UNUSED (file_name);
 
-	if (!COB_MODULE_PTR->cob_procedure_params[0]) {
+	fn = cob_param_no_quotes (1);
+	if (fn == NULL) {
 		memset (file_handle, -1, (size_t)4);
 		return -1;
 	}
 	flag |= file_flags;
-	switch (*file_access & 0x3F) {
+	switch (file_access & 0x3F) {
 		case 1:
 			flag |= O_RDONLY;
 			break;
@@ -7772,11 +7740,10 @@ open_cbl_file (unsigned char *file_name, unsigned char *file_access,
 			flag |= O_RDWR;
 			break;
 		default:
-			cob_runtime_warning (_("call to CBL_OPEN_FILE with wrong access mode: %d"), *file_access & 0x3F);
+			cob_runtime_warning (_("call to CBL_OPEN_FILE with wrong access mode: %d"), file_access & 0x3F);
 			memset (file_handle, -1, (size_t)4);
 			return -1;
 	}
-	fn = cob_str_from_fld (COB_MODULE_PTR->cob_procedure_params[0]);
 	fd = open (fn, flag, COB_FILE_MODE);
 	if (fd < 0) {
 		cob_free (fn);
@@ -7793,26 +7760,13 @@ cob_sys_open_file (unsigned char *file_name, unsigned char *file_access,
 		   unsigned char *file_lock, unsigned char *file_dev,
 		   unsigned char *file_handle)
 {
+	COB_UNUSED (file_access);
 	COB_UNUSED (file_lock);
 	COB_UNUSED (file_dev);
 
-	 /* If value is passed as numeric literal, it becomes an 'int' so value is in 4th byte */
-	 if(file_access[0] == 0x00
-	 && file_access[1] == 0x00
-	 && file_access[2] == 0x00)
-		 file_access += 3;
-	 if(file_lock[0] == 0x00
-	 && file_lock[1] == 0x00
-	 && file_lock[2] == 0x00)
-		 file_lock += 3;
-	 if(file_dev[0] == 0x00
-	 && file_dev[1] == 0x00
-	 && file_dev[2] == 0x00)
-		 file_dev += 3;
-
 	COB_CHK_PARMS (CBL_OPEN_FILE, 5);
 
-	return open_cbl_file (file_name, file_access, file_handle, 0);
+	return open_cbl_file (file_name, (int)cob_get_s64_param (2), file_handle, 0);
 }
 
 int
@@ -7820,35 +7774,28 @@ cob_sys_create_file (unsigned char *file_name, unsigned char *file_access,
 		     unsigned char *file_lock, unsigned char *file_dev,
 		     unsigned char *file_handle)
 {
+	int		p_lock, p_dev;	
+	COB_UNUSED (file_access);
+	COB_UNUSED (file_lock);
+	COB_UNUSED (file_dev);
 	/*
 	 * @param: file_access : 1 (read-only), 2 (write-only), 3 (both)
 	 * @param: file_lock : not implemented, set 0
 	 * @param: file_dev : not implemented, set 0
 	 */
-	 /* If value is passed as numeric literal, it becomes an 'int' so value is in 4th byte */
-	 if(file_access[0] == 0x00
-	 && file_access[1] == 0x00
-	 && file_access[2] == 0x00)
-		 file_access += 3;
-	 if(file_lock[0] == 0x00
-	 && file_lock[1] == 0x00
-	 && file_lock[2] == 0x00)
-		 file_lock += 3;
-	 if(file_dev[0] == 0x00
-	 && file_dev[1] == 0x00
-	 && file_dev[2] == 0x00)
-		 file_dev += 3;
+	p_lock = (int)cob_get_s64_param (3);
+	p_dev  = (int)cob_get_s64_param (4);
 
-	if (*file_lock != 0) {
-		cob_runtime_warning (_("call to CBL_CREATE_FILE with wrong file_lock: %d"), *file_lock);
+	if (p_lock != 0) {
+		cob_runtime_warning (_("call to CBL_CREATE_FILE with wrong file_lock: %d"), p_lock);
 	}
-	if (*file_dev != 0) {
-		cob_runtime_warning (_("call to CBL_CREATE_FILE with wrong file_dev: %d"), *file_dev);
+	if (p_dev != 0) {
+		cob_runtime_warning (_("call to CBL_CREATE_FILE with wrong file_dev: %d"), p_dev);
 	}
 
 	COB_CHK_PARMS (CBL_CREATE_FILE, 5);
 
-	return open_cbl_file (file_name, file_access, file_handle, O_CREAT | O_TRUNC);
+	return open_cbl_file (file_name, (int)cob_get_s64_param (2), file_handle, O_CREAT | O_TRUNC);
 }
 
 int
@@ -7858,25 +7805,26 @@ cob_sys_read_file (unsigned char *file_handle, unsigned char *file_offset,
 {
 	cob_s64_t	off;
 	int		fd;
-	int		len;
+	size_t	len;
 	int		rc;
 	struct stat	st;
+	cob_u8_ptr	p_flags;
 
+	COB_UNUSED (file_len);
+	COB_UNUSED (flags);
+	COB_UNUSED (file_offset);
 	COB_CHK_PARMS (CBL_READ_FILE, 5);
 
 	rc = 0;
 	memcpy (&fd, file_handle, (size_t)4);
-	memcpy (&off, file_offset, (size_t)8);
-	memcpy (&len, file_len, (size_t)4);
-#ifndef	WORDS_BIGENDIAN
-	off = COB_BSWAP_64 (off);
-	len = COB_BSWAP_32 (len);
-#endif
+	off = cob_get_s64_param (2);
+	len = (size_t)cob_get_s64_param (3);
+	p_flags = cob_get_param_data (4);
 	if (lseek (fd, (off_t)off, SEEK_SET) == (off_t)-1) {
 		return -1;
 	}
 	if (len > 0) {
-		rc = read (fd, buf, (size_t)len);
+		rc = read (fd, buf, len);
 		if (rc < 0) {
 			rc = -1;
 		} else if (rc == 0) {
@@ -7885,15 +7833,11 @@ cob_sys_read_file (unsigned char *file_handle, unsigned char *file_offset,
 			rc = 0;
 		}
 	}
-	if ((*flags & 0x80) != 0) {
+	if ((*p_flags & 0x80) != 0) {
 		if (fstat (fd, &st) < 0) {
 			return -1;
 		}
-		off = st.st_size;
-#ifndef	WORDS_BIGENDIAN
-		off = COB_BSWAP_64 (off);
-#endif
-		memcpy (file_offset, &off, (size_t)8);
+		cob_put_s64_param ( 2, (cob_s64_t) st.st_size);
 	}
 	return rc;
 }
@@ -7905,20 +7849,18 @@ cob_sys_write_file (unsigned char *file_handle, unsigned char *file_offset,
 {
 	cob_s64_t	off;
 	int		fd;
-	int		len;
+	size_t	len;
 	int		rc;
 
 	COB_UNUSED (flags);
+	COB_UNUSED (file_len);
+	COB_UNUSED (file_offset);
 
 	COB_CHK_PARMS (CBL_WRITE_FILE, 5);
 
 	memcpy (&fd, file_handle, (size_t)4);
-	memcpy (&off, file_offset, (size_t)8);
-	memcpy (&len, file_len, (size_t)4);
-#ifndef	WORDS_BIGENDIAN
-	off = COB_BSWAP_64 (off);
-	len = COB_BSWAP_32 (len);
-#endif
+	off = cob_get_s64_param (2);
+	len = (size_t)cob_get_s64_param (3);
 	if (lseek (fd, (off_t)off, SEEK_SET) == (off_t)-1) {
 		return -1;
 	}
@@ -7960,10 +7902,10 @@ cob_sys_delete_file (unsigned char *file_name)
 
 	COB_CHK_PARMS (CBL_DELETE_FILE, 1);
 
-	if (!COB_MODULE_PTR->cob_procedure_params[0]) {
+	fn = cob_param_no_quotes (1);
+	if (fn == NULL) {
 		return -1;
 	}
-	fn = cob_str_from_fld (COB_MODULE_PTR->cob_procedure_params[0]);
 	ret = unlink (fn);
 	cob_free (fn);
 	if (ret) {
@@ -7987,30 +7929,31 @@ cob_sys_copy_file (unsigned char *fname1, unsigned char *fname2)
 
 	COB_CHK_PARMS (CBL_COPY_FILE, 2);
 
-	if (!COB_MODULE_PTR->cob_procedure_params[0]) {
+	fn1 = cob_param_no_quotes (1);
+	if (fn1 == NULL) {
 		return -1;
 	}
-	if (!COB_MODULE_PTR->cob_procedure_params[1]) {
+	fn2 = cob_param_no_quotes (2);
+	if (fn2 == NULL) {
+		cob_free (fn1);
 		return -1;
 	}
-	fn1 = cob_str_from_fld (COB_MODULE_PTR->cob_procedure_params[0]);
 	flag |= O_RDONLY;
 	fd1 = open (fn1, flag, 0);
 	if (fd1 < 0) {
 		cob_free (fn1);
+		cob_free (fn2);
 		return -1;
 	}
-	cob_free (fn1);
-	fn2 = cob_str_from_fld (COB_MODULE_PTR->cob_procedure_params[1]);
 	flag &= ~O_RDONLY;
 	flag |= O_CREAT | O_TRUNC | O_WRONLY;
 	fd2 = open (fn2, flag, COB_FILE_MODE);
 	if (fd2 < 0) {
 		close (fd1);
+		cob_free (fn1);
 		cob_free (fn2);
 		return -1;
 	}
-	cob_free (fn2);
 
 	ret = 0;
 	while ((i = read (fd1, file_open_buff, COB_FILE_BUFF)) > 0) {
@@ -8021,6 +7964,8 @@ cob_sys_copy_file (unsigned char *fname1, unsigned char *fname2)
 	}
 	close (fd1);
 	close (fd2);
+	cob_free (fn1);
+	cob_free (fn2);
 	return ret;
 }
 
@@ -8038,18 +7983,15 @@ cob_sys_check_file_exist (unsigned char *file_name, unsigned char *file_info)
 
 	COB_CHK_PARMS (CBL_CHECK_FILE_EXIST, 2);
 
-	if (!COB_MODULE_PTR->cob_procedure_params[0]) {
+	fn = cob_param_no_quotes (1);
+	if (fn == NULL) {
 		return -1;
 	}
-	if (!COB_MODULE_PTR->cob_procedure_params[1]) {
-		return -1;
-	}
-	if (COB_MODULE_PTR->cob_procedure_params[1]->size < 16U) {
+	if (cob_get_param_size(2) < 16) {
 		cob_runtime_error (_("'%s' - File detail area is too short"), "CBL_CHECK_FILE_EXIST");
 		cob_stop_run (1);
 	}
 
-	fn = cob_str_from_fld (COB_MODULE_PTR->cob_procedure_params[0]);
 	if (stat (fn, &st) < 0) {
 		cob_free (fn);
 		return 35;
@@ -8096,14 +8038,15 @@ cob_sys_rename_file (unsigned char *fname1, unsigned char *fname2)
 
 	COB_CHK_PARMS (CBL_RENAME_FILE, 2);
 
-	if (!COB_MODULE_PTR->cob_procedure_params[0]) {
+	fn1 = cob_param_no_quotes (1);
+	if (fn1 == NULL) {
 		return -1;
 	}
-	if (!COB_MODULE_PTR->cob_procedure_params[1]) {
+	fn2 = cob_param_no_quotes (2);
+	if (fn2 == NULL) {
+		cob_free (fn1);
 		return -1;
 	}
-	fn1 = cob_str_from_fld (COB_MODULE_PTR->cob_procedure_params[0]);
-	fn2 = cob_str_from_fld (COB_MODULE_PTR->cob_procedure_params[1]);
 	ret = rename (fn1, fn2);
 	cob_free (fn1);
 	cob_free (fn2);
@@ -8114,14 +8057,20 @@ cob_sys_rename_file (unsigned char *fname1, unsigned char *fname2)
 }
 
 int
-cob_sys_get_current_dir (const int flags, const int dir_length,
-			 unsigned char *dir)
+cob_sys_get_current_dir (const int p1, const int p2, unsigned char *p3)
 {
-	char	*dirname;
-	int	dir_size;
+	char	*dirname, *dir;
+	int	dir_size, dir_length, flags;
 	int	has_space;
 
+	COB_UNUSED (p1);
+	COB_UNUSED (p2);
+	COB_UNUSED (p3);
 	COB_CHK_PARMS (CBL_GET_CURRENT_DIR, 3);
+
+	flags = (int)cob_get_s64_param (1);
+	dir_length = (int)cob_get_s64_param (2);
+	dir = cob_get_param_data (3);
 
 	if (dir_length < 1) {
 		return 128;
@@ -8150,7 +8099,7 @@ cob_sys_get_current_dir (const int flags, const int dir_length,
 	} else {
 		memcpy (dir, dirname, (size_t)dir_size);
 	}
-	cob_free (dirname);
+	free (dirname);
 	return 0;
 }
 
@@ -8164,10 +8113,10 @@ cob_sys_create_dir (unsigned char *dir)
 
 	COB_CHK_PARMS (CBL_CREATE_DIR, 1);
 
-	if (!COB_MODULE_PTR->cob_procedure_params[0]) {
+	fn = cob_param_no_quotes (1);
+	if (fn == NULL) {
 		return -1;
 	}
-	fn = cob_str_from_fld (COB_MODULE_PTR->cob_procedure_params[0]);
 #ifdef	_WIN32
 	ret = mkdir (fn);
 #else
@@ -8190,10 +8139,10 @@ cob_sys_change_dir (unsigned char *dir)
 
 	COB_CHK_PARMS (CBL_CHANGE_DIR, 1);
 
-	if (!COB_MODULE_PTR->cob_procedure_params[0]) {
+	fn = cob_param_no_quotes (1);
+	if (fn == NULL) {
 		return -1;
 	}
-	fn = cob_str_from_fld (COB_MODULE_PTR->cob_procedure_params[0]);
 	ret = chdir (fn);
 	cob_free (fn);
 	if (ret) {
@@ -8212,10 +8161,10 @@ cob_sys_delete_dir (unsigned char *dir)
 
 	COB_CHK_PARMS (CBL_DELETE_DIR, 1);
 
-	if (!COB_MODULE_PTR->cob_procedure_params[0]) {
+	fn = cob_param_no_quotes (1);
+	if (fn == NULL) {
 		return -1;
 	}
-	fn = cob_str_from_fld (COB_MODULE_PTR->cob_procedure_params[0]);
 	ret = rmdir (fn);
 	cob_free (fn);
 	if (ret) {
@@ -8251,7 +8200,7 @@ cob_sys_chdir (unsigned char *dir, unsigned char *status)
 	if (ret < 0) {
 		ret = 128;
 	}
-	cob_set_int (COB_MODULE_PTR->cob_procedure_params[1], ret);
+	cob_put_s64_param (2, (cob_s64_t)ret);
 	return ret;
 }
 
@@ -8266,7 +8215,7 @@ cob_sys_copyfile (unsigned char *fname1, unsigned char *fname2,
 
 	COB_CHK_PARMS (C$COPY, 3);
 
-	if (cobglobptr->cob_call_params < 3) {
+	if (cob_get_num_params () < 3) {
 		return 128;
 	}
 	ret = cob_sys_copy_file (fname1, fname2);
@@ -8291,19 +8240,18 @@ cob_sys_file_info (unsigned char *file_name, unsigned char *file_info)
 
 	COB_CHK_PARMS (C$FILEINFO, 2);
 
-	if (cobglobptr->cob_call_params < 2 ||
-	    !COB_MODULE_PTR->cob_procedure_params[0]) {
+	if (cob_get_num_params () < 2 ) {
 		return 128;
 	}
-	if (!COB_MODULE_PTR->cob_procedure_params[1]) {
-		return 128;
+	fn = cob_param_no_quotes (1);
+	if (fn == NULL) {
+		return -1;
 	}
-	if (COB_MODULE_PTR->cob_procedure_params[1]->size < 16U) {
+	if (cob_get_param_size(2) < 16) {
 		cob_runtime_error (_("'%s' - File detail area is too short"), "C$FILEINFO");
 		cob_stop_run (1);
 	}
 
-	fn = cob_str_from_fld (COB_MODULE_PTR->cob_procedure_params[0]);
 	if (stat (fn, &st) < 0) {
 		cob_free (fn);
 		return 35;
@@ -8344,20 +8292,25 @@ int
 cob_sys_file_delete (unsigned char *file_name, unsigned char *file_type)
 {
 	int	ret;
+	char	*fn;
 
 	/* RXW - Type is not yet evaluated */
 	COB_UNUSED (file_type);
 
 	COB_CHK_PARMS (C$DELETE, 2);
-
-	if (cobglobptr->cob_call_params < 2 ||
-	    !COB_MODULE_PTR->cob_procedure_params[0]) {
+	if (cob_get_num_params () < 2 ) {
 		return 128;
 	}
+	fn = cob_param_no_quotes (1);
+	if (fn == NULL) {
+		return -1;
+	}
+
 	ret = cob_sys_delete_file (file_name);
 	if (ret < 0) {
 		ret = 128;
 	}
+	cob_free (fn);
 	return ret;
 }
 

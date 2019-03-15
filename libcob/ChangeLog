@@ -791,6 +791,14 @@
 	* numeric.c, common.c, coblocal.h: define ISFINITE depending on
 	  HAVE_ISFINITE to either use 'isfinite' or 'finite' or '_finite'
 
+2017-04-12 Ron Norman <rjn@inglenet.com>
+
+	* fileio.c,common.c: 
+	 Routines which implement functions defined via 'system.def'
+	 have been enhanced to use the C API functions to access
+	 parameter fields passed on the CALL statement in the COBOL
+	 application code.
+
 2017-04-10  Ron Norman <rjn@inglenet.com>
 
 	* move.c, call.c, common.h: C-API
