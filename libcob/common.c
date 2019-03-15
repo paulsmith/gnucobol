@@ -4647,7 +4647,7 @@ cob_sys_system (const void *cmdline)
 	COB_CHK_PARMS (SYSTEM, 1);
 
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
-		cmd = cmdline;
+		const char *cmd = cmdline;
 		i = (int)COB_MODULE_PTR->cob_procedure_params[0]->size;
 		/* LCOV_EXCL_START */
 		if (unlikely (i > COB_MEDIUM_MAX)) {
@@ -5533,6 +5533,7 @@ cob_sys_sleep (const void *data)
 #else
 			sleep (n);
 #endif
+		}
 	}
 	return 0;
 }
