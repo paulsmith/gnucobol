@@ -221,11 +221,21 @@ C    bin/ChangeLog	  merged
 U    bin/cobcrun.c
 U    bin/gcdiff.c
 
-
-
-
-
 r1402
+--- Merging r1402 into '.':
+   C build_windows/vc10
+   C build_windows/vc11
+   C build_windows/vc12
+   C build_windows/vc14
+   C build_windows/vc8
+   C build_windows/vc9
+C    build_windows/ChangeLog.txt
+A    build_windows/version_gcdiff.rc
+
+
+
+
+
 r1404
 r1405
 r1410
