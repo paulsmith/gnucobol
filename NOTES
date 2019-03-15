@@ -397,11 +397,14 @@ C    cobc/ChangeLog	merged
 C    cobc/field.c	merged, but borked
 U    tests/testsuite.src/run_misc.at
 
-
-
-
-
 r1870
+--- Merging r1854 through r1870 into '.':
+U    tests/testsuite.src/run_misc.at
+
+
+
+
+
 r1991
 r2092
 r2110
