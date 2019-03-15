@@ -391,11 +391,16 @@ U    cobc/ChangeLog	ok
 C    cobc/field.c	ok, whitespace "conflict"
 U    tests/testsuite.src/run_misc.at	ok
 
-
-
-
-
 r1739
+--- Merging r1737 through r1739 into '.':
+C    cobc/ChangeLog	merged
+C    cobc/field.c	merged, but borked
+U    tests/testsuite.src/run_misc.at
+
+
+
+
+
 r1870
 r1991
 r2092

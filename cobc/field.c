@@ -1618,10 +1618,22 @@ validate_elem_screen (struct cb_field *f)
 	warn_full_on_numeric_items_is_useless (f);
 }
 
+static void
+validate_field_clauses (cb_tree x, struct cb_field *f)
+{
+	if (f->flag_blank_zero) {
+		cb_error_x (x, _("BLANK ZERO not compatible with USAGE"));
+	}
+	if (f->flag_sign_leading || f->flag_sign_separate) {
+		cb_error_x (x, _("SIGN clause not compatible with USAGE"));
+	}
+}
+
 /* Perform validation of a non-66-or-88-level elementary item. */
 static unsigned int
 validate_elementary_item (struct cb_field *f)
 {
+	static const int cb_mf_ibm_comp = 1; // borked by r1739
 	unsigned int	ret;
 	cob_pic_symbol	*pstr;
 	int		n;
@@ -1716,12 +1728,94 @@ validate_elementary_item (struct cb_field *f)
 			} else {
 				n = 3;
 			}
+
 			f->pic->str = cobc_parse_malloc ((size_t)n * sizeof (cob_pic_symbol));
 			pstr = f->pic->str;
 			if (f->pic->have_sign) {
 				pstr->symbol = '+';
 				pstr->times_repeated = 1;
 				++pstr;
+			}
+		} //// munged by merge with 1739
+		cb_tree x = CB_TREE (f);
+
+		switch (f->usage) {
+		default:
+			/* just because r1739 */
+			break;
+		case CB_USAGE_DISPLAY:
+			if (current_program->flag_trailing_separate &&
+			    f->pic &&
+			    f->pic->category == CB_CATEGORY_NUMERIC &&
+			    !f->flag_sign_leading) {
+				f->flag_sign_separate = 1;
+			}
+			break;
+		case CB_USAGE_SIGNED_CHAR:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-CHAR", 2, 1);
+			f->flag_real_binary = 1;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_SIGNED_SHORT:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-SHORT", 4, 1);
+			f->flag_real_binary = 1;
+			if(cb_mf_ibm_comp == 1) 
+				f->flag_synchronized = 0;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_SIGNED_INT:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-LONG", 9, 1);
+			f->flag_real_binary = 1;
+			if(cb_mf_ibm_comp == 1) 
+				f->flag_synchronized = 0;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_SIGNED_LONG:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-DOUBLE", 18, 1);
+			f->flag_real_binary = 1;
+			if(cb_mf_ibm_comp == 1) 
+				f->flag_synchronized = 0;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_UNSIGNED_CHAR:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-CHAR", 2, 0);
+			f->flag_real_binary = 1;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_UNSIGNED_SHORT:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-SHORT", 4, 0);
+			f->flag_real_binary = 1;
+			if(cb_mf_ibm_comp == 1) 
+				f->flag_synchronized = 0;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_UNSIGNED_INT:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-LONG", 9, 0);
+			f->flag_real_binary = 1;
+			if(cb_mf_ibm_comp == 1) 
+				f->flag_synchronized = 0;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_UNSIGNED_LONG:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-DOUBLE", 18, 0);
+			f->flag_real_binary = 1;
+			if(cb_mf_ibm_comp == 1) 
+				f->flag_synchronized = 0;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_BINARY:
+		case CB_USAGE_PACKED:
+		case CB_USAGE_BIT:
+			if (f->pic->category != CB_CATEGORY_NUMERIC) {
+				cb_error_x (x, _("'%s' PICTURE clause not compatible with USAGE"), cb_name (x));
 			}
 			pstr->symbol = '9';
 			pstr->times_repeated = (int)f->pic->digits - f->pic->scale;
@@ -1735,6 +1829,8 @@ validate_elementary_item (struct cb_field *f)
 			++pstr;
 
 			f->pic->size++;
+#if 0
+		//// borked by r1739
 		} else {
 			/* Size for genned string */
 			if (f->pic->have_sign) {
@@ -1751,6 +1847,8 @@ validate_elementary_item (struct cb_field *f)
 			}
 			pstr->symbol = '9';
 			pstr->times_repeated = f->pic->digits;
+		//// borked by r1739
+#endif
 		}
 		f->pic->lenstr = n;
 		f->pic->category = CB_CATEGORY_NUMERIC_EDITED;
@@ -2153,6 +2251,7 @@ set_report_field_offset (struct cb_field *f)
 static int
 compute_size (struct cb_field *f)
 {
+	static const int cb_mf_ibm_comp = 0; //// missing from 41739
 	struct cb_field	*c;
 	int		size = 0;
 	int		size_check = 0;
@@ -2253,15 +2352,24 @@ unbounded_again:
 					case CB_USAGE_COMP_X:
 					case CB_USAGE_COMP_N:
 					case CB_USAGE_FLOAT:
-						if (c->size == 2) {
-							align_size = 2;
-						} else if (c->size == 4 
-							|| c->size == 8 
+					case CB_USAGE_DOUBLE:
+						if (c->size == 2
+						 || c->size == 4) {
+							align_size = c->size;
+						} else if (c->size == 8 
 							|| c->size == 16) {
-							align_size = 4;
+							if(cb_mf_ibm_comp == 1) {
+								if (c->usage == CB_USAGE_DOUBLE)
+									align_size = 8;	/* COMP-2 */
+								else
+									align_size = 4;
+							} else if (sizeof (void *) == 4) {
+								align_size = 4; 	/* 32 bit mode */
+							} else {
+								align_size = 8;		/* 64 bit mode */
+							}
 						}
 						break;
-					case CB_USAGE_DOUBLE:
 					case CB_USAGE_LONG_DOUBLE:
 					case CB_USAGE_FP_BIN32:
 					case CB_USAGE_FP_BIN64:
