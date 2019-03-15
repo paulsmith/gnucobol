@@ -1,11 +1,11 @@
 /*
-   Copyright (C) 2017,  Free Software Foundation, Inc.
-   Written by Ron Norman
+   Copyright (C) 2017 Free Software Foundation, Inc.
+   Written by Ron Norman, Simon Sobisch
 
    This file is part of GnuCOBOL.
 
-   The GnuCOBOL runtime library is free software: you can redistribute it
-   and/or modify it under the terms of the GNU Lesser General Public License
+   The GnuCOBOL diff helper program is free software: you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation, either version 3 of the
    License, or (at your option) any later version.
 
@@ -26,18 +26,41 @@
 */
 
 #include	"config.h"
-#include	"defaults.h"
 #include	<stdio.h>
 #include	<stdlib.h>
+#ifdef	HAVE_UNISTD_H
 #include	<unistd.h>
+#endif
 #include	<string.h> 
 #include	<time.h> 
-#include	<sys/time.h> 
+#ifdef	HAVE_SYS_TIME_H
+#include	<sys/time.h>
+#endif
 #include	<sys/types.h>
 #include	<sys/stat.h>
-#include	<ctype.h>  
-#include	<libcob.h>  
+#include	<ctype.h>
+#include	<libcob.h>
+#include	"tarstamp.h"
 #include	"libcob/cobgetopt.h"
+
+/* needed for time checks */
+#ifdef	HAVE_LOCALE_H
+#include <locale.h>
+#endif
+
+
+#if	defined(ENABLE_NLS) && defined(COB_NLS_RUNTIME)
+#include	"defaults.h" /* get LOCALEDIR */
+#include	"lib/gettext.h"
+#define _(s)		gettext(s)
+#define N_(s)		gettext_noop(s)
+#else
+#define _(s)		s
+#define N_(s)		s
+#endif
+
+/* Support for gcdiff from stdin */
+#define GCD_DASH			"-"
 
 static char	ign_char = '~';		/* This 'char' in reference file ignores same byte position in test file */
 static int	ign_spaces = 0;		/* If '1' then all spaces are ignored */
@@ -45,7 +68,7 @@ static int	be_quiet = 0;		/* Be less wordy */
 static struct stat st_ref;
 static struct stat st_test;
 
-static const char short_options[] = "hqwr:t:c:e:I:";
+static const char short_options[] = "hqwr:t:c:e:I:V";
 
 #define	CB_NO_ARG	no_argument
 #define	CB_RQ_ARG	required_argument
@@ -53,6 +76,7 @@ static const char short_options[] = "hqwr:t:c:e:I:";
 
 static const struct option long_options[] = {
 	{"help",		CB_NO_ARG, NULL, 'h'},
+	{"version",   	CB_NO_ARG, NULL, 'V'},
 	{"quiet",		CB_NO_ARG, NULL, 'q'},
 	{"spaces",		CB_NO_ARG, NULL, 'w'},
 	{"ref",			CB_RQ_ARG, NULL, 'r'},
@@ -120,33 +144,107 @@ sort_templates()
 }
 
 /*
+* Output version information
+*/
+static void
+gcd_print_version (void)
+{
+	char	cob_build_stamp[COB_MINI_BUFF];
+	char	month[64];
+	int status, day, year;
+
+	/* Set up build time stamp */
+	memset (cob_build_stamp, 0, (size_t)COB_MINI_BUFF);
+	memset (month, 0, sizeof(month));
+	day = 0;
+	year = 0;
+	status = sscanf (__DATE__, "%s %d %d", month, &day, &year);
+	if (status == 3) {
+		snprintf (cob_build_stamp, (size_t)COB_MINI_MAX,
+			"%s %2.2d %4.4d %s", month, day, year, __TIME__);
+	} else {
+		snprintf (cob_build_stamp, (size_t)COB_MINI_MAX,
+			"%s %s", __DATE__, __TIME__);
+	}
+
+	printf ("gcdiff (%s) %s.%d\n",
+		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
+	puts ("Copyright (C) 2017 Free Software Foundation, Inc.");
+	puts (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"));
+	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
+		"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
+	printf (_("Written by %s"), "Ron Norman, Simon Sobisch");
+	putchar ('\n');
+	printf (_("Built     %s"), cob_build_stamp);
+	putchar ('\n');
+	printf (_("Packaged  %s"), COB_TAR_DATE);
+	putchar ('\n');
+}
+
+/*
  * Display program usage information
 */
 static void
-usage(char *binname)
+gcd_usage (char *prog, char * referencefile)
 {
-	fprintf(stdout,"Compare GnuCOBOL test case files\n");
-	fprintf(stdout,"  %s [opts] referencefile testfile\n",binname);
-	fprintf(stdout,"Where [opts] are: \n");
-	fprintf(stdout,"  -c x            Character 'x' indicates ignore");
-	if (ign_char)
-		fprintf(stdout,"; Default: '%c'",ign_char);
-	fprintf(stdout,"\n");
-	fprintf(stdout,"  -e STR          String STR is ignored\n");
-	fprintf(stdout,"  -n STR          String STR is ignored; Alpha chars are DIGITS in testfile\n");
-	fprintf(stdout,"  -I STR          If STR is on line of referencefile, ignore complete line\n");
-	fprintf(stdout,"  -w              ignore all spaces\n");
-	fprintf(stdout,"  -h              Display this usage information\n");
-	fprintf(stdout,"  referencefile   base text file (reference case) to compare with\n");
-	fprintf(stdout,"  testfile        text file created by the test case to be compared\n");
-	fflush(stdout);
+	int		i;
+
+	puts (_("Compare GnuCOBOL test case files"));
+	putchar ('\n');
+	printf (_("usage: %s [options] referencefile testfile"), prog);
+	putchar ('\n');
+	putchar ('\n');
+	puts (_("Options:"));
+	printf (_("  -c x            character 'x' indicates ignore"));
+	if (ign_char) {
+		printf ("; %s: '%c'", _("default"), ign_char);
+	}
+	putchar ('\n');
+	puts (_("  -e STR          string STR is ignored"));
+	puts (_("  -n STR          string STR is ignored; alpha chars are DIGITS in testfile"));
+	puts (_("  -I STR          if STR is on line of referencefile, ignore complete line"));
+	puts (_("  -w              ignore all spaces"));
+	puts (_("  -h, -help       display this help and exit"));
+	puts (_("  -V, -version    display version and exit"));
+	puts (_("  referencefile   base text file (reference case) to compare with"));
+	puts (_("  testfile        text file created by the test case to be compared"));
+	if (referencefile) {
+		sort_templates();
+		putchar ('\n');
+		printf(_("default strings to be ignored when found in  '%s'"),
+			referencefile[0] > ' '?referencefile:"referencefile");
+		putchar ('\n');
+		for (i=0; i < MAX_TEMPLATES-1 && templates[i].len > 0; i++) {
+			if (templates[i].is_num) {
+				printf("%.*s  ",templates[i].len,templates[i].pat);
+			} else {
+				printf("'%.*s' ",templates[i].len,templates[i].pat);
+			}
+
+		}
+		putchar ('\n');
+		if (skip_lines[0].len > 0) {
+			putchar ('\n');
+			puts (_("default strings to cause line to be ignored"));
+			for (i=0; i < MAX_SKIP-1 && skip_lines[i].len > 0; i++) {
+				printf("%.*s  ",skip_lines[i].len,skip_lines[i].pat);
+			}
+			putchar ('\n');
+		}
+	}
+	putchar ('\n');
+	printf (_("Report bugs to: %s or\n"
+		"use the preferred issue tracker via home page"), "bug-gnucobol@gnu.org");
+	putchar ('\n');
+	puts (_("GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>"));
+	puts (_("General help using GNU software: <http://www.gnu.org/gethelp/>"));
 }
 
 /*
  * Compare 'ref' to 'rslt'
  */
 static int
-compareFile(FILE *ref, FILE *rslt, FILE *rpt)
+compare_file(FILE *ref, FILE *rslt, FILE *rpt)
 {
 	char	rbuf[4096], nbuf[4096];
 	int		i, j, k, n, t, numdiff, linenum;
@@ -241,6 +339,10 @@ main(
 	char	referencefile[256];
 	char	testfile[256];
 
+#ifdef	HAVE_SETLOCALE
+	setlocale (LC_ALL, "");
+#endif
+
 	for (i=0; i < MAX_TEMPLATES; i++) {
 		if (templates[i].len == -1) {
 			while (i < MAX_TEMPLATES) {
@@ -311,29 +413,17 @@ main(
 
 		case '?':
 		default:
-			usage(argv[0]);
+			gcd_usage(argv[0], NULL);
 			exit(2);
 			break;
 
 		case 'h':
-			usage((char*)"gcdiff");
-			sort_templates();
-			fprintf(stdout,"\nDefault strings to be ignored when found in  '%s'\n",
-							referencefile[0] > ' '?referencefile:"referencefile");
-			for (i=0; i < MAX_TEMPLATES-1 && templates[i].len > 0; i++) {
-				if (templates[i].is_num)
-					fprintf(stdout,"%.*s  ",templates[i].len,templates[i].pat);
-				else
-					fprintf(stdout,"'%.*s' ",templates[i].len,templates[i].pat);
-			}
-			fprintf(stdout,"\n");
-			if (skip_lines[0].len > 0) {
-				fprintf(stdout,"\nDefault strings to cause line to be ignored\n");
-				for (i=0; i < MAX_SKIP-1 && skip_lines[i].len > 0; i++) {
-					fprintf(stdout,"%.*s  ",skip_lines[i].len,skip_lines[i].pat);
-				}
-				fprintf(stdout,"\n");
-			}
+			gcd_usage((char*)"gcdiff", referencefile);
+			exit(2);
+			break;
+
+		case 'V':
+			gcd_print_version ();
 			exit(2);
 			break;
 		}
@@ -347,13 +437,15 @@ main(
 		strcpy(testfile,argv[cob_optind++]);
 	}
 	if (referencefile[0] <= ' ') {
-		printf("Missing 'referencefile'\n");
-		usage(argv[0]);
+		puts (_("missing 'referencefile'"));
+		putchar ('\n');
+		gcd_usage(argv[0], NULL);
 		exit(2);
 	}
 	if (testfile[0] <= ' ') {
-		printf("Missing 'testfile'\n");
-		usage(argv[0]);
+		puts (_("missing 'testfile'"));
+		putchar ('\n');
+		gcd_usage(argv[0], NULL);
 		exit(2);
 	}
 
@@ -361,17 +453,25 @@ main(
 	stat(referencefile, &st_ref);
 	stat(testfile, &st_test);
 
-	ref = fopen(referencefile,"r");
+	if (strcmp(referencefile, GCD_DASH) == 0) {
+		ref = stdin;
+	} else {
+		ref = fopen(referencefile,"r");
+	}
 	if (ref == NULL) {
 		perror(referencefile);
 		exit(2);
 	}
-	rslt = fopen(testfile,"r");
+	if (strcmp(testfile, GCD_DASH) == 0) {
+		rslt = stdin;
+	} else {
+		rslt = fopen(testfile,"r");
+	}
 	if (rslt == NULL) {
 		perror(testfile);
 		exit(2);
 	}
-	k = compareFile( ref, rslt, stdout);
+	k = compare_file(ref, rslt, stdout);
 	fclose(ref);
 	fclose(rslt);
 	exit(k);

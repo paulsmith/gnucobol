@@ -72,10 +72,17 @@
 	* cobcrun.c: don't print runtime env when program name > max length,
 	  surrounded exception ABORTs that cannot be tested by LCOV_EXCP markers
 
+2017-02-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net> 
+
+	* gcdiff.c: added option to read files from stdin (GCD_DASH)
+	* gcdiff.c: added NLS and locale, changed fprintf calls to puts/printf,
+	  added version output and used output for usage similar to cobcrun
+	* gcdiff.c [_WIN32]: compatibility changes
+
 2017-02-03  Ron Norman <rjn@inglenet.com>
-	* gcdiff.c    : New module for doing a 'diff' for test cases
+
+	* gcdiff.c : New module for doing a 'diff' for test cases
 	* Makefile.am : Updated for gcdiff.c
-	* Makefile.in : Updated for gcdiff.c
 
 2017-01-10  Simon Sobisch <simonsobisch@gnu.org>
 

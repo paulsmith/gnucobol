@@ -214,11 +214,17 @@ r1398
 --- Merging r1398 into '.':
 C    libcob/call.c     declined, already done differently
 
-
-
-
-
 r1401
+--- Merging r1399 through r1401 into '.':
+U    AUTHORS	  	  ok
+C    bin/ChangeLog	  merged
+U    bin/cobcrun.c
+U    bin/gcdiff.c
+
+
+
+
+
 r1402
 r1404
 r1405
