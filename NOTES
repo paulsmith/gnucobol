@@ -440,11 +440,18 @@ U    libcob/common.h	  ok
 C    libcob/numeric.c	  combined
 C    tests/testsuite.src/run_misc.at	merged
 
-
-
-
-
 r2166
+--- Merging r2162 through r2166 into '.':
+C    cobc/ChangeLog	  merged
+C    cobc/codegen.c	  merged
+C    cobc/flag.def	  declined
+C    libcob/ChangeLog	  merged
+C    libcob/common.h	  merged
+
+
+
+
+
 r2221
 r2278
 r2364

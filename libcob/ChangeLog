@@ -544,6 +544,10 @@
 	  calls (calls to put were completely unchecked before) and raise correct
 	  fileio status (especially 34 for disk/quota full) instead of status 30
 
+2017-10-31  Ron Norman <rjn@inglenet.com>
+
+	* common.h: Add cob_global_exception and COB_RESET_EXCEPTION
+
 2017-10-24  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c: changed message format back to old version, see bug #455

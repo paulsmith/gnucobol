@@ -6226,6 +6226,7 @@ output_call (struct cb_call *p)
 			output_prefix ();
 			output ("cob_glob_ptr->cob_call_name_hash = 0x%X;\n",
 					cob_get_name_hash(callname));
+			output_line ("COB_RESET_EXCEPTION (0);");  //// r2166
 		}
 		output_prefix ();
 		/* call frame cast prototype */
@@ -7595,11 +7596,11 @@ output_stmt (cb_tree x)
 		}
 
 		if (!p->file && (p->ex_handler || p->not_ex_handler)) {
-			output_line ("cob_glob_ptr->cob_exception_code = 0;");
+			output_line ("COB_RESET_EXCEPTION (0);");
 		} else
 		if (!p->file 
 		 && cobc_wants_debug) {
-			output_line ("cob_glob_ptr->cob_exception_code = -1;");
+			output_line ("cob_global_exception = -1;");
 		}
 
 
@@ -7661,13 +7662,13 @@ output_stmt (cb_tree x)
 		/* Must be done immediately after I/O and before */
 		/* status check */
 		if (current_prog->flag_gen_debug && p->file && p->flag_callback) {
-			output_line ("save_exception_code = cob_glob_ptr->cob_exception_code;");
+			output_line ("save_exception_code = cob_global_exception;");
 			output_stmt (cb_build_debug (cb_debug_name,
 				     CB_FILE(p->file)->name, NULL));
 			output_move (cb_space, cb_debug_contents);
 			output_perform_call (CB_FILE(p->file)->debug_section,
 					     CB_FILE(p->file)->debug_section);
-			output_line ("cob_glob_ptr->cob_exception_code = save_exception_code;");
+			output_line ("cob_global_exception = save_exception_code;");
 			need_save_exception = 1;
 		}
 

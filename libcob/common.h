@@ -840,6 +840,9 @@ enum cob_exception_id {
 #undef	COB_EXCEPTION
 #endif
 
+#define cob_global_exception    cob_glob_ptr->cob_exception_code
+#define COB_RESET_EXCEPTION(x)  if (x == 0 || cob_global_exception == x) cob_global_exception = 0
+
 /* File attributes */
 
 /* Start conditions */

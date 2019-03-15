@@ -1168,6 +1168,11 @@
 	* cobc.c: check missing evaluation of command line option;
 	  code-coverage specific changes
 
+2017-10-31  Ron Norman <rjn@inglenet.com>
+	* flag.def: effectively remove use of -fif-cutoff by setting large
+	  default. This code should be removed in the near future
+	* codegen.c: Emit code to use cob_global_exception
+
 2017-10-25  Ron Norman <rjn@inglenet.com>
 
 	* typeck.c (validate_move invalid:) fixed bug #225 report
