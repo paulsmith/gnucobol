@@ -428,6 +428,18 @@ svn: E155015: One or more conflicts were produced while merging r2025:2092 into
 resolve all conflicts and rerun the merge to apply the remaining
 unmerged revisions
 
+2nd try:
+--- Merging r2109 through r2110 into '.':
+C    cobc/ChangeLog	  merged
+C    cobc/codegen.c	  declined, trunk better
+C    cobc/parser.y	  declined	   
+C    cobc/typeck.c	  declined
+C    libcob/ChangeLog	  merged
+C    libcob/common.c	  merged
+U    libcob/common.h	  ok
+C    libcob/numeric.c	  combined
+C    tests/testsuite.src/run_misc.at	merged
+
 
 
 

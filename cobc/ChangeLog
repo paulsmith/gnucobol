@@ -1231,6 +1231,18 @@
 
 	* parser.y (stop_statement): set context-sensitive flag (bug #433).
 
+2017-09-26  Ron Norman <rjn@inglenet.com>
+
+	* Changes to catch Divide by Zero errors when on ON SIZE ERROR
+	* parser.y:
+	  Indicate that there was no  [NOT] ON SIZE ERROR
+	  by setting handler_id to -1
+	* typeck.c: Ignore handler_id if -1
+	* codegen.c: Ignore handler_id is -1 then emit code
+	  to set cob_exception_code to -1 to indicate there
+	  was no ON SIZE ERROR clause and handle an error
+	  accordingly
+
 2017-09-22  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (cobc_abort_msg): output orig_program_id instead of C-converted

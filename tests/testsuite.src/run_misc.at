@@ -6754,11 +6754,19 @@ AT_DATA([callsub.cob], [
 
 AT_CHECK([$COMPILE_MODULE callsub.cob], [0], [], [])
 
+AT_CHECK([export COB_DUMP_FILE=tstdump.txt
+./prog], [11], [X is 000000001
+X is 000005441
+], [
+cpyabrt: 3: attempt to reference unallocated memory (signal SIGSEGV)
+libcob: cpyabrt: 3: warning: implicit CLOSE of FLATFILE ('RELFIX')
+abnormal termination - file contents may be incorrect
+])
 
 
 AT_CAPTURE_FILE(./tstdump.txt)
 
-AT_DATA([reference], [Module dump due to Signal SIGSEGV
+AT_DATA([reference], [Module dump due to signal SIGSEGV
  Last statement of sub1 was Line 3 of cpyabrt
  Last statement of prog was Line 116 of prog.cob
 

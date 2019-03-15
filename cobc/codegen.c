@@ -7596,6 +7596,10 @@ output_stmt (cb_tree x)
 
 		if (!p->file && (p->ex_handler || p->not_ex_handler)) {
 			output_line ("cob_glob_ptr->cob_exception_code = 0;");
+		} else
+		if (!p->file 
+		 && cobc_wants_debug) {
+			output_line ("cob_glob_ptr->cob_exception_code = -1;");
 		}
 
 

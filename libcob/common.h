@@ -823,6 +823,7 @@ enum cob_fatal_error {
 	COB_FERROR_XML,
 	COB_FERROR_JSON
 };
+#define COB_FERROR_DIV_ZERO	14
 
 /* Exception identifier enumeration */
 

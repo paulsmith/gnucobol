@@ -1825,11 +1825,18 @@ cob_decimal_div (cob_decimal *d1, cob_decimal *d2)
 	/* Check for division by zero */
 	if (unlikely (mpz_sgn (d2->value) == 0)) {
 		d1->scale = COB_DECIMAL_NAN;
+
 		/* FIXME: we currently don't handle the fatal exception correct
 		   fatal->abort. We only should set it when it *doesn't* happen
 		   within a arithmetic statement with SIZE error phrase and must
 		   execute the appropriate USE statement, if any before the abort
 		*/
+
+		if (cobglobptr->cob_exception_code == -1) {
+			cob_set_exception (COB_EC_SIZE_ZERO_DIVIDE);
+			cob_fatal_error (COB_FERROR_DIV_ZERO);
+		}
+
 		cob_set_exception (COB_EC_SIZE_ZERO_DIVIDE);
 		return;
 	}

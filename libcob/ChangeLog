@@ -581,6 +581,13 @@
 	* screenio.c (cob_screen_get_all): changed backspace to emit beep if
 	  entered at start of field, not to act like back-tab (bug #426).
 
+2017-09-26  Ron Norman <rjn@inglenet.com>
+
+	* common.c,common.h: Add code for COB_FERROR_DIV_ZERO
+	  restore code to invoke 'dump' on program abort
+	* numeric.c: If divide by Zero and no ON SIZE ERROR
+	  then abort with COB_FERROR_DIV_ZERO
+
 2017-09-21  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_sig_handler, cob_set_signal): added code for SIGFPE
