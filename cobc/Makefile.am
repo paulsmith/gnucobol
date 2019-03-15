@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/cobc
 #
-# Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -30,6 +30,8 @@ AM_CPPFLAGS = -I$(top_srcdir)
 AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)
 cobc_LDADD = $(COBC_LIBS) $(top_builddir)/libcob/libcob.la $(top_builddir)/lib/libsupport.a \
 	$(CODE_COVERAGE_LIBS)
+# Only bison is supported, so drop yacc-compatibility warnings
+AM_YFLAGS = -Wno-yacc
 
 dist_man_MANS = cobc.1
 COBC = $(top_builddir)/cobc/cobc$(EXEEXT)
