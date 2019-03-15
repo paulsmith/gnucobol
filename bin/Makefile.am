@@ -20,11 +20,12 @@
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
 bin_SCRIPTS = cob-config
-bin_PROGRAMS = cobcrun # source file missing in 1395: gcdiff
+bin_PROGRAMS = cobcrun gcdiff
 cobcrun_SOURCES = cobcrun.c
 dist_man_MANS = cobcrun.1 cob-config.1
 COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)
-#### r1395: gcdiff_SOURCES = gcdiff.c
+gcdiff_SOURCES = gcdiff.c
+gcdiff_LDFLAGS = -lcob
 
 AM_LDFLAGS = $(COB_EXPORT_DYN)
 AM_CPPFLAGS = -I$(top_srcdir)

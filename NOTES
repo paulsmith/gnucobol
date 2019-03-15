@@ -203,14 +203,18 @@ U    tests/testsuite.src/run_file.at	ok
 
 r1395
 --- Merging r1392 through r1395 into '.':
-C    bin/ChangeLog
-C    bin/Makefile.am
-
-
-
-
+C    bin/ChangeLog	  merged
+C    bin/Makefile.am	  modified here and again for 1396
 
 r1396
+--- Merging r1396 into '.':
+A    bin/gcdiff.c      ok
+
+
+
+
+
+
 r1398
 r1401
 r1402
