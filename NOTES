@@ -347,14 +347,31 @@ r1566
 U    libcob/fileio.c	ok
 C    tests/testsuite.src/run_file.at accepted
 
-
-
-
-
 r1605
+--- Merging r1605 into '.':
+C    bin/Makefile.am   accepted copyright
+
 r1623
+--- Merging r1623 into '.':
+C    tests/testsuite.src/run_file.at
+C    tests/testsuite.src/run_misc.at
+
 r1624
+--- Merging r1624 into '.':
+U    tests/testsuite.src/run_file.at
+
 r1685
+--- Merging r1677 through r1685 into '.':
+C    ChangeLog
+Skipped 'config.h.in'
+Skipped 'configure'
+U    configure.ac
+U    libcob/coblocal.h
+
+
+
+
+
 r1686
 r1726
 r1727

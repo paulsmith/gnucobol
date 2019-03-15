@@ -204,7 +204,12 @@
 	  always have to be executed and don't result in a file,
 	  define prerequisites to fix parallel builds
 
-2017-05-31  Ron Norman <rjn@inglenet.com> 
+2017-06-07  Ron Norman <rjn@inglenet.com>
+
+	* configure.ac,configure,config.h.in: Add check for atoll, strtoll
+	* coblocal.h: if 'atoll' is not available, then use strtoll in #define
+
+2017-05-31  Ron Norman <rjn@inglenet.com>
 
 	* configure.ac: set COB_HAS_ISAM to type of ISAM handler instead of 'yes'
 	  'cisam', 'disam', 'vbisam', 'db', 'index_extfh' - if no ISAM then it is
@@ -354,7 +359,7 @@
 	  and relative files to match what Micro Focus would create
 	  Numerous runtime.cfg settings added for selecting file
 	  format.
-	
+
 2015-07-10  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: moved additional build-scripts to build_aux,
@@ -1076,4 +1081,3 @@ Copyright 2002-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.
-
