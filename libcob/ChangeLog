@@ -808,6 +808,16 @@
 	  less than n, ultimately causing an invalid read.
 	* fileio.c (indexed_open): fixed minor memory leak.
 
+2017-04-07  Ron Norman <rjn@inglenet.com>
+	* common.c,coblocal.h,runtime.cfg:
+	  Added COB_MF_LS_NULLS,COB_MF_LS_VALIDATE,COB_SHARE_MODE
+	  & COB_RETRY_MODE to runtime.cfg
+	* fileio.c:
+	  Added check for IX,SQ,RL,LS,LA_OPTIONS env var for file
+	  I/O options when IO_fdname is not defined.
+	  Added check for mf_ls_nulls and mf_ls_validate options
+	  for Micro Focus compatible LINE SEQUENTIAL files
+
 2017-03-31  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c: fixed minor buffer overflows in the formatted-date
@@ -847,14 +857,14 @@
 
 2017-02-07  Ron Norman <rjn@inglenet.com>
 	* common.c,common.h,coblocal.h:
-	  Added COB_STATS_RECORD & COB_STATS_FILE to runtime.conf
+	  Added COB_STATS_RECORD & COB_STATS_FILE to runtime.cfg
 	* fileio.c:
 	  Added stats code to save_status.
 	  Added check for IO_fdname and check for 'stats' option
 
 2017-02-07  Ron Norman <rjn@inglenet.com>
 	* common.c,common.h,coblocal.h:
-	  Added COB_TRACE_IO to runtime.conf
+	  Added COB_TRACE_IO to runtime.cfg
 	* termio.c:
 	  Added cob_print_field to be used by fileio Trace code
 	* fileio.c:
@@ -984,7 +994,7 @@
 2016-12-24  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c,common.c,common.h,coblocal.h
-	  Extensive updates for fileio.c to handle OPEN SHARING 
+	  Extensive updates for fileio.c to handle OPEN SHARING
 	  and RETRY clauses on all I/O statements.
 	  Relative files use sigaction/alarm/fcntl to wait for
 	  record locks.

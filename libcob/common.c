@@ -319,14 +319,17 @@ static struct config_enum varseqopts[] = {{"0", "0"}, {"1", "1"}, {"2", "2"}, {"
 					  {NULL, NULL}};
 #if 0 && reportwriter
 /* Make sure the values here match up with those defined in common.h */
-static struct config_enum relopts[]	= {{"0","0"},{"gc","10"},{"mf","11"},
+static struct config_enum relopts[]	= {
+						{"0","0"},{"gc","10"},{"mf","11"},
 					   {"b4","4"},{"b32","4"},{"b8","5"},{"b64","5"},
 					   {"l4","6"},{"l32","6"},{"l8","7"},{"l64","7"},
 					   {NULL,NULL}};
 static char	varrel_dflt[8] = "gc";	/* Default Variable length Relative file format */
 static char	fixrel_dflt[8] = "gc";	/* Default Fixed length Relative file format */
 #endif
-static char	varseq_dflt[8] = "0";
+static struct config_enum shareopts[]	= {{"none","0"},{"read","1"},{"all","2"},{"no","4"},{NULL,NULL}};
+static struct config_enum retryopts[]	= {{"none","0"},{"never","64"},{"forever","8"},{NULL,NULL}};
+static char	varseq_dflt[8] = "0";	/* varseq0: Default Variable length Sequential file format */
 static char min_conf_length = 0;
 static const char *not_set;
 
@@ -388,10 +391,14 @@ static struct config_tbl gc_conf[] = {
 	{"COB_VARSEQ_FORMAT","varseq_format",	varseq_dflt,varseqopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_varseq_type)},
 	{"COB_LS_FIXED","ls_fixed",		"0",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_fixed)},
 	{"STRIP_TRAILING_SPACES","strip_trailing_spaces",		NULL,	NULL,GRP_HIDE,ENV_BOOL|ENV_NOT,SETPOS(cob_ls_fixed)},
-	{"COB_LS_NULLS","ls_nulls",		"0",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_nulls)},
-	{"COB_LS_VALIDATE","ls_validate",	"true",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_validate)},
-	{"COB_GC_FILES","gc_files",		"false",NULL,GRP_HIDE,ENV_BOOL,SETPOS(cob_gc_files)},
-	{"COB_RETRY_TIMES","retry_times",	"0",NULL,GRP_FILE,ENV_INT,SETPOS(cob_retry_times)},
+	{"COB_LS_NULLS","ls_nulls",				"false",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_nulls)},
+	{"COB_LS_VALIDATE","ls_validate",		"true",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_validate)},
+	{"COB_MF_LS_NULLS","mf_ls_nulls",		"true",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_ls_nulls)},
+	{"COB_MF_LS_VALIDATE","mf_ls_validate",	"false",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_ls_validate)},
+	{"COB_GC_FILES","gc_files",				"false",NULL,GRP_HIDE,ENV_BOOL,SETPOS(cob_gc_files)},
+	{"COB_SHARE_MODE","share_mode",			"none",shareopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_share_mode)},
+	{"COB_RETRY_MODE","retry_mode",			"none",retryopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_retry_mode)},
+	{"COB_RETRY_TIMES","retry_times",		"0",NULL,GRP_FILE,ENV_INT,SETPOS(cob_retry_times)},
 	{"COB_RETRY_SECONDS","retry_seconds",	"0",NULL,GRP_FILE,ENV_INT,SETPOS(cob_retry_seconds)},
 	{"COB_SORT_CHUNK","sort_chunk",		"256K",	NULL,GRP_FILE,ENV_SIZE,SETPOS(cob_sort_chunk),(128 * 1024),(16 * 1024 * 1024)},
 	{"COB_SORT_MEMORY","sort_memory",	"128M",	NULL,GRP_FILE,ENV_SIZE,SETPOS(cob_sort_memory),(1024*1024),4294967294 /* max. guaranteed - 1 */},

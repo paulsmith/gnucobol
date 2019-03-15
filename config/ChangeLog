@@ -232,6 +232,11 @@
 
 	* general: added stop-identifier config option
 
+2017-04-07  Ron Norman <rjn@inglenet.com>
+
+	* Add mf_ls_nulls, mf_ls_validate, share_mode, retry_mode,
+	  retry_times, retry_seconds
+
 2016-12-26  Simon Sobisch <simonsobisch@gnu.org>
 
 	* runtime.conf: FR #191 added COB_EXIT_WAIT and COB_EXIT_MSG

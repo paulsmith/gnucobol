@@ -915,7 +915,8 @@ cob_chk_file_env (cob_file *f, const char *src)
 	char		*p;
 	char		*q;
 	char		*s;
-	int		i;
+	const char	*t;
+	unsigned int	 i;
 
 	if (unlikely (cobsetptr->cob_env_mangle)) {
 		q = cob_strdup (src);
@@ -955,6 +956,30 @@ cob_chk_file_env (cob_file *f, const char *src)
 				}
 				file_open_io_env = getenv (file_open_env);
 			}
+		}
+	}
+
+	if (file_open_io_env == NULL) {		/* Re-check for xx_OPTIONS where 'xx' depends on file type */
+		if (f->organization == COB_ORG_INDEXED) {
+			t = "IX";
+		} else if (f->organization == COB_ORG_SEQUENTIAL) {
+			t = "SQ";
+		} else if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
+			if(f->flag_line_adv)
+				t = "LA";
+			else
+				t = "LS";
+		} else if (f->organization == COB_ORG_RELATIVE) {
+			t = "RL";
+		} else {
+			t = "IO";
+		}
+		snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s_OPTIONS", t);
+		if ((file_open_io_env = getenv (file_open_env)) == NULL) {
+			snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s_options", t);
+			file_open_env[0] = tolower(file_open_env[0]);
+			file_open_env[1] = tolower(file_open_env[1]);
+			file_open_io_env = getenv (file_open_env);
 		}
 	}
 
@@ -1161,9 +1186,20 @@ set_file_format(cob_file *f)
 		f->file_features |= COB_FILE_SYNC;
 	else
 		f->file_features &= ~COB_FILE_SYNC;
+	f->dflt_times = cobsetptr->cob_retry_times;
+	f->dflt_seconds = cobsetptr->cob_retry_seconds;
+	f->dflt_share = cobsetptr->cob_share_mode;
+	f->dflt_retry = cobsetptr->cob_retry_mode;
+	if(f->dflt_retry == 0) {
+		if(f->dflt_times > 0)
+				f->dflt_retry |= COB_RETRY_TIMES;
+		if(f->dflt_seconds > 0)
+				f->dflt_retry |= COB_RETRY_SECONDS;
+	}
 
 	if (f->file_format == 255) {	/* File type not set by compiler; Set default */
 		if (f->organization == COB_ORG_SEQUENTIAL) {
+			f->file_format = COB_FILE_IS_GC;
 			if (f->record_min != f->record_max) {
 				f->file_format = cobsetptr->cob_varseq_type;
 			} else {
@@ -1172,29 +1208,6 @@ set_file_format(cob_file *f)
 		} else
 		if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
 			f->file_format = COB_FILE_IS_GC;
-			if(cobsetptr->cob_ls_nulls)
-				f->file_features |= COB_FILE_LS_NULLS;
-			else
-				f->file_features &= ~COB_FILE_LS_NULLS;
-			if(cobsetptr->cob_ls_fixed)
-				f->file_features |= COB_FILE_LS_FIXED;
-			else
-				f->file_features &= ~COB_FILE_LS_FIXED;
-			if(cobsetptr->cob_ls_validate
-			&& !f->flag_line_adv)
-				f->file_features |= COB_FILE_LS_VALIDATE;
-			else
-				f->file_features &= ~COB_FILE_LS_VALIDATE;
-#ifdef	_WIN32
-			if(cobsetptr->cob_unix_lf)
-				f->file_features |= COB_FILE_LS_LF;
-			else
-				f->file_features |= COB_FILE_LS_CRLF;
-#else
-			f->file_features |= COB_FILE_LS_LF;
-#endif
-			if(cobsetptr->cob_ls_uses_cr)
-				f->file_features |= COB_FILE_LS_CRLF;
 		} else
 		if (f->organization == COB_ORG_RELATIVE) {
 			if (f->record_min != f->record_max) {
@@ -1205,21 +1218,57 @@ set_file_format(cob_file *f)
 		}
 	}
 
+	if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
+		if(cobsetptr->cob_ls_fixed)
+			f->file_features |= COB_FILE_LS_FIXED;
+		else
+			f->file_features &= ~COB_FILE_LS_FIXED;
+#ifdef	_WIN32
+		if(cobsetptr->cob_unix_lf)
+			f->file_features |= COB_FILE_LS_LF;
+		else
+			f->file_features |= COB_FILE_LS_CRLF;
+#else
+		f->file_features |= COB_FILE_LS_LF;
+#endif
+		if(cobsetptr->cob_ls_uses_cr)
+			f->file_features |= COB_FILE_LS_CRLF;
+
+		if(f->file_format == COB_FILE_IS_MF) {			/* Micro Focus format LINE SEQUENTIAL */
+			if(cobsetptr->cob_mf_ls_nulls)
+				f->file_features |= COB_FILE_LS_NULLS;
+			else
+				f->file_features &= ~COB_FILE_LS_NULLS;
+			if(cobsetptr->cob_mf_ls_validate
+			&& !f->flag_line_adv)
+				f->file_features |= COB_FILE_LS_VALIDATE;
+			else
+				f->file_features &= ~COB_FILE_LS_VALIDATE;
+		} else {										/* GnuCOBOL default format LINE SEQUENTIAL */
+			if(cobsetptr->cob_ls_nulls)
+				f->file_features |= COB_FILE_LS_NULLS;
+			else
+				f->file_features &= ~COB_FILE_LS_NULLS;
+			if(cobsetptr->cob_ls_validate
+			&& !f->flag_line_adv)
+				f->file_features |= COB_FILE_LS_VALIDATE;
+			else
+				f->file_features &= ~COB_FILE_LS_VALIDATE;
+		}
+	}
+
 	/*
 	 * IO_filename was found
 	*/
 	if(file_open_io_env != NULL) {		/* Special options for just this file */
-		f->dflt_share = 0;
 		f->dflt_retry = 0;
-		f->dflt_times = 0;
-		f->dflt_seconds = 0;
 		for(i=0; file_open_io_env[i] != 0; ) {
 			while(isspace(file_open_io_env[i])	/* Skip option separators */
 			|| file_open_io_env[i] == ','
 			|| file_open_io_env[i] == ';') i++;
 			if(file_open_io_env[i] == 0)
 				break;
-			for(j=0; j < 30 && !isspace(file_open_io_env[i])
+			for(j=0; j < sizeof(option)-1 && !isspace(file_open_io_env[i])
 				&& file_open_io_env[i] != ','
 				&& file_open_io_env[i] != ';'
 				&& file_open_io_env[i] != '='
@@ -1243,7 +1292,7 @@ set_file_format(cob_file *f)
 			}
 			if(file_open_io_env[i] == '=') {
 				i++;
-				for(j=0; j < 30 && !isspace(file_open_io_env[i])
+				for(j=0; j < sizeof(value)-1 && !isspace(file_open_io_env[i])
 					&& file_open_io_env[i] != ','
 					&& file_open_io_env[i] != ';'
 					&& file_open_io_env[i] != 0; ) {	/* Collect one option */
@@ -1425,7 +1474,7 @@ set_file_format(cob_file *f)
 				}
 			}
 		}
-		/* IF SHARE or RETRY given, then override application choices */
+		/* If SHARE or RETRY given, then override application choices */
 		if(f->dflt_share != 0)
 			f->share_mode = f->dflt_share;
 		if(f->dflt_retry != 0) {

@@ -288,11 +288,19 @@ C    cobc/ChangeLog	merged
 C    cobc/codegen.c	combined
 C    tests/testsuite.src/run_misc.at	declined, don't know what to do
 
-
-
-
-
 r1497
+--- Merging r1495 through r1497 into '.':
+C    config/ChangeLog	  merged
+C    config/runtime.cfg	  accepted (no actual conflict)
+C    libcob/ChangeLog	  merged
+C    libcob/coblocal.h	  declined: copyright more recent in trunk
+C    libcob/common.c	  merged
+C    libcob/fileio.c	  accepted
+
+
+
+
+
 r1508
 r1520
 r1547

@@ -5842,9 +5842,9 @@ output_call (struct cb_call *p)
 				output_line ("cob_field      content_%s%u;", CB_PREFIX_FIELD, n);
 				output_line ("cob_field_attr content_%s%u;", CB_PREFIX_ATTR, n);
 #if   defined(__SUNPRO_C)
-				output_bin_field (x, n, 1);
+				output_bin_field (x, n);
 #else
-				output_bin_field (x, n, 0);
+				output_bin_field (x, n);
 #endif
 			}
 			break;
