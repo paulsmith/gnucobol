@@ -27,6 +27,9 @@
 	  added notes about coprocessor-only reserved words, made all phrases
 	  for XML GENERATE / XML PARSE statements context-sensitive
 
+2018-07-05  Ron Norman <rjn@inglenet.com>
+	* Added 'depending-on-not-fixed' option & error for MF
+
 2018-04-21  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: added symbolic-constant, set to OK for default only

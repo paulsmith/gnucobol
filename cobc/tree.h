@@ -2208,7 +2208,8 @@ extern cb_tree		cobc_tree_cast_check (const cb_tree, const char *,
 
 /* codegen.c */
 extern void		codegen (struct cb_program *, const int);
-extern struct cb_field * chk_field_variable_size (struct cb_field *f);
+extern struct cb_field *chk_field_variable_size (struct cb_field *f);
+extern unsigned int	chk_field_variable_address (struct cb_field *fld);
 
 /* scanner.l */
 extern void		cb_unput_dot (void);

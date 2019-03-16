@@ -312,3 +312,16 @@ CB_CONFIG_SUPPORT (cb_xml_generate_extra_phrases, "xml-generate-extra-phrases",
 
 CB_CONFIG_SUPPORT (cb_json_generate, "json-generate",
 	_("JSON GENERATE statement"))
+
+/**** r2617: these look mergeworthy, but on compiling look to be duplicates 
+CB_CONFIG_STRING  (cb_config_name, "name", _("name"))
+CB_CONFIG_INT (cb_text_column, "text-column", _("text-column")) 
+CB_CONFIG_BOOLEAN (cb_relaxed_syntax_check, "relaxed-syntax-check", _("relaxed-syntax-check"))
+CB_CONFIG_BOOLEAN (cb_cobol85_reserved, "cobol85-reserved", _("cobol85-reserved"))
+CB_CONFIG_BOOLEAN (cb_move_non_numeric_lit_to_numeric_is_zero, "move-non-numeric-lit-to-numeric-is-zero", _("move-non-numeric-lit-to-numeric-is-zero"))
+CB_CONFIG_SUPPORT (cb_move_figurative_constant_to_numeric, "move-figurative-constant-to-numeric", _("move-figurative-constant-to-numeric"))
+CB_CONFIG_SUPPORT (cb_debugging_line, "debugging-line", _("debugging-line"))
+CB_CONFIG_SUPPORT (cb_eject_statement, "eject-statement", _("eject-statement"))
+****/
+
+CB_CONFIG_SUPPORT (cb_depending_on_not_fixed, "depending-on-not-fixed", _("depending-on-not-fixed"))

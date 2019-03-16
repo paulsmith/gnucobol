@@ -3302,6 +3302,16 @@ cb_validate_program_data (struct cb_program *prog)
 			depfld = NULL;
 		} else if (cb_ref (q->depending) != cb_error_node) {
 			depfld = CB_FIELD_PTR (q->depending);
+			if (chk_field_variable_address (depfld) ) {
+				if (cb_depending_on_not_fixed == CB_WARNING) {
+					cb_warning_x (COBC_WARN_FILLER, CB_TREE (depfld), 
+						      _("%s does not have a fixed location"),depfld->name);
+				} else
+				if (cb_depending_on_not_fixed == CB_ERROR) {
+					cb_error_x (CB_TREE (depfld), 
+						_("%s does not have a fixed location"),depfld->name);
+				}
+			}
 		} else {
 			depfld = NULL;
 		}

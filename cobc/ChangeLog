@@ -357,6 +357,13 @@
 	  ignored LOC phrase
 
 2018-07-05  Ron Norman <rjn@inglenet.com>
+	* config.def: Added 'depending-on-not-fixed'
+	* codegen.c,tree.h: Made 'chk_field_variable_size' extern
+	* typeck.c: Added code for 'depending-on-not-fixed'
+	 which checks if a DEPENDING ON field is in a fixed location
+
+2018-07-05  Ron Norman <rjn@inglenet.com>
+	* parser.y,scanner.l: Removed LENGTH_OF as it is no longer used
 
 	* parser.y, scanner.l: removed LENGTH_OF as it is no longer used
 

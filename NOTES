@@ -595,11 +595,48 @@ U    libcob/coblocal.h	ok
 U    libcob/common.c	ok
 U    libcob/fileio.c	ok
 
-
-
-
-
 r2617
+--- Merging r2617 into '.':
+C    cobc/ChangeLog     merged
+U    cobc/codegen.c	ok
+C    cobc/config.def	merged, see below
+U    cobc/tree.h	ok
+U    cobc/typeck.c	ok
+C    config/ChangeLog	merged
+C    config/acu.conf	declined
+C    config/bs2000.conf	declined
+C    config/cobol2002.conf	combined
+C    config/cobol2014.conf	combined
+C    config/cobol85.conf	combined
+C    config/default.conf	combined
+C    config/ibm.conf		declined
+C    config/mf.conf		declined
+C    config/mvs.conf		declined
+C    tests/testsuite.src/configuration.at	merged
+C    tests/testsuite.src/run_extensions.at	declined
+C    tests/testsuite.src/syn_occurs.at		accepted
+
+Analysis shows 9 new configuration fields in 2617:
+
+[cobc]$ ls config.def*
+config.def  config.def.merge-left.r2616  config.def.merge-right.r2617  config.def.working
+[cobc]$ mkdir t
+[cobc]$ for F in config.def.* ; do awk -F'[(),]+' '/^CB_CONFIG/ {print $1, $2}' $F  | sort > t/$F; done
+[cobc]$ comm -23 t/config.def.merge-right* t/config.def.working > t/f && nl t/f
+     1  CB_CONFIG_BOOLEAN  cb_cobol85_reserved
+     2  CB_CONFIG_BOOLEAN  cb_move_non_numeric_lit_to_numeric_is_zero
+     3  CB_CONFIG_BOOLEAN  cb_relaxed_syntax_check
+     4  CB_CONFIG_INT  cb_text_column
+     5  CB_CONFIG_STRING   cb_config_name
+     6  CB_CONFIG_SUPPORT  cb_debugging_line
+     7  CB_CONFIG_SUPPORT  cb_depending_on_not_fixed
+     8  CB_CONFIG_SUPPORT  cb_eject_statement
+     9  CB_CONFIG_SUPPORT  cb_move_figurative_constant_to_numeric
+
+
+
+
+
 r2619
 r2641
 r2644

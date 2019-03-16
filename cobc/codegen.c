@@ -651,7 +651,7 @@ chk_field_variable_size (struct cb_field *f)
 }
 
 /* Check if previous field on current or higher level has variable size */
-static unsigned int
+unsigned int
 chk_field_variable_address (struct cb_field *fld)
 {
 	struct cb_field		*p;
