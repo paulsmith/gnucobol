@@ -180,10 +180,6 @@
 
 	* coblocal.h, numeric.c (cob_decimal_init2): fixed compiler warning
 
-2018-06-21  Brian Tiffin <btiffin@gnu.org>
-
-	* common.h, intrinsic.c: CONTENTS-OF renamed to CONTENT-OF
-
 2018-07-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.h: added defines for not yet implemented standard
@@ -198,6 +194,17 @@
 2018-07-13  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_check_ref_mod): display maximum size on overflow
+
+2018-07-04  Ron Norman <rjn@inglenet.com>
+	* common.h: Added COB_MF_LS_SPLIT flag
+	* fileio.c:
+	  Added check for IO_fdname having 'ls_split' for 
+	  Micro Focus compatible LINE SEQUENTIAL files.
+	  When a record is longer than the program was compiled for
+	  Micro Focus will return the extra data as an extra record.
+	  This is the result for when IO_fdname has ls_split.
+	  For 'GC' format LINE SEQUENTIAL or for 'nols_split' a long
+	  record will get truncated and skip to the next LF.
 
 2018-07-04  Edward Hart <edward.dan.hart@gmail.com>
 

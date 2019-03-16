@@ -1236,6 +1236,7 @@ set_file_format(cob_file *f)
 			f->file_features |= COB_FILE_LS_CRLF;
 
 		if(f->file_format == COB_FILE_IS_MF) {			/* Micro Focus format LINE SEQUENTIAL */
+			f->file_features |= COB_FILE_LS_SPLIT;
 			if(cobsetptr->cob_mf_ls_nulls)
 				f->file_features |= COB_FILE_LS_NULLS;
 			else
@@ -1381,6 +1382,13 @@ set_file_format(cob_file *f)
 						f->file_features &= ~COB_FILE_LS_FIXED;
 					continue;
 				}
+				if(strcasecmp(option,"ls_split") == 0) {
+					if(settrue)
+						f->file_features |= COB_FILE_LS_SPLIT;
+					else
+						f->file_features &= ~COB_FILE_LS_SPLIT;
+					continue;
+				}
 				if(strcasecmp(option,"ls_validate") == 0) {
 					if(settrue)
 						f->file_features |= COB_FILE_LS_VALIDATE;
@@ -1407,6 +1415,7 @@ set_file_format(cob_file *f)
 				if(strcasecmp(option,"mf") == 0) {	/* LS file like MF would do */
 					f->file_features &= ~COB_FILE_LS_FIXED;
 					f->file_features |= COB_FILE_LS_NULLS;
+					f->file_features |= COB_FILE_LS_SPLIT;
 					f->file_features &= ~COB_FILE_LS_VALIDATE;
 #ifdef	_WIN32
 					f->file_features |= COB_FILE_LS_CRLF;
@@ -1417,6 +1426,7 @@ set_file_format(cob_file *f)
 				if(strcasecmp(option,"gc") == 0) {	/* LS file like GNUCobol used to do */
 					f->file_features &= ~COB_FILE_LS_FIXED;
 					f->file_features &= ~COB_FILE_LS_NULLS;
+					f->file_features &= ~COB_FILE_LS_SPLIT;
 					f->file_features &= ~COB_FILE_LS_VALIDATE;
 #ifdef	_WIN32
 					f->file_features |= COB_FILE_LS_CRLF;
@@ -3186,7 +3196,7 @@ lineseq_read (cob_file *f, const int read_opts)
 {
 	unsigned char	*dataptr;
 	size_t		i = 0;
-	int		n;
+	int		n, k;
 
 #ifdef	WITH_SEQRA_EXTFH
 	int		extfh_ret;
@@ -3233,6 +3243,21 @@ lineseq_read (cob_file *f, const int read_opts)
 		if (likely(i < f->record_max)) {
 			*dataptr++ = (unsigned char)n;
 			i++;
+			if (i >= f->record_max
+			 && (f->file_features & COB_FILE_LS_SPLIT)) {
+				/* If record is too long, then simulate end
+				 * so balance becomes the next record read */
+				n = getc ((FILE *)f->file);
+				k = 1;
+				if (n == '\r') {
+					n = getc ((FILE *)f->file);
+					k++;
+				}
+				if (n != '\n') {
+					fseek((FILE*)f->file, -k, SEEK_CUR);
+				}
+				break;
+			}
 		}
 	}
 	if (i < f->record_max) {

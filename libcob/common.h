@@ -920,9 +920,11 @@ enum cob_exception_id {
 #define COB_FILE_SYNC		(1 << 0)/* sync writes to disk */
 #define COB_FILE_LS_VALIDATE	(1 << 1)/* Validate LINE SEQUENTIAL data */
 #define COB_FILE_LS_NULLS	(1 << 2)/* Do NUL insertion for LINE SEQUENTIAL */
-#define COB_FILE_LS_FIXED	(1 << 3)/* Do NUL insertion for LINE SEQUENTIAL */
+#define COB_FILE_LS_FIXED	(1 << 3)/* Write LINE SEQUENTIAL record fixed size */
 #define COB_FILE_LS_CRLF	(1 << 4)/* End LINE SEQUENTIAL records with CR LF */
 #define COB_FILE_LS_LF		(1 << 5)/* End LINE SEQUENTIAL records with LF */
+#define COB_FILE_LS_SPLIT	(1 << 6)/* LINE SEQUENTIAL records longer than max should be split */
+									/* Default is longer than max get truncated & skip to LF */
 
 /* Sharing option */
 

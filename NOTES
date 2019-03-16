@@ -580,11 +580,17 @@ U    cobc/codegen.c	ok
 U    cobc/typeck.c	ok
 U    tests/testsuite.src/run_extensions.at	ok
 
-
-
-
-
 r2614
+--- Merging r2614 into '.':
+C    libcob/ChangeLog   merged
+U    libcob/common.h	ok
+U    libcob/fileio.c	ok
+C    tests/testsuite.src/run_file.at accepted
+
+
+
+
+
 r2616
 r2617
 r2619
