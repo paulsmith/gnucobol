@@ -558,13 +558,19 @@ C    cobc/codegen.c	  declined
 r2586
 --- Merging r2586 into '.':
 C    cobc/ChangeLog    merged
-C    cobc/tree.c       delined
-
-
-
-
+C    cobc/tree.c       declined
 
 r2603
+--- Merging r2601 through r2603 into '.':
+C    cobc/ChangeLog	  merged
+C    cobc/codegen.c	  accepted
+C    cobc/typeck.c	  combined
+U    tests/testsuite.src/run_extensions.at	ok
+
+
+
+
+
 r2606
 r2612
 r2614

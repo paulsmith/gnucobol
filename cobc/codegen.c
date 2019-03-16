@@ -642,8 +642,6 @@ chk_field_variable_size (struct cb_field *f)
 			f->flag_vsize_done = 1;
 			return fc;
 		} else if ((p = chk_field_variable_size (fc)) != NULL) {
-			f->vsize = p;
-			f->flag_vsize_done = 1;
 			return p;
 		}
 	}
@@ -1168,12 +1166,20 @@ output_size (const cb_tree x)
 		}
 		if (r->length) {
 			output_integer (r->length);
-		} else if (r->offset && f->flag_any_length) {
-			output ("%s%d.size - ", CB_PREFIX_FIELD, f->id);
+			break;
+		} 
+		if (r->offset && !chk_field_variable_size (f)) {
+			if (f->flag_any_length) {
+				output ("%s%d.size - ", CB_PREFIX_FIELD, f->id);
+			} else {
+				output ("%d - ", f->size);
+			}
 			output_index (r->offset);
-		} else if (chk_field_variable_size (f)
-			&& cb_flag_odoslide
-			&& !gen_init_working) {
+			break;
+		} 
+		if (chk_field_variable_size (f)
+		 && cb_flag_odoslide
+		 && !gen_init_working) {
 			out_odoslide_size (f);
 		} else {
 			p = chk_field_variable_size (f);
@@ -1213,6 +1219,10 @@ again:
 				output (" - ");
 				output_index (r->offset);
 			}
+		}
+		if (r->offset) {		/* Size is reduced by initial offset (if any) */
+			output (" - ");
+			output_index (r->offset);
 		}
 		break;
 	case CB_TAG_FIELD:

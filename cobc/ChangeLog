@@ -394,6 +394,14 @@
 	* field.c: renamed (check_picture_item, is_numeric_usage): define
 	  numeric implicit pictures for numeric USAGEs
 
+2018-06-24  Ron Norman <rjn@inglenet.com>
+	* codegen.c: Fixed 'output_size' to adjust size by starting offset
+	* typeck.c: If destination of a MOVE is variable_size and
+	   there is no reference mod (or start position is 1) then
+	   emit code to MOVE fixed size header of field first as it
+	   may be holding the DEPENDING ON fields/values then do
+	   a complete MOVE.
+
 2018-06-24  Simon Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_emit_call): use X"nn" as name for error messages
