@@ -1422,7 +1422,7 @@ AT_DATA([prog.cob], [
 
            MOVE "A23BCDEFGH" TO WITH-ODO (1:)
            DISPLAY "TEST WITH ODO: '" WITH-ODO 
-                   "' Len:" LENGTH OF WITH-ODO
+                   "' Len:" LENGTH OF WITH-ODO.
            DISPLAY "ODO-DATA1=" ODO-DATA1 "."
            DISPLAY "ODO-DEP1="  ODO-DEP1 "."
            DISPLAY "ODO-DEP2="  ODO-DEP2 "."
@@ -1472,7 +1472,8 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE -std=mf -fodoslide prog.cob ], [0], [], [])
+AT_CHECK([$COMPILE -std=default -fodoslide prog.cob ], [0], [], [prog.cob: 36: Warning: ODO-2 does not have a fixed location
+])
 
 AT_CHECK([./prog], [0], [********
 TEST WITHOUT ODO: 'A01  B  CD'
@@ -1518,7 +1519,6 @@ Slided ODO : '2126123456End'
 ], [])
 
 AT_CLEANUP
-
 
 AT_SETUP([DEPENDING ON with ODOSLIDE])
 AT_KEYWORDS([Subroutine])

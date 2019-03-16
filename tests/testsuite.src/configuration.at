@@ -505,6 +505,8 @@ test.conf: missing definitions:
 ####    No definition of 'cobol85-reserved'  see: -std=cobol85 
         No definition of 'debugging-line'
         No definition of 'eject-statement'
+# r2617:
+        No definition of 'depending-on-not-fixed'
 ])
 
 AT_CLEANUP
