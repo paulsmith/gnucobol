@@ -4736,7 +4736,11 @@ output_initialize_one (struct cb_initialize *p, cb_tree x)
 		output_string (litbuff + inci, size, l->llit);
 		output (", %d);\n", size);
 
-		if (offset) {
+		if (offset > 0 
+		 && n > 0) {
+		 	if (f->storage == CB_STORAGE_REPORT	/* REPORT lines are cleared to SPACES */
+			 && buffchar == ' ')
+				return;
 			output_prefix ();
 			output ("memset (");
 			output_data (x);
@@ -11422,6 +11426,13 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
 			rep = CB_REPORT_PTR (CB_VALUE(l));
 			if (rep) {
+				for (f=rep->records; f; f = f->sister) {	
+					/* Clear report lines to SPACES */
+					output_prefix ();
+					output ("memset (");
+					output_base (f, 0);
+					output (", ' ', %d);\n", f->size);
+				}
 				output_initial_values (rep->records);
 			}
 		}

@@ -423,6 +423,14 @@
 
 	* Makefile.am: remove path output when creating manpage
 
+2018-05-23  Ron Norman <rjn@inglenet.com>
+	* codegen.c: For report records, initialize to SPACEs and
+	    when setting to a literal, skip clear of trailing spaces
+
+2018-05-21  Ron Norman <rjn@inglenet.com>
+	* cobc.c: If LANG is undefined in environment, then set it to "C"
+	* config.c: hand-merged change 2015-04-27 with an option to go back
+
 2018-05-16  Simon Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (compare_field_literal): compare literals also against

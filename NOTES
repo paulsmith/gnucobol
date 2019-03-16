@@ -550,11 +550,16 @@ C    cobc/ChangeLog	  merged
 U    cobc/field.c	  ok
 C    tests/testsuite.src/run_misc.at	accepted
 
-
-
-
-
 r2585
+--- Merging r2583 through r2585 into '.':
+C    cobc/ChangeLog	  merged
+C    cobc/codegen.c	  declined
+
+
+
+
+
+
 r2586
 r2603
 r2606
