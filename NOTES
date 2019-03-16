@@ -514,9 +514,28 @@ also added
 
 to libcob/tree.h
 
-
-r2364
 r2379
+--- Merging r2379 into '.':
+C    cobc/ChangeLog		merged
+C    cobc/config.def		declined
+C    cobc/typeck.c		declined, seems handled in trunk
+C    config/ChangeLog		merged
+C    config/acu.conf		accepted
+C    config/bs2000.conf		accepted
+U    config/cobol2002.conf	ok
+U    config/cobol2014.conf	ok
+U    config/cobol85.conf	ok
+U    config/default.conf	ok
+C    config/ibm.conf		accepted
+C    config/mf.conf		accepted
+C    config/mvs.conf		accepted
+C    tests/testsuite.src/configuration.at	merged
+C    tests/testsuite.src/run_misc.at		declined
+
+
+
+
+
 r2468
 r2504
 r2574
