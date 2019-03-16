@@ -544,12 +544,16 @@ r2504
 --- Merging r2504 into '.':
 C    tests/testsuite.src/run_misc.at declined
 
-
-
-
-
-
 r2574
+--- Merging r2527 through r2574 into '.':
+C    cobc/ChangeLog	  merged
+U    cobc/field.c	  ok
+C    tests/testsuite.src/run_misc.at	accepted
+
+
+
+
+
 r2585
 r2586
 r2603
