@@ -6659,6 +6659,7 @@ Program-Id: caller           Statement: MOVE                   Line: 18
 Program-Id: caller           Statement: STOP RUN               Line: 19
 ])
 
+
 AT_CHECK([$COBC -ftraceall callee1.cob], [0], [], [])
 AT_CHECK([$COBC callee2.cob], [0], [], [])
 AT_CHECK([$COBC -ftrace preload.cob], [0], [], [])
@@ -6752,6 +6753,346 @@ libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 
 libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 7
 libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 13
 libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 7
+#### r2619:
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 10: Warning: ' SUB ' literal includes leading spaces which are omitted
+prog.cob: 10: Warning: ' SUB ' literal includes trailing spaces which are omitted
+prog.cob: 21: Warning: 'SUB ' literal includes trailing spaces which are omitted
+prog.cob: 30: Warning: ' SUB' literal includes leading spaces which are omitted
+])
+
+AT_CHECK([./prog], [0],
+[SUB GOT X
+SUB GOT Y
+SUB GOT Z
+S U B  GOT A
+S U B  GOT B
+],
+[libcob: prog.cob: 12: warning: ' SUB' literal includes leading spaces which are omitted
+libcob: prog.cob: 16: warning: ' S U B' literal includes leading spaces which are omitted
+])
+
+AT_CLEANUP
+
+AT_SETUP([C API Test])
+AT_KEYWORDS([CALL])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  BIN5FLD     PIC  9(5) COMP-5  VALUE  5555.
+       01  BINFLD5S    PIC S9(5) BINARY  VALUE  4444.
+       01  BINFLD9     PIC  9(9) BINARY  VALUE  6666.
+       01  COMP3       PIC  9(8) COMP-3  VALUE  3333.
+       01  COMP3V99    PIC S9(7)V99 COMP-3  VALUE  12.50.
+       01  PIC9        PIC S9(8) DISPLAY VALUE  8888.
+       01  NE          PIC Z(4)9.99-.
+       01  CHRX        PIC  X(9)         VALUE 'Hello'.
+       01  GRPX. 
+           05  FILLER  PIC  X(9)         VALUE 'Hello'.
+           05  FILLER  PIC  X(9)         VALUE 'World'.
+       01  MYOCC        PIC 9(8) COMP.
+       01  MYTAB.
+           03  MYBYTE   PIC XX OCCURS 1 TO 20
+                        DEPENDING ON MYOCC.
+
+       PROCEDURE DIVISION.
+           MOVE -512.77 TO NE.
+           CALL "CAPI" USING BY CONTENT 
+                             FUNCTION CONCATENATE("ABC" "DEF").
+           CALL "CAPI" USING 2560 BY VALUE 16.
+           CALL "CAPI" USING BIN5FLD, NE.
+           CALL "CAPI" USING BINFLD5S.
+           CALL "CAPI" USING BINFLD9.
+           CALL "CAPI" USING BY CONTENT BIN5FLD, NE.
+           CALL "CAPI" USING BY CONTENT BIN5FLD, NE.
+           CALL "CAPI" USING BY CONTENT BINFLD5S.
+           CALL "CAPI" USING BY CONTENT BINFLD5S.
+           CALL "CAPI" USING BY CONTENT BINFLD9.
+           CALL "CAPI" USING BY CONTENT BINFLD9.
+           CALL "CAPI" USING BY VALUE BIN5FLD, NE.
+           CALL "CAPI" USING BY VALUE BIN5FLD, NE.
+           CALL "CAPI" USING BY VALUE BINFLD5S.
+           CALL "CAPI" USING BY VALUE BINFLD5S.
+           CALL "CAPI" USING BY VALUE BINFLD9.
+           CALL "CAPI" USING BY VALUE BINFLD9.
+           MOVE  512.77 TO NE.
+           CALL "CAPI" USING COMP3, NE.
+           DISPLAY "GRPX     was    " GRPX ";".
+           CALL "CAPI" USING PIC9 BINFLD5S CHRX GRPX.
+           DISPLAY "GRPX     is now " GRPX ";".
+           CALL "CAPI" USING COMP3, NE, CHRX.
+           CALL "CAPI" USING BIN5FLD, NE.
+           MOVE "Hello!" TO CHRX.
+           DISPLAY "BIN5FLD BY VALUE & " CHRX ";".
+           CALL "CAPI" USING BY VALUE BIN5FLD, CHRX.
+           CALL "CAPI" USING BY VALUE BIN5FLD, CHRX.
+           CALL "CAPI" USING LENGTH OF GRPX.
+           MOVE "Anyone out there?" TO GRPX.
+           DISPLAY "GRPX     was    " GRPX ";".
+           CALL "CAPI" USING BY VALUE GRPX LENGTH OF GRPX.
+           DISPLAY "GRPX     is now " GRPX ";".
+           CALL "CAPI" USING "Fred Fish", COMP3.
+           CALL "CAPI" USING COMP3V99.
+           CALL "CAPI" .
+           DISPLAY "COMP3    is now " COMP3 ";".
+           DISPLAY "COMP4    is now " BIN5FLD ";".
+           DISPLAY "BINFLD5S is now " BINFLD5S ";".
+           DISPLAY "CHRX     is now " CHRX ";".
+           DISPLAY "NE       is now " NE ";".
+           MOVE 9 TO MYOCC.
+           CALL "CAPI" USING BY CONTENT 1.
+           CALL "CAPI" USING BY VALUE 1.
+           CALL "CAPI" USING BY REFERENCE 1.
+           DISPLAY "Now BY CONTENT LENGTH OF MYTAB;".
+           CALL "CAPI" USING BY CONTENT LENGTH OF MYTAB.
+           DISPLAY "Now BY CONTENT LENGTH OF MYOCC;".
+           CALL "CAPI" USING BY CONTENT LENGTH OF MYOCC.
+           MOVE 7 TO MYOCC.
+           DISPLAY "Now LENGTH OF MYTAB;".
+           CALL "CAPI" USING LENGTH OF MYTAB.
+           DISPLAY "Now LENGTH OF MYOCC;".
+           CALL "CAPI" USING LENGTH OF MYOCC.
+           MOVE 5 TO MYOCC.
+           DISPLAY "Now BY VALUE LENGTH OF MYTAB;".
+           CALL "CAPI" USING BY VALUE LENGTH OF MYTAB.
+           DISPLAY "Now BY VALUE LENGTH OF MYOCC;".
+           CALL "CAPI" USING BY VALUE LENGTH OF MYOCC.
+           STOP RUN.
+])
+
+AT_DATA([cmod.c], [[
+#include <stdio.h>
+#include <string.h>
+#include <libcob.h>
+
+static char *
+getType(int type, int byvalue)
+{
+   static char wrk[24];
+   switch (type) {
+   case COB_TYPE_GROUP:    return "Group";
+   case COB_TYPE_NUMERIC_COMP5:  return byvalue==2?"COMP-4":"COMP-5";
+   case COB_TYPE_NUMERIC_BINARY: return "COMP-4";
+   case COB_TYPE_NUMERIC_PACKED: return "COMP-3";
+   case COB_TYPE_NUMERIC_FLOAT:  return "COMP-1";
+   case COB_TYPE_NUMERIC_DOUBLE: return "COMP-2";
+   case COB_TYPE_NUMERIC_DISPLAY:   return "DISPLAY";
+   case COB_TYPE_ALPHANUMERIC:   return "X";
+   case COB_TYPE_NUMERIC_EDITED: return "EDITED";
+   }
+   sprintf(wrk,"Type %04X",type);
+   return wrk;
+}
+
+int
+CAPI(void *p1, ...)
+{
+   int      k,nargs,type,digits,scale,size,sign,byvalue;
+   cob_s64_t   val;
+   char     *str, wrk[80],pic[24];
+
+   nargs = cob_get_num_params();
+   if ((k = cob_get_name_line (wrk, NULL)) > 0) {
+      printf("Line%3d: ",k);
+   }
+   printf("CALL with %d parameters\n",nargs);
+   for(k=1; k <= nargs; k++) {
+      type   = cob_get_param_type (k);
+      digits = cob_get_param_digits (k);
+      scale  = cob_get_param_scale (k);
+      size   = cob_get_param_size (k);
+      sign   = cob_get_param_sign (k);
+      byvalue = cob_get_param_constant(k);
+      printf("     P%d: %-8s ",k,getType(type,byvalue));
+      if (byvalue == 3)
+         printf("BY CONTENT   ");
+      else if (byvalue == 2)
+         printf("BY VALUE     ");
+      else if (byvalue == 1)
+         printf("LITERAL      ");
+      else
+         printf("BY REFERENCE ");
+      if (type == COB_TYPE_ALPHANUMERIC) {
+         sprintf(pic,"X(%d)",size);
+         str = cob_get_picx_param (k, NULL, 0);
+         printf("%-11s '%s'",pic,str);
+         cob_free ((void*)str);
+         cob_put_picx_param (k, "Bye!");
+      } else if (type == COB_TYPE_GROUP) {
+         sprintf(pic,"(%d)",size);
+         str = cob_get_grp_param (k, NULL, 0);
+         printf("%-11s '%.*s'",pic,size,str);
+         cob_free ((void*)str);
+         memset(wrk,' ',sizeof(wrk));
+         memcpy(wrk,"Bye-Bye Birdie!",15);
+         cob_put_grp_param (k, wrk, sizeof(wrk));
+         str = cob_get_grp_param (k, NULL, 0);
+         printf(" --> '%.*s'",size,str);
+         cob_free ((void*)str);
+      } else if (type == COB_TYPE_NUMERIC_EDITED) {
+         if(scale > 0) {
+            sprintf(pic,"%s9(%d)V9(%d)",sign?"S":"",digits-scale,scale);
+         } else {
+            sprintf(pic,"%s9(%d)",sign?"S":"",digits-scale);
+         }
+         val = cob_get_s64_param (k);
+         printf("%-11s %lld ",pic,val);
+         val = val + 130;
+         val = -val;
+         cob_put_s64_param (k, val);
+         cob_get_grp_param (k, wrk, sizeof(wrk));
+         printf(" to %.*s",size,wrk);
+      } else {
+         if(scale > 0) {
+            sprintf(pic,"%s9(%d)V9(%d)",sign?"S":"",digits-scale,scale);
+         } else {
+            sprintf(pic,"%s9(%d)",sign?"S":"",digits-scale);
+         }
+         val = cob_get_s64_param (k);
+         printf("%-11s %lld",pic,val);
+         cob_put_s64_param (k, val + 3);
+      }
+      printf(";\n");
+      fflush(stdout);
+   }
+   if (nargs > 2)
+      cob_put_s64_param (7, val + 3);
+   return 0;
+}
+]])
+
+AT_CHECK([cobc -x -std=mf -w -debug prog.cob cmod.c], [0], [], [prog.cob: 37: Warning: BY CONTENT assumed for alphanumeric item 'NE'
+prog.cob: 38: Warning: BY CONTENT assumed for alphanumeric item 'NE'
+prog.cob: 52: Warning: BY CONTENT assumed for alphanumeric item 'CHRX'
+prog.cob: 53: Warning: BY CONTENT assumed for alphanumeric item 'CHRX'
+prog.cob: 57: Warning: BY CONTENT assumed for alphanumeric item 'GRPX'
+])
+
+AT_CHECK([./prog], [0], [Line 25: CALL with 1 parameters
+     P1: X        BY REFERENCE X(6)        'ABCDEF';
+Line 27: CALL with 2 parameters
+     P1: COMP-4   LITERAL      S9(9)       2560;
+     P2: DISPLAY  BY VALUE     9(2)        16;
+Line 28: CALL with 2 parameters
+     P1: COMP-5   BY REFERENCE 9(5)        5555;
+     P2: EDITED   BY REFERENCE S9(5)V9(2)  -51277  to   511.47 ;
+Line 29: CALL with 1 parameters
+     P1: COMP-4   BY REFERENCE S9(5)       4444;
+Line 30: CALL with 1 parameters
+     P1: COMP-4   BY REFERENCE 9(9)        6666;
+Line 31: CALL with 2 parameters
+     P1: COMP-5   BY CONTENT   9(5)        5558;
+     P2: EDITED   BY CONTENT   S9(5)V9(2)  51147  to   512.77-;
+Line 32: CALL with 2 parameters
+     P1: COMP-5   BY CONTENT   9(5)        5558;
+     P2: EDITED   BY CONTENT   S9(5)V9(2)  51147  to   512.77-;
+Line 33: CALL with 1 parameters
+     P1: COMP-4   BY CONTENT   S9(5)       4447;
+Line 34: CALL with 1 parameters
+     P1: COMP-4   BY CONTENT   S9(5)       4447;
+Line 35: CALL with 1 parameters
+     P1: COMP-4   BY CONTENT   9(9)        6669;
+Line 36: CALL with 1 parameters
+     P1: COMP-4   BY CONTENT   9(9)        6669;
+Line 37: CALL with 2 parameters
+     P1: COMP-4   BY VALUE     9(5)        5558;
+     P2: EDITED   BY CONTENT   S9(5)V9(2)  51147  to   512.77-;
+Line 38: CALL with 2 parameters
+     P1: COMP-4   BY VALUE     9(5)        5558;
+     P2: EDITED   BY CONTENT   S9(5)V9(2)  51147  to   512.77-;
+Line 39: CALL with 1 parameters
+     P1: COMP-4   BY VALUE     S9(5)       4447;
+Line 40: CALL with 1 parameters
+     P1: COMP-4   BY VALUE     S9(5)       4447;
+Line 41: CALL with 1 parameters
+     P1: COMP-4   BY VALUE     9(9)        6669;
+Line 42: CALL with 1 parameters
+     P1: COMP-4   BY VALUE     9(9)        6669;
+Line 44: CALL with 2 parameters
+     P1: COMP-3   BY REFERENCE 9(8)        3333;
+     P2: EDITED   BY REFERENCE S9(5)V9(2)  51277  to   514.07-;
+GRPX     was    Hello    World    ;
+Line 46: CALL with 4 parameters
+     P1: DISPLAY  BY REFERENCE S9(8)       8888;
+     P2: COMP-4   BY REFERENCE S9(5)       4447;
+     P3: X        BY REFERENCE X(9)        'Hello';
+     P4: Group    BY REFERENCE (18)        'Hello    World    ' --> 'Bye-Bye Birdie!   ';
+GRPX     is now Bye-Bye Birdie!   ;
+Line 48: CALL with 3 parameters
+     P1: COMP-3   BY REFERENCE 9(8)        3336;
+     P2: EDITED   BY REFERENCE S9(5)V9(2)  -51407  to   512.77 ;
+     P3: X        BY REFERENCE X(9)        'Bye!';
+Line 49: CALL with 2 parameters
+     P1: COMP-5   BY REFERENCE 9(5)        5558;
+     P2: EDITED   BY REFERENCE S9(5)V9(2)  51277  to   514.07-;
+BIN5FLD BY VALUE & Hello!   ;
+Line 52: CALL with 2 parameters
+     P1: COMP-4   BY VALUE     9(5)        5561;
+     P2: X        BY CONTENT   X(9)        'Hello!';
+Line 53: CALL with 2 parameters
+     P1: COMP-4   BY VALUE     9(5)        5561;
+     P2: X        BY CONTENT   X(9)        'Hello!';
+Line 54: CALL with 1 parameters
+     P1: COMP-4   LITERAL      S9(9)       18;
+GRPX     was    Anyone out there? ;
+Line 57: CALL with 2 parameters
+     P1: Group    BY CONTENT   (18)        'Anyone out there? ' --> 'Bye-Bye Birdie!   ';
+     P2: DISPLAY  BY VALUE     9(2)        18;
+GRPX     is now Anyone out there? ;
+Line 59: CALL with 2 parameters
+     P1: X        BY CONTENT   X(9)        'Fred Fish';
+     P2: COMP-3   BY REFERENCE 9(8)        3339;
+Line 60: CALL with 1 parameters
+     P1: COMP-3   BY REFERENCE S9(7)V9(2)  1250;
+Line 61: CALL with 0 parameters
+COMP3    is now 00003342;
+COMP4    is now 00005561;
+BINFLD5S is now +04450;
+CHRX     is now Hello!   ;
+NE       is now   514.07-;
+Line 68: CALL with 1 parameters
+     P1: COMP-4   LITERAL      S9(9)       1;
+Line 69: CALL with 1 parameters
+     P1: DISPLAY  BY VALUE     9(1)        1;
+Line 70: CALL with 1 parameters
+     P1: COMP-4   LITERAL      S9(9)       1;
+Now BY CONTENT LENGTH OF MYTAB;
+Line 72: CALL with 1 parameters
+     P1: COMP-4   LITERAL      9(9)        18;
+Now BY CONTENT LENGTH OF MYOCC;
+Line 74: CALL with 1 parameters
+     P1: COMP-4   LITERAL      S9(9)       4;
+Now LENGTH OF MYTAB;
+Line 77: CALL with 1 parameters
+     P1: COMP-4   LITERAL      9(9)        14;
+Now LENGTH OF MYOCC;
+Line 79: CALL with 1 parameters
+     P1: COMP-4   LITERAL      S9(9)       4;
+Now BY VALUE LENGTH OF MYTAB;
+Line 82: CALL with 1 parameters
+     P1: COMP-4   BY VALUE     9(9)        10;
+Now BY VALUE LENGTH OF MYOCC;
+Line 84: CALL with 1 parameters
+     P1: DISPLAY  BY VALUE     9(1)        4;
+], [libcob: prog.cob: 27: warning: cob_put_s64_param: attempt to over-write constant param 1 with 2563
+libcob: prog.cob: 27: warning: cob_put_s64_param: attempt to over-write constant param 2 with 19
+libcob: prog.cob: 46: warning: cob_put_s64_param: param 7 is not within range of 4
+libcob: prog.cob: 48: warning: cob_put_s64_param: param 7 is not within range of 3
+libcob: prog.cob: 54: warning: cob_put_s64_param: attempt to over-write constant param 1 with 21
+libcob: prog.cob: 57: warning: cob_put_s64_param: attempt to over-write constant param 2 with 21
+libcob: prog.cob: 59: warning: cob_put_picx_param: attempt to over-write constant param 1 with 'Bye!'
+libcob: prog.cob: 68: warning: cob_put_s64_param: attempt to over-write constant param 1 with 4
+libcob: prog.cob: 69: warning: cob_put_s64_param: attempt to over-write constant param 1 with 4
+libcob: prog.cob: 70: warning: cob_put_s64_param: attempt to over-write constant param 1 with 4
+libcob: prog.cob: 72: warning: cob_put_s64_param: attempt to over-write constant param 1 with 21
+libcob: prog.cob: 74: warning: cob_put_s64_param: attempt to over-write constant param 1 with 7
+libcob: prog.cob: 77: warning: cob_put_s64_param: attempt to over-write constant param 1 with 17
+libcob: prog.cob: 79: warning: cob_put_s64_param: attempt to over-write constant param 1 with 7
+libcob: prog.cob: 84: warning: cob_put_s64_param: attempt to over-write constant param 1 with 7
 ])
 
 AT_CLEANUP

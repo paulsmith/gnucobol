@@ -755,6 +755,8 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #define COB_FLAG_REAL_SIGN		(1U << 10)	/* 0x0400 */
 #define COB_FLAG_BINARY_TRUNC		(1U << 11)	/* 0x0800 */
 #define COB_FLAG_CONSTANT		(1U << 12)	/* 0x1000 */
+#define COB_FLAG_VALUE			(1U << 13)	/* 0x2000 */
+#define COB_FLAG_CONTENT		(1U << 14)	/* 0x4000 */
 
 #define COB_FIELD_HAVE_SIGN(f)		((f)->attr->flags & COB_FLAG_HAVE_SIGN)
 #define COB_FIELD_SIGN_SEPARATE(f)	((f)->attr->flags & COB_FLAG_SIGN_SEPARATE)
@@ -769,6 +771,8 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #define COB_FIELD_REAL_SIGN(f)		((f)->attr->flags & COB_FLAG_REAL_SIGN)
 #define COB_FIELD_BINARY_TRUNC(f)	((f)->attr->flags & COB_FLAG_BINARY_TRUNC)
 #define COB_FIELD_CONSTANT(f)		((f)->attr->flags & COB_FLAG_CONSTANT)
+#define COB_FIELD_VALUE(f)		((f)->attr->flags & COB_FLAG_VALUE)
+#define COB_FIELD_CONTENT(f)		((f)->attr->flags & COB_FLAG_CONTENT)
 
 #define	COB_FLAG_LEADSEP		\
 	(COB_FLAG_SIGN_SEPARATE | COB_FLAG_SIGN_LEADING)
@@ -2054,6 +2058,8 @@ COB_EXPIMP void	cob_gmp_free		(void *);
 
 DECLNORET COB_EXPIMP void	cob_call_error		(void) COB_A_NORETURN;
 COB_EXPIMP void		cob_field_constant (cob_field *f, cob_field *t, cob_field_attr *a, void *d);
+COB_EXPIMP void		cob_field_value (cob_field *f, cob_field *t, cob_field_attr *a, void *d);
+COB_EXPIMP void		cob_field_content (cob_field *f, cob_field *t, cob_field_attr *a, void *d);
 COB_EXPIMP unsigned int	cob_get_name_hash (const char *name);
 
 COB_EXPIMP void		cob_set_cancel		(cob_module *);
@@ -2074,7 +2080,7 @@ COB_EXPIMP int		cob_func		(const char *, const int, void **);
 COB_EXPIMP void		*cob_savenv		(struct cobjmp_buf *);
 COB_EXPIMP void		*cob_savenv2		(struct cobjmp_buf *, const int);
 COB_EXPIMP void		cob_longjmp		(struct cobjmp_buf *);
-
+COB_EXPIMP int		cob_get_name_line ( char *prog, int *line );
 COB_EXPIMP int		cob_get_num_params ( void );
 COB_EXPIMP int		cob_get_param_constant ( int num_param );
 COB_EXPIMP int		cob_get_param_digits( int num_param );

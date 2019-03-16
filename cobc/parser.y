@@ -10502,6 +10502,17 @@ call_param:
 	int	save_mode;	/* internal single parameter only mode */
 
 	save_mode = call_mode;
+	if (CB_LITERAL_P($3)) {
+		/* literals become BY CONTENT */
+		if (CB_NUMERIC_LITERAL_P ($3)) {
+			/* If not BY VALUE numeric-literals become BY CONTENT */
+			if (call_mode != CB_CALL_BY_VALUE) {
+				call_mode = CB_CALL_BY_CONTENT;
+			}
+		} else {
+			call_mode = CB_CALL_BY_CONTENT;
+		}
+	}
 	if (call_mode != CB_CALL_BY_REFERENCE) {
 		if (CB_FILE_P ($3) || (CB_REFERENCE_P ($3) &&
 		    CB_FILE_P (CB_REFERENCE ($3)->value))) {

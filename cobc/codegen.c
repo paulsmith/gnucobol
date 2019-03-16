@@ -5669,6 +5669,44 @@ find_nested_prog_with_id (const char *encoded_id)
 }
 
 static void
+output_content (cb_tree x, int n, int addnul)
+{
+	output_line ("union {");
+	output_prefix ();
+	output ("\tunsigned char data[");
+	if (CB_REF_OR_FIELD_P (x)) {
+		output ("%u", (cob_u32_t)cb_code_field (x)->size);
+	} else {
+		output_size (x);
+	}
+	if (addnul)
+		output ("+%d];\n",addnul);
+	else
+		output ("];\n");
+	output_line ("\tcob_s64_t     datall;");
+	output_line ("\tcob_u64_t     dataull;");
+	output_line ("\tint           dataint;");
+	output_line ("} content_%u;", n);
+}
+
+static void
+output_field_constant (cb_tree x, int n, const char *flagname)
+{
+	output_prefix ();
+	if (flagname)
+		output ("cob_field_%s (",flagname);
+	else
+		output ("cob_field_constant (");
+	if (x != NULL)
+		output_param (x, -1);
+	else
+		output ("&content_fb_%u", n);
+	output (", &content_%s%u ", CB_PREFIX_FIELD, n);
+	output (", &content_%s%u ", CB_PREFIX_ATTR, n);
+	output (", &content_%u);\n", n);
+}
+
+static void
 output_call (struct cb_call *p)
 {
 	cb_tree				x;
@@ -5688,9 +5726,6 @@ output_call (struct cb_call *p)
 		= is_literal_or_prototype_ref (p->name);
 	int				except_id;
 	unsigned int 			pval;
-#if	0	/* RXWRXW - Clear params */
-	cob_u32_t			parmnum;
-#endif
 
 	except_id = 0;
 	if (p->call_returning && p->call_returning != cb_null &&
@@ -5768,7 +5803,7 @@ output_call (struct cb_call *p)
 		 && CB_REF_OR_FIELD_P (x) 
 		 && CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC 
 		 && cb_code_field (x)->usage == CB_USAGE_LENGTH) {
-			CB_INTEGER (CB_PURPOSE (l))->val = CB_CALL_BY_CONTENT;
+			CB_PURPOSE (l) = cb_int (CB_CALL_BY_CONTENT);
 		}
 	}
 
@@ -5806,25 +5841,13 @@ output_call (struct cb_call *p)
 					need_brace = 1;
 					output_indent ("{");
 				}
-				output_line ("union {");
-				output_prefix ();
-				output ("\tunsigned char data[");
 				if (CB_NUMERIC_LITERAL_P (x)
 				 || CB_BINARY_OP_P (x)
 				 || CB_CAST_P(x)) {
-					output ("8");
+					output_line ("cob_content\tcontent_%u;", n);
 				} else {
-					if (CB_REF_OR_FIELD_P (x)) {
-						output ("%u", (cob_u32_t)cb_code_field (x)->size);
-					} else {
-						output_size (x);
-					}
+					output_content (x, n, 1);
 				}
-				output ("];\n");
-				output_line ("\tcob_s64_t     datall;");
-				output_line ("\tcob_u64_t     dataull;");
-				output_line ("\tint           dataint;");
-				output_line ("} content_%u;", n);
 				output_line ("cob_field      content_%s%u;", CB_PREFIX_FIELD, n);
 				output_line ("cob_field_attr content_%s%u;", CB_PREFIX_ATTR, n);
 				output_bin_field (x, n);
@@ -5839,32 +5862,34 @@ output_call (struct cb_call *p)
 					need_brace = 1;
 					output_indent ("{");
 				}
-				output_line ("union {");
-				output_prefix ();
-				output ("\tunsigned char data[");
 				if (CB_NUMERIC_LITERAL_P (x) 
 				 || CB_BINARY_OP_P (x) 
 				 || CB_CAST_P(x)) {
-					output ("8");
+					output_line ("cob_content\tcontent_%u;", n);
 				} else {
-					if (CB_REF_OR_FIELD_P (x)) {
-						output ("%u", (cob_u32_t)cb_code_field (x)->size);
-					} else {
-						output_size (x);
-					}
+					output_content (x, n, 0);
+					output_line ("cob_field      content_%s%u;", CB_PREFIX_FIELD, n);
 				}
-				output ("];\n");
-				output_line ("\tcob_s64_t     datall;");
-				output_line ("\tcob_u64_t     dataull;");
-				output_line ("\tint           dataint;");
-				output_line ("} content_%u;", n);
-				output_line ("cob_field      content_%s%u;", CB_PREFIX_FIELD, n);
 				output_line ("cob_field_attr content_%s%u;", CB_PREFIX_ATTR, n);
 #if   defined(__SUNPRO_C)
 				output_bin_field (x, n);
 #else
 				output_bin_field (x, n);
 #endif
+			} else {
+				if (!need_brace) {
+					need_brace = 1;
+					output_indent ("{");
+				}
+				if (CB_NUMERIC_LITERAL_P (x) 
+				 || CB_BINARY_OP_P (x) 
+				 || CB_CAST_P(x)) {
+					output_line ("cob_content\tcontent_%u;", n);
+				} else {
+					output_content (x, n, 0);
+				}
+				output_line ("cob_field_attr content_%s%u;", CB_PREFIX_ATTR, n);
+				output_line ("cob_field      content_%s%u;", CB_PREFIX_FIELD, n);
 			}
 			break;
 		default:
@@ -5929,15 +5954,12 @@ output_call (struct cb_call *p)
 						output (CB_FMT_LLD_F, cb_get_long_long (x));
 					}
 					output (";\n");
-				} else if (CB_REF_OR_FIELD_P (x)
-					&& CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC
+
+					//// r2619: output_field_constant (NULL, n, NULL);
+				} else if (CB_REF_OR_FIELD_P (x) 
+					&& CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC 
 					&& cb_code_field (x)->usage == CB_USAGE_LENGTH) {
-					output_prefix ();
-					output ("cob_field_constant (");
-					output_param (x, -1);
-					output (", &content_%s%u ", CB_PREFIX_FIELD, n);
-					output (", &content_%s%u ", CB_PREFIX_ATTR, n);
-					output (", &content_%u);\n", n);
+					output_field_constant (x, n, NULL);
 #ifndef WORDS_BIGENDIAN
 					if (cb_binary_byteorder == CB_BYTEORDER_BIG_ENDIAN) {
 						output_prefix ();
@@ -5955,27 +5977,16 @@ output_call (struct cb_call *p)
 					 * Create copy of cob_field&attr pointing to local copy of data
 					 * and setting flag COB_FLAG_CONSTANT
 					 */
-					output_prefix ();
-					output ("cob_field_constant (");
-					output_param (x, -1);
-					output (", &content_%s%u ", CB_PREFIX_FIELD, n);
-					output (", &content_%s%u ", CB_PREFIX_ATTR, n);
-					output (", &content_%u);\n", n);
+					output_field_constant (x, n, "content");
+					if (CB_LITERAL_P (x)
+					 && !CB_NUMERIC_LITERAL_P (x)) {
+						output_line ("content_%u.data[%d] = 0;",n,CB_LITERAL (x)->size);
+					}
 				}
 			}
 			break;
 		case CB_CALL_BY_VALUE:
-			if (CB_TREE_TAG (x) == CB_TAG_REFERENCE
-			 && CB_TREE_TAG (CB_REFERENCE(x)->value) == CB_TAG_FIELD
-			 && CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC 
-			 && cb_code_field (x)->usage == CB_USAGE_LENGTH) {
-				output_prefix ();
-				output ("cob_field_constant (");
-				output_param (x, -1);
-				output (", &content_%s%u ", CB_PREFIX_FIELD, n);
-				output (", &content_%s%u ", CB_PREFIX_ATTR, n);
-				output (", &content_%u);\n", n);
-			}
+			output_field_constant (x, n, "value");
 			break;
 		default:
 			break;
@@ -5998,7 +6009,8 @@ output_call (struct cb_call *p)
 			}
 			/* Fall through */
 		case CB_TAG_FIELD:
-			if (CB_PURPOSE_INT (l) == CB_CALL_BY_CONTENT) {
+			if (CB_PURPOSE_INT (l) == CB_CALL_BY_CONTENT
+			 || CB_PURPOSE_INT (l) == CB_CALL_BY_VALUE) {
 				output ("&content_%s%u", CB_PREFIX_FIELD, n + 1);
 				break;
 			}
@@ -6011,14 +6023,16 @@ output_call (struct cb_call *p)
 			switch (CB_TREE_TAG (CB_REFERENCE(x)->value)) {
 			case CB_TAG_LITERAL:
 			case CB_TAG_INTRINSIC:
-				if (CB_PURPOSE_INT (l) == CB_CALL_BY_CONTENT) {
+				if (CB_PURPOSE_INT (l) == CB_CALL_BY_CONTENT
+				 || CB_PURPOSE_INT (l) == CB_CALL_BY_VALUE) {
 					output ("&content_%s%u", CB_PREFIX_FIELD, n + 1);
 					break;
 				}
 				output_param (x, -1);
 				break;
 			case CB_TAG_FIELD:
-				if ( CB_PURPOSE_INT (l) == CB_CALL_BY_CONTENT
+				if (CB_PURPOSE_INT (l) == CB_CALL_BY_CONTENT
+				 || CB_PURPOSE_INT (l) == CB_CALL_BY_VALUE
 				 || (CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC 
 				  && cb_code_field (x)->usage == CB_USAGE_LENGTH)) {
 					output ("&content_%s%u", CB_PREFIX_FIELD, n + 1);

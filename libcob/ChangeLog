@@ -195,6 +195,11 @@
 
 	* common.c (cob_check_ref_mod): display maximum size on overflow
 
+2018-07-12  Ron Norman <rjn@inglenet.com>
+	* call.c: Added cob_get_name_line to return source line of CALL
+	          Added cob_field_value to copy field & set COB_FLAG_VALUE
+	          Added cob_field_content to copy field & set COB_FLAG_CONTENT
+
 2018-07-05  Ron Norman <rjn@inglenet.com>
 	* coblocal.h,common.c: Added runtime.cfg options for COB_LS_SPLIT
 	* fileio.c: Added checks for runtime.cfg options for split or truncate

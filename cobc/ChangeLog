@@ -356,6 +356,10 @@
 	* reserved.c, parser.y: added IBM's ALLOCATE format by including the
 	  ignored LOC phrase
 
+2018-07-12  Ron Norman <rjn@inglenet.com>
+	* parser.y: Set CB_CALL_BY_CONTENT for literal parameters
+	* codegen.c: Make copy of fields for BY CONTENT & BY VALUE
+
 2018-07-05  Ron Norman <rjn@inglenet.com>
 	* config.def: Added 'depending-on-not-fixed'
 	* codegen.c,tree.h: Made 'chk_field_variable_size' extern

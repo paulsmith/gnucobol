@@ -1536,7 +1536,21 @@ cob_get_param_field (int n, const char *caller_name)
 }
 
 int
-cob_get_num_params (void)
+cob_get_name_line ( char *prog, int *line )
+{
+	int	k;
+	if (line != NULL)
+		*line = COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt);
+	if (prog != NULL) {
+		strcpy(prog, COB_MODULE_PTR->module_name);
+		for (k=strlen(prog); k > 0 && prog[k-1] == ' '; k--)
+			prog[k-1] = 0;
+	}
+	return COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt);
+}
+
+int
+cob_get_num_params ( void )
 {
 	if (cobglobptr) {
 		return cobglobptr->cob_call_params;
@@ -1618,8 +1632,11 @@ cob_get_param_constant (int n)
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_constant");
 	if (f == NULL) {
 		return -1;
-	}
-	if (COB_FIELD_CONSTANT (f)) {
+	if (COB_FIELD_CONTENT(f)) 
+		return 3;
+	if (COB_FIELD_VALUE(f)) 
+		return 2;
+	if (COB_FIELD_CONSTANT(f)) 
 		return 1;
 	}
 	return 0;
@@ -1944,5 +1961,29 @@ cob_field_constant (cob_field *f, cob_field *t, cob_field_attr *a, void *d)
 	t->data = d;
 	t->attr = a;
 	a->flags |= COB_FLAG_CONSTANT;
-	memcpy((void*)t->data, (void*)f->data, f->size);
+	memmove((void*)t->data, (void*)f->data, f->size);
+}
+
+/* Create copy of field and mark as a VALUE */
+void
+cob_field_value (cob_field *f, cob_field *t, cob_field_attr *a, void *d)
+{
+	memcpy((void*)t, (void*)f, sizeof(cob_field));
+	memcpy((void*)a, (void*)f->attr, sizeof(cob_field_attr));
+	t->data = d;
+	t->attr = a;
+	a->flags |= COB_FLAG_VALUE;
+	memmove((void*)t->data, (void*)f->data, f->size);
+}
+
+/* Create copy of field and mark as a CONTENT */
+void
+cob_field_content (cob_field *f, cob_field *t, cob_field_attr *a, void *d)
+{
+	memcpy((void*)t, (void*)f, sizeof(cob_field));
+	memcpy((void*)a, (void*)f->attr, sizeof(cob_field_attr));
+	t->data = d;
+	t->attr = a;
+	a->flags |= COB_FLAG_CONTENT;
+	memmove((void*)t->data, (void*)f->data, f->size);
 }

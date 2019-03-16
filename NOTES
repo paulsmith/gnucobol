@@ -633,11 +633,22 @@ config.def  config.def.merge-left.r2616  config.def.merge-right.r2617  config.de
      8  CB_CONFIG_SUPPORT  cb_eject_statement
      9  CB_CONFIG_SUPPORT  cb_move_figurative_constant_to_numeric
 
-
-
-
-
 r2619
+--- Merging r2618 through r2619 into '.':
+C    cobc/ChangeLog	  merged
+C    cobc/codegen.c	  declined but commented
+C    cobc/parser.y	  declined, out of date
+C    libcob/ChangeLog	  merged
+C    libcob/call.c	  accepted
+U    libcob/common.h	  ok
+C    tests/testsuite.src/run_extensions.at	declined
+C    tests/testsuite.src/run_misc.at		combined
+C    tests/testsuite.src/syn_definition.at	declined
+
+
+
+
+
 r2641
 r2644
 r2645
