@@ -665,11 +665,16 @@ U    config/ibm.conf	ok
 U    config/mf.conf	ok
 U    config/mvs.conf	ok
 
-
-
-
-
 r2645
+--- Merging r2645 into '.':
+C    libcob/ChangeLog   merged
+U    libcob/common.h	ok
+U    libcob/fileio.c	ok
+
+
+
+
+
 r2646
 r2649
 r2700

@@ -1024,7 +1024,7 @@ enum cob_exception_id {
 #define COB_STATUS_49_I_O_DENIED		49
 #define COB_STATUS_51_RECORD_LOCKED		51
 #define COB_STATUS_52_DEAD_LOCK			52	/* currently not implemented (patch available) */
-#define COB_STATUS_53_MAX_LOCKS			53	/* currently not implemented */
+#define COB_STATUS_53_MAX_LOCKS			53	
 #define COB_STATUS_54_MAX_LOCKS_FD		54	/* currently not implemented */
 #define COB_STATUS_57_I_O_LINAGE		57
 #define COB_STATUS_61_FILE_SHARING		61

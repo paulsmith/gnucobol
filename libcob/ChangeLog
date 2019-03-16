@@ -180,6 +180,9 @@
 
 	* coblocal.h, numeric.c (cob_decimal_init2): fixed compiler warning
 
+2018-07-29  Ron Norman <rjn@inglenet.com>
+	* fileio.c: Added code to set COB_STATUS_53_MAX_LOCKS
+
 2018-07-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.h: added defines for not yet implemented standard
