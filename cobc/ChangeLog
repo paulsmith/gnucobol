@@ -88,6 +88,11 @@
 	* reserved.c (default_reserved_words): fixed context-sensitive words
 	  marked as not context-sensitive
 
+2019-01-02  Ron Norman <rjn@inglenet.com>
+	* field.c: Check for duplicate LINE in REPORT and ignore it
+	* codegen.c: Skip initialize to SPACES for REPORT lines as
+	            all lines are cleared to SPACES
+
 2019-01-02  Simon Sobisch <simonsobisch@gnu.org>
 
 	* field.c (set_report_field): renamed to (set_report_field_offset)

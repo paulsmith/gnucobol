@@ -4410,6 +4410,10 @@ static void
 output_figurative (cb_tree x, const struct cb_field *f, const int value,
 		   const int init_occurs)
 {
+	/* REPORT lines are cleared to SPACES */
+	if (f->storage == CB_STORAGE_REPORT
+	 && value == ' ')	
+		return;
 	output_prefix ();
 	/* Check for non-standard 01 OCCURS */
 	if (init_occurs) {
@@ -4455,6 +4459,10 @@ output_initialize_literal (cb_tree x, struct cb_field *f,
 		lsize = (int)l->size;
 	}
 	if (lsize == 1) {
+		/* REPORT lines are cleared to SPACES */
+		if (f->storage == CB_STORAGE_REPORT
+		 && l->data[0] == ' ')	
+			return;
 		output_prefix ();
 		output ("memset (");
 		output_data (x);
@@ -4524,6 +4532,12 @@ output_initialize_fp (cb_tree x, struct cb_field *f)
 static void
 output_initialize_uniform (cb_tree x, const int c, const int size)
 {
+	struct cb_field		*f;
+	f = cb_code_field (x);
+	/* REPORT lines are cleared to SPACES */
+	if (f->storage == CB_STORAGE_REPORT
+	 && c == ' ')	
+		return;
 	output_prefix ();
 	if (size == 1) {
 		output ("*(cob_u8_ptr)(");
@@ -4676,6 +4690,9 @@ output_initialize_one (struct cb_initialize *p, cb_tree x)
 			output_data (x);
 			output (", %u, %d);\n", (unsigned int)buffchar,
 				(int)lsize);
+			/* REPORT lines are cleared to SPACES */
+		 	if (f->storage == CB_STORAGE_REPORT)	
+				return;
 			if ((int)l->size < (int)size) {
 				output_prefix ();
 				output ("memset (");

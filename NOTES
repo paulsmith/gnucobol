@@ -706,8 +706,20 @@ r2700
 C    tests/ChangeLog	  merged
 U    tests/testsuite.src/run_misc.at	ok
 
-
-
-
-
 r2827
+--- Merging r2804 into 'tests/testsuite.src/run_misc.at':
+C    tests/testsuite.src/run_misc.at	accepted
+Summary of conflicts:
+  Text conflicts: 1
+svn: E155015: One or more conflicts were produced while merging r2803:2804 into
+'/home/jklowden/projects/3rd/cobol/branches/pangaea' --
+resolve all conflicts and rerun the merge to apply the remaining
+unmerged revisions
+
+2nd try:
+--- Merging r2818 through r2827 into '.':
+C    cobc/ChangeLog	  merged
+U    cobc/codegen.c	  ok
+C    cobc/field.c	  declined (whitespace)
+C    tests/testsuite.src/run_reportwriter.at	declined
+
