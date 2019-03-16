@@ -367,6 +367,19 @@
 	  See bug #220
 
 2018-07-04  Ron Norman <rjn@inglenet.com>
+	* codegen.c: Fixed 'output_size' to compute size of OCCURS DEPENDING
+	          for -fodoslide as well as when the field is BASED or
+			  is in LINKAGE SECTION
+	* typeck.c: If destination of a MOVE is variable_size
+	   and there is no reference mod (or start position is 1)
+	   and the field is BASED or in LINKAGE SECTION
+	   then emit code to MOVE fixed size header of field first as it
+	   may be holding the DEPENDING ON fields/values
+	   and then do a complete MOVE.
+	   If the field is NOT BASED and NOT LINKAGE
+	   then MOVE for the maximum size of the destination field
+
+2018-07-04  Ron Norman <rjn@inglenet.com>
 
 	* parser.y: accept both LENGTH and LENGTH OF in all places
 
@@ -988,7 +1001,7 @@
 	* codegen.c: For FUNCTION-ID and RECURSIVE, generate all LINKAGE
 	  and LOCAL-STORAGE fields with the 'cob_field' on the function
 	  stack instead of making them 'static'. If static then the fields
-	  end up as a side effect with the same memory address which is 
+	  end up as a side effect with the same memory address which is
 	  not correct. Additional change for C compiler issue of returning
 	  a local variable.
 
@@ -1089,7 +1102,7 @@
 	* codegen.c: For FUNCTION-ID and RECURSIVE, generate all LINKAGE
 	  and LOCAL-STORAGE fields with the 'cob_field' on the function
 	  stack instead of making them 'static'. If static then the fields
-	  end up as a side effect with the same memory address which is 
+	  end up as a side effect with the same memory address which is
 	  not correct.
 
 2017-11-22  Simon Sobisch <simonsobisch@gnu.org>

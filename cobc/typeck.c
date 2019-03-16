@@ -10081,10 +10081,11 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 		}
 		if (!tempval) {
 			if (CB_REFERENCE_P (x)
+			 && CB_REFERENCE (x)->length == NULL
 			 && cb_complex_odo) {
 				p = CB_FIELD_PTR(x);
-				bgnpos = -1;
 				if ((f = chk_field_variable_size (p)) != NULL) {
+					bgnpos = -1;
 					if (CB_REFERENCE (x)->offset == NULL
 					 || CB_REFERENCE (x)->offset == cb_int1) {
 						bgnpos = 1;
@@ -10096,20 +10097,26 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 						lt = CB_LITERAL (CB_REFERENCE (x)->offset);
 						bgnpos = atoi((const char*)lt->data);
 					}
-					if (bgnpos >= p->offset
-					 && bgnpos < f->offset
-					 && CB_REFERENCE (x)->length == NULL
-					 && p->offset < f->offset) {
-						/* Move for fixed size header of field */
-						/* to move values of possible DEPENDING ON fields */
-						svoff = CB_REFERENCE (x)->offset;
-						CB_REFERENCE (x)->offset = cb_int (bgnpos);
-						CB_REFERENCE (x)->length = cb_int (f->offset - p->offset - bgnpos + 1);
-						m = cb_build_move (src, cb_check_sum_field(x));
-						cb_emit (m);
-						CB_REFERENCE (x)->offset = svoff;
-						CB_REFERENCE (x)->length = NULL;
-						/* Then move the full field with ODO lengths set */
+					if (p->storage == CB_STORAGE_LINKAGE 
+					 || p->flag_item_based) {
+						if (bgnpos >= p->offset
+						 && bgnpos < f->offset
+						 && p->offset < f->offset) {
+							/* Move for fixed size header of field */
+							/* to move values of possible DEPENDING ON fields */
+							svoff = CB_REFERENCE (x)->offset;
+							CB_REFERENCE (x)->offset = cb_int (bgnpos);
+							CB_REFERENCE (x)->length = cb_int (f->offset - p->offset - bgnpos + 1);
+							m = cb_build_move (src, cb_check_sum_field(x));
+							cb_emit (m);
+							CB_REFERENCE (x)->offset = svoff;
+							CB_REFERENCE (x)->length = NULL;
+							/* Then move the full field with ODO lengths set */
+						}
+					} else {
+						if (bgnpos >= 1) {
+							CB_REFERENCE (x)->length = cb_int (p->size - bgnpos + 1);
+						}
 					}
 				}
 			}

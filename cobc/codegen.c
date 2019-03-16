@@ -1178,7 +1178,10 @@ output_size (const cb_tree x)
 			break;
 		} 
 		if (chk_field_variable_size (f)
-		 && cb_flag_odoslide
+		 && (cb_flag_odoslide
+		  || f->flag_local 
+		  || f->flag_item_based
+		  || f->storage == CB_STORAGE_LINKAGE)
 		 && !gen_init_working) {
 			out_odoslide_size (f);
 		} else {

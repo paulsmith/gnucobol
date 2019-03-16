@@ -573,11 +573,17 @@ U    cobc/ChangeLog	ok
 U    cobc/typeck.c	ok
 U    tests/testsuite.src/run_extensions.at	ok
 
-
-
-
-
 r2612
+--- Merging r2609 through r2612 into '.':
+C    cobc/ChangeLog	merged
+U    cobc/codegen.c	ok
+U    cobc/typeck.c	ok
+U    tests/testsuite.src/run_extensions.at	ok
+
+
+
+
+
 r2614
 r2616
 r2617
