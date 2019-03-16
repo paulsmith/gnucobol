@@ -1341,6 +1341,143 @@ Length is +0000000134 with 02, 03, 01, 04, 00
 
 AT_CLEANUP
 
+AT_SETUP([DEPENDING ON with ODOSLIDE])
+AT_KEYWORDS([MOVE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+      ******************************************************************
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+      ******************************************************************
+       WORKING-STORAGE SECTION.
+      *
+       01 WITHOUT-ODO.
+          02 DATA1   PIC X(1).
+          02 DEP1    PIC 9(1).
+          02 DEP2    PIC 9(1).
+          02 GROUP1  OCCURS 2 TIMES.
+             03 DATA11   PIC X(1).
+          02 GROUP2  OCCURS 3 TIMES.
+             03 DATA21   PIC X(1).
+          02 DATA3   PIC X(2).
+
+      *
+       01 WITH-ODO.
+          02 ODO-DATA1   PIC X(1).
+          02 ODO-DEP1    PIC 9(1).
+          02 ODO-DEP2    PIC 9(1).
+          02 ODO-GROUP1  OCCURS 0 TO 2 TIMES DEPENDING ON ODO-DEP1.
+             03 ODO-DATA11   PIC X(1).
+          02 ODO-GROUP2  OCCURS 0 TO 3 TIMES DEPENDING ON ODO-DEP2.
+             03 ODO-DATA21   PIC X(1).
+          02 ODO-DATA3   PIC X(2).
+
+       77 IX  PIC 9.
+       01 DAT.
+           02 ODO-1 PIC 9.
+           02 ODO-1-DATA OCCURS 1 TO 6 TIMES DEPENDING ON ODO-1
+                PIC 9.
+           02 ODO-2 PIC 9.
+           02 ODO-2-DATA OCCURS 1 TO 6 TIMES DEPENDING ON ODO-2
+                PIC 9.
+           02 ODO-3 PIC XXX.     
+          
+      ******************************************************************
+       PROCEDURE DIVISION.
+      ******************************************************************
+      *
+       TEST1.
+           MOVE "A01  B  CD" TO WITHOUT-ODO
+           DISPLAY "********"
+           DISPLAY "TEST WITHOUT ODO:"
+           DISPLAY "DATA1=" DATA1
+           DISPLAY "DEP1="  DEP1.
+           DISPLAY "DEP2="  DEP2
+           DISPLAY "DATA21(1)="  DATA21 (1)
+           DISPLAY "DATA3="  DATA3
+           .
+
+       TEST2.
+           MOVE "A01BCD" TO WITH-ODO 
+           DISPLAY "********"
+           DISPLAY "TEST WITH ODO:"
+           DISPLAY "ODO-DATA1=" ODO-DATA1
+           DISPLAY "ODO-DEP1="  ODO-DEP1
+           DISPLAY "ODO-DEP2="  ODO-DEP2
+           DISPLAY "ODO-DATA21(1)="  ODO-DATA21 (1)
+           DISPLAY "ODO-DATA3="  ODO-DATA3
+           .
+
+       TEST3.
+           MOVE "A01" TO WITH-ODO (1:3)
+           MOVE "BCD" TO WITH-ODO (4:3)
+           DISPLAY "********"
+           DISPLAY "TEST WITH ODO, SEPERATED:"
+           DISPLAY "ODO-DATA1=" ODO-DATA1
+           DISPLAY "ODO-DEP1="  ODO-DEP1
+           DISPLAY "ODO-DEP2="  ODO-DEP2
+           DISPLAY "ODO-DATA21(1)="  ODO-DATA21 (1)
+           DISPLAY "ODO-DATA3="  ODO-DATA3
+           .
+  
+
+           DISPLAY "********"
+           MOVE 2 TO ODO-1
+           MOVE 3 TO ODO-2
+           MOVE "End" TO ODO-3
+           PERFORM SHOW-ODO
+           MOVE 2 TO ODO-1
+           MOVE 6 TO ODO-2
+           MOVE "End" TO ODO-3
+           PERFORM SHOW-ODO
+           STOP RUN
+           .
+
+       SHOW-ODO.
+           PERFORM VARYING IX FROM 1 BY 1
+                     UNTIL IX > ODO-1
+               MOVE IX TO ODO-1-DATA (IX)
+           END-PERFORM
+           PERFORM VARYING IX FROM 1 BY 1
+                     UNTIL IX > ODO-2
+               MOVE IX TO ODO-2-DATA (IX)
+           END-PERFORM
+           DISPLAY "Slided ODO : '" DAT "'"
+           .
+])
+
+AT_CHECK([cobc -x -std=ibm -w -fodoslide prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [********
+TEST WITHOUT ODO:
+DATA1=A
+DEP1=0
+DEP2=1
+DATA21(1)=B
+DATA3=CD
+********
+TEST WITH ODO:
+ODO-DATA1=A
+ODO-DEP1=0
+ODO-DEP2=1
+ODO-DATA21(1)=B
+ODO-DATA3=CD
+********
+TEST WITH ODO, SEPERATED:
+ODO-DATA1=A
+ODO-DEP1=0
+ODO-DEP2=1
+ODO-DATA21(1)=B
+ODO-DATA3=CD
+********
+Slided ODO : '2123123End'
+Slided ODO : '2126123456End'
+], [])
+
+AT_CLEANUP
+
 
 AT_SETUP([INITIALIZE level 01])
 AT_KEYWORDS([initialize])

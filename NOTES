@@ -532,11 +532,18 @@ C    config/mvs.conf		accepted
 C    tests/testsuite.src/configuration.at	merged
 C    tests/testsuite.src/run_misc.at		declined
 
-
-
-
-
 r2468
+--- Merging r2468 into '.':
+C    cobc/ChangeLog     merged
+C    cobc/codegen.c	declined
+U    cobc/tree.h	ok
+U    cobc/typeck.c	ok
+U    tests/testsuite.src/run_extensions.at	ok
+
+
+
+
+
 r2504
 r2574
 r2585

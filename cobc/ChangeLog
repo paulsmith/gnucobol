@@ -615,6 +615,13 @@
 	* scanner.l: fix bug #499 tokenizer combining partial words
 
 2018-03-10  Ron Norman <rjn@inglenet.com>
+	* codegen.c,tree.h: Make chk_field_variable_size available
+	* typeck.c: If destination of a MOVE is variable_size then
+	   emit code as if  dest (1:)  had been coded so entire
+	   field is copied. To avoid ODO limiting length of MOVE.
+
+2018-03-10  Ron Norman <rjn@inglenet.com>
+	* codegen.c: Fix for INITIALIZE of signed numeric use 'cob_move'
 
 	* codegen.c: Fix for INITIALIZE of signed numeric (2018-03-08)
 

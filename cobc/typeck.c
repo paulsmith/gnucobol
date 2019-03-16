@@ -10076,6 +10076,11 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 			continue;
 		}
 		if (!tempval) {
+			if (CB_REFERENCE_P (x)
+			 && CB_REFERENCE (x)->offset == 0) {
+				if (chk_field_variable_size (CB_FIELD_PTR(x)))
+					CB_REFERENCE (x)->offset = cb_int1;
+			}
 			m = cb_build_move (src, cb_check_sum_field(x));
 		} else {
 			m = CB_BUILD_FUNCALL_1 ("cob_get_indirect_field", x);
