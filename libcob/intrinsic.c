@@ -554,11 +554,26 @@ cob_alloc_set_field_uint (const cob_u32_t val)
 	cob_field_attr	attr;
 	cob_field	field;
 
-	COB_ATTR_INIT (COB_TYPE_NUMERIC_BINARY, 9,
+	COB_ATTR_INIT (COB_TYPE_NUMERIC_BINARY, 10,
 		       0, 0, NULL);
 	COB_FIELD_INIT (4, NULL, &attr);
 	make_field_entry (&field);
 	memcpy (curr_field->data, &val, sizeof(cob_u32_t));
+}
+
+static void
+cob_alloc_set_field_pretty (const cob_u32_t val)
+{
+	cob_field_attr	attr;
+	cob_field	field;
+	int		sz;
+	char		buff[32];
+
+	sz = sprintf(buff,"%d",val);
+	COB_ATTR_INIT (COB_TYPE_NUMERIC_DISPLAY, sz, 0, 0, NULL);
+	COB_FIELD_INIT (sz, NULL, &attr);
+	make_field_entry (&field);
+	memcpy (curr_field->data, buff, sz);
 }
 
 static void
@@ -3518,6 +3533,15 @@ cob_intr_binop (cob_field *f1, const int op, cob_field *f2)
 cob_field *
 cob_intr_length (cob_field *srcfield)
 {
+	if (COB_MODULE_PTR->flag_pretty_display) {
+		if (COB_FIELD_IS_NATIONAL (srcfield)) {
+			cob_alloc_set_field_pretty ((cob_u32_t)srcfield->size / COB_NATIONAL_SIZE);
+		} else {
+			cob_alloc_set_field_pretty ((cob_u32_t)srcfield->size);
+		}
+		return curr_field;
+	}
+
 	if (COB_FIELD_IS_NATIONAL (srcfield)) {
 		cob_alloc_set_field_uint ((cob_u32_t)srcfield->size / COB_NATIONAL_SIZE);
 	} else {

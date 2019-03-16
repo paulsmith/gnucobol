@@ -332,11 +332,22 @@
 	* parser.y (check_not_88_level): invalidate wrong items to prevent
 	  multiple errors for same field
 
+2018-07-31  Ron Norman <rjn@inglenet.com>
+	* config.def: Added 'cb_length_in_data_division' and if 'no' then
+	            LENGTH OF is not allowed for 78 VALUEs
+	* typeck.c: Checks cb_length_in_data_division
+	           ACU Cobol variation on computing LENGTH OF occurs-fld
+		   when no subscript is provided
+	* typeck.c: Improved checks for cb_pretty_display
+	           All DISPLAY for LENGTH displays up to 10 digits as the
+		   value is unsigned
+	* typeck.c: IBM does not allow LENGTH for 78 VALUEs
+
 2018-07-29  Ron Norman <rjn@inglenet.com>
 	* config.def: Added 'cb_occurs_max_length_without_subscript'
 	* typeck.c: Checks cb_occurs_max_length_without_subscript for
 	           ACU Cobol variation on computing LENGTH OF occurs-fld
-			   when no subscript is provided
+		   when no subscript is provided
 
 2018-07-19  Simon Sobisch <simonsobisch@gnu.org>
 

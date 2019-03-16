@@ -467,6 +467,7 @@ test.conf: missing definitions:
 	no definition of 'entry-statement'
 	no definition of 'move-noninteger-to-alphanumeric'
 	no definition of 'occurs-max-length-without-subscript'
+	no definition of 'length-in-data-division'
 	no definition of 'move-figurative-constant-to-numeric'
 	no definition of 'move-figurative-space-to-numeric'
 	no definition of 'move-figurative-quote-to-numeric'

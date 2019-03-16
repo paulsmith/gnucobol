@@ -71,6 +71,7 @@ struct expr_node {
 #define START_STACK_SIZE	32
 #define TOKEN(offset)		(expr_stack[expr_index + offset].token)
 #define VALUE(offset)		(expr_stack[expr_index + offset].value)
+#define FMT_LEN cb_pretty_display ? "%d" : "%010d"
 
 #define dpush(x)		CB_ADD_TO_CHAIN (x, decimal_stack)
 
@@ -2211,7 +2212,7 @@ cb_build_const_length (cb_tree x)
 		return cb_error_node;
 	}
 	if (CB_INTEGER_P (x)) {
-		sprintf (buff, "%d", CB_INTEGER(x)->val);
+		sprintf (buff, FMT_LEN, CB_INTEGER(x)->val);
 		return cb_build_numeric_literal (0, buff, 0);
 	}
 	if (CB_LITERAL_P (x)) {
@@ -2251,10 +2252,10 @@ cb_build_const_length (cb_tree x)
 			cb_validate_field (f->rename_thru);
 		}
 		cb_validate_field (f);
-		sprintf (buff, "%d", f->size);
+		sprintf (buff, FMT_LEN, f->size);
 	} else {
 		cb_validate_field (f);
-		sprintf (buff, "%d", f->memory_size);
+		sprintf (buff, FMT_LEN, f->memory_size);
 	}
 	return cb_build_numeric_literal (0, buff, 0);
 }
@@ -2437,7 +2438,7 @@ cb_build_length (cb_tree x)
 {
 	struct cb_field		*f;
 	struct cb_literal	*l;
-	cb_tree			temp, size;
+	cb_tree			temp,z1,z2;
 	char			buff[32];
 
 	if (x == cb_error_node) {
@@ -2449,7 +2450,7 @@ cb_build_length (cb_tree x)
 
 	if (CB_LITERAL_P (x)) {
 		l = CB_LITERAL (x);
-		sprintf (buff, "%d", (int)l->size);
+		sprintf (buff, FMT_LEN, (int)l->size);
 		return cb_build_numeric_literal (0, buff, 0);
 	}
 	if (CB_INTRINSIC_P (x)) {
@@ -2462,20 +2463,13 @@ cb_build_length (cb_tree x)
 		f = CB_FIELD_PTR (x);
 		if (f->flag_occurs) {
 			if (!CB_REFERENCE (x)->subs) {
-				if (f->depending) {
-					temp = cb_build_index (cb_build_filler (), NULL, 0, NULL);
-					CB_FIELD (cb_ref (temp))->usage = CB_USAGE_LENGTH;
-					CB_FIELD (cb_ref (temp))->count++;
-					size = cb_build_length_1 (cb_build_field_reference (f, x));
-					size = cb_build_binary_op (size, '*', f->depending);
-					cb_emit (cb_build_assign (temp, size));
-					return temp;
-				}
-				if (cb_field_variable_size (f) == NULL) {
-					sprintf (buff, "%d", cb_field_size (x) * f->occurs_max);
-					return cb_build_numeric_literal (0, buff, 0);
-				}
+				sprintf (buff, FMT_LEN, cb_field_size (x) * f->occurs_max);
+				return cb_build_numeric_literal (0, buff, 0);
 			}
+		}
+		if (cb_field_variable_size (f)) {
+			sprintf (buff, FMT_LEN, cb_field_size (x));
+			return cb_build_numeric_literal (0, buff, 0);
 		}
 	}
 	if (CB_REF_OR_FIELD_P (x)) {
@@ -2487,7 +2481,7 @@ cb_build_length (cb_tree x)
 			return cb_build_any_intrinsic (CB_LIST_INIT (x));
 		}
 		if (cb_field_variable_size (f) == NULL) {
-			sprintf (buff, "%d", cb_field_size (x));
+			sprintf (buff, FMT_LEN, cb_field_size (x));
 			return cb_build_numeric_literal (0, buff, 0);
 		}
 	}
@@ -2495,6 +2489,19 @@ cb_build_length (cb_tree x)
 	CB_FIELD (cb_ref (temp))->usage = CB_USAGE_LENGTH;
 	CB_FIELD (cb_ref (temp))->count++;
 	cb_emit (cb_build_assign (temp, cb_build_length_1 (x)));
+
+	if (cb_pretty_display
+	 && cobc_cs_check == CB_CS_DISPLAY) {
+		z1 = cb_build_filler ();
+		z2 = cb_build_field_tree (NULL, z1, NULL, CB_STORAGE_WORKING, NULL, 1);
+		CB_FIELD (z2)->pic = CB_PICTURE (cb_build_picture ("9(10)"));
+		CB_FIELD (z2)->flag_filler = 1;
+		CB_FIELD (z2)->usage = CB_USAGE_DISPLAY;
+		CB_FIELD (z2)->count++;
+		cb_validate_field (CB_FIELD (z2));
+		cb_emit (CB_BUILD_FUNCALL_2 ("cob_field_int_display",temp,z2));
+		return z1;
+	}
 	return temp;
 }
 

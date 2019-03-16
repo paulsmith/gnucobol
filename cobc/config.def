@@ -215,6 +215,10 @@ CB_CONFIG_SUPPORT (cb_move_noninteger_to_alphanumeric, "move-noninteger-to-alpha
 CB_CONFIG_BOOLEAN (cb_occurs_max_length_without_subscript, "occurs-max-length-without-subscript",
 		  _("occurs max length without subscript"))
 
+/* config.def.merge-right.r2649 */
+CB_CONFIG_BOOLEAN (cb_length_in_data_division, "length-in-data-division",
+	_("length in data division"))
+
 CB_CONFIG_SUPPORT (cb_move_fig_constant_to_numeric, "move-figurative-constant-to-numeric",
 	_("move figurative constants to numeric"))
 

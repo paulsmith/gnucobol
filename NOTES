@@ -676,10 +676,36 @@ r2646
 C    tests/testsuite.src/configuration.at	added occurs-max-length-without-subscript
 U    tests/testsuite.src/run_misc.at	ok
 
-
-
-
-
 r2649
+--- Merging r2647 through r2649 into '.':
+C    cobc/ChangeLog	  merged
+C    cobc/config.def	  merged, added length-in-data-division
+C    cobc/typeck.c	  declined, obsolete
+C    config/ChangeLog	  merged
+U    config/acu.conf	ok
+U    config/bs2000.conf	ok
+U    config/cobol2002.conf	ok
+U    config/cobol2014.conf	ok
+U    config/cobol85.conf	ok
+U    config/default.conf	ok
+U    config/ibm.conf	ok
+U    config/mf.conf	ok
+U    config/mvs.conf	ok
+C    libcob/ChangeLog	merged
+U    libcob/common.h	ok
+U    libcob/intrinsic.c	ok
+U    libcob/termio.c	ok
+C    tests/testsuite.src/configuration.at	added length-in-data-division
+U    tests/testsuite.src/run_extensions.at	ok
+U    tests/testsuite.src/run_functions.at	ok
+U    tests/testsuite.src/run_misc.at	ok
+C    tests/testsuite.src/syn_misc.at	combined
+Summary of conflicts:
+  Text conflicts: 7
+
+
+
+
+
 r2700
 r2827

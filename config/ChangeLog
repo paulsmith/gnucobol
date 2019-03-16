@@ -21,8 +21,11 @@
 	* general: added xml-generate and xml-generate-extra-phrases options.
 	* general: marked XML-CODE as implemented.
 
+2018-07-31  Ron Norman <rjn@inglenet.com>
+	* Added 'length-in-data-division' option
+
 2018-07-25  Ron Norman <rjn@inglenet.com>
-	* Added 'occurs-max-length-without-subscript' option 
+	* Added 'occurs-max-length-without-subscript' option
 
 2018-07-13  Simon Sobisch <simonsobisch@gnu.org>
 

@@ -2457,6 +2457,7 @@ COB_EXPIMP void cob_display(const int, const int, const int, ...);
 COB_EXPIMP void cob_dump_field (const int, const char *, cob_field *, const int, const int, ...);
 COB_EXPIMP void cob_print_field (FILE *, cob_field *, int, int );
 COB_EXPIMP void cob_accept(cob_field *);
+COB_EXPIMP void cob_field_int_display (cob_field *i, cob_field *f);
 
 /*******************************/
 /* Functions in fileio.c */

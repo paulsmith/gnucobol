@@ -23331,46 +23331,59 @@ AT_DATA([prog.cob], [
           03 MY-TABLE OCCURS 20 TIMES.
              05 MY-ELEMENT-1  PIC X(10).
              05 MY-ELEMENT-2  PIC 99.
+       78 MY-LEN VALUE LENGTH OF MY-DATA.
 
        01 TBLX       PIC 99 VALUE 5.
        01 ODO-DATA.
           03 ODO-TABLE OCCURS 1 TO 15 TIMES DEPENDING ON TBLX.
              05 ODO-ELEMENT-1 PIC X(10).
              05 ODO-ELEMENT-2 PIC 99.
+       78 ODO-LEN VALUE LENGTH OF ODO-DATA.
 
        PROCEDURE DIVISION.
+           DISPLAY "MY-LEN       is " MY-LEN.
+           DISPLAY "ODO-LEN      is " ODO-LEN.
            MOVE LENGTH OF MY-DATA TO DATA-SIZE.
-           DISPLAY "MY-DATA      is " DATA-SIZE.
+           DISPLAY "MY-DATA      is " FUNCTION LENGTH (MY-DATA)
+                   " and " DATA-SIZE.
            MOVE LENGTH OF MY-ELEMENT-1 TO DATA-SIZE.
-           DISPLAY "MY-ELEMENT-1 is " DATA-SIZE
-                   " and " LENGTH OF MY-ELEMENT-1.
+           DISPLAY "MY-ELEMENT-1 is " FUNCTION LENGTH (MY-ELEMENT-1)
+                   " and " DATA-SIZE.
            MOVE LENGTH OF MY-TABLE TO DATA-SIZE.
-           DISPLAY "MY-TABLE     is " DATA-SIZE
-                   " and " LENGTH OF MY-TABLE.
+           DISPLAY "MY-TABLE     is " LENGTH OF MY-TABLE
+                   " and " DATA-SIZE.
            MOVE LENGTH OF MY-TABLE(1) TO DATA-SIZE.
-           DISPLAY "MY-TABLE(1)  is " DATA-SIZE
-                   " and " LENGTH OF MY-TABLE(1).
+           DISPLAY "MY-TABLE(1)  is " FUNCTION LENGTH (MY-TABLE(1))
+                   " and " DATA-SIZE.
 
            MOVE LENGTH OF ODO-DATA TO DATA-SIZE.
-           DISPLAY "ODO-DATA     is " DATA-SIZE.
+           DISPLAY "ODO-DATA a   is " FUNCTION LENGTH (ODO-DATA)
+                   " and " DATA-SIZE.
+           MOVE FUNCTION LENGTH (ODO-DATA) TO DATA-SIZE.
+           DISPLAY "ODO-DATA b   is " LENGTH OF ODO-DATA
+                   " and " DATA-SIZE.
            MOVE LENGTH OF ODO-TABLE TO DATA-SIZE.
-           DISPLAY "ODO-TABLE    is " DATA-SIZE
-                   " and " LENGTH OF ODO-TABLE.
+           DISPLAY "ODO-TABLE    is " LENGTH OF ODO-TABLE
+                   " and " DATA-SIZE.
            MOVE LENGTH OF ODO-TABLE(1) TO DATA-SIZE.
-           DISPLAY "ODO-TABLE(1) is " DATA-SIZE
-                   " and " LENGTH OF ODO-TABLE(1).
+           DISPLAY "ODO-TABLE(1) is " FUNCTION LENGTH (ODO-TABLE(1))
+                   " and " DATA-SIZE.
            STOP RUN.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [prog.cob: 30: Warning: Subscripts missing for 'MY-ELEMENT-1' - Defaulting to 1
+])
 
-AT_CHECK([./prog], [0], [MY-DATA      is 240
-MY-ELEMENT-1 is 010 and 10
-MY-TABLE     is 012 and 12
-MY-TABLE(1)  is 012 and 12
-ODO-DATA     is 060
-ODO-TABLE    is 012 and 12
-ODO-TABLE(1) is 012 and 12
+AT_CHECK([./prog], [0], [MY-LEN       is 240
+ODO-LEN      is 180
+MY-DATA      is 240 and 240
+MY-ELEMENT-1 is 10 and 010
+MY-TABLE     is 12 and 012
+MY-TABLE(1)  is 12 and 012
+ODO-DATA a   is 60 and 060
+ODO-DATA b   is 60 and 060
+ODO-TABLE    is 12 and 012
+ODO-TABLE(1) is 12 and 012
 ], [])
 
 AT_CLEANUP
@@ -23392,46 +23405,59 @@ AT_DATA([prog.cob], [
           03 MY-TABLE OCCURS 20 TIMES.
              05 MY-ELEMENT-1  PIC X(10).
              05 MY-ELEMENT-2  PIC 99.
+       78 MY-LEN VALUE LENGTH OF MY-DATA.
 
        01 TBLX       PIC 99 VALUE 5.
        01 ODO-DATA.
           03 ODO-TABLE OCCURS 1 TO 15 TIMES DEPENDING ON TBLX.
              05 ODO-ELEMENT-1 PIC X(10).
              05 ODO-ELEMENT-2 PIC 99.
+       78 ODO-LEN VALUE LENGTH OF ODO-DATA.
 
        PROCEDURE DIVISION.
+           DISPLAY "MY-LEN       is " MY-LEN.
+           DISPLAY "ODO-LEN      is " ODO-LEN.
            MOVE LENGTH OF MY-DATA TO DATA-SIZE.
-           DISPLAY "MY-DATA      is " DATA-SIZE.
+           DISPLAY "MY-DATA      is " FUNCTION LENGTH (MY-DATA)
+                   " and " DATA-SIZE.
            MOVE LENGTH OF MY-ELEMENT-1 TO DATA-SIZE.
-           DISPLAY "MY-ELEMENT-1 is " DATA-SIZE
-                   " and " LENGTH OF MY-ELEMENT-1.
+           DISPLAY "MY-ELEMENT-1 is " FUNCTION LENGTH (MY-ELEMENT-1)
+                   " and " DATA-SIZE.
            MOVE LENGTH OF MY-TABLE TO DATA-SIZE.
-           DISPLAY "MY-TABLE     is " DATA-SIZE
-                   " and " LENGTH OF MY-TABLE.
+           DISPLAY "MY-TABLE     is " LENGTH OF MY-TABLE
+                   " and " DATA-SIZE.
            MOVE LENGTH OF MY-TABLE(1) TO DATA-SIZE.
-           DISPLAY "MY-TABLE(1)  is " DATA-SIZE
-                   " and " LENGTH OF MY-TABLE(1).
+           DISPLAY "MY-TABLE(1)  is " FUNCTION LENGTH (MY-TABLE(1))
+                   " and " DATA-SIZE.
 
            MOVE LENGTH OF ODO-DATA TO DATA-SIZE.
-           DISPLAY "ODO-DATA     is " DATA-SIZE.
+           DISPLAY "ODO-DATA a   is " FUNCTION LENGTH (ODO-DATA)
+                   " and " DATA-SIZE.
+           MOVE FUNCTION LENGTH (ODO-DATA) TO DATA-SIZE.
+           DISPLAY "ODO-DATA b   is " LENGTH OF ODO-DATA
+                   " and " DATA-SIZE.
            MOVE LENGTH OF ODO-TABLE TO DATA-SIZE.
-           DISPLAY "ODO-TABLE    is " DATA-SIZE
-                   " and " LENGTH OF ODO-TABLE.
+           DISPLAY "ODO-TABLE    is " LENGTH OF ODO-TABLE
+                   " and " DATA-SIZE.
            MOVE LENGTH OF ODO-TABLE(1) TO DATA-SIZE.
-           DISPLAY "ODO-TABLE(1) is " DATA-SIZE
-                   " and " LENGTH OF ODO-TABLE(1).
+           DISPLAY "ODO-TABLE(1) is " FUNCTION LENGTH (ODO-TABLE(1))
+                   " and " DATA-SIZE.
            STOP RUN.
 ])
 
-AT_CHECK([cobc -x -std=acu -w prog.cob ], [0], [], [])
+AT_CHECK([cobc -x -std=acu -w prog.cob ], [0], [], [prog.cob: 30: Warning: Subscripts missing for 'MY-ELEMENT-1' - Defaulting to 1
+])
 
-AT_CHECK([./prog], [0], [MY-DATA      is 240
-MY-ELEMENT-1 is 010 and 10
-MY-TABLE     is 240 and 240
-MY-TABLE(1)  is 012 and 12
-ODO-DATA     is 060
-ODO-TABLE    is 060 and 000000060
-ODO-TABLE(1) is 012 and 12
+AT_CHECK([./prog], [0], [MY-LEN       is 0000000240
+ODO-LEN      is 0000000180
+MY-DATA      is 0000000240 and 240
+MY-ELEMENT-1 is 0000000010 and 010
+MY-TABLE     is 0000000240 and 240
+MY-TABLE(1)  is 0000000012 and 012
+ODO-DATA a   is 0000000060 and 180
+ODO-DATA b   is 0000000180 and 060
+ODO-TABLE    is 0000000180 and 180
+ODO-TABLE(1) is 0000000012 and 012
 ], [])
 
 AT_CLEANUP

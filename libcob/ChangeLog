@@ -180,6 +180,12 @@
 
 	* coblocal.h, numeric.c (cob_decimal_init2): fixed compiler warning
 
+2018-07-31  Ron Norman <rjn@inglenet.com>
+	* termio.c: Improved pretty display for LENGTH/FUNCTION values
+	            Added cob_field_int_display
+	* common.h: added cob_field_int_display
+	* intrinsic.c: Improved for pretty_display
+
 2018-07-29  Ron Norman <rjn@inglenet.com>
 	* fileio.c: Added code to set COB_STATUS_53_MAX_LOCKS
 
