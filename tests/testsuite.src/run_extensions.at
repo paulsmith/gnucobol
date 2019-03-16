@@ -1341,7 +1341,6 @@ Length is +0000000134 with 02, 03, 01, 04, 00
 
 AT_CLEANUP
 
-
 AT_SETUP([DEPENDING ON with ODOSLIDE])
 AT_KEYWORDS([MOVE])
 
@@ -1409,7 +1408,7 @@ AT_DATA([prog.cob], [
            DISPLAY "ODO-DATA21(1)="  ODO-DATA21 (1) "."
            DISPLAY "ODO-DATA3="  ODO-DATA3 "."
 
-           MOVE "A12BCDEF" TO WITH-ODO 
+           MOVE "12BCDEF" TO WITH-ODO (2:)
            DISPLAY "TEST WITH ODO: '" WITH-ODO "'"
            DISPLAY "ODO-DATA1=" ODO-DATA1 "."
            DISPLAY "ODO-DEP1="  ODO-DEP1 "."
@@ -1494,7 +1493,6 @@ Slided ODO : '2126123456End'
 ], [])
 
 AT_CLEANUP
-
 
 AT_SETUP([DEPENDING ON with ODOSLIDE])
 AT_KEYWORDS([Subroutine])

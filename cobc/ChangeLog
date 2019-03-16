@@ -395,6 +395,11 @@
 	  numeric implicit pictures for numeric USAGEs
 
 2018-06-24  Ron Norman <rjn@inglenet.com>
+	* typeck.c: If destination of a MOVE is variable_size handle
+	   starting position that is more than 1 and less than fixed
+	   header of an ODO field
+
+2018-06-24  Ron Norman <rjn@inglenet.com>
 	* codegen.c: Fixed 'output_size' to adjust size by starting offset
 	* typeck.c: If destination of a MOVE is variable_size and
 	   there is no reference mod (or start position is 1) then

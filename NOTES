@@ -567,11 +567,16 @@ C    cobc/codegen.c	  accepted
 C    cobc/typeck.c	  combined
 U    tests/testsuite.src/run_extensions.at	ok
 
-
-
-
-
 r2606
+--- Merging r2604 through r2606 into '.':
+U    cobc/ChangeLog	ok
+U    cobc/typeck.c	ok
+U    tests/testsuite.src/run_extensions.at	ok
+
+
+
+
+
 r2612
 r2614
 r2616

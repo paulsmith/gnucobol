@@ -10037,6 +10037,7 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 	cb_tree		l;
 	cb_tree		x;
 	cb_tree		m;
+	cb_tree		svoff;
 	struct cb_literal	*lt;
 	struct cb_field	*f, *p;
 	unsigned int	tempval;
@@ -10082,27 +10083,31 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 			if (CB_REFERENCE_P (x)
 			 && cb_complex_odo) {
 				p = CB_FIELD_PTR(x);
-				bgnpos = 0;
+				bgnpos = -1;
 				if ((f = chk_field_variable_size (p)) != NULL) {
 					if (CB_REFERENCE (x)->offset == NULL
 					 || CB_REFERENCE (x)->offset == cb_int1) {
 						bgnpos = 1;
+					} else if (CB_REFERENCE (x)->offset == cb_int2) {
+						bgnpos = 2;
 					} else 
 					if (CB_REFERENCE (x)->offset != NULL
 					 && CB_LITERAL_P (CB_REFERENCE (x)->offset)) {
 						lt = CB_LITERAL (CB_REFERENCE (x)->offset);
 						bgnpos = atoi((const char*)lt->data);
 					}
-					if (bgnpos == 1
+					if (bgnpos >= p->offset
+					 && bgnpos < f->offset
 					 && CB_REFERENCE (x)->length == NULL
 					 && p->offset < f->offset) {
 						/* Move for fixed size header of field */
 						/* to move values of possible DEPENDING ON fields */
-						CB_REFERENCE (x)->offset = cb_int1;
-						CB_REFERENCE (x)->length = cb_int (f->offset - p->offset);
+						svoff = CB_REFERENCE (x)->offset;
+						CB_REFERENCE (x)->offset = cb_int (bgnpos);
+						CB_REFERENCE (x)->length = cb_int (f->offset - p->offset - bgnpos + 1);
 						m = cb_build_move (src, cb_check_sum_field(x));
 						cb_emit (m);
-						CB_REFERENCE (x)->offset = NULL;
+						CB_REFERENCE (x)->offset = svoff;
 						CB_REFERENCE (x)->length = NULL;
 						/* Then move the full field with ODO lengths set */
 					}
