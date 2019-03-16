@@ -647,15 +647,28 @@ C    tests/testsuite.src/syn_definition.at	declined
 
 r2641
 --- Merging r2620 through r2641 into '.':
-C    cobc/tree.h
-Summary of conflicts:
-  Text conflicts: 1
-
-
-
-
+C    cobc/tree.h  declined, copyright
 
 r2644
+--- Merging r2643 through r2644 into '.':
+C    cobc/ChangeLog	  merged
+C    cobc/config.def	  merged
+U    cobc/typeck.c	ok
+C    config/ChangeLog	merged
+U    config/acu.conf	ok
+U    config/bs2000.conf	ok
+C    config/cobol2002.conf	merged
+C    config/cobol2014.conf	merged
+C    config/cobol85.conf	merged
+C    config/default.conf	merged
+U    config/ibm.conf	ok
+U    config/mf.conf	ok
+U    config/mvs.conf	ok
+
+
+
+
+
 r2645
 r2646
 r2649

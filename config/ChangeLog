@@ -21,6 +21,9 @@
 	* general: added xml-generate and xml-generate-extra-phrases options.
 	* general: marked XML-CODE as implemented.
 
+2018-07-25  Ron Norman <rjn@inglenet.com>
+	* Added 'occurs-max-length-without-subscript' option 
+
 2018-07-13  Simon Sobisch <simonsobisch@gnu.org>
 
 	* ibm.words: updated to Enterprise COBOL 6.1 documentation,

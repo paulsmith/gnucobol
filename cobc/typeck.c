@@ -2437,7 +2437,7 @@ cb_build_length (cb_tree x)
 {
 	struct cb_field		*f;
 	struct cb_literal	*l;
-	cb_tree			temp;
+	cb_tree			temp, size;
 	char			buff[32];
 
 	if (x == cb_error_node) {
@@ -2454,6 +2454,29 @@ cb_build_length (cb_tree x)
 	}
 	if (CB_INTRINSIC_P (x)) {
 		return cb_build_any_intrinsic (CB_LIST_INIT (x));
+	}
+	if (cb_occurs_max_length_without_subscript
+	 && CB_REFERENCE_P (x)
+	 && CB_REFERENCE (x)->length == NULL
+	 && CB_REFERENCE (x)->offset == NULL) {
+		f = CB_FIELD_PTR (x);
+		if (f->flag_occurs) {
+			if (!CB_REFERENCE (x)->subs) {
+				if (f->depending) {
+					temp = cb_build_index (cb_build_filler (), NULL, 0, NULL);
+					CB_FIELD (cb_ref (temp))->usage = CB_USAGE_LENGTH;
+					CB_FIELD (cb_ref (temp))->count++;
+					size = cb_build_length_1 (cb_build_field_reference (f, x));
+					size = cb_build_binary_op (size, '*', f->depending);
+					cb_emit (cb_build_assign (temp, size));
+					return temp;
+				}
+				if (cb_field_variable_size (f) == NULL) {
+					sprintf (buff, "%d", cb_field_size (x) * f->occurs_max);
+					return cb_build_numeric_literal (0, buff, 0);
+				}
+			}
+		}
 	}
 	if (CB_REF_OR_FIELD_P (x)) {
 		if (CB_REFERENCE_P (x) && CB_REFERENCE (x)->offset) {

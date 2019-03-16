@@ -332,6 +332,12 @@
 	* parser.y (check_not_88_level): invalidate wrong items to prevent
 	  multiple errors for same field
 
+2018-07-29  Ron Norman <rjn@inglenet.com>
+	* config.def: Added 'cb_occurs_max_length_without_subscript'
+	* typeck.c: Checks cb_occurs_max_length_without_subscript for
+	           ACU Cobol variation on computing LENGTH OF occurs-fld
+			   when no subscript is provided
+
 2018-07-19  Simon Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l: allow floating-point literals containing no digit after

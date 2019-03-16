@@ -96,7 +96,7 @@ CB_CONFIG_BOOLEAN (cb_complex_odo, "complex-odo",
 CB_CONFIG_BOOLEAN (cb_indirect_redefines, "indirect-redefines",
 	_("allow REDEFINES to other than last equal level number"))
 
-CB_CONFIG_BOOLEAN (cb_larger_redefines_ok, "larger-redefines-ok", /* TO-DO: change to CB_CONFIG_SUPPORT */
+CB_CONFIG_BOOLEAN (cb_larger_redefines_ok, "larger-redefines-ok", /* TODO: change to CB_CONFIG_SUPPORT */
 	_("allow larger REDEFINES items"))
 
 CB_CONFIG_BOOLEAN (cb_relaxed_syntax_checks, "relax-syntax-checks",
@@ -111,7 +111,7 @@ CB_CONFIG_BOOLEAN (cb_select_working, "select-working",
 CB_CONFIG_BOOLEAN (cb_sticky_linkage, "sticky-linkage",
 	_("LINKAGE-SECTION items remain allocated between invocations"))
 
-CB_CONFIG_BOOLEAN (cb_move_ibm, "move-ibm",	/* counterpart for MF's BYTE-MODE-MOVE */
+CB_CONFIG_BOOLEAN (cb_move_ibm, "move-ibm",	/* counterpart for MF''s BYTE-MODE-MOVE */
 	_("MOVE operates as on IBM (left to right, byte by byte)"))
 
 CB_CONFIG_BOOLEAN (cb_perform_osvs, "perform-osvs",
@@ -210,6 +210,10 @@ CB_CONFIG_SUPPORT (cb_entry_statement, "entry-statement",
 
 CB_CONFIG_SUPPORT (cb_move_noninteger_to_alphanumeric, "move-noninteger-to-alphanumeric",
 	_("move noninteger to alphanumeric"))
+
+/* config.def.merge-right.r2644: */
+CB_CONFIG_BOOLEAN (cb_occurs_max_length_without_subscript, "occurs-max-length-without-subscript",
+		  _("occurs max length without subscript"))
 
 CB_CONFIG_SUPPORT (cb_move_fig_constant_to_numeric, "move-figurative-constant-to-numeric",
 	_("move figurative constants to numeric"))
