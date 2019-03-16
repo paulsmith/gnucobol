@@ -671,11 +671,15 @@ C    libcob/ChangeLog   merged
 U    libcob/common.h	ok
 U    libcob/fileio.c	ok
 
-
-
-
-
 r2646
+--- Merging r2646 into '.':
+C    tests/testsuite.src/configuration.at	added occurs-max-length-without-subscript
+U    tests/testsuite.src/run_misc.at	ok
+
+
+
+
+
 r2649
 r2700
 r2827

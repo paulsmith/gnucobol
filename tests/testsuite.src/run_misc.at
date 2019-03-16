@@ -23315,6 +23315,127 @@ AT_CHECK([./prog], [0], [23 tests & 00 failed
 
 AT_CLEANUP
 
+AT_SETUP([NO Subscript])
+AT_KEYWORDS([LENGTH])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01 DATA-SIZE  PIC 999.
+       01 MY-DATA.
+          03 MY-TABLE OCCURS 20 TIMES.
+             05 MY-ELEMENT-1  PIC X(10).
+             05 MY-ELEMENT-2  PIC 99.
+
+       01 TBLX       PIC 99 VALUE 5.
+       01 ODO-DATA.
+          03 ODO-TABLE OCCURS 1 TO 15 TIMES DEPENDING ON TBLX.
+             05 ODO-ELEMENT-1 PIC X(10).
+             05 ODO-ELEMENT-2 PIC 99.
+
+       PROCEDURE DIVISION.
+           MOVE LENGTH OF MY-DATA TO DATA-SIZE.
+           DISPLAY "MY-DATA      is " DATA-SIZE.
+           MOVE LENGTH OF MY-ELEMENT-1 TO DATA-SIZE.
+           DISPLAY "MY-ELEMENT-1 is " DATA-SIZE
+                   " and " LENGTH OF MY-ELEMENT-1.
+           MOVE LENGTH OF MY-TABLE TO DATA-SIZE.
+           DISPLAY "MY-TABLE     is " DATA-SIZE
+                   " and " LENGTH OF MY-TABLE.
+           MOVE LENGTH OF MY-TABLE(1) TO DATA-SIZE.
+           DISPLAY "MY-TABLE(1)  is " DATA-SIZE
+                   " and " LENGTH OF MY-TABLE(1).
+
+           MOVE LENGTH OF ODO-DATA TO DATA-SIZE.
+           DISPLAY "ODO-DATA     is " DATA-SIZE.
+           MOVE LENGTH OF ODO-TABLE TO DATA-SIZE.
+           DISPLAY "ODO-TABLE    is " DATA-SIZE
+                   " and " LENGTH OF ODO-TABLE.
+           MOVE LENGTH OF ODO-TABLE(1) TO DATA-SIZE.
+           DISPLAY "ODO-TABLE(1) is " DATA-SIZE
+                   " and " LENGTH OF ODO-TABLE(1).
+           STOP RUN.
+])
+
+AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [MY-DATA      is 240
+MY-ELEMENT-1 is 010 and 10
+MY-TABLE     is 012 and 12
+MY-TABLE(1)  is 012 and 12
+ODO-DATA     is 060
+ODO-TABLE    is 012 and 12
+ODO-TABLE(1) is 012 and 12
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([NO Subscript])
+AT_KEYWORDS([ACU LENGTH])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01 DATA-SIZE  PIC 999.
+       01 MY-DATA.
+          03 MY-TABLE OCCURS 20 TIMES.
+             05 MY-ELEMENT-1  PIC X(10).
+             05 MY-ELEMENT-2  PIC 99.
+
+       01 TBLX       PIC 99 VALUE 5.
+       01 ODO-DATA.
+          03 ODO-TABLE OCCURS 1 TO 15 TIMES DEPENDING ON TBLX.
+             05 ODO-ELEMENT-1 PIC X(10).
+             05 ODO-ELEMENT-2 PIC 99.
+
+       PROCEDURE DIVISION.
+           MOVE LENGTH OF MY-DATA TO DATA-SIZE.
+           DISPLAY "MY-DATA      is " DATA-SIZE.
+           MOVE LENGTH OF MY-ELEMENT-1 TO DATA-SIZE.
+           DISPLAY "MY-ELEMENT-1 is " DATA-SIZE
+                   " and " LENGTH OF MY-ELEMENT-1.
+           MOVE LENGTH OF MY-TABLE TO DATA-SIZE.
+           DISPLAY "MY-TABLE     is " DATA-SIZE
+                   " and " LENGTH OF MY-TABLE.
+           MOVE LENGTH OF MY-TABLE(1) TO DATA-SIZE.
+           DISPLAY "MY-TABLE(1)  is " DATA-SIZE
+                   " and " LENGTH OF MY-TABLE(1).
+
+           MOVE LENGTH OF ODO-DATA TO DATA-SIZE.
+           DISPLAY "ODO-DATA     is " DATA-SIZE.
+           MOVE LENGTH OF ODO-TABLE TO DATA-SIZE.
+           DISPLAY "ODO-TABLE    is " DATA-SIZE
+                   " and " LENGTH OF ODO-TABLE.
+           MOVE LENGTH OF ODO-TABLE(1) TO DATA-SIZE.
+           DISPLAY "ODO-TABLE(1) is " DATA-SIZE
+                   " and " LENGTH OF ODO-TABLE(1).
+           STOP RUN.
+])
+
+AT_CHECK([cobc -x -std=acu -w prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [MY-DATA      is 240
+MY-ELEMENT-1 is 010 and 10
+MY-TABLE     is 240 and 240
+MY-TABLE(1)  is 012 and 12
+ODO-DATA     is 060
+ODO-TABLE    is 060 and 000000060
+ODO-TABLE(1) is 012 and 12
+], [])
+
+AT_CLEANUP
+
 
 AT_SETUP([MF SYNC])
 AT_KEYWORDS([Numeric])
