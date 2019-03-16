@@ -1,7 +1,7 @@
 #
 # gnucobol/tests/cobol85/report.pl
 #
-# Copyright (C) 2001-2012, 2016-2018 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2016-2019 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 #
 # This file is part of GnuCOBOL.
@@ -72,25 +72,46 @@ if (defined $cobcrun_direct) {
 	$cobcrun_direct = "";
 }
 
-# temporary directory (used for fifos)
-my $tmpdir = $ENV{"TMPDIR"};
-if (!defined $tmpdir) {
-	$tmpdir = $ENV{"TEMP"};
-	if (!defined $tmpdir) {
-		$tmpdir = $ENV{"TMP"};
-		if (!defined $tmpdir) {
-			$tmpdir = "/tmp";
-		}
-	}
-}
-
-
 $compile_module = "$cobc -m";
 if ($force_cobcrun) {
 	$compile = $compile_module;
 } else {
 	$compile = "$cobc -x";
 }
+
+my $REMOVE = "XXXXX*";
+my $TRAP;
+my $REMOVE_COMMANDS;
+if ($^O ne "MSWin32" && $^O ne "dos") {
+	$TRAP = "trap 'exit 77' INT QUIT TERM PIPE;";
+	$REMOVE_COMMANDS = "$TRAP  rm -rf $REMOVE";
+	if ($ENV{'DB_HOME'}) {
+		$REMOVE_COMMANDS = "$REMOVE_COMMANDS $ENV{'DB_HOME'}/$REMOVE";
+	}
+	$cobcrun_direct = "$cobcrun_direct./";
+} else {
+	$TRAP = "";
+	$REMOVE_COMMANDS = "ERASE /F /Q $REMOVE &&";
+	if ($ENV{'DB_HOME'}) {
+		$REMOVE_COMMANDS = "$REMOVE_COMMANDS $ENV{'DB_HOME'}\\$REMOVE &&";
+	}
+	$REMOVE_COMMANDS = "$REMOVE_COMMANDS " .
+		"FOR /F %I IN ('DIR /A:D /B $REMOVE') DO RD /S /Q %I";
+	$REMOVE_COMMANDS = "$REMOVE_COMMANDS 1>NUL 2>&1";
+	$cobcrun_direct = "$cobcrun_direct.\\";
+}
+
+# temporary directory (used for fifos, currently not active)
+# my $tmpdir = $ENV{"TMPDIR"};
+# if (!defined $tmpdir) {
+# 	$tmpdir = $ENV{"TEMP"};
+# 	if (!defined $tmpdir) {
+# 		$tmpdir = $ENV{"TMP"};
+# 		if (!defined $tmpdir) {
+# 			$tmpdir = "/tmp";
+# 		}
+# 	}
+# }
 
 my $num_progs = 0;
 my $test_skipped = 0;
@@ -241,7 +262,7 @@ printf LOG_FH ("Execute error:         %2s\n", $execute_error);
 sub compile_lib {
 	my $in = $_[0];
 	print "$compile_module $in\n";
-	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile_module $in");
+	$ret = system ("$TRAP  $compile_module $in");
 	if ($ret != 0) {
 		if (($ret >> 8) == 77) {
 			die "Interrupted\n";
@@ -270,13 +291,13 @@ sub run_test {
 		if ($force_cobcrun) {
 			$cmd = "$cobcrun $exe < $exe.DAT";
 		} else {
-			$cmd = "$cobcrun_direct./$exe < $exe.DAT";
+			$cmd = "$cobcrun_direct$exe < $exe.DAT";
 		}
 	} else {
 		if ($force_cobcrun) {
 			$cmd = "$cobcrun $exe";
 		} else {
-			$cmd = "$cobcrun_direct./$exe";
+			$cmd = "$cobcrun_direct$exe";
 		}
 	}
 
@@ -305,7 +326,7 @@ sub run_test {
 	my $deleted = 0;
 	my $inspect = 0;
 
-	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile_current");
+	$ret = system ("$TRAP  $compile_current");
 	if ($ret != 0) {
 		if (($ret >> 8) == 77) {
 			die "Interrupted\n";
@@ -338,11 +359,7 @@ sub run_test {
 
 
 	if ($in =~ /\.CBL/) {
-		if ($ENV{'DB_HOME'}) {
-			$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; rm -f XXXXX*; rm -f $ENV{'DB_HOME'}/XXXXX*");
-		} else {
-			$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; rm -f XXXXX*");
-		}
+		$ret = system ("$REMOVE_COMMANDS");
 		if (($ret >> 8) == 77) {
 			die "Interrupted\n";
 		}
@@ -367,9 +384,9 @@ sub run_test {
 
 testrepeat:
 	if (!$to_kill{$exe}) {
-		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $cmd > $exe.out");
+		$ret = system ("$TRAP  $cmd > $exe.out");
 	} else {
-		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $cmd > $exe.out 2>/dev/null");
+		$ret = system ("$TRAP  $cmd > $exe.out 2>/dev/null");
 	}
 
 	if ($ret != 0 && !($ret >> 2 && $to_kill{$exe})) {

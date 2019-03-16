@@ -14,16 +14,16 @@ You will receive further instructions where to send this.
 *NOTE* This test can take a long time depending on your hardware.
 
 1. Prerequisite: test suite "newcob.val", EITHER -
-a) Manually download the test archive "newcob.val.Z" from
-   http://www.itl.nist.gov/div897/ctg/cobol_form.htm
-
-   Uncompress it and move the file newcob.val to the tests/cobol85 directory
-
-b) Automatic download/uncompress
+   Automatic download/uncompress
    If the test suite is not available "make test" will uncompress the archive
    "newcob.val.Z" from tests/cobol85.
    If the test archive is also missing "make test" will try to download the
-   archive beforehand.
+   archive beforehand. 
+OR-
+   Manually download the test archive "newcob.val.Z" from
+   http://www.itl.nist.gov/div897/ctg/cobol_form.htm
+
+   Uncompress it and move the file newcob.val to the tests/cobol85 directory
 
 2. Run the test suite:
    make test

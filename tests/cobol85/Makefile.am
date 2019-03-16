@@ -42,7 +42,8 @@ EXTRA_DIST = EXEC85.conf.in expand.pl report.pl summary.pl summary.txt \
 #CLEANFILES = EXEC85$(EXEEXT) summary.log
 
 COB85DIR = "`cd $(srcdir) && pwd`"
-WGETFLAGS = -t1 -T5
+WGET_FLAGS = -t1 -T5
+DIFF_FLAGS = --strip-trailing-cr
 
 # MAKEFLAGS = --no-print-directory
 
@@ -103,26 +104,26 @@ summary.log:
 
 diff: summary.log
 	@for m in $(MODULES); do \
-		(diff $(srcdir)/$$m.txt $$m/report.txt) \
+		(diff $(DIFF_FLAGS) $(srcdir)/$$m.txt $$m/report.txt) \
 	done
 	$(MAKE) diff-summary
 
 diff-summary:
 	@echo "Comparing total test results"
 if COB_MAKE_IX
-	diff $(srcdir)/summary.txt summary.log
+	diff $(DIFF_FLAGS) $(srcdir)/summary.txt summary.log
 else
-	diff $(srcdir)/summarynoix.txt summary.log
+	diff $(DIFF_FLAGS) $(srcdir)/summarynoix.txt summary.log
 endif
 	@echo
 
 newcob.val.Z:
 	@echo "Trying to download newcob.val.Z..."
-	@wget $(WGETFLAGS) "https://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z"
+	@wget $(WGET_FLAGS) "https://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z"
 
 newcob.val.tar.gz:
 	@echo "Trying to download newcob.val.tar.gz..."
-	@wget $(WGETFLAGS) -O $@ "https://sourceforge.net/projects/open-cobol/files/nist/newcob.val.tar.gz/download"
+	@wget $(WGET_FLAGS) -O $@ "https://sourceforge.net/projects/open-cobol/files/nist/newcob.val.tar.gz/download"
 
 unpack-Z: newcob.val.Z
 	@echo "Unpacking $@..."

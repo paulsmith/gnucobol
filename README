@@ -245,7 +245,6 @@ Tests
 
 ** NOTE **
    The language interpreter "perl" is required to run COBOL85 tests.
-   If you build in Cygwin/MSYS you must use a Cygwin/MSYS version of perl.
  
 ** NOTE **
    Running "make test" will try to download the COBOL85

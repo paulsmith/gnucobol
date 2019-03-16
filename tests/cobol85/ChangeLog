@@ -1,7 +1,14 @@
 
+2019-03-16  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: new DIFF_FLAGS initialized to --strip-trailing-cr to allow
+	  valid test results also with unclean/unexpected EOL
+	* report.pl: reduced number of environment checks,
+	  adjusted to actually work with a MSWin32 port of perl
+
 2019-01-18  Simon Sobisch <simonsobisch@gnu.org>
 
-	* Makefile.am: fix for Bug #563: new WGETFLAGS initialized to "-t1 -T5"
+	* Makefile.am: fix for Bug #563: new WGET_FLAGS initialized to "-t1 -T5"
 	  to explicit specify the timeout and allow overriding these parameters
 
 2019-01-01  Simon Sobisch <simonsobisch@gnu.org>
@@ -142,7 +149,7 @@
 
 2016-08-28  Simon Sobisch <simonsobisch@gnu.org>
 
-	* Makefile.am: checking `perl` before running target "test"
+	* Makefile.am: checking perl binary before running target "test"
 
 2015-02-11  Simon Sobisch <simonsobisch@gnu.org>
 
