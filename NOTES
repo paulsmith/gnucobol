@@ -645,11 +645,16 @@ C    tests/testsuite.src/run_extensions.at	declined
 C    tests/testsuite.src/run_misc.at		combined
 C    tests/testsuite.src/syn_definition.at	declined
 
-
-
-
-
 r2641
+--- Merging r2620 through r2641 into '.':
+C    cobc/tree.h
+Summary of conflicts:
+  Text conflicts: 1
+
+
+
+
+
 r2644
 r2645
 r2646
