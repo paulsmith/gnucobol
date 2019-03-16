@@ -500,6 +500,11 @@ test.conf: missing definitions:
 	no definition of 'xml-generate'
 	no definition of 'xml-generate-extra-phrases'
 	no definition of 'json-generate'
+# r2379:
+        No definition of 'relaxed-syntax-check'
+####    No definition of 'cobol85-reserved'  see: -std=cobol85 
+        No definition of 'debugging-line'
+        No definition of 'eject-statement'
 ])
 
 AT_CLEANUP
