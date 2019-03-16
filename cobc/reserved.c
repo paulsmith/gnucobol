@@ -2757,7 +2757,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "U",			0, 1, U,			/* Extension */
 				0, CB_CS_RECORDING
   },
-  { "UCS-4",			0, 1, -1,			/* 2002 (C/S) */
+  { "UCS-4",			0, 1, UCS_4,			/* 2002 (C/S) */
 				0, CB_CS_ALPHABET
   },
   { "UNBOUNDED",		0, 1, UNBOUNDED,			/* IBM V5 */
@@ -2838,10 +2838,10 @@ static struct cobc_reserved default_reserved_words[] = {
   { "USING",			0, 0, USING,			/* 2002 */
 				0, 0
   },
-  { "UTF-16",			0, 1, -1,			/* 2002 (C/S) */
+  { "UTF-16",			0, 1, UTF_16,			/* 2002 (C/S) */
 				0, CB_CS_ALPHABET
   },
-  { "UTF-8",			0, 1, -1,			/* 2002 (C/S) */
+  { "UTF-8",			0, 1, UTF_8,			/* 2002 (C/S) */
 				0, CB_CS_ALPHABET
   },
   { "V",			0, 1, V,			/* Extension */

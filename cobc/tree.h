@@ -118,11 +118,19 @@ enum cb_tag {
 	   cobc_enum_explain as well. */
 };
 
+/* Alphabet target */
+#define CB_ALPHABET_ALPHANUMERIC	0
+#define CB_ALPHABET_NATIONAL	1
+
 /* Alphabet type */
 #define CB_ALPHABET_NATIVE	0
 #define CB_ALPHABET_ASCII	1
 #define CB_ALPHABET_EBCDIC	2
 #define CB_ALPHABET_CUSTOM	3
+#define CB_ALPHABET_LOCALE	4
+#define CB_ALPHABET_UTF_8	5
+#define CB_ALPHABET_UTF_16	6
+#define CB_ALPHABET_UCS_4	7
 
 /* Call convention bits */
 /* Bit number	Meaning			Value */
@@ -607,7 +615,8 @@ struct cb_alphabet_name {
 	struct cb_tree_common	common;		/* Common values */
 	const char		*name;		/* Original name */
 	char			*cname;		/* Name used in C */
-	cb_tree			custom_list;	/* Custom ALPHABET */
+	cb_tree			custom_list;	/* Custom ALPHABET / LOCALE reference */
+	unsigned int		alphabet_target;	/* ALPHANUMERIC or NATIONAL */
 	unsigned int		alphabet_type;	/* ALPHABET type */
 	int			low_val_char;	/* LOW-VALUE */
 	int			high_val_char;	/* HIGH-VALUE */
@@ -925,6 +934,7 @@ struct cb_alt_key {
 	struct cb_alt_key	*next;			/* Pointer to next */
 	cb_tree			key;			/* Key item */
 	cb_tree			password;			/* Password item */
+	cb_tree			collating_sequence_key;	/* COLLATING */
 	int			duplicates;		/* DUPLICATES */
 	int			offset;			/* Offset from start */
 	int			tf_suppress;		/* !0 for SUPPRESS */
@@ -944,6 +954,10 @@ struct cb_file {
 	cb_tree			password;			/* Password item for file or primary key */
 	struct cb_key_component	*component_list;	/* List of fields making up primary key */
 	struct cb_alt_key	*alt_key_list;		/* ALTERNATE RECORD KEY */
+	cb_tree			collating_sequence_key;	/* COLLATING */
+	cb_tree			collating_sequence;	/* COLLATING */
+	cb_tree			collating_sequence_n;	/* COLLATING FOR NATIONAL*/
+	cb_tree			collating_sequence_keys;	/* list of postponed COLLATING OF */
 	/* FD/SD */
 	struct cb_field		*record;		/* Record descriptions */
 	cb_tree			record_depending;	/* RECORD DEPENDING */
@@ -2134,7 +2148,7 @@ extern cb_tree		cb_build_set_attribute (const struct cb_field *,
 						const cob_flags_t);
 extern void		cb_emit_set_last_exception_to_off (void);
 
-extern void		cb_emit_sort_init (cb_tree, cb_tree, cb_tree);
+extern void		cb_emit_sort_init (cb_tree, cb_tree, cb_tree, cb_tree);
 extern void		cb_emit_sort_using (cb_tree, cb_tree);
 extern void		cb_emit_sort_input (cb_tree);
 extern void		cb_emit_sort_giving (cb_tree, cb_tree);

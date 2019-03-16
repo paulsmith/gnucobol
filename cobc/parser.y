@@ -238,6 +238,9 @@ static cb_tree			xml_encoding;
 static int			with_xml_dec;
 static int			with_attrs;
 
+static cb_tree			alphanumeric_collation;
+static cb_tree			national_collation;
+
 static enum cb_ml_suppress_category	ml_suppress_category;
 
 static int			term_array[TERM_MAX];
@@ -2792,6 +2795,7 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %token TRUNCATION
 %token TYPE
 %token U
+%token UCS_4		"UCS-4"
 %token UNBOUNDED
 %token UNDERLINE
 %token UNFRAMED
@@ -2823,6 +2827,8 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %token USER_DEFAULT		"USER-DEFAULT"
 %token USER_FUNCTION_NAME	"user function name"
 %token USING
+%token UTF_8		"UTF-8"
+%token UTF_16		"UTF-16"
 %token V
 %token VALIDATE
 %token VALIDATING
@@ -3511,42 +3517,54 @@ object_computer_memory:
 ;
 
 object_computer_sequence:
-  _program _collating SEQUENCE prog_coll_sequence_values
+  _program program_collating_sequence
+  {
+	current_program->collating_sequence = alphanumeric_collation;
+	current_program->collating_sequence_n = national_collation;
+  }
 ;
 
-prog_coll_sequence_values:
+program_collating_sequence:
+  _collating SEQUENCE
+  {
+	alphanumeric_collation = national_collation = NULL;
+  }
+  program_coll_sequence_values
+;
+
+program_coll_sequence_values:
   _is single_reference
   {
-	current_program->collating_sequence = $2;
+	alphanumeric_collation = $2;
   }
 | _is single_reference single_reference
   {
-	current_program->collating_sequence = $2;
+	alphanumeric_collation = $2;
 	CB_PENDING_X ($3, "NATIONAL COLLATING SEQUENCE");
-	current_program->collating_sequence_n = $3;
+	national_collation = $3;
   }
 | _for ALPHANUMERIC _is single_reference
   {
-	current_program->collating_sequence = $4;
+	alphanumeric_collation = $4;
   }
 | _for NATIONAL _is single_reference
   {
 	CB_PENDING_X ($4, "NATIONAL COLLATING SEQUENCE");
-	current_program->collating_sequence_n = $4;
+	national_collation = $4;
   }
 | _for ALPHANUMERIC _is single_reference
   _for NATIONAL _is single_reference
   {
-	current_program->collating_sequence = $4;
+	alphanumeric_collation = $4;
 	CB_PENDING_X ($8, "NATIONAL COLLATING SEQUENCE");
-	current_program->collating_sequence_n = $8;
+	national_collation = $8;
   }
 | _for NATIONAL _is single_reference
   _for ALPHANUMERIC _is single_reference
   {
 	CB_PENDING_X ($4, "NATIONAL COLLATING SEQUENCE");
-	current_program->collating_sequence_n = $4;
-	current_program->collating_sequence = $8;
+	national_collation = $4;
+	alphanumeric_collation = $8;
   }
 ;
 
@@ -3834,7 +3852,7 @@ alphabet_name_clause:
 		$$ = cb_build_alphabet_name ($2);
 	}
   }
-  _is alphabet_definition
+  alphabet_definition
   {
 	if ($3) {
 		current_program->alphabet_name_list =
@@ -3845,12 +3863,35 @@ alphabet_name_clause:
 ;
 
 alphabet_definition:
-  NATIVE
+  alphabet_target_alphanumeric
   {
-	if ($-1) {
-		CB_ALPHABET_NAME ($-1)->alphabet_type = CB_ALPHABET_NATIVE;
+	$$ = $0;
+	if ($0) {
+		CB_ALPHABET_NAME ($0)->alphabet_target = CB_ALPHABET_ALPHANUMERIC;
 	}
   }
+  _is alphabet_type_alphanumeric
+| alphabet_target_national
+  {
+	$$ = $0;
+	if ($0) {
+		CB_ALPHABET_NAME($0)->alphabet_target = CB_ALPHABET_NATIONAL;
+	}
+  }
+  _is alphabet_type_national
+;
+
+alphabet_target_alphanumeric:
+  /* empty */
+| _for ALPHANUMERIC
+;
+
+alphabet_target_national:
+  _for NATIONAL
+;
+
+alphabet_type_alphanumeric:
+  alphabet_type_common
 | STANDARD_1
   {
 	if ($-1) {
@@ -3863,16 +3904,58 @@ alphabet_definition:
 		CB_ALPHABET_NAME ($-1)->alphabet_type = CB_ALPHABET_ASCII;
 	}
   }
-| EBCDIC
+| EBCDIC	/* concerning the standard: a code-name */
   {
 	if ($-1) {
 		CB_ALPHABET_NAME ($-1)->alphabet_type = CB_ALPHABET_EBCDIC;
 	}
   }
-| ASCII
+| ASCII	/* concerning the standard: a code-name */
   {
 	if ($-1) {
 		CB_ALPHABET_NAME ($-1)->alphabet_type = CB_ALPHABET_ASCII;
+	}
+  }
+;
+
+alphabet_type_national:
+  alphabet_type_common
+| UCS_4
+  {
+	if ($-1) {
+		CB_PENDING_X ($-1, "ALPHABET UCS-4");
+		CB_ALPHABET_NAME ($-1)->alphabet_type = CB_ALPHABET_UCS_4;
+	}
+  }
+| UTF_8
+  {
+	if ($-1) {
+		CB_PENDING_X ($-1, "ALPHABET UTF-8");
+		CB_ALPHABET_NAME ($-1)->alphabet_type = CB_ALPHABET_UTF_8;
+	}
+  }
+| UTF_16
+  {
+	if ($-1) {
+		CB_PENDING_X ($-1, "ALPHABET UTF-16");
+		CB_ALPHABET_NAME ($-1)->alphabet_type = CB_ALPHABET_UTF_16;
+	}
+  }
+;
+
+alphabet_type_common:
+  NATIVE
+  {
+	if ($-1) {
+		CB_ALPHABET_NAME ($-1)->alphabet_type = CB_ALPHABET_NATIVE;
+	}
+  }
+| LOCALE single_reference
+  {
+	if ($-1) {
+		CB_ALPHABET_NAME ($-1)->alphabet_type = CB_ALPHABET_LOCALE;
+		CB_ALPHABET_NAME ($-1)->custom_list = $2;
+		CB_PENDING_X ($-1, "LOCALE ALPHABET");
 	}
   }
 | alphabet_literal_list
@@ -4134,7 +4217,7 @@ _class_type:
   }
 | _for NATIONAL
   {
-	CB_PENDING_X ($2, _("NATIONAL CLASS"));
+	CB_PENDING_X ($2, "NATIONAL CLASS");
 	$$ = cb_int0;
   }
 ;
@@ -4451,6 +4534,7 @@ select_clause:
 | access_mode_clause
 | relative_key_clause
 | collating_sequence_clause
+| collating_sequence_clause_key
 | record_key_clause
 | alternative_record_key_clause
 | file_status_clause
@@ -4737,10 +4821,67 @@ _suppress_clause:
 /* COLLATING SEQUENCE clause */
 
 collating_sequence_clause:
-  coll_sequence _is alphabet_name
+  collating_sequence
   {
 	check_repeated ("COLLATING", SYN_CLAUSE_3, &check_duplicate);
-	CB_PENDING ("COLLATING SEQUENCE");
+	current_file->collating_sequence = alphanumeric_collation;
+	current_file->collating_sequence_n = national_collation;
+	CB_PENDING ("FILE COLLATING SEQUENCE");
+  }
+;
+
+collating_sequence:
+  _collating SEQUENCE
+  {
+	alphanumeric_collation = national_collation = NULL;
+  }
+  coll_sequence_values
+;
+
+coll_sequence_values:
+  _is alphabet_name
+  {
+	alphanumeric_collation = $2;
+  }
+| _is alphabet_name alphabet_name
+  {
+	alphanumeric_collation = $2;
+	CB_PENDING_X ($3, "NATIONAL COLLATING SEQUENCE");
+	national_collation = $3;
+  }
+| _for ALPHANUMERIC _is alphabet_name
+  {
+	alphanumeric_collation = $4;
+  }
+| _for NATIONAL _is alphabet_name
+  {
+	CB_PENDING_X ($4, "NATIONAL COLLATING SEQUENCE");
+	national_collation = $4;
+  }
+| _for ALPHANUMERIC _is alphabet_name
+  _for NATIONAL _is alphabet_name
+  {
+	alphanumeric_collation = $4;
+	CB_PENDING_X ($8, "NATIONAL COLLATING SEQUENCE");
+	national_collation = $8;
+  }
+| _for NATIONAL _is alphabet_name
+  _for ALPHANUMERIC _is alphabet_name
+  {
+	CB_PENDING_X ($4, "NATIONAL COLLATING SEQUENCE");
+	national_collation = $4;
+	alphanumeric_collation = $8;
+  }
+;
+
+collating_sequence_clause_key:
+  _collating SEQUENCE OF reference _is alphabet_name
+  {
+	/* note: both entries must be resolved later on
+	   and also attached to the correct key later, so just store in a list here: */
+	current_file->collating_sequence_keys =
+		cb_list_add(current_file->collating_sequence_keys, CB_BUILD_PAIR ($6, $4));
+	CB_PENDING ("KEY COLLATING SEQUENCE");
   }
 ;
 
@@ -13774,7 +13915,7 @@ sort_statement:
 ;
 
 sort_body:
-  table_identifier sort_key_list _sort_duplicates sort_collating
+  table_identifier sort_key_list _sort_duplicates _sort_collating
   {
 	cb_tree		x = cb_ref ($1);
 
@@ -13797,14 +13938,14 @@ sort_body:
 					lparm = cb_list_add (NULL, x);
 					CB_PURPOSE (lparm) = cb_int(f->keys[0].dir);
 					$2 = cb_list_append (NULL, lparm);
-					cb_emit_sort_init ($1, $2, $4);
+					cb_emit_sort_init ($1, $2, alphanumeric_collation, national_collation);
 					$$ = $1;
 				} else {
 					cb_error (_("table SORT requires KEY phrase"));
 				}
 			}
 		} else if ($2 != cb_error_node) {
-			cb_emit_sort_init ($1, $2, $4);
+			cb_emit_sort_init ($1, $2, alphanumeric_collation, national_collation);
 			$$ = $1;
 		}
 	}
@@ -13823,27 +13964,24 @@ sort_key_list:
 	$$ = NULL;
   }
 | sort_key_list
-  _on ascending_or_descending _key _key_list
+  _on ascending_or_descending _key _key_sort_list
   {
+	cb_tree lparm = $5;
 	cb_tree l;
-	cb_tree lparm;
 
-	if ($5 == NULL) {
-		l = CB_LIST_INIT (NULL);
-	} else {
-		l = $5;
+	if (lparm == NULL) {
+		lparm = CB_LIST_INIT (NULL);
 	}
-	lparm = l;
-	for (; l; l = CB_CHAIN (l)) {
+	for (l = lparm; l; l = CB_CHAIN (l)) {
 		CB_PURPOSE (l) = $3;
 	}
 	$$ = cb_list_append ($1, lparm);
   }
 ;
 
-_key_list:
+_key_sort_list:
   /* empty */			{ $$ = NULL; }
-| _key_list qualified_word	{ $$ = cb_list_add ($1, $2); }
+| _key_sort_list qualified_word	{ $$ = cb_list_add ($1, $2); }
 ;
 
 _sort_duplicates:
@@ -13854,9 +13992,12 @@ _sort_duplicates:
   }
 ;
 
-sort_collating:
-  /* empty */				{ $$ = cb_null; }
-| coll_sequence _is reference		{ $$ = cb_ref ($3); }
+_sort_collating:
+  /* empty */
+  {
+	alphanumeric_collation = national_collation = NULL;
+  }
+| collating_sequence
 ;
 
 sort_input:
@@ -17453,7 +17594,6 @@ _with_for:	| WITH | FOR ;
 
 /* Mandatory selection */
 
-coll_sequence:		COLLATING SEQUENCE | SEQUENCE ;
 column_or_col:		COLUMN | COL ;
 columns_or_cols:	COLUMNS | COLS ;
 column_or_cols:		column_or_col | columns_or_cols ;

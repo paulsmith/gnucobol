@@ -3378,6 +3378,19 @@ cb_validate_program_data (struct cb_program *prog)
 		}
 	}
 
+	/* check alphabets */
+	for (l = current_program->alphabet_name_list; l; l = CB_CHAIN(l)) {
+		struct cb_alphabet_name *alphabet = CB_ALPHABET_NAME (CB_VALUE(l));
+		if (alphabet->alphabet_type == CB_ALPHABET_LOCALE) {
+			x = cb_ref (alphabet->custom_list);
+			if (x != cb_error_node && !CB_LOCALE_NAME_P(x)) {
+				cb_error_x (alphabet->custom_list, _("'%s' is not a locale-name"),
+					cb_name(x));
+				x = cb_error_node;
+			}
+		}
+	}
+
 	/* Resolve APPLY COMMIT  */
 	if (CB_VALID_TREE(prog->apply_commit)) {
 		for (l = prog->apply_commit; l; l = CB_CHAIN(l)) {
@@ -10948,7 +10961,7 @@ cb_emit_set_last_exception_to_off (void)
 /* SORT statement */
 
 void
-cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
+cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col, cb_tree nat_col)
 {
 	cb_tree			l;
 	cb_tree			rtree;
@@ -10967,6 +10980,21 @@ cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 		}
 	}
 
+	/* note: the reference to the program's collation,
+	   if not explicit specified in SORT is done within libcob */
+	if (col == NULL) {
+		col = cb_null;
+	} else {
+		col = cb_ref (col);
+	}
+	if (nat_col == NULL) {
+		nat_col = cb_null;
+	} else {
+		nat_col = cb_ref (nat_col);
+	}
+	/* TODO: pass national collation to libcob */
+	COB_UNUSED (nat_col);
+
 	if (CB_FILE_P (rtree)) {
 		if (CB_FILE (rtree)->organization != COB_ORG_SORT) {
 			cb_error_x (name, _("invalid SORT filename"));
@@ -10983,6 +11011,7 @@ cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 						     cb_null, CB_FILE(rtree)->file_status));
 
 		}
+		/* TODO: pass key-specific collation to libcob */
 		for (l = keys; l; l = CB_CHAIN (l)) {
 			cb_emit (CB_BUILD_FUNCALL_4 ("cob_file_sort_init_key",
 						     rtree,
@@ -10993,6 +11022,7 @@ cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 	} else {
 		cb_emit (CB_BUILD_FUNCALL_2 ("cob_table_sort_init",
 					     cb_int ((int)cb_list_length (keys)), col));
+		/* TODO: pass key-specific collation to libcob */
 		for (l = keys; l; l = CB_CHAIN (l)) {
 			cb_emit (CB_BUILD_FUNCALL_3 ("cob_table_sort_init_key",
 					CB_VALUE (l),
