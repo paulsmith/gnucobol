@@ -11,6 +11,11 @@
 
 	* atlocal_win: dynamically set COB_OBJECT_EXT and COB_EXE_EXT
 
+2018-08-11  Ron Norman <rjn@inglenet.com>
+
+	* testsuite.src/run_misc.at: Added code to test temp decimals
+	                to the 'Multiple calls of INITIAL program' test case
+
 2018-08-07  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/run_functions.at: Rename CONTENTS-OF to CONTENT-OF

@@ -700,12 +700,14 @@ U    tests/testsuite.src/run_extensions.at	ok
 U    tests/testsuite.src/run_functions.at	ok
 U    tests/testsuite.src/run_misc.at	ok
 C    tests/testsuite.src/syn_misc.at	combined
-Summary of conflicts:
-  Text conflicts: 7
-
-
-
-
 
 r2700
+--- Merging r2651 through r2700 into '.':
+C    tests/ChangeLog	  merged
+U    tests/testsuite.src/run_misc.at	ok
+
+
+
+
+
 r2827
