@@ -10991,10 +10991,6 @@ cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 						     cb_int (CB_FIELD_PTR (CB_VALUE(l))->offset)));
 		}
 	} else {
-		if (keys == NULL) {
-			/* FIXME: use key defined in OCCURS */
-			cb_error_x (name, _("%s is not implemented"), _("table SORT without keys"));
-		}
 		cb_emit (CB_BUILD_FUNCALL_2 ("cob_table_sort_init",
 					     cb_int ((int)cb_list_length (keys)), col));
 		for (l = keys; l; l = CB_CHAIN (l)) {

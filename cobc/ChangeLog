@@ -1,4 +1,9 @@
 
+2019-03-16  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: added unqualified_word which consumes qualification
+	  checking that it does not occur; used for INDEXED BY and OCCURS KEY
+
 2019-03-15  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: drop yacc-compatibility warnings via AM_YFLAGS -Wno-yacc
@@ -8,6 +13,11 @@
 
 	* config.c: hand-merged change 2015-04-27 with an option to go back,
 	  see COBC_STORES_CONFIG_VALUES
+
+2019-03-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, typeck: implemented table SORT without specifying key,
+	  see Patch #42
 
 2019-03-11  Simon Sobisch <simonsobisch@gnu.org>
 

@@ -6809,15 +6809,31 @@ occurs_key_list:
 ;
 
 occurs_key_field:
-  ascending_or_descending _key _is reference_list
+  ascending_or_descending _key _is single_reference_list
   {
-	cb_tree l;
+	cb_tree l, item;
+	struct cb_field *field;
 
 	for (l = $4; l; l = CB_CHAIN (l)) {
 		CB_PURPOSE (l) = $1;
-		if (qualifier && !CB_REFERENCE(CB_VALUE(l))->chain &&
-		    strcasecmp (CB_NAME(CB_VALUE(l)), CB_NAME(qualifier))) {
-			CB_REFERENCE(CB_VALUE(l))->chain = qualifier;
+		item = CB_VALUE (l);
+		if (item == cb_error_node) {
+			continue;
+		}
+		/* internally reference-modify each of the given keys */
+		if (qualifier
+#if 0 /* Simon: those are never reference-modified ... */
+		  && !CB_REFERENCE(item)->chain
+#endif /* the following is perfectly fine and would raise a syntax error
+		  if we add the self-reference */
+		  && strcasecmp (CB_NAME(item), CB_NAME(qualifier))) {
+			/* reference by the OCCURS item */
+			CB_REFERENCE(item)->chain = qualifier;
+		}
+		/* reference all the way up as later fields may have same name */
+		for (field = CB_FIELD(cb_ref(qualifier))->parent; field; field = field->parent) {
+			if (field->flag_filler) continue;
+			CB_REFERENCE(item)->chain = cb_build_reference(field->name);
 		}
 	}
 	keys_list = cb_list_append (keys_list, $4);
@@ -6848,7 +6864,7 @@ occurs_index_list:
 ;
 
 occurs_index:
-  WORD
+  unqualified_word
   {
 	$$ = cb_build_index ($1, cb_int1, 1U, current_field);
 	CB_FIELD_PTR ($$)->index_type = CB_STATIC_INT_INDEX;
@@ -13760,24 +13776,37 @@ sort_statement:
 sort_body:
   table_identifier sort_key_list _sort_duplicates sort_collating
   {
-	cb_tree		x;
+	cb_tree		x = cb_ref ($1);
 
-	x = cb_ref ($1);
+	$$ = NULL;
 	if (CB_VALID_TREE (x)) {
-		if (CB_INVALID_TREE ($2)) {
+		if ($2 == NULL) {
 			if (CB_FILE_P (x)) {
 				cb_error (_("file sort requires KEY phrase"));
 			} else {
-				/* FIXME: use key definition from OCCURS */
-				cb_error (_("%s is not implemented"), _("table SORT without keys"));
+				struct cb_field	*f = CB_FIELD_PTR (x);
+/* TODO: add compiler configuration cb_sort_without_keys
+				if (f->nkeys
+				 && cb_verify (cb_sort_without_keys, _("table SORT without keys"))) {
+*/
+				if (f->nkeys) {
+					cb_tree lparm;
+					/* create reference to first key */
+					x = cb_ref (f->keys[0].key);
+					/* use this as single sort key, with search order derived from definition */
+					lparm = cb_list_add (NULL, x);
+					CB_PURPOSE (lparm) = cb_int(f->keys[0].dir);
+					$2 = cb_list_append (NULL, lparm);
+					cb_emit_sort_init ($1, $2, $4);
+					$$ = $1;
+				} else {
+					cb_error (_("table SORT requires KEY phrase"));
+				}
 			}
-			$$ = NULL;
-		} else {
+		} else if ($2 != cb_error_node) {
 			cb_emit_sort_init ($1, $2, $4);
-			$$= $1;
+			$$ = $1;
 		}
-	} else {
-		$$ = NULL;
 	}
   }
   sort_input sort_output
@@ -16060,14 +16089,17 @@ _reference:
 | reference		{$$ = $1;}
 ;
 
-single_reference:
-  WORD
-  {
-	$$ = $1;
-	CB_ADD_TO_CHAIN ($$, current_program->reference_list);
-  }
+single_reference_list:
+  single_reference			{ $$ = CB_LIST_INIT ($1); }
+| single_reference_list single_reference{ $$ = cb_list_add ($1, $2); }
 ;
 
+single_reference:
+  unqualified_word
+  {
+	CB_ADD_TO_CHAIN ($1, current_program->reference_list);
+  }
+;
 
 
 /* FIXME: either this is "optional" then _ prefix should be used,
@@ -16658,6 +16690,32 @@ qualified_word:
   {
 	$$ = $1;
 	CB_REFERENCE ($1)->chain = $3;
+  }
+;
+
+unqualified_word:
+  {
+	start_tree = NULL;	// actually not needed - initialized for clarity only
+  }
+  unqualified_word_check
+  {
+	if ($2 == cb_error_node) {
+		cb_error_x (start_tree, _("a subscripted data-item cannot be used here"));
+	}
+	$$ = start_tree;
+  }
+;
+
+unqualified_word_check:
+  WORD
+  {
+	start_tree = $1;
+	$$ = $1;
+  }
+| WORD in_of unqualified_word_check
+  {
+	start_tree = $1;
+	$$ = cb_error_node;
   }
 ;
 
