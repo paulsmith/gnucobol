@@ -540,11 +540,15 @@ U    cobc/tree.h	ok
 U    cobc/typeck.c	ok
 U    tests/testsuite.src/run_extensions.at	ok
 
-
-
-
-
 r2504
+--- Merging r2504 into '.':
+C    tests/testsuite.src/run_misc.at declined
+
+
+
+
+
+
 r2574
 r2585
 r2586

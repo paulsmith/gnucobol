@@ -6756,7 +6756,6 @@ libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 
 
 AT_CLEANUP
 
-
 AT_SETUP([Trace feature with subroutine])
 AT_KEYWORDS([Trace])
 
