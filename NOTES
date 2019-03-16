@@ -555,12 +555,15 @@ r2585
 C    cobc/ChangeLog	  merged
 C    cobc/codegen.c	  declined
 
-
-
-
-
-
 r2586
+--- Merging r2586 into '.':
+C    cobc/ChangeLog    merged
+C    cobc/tree.c       delined
+
+
+
+
+
 r2603
 r2606
 r2612

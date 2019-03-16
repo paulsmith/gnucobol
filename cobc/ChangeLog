@@ -423,6 +423,10 @@
 
 	* Makefile.am: remove path output when creating manpage
 
+2018-05-24  Ron Norman <rjn@inglenet.com>
+	* tree.c: Limit compile time constant expression resolution
+	    to values small than 9 digits. (To avoid a problem on macOS)
+
 2018-05-23  Ron Norman <rjn@inglenet.com>
 	* codegen.c: For report records, initialize to SPACEs and
 	    when setting to a literal, skip clear of trailing spaces
