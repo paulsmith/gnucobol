@@ -1236,7 +1236,10 @@ set_file_format(cob_file *f)
 			f->file_features |= COB_FILE_LS_CRLF;
 
 		if(f->file_format == COB_FILE_IS_MF) {			/* Micro Focus format LINE SEQUENTIAL */
-			f->file_features |= COB_FILE_LS_SPLIT;
+			if(cobsetptr->cob_mf_ls_split)
+				f->file_features |= COB_FILE_LS_SPLIT;
+			else
+				f->file_features &= ~COB_FILE_LS_SPLIT;
 			if(cobsetptr->cob_mf_ls_nulls)
 				f->file_features |= COB_FILE_LS_NULLS;
 			else
@@ -1247,6 +1250,10 @@ set_file_format(cob_file *f)
 			else
 				f->file_features &= ~COB_FILE_LS_VALIDATE;
 		} else {										/* GnuCOBOL default format LINE SEQUENTIAL */
+			if(cobsetptr->cob_ls_split)
+				f->file_features |= COB_FILE_LS_SPLIT;
+			else
+				f->file_features &= ~COB_FILE_LS_SPLIT;
 			if(cobsetptr->cob_ls_nulls)
 				f->file_features |= COB_FILE_LS_NULLS;
 			else
@@ -9201,6 +9208,7 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 
 	if(cobsetptr->cob_mf_files) {	/* Just use all MF format files */
 		cobsetptr->cob_ls_nulls = 1;
+		cobsetptr->cob_ls_split = 1;
 		cobsetptr->cob_ls_validate = 0;
 		if(cobsetptr->cob_varseq_type == COB_FILE_IS_GC
 		|| cobsetptr->cob_varseq_type == 0)
@@ -9212,6 +9220,7 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 	}
 	if(cobsetptr->cob_gc_files) {	/* Just use all GNUCobol format files */
 		cobsetptr->cob_ls_nulls = 0;
+		cobsetptr->cob_ls_split = 0;
 		cobsetptr->cob_ls_validate = 0;
 		if(cobsetptr->cob_varseq_type == COB_FILE_IS_MF)
 			cobsetptr->cob_varseq_type = COB_FILE_IS_GC;

@@ -195,6 +195,11 @@
 
 	* common.c (cob_check_ref_mod): display maximum size on overflow
 
+2018-07-05  Ron Norman <rjn@inglenet.com>
+	* coblocal.h,common.c: Added runtime.cfg options for COB_LS_SPLIT
+	* fileio.c: Added checks for runtime.cfg options for split or truncate
+	   LINE SEQUENTIAL records which are longer than expected
+
 2018-07-04  Ron Norman <rjn@inglenet.com>
 	* common.h: Added COB_MF_LS_SPLIT flag
 	* fileio.c:

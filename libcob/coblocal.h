@@ -255,8 +255,10 @@ typedef struct __cob_settings {
 	unsigned int	cob_ls_uses_cr;		/* Line Sequential uses CR LF */
 	unsigned int	cob_ls_fixed;		/* Line Sequential is fixed length */
 	unsigned int	cob_ls_nulls;		/* NUL insert to Line Sequential */
+	unsigned int	cob_ls_split;		/* Split 'too long' record into parts (Default is truncate) */
 	unsigned int	cob_ls_validate;	/* Validate data in Line Sequential */
 	unsigned int	cob_mf_ls_nulls;	/* MF file: NUL insert to Line Sequential */
+	unsigned int	cob_mf_ls_split;	/* MF file: Split 'too long' record into parts */
 	unsigned int	cob_mf_ls_validate;	/* MF file: Validate data in Line Sequential */
 	unsigned int	cob_varseq_type;	/* Variable Sequential Default file format */
 	unsigned int	cob_varrel_type;	/* Variable Relative default file format */

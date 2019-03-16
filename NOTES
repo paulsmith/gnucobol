@@ -587,11 +587,18 @@ U    libcob/common.h	ok
 U    libcob/fileio.c	ok
 C    tests/testsuite.src/run_file.at accepted
 
-
-
-
-
 r2616
+--- Merging r2616 into '.':
+U    config/runtime.cfg	ok
+C    libcob/ChangeLog	merged
+U    libcob/coblocal.h	ok
+U    libcob/common.c	ok
+U    libcob/fileio.c	ok
+
+
+
+
+
 r2617
 r2619
 r2641
