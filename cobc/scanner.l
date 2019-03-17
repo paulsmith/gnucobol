@@ -1779,10 +1779,13 @@ significand_is_zero (const char *int_part, const char *dec_part)
 		&& all_zeroes (dec_part);
 }
 
-	/* Note: Exponent *digits* in literals according to COBOL 202x: 36 */
-#define COB_FLOAT_DIGITS_MAX         36
-#define COB_FLOAT_DIGITS_CHCK_MAX    37
-#define COB_FLOAT_DIGITS_STR_MAX     38
+/* Note: Exponent *digits* in literals according to COBOL 202x: 36 */
+/* Note: Exponent *digits* in literals according to COBOL 202x: 36 */
+#if COB_FLOAT_DIGITS_MAX != 36
+#error COB_FLOAT_DIGITS_MAX adjustment needed, common.h must match scanner.l
+#endif
+#define COB_FLOAT_DIGITS_CHCK_MAX    38 /* incl. sign and comma */
+#define COB_FLOAT_DIGITS_STR_MAX     39
 
 #define COB_FLOAT_DIGITS_WIDTH	"%" CB_XSTRINGIFY(COB_FLOAT_DIGITS_STR_MAX)
 
@@ -1796,10 +1799,10 @@ scan_floating_numeric (const char *text)
 	int		scale;
 	int		exponent;
 	int		n;
-	char		significand_str[COB_FLOAT_DIGITS_STR_MAX + 1] = { '\0' };
+	char		significand_str[COB_FLOAT_DIGITS_STR_MAX] = { '\0' };
 	char		*significand_pos;
-	char		significand_dec[COB_FLOAT_DIGITS_STR_MAX + 1] = { '\0' };
-	char		significand_int[COB_FLOAT_DIGITS_STR_MAX + 1] = { '\0' };
+	char		significand_dec[COB_FLOAT_DIGITS_STR_MAX] = { '\0' };
+	char		significand_int[COB_FLOAT_DIGITS_STR_MAX] = { '\0' };
 	char		exponent_str[8] = { '\0' };
 	char		*exponent_pos;
 
@@ -1841,11 +1844,11 @@ scan_floating_numeric (const char *text)
 	if (n == 0) { /* no integer part, copy after decimal-point */
 		significand_int[0] = 0;
 		strncpy (significand_dec, significand_pos + 1, COB_FLOAT_DIGITS_STR_MAX);
-		significand_dec[COB_FLOAT_DIGITS_STR_MAX] = 0;
+		significand_dec[COB_FLOAT_DIGITS_STR_MAX - 1] = 0;
 	} else {
 	/* silencing some warnings */
-		significand_int[COB_FLOAT_DIGITS_STR_MAX] = 0;
-		significand_dec[COB_FLOAT_DIGITS_STR_MAX] = 0;
+		significand_int[COB_FLOAT_DIGITS_STR_MAX - 1] = 0;
+		significand_dec[COB_FLOAT_DIGITS_STR_MAX - 1] = 0;
 	}
 
 	/* Validation and exponent handling */
@@ -1854,6 +1857,7 @@ scan_floating_numeric (const char *text)
 	exponent = 0;
 
 	if (sig_int_len + sig_dec_len > COB_FLOAT_DIGITS_MAX) {
+		/* note: same message in tree.c for floating-point numeric-edited item */
 		snprintf (err_msg, COB_MINI_MAX,
 			_("significand has more than %d digits"), COB_FLOAT_DIGITS_MAX);
 		error_literal ("float", text);
@@ -1864,6 +1868,7 @@ scan_floating_numeric (const char *text)
 			error_literal ("float", text);
 		} else {
 			if (strlen (exponent_pos) > 4) {
+				/* note: same message in tree.c for floating-point numeric-edited item */
 				snprintf (err_msg, COB_MINI_MAX,
 					_("exponent has more than 4 digits"));
 				error_literal ("float", text);

@@ -6504,10 +6504,53 @@ volatile_clause:
 /* PICTURE clause */
 
 picture_clause:
-  PICTURE
+  PICTURE	/* token from scanner, includes full picture definition */
+  _pic_locale_format
   {
 	check_repeated ("PICTURE", SYN_CLAUSE_4, &check_pic_duplicate);
 	current_field->pic = CB_PICTURE ($1);
+
+	if ($2 && $2 != cb_error_node) {
+		if (  (current_field->pic->category != CB_CATEGORY_NUMERIC
+		    && current_field->pic->category != CB_CATEGORY_NUMERIC_EDITED)
+		 || strpbrk (current_field->pic->orig, " CRDB-*") /* the standard seems to forbid also ',' */) {
+			cb_error_x ($1, _("a locale-format PICTURE string must only consist of '9', '.', '+', 'Z' and the currency-sign"));
+		} else {
+			/* TODO: check that not in or part of CONSTANT RECORD */
+			CB_PENDING_X ($1, "locale-format PICTURE");
+		}
+	}
+  }
+;
+
+_pic_locale_format:
+  /* empty */
+  { $$ = NULL; }
+| LOCALE _is_locale_name SIZE _is integer  
+  {
+	/* $2 -> optional locale-name to be used */
+	$$ = $5;
+  }
+;
+
+_is_locale_name:
+  /* empty */
+| _is locale_name  
+  {
+	$$ = $2;
+  }
+;
+
+
+locale_name:
+  WORD
+  {
+	if (CB_LOCALE_NAME_P (cb_ref ($1))) {
+		$$ = $1;
+	} else {
+		cb_error_x ($1, _("'%s' is not a locale-name"),	cb_name ($1));
+		$$ = cb_error_node;
+	}
   }
 ;
 

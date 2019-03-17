@@ -1503,6 +1503,9 @@ output_attr (const cb_tree x)
 					flags |= COB_FLAG_IS_FP;
 					break;
 				default:
+					if (f->pic->category == CB_CATEGORY_FLOATING_EDITED) {
+						flags |= COB_FLAG_IS_FP;
+					}
 					break;
 				}
 
@@ -4302,6 +4305,7 @@ deduce_initialize_type (struct cb_initialize *p, struct cb_field *f,
 		case CB_CATEGORY_NUMERIC_EDITED:
 		case CB_CATEGORY_ALPHANUMERIC_EDITED:
 		case CB_CATEGORY_NATIONAL_EDITED:
+		case CB_CATEGORY_FLOATING_EDITED:
 			return INITIALIZE_ONE;
 		default:
 			if (cb_tree_type (CB_TREE (f), f) == COB_TYPE_NUMERIC_PACKED) {
@@ -4732,6 +4736,7 @@ output_initialize_one (struct cb_initialize *p, cb_tree x)
 		switch (CB_TREE_CATEGORY (x)) {
 		case CB_CATEGORY_NUMERIC:
 		case CB_CATEGORY_NUMERIC_EDITED:
+		case CB_CATEGORY_FLOATING_EDITED:
 			output_move (cb_zero, x);
 			break;
 		case CB_CATEGORY_ALPHANUMERIC:

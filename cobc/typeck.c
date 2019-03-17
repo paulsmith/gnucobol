@@ -680,7 +680,8 @@ cb_check_numeric_edited_name (cb_tree x)
 	 && CB_FIELD_P (cb_ref (x))) {
 		enum cb_category cat = CB_TREE_CATEGORY(x);
 		if (cat == CB_CATEGORY_NUMERIC
-		 || cat == CB_CATEGORY_NUMERIC_EDITED) {
+		 || cat == CB_CATEGORY_NUMERIC_EDITED
+		 || cat == CB_CATEGORY_FLOATING_EDITED) {
 			return x;
 		}
 	}
@@ -728,6 +729,7 @@ cb_check_numeric_value (cb_tree x)
 		cb_error_x (x, _("'%s' is Alpha Edited, instead of a numeric value"), cb_name (x));
 		break;
 	case CB_CATEGORY_NUMERIC_EDITED:
+	case CB_CATEGORY_FLOATING_EDITED:
 		f = CB_FIELD (cb_ref(x));
 		if (f->report) {
 			sc = get_sum_data_field (f->report, f);
@@ -8658,7 +8660,8 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 	case CB_TAG_CONST:
 		if (src == cb_space || src == cb_low || src == cb_high || src == cb_quote) {
 			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC
-			 || (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED && !is_value)) {
+			 || (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED && !is_value)
+			 || (CB_TREE_CATEGORY (dst) == CB_CATEGORY_FLOATING_EDITED && !is_value)) {
 				if ((current_statement && strcmp (current_statement->name, "SET") == 0)
 				 || cobc_cs_check == CB_CS_SET) {
 					goto invalid;
@@ -8668,7 +8671,8 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 
 		if (src == cb_space) {	/* error because SPACE is category alphabetic */
 			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC
-			 || (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED && !is_value)) {
+			 || (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED && !is_value)
+			 || (CB_TREE_CATEGORY (dst) == CB_CATEGORY_FLOATING_EDITED && !is_value)) {
 				/* note: ACUCOBOL and MF allow this, but not for NUMERIC + VALUE */
 				if (is_value) {
 					goto invalid;
@@ -8760,6 +8764,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 				}
 				goto non_integer_move;
 			case CB_CATEGORY_NUMERIC_EDITED:
+			case CB_CATEGORY_FLOATING_EDITED:
 				if (is_value) {
 					cb_verify_x (loc, cb_numeric_value_for_edited_item,
 						_("numeric literal in VALUE clause of numeric-edited item"));
@@ -9029,6 +9034,28 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 					/* TODO: validate the value for VALUE - needed? */
 				}
 				break;
+			case CB_CATEGORY_FLOATING_EDITED:
+				if (!is_value) {
+					/* TODO check if the following is correct: */
+					/* validate the value for normal MOVE as MF does*/
+					for (i = 0; i < l->size; i++) {
+						if (!isdigit (l->data[i])
+						 && l->data[i] != '.'
+						 && l->data[i] != ','
+						 && l->data[i] != '+'
+						 && l->data[i] != '-'
+						 && l->data[i] != 'E'
+						 && l->data[i] != ' ') {
+							if (cb_move_nonnumlit_to_numeric_is_zero) {
+								goto movezero;
+							}
+							goto expect_numeric;
+						}
+					}
+				} else {
+					/* TODO: validate the value for VALUE - needed? */
+				}
+				break;
 			default:
 				break;
 			}
@@ -9135,6 +9162,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 				}
 				break;
 			case CB_CATEGORY_ALPHANUMERIC_EDITED:
+			case CB_CATEGORY_FLOATING_EDITED:
 				if (size > count_pic_alphanumeric_edited (fdst)) {
 					goto size_overflow_1;
 				}
@@ -9151,6 +9179,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 			switch (CB_TREE_CATEGORY (dst)) {
 			case CB_CATEGORY_NUMERIC:
 			case CB_CATEGORY_NUMERIC_EDITED:
+			case CB_CATEGORY_FLOATING_EDITED:
 				goto invalid;
 			case CB_CATEGORY_ALPHANUMERIC_EDITED:
 				if (size > count_pic_alphanumeric_edited(fdst)) {
@@ -9166,6 +9195,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 			break;
 		case CB_CATEGORY_NUMERIC:
 		case CB_CATEGORY_NUMERIC_EDITED:
+		case CB_CATEGORY_FLOATING_EDITED:
 			switch (CB_TREE_CATEGORY (dst)) {
 			case CB_CATEGORY_ALPHABETIC:
 				goto invalid;
@@ -9617,7 +9647,7 @@ cob_put_sign_ebcdic (unsigned char *p, const int sign)
 		*p = (unsigned char)'I';
 		return;
 	default:
-		/* What to do here */
+		/* What to do here ? */
 		*p = (unsigned char)'{';
 		return;
 	}
@@ -9646,8 +9676,9 @@ cb_build_move_literal (cb_tree src, cb_tree dst)
 	}
 
 	if (l->all) {
-		if (cat == CB_CATEGORY_NUMERIC ||
-		    cat == CB_CATEGORY_NUMERIC_EDITED) {
+		if (cat == CB_CATEGORY_NUMERIC
+		 || cat == CB_CATEGORY_NUMERIC_EDITED
+		 || cat == CB_CATEGORY_FLOATING_EDITED) {
 			return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
 		}
 		if (l->size == 1) {
@@ -9682,7 +9713,8 @@ cb_build_move_literal (cb_tree src, cb_tree dst)
 					   CB_BUILD_CAST_LENGTH (dst));
 	}
 
-	if (cat == CB_CATEGORY_NUMERIC_EDITED) {
+	if (cat == CB_CATEGORY_NUMERIC_EDITED
+	 || cat == CB_CATEGORY_FLOATING_EDITED) {
 		return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
 	}
 

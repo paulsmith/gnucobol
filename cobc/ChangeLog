@@ -1,4 +1,13 @@
 
+2019-03-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* tree.c: improved error handling for wrong PICTURE clause,
+	  including a new warning for uncommon parentheses and
+	  only error once for same invalid character
+	* tree.c, tree.h, scanner.l, typeck.c, codegen.c, cobc.c: added compiler part for
+	  floating-point numeric-edited item (libcob open)
+	* parser.y: added parsing for PICTURE clause locale-format
+
 2019-03-16  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: added unqualified_word which consumes qualification

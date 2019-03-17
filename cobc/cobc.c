@@ -4916,6 +4916,7 @@ set_category (int category, int usage, char *type)
 		break;
 	case CB_CATEGORY_NUMERIC:
 	case CB_CATEGORY_NUMERIC_EDITED:
+	case CB_CATEGORY_FLOATING_EDITED:
 		strcpy (type, "NUMERIC");
 		break;
 	case CB_CATEGORY_OBJECT_REFERENCE:

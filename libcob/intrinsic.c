@@ -2424,8 +2424,9 @@ split_around_t (const char *str, char *first, char *second)
 	for (i = 0; str[i] != '\0' && str[i] != 'T'; ++i);
 
 	/* Copy everything before 'T' into first (if present) */
-	first_length = i;
-	if (first_length > COB_DATESTR_MAX) {
+	if (i < COB_DATESTR_MAX) {
+		first_length = i;
+	} else {
 		first_length = COB_DATESTR_MAX;
 	}
 	if (first != NULL) {

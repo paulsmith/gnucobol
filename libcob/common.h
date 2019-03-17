@@ -644,6 +644,9 @@ only usable with COB_USE_VC2013_OR_GREATER */
 /* Maximum digits in binary field */
 #define	COB_MAX_BINARY		39
 
+/* Maximum exponent digits (both in literals and floating-point numeric-edited item */
+#define COB_FLOAT_DIGITS_MAX         36
+
 /* Maximum bytes in a single/group field,
    which doesn't contain UNBOUNDED items */
 /* TODO: add compiler configuration for limiting this */

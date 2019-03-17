@@ -49,10 +49,12 @@
 #define PIC_NUMERIC		0x02
 #define PIC_NATIONAL		0x04
 #define PIC_EDITED		0x08
+#define PIC_NUMERIC_FLOATING		0x10
 #define PIC_ALPHANUMERIC	(PIC_ALPHABETIC | PIC_NUMERIC)
 #define PIC_ALPHABETIC_EDITED	(PIC_ALPHABETIC | PIC_EDITED)
 #define PIC_ALPHANUMERIC_EDITED	(PIC_ALPHANUMERIC | PIC_EDITED)
 #define PIC_NUMERIC_EDITED	(PIC_NUMERIC | PIC_EDITED)
+#define PIC_FLOATING_EDITED	(PIC_NUMERIC | PIC_NUMERIC_FLOATING | PIC_EDITED)
 #define PIC_NATIONAL_EDITED	(PIC_NATIONAL | PIC_EDITED)
 
 /* Local variables */
@@ -1329,6 +1331,7 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 		/* LCOV_EXCL_STOP */
 		}
 	case CB_CATEGORY_NUMERIC_EDITED:
+	case CB_CATEGORY_FLOATING_EDITED:
 		return COB_TYPE_NUMERIC_EDITED;
 	case CB_CATEGORY_OBJECT_REFERENCE:
 	case CB_CATEGORY_DATA_POINTER:
@@ -2753,7 +2756,7 @@ valid_char_order (const cob_pic_symbol *str, const int s_char_seen)
 }
 
 static int
-get_pic_number_from_str (const unsigned char *str, int * const error_detected)
+get_pic_number_from_str (const unsigned char *str, unsigned int * const error_detected)
 {
 	cob_u32_t		num_sig_digits = 0;
 	int			value = 0;
@@ -2786,40 +2789,49 @@ get_pic_number_from_str (const unsigned char *str, int * const error_detected)
 	return value;
 }
 
+static size_t
+skip_bad_parentheses(const unsigned char *p)
+{
+	const unsigned char *pos = p;
+	cb_error(_("parentheses must be preceded by a picture symbol"));
+
+	do {
+		++pos;
+	} while (*pos != ')' && *pos != '\0');
+
+	return pos - p;
+}
+
 /*
   Return the number in parentheses. p should point to the opening parenthesis.
   When the function returns, p will point to the closing parentheses or the null
   terminator.
 */
 static int
-get_number_in_parentheses (const unsigned char ** const p,
-			   int * const error_detected,
-			   int * const end_pic_processing)
+get_number_in_parentheses (const unsigned char ** p,
+			   unsigned int * const error_detected)
 {
 	const unsigned char	*open_paren = *p;
-	const unsigned char	*close_paren;
+	const unsigned char	*close_paren = *p + 1;
 	const unsigned char	*c;
 	int			contains_name;
 	size_t			name_length;
-        char			*name_buff;
+	char			*name_buff;
 	cb_tree			item;
 	cb_tree			item_value;
 
-	for (close_paren = *p; *close_paren != ')' && *close_paren;
-	     ++close_paren);
+	while (*close_paren != ')' && *close_paren)	++close_paren;
 
 	if (!*close_paren) {
 		cb_error (_("unbalanced parentheses"));
-		*p = close_paren;
-		/* There are no more informative messages to display. */
-	        *end_pic_processing = 1;
+		*error_detected = 1;
 		return 1;
 	}
 
 	*p = close_paren;
 
 	if (open_paren + 1 == close_paren) {
-		cb_error (_("parentheses must contain (a constant-name defined as) a positive integer"));
+		cb_error (_("parentheses must contain an unsigned integer"));
 		*error_detected = 1;
 		return 1;
 	}
@@ -2827,10 +2839,17 @@ get_number_in_parentheses (const unsigned char ** const p,
 	/* Find out if the parens contain a number or a constant-name. */
 	contains_name = 0;
 	for (c = open_paren + 1; c != close_paren; ++c) {
-		if (!(isdigit (*c) || *c == '.' || *c == '+'
-		      || *c == '-')) {
+		if (*c == '(') {
+			size_t skipped = skip_bad_parentheses(c);
+			close_paren = c + skipped + 1;
+			*error_detected = 1;
+			while (*close_paren != ')' && *close_paren)	++close_paren;
+			*p = close_paren;
+			/* actually only partial fix - we only skip one "inner" parens... */
+			return 1;
+		} else if (!(isdigit (*c)
+			 || *c == '.' || *c == '+' || *c == '-')) {
 			contains_name = 1;
-			break;
 		}
 	}
 
@@ -2841,14 +2860,15 @@ get_number_in_parentheses (const unsigned char ** const p,
 		strncpy (name_buff, (char *) open_paren + 1, name_length);
 		name_buff[name_length - 1] = '\0';
 
+		/* TODO: check if name_buf contains a valid user-defined name or not */
+
 		/* Build reference to name */
 		item = cb_ref (cb_build_reference (name_buff));
 
 		if (item == cb_error_node) {
 			*error_detected = 1;
 			return 1;
-		} else if (!(CB_FIELD_P (item)
-			     && CB_FIELD (item)->flag_item_78)) {
+		} else if (!(CB_FIELD_P (item) && CB_FIELD (item)->flag_item_78)) {
 			cb_error (_("'%s' is not a constant-name"), name_buff);
 			*error_detected = 1;
 			return 1;
@@ -2884,6 +2904,8 @@ cb_build_picture (const char *str)
 {
 	struct cb_picture	*pic;
 	static cob_pic_symbol	*pic_buff = NULL;
+	char			err_chars[10] = { 0 };
+	size_t			err_char_pos = 0;
 	const unsigned char	*p;
 	unsigned int		pic_str_len = 0;
 	size_t			idx = 0;
@@ -2895,22 +2917,24 @@ cb_build_picture (const char *str)
 	cob_u32_t		z_char_seen = 0;
 	cob_u32_t		c_count = 0;
 	cob_u32_t		s_count = 0;
+	cob_u32_t		s_edit_count = 0;
 	cob_u32_t		v_count = 0;
 	cob_u32_t		digits = 0;
+	cob_u32_t		digits_exponent = 0;
 #if 0 /* currently unused */
 	cob_u32_t		real_digits = 0;
 #endif
 	cob_u32_t		x_digits = 0;
+	cob_u32_t		has_parens;
+	cob_u32_t		error_detected = 0;
 	int			category = 0;
 	int			size = 0;
 	int			scale = 0;
 	int			paren_num;
 	int			n;
-	int			end_immediately = 0;
 	unsigned char		c;
 	unsigned char		first_last_char = '\0';
 	unsigned char		second_last_char = '\0';
-	int			error_detected = 0;
 
 	pic = make_tree (CB_TAG_PICTURE, CB_CATEGORY_UNKNOWN,
 			sizeof (struct cb_picture));
@@ -2923,31 +2947,48 @@ cb_build_picture (const char *str)
 	if (!pic_buff) {
 		pic_buff = cobc_main_malloc ((size_t)COB_MINI_BUFF * sizeof(cob_pic_symbol));
 	}
+	
+	p = (const unsigned char *)str;
+	
+	if (*p == '(') {
+		size_t skipped = skip_bad_parentheses (p) + 1;
+		p += skipped;
+		pic_str_len += skipped;
 
-	for (p = (const unsigned char *)str; *p; p++) {
+		error_detected = 1;
+	}
+
+	for (; *p; p++) {
 		n = 1;
+		has_parens = 0;
 		c = *p;
 repeat:
-		/* Count the number of repeated chars */
-		while (p[1] == c) {
-			p++, n++, pic_str_len++;
+		/* early check for picture characters with mulitple characters */
+		if ( (c == 'C' && p[1] == 'R')
+		  || (c == 'D' && p[1] == 'B')) {
+			p++;
+			pic_str_len++;
+		} else if (c == 'C') {
+			cb_error(_("C must be followed by R"));
+			error_detected = 1;
+		} else if (c == 'D') {
+			cb_error(_("D must be followed by B"));
+			error_detected = 1;
+		}
+		/* handle repeated chars */
+		if (p[1] == c) {
+			n++, p++, pic_str_len++;
+			goto repeat;
 		}
 
-		if (*p == ')' && p[1] == '(') {
-			cb_error (_("only one set of parentheses is permitted"));
-			error_detected = 1;
-
-			do {
-				++p;
-				++pic_str_len;
-			} while (*p != ')' && *p != '\0');
-		} else if (p[1] == '(') {
+		if (p[1] == '(') {
+			has_parens = 1;
 			++p;
 			++pic_str_len;
-			paren_num = get_number_in_parentheses (&p, &error_detected, &end_immediately);
-			if (end_immediately) {
-				goto end;
+			if (n != 1) {
+				cb_warning (COBC_WARN_FILLER, _("uncommon parentheses"));
 			}
+			paren_num = get_number_in_parentheses (&p, &error_detected);
 
 			n += paren_num - 1;
 			/*
@@ -2958,13 +2999,29 @@ repeat:
 			for (; paren_num != 0; paren_num /= 10) {
 				++pic_str_len;
 			}
-
-			goto repeat;
+			if (p[1] == '(') {
+				size_t skipped = skip_bad_parentheses(p);
+				p += skipped;
+				pic_str_len += skipped;
+				error_detected = 1;
+			}
+		}
+		if (category & PIC_NUMERIC_FLOATING) {
+			if (c != '9') {
+				char symbol[2] = { 0 };
+				symbol[0] = c;
+				cb_error (_("%s cannot follow %s"), symbol, _("exponent"));
+				goto end;
+			}
 		}
 
 		/* Check grammar and category */
 		switch (c) {
 		case '9':
+			if (category & PIC_NUMERIC_FLOATING) {
+				digits_exponent = n;
+				break;
+			}
 			category |= PIC_NUMERIC;
 			digits += n;
 #if 0 /* currently unused */
@@ -2997,6 +3054,9 @@ repeat:
 			category |= PIC_NUMERIC;
 			if (s_count <= 1) {
 				s_count += n;
+				if (has_parens) {
+					cb_warning (COBC_WARN_FILLER, _("uncommon parentheses"));
+				}
 				if (s_count > 1) {
 					cb_error (_("%s may only occur once in a PICTURE string"), "S");
 					error_detected = 1;
@@ -3020,6 +3080,9 @@ repeat:
 		case 'V':
 			category |= PIC_NUMERIC;
 			v_count += n;
+			if (has_parens) {
+				cb_warning (COBC_WARN_FILLER, _("uncommon parentheses"));
+			}
 			if (v_count > 1) {
 				error_detected = 1;
 			}
@@ -3104,16 +3167,16 @@ repeat:
 		case '-':
 			category |= PIC_NUMERIC_EDITED;
 			digits += n;
-			if (s_count == 0) {
+			if (s_edit_count == 0) {
 				--digits;
 			}
 			if (v_count) {
 				scale += n;
-				if (s_count == 0) {
+				if (s_edit_count == 0) {
 					--scale;
 				}
 			}
-			s_count++;
+			s_edit_count++;
 			break;
 
 		case '1':
@@ -3125,31 +3188,26 @@ repeat:
 			break;
 
 		case 'C':
-			category |= PIC_NUMERIC_EDITED;
-			if (p[1] != 'R') {
-				cb_error (_("C must be followed by R"));
-				error_detected = 1;
-			} else {
-				p++;
-				pic_str_len++;
-			}
-
-			s_count++;
-			break;
-
 		case 'D':
+			/* note: only reached if actually CR/DB, length adjusted already */
 			category |= PIC_NUMERIC_EDITED;
-
-			if (p[1] != 'B') {
-				cb_error (_("D must be followed by B"));
+			if (has_parens) {
+				cb_warning (COBC_WARN_FILLER, _("uncommon parentheses"));
+			}
+			if (n != 1) {
 				error_detected = 1;
-			} else {
-				p++;
-				pic_str_len++;
 			}
 
-			s_count++;
+			s_edit_count++;
 			break;
+
+		case 'E':
+			if (p[1] == '+') {
+				category |= PIC_NUMERIC_FLOATING | PIC_NUMERIC_EDITED;
+				p++;
+				break;
+			}
+			/* fall through */
 
 		default:
 			if (c == current_program->currency_symbol) {
@@ -3164,8 +3222,14 @@ repeat:
 				break;
 			}
 
-			cb_error (_("invalid PICTURE character '%c'"), c);
-			error_detected = 1;
+			if (err_char_pos == sizeof err_chars) {
+				goto end;
+			}
+			if (!strchr (err_chars, (int)c)) {
+				err_chars[err_char_pos++] = (char)c;
+				cb_error (_("invalid PICTURE character '%c'"), c);
+				error_detected = 1;
+			}
 		}
 
 		/* Calculate size */
@@ -3215,7 +3279,7 @@ repeat:
 	pic->size = size;
 	pic->digits = digits;
 	pic->scale = scale;
-	pic->have_sign = s_count;
+	pic->have_sign = (s_count || s_edit_count);
 #if 0 /* currently unused */
 	pic->real_digits = real_digits;
 #endif
@@ -3236,6 +3300,32 @@ repeat:
 		break;
 	case PIC_ALPHABETIC:
 		pic->category = CB_CATEGORY_ALPHABETIC;
+		break;
+	case PIC_FLOATING_EDITED:
+		/* note: same messages in scanner.l */
+		if (digits > COB_MAX_DIGITS) {
+			cb_error (_("significand has more than %d digits"), COB_FLOAT_DIGITS_MAX);
+		}
+		switch (digits_exponent) {
+		case 1: digits_exponent = 0; break;
+		case 2: digits_exponent = 99; break;
+		case 3: digits_exponent = 999; break;
+		case 4: digits_exponent = 9999; break;
+		default:
+			cb_error (_("exponent has more than 4 digits"));
+			digits_exponent = 9999;
+		}
+		/* No decimals; power up by scale difference */
+		if (scale < 0) {
+			scale -= digits_exponent;
+		} else {
+			scale += digits_exponent;
+		}
+		pic->scale = scale;
+		pic->str = cobc_parse_malloc ((idx + 1) * sizeof(cob_pic_symbol));
+		memcpy (pic->str, pic_buff, idx * sizeof(cob_pic_symbol));
+		pic->category = CB_CATEGORY_FLOATING_EDITED;
+		pic->lenstr = idx;
 		break;
 	case PIC_NUMERIC_EDITED:
 		pic->str = cobc_parse_malloc ((idx + 1) * sizeof(cob_pic_symbol));
@@ -3325,8 +3415,8 @@ cb_field_dup (struct cb_field *f, struct cb_reference *ref)
 	&& CB_LITERAL_P(ref->length)) {
 		sprintf(pic,"X(%d)",cb_get_int(ref->length));
 	} else
-	if(f->pic->category == CB_CATEGORY_NUMERIC
-	|| f->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
+	if (f->pic->category == CB_CATEGORY_NUMERIC
+	 || f->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
 		dig = f->pic->digits;
 		if((dec = f->pic->scale) > 0) {
 			if((dig-dec) == 0) {
@@ -3344,8 +3434,9 @@ cb_field_dup (struct cb_field *f, struct cb_reference *ref)
 	}
 	s = CB_FIELD (x);
 	s->pic 	= CB_PICTURE (cb_build_picture (pic));
-	if(f->pic->category == CB_CATEGORY_NUMERIC
-	|| f->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
+	if (f->pic->category == CB_CATEGORY_NUMERIC
+	 || f->pic->category == CB_CATEGORY_NUMERIC_EDITED
+	 || f->pic->category == CB_CATEGORY_FLOATING_EDITED) {
 		s->values	= CB_LIST_INIT (cb_zero);
 	} else {
 		s->values	= CB_LIST_INIT (cb_space);
@@ -4599,7 +4690,8 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal
 	}
 
 	if ((category != CB_CATEGORY_NUMERIC
-	  && category != CB_CATEGORY_NUMERIC_EDITED)
+	  && category != CB_CATEGORY_NUMERIC_EDITED
+	  && category != CB_CATEGORY_FLOATING_EDITED)
 	 || refmod_length) {
 		 if (!refmod_length) {
 			 refmod_length = f->size;

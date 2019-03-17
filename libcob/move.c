@@ -1,6 +1,7 @@
 /*
-   Copyright (C) 2002-2012, 2014-2017 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
+   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
+   Edwart Hard
 
    This file is part of GnuCOBOL.
 
@@ -1171,8 +1172,9 @@ cob_move_ibm (void *dst, void *src, const int len)
 	char	*dest = dst;
 	char	*srce = src;
 	int	i;
-	for(i=0; i < len; i++)
+	for (i=0; i < len; i++) {
 		dest[i] = srce[i];
+	}
 }
 
 void
@@ -1202,16 +1204,16 @@ cob_move (cob_field *src, cob_field *dst)
 	}
 
 	/* Non-elementary move */
-	if (COB_FIELD_TYPE (src) == COB_TYPE_GROUP ||
-	    COB_FIELD_TYPE (dst) == COB_TYPE_GROUP) {
+	if (COB_FIELD_TYPE (src) == COB_TYPE_GROUP
+	 || COB_FIELD_TYPE (dst) == COB_TYPE_GROUP) {
 		cob_move_alphanum_to_alphanum (src, dst);
 		return;
 	}
 
 	opt = 0;
 	if (COB_FIELD_TYPE (dst) == COB_TYPE_NUMERIC_BINARY) {
-		if (COB_FIELD_BINARY_TRUNC (dst) &&
-		    !COB_FIELD_REAL_BINARY(dst)) {
+		if (COB_FIELD_BINARY_TRUNC (dst)
+		 && !COB_FIELD_REAL_BINARY (dst)) {
 			opt = COB_STORE_TRUNC_ON_OVERFLOW;
 		}
 	}
@@ -1243,12 +1245,12 @@ cob_move (cob_field *src, cob_field *dst)
 			cob_move_display_to_edited (src, dst);
 			return;
 		case COB_TYPE_ALPHANUMERIC_EDITED:
-			if (COB_FIELD_SCALE(src) < 0 ||
-			    COB_FIELD_SCALE(src) > COB_FIELD_DIGITS(src)) {
+			if (COB_FIELD_SCALE (src) < 0
+			 || COB_FIELD_SCALE (src) > COB_FIELD_DIGITS (src)) {
 				/* Expand P's */
 				indirect_move (cob_move_display_to_display, src, dst,
-					      (size_t)cob_max_int ((int)COB_FIELD_DIGITS(src), (int)COB_FIELD_SCALE(src)),
-					      cob_max_int (0, (int)COB_FIELD_SCALE(src)));
+						(size_t)cob_max_int ((int)COB_FIELD_DIGITS(src), (int)COB_FIELD_SCALE(src)),
+						cob_max_int (0, (int)COB_FIELD_SCALE(src)));
 				return;
 			} else {
 				cob_move_alphanum_to_edited (src, dst);
@@ -1310,13 +1312,13 @@ cob_move (cob_field *src, cob_field *dst)
 			return;
 		case COB_TYPE_NUMERIC_EDITED:
 			indirect_move (cob_move_binary_to_display, src, dst,
-				       (size_t)COB_MAX_DIGITS,
-				       COB_FIELD_SCALE(src));
+					(size_t)COB_MAX_DIGITS,
+					COB_FIELD_SCALE(src));
 			return;
 		default:
 			indirect_move (cob_move_binary_to_display, src, dst,
-				       (size_t)(COB_FIELD_DIGITS(src)),
-				       COB_FIELD_SCALE(src));
+					(size_t)(COB_FIELD_DIGITS(src)),
+					COB_FIELD_SCALE(src));
 			return;
 		}
 
