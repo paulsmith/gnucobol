@@ -6718,30 +6718,6 @@ Program-Id:  caller
 Program-Id:  caller                      CANCEL                          Line:     17
 Program-Id:  caller                      MOVE                            Line:     18
 Program-Id:  caller                      STOP RUN                        Line:     19
-libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 4
-libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 21
-libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 7
-libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 17
-libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 7
-libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 13
-libcob: warning: cob_put_s64_param: attempt to over-write constant param 1 with 7
-#### r2619:
-AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 10: Warning: ' SUB ' literal includes leading spaces which are omitted
-prog.cob: 10: Warning: ' SUB ' literal includes trailing spaces which are omitted
-prog.cob: 21: Warning: 'SUB ' literal includes trailing spaces which are omitted
-prog.cob: 30: Warning: ' SUB' literal includes leading spaces which are omitted
-])
-
-AT_CHECK([./prog], [0],
-[SUB GOT X
-SUB GOT Y
-SUB GOT Z
-S U B  GOT A
-S U B  GOT B
-],
-[libcob: prog.cob: 12: warning: ' SUB' literal includes leading spaces which are omitted
-libcob: prog.cob: 16: warning: ' S U B' literal includes leading spaces which are omitted
 ])
 
 AT_CLEANUP
@@ -7100,14 +7076,6 @@ AT_DATA([callsub.cob], [
 
 AT_CHECK([$COMPILE_MODULE callsub.cob], [0], [], [])
 
-AT_CHECK([export COB_DUMP_FILE=tstdump.txt
-./prog], [11], [X is 000000001
-X is 000005441
-], [
-cpyabrt: 3: attempt to reference unallocated memory (signal SIGSEGV)
-libcob: cpyabrt: 3: warning: implicit CLOSE of FLATFILE ('RELFIX')
-abnormal termination - file contents may be incorrect
-])
 
 
 AT_CAPTURE_FILE(./tstdump.txt)
@@ -10278,6 +10246,13 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 The date is 0000*08*21 INITIALIZE
 The date is 0000 08 21 WITH FILLER
 The date is 2017-08-21 ALL TO VALUE
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([PICTURE with constant-name])
+AT_KEYWORDS([runmisc])
 
 #### r2273
 AT_CHECK([COB_TRACE_FILE=trace.txt \
