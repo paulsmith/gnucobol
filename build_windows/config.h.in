@@ -254,7 +254,11 @@
 /* #undef HAVE_DOPRNT */
 
 /* Define to 1 if you have the `fcntl' function. */
+#if defined(__ORANGEC__)
+#define HAVE_FCNTL 1
+#else
 /* #undef HAVE_FCNTL */
+#endif
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
@@ -497,6 +501,7 @@
 #endif
 
 /* Has timezone variable */
+/* note: MSC and ORANGEC have it as _timezone */
 #define HAVE_TIMEZONE 1
 
 /* Define to 1 if you have the <unistd.h> header file. */

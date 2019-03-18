@@ -1199,11 +1199,14 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 #	CFLAGS="$MYOLDCFLAGS"
 #fi
 
-# Check if aligned attribute works
+# Check if aligned attribute seems to work
+# done:   does not raise an error
+# *TODO*: has same output as omitting it)
 AC_MSG_CHECKING([for aligned attribute])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],
 	[[char testchar[4] __attribute__((aligned));]])],
-	[AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], [1]) AC_MSG_RESULT([yes])],
+	[AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], [1]) AC_MSG_RESULT([yes])
+	],
 	[AC_MSG_RESULT([no])])
 
 # GnuCOBOL Configuration
@@ -1232,8 +1235,8 @@ fi
 COB_OBJECT_EXT="$OBJEXT"
 LIBS="$save_libs"
 COB_EXPORT_DYN="`eval echo $export_dynamic_flag_spec`"
+# FIXME: lt_prog_compiler_pic is not always correct, for example with occ
 COB_PIC_FLAGS=`echo "$lt_prog_compiler_pic" | sed -e 's/^ //'`
-COB_SHARED_OPT="-shared"
 
 if test "$enable_cflags_setting" = "yes"; then
 
@@ -1371,6 +1374,11 @@ AH_VERBATIM([_XOPEN_SOURCE_EXTENDED],
 # undef _XOPEN_SOURCE_EXTENDED
 #endif])dnl
 
+# FIXME: COB_SHARED_OPT should at least be checked for "compiles";
+#        for example breaks with occ and other non-GCC compilers,
+#        *at least* check that compilation still works when using this option...
+COB_SHARED_OPT="-shared"
+
 COB_FIX_LIB="$COB_EXPORT_DYN"
 COB_FIX_LIBTOOL=""
 case $host_os in
@@ -1393,7 +1401,9 @@ case $host_os in
 	COB_FIX_LIB=""
 	;;
   darwin* | rhapsody*)
-	COB_SHARED_OPT="-bundle -flat_namespace -undefined suppress"
+	if test "$COB_USES_GCC" = "yes"; then
+		COB_SHARED_OPT="-bundle -flat_namespace -undefined suppress"
+	fi
 	;;
   hpux*)
 	if test "$COB_USES_GCC" != "yes"; then

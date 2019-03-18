@@ -7968,13 +7968,13 @@ cob_dump_module (char *reason)
 			return;
 		}
 		fprintf(fp,"\n");
-		for(mod = COB_MODULE_PTR; mod; mod = mod->next) {
-			if(mod->module_cancel.funcint) {
+		for (mod = COB_MODULE_PTR; mod; mod = mod->next) {
+			if (mod->module_cancel.funcint) {
 				cancel_func = mod->module_cancel.funcint;
-				fprintf (fp,_("Dump Program-Id %s from %s compiled %s\n"),
-						mod->module_name,mod->module_source,mod->module_formatted_date);
+				fprintf (fp, _("Dump Program-Id %s from %s compiled %s\n"),
+						mod->module_name, mod->module_source, mod->module_formatted_date);
 				(void)cancel_func (-10);
-				fprintf(fp,"\n");
+				fprintf (fp,"\n");
 			}
 		}
 	}
