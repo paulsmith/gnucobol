@@ -1,4 +1,9 @@
 
+2019-03-18  Simon Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l, config.def: FR #352 added national-character-literals setting
+	  and read of NC"" literals (identical to N"" literals)
+
 2019-03-17  Simon Sobisch <simonsobisch@gnu.org>
 
 	* tree.c: improved error handling for wrong PICTURE clause,

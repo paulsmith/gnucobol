@@ -1,11 +1,16 @@
 
+2019-03-18 Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: FR #352 added national-character-literals option, set to warning
+	  for default/lax only as we still don't have a dialect file for Fujitsu
+
 2019-01-29 Simon Sobisch <simonsobisch@gnu.org>
 
 	* runtime.cfg: added COB_DISPLAY_PUNCH_FILE
 
 2019-01-05  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added json-generate option.
+	* general: added json-generate option
 
 2018-04-12  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -18,8 +23,8 @@
 
 2018-08-07  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added xml-generate and xml-generate-extra-phrases options.
-	* general: marked XML-CODE as implemented.
+	* general: added xml-generate and xml-generate-extra-phrases options
+	* general: marked XML-CODE as implemented
 
 2018-07-13  Simon Sobisch <simonsobisch@gnu.org>
 

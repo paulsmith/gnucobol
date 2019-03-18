@@ -336,6 +336,15 @@ N[''""] {
 	RETURN_TOK (LITERAL);
 }
 
+NC[''""] {
+	/* NC national character string literal (extension, but
+	   same handling as COBOL 2002 national string literal) */
+	cobc_force_literal = 0;
+	/* TODO: national string - needs different handling */
+	read_literal (yytext [2], "NC");
+	RETURN_TOK (LITERAL);
+}
+
 NX"\'"[^''\n]*"\'" |
 NX"\""[^""\n]*"\"" {
 	/* NX string literal */
@@ -1224,15 +1233,15 @@ read_literal (const char mark, const char *type)
 			error_literal ("", plex_buff);
 		}
 	}
-	/* FIXME: Exact behaviour should depend on level of support:
-	    * "OK" => stanadard behaviour, e.g. normal items filled with spaces/
-                      zeroes, DYNAMIC LENGTH items made empty
-	    * "warning" => current implementation, interpret '' as SPACE/ZERO
-	    * "ignore" => assume a space without warning; make sure zero length
-                          items work everywhere (should do as we support zero
-                          lengths via ODO items already)
-	*/
 
+	/* FIXME: Exact behavior should depend on level of support:
+	    * "OK"      => standard behavior, e.g. normal items filled with spaces/
+	                   zeros, DYNAMIC LENGTH items made empty
+	    * "warning" => current implementation, interpret '' as SPACE/ZERO
+	    * "ignore"  => assume a space without warning; make sure zero length
+	                   items work everywhere (should do as we support zero
+	                   lengths via ODO items already)
+	*/
 	if (!i) {
 		cb_verify (cb_zero_length_lit, _("zero-length literal"));
 		cb_warning (COBC_WARN_FILLER,
@@ -1249,8 +1258,14 @@ read_literal (const char mark, const char *type)
 	if (type[0] != 'N') {
 		yylval = cb_build_alphanumeric_literal (plex_buff, i);
 	} else {
-		if (cb_verify (cb_national_literals, _("national literal"))) {
-			CB_UNFINISHED (_("national literal"));
+		if (type[1] != 'C') {
+			if (cb_verify (cb_national_literals, _("national literal"))) {
+				CB_UNFINISHED (_("national literal"));
+			}
+		} else {
+			if (cb_verify (cb_nationalc_literals, _("national-character literal"))) {
+				CB_UNFINISHED (_("national literal"));
+			}
 		}
 		yylval = cb_build_national_literal (plex_buff, i);
 	}

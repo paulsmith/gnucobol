@@ -3234,6 +3234,8 @@ AT_DATA([prog.cob], [
            DISPLAY N'0123456789ABCDEF'.
            DISPLAY N"0123456789ABCDEF"-
                    N"0123456789ABCDEF".
+           DISPLAY NC"0123456789ABCDEF"-
+                   NC'0123456789ABCDEF'.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
@@ -3241,6 +3243,10 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 prog.cob:6: warning: handling of national literal is unfinished; implementation is likely to be changed
 prog.cob:7: warning: handling of national literal is unfinished; implementation is likely to be changed
 prog.cob:8: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:9: warning: national-character literal used
+prog.cob:9: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:10: warning: national-character literal used
+prog.cob:10: warning: handling of national literal is unfinished; implementation is likely to be changed
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
@@ -3248,6 +3254,8 @@ AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
 prog.cob:6: error: national literal does not conform to COBOL 85
 prog.cob:7: error: national literal does not conform to COBOL 85
 prog.cob:8: error: national literal does not conform to COBOL 85
+prog.cob:9: error: national-character literal does not conform to COBOL 85
+prog.cob:10: error: national-character literal does not conform to COBOL 85
 ])
 
 AT_CLEANUP

@@ -244,6 +244,9 @@ CB_CONFIG_SUPPORT (cb_national_literals, "national-literals",
 CB_CONFIG_SUPPORT (cb_national_hex_literals, "hexadecimal-national-literals",
 	_("hexadecimal-national literals (NX'265E')"))
 
+CB_CONFIG_SUPPORT (cb_nationalc_literals, "national-character-literals",
+	_("non-standard national literals (NC'UTF-16 string')"))
+
 CB_CONFIG_SUPPORT (cb_acu_literals, "acu-literals",
 	_("ACUCOBOL-GT literals (#B #O #H #X)"))
 
