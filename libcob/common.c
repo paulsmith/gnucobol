@@ -4355,7 +4355,7 @@ void print_stat (const char *filename, struct stat sb)
 }
 #endif
 
-COB_INLINE int
+static COB_INLINE int
 check_valid_dir (const char *dir)
 {
 	struct stat		sb;
