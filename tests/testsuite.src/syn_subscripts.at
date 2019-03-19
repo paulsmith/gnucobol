@@ -182,12 +182,5 @@ prog.cob:16: warning: subscript missing for 'Y' - defaulting to 1
 prog.cob:20: error: 'Y' requires 2 subscripts
 ])
 
-AT_CHECK([$COMPILE_ONLY -frelax-syntax prog.cob], [1], ,
-[prog.cob: 10: Warning: Subscripts missing for 'X' - Defaulting to 1
-prog.cob: 14: Error: 'X' requires 1 subscript
-prog.cob: 16: Warning: Subscripts missing for 'Y' - Defaulting to 1
-prog.cob: 20: Error: 'Y' requires 2 subscripts
-])
-
 AT_CLEANUP
 
