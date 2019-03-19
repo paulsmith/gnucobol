@@ -10192,6 +10192,11 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 		cb_error_x (CB_TREE (current_statement),
 				_("%s not allowed on %s files"), "OPEN", "SORT");
 		return;
+	} else if (f->organization == COB_ORG_LINE_SEQUENTIAL &&
+		   mode == cb_int (COB_OPEN_I_O)) {
+		cb_error_x (CB_TREE (current_statement),
+				_("%s not allowed on %s files"), "OPEN I-O", "LINE SEQUENTIAL");
+		return;
 	}
 	if (sharing == NULL) {
 		if (f->sharing) {
