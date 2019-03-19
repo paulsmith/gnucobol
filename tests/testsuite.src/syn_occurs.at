@@ -441,7 +441,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=mf prog.cob ], [1], [],
-[prog.cob: 13: Error: ODO-2 does not have a fixed location
+[prog.cob:13: error: ODO-2 does not have a fixed location
 ])
 
 AT_CLEANUP
