@@ -25,9 +25,9 @@
 #include <ctype.h>
 #include <stdio.h>
 
-/* Force symbol exports */
+/* Force symbol exports, don't include gmp.h */
 #define	COB_LIB_EXPIMP
-
+#define COB_WITHOUT_DECIMAL
 #include "libcob.h"
 #include "coblocal.h"
 
@@ -164,19 +164,12 @@ get_num (cob_field * const f, void * (*strndup_func)(const char *, int))
 static void
 set_xml_code (const unsigned int code)
 {
-	cob_decimal	d;
-
 	/* if the COBOL module never checks the code it isn't generated,
 	   this also makes clear that we don't need to (and can't) set it */
 	if (!COB_MODULE_PTR->xml_code) {
 		return;
 	}
-
-	mpz_init2 (d.value, COB_MPZ_DEF);
-	mpz_set_ui (d.value, code);
-	d.scale = 0;
-	cob_decimal_get_field (&d, COB_MODULE_PTR->xml_code, 0);
-	mpz_clear (d.value);
+	cob_decimal_set_field_to_uint (COB_MODULE_PTR->xml_code, code);
 }
 
 static int
@@ -554,20 +547,12 @@ set_xml_exception (const unsigned int code)
 static void
 set_json_code (const unsigned int code)
 {
-	cob_decimal	d;
-
 	/* if the COBOL module never checks the code it isn't generated,
 	   this also makes clear that we don't need to (and can't) set it */
 	if (!COB_MODULE_PTR->json_code) {
 		return;
 	}
-
-	/* TO-DO: Duplication! */
-	mpz_init2 (d.value, COB_MPZ_DEF);
-	mpz_set_ui (d.value, code);
-	d.scale = 0;
-	cob_decimal_get_field (&d, COB_MODULE_PTR->json_code, 0);
-	mpz_clear (d.value);
+	cob_decimal_set_field_to_uint (COB_MODULE_PTR->json_code, code);
 }
 
 static void

@@ -3,6 +3,7 @@
 
 	* cobc.c: use of COB_MAX_NAMELEN
 	* cobc.h: comment-explanation for cb_flag_main / cobc_flag_main
+	* cobc.h: suppressed inclusion of gmp.h
 
 2019-03-18  Simon Sobisch <simonsobisch@gnu.org>
 

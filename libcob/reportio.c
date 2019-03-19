@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2013-2018 Free Software Foundation, Inc.
-   Written by Ron Norman
+   Copyright (C) 2013-2019 Free Software Foundation, Inc.
+   Written by Ron Norman, Simon Sobisch
 
    This file is part of GnuCOBOL.
 
@@ -28,9 +28,9 @@
 #include <ctype.h>
 #include <errno.h>
 
-/* Force symbol exports */
+/* Force symbol exports, don't include gmp.h */
 #define	COB_LIB_EXPIMP
-
+#define COB_WITHOUT_DECIMAL
 #include "libcob.h"
 #include "coblocal.h"
 

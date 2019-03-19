@@ -2,6 +2,7 @@
 2019-03-19  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c: use of COB_MAX_NAMELEN
+	* cobcrun.c: suppressed inclusion of gmp.h
 
 2018-07-16  Brian Tiffin <btiffin@gnu.org>
 

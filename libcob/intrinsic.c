@@ -58,7 +58,6 @@
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
-
 #include "libcob.h"
 #include "coblocal.h"
 

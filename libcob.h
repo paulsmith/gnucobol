@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2002-2012, 2018 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While
+   Copyright (C) 2002-2012, 2019 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
 

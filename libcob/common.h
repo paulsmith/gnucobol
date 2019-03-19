@@ -1883,6 +1883,7 @@ COB_EXPIMP void	cob_decimal_init	(cob_decimal *);
 COB_EXPIMP void	cob_decimal_clear	(cob_decimal *);
 COB_EXPIMP void cob_decimal_set_llint	(cob_decimal *, const cob_s64_t);
 COB_EXPIMP void cob_decimal_set_ullint	(cob_decimal *, const cob_u64_t);
+COB_EXPIMP void	cob_decimal_set_field_to_uint	(cob_field *, const cob_u32_t);
 COB_EXPIMP void	cob_decimal_set_field	(cob_decimal *, cob_field *);
 COB_EXPIMP int	cob_decimal_get_field	(cob_decimal *, cob_field *, const int);
 COB_EXPIMP void	cob_decimal_add		(cob_decimal *, cob_decimal *);

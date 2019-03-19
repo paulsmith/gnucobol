@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2014, 2016-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014, 2016-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Edward Hart, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -29,9 +29,9 @@
 #include <errno.h>
 #include <sys/types.h>
 
-/* Force symbol exports */
+/* Force symbol exports, don't include gmp.h */
 #define	COB_LIB_EXPIMP
-
+#define COB_WITHOUT_DECIMAL
 #include "libcob.h"
 #include "coblocal.h"
 

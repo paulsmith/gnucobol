@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2010-2012, 2014-2016, 2018 Free Software Foundation, Inc.
+   Copyright (C) 2010-2012, 2014-2016, 2018-2019 Free Software Foundation, Inc.
    Modified for use in GnuCOBOL by Roger While, Simon Sobisch
 */
 
@@ -45,8 +45,9 @@
 #define N_(msgid)		msgid
 #endif
 
-/* Force symbol exports */
+   /* Force symbol exports, don't include gmp.h */
 #define	COB_LIB_EXPIMP
+#define COB_WITHOUT_DECIMAL
 #include "libcob.h"
 
 #define NONOPTION_P (argv[cob_optind][0] != '-' || argv[cob_optind][1] == '\0')
