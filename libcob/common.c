@@ -6190,30 +6190,13 @@ set_config_val (char *value, int pos)
 		}
 		set_value (data, data_len, numval);
 
-	} else if((data_type & ENV_BOOL)) {	/* Boolean: Yes/No,True/False,... */
-		numval = -1;
-		switch(toupper((unsigned char)*ptr)) {
-		case 'T':	/* True */
-		case 'Y':	/* Yes */
-		case '1':
-			numval = 1;
-			break;
-		case 'O':	/* ON / OFF */
-			if(toupper((unsigned char)ptr[1]) == 'N')	/* ON */
-				numval = 1;
-			else if(toupper((unsigned char)ptr[1]) == 'F') /* OFF */
-				numval = 0;
-			break;
-		case 'F':	/* False */
-		case 'N':	/* No */
-		case '0':
-			numval = 0;
-			break;
-		default:
-			break;
-		}
-		if(numval == -1) {
-			cob_runtime_error (_("%s should be 'true' or 'false'; '%s' is invalid"),gc_conf[pos].env_name,ptr); 
+	} else if ((data_type & ENV_BOOL)) {	/* Boolean: Yes/No, True/False,... */
+		numval = translate_boolean_to_int (ptr);
+
+		if (numval != 1
+		 && numval != 0) {
+			conf_runtime_error_value (ptr, pos);
+			conf_runtime_error (1, _("should be one of the following values: %s"), "true, false");
 			return 1;
 		} else {
 			if ((data_type & ENV_NOT)) {	/* Negate logic for actual setting */
