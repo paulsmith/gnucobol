@@ -17,7 +17,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 # use GREP from configure, passed when called from Makefile
 GREP_ORIG="$GREP";
@@ -106,7 +106,7 @@ _create_file () {
 		"cbconf.tex")
 			echo "@verbatim"               > $1
 			cat $confdir/default.conf \
-			| $GREP -A9999 "http://www.gnu.org/licenses/" \
+			| $GREP -A9999 "https://www.gnu.org/licenses/" \
 			| tail -n +2 \
 			                               >>$1
 			echo "@end verbatim"           >>$1

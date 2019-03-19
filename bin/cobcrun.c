@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "config.h"
@@ -104,7 +104,7 @@ cobcrun_print_version (void)
 	printf ("cobcrun (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
 	puts ("Copyright (C) 2019 Free Software Foundation, Inc.");
-	puts (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"));
+	puts (_("License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>"));
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Written by %s\n"), "Roger While, Simon Sobisch, Brian Tiffin");
@@ -120,7 +120,7 @@ cobcrun_print_version (void)
 static void
 cobcrun_print_usage (char * prog)
 {
-	puts (_("COBOL driver program for GnuCOBOL modules"));
+	puts (_("GnuCOBOL module loader"));
 	putchar ('\n');
 	printf (_("Usage: %s [options] PROGRAM [parameter ...]"), prog);
 	putchar ('\n');
@@ -146,8 +146,8 @@ cobcrun_print_usage (char * prog)
 	printf (_("Report bugs to: %s\n" 
 			  "or (preferably) use the issue tracker via the home page."), "bug-gnucobol@gnu.org");
 	putchar ('\n');
-	puts (_("GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>"));
-	puts (_("General help using GNU software: <http://www.gnu.org/gethelp/>"));
+	puts (_("GnuCOBOL home page: <https://www.gnu.org/software/gnucobol/>"));
+	puts (_("General help using GNU software: <https://www.gnu.org/gethelp/>"));
 }
 
 /**

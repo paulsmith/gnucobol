@@ -17,7 +17,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 if COB_MAKE_RUN_BINARIES
 COBCINFOSH = . $(top_builddir)/tests/atconfig && . $(top_builddir)/tests/atlocal && \

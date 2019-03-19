@@ -7,6 +7,7 @@
 	  to numeric.c as separate function cob_decimal_set_field_to_uint
 	* coblocal.h [COB_WITHOUT_DECIMAL]: allow inclusion without gmp header
 	* general: suppressed inclusion of gmp.h where not necessary
+	* intrinsic.h: function-statement cobol 202x 63
 
 2019-03-15  Simon Sobisch <simonsobisch@gnu.org>
 

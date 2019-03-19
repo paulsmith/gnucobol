@@ -17,7 +17,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 # FIXME: doesn't work when EXEC85$(EXEEXT) exists in sourcedir but not
 #        in builddir
