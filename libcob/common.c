@@ -654,8 +654,6 @@ cob_terminate_routines (void)
 	 && !cobsetptr->external_trace_file	/* note: may include stdout */) {
 		fclose (cobsetptr->cob_trace_file);
 	}
-#else
-	cob_exit_common ();
 #endif
 	cobsetptr->cob_trace_file = NULL;
 

@@ -12633,7 +12633,7 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	output_local_base_cache ();
 	output_local_field_cache (prog);
 
-	if (local_field_cache) {
+	if (0 && local_field_cache) { //// brought in from reportwriter.  Seems to generate invalid local variables (test #2)
 		/* Switch to local storage file */
 		output_target = current_prog->local_include->local_fp;
 		if (prog->flag_recursive) {
@@ -12666,7 +12666,7 @@ codegen (struct cb_program *prog, const int subsequent_call)
 			if (k->f->flag_filler) {
 				output (";\t/* Implicit FILLER */\n");
 			} else {
-				output (";\t/* %s */\n", k->f->name);
+				output (";\t/* %s generated: %s:%d*/\n", k->f->name, __func__, __LINE__);
 			}
 			k->f->report_flag |= COB_REPORT_REF_EMITTED;
 		}
