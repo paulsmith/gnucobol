@@ -113,6 +113,14 @@
 
 #include "libcob/cobgetopt.h"
 
+/* sanity checks */
+#if COB_MAX_WORDLEN > 255
+#error COB_MAX_WORDLEN is too big, must be less than 256
+#endif
+#if COB_MAX_NAMELEN > COB_MAX_WORDLEN
+#error COB_MAX_NAMELEN is too big, must be less than COB_MAX_WORDLEN
+#endif
+
 #define	CB_IMSG_SIZE	24
 #define	CB_IVAL_SIZE	(80 - CB_IMSG_SIZE - 4)
 
@@ -1900,7 +1908,8 @@ cob_trace_print (char *val)
 			} else
 			if (toupper(cobsetptr->cob_trace_format[i]) == 'F') {
 				if (i != last_pos) {
-					fprintf (cobsetptr->cob_trace_file, "Source: %-31.31s", cob_last_sfile);
+					fprintf (cobsetptr->cob_trace_file, "Source: %-*.*s",
+						-COB_MAX_NAMELEN, COB_MAX_NAMELEN, cob_last_sfile);
 				} else {
 					fprintf (cobsetptr->cob_trace_file, "Source: %s", cob_last_sfile);
 				}
@@ -7117,7 +7126,7 @@ print_version (void)
 
 	printf ("libcob (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2018 Free Software Foundation, Inc.");
+	puts ("Copyright (C) 2019 Free Software Foundation, Inc.");
 	puts (_("License LGPLv3+: GNU LGPL version 3 or later <http://gnu.org/licenses/lgpl.html>"));
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));

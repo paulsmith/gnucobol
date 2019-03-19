@@ -1,4 +1,9 @@
 
+2019-03-19  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: use of COB_MAX_NAMELEN
+	* cobc.h: comment-explanation for cb_flag_main / cobc_flag_main
+
 2019-03-18  Simon Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l, config.def: FR #352 added national-character-literals setting

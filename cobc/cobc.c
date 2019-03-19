@@ -1491,8 +1491,8 @@ cobc_error_name (const char *name, const enum cobc_name_type type,
 	const char	*s;
 
 	switch (reason) {
-	case INVALID_LENGTH:
-		s = _(" - length is < 1 or > 31");
+	case INVALID_LENGTH:	/* <1 || > COB_MAX_NAMELEN ("normal mode ") || > COB_MAX_WORDLEN */
+		s = _(" - length is less than 1 or exceeds maximum");
 		break;
 	case SPACE_UNDERSCORE_FIRST_CHAR:
 		s = _(" - name cannot begin with space or underscore");
@@ -1551,9 +1551,16 @@ cobc_check_valid_name (const char *name, const enum cobc_name_type prechk)
 		cobc_error_name (name, prechk, INVALID_LENGTH);
 		return 1;
 	}
-	if (!cb_relaxed_syntax_checks && len > 31) {
-		cobc_error_name (name, prechk, INVALID_LENGTH);
-		return 1;
+	if (cb_flag_main || !cb_relaxed_syntax_checks) {
+		if (len > COB_MAX_NAMELEN) {
+			cobc_error_name (name, prechk, INVALID_LENGTH);
+			return 1;
+		}
+	} else {
+		if (len > COB_MAX_WORDLEN) {
+			cobc_error_name (name, prechk, INVALID_LENGTH);
+			return 1;
+		}
 	}
 
 	if (*name == '_' || *name == ' ') {
