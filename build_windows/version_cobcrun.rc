@@ -51,7 +51,7 @@ VS_VERSION_INFO    VERSIONINFO
       VALUE "SpecialBuild",     ""
 
       /* Non-Standard entries */
-      VALUE "Build",            "Mar 2019"
+      VALUE "Build",            "March 2019"
       VALUE "Developer",        "Roger While, Simon Sobisch, Brian Tiffin (see AUTHORS and THANKS)"
       VALUE "Support",          "https://www.gnu.org/software/gnucobol/"
       VALUE "Users",            "Unlimited."
