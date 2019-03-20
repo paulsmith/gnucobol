@@ -6202,14 +6202,13 @@ output_call (struct cb_call *p)
 		}
 	} else {
 		/* Dynamic link */
-#if 0 && reportwriter //// removed for 1547
 		if (name_is_literal_or_prototype) {
 			s = get_program_id_str (p->name);
 			name_str = cb_encode_program_id (s);
 			lookup_call (name_str);
 
 			output ("if (unlikely(call_%s.funcvoid == NULL || cob_glob_ptr->cob_physical_cancel)) {\n", name_str);
-#endif
+#if 0 && reportwriter //// removed for 1547
 		if (CB_LITERAL_P (p->name)) {
 			s = (char *)(CB_LITERAL (p->name)->data);
 			callname = s;
@@ -6223,6 +6222,7 @@ output_call (struct cb_call *p)
 				}
 			}
 			output ("if (unlikely(call_%s.funcvoid == NULL)) {\n", callp);
+#endif
 			output_prefix ();
 
 			nlp = find_nested_prog_with_id (name_str);
