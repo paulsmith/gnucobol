@@ -5733,7 +5733,6 @@ prog.cob:18: error: 'invalid-6' ANY LENGTH has invalid definition
 AT_CLEANUP
 
 
-
 AT_SETUP([VOLATILE clause])
 AT_KEYWORDS([extensions])
 

@@ -2220,41 +2220,39 @@ cb_build_system_name (const enum cb_system_name_category category, const int tok
 cb_tree
 cb_build_numeric_literal (int sign, const void *data, const int scale)
 {
+        /* TODO: remove sign parameter because it isn't used */
 	struct cb_literal *p;
-	cb_tree			l;
-	/* using an intermediate char pointer for pointer arithmetic */
-	const char	*data_chr_ptr = data;
-	int	dec = 0;
+	cb_tree            tree;
+	char       	  *pc = (char*)data;
+	int	           i, dec;
 
-	if (*data_chr_ptr == '-') {
+	if (*pc == '-') {
 		sign = -1;
-		data_chr_ptr++;
-	} else if (*data_chr_ptr == '+') {
+		pc++;
+	} else if (*pc == '+') {
 		sign = 1;
-		data_chr_ptr++;
+		pc++;
 	}
-#if 0 &&  r2092 //// sdata undefined
+
 	/* Check for '.' in numeric string and adjust scale */
-	dec = 0;
-	for (k=0; sdata[k] != 0; k++) {
-		if (sdata[k] == '.') {
-			memmove(&sdata[k], &sdata[k+1], strlen(&sdata[k]));
-			dec = strlen(&sdata[k]);
+	for (dec = i = 0; pc[i] != 0; i++) {
+		if (pc[i] == '.') {
+			memmove(&pc[i], &pc[i+1], strlen(&pc[i]));
+			dec = strlen(&pc[i]);
 			break;
 		}
 	}
-	data = data_chr_ptr;
-#endif
-	p = build_literal (CB_CATEGORY_NUMERIC, data, strlen (data));
+
+	p = build_literal (CB_CATEGORY_NUMERIC, pc, strlen (data));
 	p->sign = (short)sign;
 	p->scale = scale + dec;
 
-	l = CB_TREE (p);
+	tree = CB_TREE (p);
 
-	l->source_file = cb_source_file;
-	l->source_line = cb_source_line;
+	tree->source_file = cb_source_file;
+	tree->source_line = cb_source_line;
 
-	return l;
+	return tree;
 }
 
 cb_tree
@@ -5122,8 +5120,9 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			 && yl->scale == 0
 			 && xl->sign == 0
 			 && yl->sign == 0
-			 && xl->size < 9
-			 && yl->size < 9
+			    /*&& xl->size < 9
+			      && yl->size < 9  
+			      from reportwriter, caused missing warning in test 213 */
 			 && xl->all == 0
 			 && yl->all == 0) {
 				copy_file_line (e, y, x);
