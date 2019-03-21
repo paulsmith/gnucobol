@@ -10386,26 +10386,21 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		}
 	}
 
-#if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
-         for now - TODO: activate on merge of r1547 */
 	output_line ("/* Entry point name_hash values */");
 	output_line ("static const unsigned int %sname_hash [] = {",CB_PREFIX_STRING);
 	if (cb_list_length (prog->entry_list) > 1) {
 		for (i = 0, l = prog->entry_list; l; l = CB_CHAIN (l)) {
-			name_hash = ;
+			name_hash = cob_get_name_hash (CB_LABEL (CB_PURPOSE (l))->name);
 			output_line ("\t0x%X,\t/* %d: %s */",
-				cob_get_name_hash (CB_LABEL (CB_PURPOSE (l))->name),
-				i, CB_LABEL (CB_PURPOSE (l))->name);
+				name_hash, i, CB_LABEL (CB_PURPOSE (l))->name);
 			i++;
 		}
 	} else {
-		name_hash = ;
+		name_hash = cob_get_name_hash (prog->orig_program_id);
 		output_line ("\t0x%X,\t/* %s */",
-			cob_get_name_hash (prog->orig_program_id),
-			prog->orig_program_id);
+			name_hash, prog->orig_program_id);
 	}
 	output_line ("0};");
-#endif
 
 	/* Module initialization indicator */
 
@@ -10642,14 +10637,8 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output_line ("/* Check initialized, check module allocated, */");
 	output_line ("/* set global pointer, */");
 	output_line ("/* push module stack, save call parameter count */");
-#if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
-         for now - TODO: activate on merge of r1547 */
 	output_line ("if (cob_module_global_enter (&module, &cob_glob_ptr, %d, entry, %sname_hash))",
 				      cb_flag_implicit_init, CB_PREFIX_STRING);
-#else
-	output_line ("if (cob_module_global_enter (&module, &cob_glob_ptr, %d, entry, 0))",
-				      cb_flag_implicit_init);
-#endif
 	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		output_line ("\treturn NULL;");
 	} else {
@@ -11007,8 +10996,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			pickup_param (l, i, 0);
 		}
 	}
-#if 1 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
-         for now - TODO: activate on merge of r1547 */
 	output_newline ();
 	name_hash = cob_get_name_hash (prog->orig_program_id);
 	output_line ("if (cob_glob_ptr->cob_call_name_hash != 0x%X) {", name_hash);
@@ -11019,7 +11006,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		pickup_param (l, i, 0);
 	}
 	output_line ("}");
-#endif
 
 	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION &&
 		CB_FIELD_PTR(prog->returning)->storage == CB_STORAGE_LINKAGE) {

@@ -2247,8 +2247,6 @@ cob_module_global_enter (cob_module **module, cob_global **mglobal,
 	/* Set global pointer */
 	*mglobal = cobglobptr;
 
-#if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
-         for now - TODO: activate on merge of r1547 */
 	/* Was caller a COBOL module */
 	if (name_hash != NULL
 	 && cobglobptr->cob_call_name_hash != 0) {
@@ -2263,10 +2261,6 @@ cob_module_global_enter (cob_module **module, cob_global **mglobal,
 			k++;
 		}
 	}
-#else
-	/* LCOV_EXCL_LINE */
-	COB_UNUSED(name_hash);
-#endif
 
 	/* Check module pointer */
 	if (!*module) {
@@ -2276,13 +2270,8 @@ cob_module_global_enter (cob_module **module, cob_global **mglobal,
 		mod_ptr->cob_pointer = *module;
 		mod_ptr->next = cob_module_list;
 		cob_module_list = mod_ptr;
-#if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
-         for now - TODO: activate on merge of r1547 */
 	} else if (entry == 0
 		&& !cobglobptr->cob_call_from_c) {
-#else
-	} else if (entry == 0) {
-#endif
 		for (k = 0, mod = COB_MODULE_PTR; mod && k < MAX_ITERS; mod = mod->next, k++) {
 			if (*module == mod) {
 				if (cobglobptr->cob_stmt_exception) {
@@ -2350,14 +2339,14 @@ cob_module_free (cob_module **module)
 			prv = ptr;
 		}
 
-#if 0 /* cob_module->param_buf and cob_module->param_field are rw-branch only features
-         for now - TODO: activate on merge of r1547 */
-		&& !cobglobptr->cob_call_from_c
-		if ((*module)->param_buf != NULL)
-			cob_cache_free ((*module)->param_buf);
-		if ((*module)->param_field != NULL)
-			cob_cache_free ((*module)->param_field);
-#endif
+		if (!cobglobptr->cob_call_from_c) {
+			if ((*module)->param_buf != NULL) {
+				cob_cache_free((*module)->param_buf);
+			}
+			if ((*module)->param_field != NULL) {
+				cob_cache_free((*module)->param_field);
+			}
+		}
 		cob_cache_free (*module);
 		*module = NULL;
 	}

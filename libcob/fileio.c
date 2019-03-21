@@ -113,10 +113,6 @@
 #include "libcob.h"
 #include "coblocal.h"
 
-#if !defined (EDEADLK) && defined (EDEADLOCK)
-#define EDEADLK EDEADLOCK
-#endif
-
 #ifdef	WITH_DB
 
 #include <db.h>
@@ -1754,7 +1750,8 @@ unlock_record(cob_file *f, unsigned int recnum)
 }
 
 #else
-	/* System does not even have 'fcntl' so no Record/File lock is used */
+	/* System does not even have 'fcntl' so no explicit Record/File lock is used */
+	/* TODO: check later for possible fall-back [at least WIN32]*/
 static int
 lock_record(
 	cob_file *f, 
@@ -2615,37 +2612,8 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	}
 	f->record_off = -1;
 
-#ifdef	HAVE_FCNTL
-	/* Lock the file */
-	if (memcmp (filename, "/dev/", (size_t)5)) {
-		struct flock	lock;
-		memset ((void *)&lock, 0, sizeof (struct flock));
-		if (mode != COB_OPEN_INPUT) {
-			lock.l_type = F_WRLCK;
-		} else {
-			lock.l_type = F_RDLCK;
-		}
-		lock.l_whence = SEEK_SET;
-		lock.l_start = 0;
-		lock.l_len = 0;
-		errno = 0;
-		if (fcntl (fd, F_SETLK, &lock) < 0) {
-			int		ret = errno;
-			close (fd);
-			f->fd = -1;
-			switch (ret) {
-			case EACCES:
-			case EAGAIN:
-#ifdef EDEADLK
-			case EDEADLK:
-#endif
-				return COB_STATUS_61_FILE_SHARING;
-			default:
-				return COB_STATUS_30_PERMANENT_ERROR;
-			}
-		}
-	}
-#endif
+	if ((ret=set_file_lock(f, filename, mode)) != 0)
+		return ret;
 	if (f->flag_optional && nonexistent) {
 		return COB_STATUS_05_SUCCESS_OPTIONAL;
 	}
@@ -2658,8 +2626,9 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 	/* Note filename points to file_open_name */
 	/* cob_chk_file_mapping manipulates file_open_name directly */
 
-#ifdef	WITH_SEQRA_EXTFH
 	int		ret;
+
+#ifdef	WITH_SEQRA_EXTFH
 
 	f->share_mode = sharing;
 	ret = extfh_seqra_locate (f, filename);
@@ -2818,35 +2787,9 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 	}
 	set_file_format(f);		/* Set file format */
 
-#ifdef	HAVE_FCNTL
-	/* Lock the file */
-	if (memcmp (filename, "/dev/", (size_t)5)) {
-		struct flock		lock;
-		memset ((void *)&lock, 0, sizeof (struct flock));
-		if (mode != COB_OPEN_INPUT) {
-			lock.l_type = F_WRLCK;
-		} else {
-			lock.l_type = F_RDLCK;
-		}
-		lock.l_whence = SEEK_SET;
-		lock.l_start = 0;
-		lock.l_len = 0;
-		if (fcntl (fileno (fp), F_SETLK, &lock) < 0) {
-			int ret = errno;
-			fclose (fp);
-			switch (ret) {
-			case EACCES:
-			case EAGAIN:
-#ifdef EDEADLK
-			case EDEADLK:
-#endif
-				return COB_STATUS_61_FILE_SHARING;
-			default:
-				return COB_STATUS_30_PERMANENT_ERROR;
-			}
-		}
+	if ((ret=set_file_lock(f, filename, mode)) != 0) {
+		return ret;
 	}
-#endif
 	if (f->flag_optional && nonexistent) {
 		return COB_STATUS_05_SUCCESS_OPTIONAL;
 	}
@@ -3379,11 +3322,8 @@ lineseq_write (cob_file *f, const int opt)
 
 	if ((opt == 0) 
 	&& !(f->flag_select_features & COB_SELECT_LINAGE)
-#if 0 /* TODO: activate on merge of file_features from rw-branch */
 	&& ((f->file_features & COB_FILE_LS_LF)
-	 || (f->file_features & COB_FILE_LS_CRLF))
-#endif
-	){
+	 || (f->file_features & COB_FILE_LS_CRLF))){
 		/* At least add 1 LF */
 		putc ('\n', (FILE *)f->file);
 		f->flag_needs_nl = 0;
@@ -9446,14 +9386,12 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 	} else if(f->organization == COB_ORG_LINE_SEQUENTIAL) {
 		fcd->fileOrg = ORG_LINE_SEQ;
 		STCOMPX2(0, fcd->refKey);
-#if 0 /* TODO: activate on merge of file_features from rw-branch */
 		if((f->file_features & COB_FILE_LS_CRLF))
 			fcd->fstatusType |= MF_FST_CRdelim;
 		if((f->file_features & COB_FILE_LS_NULLS))
 			fcd->fstatusType |= MF_FST_InsertNulls;
 		if((f->file_features & COB_FILE_LS_FIXED))
 			fcd->fstatusType |= MF_FST_NoStripSpaces;
-#endif
 	} else if(f->organization == COB_ORG_RELATIVE) {
 		fcd->fileOrg = ORG_RELATIVE;
 		STCOMPX2(0, fcd->refKey);
@@ -9555,7 +9493,6 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 		f->organization = COB_ORG_SEQUENTIAL;
 	} else if(fcd->fileOrg == ORG_LINE_SEQ) {
 		f->organization = COB_ORG_LINE_SEQUENTIAL;
-#if 0 /* TODO: activate on merge of file_features from rw-branch */
 #ifdef	_WIN32
 		f->file_features |= COB_FILE_LS_CRLF;
 #else
@@ -9568,7 +9505,6 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 			f->file_features |= COB_FILE_LS_NULLS;
 		if((fcd->fstatusType & MF_FST_NoStripSpaces))
 			f->file_features |= COB_FILE_LS_FIXED;
-#endif
 	} else if(fcd->fileOrg == ORG_RELATIVE) {
 		f->organization = COB_ORG_RELATIVE;
 	} else {
