@@ -3806,8 +3806,7 @@ cb_validate_program_body (struct cb_program *prog)
 static COB_INLINE COB_A_INLINE void
 cb_copy_source_reference (cb_tree target, cb_tree x)
 {
-	target->source_file = x->source_file;
-	target->source_line = x->source_line;
+	SET_SOURCE(target, x->source_file, x->source_line);
 	target->source_column = x->source_column;
 }
 
@@ -4246,8 +4245,7 @@ cb_expr_finish (void)
 		return cb_error_node;
 	}
 
-	expr_stack[3].value->source_file = cb_source_file;
-	expr_stack[3].value->source_line = cb_exp_line;
+	SET_SOURCE(expr_stack[3].value, cb_source_file, cb_exp_line);
 
 	if (expr_index != 4) {
 		/* TODO: Add test case for this to syn_misc.at invalid expression */
@@ -4367,8 +4365,7 @@ cb_build_expr (cb_tree list)
 			 && expr_index > 3
 			 && (op == '|' || op == '&')) {
 				cb_tree e = cb_any;
-				e->source_line = cb_exp_line;
-				e->source_file = cb_source_file;
+				SET_SOURCE(e, cb_source_file, cb_exp_line);
 
 				if (op == '|' && expr_stack[expr_index-2].token == '&') {
 					cb_warning_x (cb_warn_parentheses, e,
@@ -7867,9 +7864,11 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 	if (c1 == NULL) {
 		int old_line = cb_source_line;
 		const char *old_file = cb_source_file;
+		struct cb_tree_common dummy = {};
 
 		cb_source_line = stmt->source_line;
 		cb_source_file = stmt->source_file;
+		SET_SOURCE_CB(&dummy); //// just for debugging message
 
 		cb_emit (cb_build_comment ("WHEN OTHER"));
 		cb_emit (stmt);

@@ -229,27 +229,24 @@ static void
 copy_file_line (cb_tree e, cb_tree y, cb_tree x)
 {
 	if (y == cb_zero || x == cb_zero) {
-		e->source_line = prev_expr_line = cb_exp_line;
-		e->source_file = cb_source_file;
+		prev_expr_line = cb_exp_line;
+		SET_SOURCE(e, cb_source_file, cb_exp_line);
 	} else if (y && x && y->source_line > x->source_line) {
-		e->source_file = y->source_file;
-		e->source_line = y->source_line;
+		SET_SOURCE(e, y->source_file, y->source_line);
 		e->source_column = y->source_column;
 #if 0 /* TODO remove if not needed */
 		save_expr_file = (char *)y->source_file;
 		save_expr_line = y->source_line;
 #endif
 	} else if (!x && y && y->source_line) {
-		e->source_file = y->source_file;
-		e->source_line = y->source_line;
+		SET_SOURCE(e, y->source_file, y->source_line);
 		e->source_column = y->source_column;
 #if 0 /* TODO remove if not needed */
 		save_expr_file = (char *)e->source_file;
 		save_expr_line = e->source_line;
 #endif
 	} else if (x && x->source_line) {
-		e->source_file = x->source_file;
-		e->source_line = x->source_line;
+		SET_SOURCE(e, x->source_file, x->source_line);
 		e->source_column = x->source_column;
 #if 0 /* TODO remove if not needed */
 		save_expr_file = (char *)e->source_file;
@@ -262,8 +259,7 @@ copy_file_line (cb_tree e, cb_tree y, cb_tree x)
 		e->source_line = save_expr_line;
 #endif
 	} else {
-		e->source_line = cb_exp_line;
-		e->source_file = cb_source_file;
+		SET_SOURCE(e, cb_source_file, cb_exp_line);
 	}
 }
 
@@ -834,6 +830,20 @@ get_data_and_size_from_lit (cb_tree x, unsigned char **data, size_t *size)
 	return 0;
 }
 
+#if 0
+static void
+dump_literal( const char func[], int line, const void *tree ) {
+	if( 1 && tree && CB_LITERAL_P(tree) ) {
+		const struct cb_literal *lit = CB_LITERAL(tree);
+		printf( "%s:%d: %p: %.*s, size=%d\n", func, line, 
+			lit, lit->size, lit->data, lit->size );
+	}
+}
+# define dump_literal(t) dump_literal(__func__, __LINE__, (t))
+#else 
+# define dump_literal(t)
+#endif
+
 static struct cb_literal *
 concat_literals (const cb_tree left, const cb_tree right)
 {
@@ -857,6 +867,7 @@ concat_literals (const cb_tree left, const cb_tree right)
 	memcpy (p->data, ldata, lsize);
 	memcpy (p->data + lsize, rdata, rsize);
 
+	dump_literal(p);
 	return p;
 }
 
@@ -1623,6 +1634,11 @@ cb_get_int (const cb_tree x)
 
 	val = 0;
 	for (; i < l->size; i++) {
+		if( !isdigit(l->data[i]) ) {
+			fprintf(stdout, "'%.*s' at pos %d of %d is not an ASCII digit\n",
+				l->size, l->data, i+1, l->size);
+			continue;
+		}
 		val = val * 10 + l->data[i] - '0';
 	}
 	if (val && l->sign < 0) {
@@ -1779,8 +1795,7 @@ cb_build_list (cb_tree purpose, cb_tree value, cb_tree chain)
 
 	/* Set location to that of initial element. */
 	if (value) {
-		CB_TREE(p)->source_file = value->source_file;
-		CB_TREE(p)->source_line = value->source_line;
+		SET_SOURCE(CB_TREE(p), value->source_file, value->source_line);
 		CB_TREE(p)->source_column = value->source_column;
 	}
 
@@ -1863,8 +1878,7 @@ cb_define (cb_tree name, cb_tree val)
 	w = CB_REFERENCE (name)->word;
 	w->items = cb_list_add (w->items, val);
 	w->count++;
-	val->source_file = name->source_file;
-	val->source_line = name->source_line;
+	SET_SOURCE(val, name->source_file, name->source_line);
 	CB_REFERENCE (name)->value = val;
 	return w->name;
 }
@@ -1886,6 +1900,26 @@ add_contained_prog (struct nested_list *parent_list, struct cb_program *child_pr
 	nlp->next = parent_list;
 	nlp->nested_prog = child_prog;
 	return nlp;
+}
+
+void
+cb_tree_source_set( const char func[], int line, cb_tree tree, 
+		    const char source_file[], int source_line )
+{
+	tree->source_file = source_file;
+	tree->source_line = source_line;
+
+	if(0) {
+		printf( "%s:%d: set tag %d for %s:%d ",
+			func, line, 
+			tree->tag, tree->source_file, tree->source_line );
+		if( CB_LITERAL_P(tree) ) {
+			const struct cb_literal *lit = CB_LITERAL(tree);
+			printf( "(%p: %.*s, size=%d)",
+				lit, lit->size, lit->data, lit->size );
+		}
+		printf("\n");
+	}
 }
 
 struct cb_program *
@@ -2019,8 +2053,7 @@ cb_int (const int n)
 	x = CB_TREE (y);
 	x->tag = CB_TAG_INTEGER;
 	x->category = CB_CATEGORY_NUMERIC;
-	x->source_file = cb_source_file;
-	x->source_line = cb_source_line;
+	SET_SOURCE_CB(x);
 
 	p = cobc_main_malloc (sizeof (struct int_node));
 	p->n = n;
@@ -2084,8 +2117,7 @@ cb_build_comment (const char *str)
 	p = make_tree (CB_TAG_DIRECT, CB_CATEGORY_ALPHANUMERIC,
 		       sizeof (struct cb_direct));
 	p->line = str;
-	CB_TREE (p)->source_file = cb_source_file;
-	CB_TREE (p)->source_line = cb_source_line;
+	SET_SOURCE_CB( CB_TREE (p) );
 	return CB_TREE (p);
 }
 
@@ -2119,8 +2151,7 @@ cb_build_debug (const cb_tree target, const char *str, const cb_tree fld)
 		p->fld = fld;
 		p->size = (size_t)CB_FIELD_PTR (fld)->size;
 	}
-	CB_TREE (p)->source_file = cb_source_file;
-	CB_TREE (p)->source_line = cb_source_line;
+	SET_SOURCE_CB( CB_TREE (p) );
 	return CB_TREE (p);
 }
 
@@ -2134,8 +2165,7 @@ cb_build_debug_call (struct cb_label *target)
 	p = make_tree (CB_TAG_DEBUG_CALL, CB_CATEGORY_ALPHANUMERIC,
 		       sizeof (struct cb_debug_call));
 	p->target = target;
-	CB_TREE (p)->source_file = cb_source_file;
-	CB_TREE (p)->source_line = cb_source_line;
+	SET_SOURCE_CB( CB_TREE (p) );
 	return CB_TREE (p);
 }
 
@@ -2222,7 +2252,7 @@ cb_build_numeric_literal (int sign, const void *data, const int scale)
 {
         /* TODO: remove sign parameter because it isn't used */
 	struct cb_literal *p;
-	cb_tree            tree;
+	cb_tree            x;
 	char       	  *pc = (char*)data;
 	int	           i, dec;
 
@@ -2243,16 +2273,14 @@ cb_build_numeric_literal (int sign, const void *data, const int scale)
 		}
 	}
 
-	p = build_literal (CB_CATEGORY_NUMERIC, pc, strlen (data));
+	p = build_literal (CB_CATEGORY_NUMERIC, pc, strlen(pc));
 	p->sign = (short)sign;
 	p->scale = scale + dec;
 
-	tree = CB_TREE (p);
+	x = CB_TREE (p);
+	SET_SOURCE_CB( x );
 
-	tree->source_file = cb_source_file;
-	tree->source_line = cb_source_line;
-
-	return tree;
+	return x;
 }
 
 cb_tree
@@ -2266,8 +2294,7 @@ cb_build_numsize_literal (const void *data, const size_t size, const int sign)
 
 	l = CB_TREE (p);
 
-	l->source_file = cb_source_file;
-	l->source_line = cb_source_line;
+	SET_SOURCE_CB( l );
 
 	return l;
 }
@@ -2279,8 +2306,7 @@ cb_build_alphanumeric_literal (const void *data, const size_t size)
 
 	l = CB_TREE (build_literal (CB_CATEGORY_ALPHANUMERIC, data, size));
 
-	l->source_file = cb_source_file;
-	l->source_line = cb_source_line;
+        SET_SOURCE_CB( l );
 
 	return l;
 }
@@ -2292,8 +2318,7 @@ cb_build_national_literal (const void *data, const size_t size)
 
 	l = CB_TREE (build_literal (CB_CATEGORY_NATIONAL, data, size));
 
-	l->source_file = cb_source_file;
-	l->source_line = cb_source_line;
+        SET_SOURCE_CB( l );
 
 	return l;
 }
@@ -2337,8 +2362,7 @@ cb_concat_literals (const cb_tree x1, const cb_tree x2)
 
 	l = CB_TREE (p);
 
-	l->source_file = x1->source_file;
-	l->source_line = x1->source_line;
+        SET_SOURCE_CB( l );
 
 	return l;
 }
@@ -4197,8 +4221,7 @@ cb_build_reference (const char *name)
 	x = CB_TREE (r);
 
 	/* position of tree */
-	x->source_file = cb_source_file;
-	x->source_line = cb_source_line;
+        SET_SOURCE_CB( x );
 
 	return x;
 }
@@ -5485,8 +5508,7 @@ cb_build_label (cb_tree name, struct cb_label *section)
 		p->section_id = p->id;
 	}
 	x = CB_TREE (p);
-	x->source_file = cb_source_file;
-	x->source_line = cb_source_line;
+        SET_SOURCE_CB( x );
 	return x;
 }
 

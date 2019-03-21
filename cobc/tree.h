@@ -527,6 +527,15 @@ typedef struct cb_tree_common	*cb_tree;
 #define CB_TREE_CAST(tg,ty,x)	((ty *) (x))
 #endif
 
+void
+cb_tree_source_set( const char func[], int line, cb_tree tree, 
+		    const char source_file[], int source_line );
+#define SET_SOURCE(t, s, l) cb_tree_source_set(__func__, __LINE__, (t), (s), (l))
+#define SET_SOURCE_CB(t) cb_tree_source_set(__func__, __LINE__,	(t), \
+					    cb_source_file, cb_source_line)
+
+
+
 /* xref entries */
 struct cb_xref_elem {
 	struct cb_xref_elem	*next;
