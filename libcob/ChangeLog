@@ -4,6 +4,7 @@
 	* libcob.h: removed inclusion of gmp.h
 	* common.h: cob_decimal is now only used if gmp.h / mpir.h / mp.h was
 	  included before libcob.h, otherwise COB_WITHOUT_DECIMAL is defined
+	* mlio.c: fixed missing include stddef.h
 
 2019-03-19  Simon Sobisch <simonsobisch@gnu.org>
 

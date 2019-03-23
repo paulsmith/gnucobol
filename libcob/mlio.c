@@ -22,6 +22,7 @@
 #include "config.h"
 
 #include <string.h>
+#include <stddef.h>
 #include <ctype.h>
 #include <stdio.h>
 
