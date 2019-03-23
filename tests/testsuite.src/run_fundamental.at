@@ -1232,6 +1232,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_DATA([module.c], [
+#include <stdio.h>
 #include <libcob.h>
 
 COB_EXT_EXPORT int

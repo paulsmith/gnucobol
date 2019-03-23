@@ -31,8 +31,6 @@
 #include <strings.h>
 #endif
 
-/* Don't include gmp.h */
-#define COB_WITHOUT_DECIMAL
 #include "libcob.h"
 
 #ifdef	ENABLE_NLS

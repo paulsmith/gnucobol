@@ -22,6 +22,17 @@
 #ifndef COB_COMMON_H
 #define COB_COMMON_H
 
+/* Only define cob_decimal if we have the necessary mpz_t from gmp.h/mpir.h
+   (or can self-define it from mp.h) */
+#ifndef __GMP_H__
+#ifndef __GNU_MP__
+#define COB_WITHOUT_DECIMAL
+#else
+typedef __mpz_struct mpz_t[1];
+#endif // !__GNU_MP__
+#endif // !__GMP_H__
+
+
 /* General type defines */
 #define	cob_c8_t		char
 #define	cob_s8_t		signed char
@@ -1144,7 +1155,7 @@ typedef struct __cob_fp_128 {
 
 typedef struct __cob_decimal {
 	mpz_t		value;			/* GMP value definition */
-	int		scale;			/* Decimal scale */
+	int 		scale;			/* Decimal scale */
 } cob_decimal;
 #endif
 

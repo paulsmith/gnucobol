@@ -1,9 +1,17 @@
 
+2019-03-23  Simon Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (decimal_compute), tree.h: track if cob_decimal computations
+	  will be used with new flag_decimal_comp
+	* codegen.c (output_standard_includes): additional include gmp.h when
+	  cob_decimal is used in one of the generated (sub-)programs
+	* codegen.c (output_standard_includes): don't include currently unused
+	  stdlib.h, stddef.h, math.h
+
 2019-03-19  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: use of COB_MAX_NAMELEN
 	* cobc.h: comment-explanation for cb_flag_main / cobc_flag_main
-	* cobc.h: suppressed inclusion of gmp.h
 
 2019-03-18  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -15,8 +23,8 @@
 	* tree.c: improved error handling for wrong PICTURE clause,
 	  including a new warning for uncommon parentheses and
 	  only error once for same invalid character
-	* tree.c, tree.h, scanner.l, typeck.c, codegen.c, cobc.c: added compiler part for
-	  floating-point numeric-edited item (libcob open)
+	* tree.c, tree.h, scanner.l, typeck.c, codegen.c, cobc.c: added compiler
+	  part for floating-point numeric-edited item (libcob open)
 	* parser.y: added parsing for PICTURE clause locale-format
 
 2019-03-16  Simon Sobisch <simonsobisch@gnu.org>

@@ -1551,8 +1551,8 @@ struct cb_program {
 
 	/* Internal variables */
 	int		loop_counter;			/* Loop counters */
-	unsigned int	decimal_index;			/* cob_decimal count */
-	unsigned int	decimal_index_max;		/* cob_decimal max */
+	unsigned int	decimal_index;			/* cob_decimal count of this program */
+	unsigned int	decimal_index_max;		/* program group's max cob_decimal */
 	int		nested_level;			/* Nested program level */
 	unsigned int	num_proc_params;		/* PROC DIV params */
 	int		toplev_count;			/* Top level source count */
@@ -1585,6 +1585,7 @@ struct cb_program {
 	unsigned int	flag_save_exception	: 1;	/* Save exception code */
 	unsigned int	flag_report		: 1;	/* Have REPORT SECTION */
 	unsigned int	flag_void		: 1;	/* void return for subprogram */
+	unsigned int	flag_decimal_comp	: 1;	/* program group has decimal computations */
 };
 
 #define CB_PROGRAM(x)	(CB_TREE_CAST (CB_TAG_PROGRAM, struct cb_program, x))

@@ -22,10 +22,6 @@
 #ifndef COB_LIBCOB_H
 #define COB_LIBCOB_H
 
-#ifndef COB_WITHOUT_DECIMAL
-#include <gmp.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

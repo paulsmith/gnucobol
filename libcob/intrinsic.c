@@ -56,8 +56,9 @@
 #include <locale.h>
 #endif
 
-/* Force symbol exports */
+/* Force symbol exports, include decimal definitions */
 #define	COB_LIB_EXPIMP
+#include "gmp.h"
 #include "libcob.h"
 #include "coblocal.h"
 

@@ -3477,6 +3477,7 @@ AT_DATA([callee.cob], [
 ])
 
 AT_DATA([caller.c], [[
+#include <stdio.h>
 #include <libcob.h>
 
 int callee (char *, char *);
@@ -3542,6 +3543,7 @@ AT_DATA([callee.cob], [
 ])
 
 AT_DATA([caller.c], [[
+#include <stdio.h>
 #include <libcob.h>
 
 int callee (char *, char *);
@@ -3618,6 +3620,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_DATA([cprog.c], [[
+#include <stdio.h>
 #include <libcob.h>
 
 COB_EXT_EXPORT int
@@ -3684,6 +3687,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_DATA([cprog.c], [[
+#include <stdio.h>
 #include <libcob.h>
 
 COB_EXT_EXPORT int

@@ -99,9 +99,8 @@
 
 #endif	/* _WIN32 */
 
-/* Force symbol exports, don't include gmp.h */
+/* Force symbol exports */
 #define	COB_LIB_EXPIMP
-#define COB_WITHOUT_DECIMAL
 #include "libcob.h"
 #include "coblocal.h"
 

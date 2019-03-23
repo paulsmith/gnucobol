@@ -4544,6 +4544,14 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 	if (error_statement == current_statement) {
 		return;
 	}
+
+	if (!current_program->flag_decimal_comp) {
+		struct cb_program* prog;
+		for (prog = current_program; prog && !prog->flag_decimal_comp; prog = prog->next_program) {
+			prog->flag_decimal_comp = 1;
+		}
+	}
+
 	if (cb_arithmetic_osvs) {
 		if (expr_dec_align >= 0
 		 && expr_x != NULL

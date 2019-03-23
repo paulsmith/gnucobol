@@ -1588,7 +1588,7 @@ output_globext_cache (void)
 /* Headers */
 
 static void
-output_standard_includes (void)
+output_standard_includes (struct cb_program *prog)
 {
 #if !defined (_GNU_SOURCE) && defined (_XOPEN_SOURCE_EXTENDED)
 	output ("#ifndef\t_XOPEN_SOURCE_EXTENDED\n");
@@ -1596,10 +1596,7 @@ output_standard_includes (void)
 	output ("#endif\n");
 #endif
 	output ("#include <stdio.h>\n");
-	output ("#include <stdlib.h>\n");
-	output ("#include <stddef.h>\n");
 	output ("#include <string.h>\n");
-	output ("#include <math.h>\n");
 #ifdef	WORDS_BIGENDIAN
 	output ("#define  WORDS_BIGENDIAN 1\n");
 #endif
@@ -1609,6 +1606,9 @@ output_standard_includes (void)
 #endif
 	if (cb_flag_winmain) {
 		output ("#include <windows.h>\n");
+	}
+	if (prog->decimal_index_max || prog->flag_decimal_comp) {
+		output ("#include <gmp.h>\n");
 	}
 	output ("#include <libcob.h>\n\n");
 }
@@ -11873,7 +11873,7 @@ codegen (struct cb_program *prog, const int subsequent_call)
 			}
 		}
 
-		output_standard_includes ();
+		output_standard_includes (prog);
 		/* string_buffer has formatted date from above */
 		output_gnucobol_defines (string_buffer, loctime);
 

@@ -1,4 +1,15 @@
 
+2019-09-23  Simon Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_fundamental.at, testsuite.src/run_misc.at:
+	  adjusted C test sources in the testsuite to include stdio.h
+	  where necessary
+
+2019-03-09  Simon Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/*: adjusted C test sources in the testsuite
+	  with missing/wrong external attributes
+
 2019-02-18  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: cleanup distribution rules

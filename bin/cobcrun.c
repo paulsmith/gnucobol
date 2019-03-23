@@ -38,8 +38,6 @@
 #include <fcntl.h>
 #endif
 
-/* Don't include gmp.h */
-#define COB_WITHOUT_DECIMAL
 #include "libcob.h"
 #include "tarstamp.h"
 

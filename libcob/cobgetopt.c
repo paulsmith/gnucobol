@@ -45,9 +45,8 @@
 #define N_(msgid)		msgid
 #endif
 
-   /* Force symbol exports, don't include gmp.h */
+   /* Force symbol exports */
 #define	COB_LIB_EXPIMP
-#define COB_WITHOUT_DECIMAL
 #include "libcob.h"
 
 #define NONOPTION_P (argv[cob_optind][0] != '-' || argv[cob_optind][1] == '\0')
