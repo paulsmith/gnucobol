@@ -423,6 +423,8 @@ COB_HIDDEN char		*cob_strjoin		(char**, int, char*);
 COB_HIDDEN int		cob_min_int		(const int, const int);
 COB_HIDDEN int		cob_max_int		(const int, const int);
 
+COB_HIDDEN void	cob_set_field_to_uint	(cob_field *, const cob_u32_t);
+
 #ifdef __cplusplus
 }
 #endif

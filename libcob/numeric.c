@@ -1506,7 +1506,7 @@ overflow:
 /* General uint -> field */
 
 void
-cob_decimal_set_field_to_uint (cob_field *field, const cob_u32_t data)
+cob_set_field_to_uint (cob_field *field, const cob_u32_t data)
 {
 	cob_decimal	dec;
 

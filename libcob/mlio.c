@@ -168,7 +168,7 @@ set_xml_code (const unsigned int code)
 	if (!COB_MODULE_PTR->xml_code) {
 		return;
 	}
-	cob_decimal_set_field_to_uint (COB_MODULE_PTR->xml_code, code);
+	cob_set_field_to_uint (COB_MODULE_PTR->xml_code, code);
 }
 
 static int
@@ -551,7 +551,7 @@ set_json_code (const unsigned int code)
 	if (!COB_MODULE_PTR->json_code) {
 		return;
 	}
-	cob_decimal_set_field_to_uint (COB_MODULE_PTR->json_code, code);
+	cob_set_field_to_uint (COB_MODULE_PTR->json_code, code);
 }
 
 static void
