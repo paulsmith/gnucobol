@@ -595,6 +595,10 @@ cb_name_1 (char *s, cb_tree x)
 		sprintf (s, "REPORT LINE %s", f->name);
 		break;
 
+	case CB_TAG_CD:
+		sprintf (s, "%s", CB_CD(x)->name);
+		break;
+
 	/* LCOV_EXCL_START */
 	default:
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));

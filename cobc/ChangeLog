@@ -7,6 +7,9 @@
 	  cob_decimal is used in one of the generated (sub-)programs
 	* codegen.c (output_standard_includes): don't include currently unused
 	  stdlib.h, stddef.h, math.h
+	* typeck.c (cb_resolve_debug_refs): fixed bug #570 invalid tree cast for
+	  CD-entries with debug reference
+	* tree.c (cb_name_1), cobc.c (cobc_enum_explain): cater for CB_TAG_CD
 
 2019-03-19  Simon Sobisch <simonsobisch@gnu.org>
 

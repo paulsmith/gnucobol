@@ -761,6 +761,8 @@ cobc_enum_explain (const enum cb_tag tag)
 		return "ML OUTPUT TREE";
 	case CB_TAG_ML_SUPPRESS_CHECKS:
 		return "ML SUPPRESS CHECKS";
+	case CB_TAG_CD:
+		return "COMMUNICATION DESCRIPTION";
 	default:
 		break;
 	}
