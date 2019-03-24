@@ -5571,8 +5571,12 @@ output_bin_field (const cb_tree x, const cob_u32_t id)
 	}
 	aflags |= COB_FLAG_CONSTANT;
 	i = lookup_attr (COB_TYPE_NUMERIC_BINARY, digits, 0, aflags, NULL, 0);
-	output_line ("cob_field\tcontent_fb_%u = { %u, content_%u.data, &%s%d };",
-		     id, size, id, CB_PREFIX_ATTR, i);
+	/* Note: some C compilers (SUN for one) will not accept inline initialization
+	   with 'content_%u.data' because that is a local variable,
+	   therefore generate this part of the assignment separately */
+	output_line ("cob_field\tcontent_fb_%u = { %u, NULL, &%s%d };",
+		     id, size, CB_PREFIX_ATTR, i);
+	output_line ("content_fb_%u.data = content_%u.data;", id, id);
 }
 
 static COB_INLINE COB_A_INLINE int

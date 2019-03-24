@@ -1,4 +1,10 @@
 
+2019-03-24  Simon Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_bin_field) [__SUNPRO_C]: split generated initialization
+	  of the field into two statements as some compilers don't allow an
+	  assignment of a local field there - after Ron Norman 2015
+
 2019-03-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (decimal_compute), tree.h: track if cob_decimal computations
