@@ -6275,7 +6275,7 @@ prog.cob:28: warning: numeric value is expected
 prog.cob:6: warning: 'MYFLD' defined here as PIC 9(4)
 prog.cob:34: warning: numeric value is expected
 prog.cob:6: warning: 'MYFLD' defined here as PIC 9(4)
-prog.cob:50: warning: numeric value is expected
+prog.cob:52: warning: numeric value is expected
 prog.cob:7: warning: 'BIGFLT' defined here as USAGE FLOAT
 ])
 
