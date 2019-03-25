@@ -6185,6 +6185,10 @@ AT_CLEANUP
 AT_SETUP([MF FIGURATIVE to NUMERIC])
 AT_KEYWORDS([MOVE])
 
+# FIXME: This test will NOT work on EBCDIC machines,
+#        either add it explicit here and split into two or add
+#        a pre-test and check the expected "native" result
+
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID. prog.
@@ -6230,12 +6234,16 @@ AT_DATA([prog.cob], [
            DISPLAY "MOVE HIGH-VALUES TO BIGFLT"
            MOVE HIGH-VALUES TO BIGFLT.
            PERFORM SHOW-BIG.
+           CALL "dump" USING BIGFLT.
            DISPLAY "MOVE QUOTE TO BIGFLT"
            MOVE QUOTE TO BIGFLT.
            PERFORM SHOW-BIG.
+           CALL "dump" USING BIGFLT.
            DISPLAY "MOVE ALL * TO BIGFLT"
            MOVE ALL '*' TO BIGFLT.
            PERFORM SHOW-BIG.
+      *>   Note: the next results are dependant on endianess
+      *>         therefore no dump here
            DISPLAY "MOVE ALL '21' TO BIGFLT"
            MOVE ALL '21' TO BIGFLT.
            PERFORM SHOW-BIG.
@@ -6244,7 +6252,6 @@ AT_DATA([prog.cob], [
            CALL "dump" USING MYFLD.
        SHOW-BIG.
            DISPLAY "BIGFLT is " BIGFLT.
-           CALL "dump" USING BIGFLT.
 ])
 
 AT_DATA([cmod.c], [[
@@ -6303,10 +6310,8 @@ BIGFLT is 2.1973164E-18
 22222222 .
 MOVE ALL * TO BIGFLT
 BIGFLT is 5.4312347E+12
-DA119E54 .
 MOVE ALL '21' TO BIGFLT
 BIGFLT is 2.1212121E+37
-E5547F7D .
 ], [])
 
 AT_CLEANUP
