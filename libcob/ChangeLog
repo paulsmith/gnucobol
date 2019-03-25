@@ -1,4 +1,8 @@
 
+2019-03-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (print_info): output endianess and native EBCDIC
+
 2019-03-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* libcob.h: removed inclusion of gmp.h

@@ -2269,6 +2269,18 @@ cobc_print_info (void)
 	cobc_var_print ("BINARY-C-LONG",	_("4 bytes"), 0);
 #endif
 
+#ifdef WORDS_BIGENDIAN
+	cobc_var_print (_("endianness"),	_("big-endian"), 0);
+#else
+	cobc_var_print (_("endianness"),	_("little-endian"), 0);
+#endif
+
+#ifdef COB_EBCDIC_MACHINE
+	cobc_var_print (_("native EBCDIC"),	_("yes"), 0);
+#else
+	cobc_var_print (_("native EBCDIC"),	_("no"), 0);
+#endif
+
 	cobc_var_print (_("extended screen I/O"),	WITH_CURSES, 0);
 
 	snprintf (buff, sizeof(buff), "%d", WITH_VARSEQ);
@@ -3009,7 +3021,7 @@ process_command_line (const int argc, char **argv)
 			}
 			cobc_flag_library = 1;
 			no_physical_cancel = 1;
-			cb_flag_implicit_init = 1;
+			/* note: implied -fimplicit-init until GC 3.1 */
 			break;
 
 		case 'm':

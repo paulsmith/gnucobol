@@ -3,6 +3,7 @@
 
 	* field.c (cb_is_expr, cb_evaluate_expr, create_implicit_picture): fixed
 	  check of literal type before accessing values as literals in some places
+	* cobc.c (cobc_print_info): output endianess and native EBCDIC
 
 2019-03-24  Simon Sobisch <simonsobisch@gnu.org>
 

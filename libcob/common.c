@@ -7209,6 +7209,18 @@ print_info (void)
 	var_print ("BINARY-C-LONG", _("4 bytes"), "", 0);
 #endif
 
+#ifdef WORDS_BIGENDIAN
+	var_print (_("endianness"),		_("big-endian"), "", 0);
+#else
+	var_print (_("endianness"),		_("little-endian"), "", 0);
+#endif
+
+#ifdef COB_EBCDIC_MACHINE
+	var_print (_("native EBCDIC"),		_("yes"), "", 0);
+#else
+	var_print (_("native EBCDIC"),		_("no"), "", 0);
+#endif
+
 #if !defined (__PDCURSES__) && !defined (NCURSES_VERSION)
 	var_print (_("extended screen I/O"), 	WITH_CURSES, "", 0);
 #else
