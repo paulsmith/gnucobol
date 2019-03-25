@@ -1,4 +1,9 @@
 
+2019-03-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* field.c (cb_is_expr, cb_evaluate_expr, create_implicit_picture): fixed
+	  check of literal type before accessing values as literals in some places
+
 2019-03-24  Simon Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (output_bin_field) [__SUNPRO_C]: split generated initialization

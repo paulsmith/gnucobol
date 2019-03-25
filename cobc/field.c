@@ -78,7 +78,7 @@ cb_is_expr (cb_tree ch)
 	num = 0;
 	for (l = ch; l; l = CB_CHAIN (l)) {
 		t = CB_VALUE (l);
-		if (t && CB_LITERAL (t)) {
+		if (t && CB_LITERAL_P (t)) {
 			if (++num > 1)
 				return 1;
 		}
@@ -128,7 +128,7 @@ cb_eval_op ( void )
 			if (rval == 0) {
 				xscale = 0;
 				xval = 0;
-				cb_error (_("Constant expression has Divide by ZERO"));
+				cb_error (_("constant expression has Divide by ZERO"));
 			} else {
 				xscale = lscale;
 				xval = lval / rval;
@@ -229,7 +229,7 @@ cb_evaluate_expr (cb_tree ch, int normal_prec)
 
 	for (l = ch; l; l = CB_CHAIN (l)) {
 		t = CB_VALUE (l);
-		if (t && CB_LITERAL (t)) {
+		if (t && CB_LITERAL_P (t)) {
 			lp = CB_LITERAL (t);
 			if (CB_NUMERIC_LITERAL_P (t)) {
 				xval = atoll((const char *)lp->data);
@@ -749,12 +749,12 @@ create_implicit_picture (struct cb_field *f)
 		return 0;
 	}
 
-	if (f->flag_item_78) {
+	if (f->flag_item_78 && first_value && CB_LITERAL_P (first_value)) {
 #if 0	/* CHECKME: Do we need this here? */
 		f->count++;
 #endif
-		lp = CB_LITERAL (CB_VALUE (f->values));
-		if (CB_NUMERIC_LITERAL_P (CB_VALUE (f->values))) {
+		lp = CB_LITERAL (first_value);
+		if (CB_NUMERIC_LITERAL_P (first_value)) {
 			memset (pic, 0, sizeof (pic));
 			pp = pic;
 			if (lp->sign) {
