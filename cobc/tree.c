@@ -1909,14 +1909,23 @@ cb_tree_source_set( const char func[], int line, cb_tree tree,
 	tree->source_file = source_file;
 	tree->source_line = source_line;
 
-	if(0) {
+	if(getenv("COBC_TRACE")) {
 		printf( "%s:%d: set tag %d for %s:%d ",
-			func, line, 
-			tree->tag, tree->source_file, tree->source_line );
+			func, line, tree->tag,
+			tree->source_file, tree->source_line );
 		if( CB_LITERAL_P(tree) ) {
-			const struct cb_literal *lit = CB_LITERAL(tree);
-			printf( "(%p: %.*s, size=%d)",
-				lit, lit->size, lit->data, lit->size );
+			const struct cb_literal *p = CB_LITERAL(tree);
+			if( p->data ) {
+				printf( "(%p: %.*s, size=%d)",
+					p, p->size, p->data, p->size );
+			}
+		}
+		if( CB_FIELD_P(tree) ) {
+			const struct cb_field *p = CB_FIELD(tree);
+			if( p->name ) {
+				printf( "('%s' a/k/a '%s')",
+					p->name, p->ename );
+			}
 		}
 		printf("\n");
 	}

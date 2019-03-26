@@ -2458,8 +2458,8 @@ prog.cob:9: error: literal length exceeds 8191 characters
 
 AT_CAPTURE_FILE([prog2.lst])
 AT_CHECK([$COMPILE_ONLY -free -t prog2.lst prog2.cob], [1], [],
-[prog2.cob:9: error: invalid literal: '                                   ...'
-prog2.cob:9: error: literal length 8299 exceeds 8191 characters
+[prog2.cob:43: error: invalid literal: '                                   ...'
+prog2.cob:43: error: literal length 8299 exceeds 8191 characters
 ])
 
 AT_CLEANUP
@@ -6356,11 +6356,11 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([cobc -x -std=ibm -w prog.cob ], [1], [],
-[prog.cob: 14: Error: LENGTH OF 'MY-DATA' not allowed outside of Procedure Division
-prog.cob: 14: Error: 78 VALUE used
-prog.cob: 21: Error: LENGTH OF 'ODO-DATA' not allowed outside of Procedure Division
-prog.cob: 21: Error: 78 VALUE used
-prog.cob: 30: Error: 'MY-ELEMENT-1' requires 1 subscript
+[prog.cob: 14: error: LENGTH OF 'MY-DATA' not allowed outside of Procedure Division
+prog.cob: 14: error: 78 VALUE used
+prog.cob: 21: error: LENGTH OF 'ODO-DATA' not allowed outside of Procedure Division
+prog.cob: 21: error: 78 VALUE used
+prog.cob: 30: error: 'MY-ELEMENT-1' requires 1 subscript
 ])
 
 AT_CLEANUP

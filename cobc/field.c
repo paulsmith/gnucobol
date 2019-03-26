@@ -2750,10 +2750,14 @@ cb_validate_78_item (struct cb_field *f, const cob_u32_t no78add)
 
 	x = CB_TREE (f);
 	noadd = no78add;
-	if (CB_INVALID_TREE (f->values)) {
+	if (CB_INVALID_TREE (f->values) 
+	 || CB_INVALID_TREE(CB_VALUE(f->values))) {
 		level_require_error (x, "VALUE");
 		noadd = 1;
-	} else if (CB_INVALID_TREE (CB_VALUE (f->values))) {
+	}
+
+	if (f->pic || f->flag_occurs) {
+		level_except_error (x, "VALUE");
 		noadd = 1;
 	}
 

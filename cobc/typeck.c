@@ -582,7 +582,7 @@ cb_validate_one (cb_tree x)
 		if (CB_FIELD_P (y)) {
 			f = CB_FIELD (y);
 			if (f->level == 88) {
-				cb_error_x (x, _("condition-name not allowed here: '%s'"), f->name);
+				cb_error_x (x, _("Invalid use of 88 level item"));
 				return 1;
 			}
 			if (f->flag_invalid) {
@@ -2239,6 +2239,11 @@ cb_build_const_length (cb_tree x)
 	}
 	if (f->level == 88) {
 		cb_error (_("88 level item not allowed here"));
+		return cb_error_node;
+	}
+	if (!cobc_in_procedure
+	 && !cb_length_in_data_division) {
+		cb_error_x (x,_("LENGTH OF '%s' not allowed outside of Procedure Division"),f->name);
 		return cb_error_node;
 	}
 	if (cb_field_variable_size (f)) {
@@ -7868,7 +7873,8 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 
 		cb_source_line = stmt->source_line;
 		cb_source_file = stmt->source_file;
-		SET_SOURCE_CB(&dummy); //// just for debugging message
+		//// just for debugging message:
+		SET_SOURCE(&dummy, stmt->source_file, stmt->source_line); 
 
 		cb_emit (cb_build_comment ("WHEN OTHER"));
 		cb_emit (stmt);
