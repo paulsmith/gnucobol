@@ -3359,7 +3359,7 @@ convention_type:
   }
 | TOK_EXTERN
   {
-	$$ = cb_int (0);
+	$$ = cb_int0;
   }
 | STDCALL
   {
@@ -6156,7 +6156,7 @@ con_source:
   }
 | BINARY_DOUBLE
   {
-	$$ = cb_int (8);
+	$$ = cb_int8;
   }
 | BINARY_C_LONG
   {
@@ -6184,15 +6184,15 @@ con_source:
   }
 | fp32_usage
   {
-	$$ = cb_int (4);
+	$$ = cb_int4;
   }
 | fp64_usage
   {
-	$$ = cb_int (8);
+	$$ = cb_int8;
   }
 | fp128_usage
   {
-	$$ = cb_int (16);
+	$$ = cb_int16;
   }
 | error TOK_DOT
   {
@@ -10591,7 +10591,7 @@ _mnemonic_conv:
   }
 | TOK_EXTERN	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
   {
-	$$ = cb_int (0);
+	$$ = cb_int0;
   }
 | MNEMONIC_NAME
   {

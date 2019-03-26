@@ -2709,11 +2709,16 @@ output_integer (cb_tree x)
 		}
 		break;
 	case CB_TAG_INTEGER:
+#ifdef USE_INT_HEX /* Simon: using this increases the struct and we
+		 *should* pass the flags as constants in any case... */
 		if (CB_INTEGER (x)->hexval) {
 			output ("0x%X", CB_INTEGER (x)->val);
 		} else {
 			output ("%d", CB_INTEGER (x)->val);
 		}
+#else
+		output ("%d", CB_INTEGER (x)->val);
+#endif
 		break;
 	case CB_TAG_LITERAL:
 		output ("%d", cb_get_int (x));
@@ -3002,11 +3007,16 @@ output_long_integer (cb_tree x)
 		}
 		break;
 	case CB_TAG_INTEGER:
+#ifdef USE_INT_HEX /* Simon: using this increases the struct and we
+		 *should* pass the flags as constants in any case... */
 		if (CB_INTEGER (x)->hexval) {
 			output ("0x%X", CB_INTEGER (x)->val);
 		} else {
 			output ("%d", CB_INTEGER (x)->val);
 		}
+#else
+		output ("%d", CB_INTEGER (x)->val);
+#endif
 		break;
 	case CB_TAG_LITERAL:
 		output (CB_FMT_LLD_F, cb_get_long_long (x));

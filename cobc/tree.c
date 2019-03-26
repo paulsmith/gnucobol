@@ -106,13 +106,27 @@ static int category_is_national[] = {
 	0	/* CB_CATEGORY_PROGRAM_POINTER */
 };
 
+
+/* note: integrating cached integers help to decrease memory usage for
+         compilation of source with many similar integer values,
+		 but leads to a slow-down of 2-40%, depending how many identical
+		 integer values are cached/searched
+*/
+#ifndef CACHED_INTEGERS
+#define CACHED_INTEGERS 0
+#endif
+#if CACHED_INTEGERS
 struct int_node {
 	struct int_node	*next;
-	cb_tree		node;
-	int		n;
+	struct cb_integer *node;
 };
-
 static struct int_node		*int_node_table = NULL;
+#ifdef USE_INT_HEX /* Simon: using this increases the struct and we
+		 *should* pass the flags as constants in any case... */
+static struct int_node		*int_node_table_hex = NULL;
+#endif
+#endif
+
 static char			*scratch_buff = NULL;
 static int			filler_id = 1;
 static int			class_id = 0;
@@ -168,6 +182,9 @@ cb_tree cb_int3;
 cb_tree cb_int4;
 cb_tree cb_int5;
 cb_tree cb_int6;
+cb_tree cb_int7;
+cb_tree cb_int8;
+cb_tree cb_int16;
 cb_tree cb_i[COB_MAX_SUBSCRIPTS];
 cb_tree cb_error_node;
 
@@ -1567,13 +1584,8 @@ cb_get_int (const cb_tree x)
 	unsigned int	size, i;
 	int			val;
 
-	if(x == NULL)		return 0;
-	if(x == cb_int0)	return 0;
-	if(x == cb_int1)	return 1;
-	if(x == cb_int2)	return 2;
-	if(x == cb_int3)	return 3;
-	if(x == cb_int4)	return 4;
-	if(x == cb_int5)	return 5;
+	if (x == NULL)		return 0;
+	if (CB_INTEGER_P(x)) return CB_INTEGER(x)->val;
 
 	/* LCOV_EXCL_START */
 	if (!CB_LITERAL_P (x)) {
@@ -1763,6 +1775,9 @@ cb_init_constants (void)
 	cb_int4 = cb_int (4);
 	cb_int5 = cb_int (5);
 	cb_int6 = cb_int (6);
+	cb_int7 = cb_int (7);
+	cb_int8 = cb_int (8);
+	cb_int16 = cb_int (16);
 	for (i = 0; i < COB_MAX_SUBSCRIPTS; i++) {
 		cb_i[i] = make_constant (CB_CATEGORY_NUMERIC, cb_const_subs[i]);
 	}
@@ -1995,27 +2010,11 @@ cb_insert_common_prog (struct cb_program *prog, struct cb_program *comprog)
 
 /* Integer */
 
-cb_tree
-cb_int (const int n)
+static COB_INLINE COB_A_INLINE cb_tree
+cb_int_uncached (const int n)
 {
+	struct cb_integer* y;
 	cb_tree		x;
-	struct cb_integer	*y;
-	struct int_node		*p;
-
-	/* performance note: the following loop used 3% (according to callgrind)
-	   of the complete time spent in a sample run with
-	   -fsyntax-only on 880 production code files (2,500,000 LOC)
-	   according to gcov we entered this function 629684 times with only 280 new
-	   entries but the loop produces a lot of comparisions:
-	   for: 122441668, if: 122441388
-	*/
-	/* CHECKME: optimization by alignment / otherwise? */
-
-	for (p = int_node_table; p; p = p->next) {
-		if (p->n == n) {
-			return p->node;
-		}
-	}
 
 	/* Do not use make_tree here as we want a main_malloc
 	   instead of parse_malloc! */
@@ -2028,23 +2027,117 @@ cb_int (const int n)
 	x->source_file = cb_source_file;
 	x->source_line = cb_source_line;
 
+	return x;
+}
+
+#if CACHED_INTEGERS
+cb_tree
+cb_int (const int n)
+{
+	struct int_node		*p;
+	cb_tree		x;
+
+	/* performance note: the following loop used 3% (according to callgrind)
+		of the complete time spent in a sample run with
+		-fsyntax-only on 880 production code files (2,500,000 LOC)
+		according to gcov we entered this function 629684 times with only 280 new
+		entries but the loop produces a lot of comparisions:
+		for: 122441668, if: 122441388
+		second-sample: one-file 430,000 LOC with many numbers: takes 36 % of the time
+	*/
+	for (p = int_node_table; p; p = p->next) {
+		if (p->node->val == n) {
+			return CB_TREE (p->node);
+		}
+	}
+
+	x = cb_int_uncached (n);
+
 	p = cobc_main_malloc (sizeof (struct int_node));
-	p->n = n;
-	p->node = x;
+	p->node = CB_INTEGER(x);
 	p->next = int_node_table;
 	int_node_table = p;
+
 	return x;
 }
 
 cb_tree
 cb_int_hex (const int n)
 {
+#ifdef USE_INT_HEX /* Simon: using this increases the struct and we
+		 *should* pass the flags as constants in any case... */
+	struct int_node		*p;
+	struct cb_integer	*y;
 	cb_tree		x;
 
-	x = cb_int (n);
-	CB_INTEGER (x)->hexval = 1;
+	/* note: we do need to do this here on a different cached note as we'd
+	         set cached values to be generated as integers otherwise */
+	for (p = int_node_table_hex; p; p = p->next) {
+		if (p->node->val == n) {
+			return CB_TREE (p->node);
+		}
+	}
+
+	/* Do not use make_tree here as we want a main_malloc
+	   instead of parse_malloc! */
+	y = cobc_main_malloc (sizeof(struct cb_integer));
+	y->val = n;
+	y->hexval = 1;
+
+	x = CB_TREE (y);
+	x->tag = CB_TAG_INTEGER;
+	x->category = CB_CATEGORY_NUMERIC;
+	x->source_file = cb_source_file;
+	x->source_line = cb_source_line;
+
+	p = cobc_main_malloc (sizeof (struct int_node));
+	p->node = y;
+	p->next = int_node_table_hex;
+	int_node_table_hex = p;
+
 	return x;
+#else
+	return cb_int (n);
+#endif
 }
+
+
+#else	// ! CACHED_INTEGERS
+
+cb_tree
+cb_int (const int n)
+{
+	/* not yet allocated -> uncached */
+	if (!cb_int16) return cb_int_uncached (n);
+
+	switch (n) {
+	case 0: return cb_int0;
+	case 1: return cb_int1;
+	case 2: return cb_int2;
+	case 3: return cb_int3;
+	case 4: return cb_int4;
+	case 5: return cb_int5;
+	case 6: return cb_int6;
+	case 7: return cb_int7;
+	case 8: return cb_int8;
+	default: return cb_int_uncached (n);
+	}
+}
+
+cb_tree
+cb_int_hex (const int n)
+{
+#ifdef USE_INT_HEX /* Simon: using this increases the struct and we
+		 *should* pass the flags as constants in any case... */
+	cb_tree		x = cb_int_uncached (n);
+	CB_INTEGER(x)->hexval = 1;
+	return x;
+#else
+	return cb_int (n);
+#endif
+}
+
+#endif // ! CACHED_INTEGERS
 
 /* String */
 

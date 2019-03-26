@@ -593,7 +593,10 @@ struct cb_debug_call {
 struct cb_integer {
 	struct cb_tree_common	common;		/* Common values */
 	int			val;		/* Integer value */
+#ifdef USE_INT_HEX /* Simon: using this increases the struct and we
+         *should* pass the flags as constants in any case... */
 	unsigned int		hexval;		/* Output hex value */
+#endif
 };
 
 #define CB_INTEGER(x)	(CB_TREE_CAST (CB_TAG_INTEGER, struct cb_integer, x))
@@ -1687,6 +1690,9 @@ extern cb_tree			cb_int3;
 extern cb_tree			cb_int4;
 extern cb_tree			cb_int5;
 extern cb_tree			cb_int6;
+extern cb_tree			cb_int7;
+extern cb_tree			cb_int8;
+extern cb_tree			cb_int16;
 extern cb_tree			cb_i[COB_MAX_SUBSCRIPTS];
 extern cb_tree			cb_error_node;
 

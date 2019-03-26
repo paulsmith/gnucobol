@@ -1,4 +1,21 @@
 
+2019-03-26  Simon Sobisch <simonsobisch@gnu.org>
+
+	* tree.c, tree.h: added cb_int7, cb_int8, cb_int16
+	* parser.y: replaced cb_int(0,4,8,16) by pre-created cb_int0-cb_int16
+	* typeck.c (cb_emit_open): replaced comparison of cached cb_int to compare
+	  the actual integer value
+	* tree.c (cb_int): minimized struct int_node and access providing minimal
+	  speed for integer lookup and minimal less memory consumption
+	* tree.c (cb_int_hex): fixed to not adjust hex-attribute of cached integers
+	  by using a different cache
+	* codgen.c, tree.c, tree.h: deactivated hex-attribute of CB_INTEGER for now
+	  (marked with USE_INT_HEX) as this increases the struct and we *should*
+	  pass the flags as constants in any case
+	* tree.c (cb_int, cb_int_hex): disabled caching of integer values (other
+	  than 0-8) for now (test, reactivate by defining CACHED_INTEGERS=1) as the
+	  necessary lookup can take much time with many different integer values
+
 2019-03-25  Simon Sobisch <simonsobisch@gnu.org>
 
 	* field.c (cb_is_expr, cb_evaluate_expr, create_implicit_picture): fixed

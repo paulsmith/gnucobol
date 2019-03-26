@@ -10121,6 +10121,7 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 {
 	cb_tree orig_file = file;
 	struct cb_file	*f;
+	int open_mode;
 
 	file = cb_ref (file);
 	if (file == cb_error_node) {
@@ -10128,8 +10129,9 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 	}
 	current_statement->file = file;
 	f = CB_FILE (file);
+	open_mode = CB_INTEGER(mode)->val;
 
-	if (mode == cb_int (COB_OPEN_OUTPUT)) {
+	if (open_mode == COB_OPEN_OUTPUT) {
 		/* add a "receiving" entry for the file */
 		cobc_xref_link (&f->xref, CB_REFERENCE (orig_file)->common.source_line, 1);
 	}
@@ -10139,7 +10141,7 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 				_("%s not allowed on %s files"), "OPEN", "SORT");
 		return;
 	} else if (f->organization == COB_ORG_LINE_SEQUENTIAL &&
-		   mode == cb_int (COB_OPEN_I_O)) {
+		   open_mode == COB_OPEN_I_O) {
 		cb_error_x (CB_TREE (current_statement),
 				_("%s not allowed on %s files"), "OPEN I-O", "LINE SEQUENTIAL");
 		return;
