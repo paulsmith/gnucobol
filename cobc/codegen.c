@@ -5852,36 +5852,36 @@ output_call (struct cb_call *p)
 				}
 				output_line ("void *ptr_%u;", n);
 			} else if (CB_TREE_TAG (x) != CB_TAG_INTRINSIC
-				&& x != cb_null
-				&& !(CB_CAST_P (x))) {
+				   && x != cb_null
+				   && !(CB_CAST_P (x))) {
 				if (!need_brace) {
 					need_brace = 1;
 					output_indent ("{");
 				}
 				if (CB_NUMERIC_LITERAL_P (x)
-				 || CB_BINARY_OP_P (x)
-				 || CB_CAST_P(x)) {
+				    || CB_BINARY_OP_P (x)
+				    || CB_CAST_P(x)) {
 					output_line ("cob_content\tcontent_%u;", n);
 				} else {
 					output_content (x, n, 1);
+					output_line ("cob_field      content_%s%u;", CB_PREFIX_FIELD, n);
+					output_line ("cob_field_attr content_%s%u;", CB_PREFIX_ATTR, n);
 				}
-				output_line ("cob_field      content_%s%u;", CB_PREFIX_FIELD, n);
-				output_line ("cob_field_attr content_%s%u;", CB_PREFIX_ATTR, n);
 				output_bin_field (x, n);
 			}
 			break;
 		case CB_CALL_BY_VALUE:
 			if (CB_TREE_TAG (x) == CB_TAG_REFERENCE
-			 && CB_TREE_TAG (CB_REFERENCE(x)->value) == CB_TAG_FIELD
-			 && CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC 
-			 && cb_code_field (x)->usage == CB_USAGE_LENGTH) {
+			    && CB_TREE_TAG (CB_REFERENCE(x)->value) == CB_TAG_FIELD
+			    && CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC 
+			    && cb_code_field (x)->usage == CB_USAGE_LENGTH) {
 				if (!need_brace) {
 					need_brace = 1;
 					output_indent ("{");
 				}
 				if (CB_NUMERIC_LITERAL_P (x) 
-				 || CB_BINARY_OP_P (x) 
-				 || CB_CAST_P(x)) {
+				    || CB_BINARY_OP_P (x) 
+				    || CB_CAST_P(x)) {
 					output_line ("cob_content\tcontent_%u;", n);
 				} else {
 					output_content (x, n, 0);
@@ -5899,8 +5899,8 @@ output_call (struct cb_call *p)
 					output_indent ("{");
 				}
 				if (CB_NUMERIC_LITERAL_P (x) 
-				 || CB_BINARY_OP_P (x) 
-				 || CB_CAST_P(x)) {
+				    || CB_BINARY_OP_P (x) 
+				    || CB_CAST_P(x)) {
 					output_line ("cob_content\tcontent_%u;", n);
 				} else {
 					output_content (x, n, 0);
@@ -10231,7 +10231,7 @@ pickup_param (cb_tree l, int i, int setnull)
 		output (";\n");
 		if (f->flag_any_length) {
 			output_line ("    if (cob_glob_ptr->cob_call_from_c != 0)");
-			output_line ("        %s%d.size = strlen(%s%d.data);", 
+			output_line ("        %s%d.size = strlen((char*)%s%d.data);", 
 							CB_PREFIX_FIELD, f->id,
 							CB_PREFIX_FIELD, f->id);
 		}
@@ -10276,7 +10276,7 @@ pickup_param (cb_tree l, int i, int setnull)
 		if (is_any_numeric) {
 			output_line ("    if (cob_glob_ptr->cob_call_from_c != 0");
 			output_line ("     && %s%d.data != NULL) {", CB_PREFIX_FIELD, f->id);
-			output_line ("        %s%d.size = strlen(%s%d.data);", 
+			output_line ("        %s%d.size = strlen((char*)%s%d.data);", 
 							CB_PREFIX_FIELD, f->id,
 							CB_PREFIX_FIELD, f->id);
 			output_indent_level += 4;
@@ -10289,7 +10289,7 @@ pickup_param (cb_tree l, int i, int setnull)
 		} else {
 			output_line ("    if (cob_glob_ptr->cob_call_from_c != 0");
 			output_line ("     && %s%d.data != NULL)", CB_PREFIX_FIELD, f->id);
-			output_line ("        %s%d.size = strlen(%s%d.data);", 
+			output_line ("        %s%d.size = strlen((char*)%s%d.data);", 
 							CB_PREFIX_FIELD, f->id,
 							CB_PREFIX_FIELD, f->id);
 		}
@@ -10857,33 +10857,12 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_newline ();
 	}
 
-#if	0	/* RXWRXW - Params (in each module or in cob_module_enter) */
+#if	1	/* RXWRXW - Params (in each module or in cob_module_enter) */
 	output_line ("/* Save number of call params */");
 	output_line ("module->module_num_params = cob_glob_ptr->cob_call_params;");
 	output_newline ();
 #endif
 
-#if 0 && reportwriter //// removed for 1547
-	if (!cb_sticky_linkage && !prog->flag_chained
-#if	0	/* RXWRXW USERFUNC */
-		&& prog->prog_type != COB_MODULE_TYPE_FUNCTION
-#endif
-		&& prog->num_proc_params) {
-		output_line ("/* Set not passed parameter pointers to NULL */");
-		output_line ("switch (cob_call_params) {");
-		i = 0;
-		for (l = parameter_list; l; l = CB_CHAIN (l)) {
-			output_line ("case %d:", i++);
-			output_line ("\t%s%d = NULL;",
-				CB_PREFIX_BASE, cb_code_field (CB_VALUE (l))->id);
-			output_line ("/* Fall through */");
-		}
-		output_line ("default:\n\tbreak;");
-		output_line ("}");
-		output_newline ();
-	}
-
-#endif
 	if (!cb_sticky_linkage
 	 && cb_list_length(parameter_list) > 0) {
 		output_line ("/* No sticky-linkage so NULL LINKAGE addresses */");
@@ -10908,7 +10887,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			output_param (CB_VALUE (l), i);
 			output_target = savetarget;
 
-			output_line ("if (cob_call_params > %d && "
+			output_line ("if (module->module_num_params > %d && "
 				         "module->next && "
 				         "module->next->cob_procedure_params[%d])",
 				i, i);
@@ -10925,75 +10904,12 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			output ("%s%d.data = ", CB_PREFIX_FIELD, f->id);
 			output_data (CB_VALUE (l));
 			output (";\n");
-#if	0	/* RXWRXW - Num check */
-			if (CB_EXCEPTION_ENABLE (COB_EC_DATA_INCOMPATIBLE) &&
-				f->flag_any_numeric &&
-				(f->usage == CB_USAGE_DISPLAY ||
-				 f->usage == CB_USAGE_PACKED ||
-				 f->usage == CB_USAGE_COMP_6)) {
-				output_line ("cob_check_numeric (&%s%d, %s%d);",
-						 CB_PREFIX_FIELD
-						 f->id,
-						 CB_PREFIX_STRING,
-						 lookup_string (f->name));
-			}
-#endif
 		}
-#if 0 && reportwriter //// declined from 1547
-#if 0 && reportwriter //// removed for 1547
-	if (!cb_sticky_linkage && !prog->flag_chained
-#if	0	/* RXWRXW USERFUNC */
-		&& prog->prog_type != COB_MODULE_TYPE_FUNCTION
-#endif
-		&& prog->num_proc_params) {
-		output_line ("/* Set not passed parameter pointers to NULL */");
-		output_line ("switch (cob_call_params) {");
-		i = 0;
-		for (l = parameter_list; l; l = CB_CHAIN (l)) {
-			output_line ("case %d:", i++);
-			output_line ("\t%s%d = NULL;",
-				CB_PREFIX_BASE, cb_code_field (CB_VALUE (l))->id);
-			output_line ("/* Fall through */");
-		}
-		output_line ("default:\n\tbreak;");
-		output_line ("}");
-		output_newline ();
-	}
-
-#endif
-	if (!cb_sticky_linkage
-	 && cb_list_length(parameter_list) > 0) {
-		output_line ("/* No sticky-linkage so NULL LINKAGE addresses */");
-		for (i = 0, l2 = parameter_list; l2; l2 = CB_CHAIN (l2), i++) {
-			pickup_param (l2, i, 1);
-		}
-	}
-
-	if (!cb_sticky_linkage && !prog->flag_chained
-#if	0	/* RXWRXW USERFUNC */
-		&& prog->prog_type != COB_MODULE_TYPE_FUNCTION
-#endif
-		&& prog->num_proc_params) {
-		output_line ("/* Set not passed parameter pointers to NULL */");
-		output_line ("switch (cob_call_params) {");
-		i = 0;
-		for (l = parameter_list; l; l = CB_CHAIN (l)) {
-			output_line ("case %d:", i++);
-			output_line ("\t%s%d = NULL;",
-				CB_PREFIX_BASE, cb_code_field (CB_VALUE (l))->id);
-			output_line ("/* Fall through */");
-		}
-		output_line ("default:\n\tbreak;");
-		output_line ("}");
-		output_newline ();
-	}
-
-#endif
 		name_hash = cob_get_name_hash (prog->orig_program_id);
 		output_line ("if (cob_glob_ptr->cob_call_name_hash != 0x%X)",name_hash);
 		output_line ("    cob_glob_ptr->cob_call_from_c = 1;");
-		for (i = 0, l = parameter_list; l; l = CB_CHAIN (l), i++) {
-			pickup_param (l, i, 0);
+		for (i = 0, l2 = parameter_list; l2; l2 = CB_CHAIN (l2), i++) {
+			pickup_param (l2, i, 0);
 		}
 	}
 	output_newline ();
@@ -12108,6 +12024,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		}
 	}
 
+#if 0 /* RJN: this seems like a bad idea */
 	/* For calling into a module, cob_call_params may not be known */
 	if (using_list) {
 		parmnum = 0;
@@ -12132,6 +12049,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		}
 		output_newline();
 	}
+#endif
 
 	/*
 	  We have to cater for sticky-linkage here at the entry point
@@ -12170,7 +12088,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	if (cb_sticky_linkage && using_list) {
 		output_line ("/* Set the parameter list */");
 		parmnum = 0;
-		output_line ("switch (cob_call_params) {");
+		output_line ("switch (module->module_num_params) {");
 		for (l = using_list; l; l = CB_CHAIN (l), parmnum++) {
 			output_prefix ();
 			output ("case %u:\n", parmnum);
@@ -12745,8 +12663,10 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	output_storage ("\n/* Module path */\n");
 	output_storage ("static const char\t\t*cob_module_path = NULL;\n");
 
+#if 0 /* RJN: should be using cob_glob_ptr->cob_call_params */
 	output_storage ("\n/* Number of call parameters */\n");
 	output_storage ("static int\t\tcob_call_params = 0;\n");
+#endif
 
 	output_globext_cache ();
 	output_nonlocal_base_cache ();
