@@ -135,11 +135,17 @@
 #ifdef	WITH_DISAM
 #ifndef DISAM_NO_ISCONFIG
 #include <isconfig.h>
+#include <isport.h>
 #ifndef ISCOBOL_STATS
 #undef	COB_WITH_STATUS_02
 #endif
 #endif
 #include <disam.h>
+#ifdef ISSTAT
+#ifndef COB_WITH_STATUS_02 
+#define	COB_WITH_STATUS_02
+#endif
+#endif
 #define	isfullclose(x)	isclose (x)
 #define ISRECNUM isrecnum
 #define ISERRNO  iserrno
@@ -355,7 +361,6 @@ indexed_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 				f->last_key = f->keys[k].field;
 				for(part=0; part < f->keys[k].count_components; part++)
 					*fullkeylen += f->keys[k].component[part]->size;
-				}
 				if (f->keys[k].field && f->keys[k].field->data == kf->data) {
 					*partlen = kf->size;
 				} else {
@@ -1803,6 +1808,7 @@ set_file_lock(cob_file *f, const char *filename, int open_mode)
 			lock_mode = 0;
 	} else if ((open_mode != COB_OPEN_INPUT)
 		|| (f->share_mode & COB_SHARE_NO_OTHER)
+		|| (f->share_mode & COB_LOCK_OPEN_EXCLUSIVE)
 		|| (f->lock_mode & COB_FILE_EXCLUSIVE) ) {
 		lock_mode = 1;
 	} else {
@@ -2591,6 +2597,7 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	default:
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
+	f->fd = fd;
 	if ((mode == COB_OPEN_OUTPUT || (mode == COB_OPEN_I_O && nonexistent))
 	&&  f->file_format == COB_FILE_IS_MF) {	/* Write MF file header */
 		if(f->record_min != f->record_max) {
@@ -2787,6 +2794,11 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 	}
 	set_file_format(f);		/* Set file format */
 
+	if (mode == COB_OPEN_EXTEND) {
+		if(f->lock_mode == 0
+		&& f->share_mode == 0)
+			return 0;
+	}
 	if ((ret=set_file_lock(f, filename, mode)) != 0) {
 		return ret;
 	}
@@ -2846,6 +2858,7 @@ cob_file_close (cob_file *f, const int opt)
 		} else {
 			if (f->fd >= 0) {
 				close (f->fd);
+				f->fd = -1;
 			}
 		}
 		if (opt == COB_CLOSE_NO_REWIND) {
@@ -3604,6 +3617,10 @@ relative_start (cob_file *f, const int cond, cob_field *k)
 		}
 		off = kindex * f->record_slot + f->file_header;
 		if (off >= st.st_size) {
+			if (kcond == COB_LT || kcond == COB_LE) {
+				kindex--;
+				continue;
+			}
 			break;
 		}
 		relsize = relative_read_size(f, off, &isdeleted);
@@ -6304,6 +6321,7 @@ indexed_read_next (cob_file *f, const int read_opts)
 					}
 					break;
 				case COB_LT:
+					isread (fh->isfd, (void *)f->record->data, ISPREV);
 					while (ISERRNO == 0
 					&& indexed_cmpkey(fh, f->record->data, fh->curkey, 0) >= 0) {
 						isread (fh->isfd, (void *)f->record->data, ISPREV);
@@ -6853,7 +6871,7 @@ indexed_rewrite (cob_file *f, const int opt)
 
 	struct indexfile	*fh;
 	size_t			k;
-	int			ret, retdup;
+	int			ret;
 
 	fh = f->file;
 	ret = COB_STATUS_00_SUCCESS;
@@ -6945,7 +6963,7 @@ indexed_rewrite (cob_file *f, const int opt)
 		}
 #ifdef	COB_WITH_STATUS_02
 		if (!ret && (isstat1 == '0') && (isstat2 == '2')) {
-			retdup = COB_STATUS_02_SUCCESS_DUPLICATE;
+			ret = COB_STATUS_02_SUCCESS_DUPLICATE;
 		}
 #endif
 	}
@@ -10049,15 +10067,10 @@ EXTFH (unsigned char *opcode, FCD3 *fcd)
 	cob_file *f;
 
 	if (fcd->fcdVer != FCD_VER_64Bit) {
-#if 1
 		fcd->fileStatus[0] = '9';
 		fcd->fileStatus[1] = 161;
 		cob_runtime_warning (_("ERROR: EXTFH called with FCD version %d"), fcd->fcdVer);
-		return 0;
-#else
-		cob_runtime_error (_("ERROR: EXTFH called with FCD version %d"), fcd->fcdVer);
-		exit(-1);
-#endif
+		return 1;
 	}
 	sts = opts = 0;
 	fs->data = fnstatus;

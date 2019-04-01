@@ -376,7 +376,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[STATUS OPENO 30
+[STATUS OPENO 35
 ], [])
 
 AT_CHECK([echo Test > ./nosubhere], [0], [], [])
@@ -1946,7 +1946,7 @@ AT_DATA([prog.cob], [
        SELECT test-file ASSIGN path
                         ORGANIZATION LINE SEQUENTIAL.
        DATA             DIVISION.
-       FILE	            SECTION.
+       FILE                SECTION.
        FD  test-file.
        01  test-rec     PIC X(5).
        LOCAL-STORAGE    SECTION.
@@ -1986,7 +1986,7 @@ AT_DATA([prog.cob], [
        SELECT test-file ASSIGN path
                         ORGANIZATION LINE SEQUENTIAL.
        DATA             DIVISION.
-       FILE	            SECTION.
+       FILE                SECTION.
        FD  test-file.
        01  test-rec     PIC X(5).
        LOCAL-STORAGE    SECTION.
@@ -2023,7 +2023,7 @@ AT_DATA([prog.cob], [
        SELECT test-file ASSIGN path
                         ORGANIZATION LINE SEQUENTIAL.
        DATA             DIVISION.
-       FILE	            SECTION.
+       FILE                SECTION.
        FD  test-file.
        01  test-rec     PIC X(5).
        WORKING-STORAGE  SECTION.
@@ -2056,7 +2056,7 @@ AT_DATA([prog2.cob], [
                         ORGANIZATION LINE SEQUENTIAL
                         FILE STATUS TEST-STAT.
        DATA             DIVISION.
-       FILE	            SECTION.
+       FILE                SECTION.
        FD  test-file.
        01  test-rec     PIC X(5).
        WORKING-STORAGE  SECTION.
@@ -2972,7 +2972,7 @@ AT_DATA([prog.cob], [
            record is varying in size
                from 107 to 362 characters
                depending on end-tbw-record
-	       .
+           .
        01  tbw-record.
            02 tbw-key                        pic x(100).
            02 tbw-alt.
@@ -5036,14 +5036,11 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0])
 
 AT_CLEANUP
 
-##
-## FIXME: All the SEQUENTIAL file locking tests pass in reportwriter.
-##
 
 AT_SETUP([SEQUENTIAL file with LOCK MODE EXCLUSIVE])
 AT_KEYWORDS([runfile])
 
-AT_XFAIL_IF([true])
+AT_XFAIL_IF([false])
 
 AT_DATA([prog1.cob], [
        identification division.
@@ -5111,7 +5108,7 @@ AT_CLEANUP
 AT_SETUP([SEQUENTIAL file with OPEN WITH LOCK])
 AT_KEYWORDS([runfile])
 
-AT_XFAIL_IF([true])
+AT_XFAIL_IF([false])
 
 AT_DATA([prog1.cob], [
        identification division.
@@ -5133,7 +5130,7 @@ AT_DATA([prog1.cob], [
        procedure division.
            open output file1.
            close file1.
-           open input file1 with lock.
+           open i-o file1 with lock.
            accept os-check from environment "OS".
            if os-check = spaces
              accept os-check from environment "OS_NAME".
@@ -5177,7 +5174,7 @@ AT_CLEANUP
 AT_SETUP([SEQUENTIAL file with SHARING NO])
 AT_KEYWORDS([runfile])
 
-AT_XFAIL_IF([true])
+AT_XFAIL_IF([false])
 
 AT_DATA([prog1.cob], [
        identification division.
@@ -5245,7 +5242,7 @@ AT_CLEANUP
 AT_SETUP([SEQUENTIAL file with SHARING READ ONLY])
 AT_KEYWORDS([runfile])
 
-AT_XFAIL_IF([true])
+AT_XFAIL_IF([false])
 
 AT_DATA([prog1.cob], [
        identification division.
@@ -5320,7 +5317,7 @@ AT_CLEANUP
 AT_SETUP([SEQUENTIAL file with blocked lock])
 AT_KEYWORDS([runfile])
 
-AT_XFAIL_IF([true])
+AT_XFAIL_IF([false])
 
 AT_DATA([prog1.cob], [
        identification division.
@@ -5341,7 +5338,7 @@ AT_DATA([prog1.cob], [
        procedure division.
            open output file1.
            close file1.
-           open input file1.
+           open i-o file1.
            accept os-check from environment "OS".
            if os-check = spaces
              accept os-check from environment "OS_NAME".
@@ -5588,6 +5585,7 @@ AT_SETUP([INDEXED SEQUENTIAL with variable records])
 AT_KEYWORDS([runfile])
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "disam"])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -5671,7 +5669,7 @@ AT_KEYWORDS([runfile])
 
 ## TO-DO: Support INDEXED file sharing/locking.
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
-AT_XFAIL_IF([true])
+AT_XFAIL_IF([false])
 
 AT_DATA([prog1.cob], [
        identification division.
@@ -5824,7 +5822,7 @@ AT_KEYWORDS([runfile])
 
 ## TO-DO: Support INDEXED file sharing/locking.
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
-AT_XFAIL_IF([true])
+AT_XFAIL_IF([false])
 
 AT_DATA([prog1.cob], [
        identification division.
@@ -5901,7 +5899,7 @@ AT_KEYWORDS([runfile])
 
 ## TO-DO: Support INDEXED file sharing/locking.
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
-AT_XFAIL_IF([true])
+AT_XFAIL_IF([false])
 
 AT_DATA([prog1.cob], [
        identification division.
@@ -8313,36 +8311,36 @@ AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [Loading sample program data file.
 Sample program data file load complete.
 Initial Re-Read Open Sts:00
-Read2 ALP00000 #:00001 Trms:00010
-Read  BET00000 #:00002 Trms:00013
-Read2 GAM00000 #:00003 Trms:00075
-Read  DEL00000 #:00004 Trms:00010
-Read2 EPS00000 #:00005 Trms:00090
-Read  FOR00000 #:00006 Trms:00254
+Read2 ALP00000 #:0001 Trms:0010
+Read  BET00000 #:0002 Trms:0013
+Read2 GAM00000 #:0003 Trms:0075
+Read  DEL00000 #:0004 Trms:0010
+Read2 EPS00000 #:0005 Trms:0090
+Read  FOR00000 #:0006 Trms:0254
 Read Status: 10
 For Rewrite Open I-O Sts:00
-Read2 ALP00000 #:00001 Trms:00010
-REWRITE ALP00000 Sts 00 Trms:00011
+Read2 ALP00000 #:0001 Trms:0010
+REWRITE ALP00000 Sts 00 Trms:0011
 For Rewrite/Delete Open I-O Sts:00
-Read2 ALP00000 #:00001 Trms:00011
-REWRITE ALP00000 Sts 00 Trms:00012
-Read  BET00000 #:00002 Trms:00013
+Read2 ALP00000 #:0001 Trms:0011
+REWRITE ALP00000 Sts 00 Trms:0012
+Read  BET00000 #:0002 Trms:0013
 DELETE BET00000 Sts 00
 Re-list Open Sts:00
-Read2 ALP00000 #:00001 Trms:00012
-Read2 GAM00000 #:00003 Trms:00075
-Read  DEL00000 #:00004 Trms:00010
-Read2 EPS00000 #:00005 Trms:00090
-Read  FOR00000 #:00006 Trms:00254
+Read2 ALP00000 #:0001 Trms:0012
+Read2 GAM00000 #:0003 Trms:0075
+Read  DEL00000 #:0004 Trms:0010
+Read2 EPS00000 #:0005 Trms:0090
+Read  FOR00000 #:0006 Trms:0254
 Read Status: 10
 Re-list afer Extend Open Sts:00
-Read2 ALP00000 #:00001 Trms:00012
-Read2 GAM00000 #:00003 Trms:00075
-Read  DEL00000 #:00004 Trms:00010
-Read2 EPS00000 #:00005 Trms:00090
-Read  FOR00000 #:00006 Trms:00254
-Read2 ALP00000 #:00007 Trms:00010
-Read  BET00000 #:00008 Trms:00013
+Read2 ALP00000 #:0001 Trms:0012
+Read2 GAM00000 #:0003 Trms:0075
+Read  DEL00000 #:0004 Trms:0010
+Read2 EPS00000 #:0005 Trms:0090
+Read  FOR00000 #:0006 Trms:0254
+Read2 ALP00000 #:0007 Trms:0010
+Read  BET00000 #:0008 Trms:0013
 Read Status: 10
 ], [])
 
@@ -8677,81 +8675,81 @@ AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [Loading sample program data file.
 Sample program data file load complete.
 Open Sts:00
-Next  ALP00000 #00001 Trms:00010
-Next  BET00000 #00002 Trms:00013
-Next  DEL00000 #00003 Trms:00075
-Next  EPS00000 #00004 Trms:00010
+Next  ALP00000 #0001 Trms:0010
+Next  BET00000 #0002 Trms:0013
+Next  DEL00000 #0003 Trms:0075
+Next  EPS00000 #0004 Trms:0010
 *** Test Update of file ***
-Next  ALP00000 #00001 Trms:00010
-REWRITE ALP00000 Sts 00 Trms:00011
+Next  ALP00000 #0001 Trms:0010
+REWRITE ALP00000 Sts 00 Trms:0011
 Read ALP00000 Sts:00
-REWRITE ALP00000 Sts 00 Trms:00012
+REWRITE ALP00000 Sts 00 Trms:0012
 Read BET00000
 DELETE BET00000 Sts 00
 *** List file afer Update/Delete ***
-Read ALP00000 Sts 00 Trms:00012
-Read DEL00000 Sts 00 Trms:00075
-Read EPS00000 Sts 00 Trms:00010
-Read FOR00000 Sts 00 Trms:00090
-Read2 FOR00000 #00005 Trms:00090
-Read2 DEL00000 #00003 Trms:00075
-Write of 00003 Sts 22
-Read2 DEL00000 #00003 Trms:00075
- Read of deleted 00002 Sts 23
+Read ALP00000 Sts 00 Trms:0012
+Read DEL00000 Sts 00 Trms:0075
+Read EPS00000 Sts 00 Trms:0010
+Read FOR00000 Sts 00 Trms:0090
+Read2 FOR00000 #0005 Trms:0090
+Read2 DEL00000 #0003 Trms:0075
+Write of 0003 Sts 22
+Read2 DEL00000 #0003 Trms:0075
+ Read of deleted 0002 Sts 23
 ReWrite deleted BET00000 Sts 23
 Write of deleted BET00000 Sts 00
 *** List file afer Re-Add ***
-Read  ALP00000 #00001 Trms:00012
-Read  BET00000 #00002 Trms:00013
-Read  DEL00000 #00003 Trms:00075
-Read  EPS00000 #00004 Trms:00010
-Prev  DEL00000 #00003 Trms:00075
-Prev  BET00000 #00002 Trms:00013
-Prev  ALP00000 #00001 Trms:00012
+Read  ALP00000 #0001 Trms:0012
+Read  BET00000 #0002 Trms:0013
+Read  DEL00000 #0003 Trms:0075
+Read  EPS00000 #0004 Trms:0010
+Prev  DEL00000 #0003 Trms:0075
+Prev  BET00000 #0002 Trms:0013
+Prev  ALP00000 #0001 Trms:0012
 Read Prev Status: 10
-Start Last Sts 00 Rec#00006
-Prev  GAM00000 #00006 Trms:00254
-Prev  FOR00000 #00005 Trms:00090
-Start First Sts 00 Rec#00001
-Next  ALP00000 #00001 Trms:00012
-Next  BET00000 #00002 Trms:00013
-Start GE 4:00004 Sts 00 Rec#00004
-Next  EPS00000 #00004 Trms:00010
-Next  FOR00000 #00005 Trms:00090
-Start GT 4:00005 Sts 00 Rec#00005
-Next  FOR00000 #00005 Trms:00090
-Next  GAM00000 #00006 Trms:00254
-Start LT 5: 00004 Sts 00 Rec#00004
-Read  EPS00000 #00004 Trms:00010
-Prev  DEL00000 #00003 Trms:00075
-Start LE 5:00005 Sts 00 Rec#00005
-Read  FOR00000 #00005 Trms:00090
-Prev  EPS00000 #00004 Trms:00010
+Start Last Sts 00 Rec#0006
+Prev  GAM00000 #0006 Trms:0254
+Prev  FOR00000 #0005 Trms:0090
+Start First Sts 00 Rec#0001
+Next  ALP00000 #0001 Trms:0012
+Next  BET00000 #0002 Trms:0013
+Start GE 4:0004 Sts 00 Rec#0004
+Next  EPS00000 #0004 Trms:0010
+Next  FOR00000 #0005 Trms:0090
+Start GT 4:0005 Sts 00 Rec#0005
+Next  FOR00000 #0005 Trms:0090
+Next  GAM00000 #0006 Trms:0254
+Start LT 5: 0004 Sts 00 Rec#0004
+Read  EPS00000 #0004 Trms:0010
+Prev  DEL00000 #0003 Trms:0075
+Start LE 5:0005 Sts 00 Rec#0005
+Read  FOR00000 #0005 Trms:0090
+Prev  EPS00000 #0004 Trms:0010
 Re-list Open Sts:00
-Read  ALP00000 #00001 Trms:00012
-Read  BET00000 #00002 Trms:00013
-Read  DEL00000 #00003 Trms:00075
-Read  EPS00000 #00004 Trms:00010
-Read  FOR00000 #00005 Trms:00090
-Read  GAM00000 #00006 Trms:00254
+Read  ALP00000 #0001 Trms:0012
+Read  BET00000 #0002 Trms:0013
+Read  DEL00000 #0003 Trms:0075
+Read  EPS00000 #0004 Trms:0010
+Read  FOR00000 #0005 Trms:0090
+Read  GAM00000 #0006 Trms:0254
 Read Status: 10
 Re-list after Extend Open Sts:00
-Read  ALP00000 #00001 Trms:00012
-Read  BET00000 #00002 Trms:00013
-Read  DEL00000 #00003 Trms:00075
-Read  EPS00000 #00004 Trms:00010
-Read  FOR00000 #00005 Trms:00090
-Read  GAM00000 #00006 Trms:00254
-Read  BET00000 #00007 Trms:00013
+Read  ALP00000 #0001 Trms:0012
+Read  BET00000 #0002 Trms:0013
+Read  DEL00000 #0003 Trms:0075
+Read  EPS00000 #0004 Trms:0010
+Read  FOR00000 #0005 Trms:0090
+Read  GAM00000 #0006 Trms:0254
+Read  BET00000 #0007 Trms:0013
 Read Status: 10
-Read2 ALP00000 #00001 Trms:00012
-Read2 BET00000 #00002 Trms:00013
-Read2 DEL00000 #00003 Trms:00075
-Read2 EPS00000 #00004 Trms:00010
-Read2 FOR00000 #00005 Trms:00090
-Read2 GAM00000 #00006 Trms:00254
-Read2 BET00000 #00007 Trms:00013
-Invalid Read2 00008 Status: 23
+Read2 ALP00000 #0001 Trms:0012
+Read2 BET00000 #0002 Trms:0013
+Read2 DEL00000 #0003 Trms:0075
+Read2 EPS00000 #0004 Trms:0010
+Read2 FOR00000 #0005 Trms:0090
+Read2 GAM00000 #0006 Trms:0254
+Read2 BET00000 #0007 Trms:0013
+Invalid Read2 0008 Status: 23
 Read2 Status: 23
 ], [])
 
@@ -8983,34 +8981,34 @@ AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [Loading sample program data file.
 Sample program data file load complete.
 Open Sts:00
-Read2 ALP00000 Trms:00010
-Read  BET00000 Trms:00013
-Read2 ALP00000 Trms:00010
-REWRITE ALP00000 Sts 00 Trms:00011
-Read2 ALP00000 Trms:00011
-REWRITE ALP00000 Sts 00 Trms:00012
-Read  BET00000 Trms:00013
-Read2 ALP00000 Trms:00012
-Read  BET00000 Trms:00013
-REWRITE2 BET00000 Sts 44 Trms:08225
-Read2 ALP00000 Trms:00012
-REWRITE ALP00000 Sts 44 Trms:08225
+Read2 ALP00000 Trms:0010
+Read  BET00000 Trms:0013
+Read2 ALP00000 Trms:0010
+REWRITE ALP00000 Sts 00 Trms:0011
+Read2 ALP00000 Trms:0011
+REWRITE ALP00000 Sts 00 Trms:0012
+Read  BET00000 Trms:0013
+Read2 ALP00000 Trms:0012
+Read  BET00000 Trms:0013
+REWRITE2 BET00000 Sts 44 Trms:8225
+Read2 ALP00000 Trms:0012
+REWRITE ALP00000 Sts 44 Trms:8225
 Reread file after updates Open Sts:00
-Read2 ALP00000 Trms:00012
-Read  BET00000 Trms:00013
-Read2 GAM00000 Trms:00075
-Read  DEL00000 Trms:00010
-Read2 EPS00000 Trms:00090
-Read  FOR00000 Trms:00254
+Read2 ALP00000 Trms:0012
+Read  BET00000 Trms:0013
+Read2 GAM00000 Trms:0075
+Read  DEL00000 Trms:0010
+Read2 EPS00000 Trms:0090
+Read  FOR00000 Trms:0254
 Read status: 10
 Re-list after extend Open Sts:00
-Read2 ALP00000 Trms:00012
-Read  BET00000 Trms:00013
-Read2 GAM00000 Trms:00075
-Read  DEL00000 Trms:00010
-Read2 EPS00000 Trms:00090
-Read  FOR00000 Trms:00254
-Read2 ALP00000 Trms:00010
+Read2 ALP00000 Trms:0012
+Read  BET00000 Trms:0013
+Read2 GAM00000 Trms:0075
+Read  DEL00000 Trms:0010
+Read2 EPS00000 Trms:0090
+Read  FOR00000 Trms:0254
+Read2 ALP00000 Trms:0010
 Read status: 10
 ], [])
 
@@ -9199,26 +9197,26 @@ Open Sts:00
 Read ALP00000 Sts:00
 Read BET00000 Sts:00
 Read ALP00000 Sts:00
-REWRITE ALP00000 Sts 00 Trms:00011
+REWRITE ALP00000 Sts 00 Trms:0011
 Read ALP00000 Sts:00
-REWRITE ALP00000 Sts 00 Trms:00012
+REWRITE ALP00000 Sts 00 Trms:0012
 Read BET00000
 Re-list File Open Sts:00
-Read  ALP00000 Trms:00012
-Read  BET00000 Trms:00013
-Read  GAM00000 Trms:00075
-Read  DEL00000 Trms:00010
-Read  EPS00000 Trms:00090
-Read  FOR00000 Trms:00254
+Read  ALP00000 Trms:0012
+Read  BET00000 Trms:0013
+Read  GAM00000 Trms:0075
+Read  DEL00000 Trms:0010
+Read  EPS00000 Trms:0090
+Read  FOR00000 Trms:0254
 Read Status: 10
 List File afer EXTEND Open Sts:00
-Read  ALP00000 Trms:00012
-Read  BET00000 Trms:00013
-Read  GAM00000 Trms:00075
-Read  DEL00000 Trms:00010
-Read  EPS00000 Trms:00090
-Read  FOR00000 Trms:00254
-Read  BET00000 Trms:00013
+Read  ALP00000 Trms:0012
+Read  BET00000 Trms:0013
+Read  GAM00000 Trms:0075
+Read  DEL00000 Trms:0010
+Read  EPS00000 Trms:0090
+Read  FOR00000 Trms:0254
+Read  BET00000 Trms:0013
 Read Status: 10
 ], [])
 
@@ -9226,6 +9224,9 @@ AT_CLEANUP
 
 AT_SETUP([RELATIVE File Locking])
 AT_KEYWORDS([FileIo])
+
+# has timing issues - just skip until resolved later
+AT_SKIP_IF(true)
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -9434,17 +9435,17 @@ AT_DATA([prog.cob], [
                OPEN I-O SHARING ALL OTHER FLATFILE2
                MOVE 1 TO REC-NUM
                READ FLATFILE2 WITH LOCK
-	       DELETE FLATFILE2
+               DELETE FLATFILE2
                STRING "Deleted " C2-CUST-NUM "        1  Sts:" 
-	              CUST-STAT INTO MSG
+                      CUST-STAT INTO MSG
                PERFORM DISPLAY-IT
                MOVE 3 TO REC-NUM
                READ FLATFILE2 WITH LOCK
                STRING "Read    " C2-CUST-NUM " Locked 3  Sts:" 
-	              CUST-STAT INTO MSG
+                      CUST-STAT INTO MSG
                PERFORM DISPLAY-IT
                CALL "C$SLEEP" USING 4
-	       CLOSE FLATFILE2
+               CLOSE FLATFILE2
            WHEN "READADV"
                MOVE "child.txt" TO REPORT-FILE
                OPEN EXTEND REPORTIT
@@ -9529,7 +9530,7 @@ AT_DATA([prog.cob], [
                   INTO MSG
            PERFORM DISPLAY-IT.
            ADD 1 TO C2-NO-TERMINALS
-           REWRITE FILE FLATFILE2 WITH NO LOCK
+           REWRITE FILE FLATFILE2 FROM TSP2-RECORD WITH NO LOCK
       *    REWRITE TSP2-RECORD WITH NO LOCK
            STRING "REWRITE " C2-CUST-NUM " Trms:" C2-NO-TERMINALS 
                   " Sts:" CUST-STAT INTO MSG
@@ -9861,17 +9862,17 @@ AT_DATA([prog.cob], [
            PERFORM LOADFILE.
 
            OPEN I-O FLATFILE2.
-	   MOVE 2 TO REC-NUM
+           MOVE 2 TO REC-NUM
            READ FLATFILE2
            DISPLAY "Read    " C2-CUST-NUM " Sts:" CUST-STAT
                    " Trms:" C2-NO-TERMINALS.
            ADD 1 TO C2-NO-TERMINALS
-           REWRITE FILE FLATFILE2
+           REWRITE FILE FLATFILE2 FROM TSP2-RECORD
            READ FLATFILE2
            DISPLAY "REWROTE " C2-CUST-NUM " Sts:" CUST-STAT 
                    " Trms:" C2-NO-TERMINALS.
            CLOSE FLATFILE2.
-	   STOP RUN.
+           STOP RUN.
 
        LOADFILE.
            DISPLAY "Loading sample program data file."
@@ -11147,22 +11148,22 @@ AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
       *    First read, raise a FS 10 (AT END) which is expected
            READ INFILE INTO WSINREC
            END-READ
-	   IF WSFS = '10'
+           IF WSFS = '10'
              DISPLAY "1st Read on missing optional file = " WSFS " OK"
-	   ELSE
+           ELSE
              DISPLAY "1st Read on missing optional file = " WSFS " Bad"
-	   END-IF.
+           END-IF.
 
       *    Second read, should raise a FS 46 (READ AFTER AT END)
       *    but a FS 23 is raised instead.
            READ INFILE INTO WSINREC
            END-READ
 
-	   IF WSFS = '46'
+           IF WSFS = '46'
              DISPLAY "2nd Read on missing optional file = " WSFS " OK"
-	   ELSE
+           ELSE
              DISPLAY "2nd Read on missing optional file = " WSFS " Bad"
-	   END-IF.
+           END-IF.
 
            CLOSE INFILE
            STOP RUN.
@@ -11351,7 +11352,7 @@ AT_DATA([prog.cob], [
            record is varying in size
                from 107 to 362 characters
                depending on end-tbw-record
-	       .
+           .
        01  tbw-record.
            02 tbw-key                        pic x(100).
            02 tbw-alt.
@@ -11642,14 +11643,14 @@ AT_DATA([prog.cob], [
 
            OPEN OUTPUT OUTFILE
            MOVE 9 TO INPUT-LEN
-		   MOVE "Record 1............." TO OUTPUT-REC
+           MOVE "Record 1............." TO OUTPUT-REC
            WRITE OUTPUT-REC
            DISPLAY "Write 1: STATUS IS " INPUT-STATUS 
                    " LENGTH IS " INPUT-LEN
                              UPON CONSOLE
            MOVE 64 TO INPUT-LEN
-		   MOVE ALL '.' TO OUTPUT-REC
-		   MOVE "Record 2" TO OUTPUT-REC (1:8)
+           MOVE ALL '.' TO OUTPUT-REC
+           MOVE "Record 2" TO OUTPUT-REC (1:8)
            WRITE OUTPUT-REC
            DISPLAY "Write 2: STATUS IS " INPUT-STATUS 
                    " LENGTH IS " INPUT-LEN
@@ -11756,14 +11757,14 @@ AT_DATA([prog.cob], [
 
            OPEN OUTPUT OUTFILE
            MOVE 9 TO INPUT-LEN
-		   MOVE "Record 1............." TO OUTPUT-REC
+           MOVE "Record 1............." TO OUTPUT-REC
            WRITE OUTPUT-REC
            DISPLAY "Write 1: STATUS IS " INPUT-STATUS 
                    " LENGTH IS " INPUT-LEN
                              UPON CONSOLE
            MOVE 64 TO INPUT-LEN
-		   MOVE ALL '.' TO OUTPUT-REC
-		   MOVE "Record 2" TO OUTPUT-REC (1:8)
+           MOVE ALL '.' TO OUTPUT-REC
+           MOVE "Record 2" TO OUTPUT-REC (1:8)
            WRITE OUTPUT-REC
            DISPLAY "Write 2: STATUS IS " INPUT-STATUS 
                    " LENGTH IS " INPUT-LEN

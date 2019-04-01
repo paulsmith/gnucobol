@@ -479,6 +479,7 @@ test.conf: missing definitions:
 	no definition of 'hexadecimal-boolean'
 	no definition of 'national-literals'
 	no definition of 'hexadecimal-national-literals'
+	no definition of 'national-character-literals'
 	no definition of 'acu-literals'
 	no definition of 'word-continuation'
 	no definition of 'not-exception-before-exception'

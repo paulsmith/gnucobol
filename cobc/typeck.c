@@ -582,7 +582,7 @@ cb_validate_one (cb_tree x)
 		if (CB_FIELD_P (y)) {
 			f = CB_FIELD (y);
 			if (f->level == 88) {
-				cb_error_x (x, _("Invalid use of 88 level item"));
+				cb_error_x (x, _("condition-name not allowed here: '%s'"), f->name);
 				return 1;
 			}
 			if (f->flag_invalid) {
@@ -2493,6 +2493,7 @@ cb_build_length (cb_tree x)
 	temp = cb_build_index (cb_build_filler (), NULL, 0, NULL);
 	CB_FIELD (cb_ref (temp))->usage = CB_USAGE_LENGTH;
 	CB_FIELD (cb_ref (temp))->count++;
+	CB_FIELD (cb_ref (temp))->pic->have_sign = 0;	/* LENGTH is UNSIGNED */
 	cb_emit (cb_build_assign (temp, cb_build_length_1 (x)));
 
 	if (cb_pretty_display
@@ -5274,6 +5275,7 @@ cb_build_cond (cb_tree x)
 	cb_tree			d1;
 	cb_tree			d2;
 	cb_tree			ret;
+	int			has_any_len = 0;
 	int			size1;
 	int			size2;
 
@@ -5346,6 +5348,12 @@ cb_build_cond (cb_tree x)
 			if (!p->y || p->y == cb_error_node) {
 				return cb_error_node;
 			}
+			if (CB_REF_OR_FIELD_P (p->x)) {
+				f = CB_FIELD_PTR (p->x);
+				if(f->flag_any_length)
+					has_any_len = 1;
+			}
+
 			if (CB_INDEX_OR_HANDLE_P (p->x)
 			||  CB_INDEX_OR_HANDLE_P (p->y)
 			||  CB_TREE_CLASS (p->x) == CB_CLASS_POINTER
@@ -5386,12 +5394,13 @@ cb_build_cond (cb_tree x)
 				}
 
 				/* Field comparison */
-				if ((CB_REF_OR_FIELD_P (p->x)) &&
-				    (CB_TREE_CATEGORY (p->x) == CB_CATEGORY_ALPHANUMERIC ||
-				     CB_TREE_CATEGORY (p->x) == CB_CATEGORY_ALPHABETIC) &&
-				    cb_field_size (p->x) == 1 &&
-				    !current_program->alphabet_name_list &&
-				    (p->y == cb_space || p->y == cb_low ||
+				if ((CB_REF_OR_FIELD_P (p->x)) 
+				 && (CB_TREE_CATEGORY (p->x) == CB_CATEGORY_ALPHANUMERIC ||
+				     CB_TREE_CATEGORY (p->x) == CB_CATEGORY_ALPHABETIC) 
+				 && cb_field_size (p->x) == 1 
+				 && !has_any_len
+				 && !current_program->alphabet_name_list 
+				 && (p->y == cb_space || p->y == cb_low ||
 				     p->y == cb_high || p->y == cb_zero)) {
 					ret = CB_BUILD_FUNCALL_2 ("$G", p->x, p->y);
 					break;
@@ -5404,9 +5413,9 @@ cb_build_cond (cb_tree x)
 					size1 = 0;
 					size2 = 0;
 				}
-				if (size1 == 1 && size2 == 1) {
+				if (size1 == 1 && size2 == 1 && !has_any_len) {
 					ret = CB_BUILD_FUNCALL_2 ("$G", p->x, p->y);
-				} else if (size1 != 0 && size1 == size2) {
+				} else if (size1 != 0 && size1 == size2 && !has_any_len) {
 					ret = CB_BUILD_FUNCALL_3 ("memcmp",
 						CB_BUILD_CAST_ADDRESS (p->x),
 						CB_BUILD_CAST_ADDRESS (p->y),
@@ -8754,7 +8763,8 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 				}
 			}
 		} else if (src == cb_low || src == cb_high) {
-			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC) {
+			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC
+			 || (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED && !is_value)) {
 				if (!cb_verify_x (loc, cb_move_fig_constant_to_numeric,
 					_("MOVE of figurative constant to numeric item"))) {
 					return -1;
@@ -8763,7 +8773,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 					goto movezero;
 				}
 			}
-		}
+		} 
 		break;
 	case CB_TAG_LITERAL:
 		l = CB_LITERAL (src);

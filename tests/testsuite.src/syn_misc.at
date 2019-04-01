@@ -2445,8 +2445,8 @@ prog.cob:9: error: literal length exceeds 160 characters
 ])
 
 AT_CHECK([$COMPILE_ONLY -free prog2.cob], [1], [],
-[prog2.cob:9: error: invalid literal: '                                   ...'
-prog2.cob:9: error: literal length 8299 exceeds 8191 characters
+[prog2.cob:43: error: invalid literal: '                                   ...'
+prog2.cob:43: error: literal length 8299 exceeds 8191 characters
 ])
 
 # extra test with listing as this is an edge case there
@@ -3971,6 +3971,7 @@ AT_CLEANUP
 
 AT_SETUP([ANY LENGTH item as BY VALUE formal parameter])
 AT_KEYWORDS([misc BY VALUE])
+AT_SKIP_IF(true)
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -3986,8 +3987,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:9: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
-prog.cob:9: error: ANY LENGTH items may only be BY REFERENCE formal parameters
+[prog.cob:9: error: ANY LENGTH items may only be BY REFERENCE formal parameters
 ])
 AT_CLEANUP
 
@@ -4816,25 +4816,22 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: in section 'test-DEBUG':
+[prog.cob: in section 'TEST-DEBUG2':
+prog.cob:24: error: duplicate DEBUGGING target: 'i'
+prog.cob: in section 'test-DEBUG':
 prog.cob:22: warning: 'MAIN' is not in DECLARATIVES
-prog.cob:22: error: 'TEST-DEBUG2' may only be referenced with PERFORM
 prog.cob:19: error: DEBUGGING target invalid: 'test-DEBUG'
 prog.cob: in section 'TEST-DEBUG2':
 prog.cob:25: error: DEBUGGING target invalid: 'test-DEBUG'
-prog.cob: in section 'MAIN':
-prog.cob:31: warning: 'test-DEBUG' is in DECLARATIVES
 ])
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
-[prog.cob: in section 'test-DEBUG':
-prog.cob:20: warning: USE FOR DEBUGGING is obsolete in COBOL 85
+[prog.cob: in section 'TEST-DEBUG2':
+prog.cob:24: error: duplicate DEBUGGING target: 'i'
+prog.cob: in section 'test-DEBUG':
 prog.cob:22: error: 'MAIN' is not in DECLARATIVES
-prog.cob:22: error: 'TEST-DEBUG2' may only be referenced with PERFORM
 prog.cob:19: error: DEBUGGING target invalid: 'test-DEBUG'
 prog.cob: in section 'TEST-DEBUG2':
 prog.cob:25: error: DEBUGGING target invalid: 'test-DEBUG'
-prog.cob: in section 'MAIN':
-prog.cob:31: error: 'test-DEBUG' is in DECLARATIVES
 ])
 AT_CLEANUP
 
@@ -6298,7 +6295,6 @@ prog.cob:152: error: SUPPRESS WHEN LOW-VALUE item must be USAGE DISPLAY or NATIO
 ])
 AT_CLEANUP
 
-#### r2649:
 AT_SETUP([IBM Data Division])
 AT_KEYWORDS([78 LENGTH])
 
@@ -6355,12 +6351,20 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([cobc -x -std=ibm -w prog.cob ], [1], [],
-[prog.cob: 14: error: LENGTH OF 'MY-DATA' not allowed outside of Procedure Division
-prog.cob: 14: error: 78 VALUE used
-prog.cob: 21: error: LENGTH OF 'ODO-DATA' not allowed outside of Procedure Division
-prog.cob: 21: error: 78 VALUE used
-prog.cob: 30: error: 'MY-ELEMENT-1' requires 1 subscript
+AT_CHECK([cobc -x -std=ibm prog.cob ], [1], [],
+[prog.cob:14: error: LENGTH OF 'MY-DATA' not allowed outside of Procedure Division
+prog.cob:14: error: constant item 'MY-LEN' requires a VALUE clause
+prog.cob:21: error: LENGTH OF 'ODO-DATA' not allowed outside of Procedure Division
+prog.cob:21: error: constant item 'ODO-LEN' requires a VALUE clause
+prog.cob:30: warning: subscript missing for 'MY-ELEMENT-1' - defaulting to 1
+])
+
+AT_CHECK([cobc -x -std=ibm-strict -w prog.cob ], [1], [],
+[prog.cob:14: error: LENGTH OF 'MY-DATA' not allowed outside of Procedure Division
+prog.cob:14: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:21: error: LENGTH OF 'ODO-DATA' not allowed outside of Procedure Division
+prog.cob:21: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:30: error: 'MY-ELEMENT-1' requires one subscript
 ])
 
 AT_CLEANUP

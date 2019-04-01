@@ -78,7 +78,7 @@ cb_is_expr (cb_tree ch)
 	num = 0;
 	for (l = ch; l; l = CB_CHAIN (l)) {
 		t = CB_VALUE (l);
-		if (t && CB_LITERAL (t)) {
+		if (t && CB_LITERAL_P (t)) {
 			if (++num > 1)
 				return 1;
 		}
@@ -1633,10 +1633,9 @@ validate_field_clauses (cb_tree x, struct cb_field *f)
 static unsigned int
 validate_elementary_item (struct cb_field *f)
 {
-	static const int cb_mf_ibm_comp = 1; // borked by r1739
 	unsigned int	ret;
-	cob_pic_symbol	*pstr;
-	int		n;
+	cob_pic_symbol	*pstr = NULL;
+	int		n = 0;
 
 	ret = validate_usage (f);
 	if (f->flag_sign_clause) {
@@ -2002,17 +2001,26 @@ setup_parameters (struct cb_field *f)
 		break;
 
 	case CB_USAGE_COMP_5:
+	case CB_USAGE_COMP_N:
+		if(f->pic 
+		&& f->pic->orig
+		&& f->pic->orig[0] == 'X') {
+			f->usage = CB_USAGE_COMP_X;
+		}
 		f->flag_real_binary = 1;
 		/* Fall-through */
 	case CB_USAGE_COMP_X:
-	case CB_USAGE_COMP_N:
-		if (f->pic->category == CB_CATEGORY_ALPHANUMERIC) {
+		if (f->pic->category == CB_CATEGORY_ALPHANUMERIC
+		 && f->usage == CB_USAGE_COMP_X) {
+			f->compx_size = f->size = f->pic->size;
 			if (f->pic->size > 8) {
 				f->pic = CB_PICTURE (cb_build_picture ("9(36)"));
 			} else {
 				char		pic[8];
 				sprintf (pic, "9(%d)", pic_digits[f->pic->size - 1]);
 				f->pic = CB_PICTURE (cb_build_picture (pic));
+				if(f->compx_size > 0)
+					f->pic->size = f->compx_size;
 			}
 		}
 #ifndef WORDS_BIGENDIAN
@@ -2034,7 +2042,6 @@ setup_parameters (struct cb_field *f)
 static void
 compute_binary_size (struct cb_field *f, const int size)
 {
-	static const int cb_mf_ibm_comp = 0; //// missing gobal from r2475
 
 	if (cb_binary_size == CB_BINARY_SIZE_1_2_4_8) {
 		f->size = ((size <= 2) ? 1 :
@@ -2255,7 +2262,6 @@ set_report_field_offset (struct cb_field *f)
 static int
 compute_size (struct cb_field *f)
 {
-	static const int cb_mf_ibm_comp = 0; //// missing from 41739
 	struct cb_field	*c;
 	int		size = 0;
 	int		size_check = 0;
@@ -2365,14 +2371,12 @@ unbounded_again:
 				}
 
 				/* Word alignment */
-				if (c->flag_synchronized &&
-				    cb_verify_x (CB_TREE (c), cb_synchronized_clause, "SYNC")) {
+				if (c->flag_synchronized
+				 && cb_verify_x (CB_TREE (c), cb_synchronized_clause, "SYNC")) {
 					align_size = 1;
 					switch (c->usage) {
 					case CB_USAGE_BINARY:
 					case CB_USAGE_COMP_5:
-					case CB_USAGE_COMP_X:
-					case CB_USAGE_COMP_N:
 					case CB_USAGE_FLOAT:
 					case CB_USAGE_DOUBLE:
 						if (c->size == 2
@@ -2392,16 +2396,28 @@ unbounded_again:
 							}
 						}
 						break;
+					case CB_USAGE_UNSIGNED_SHORT:
+					case CB_USAGE_SIGNED_SHORT:
+						align_size = sizeof(short);
+						break;
+		    			case CB_USAGE_UNSIGNED_INT:
+		    			case CB_USAGE_SIGNED_INT:
+						align_size = sizeof(int);
+						break;
+		    			case CB_USAGE_UNSIGNED_LONG:
+		    			case CB_USAGE_SIGNED_LONG:
+						align_size = sizeof(long);
+						break;
 					case CB_USAGE_LONG_DOUBLE:
 					case CB_USAGE_FP_BIN32:
 					case CB_USAGE_FP_BIN64:
 					case CB_USAGE_FP_BIN128:
 					case CB_USAGE_FP_DEC64:
 					case CB_USAGE_FP_DEC128:
-						if (c->size == 2 ||
-						    c->size == 4 ||
-						    c->size == 8 ||
-						    c->size == 16) {
+						if (c->size == 2 
+						 || c->size == 4
+						 || c->size == 8
+						 || c->size == 16) {
 							align_size = c->size;
 						}
 						break;
@@ -2422,10 +2438,13 @@ unbounded_again:
 					case CB_USAGE_PROGRAM_POINTER:
 						align_size = sizeof (void *);
 						break;
+					case CB_USAGE_COMP_X:
+					case CB_USAGE_COMP_N:
+						break;
 					default:
 						break;
 					}
-					if (c->offset % align_size != 0) {
+					if ((c->offset % align_size) != 0) {
 						pad = align_size - (c->offset % align_size);
 						c->offset += pad;
 						size_check += pad;
@@ -2487,12 +2506,10 @@ unbounded_again:
 
 		switch (f->usage) {
 		case CB_USAGE_COMP_X:
-			//// r614
 			if(f->compx_size > 0) {
 				size = f->compx_size;
 				break;
 			}
-			/* fallthrough (end r614) */
 		case CB_USAGE_COMP_N:
 			if (f->pic->category == CB_CATEGORY_ALPHANUMERIC) {
 				break;

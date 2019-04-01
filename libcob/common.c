@@ -1924,7 +1924,7 @@ cob_trace_prep (void)
 		if (COB_MODULE_PTR->module_type == COB_MODULE_TYPE_FUNCTION) {
 			fprintf (cobsetptr->cob_trace_file, "Function-Id: %s\n", cob_last_progid);
 		} else {
-			fprintf (cobsetptr->cob_trace_file, "Program-Id:  %s\n", cob_last_progid);
+			fprintf (cobsetptr->cob_trace_file, "Program-Id: %s\n", cob_last_progid);
 		}
 	}
 	return 0;
@@ -1948,9 +1948,9 @@ cob_trace_print (char *val)
 					}
 				} else {
 					if (i != last_pos) {
-						fprintf (cobsetptr->cob_trace_file, "Program-Id:  %-16s", cob_last_progid);
+						fprintf (cobsetptr->cob_trace_file, "Program-Id: %-16s", cob_last_progid);
 					} else {
-						fprintf (cobsetptr->cob_trace_file, "Program-Id:  %s", cob_last_progid);
+						fprintf (cobsetptr->cob_trace_file, "Program-Id: %s", cob_last_progid);
 					}
 				}
 			} else
@@ -2281,7 +2281,8 @@ cob_module_global_enter (cob_module **module, cob_global **mglobal,
 					return 1;
 				}
 				cob_module_err = mod;
-				cob_fatal_error (COB_FERROR_RECURSIVE);
+				cob_fatal_error(COB_FERROR_RECURSIVE);
+				cob_stop_run (1);
 			}
 		}
 	}
@@ -7052,6 +7053,9 @@ cob_fatal_error (const enum cob_fatal_error fatal_error)
 		cob_runtime_error (_("call to %s with NULL pointer"), "cob_free");
 		break;
 	/* LCOV_EXCL_STOP */
+	case COB_FERROR_DIV_ZERO:
+		cob_runtime_error (_("divide by ZERO"));
+		break;
 	case COB_FERROR_FILE:
 		file_status = cobglobptr->cob_error_file->file_status;
 		status = COB_D2I (file_status[0]) * 10 + COB_D2I (file_status[1]);

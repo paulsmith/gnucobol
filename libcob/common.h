@@ -21,6 +21,7 @@
 
 #ifndef COB_COMMON_H
 #define COB_COMMON_H
+#include <stdio.h> 
 
 // needed for off_t 
 #include <sys/types.h>
@@ -824,10 +825,10 @@ enum cob_fatal_error {
 	COB_FERROR_FILE,
 	COB_FERROR_FUNCTION,
 	COB_FERROR_FREE,
+	COB_FERROR_DIV_ZERO,
 	COB_FERROR_XML,
 	COB_FERROR_JSON
 };
-#define COB_FERROR_DIV_ZERO	14
 
 /* Exception identifier enumeration */
 
@@ -2215,6 +2216,14 @@ typedef struct {
 	} name
 
 /**********************************************************/
+/*                                                        */
+/* Warning: Do not change the format of FCD3              */
+/*        : It must remain exact Binary Compatible        */
+/*        : With what Microfocus uses                     */
+/*                                                        */
+/**********************************************************/
+
+/**********************************************************/
 /* Following is the 64-bit FCD (or also known as FCD3) */
 /* This format is used at least for:                      */
 /* - MF Visual COBOL         (both 32 and 64 bit)         */
@@ -2319,9 +2328,6 @@ typedef struct {
 #define MF_CALLFH_TRACE		0x20			/* Trace I/O for this file */
 #define MF_CALLFH_STATS		0x10			/* Record Stats for this file */
 	unsigned char	nlsId[2];
-#if 0 && reportwriter //// 1419
-	unsigned char	eop[2];				/* Was reserverd: Use for cob_write eop value */
-#endif
 	char		fsv2FileId[2];			/* Fileshare V2 file id */
 	char		retryOpenCount[2];
 	unsigned char	fnameLen[2];			/* file name length */

@@ -16,7 +16,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 
 # Word list for dialect: COBOL 1985
@@ -81,7 +81,15 @@ reserved:	COMMA
 reserved:	COMMON
 reserved:	COMMUNICATION
 reserved:	COMP
+reserved:	COMP-1
+reserved:	COMP-2
+reserved:	COMP-3
+reserved:	COMP-4
 reserved:	COMPUTATIONAL
+reserved:	COMPUTATIONAL-1
+reserved:	COMPUTATIONAL-2
+reserved:	COMPUTATIONAL-3
+reserved:	COMPUTATIONAL-4
 reserved:	COMPUTE
 reserved:	CONFIGURATION
 reserved:	CONTAINS

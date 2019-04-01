@@ -30,7 +30,7 @@ AT_DATA([dump.c], [
 #include <libcob.h>
 
 COB_EXT_EXPORT int
-dump (unsigned char *data, int *p)
+dump (unsigned char *data, char *p)
 {
   int i;
   if ( *p == 0 ) p++;
@@ -131,77 +131,70 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 AT_CLEANUP
 
 
-#### r1260
-#### jkl, r1260 AT_SETUP([CALL USING numeric literal])
-#### jkl, r1260 AT_KEYWORDS([CALL])
-#### jkl, r1260 
-#### jkl, r1260 AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
-#### jkl, r1260        PROGRAM-ID. prog.
-#### jkl, r1260        
-#### jkl, r1260        DATA DIVISION.
-#### jkl, r1260        WORKING-STORAGE SECTION.
-#### jkl, r1260        01  MYRTN  PIC X(9) VALUE "SUB  ".
-#### jkl, r1260        01  BINFLD PIC S9(9) BINARY VALUE 1280.
-#### jkl, r1260        
-#### jkl, r1260        PROCEDURE DIVISION.
-#### jkl, r1260            CALL "SUB"  USING LENGTH OF MYRTN BY VALUE 10.
-#### jkl, r1260            CALL "SUB"  USING BINFLD BY VALUE 11.
-#### jkl, r1260            CALL "SUB"  USING BY CONTENT BINFLD BY VALUE 12.
-#### jkl, r1260            CALL "SUB"  USING BINFLD BY VALUE 13.
-#### jkl, r1260            CALL "SUB"  USING 1280 BY VALUE 14.
-#### jkl, r1260            CALL "SUB"  USING -1280 BY VALUE 15.
-#### jkl, r1260            CALL "SUB"  USING BY CONTENT 1280 BY VALUE 16.
-#### jkl, r1260            CALL "SUB"  USING BY CONTENT -1280 BY VALUE 17.
-#### jkl, r1260            CALL "SUB"  USING BY REFERENCE 1280 BY VALUE 18.
-#### jkl, r1260            CALL "SUB"  USING BY REFERENCE -1280 BY VALUE 19.
-#### jkl, r1260            CALL "SUB"  USING BY CONTENT BINFLD BY VALUE 20.
-#### jkl, r1260            CALL "SUB"  USING BY REFERENCE BINFLD BY VALUE 21.
-#### jkl, r1260            CALL "SUB"  USING 1665431892 BY VALUE 22.
-#### jkl, r1260            CALL "SUB"  USING 1665.892 BY VALUE 23.
-#### jkl, r1260            CALL "SUB"  USING 1665.89200 BY VALUE 24. 
-#### jkl, r1260 	   CALL "SUB"  USING 16654318925468 BY VALUE 25.
-#### jkl, r1260            STOP RUN.
-#### jkl, r1260            END PROGRAM prog.
-#### jkl, r1260        
-#### jkl, r1260        IDENTIFICATION DIVISION.
-#### jkl, r1260        PROGRAM-ID. "SUB".
-#### jkl, r1260        
-#### jkl, r1260        DATA DIVISION.
-#### jkl, r1260        LINKAGE SECTION.
-#### jkl, r1260        01  x  PIC S9(9) BINARY.
-#### jkl, r1260        01  y  PIC 9(9)  COMP-5.
-#### jkl, r1260        
-#### jkl, r1260        PROCEDURE DIVISION USING x, VALUE y.
-#### jkl, r1260            DISPLAY "COBOL: X is " x " and Y is " y.
-#### jkl, r1260            ADD 1 TO x.
-#### jkl, r1260            END PROGRAM "SUB".
-#### jkl, r1260 ])
-#### jkl, r1260 
-#### jkl, r1260 AT_CHECK([cobc -x -std=mf -debug -Wall prog.cob], [0], [], [])
-#### jkl, r1260 
-#### jkl, r1260 AT_CHECK([./prog], [0], [COBOL: X is +0000000009 and Y is 0000000010
-#### jkl, r1260 COBOL: X is +0000001280 and Y is 0000000011
-#### jkl, r1260 COBOL: X is +0000001281 and Y is 0000000012
-#### jkl, r1260 COBOL: X is +0000001281 and Y is 0000000013
-#### jkl, r1260 COBOL: X is +0000001280 and Y is 0000000014
-#### jkl, r1260 COBOL: X is -0000001280 and Y is 0000000015
-#### jkl, r1260 COBOL: X is +0000001280 and Y is 0000000016
-#### jkl, r1260 COBOL: X is -0000001280 and Y is 0000000017
-#### jkl, r1260 COBOL: X is +0000001280 and Y is 0000000018
-#### jkl, r1260 COBOL: X is -0000001280 and Y is 0000000019
-#### jkl, r1260 COBOL: X is +0000001282 and Y is 0000000020
-#### jkl, r1260 COBOL: X is +0000001282 and Y is 0000000021
-#### jkl, r1260 COBOL: X is +1665431892 and Y is 0000000022
-#### jkl, r1260 COBOL: X is +0001665892 and Y is 0000000023
-#### jkl, r1260 COBOL: X is +0166589200 and Y is 0000000024
-#### jkl, r1260 COBOL: X is -1564248420 and Y is 0000000025
-#### jkl, r1260 ], [])
-#### jkl, r1260 
-#### jkl, r1260 AT_CLEANUP
-#### jkl, r1260 
-#### jkl, r1260 
-#### jkl, r1260
-####
+AT_SETUP([CALL USING numeric literal])
+AT_KEYWORDS([CALL])
+
+AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  MYRTN  PIC X(9) VALUE "SUB  ".
+       01  BINFLD PIC S9(9) BINARY VALUE 1280.
+       
+       PROCEDURE DIVISION.
+           CALL "SUB"  USING LENGTH OF MYRTN BY VALUE 10.
+           CALL "SUB"  USING BINFLD BY VALUE 11.
+           CALL "SUB"  USING BY CONTENT BINFLD BY VALUE 12.
+           CALL "SUB"  USING BINFLD BY VALUE 13.
+           CALL "SUB"  USING 1280 BY VALUE 14.
+           CALL "SUB"  USING -1280 BY VALUE 15.
+           CALL "SUB"  USING BY CONTENT 1280 BY VALUE 16.
+           CALL "SUB"  USING BY CONTENT -1280 BY VALUE 17.
+           CALL "SUB"  USING BY REFERENCE 1280 BY VALUE 18.
+           CALL "SUB"  USING BY REFERENCE -1280 BY VALUE 19.
+           CALL "SUB"  USING BY CONTENT BINFLD BY VALUE 20.
+           CALL "SUB"  USING BY REFERENCE BINFLD BY VALUE 21.
+           CALL "SUB"  USING 1665431892 BY VALUE 22.
+           CALL "SUB"  USING 1665.892 BY VALUE 23.
+           CALL "SUB"  USING 1665.89200 BY VALUE 24. 
+           STOP RUN.
+           END PROGRAM prog.
+       
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. "SUB".
+       
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  x  PIC S9(9) BINARY.
+       01  y  PIC 9(9)  COMP-5.
+       
+       PROCEDURE DIVISION USING x, VALUE y.
+           DISPLAY "COBOL: X is " x " and Y is " y.
+           ADD 1 TO x.
+           END PROGRAM "SUB".
+])
+
+AT_CHECK([cobc -x -std=mf -debug -Wall prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0], [COBOL: X is +0000000009 and Y is 0000000010
+COBOL: X is +0000001280 and Y is 0000000011
+COBOL: X is +0000001281 and Y is 0000000012
+COBOL: X is +0000001281 and Y is 0000000013
+COBOL: X is +0000001280 and Y is 0000000014
+COBOL: X is -0000001280 and Y is 0000000015
+COBOL: X is +0000001280 and Y is 0000000016
+COBOL: X is -0000001280 and Y is 0000000017
+COBOL: X is +0000001280 and Y is 0000000018
+COBOL: X is -0000001280 and Y is 0000000019
+COBOL: X is +0000001282 and Y is 0000000020
+COBOL: X is +0000001282 and Y is 0000000021
+COBOL: X is +1665431892 and Y is 0000000022
+COBOL: X is +0001665892 and Y is 0000000023
+COBOL: X is +0166589200 and Y is 0000000024
+], [])
+
+AT_CLEANUP
 
 
 ## H literal
@@ -1333,9 +1326,9 @@ AT_DATA([prog.cob], [
 AT_CHECK([cobc -x -std=ibm -w -fodoslide prog.cob ], [0], [], [])
 
 AT_CHECK([./prog], [0],
-[Length is +0000000222 with 03, 04, 00, 06, 01
+[Length is 0000000222 with 03, 04, 00, 06, 01
 "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567.901234567890123456789012345+++901234567890123456789--2345678901234567890123456789012345678901234567890123456789012345678901"
-Length is +0000000134 with 02, 03, 01, 04, 00
+Length is 0000000134 with 02, 03, 01, 04, 00
 "012345678901234567890123456789012345678901234567890123456789012345678901234567.901+++567--01234567890123456789012345678901234567890123"
 ], [])
 
@@ -1472,7 +1465,7 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE -std=default -fodoslide prog.cob ], [0], [], [prog.cob: 36: Warning: ODO-2 does not have a fixed location
+AT_CHECK([$COMPILE -std=default -fodoslide prog.cob ], [0], [], [prog.cob:36: warning: ODO-2 does not have a fixed location
 ])
 
 AT_CHECK([./prog], [0], [********
@@ -1941,7 +1934,6 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
 [prog.cob:8: warning: BY CONTENT assumed for alphanumeric item 'X'
-prog.cob:19: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
@@ -2029,10 +2021,6 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], ignore)
-#AT_CHECK([$COMPILE prog.cob], [0], [],
-# hack for now: ignore
-#[prog.cob:58: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
-#])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [4: +0000000001
 1: +002
@@ -2582,9 +2570,7 @@ AT_DATA([caller.cob], [
 ])
 
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
-AT_CHECK([$COMPILE_MODULE callee.cob], [0], [],
-[callee.cob:10: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
-])
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 
 AT_CLEANUP

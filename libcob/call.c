@@ -933,6 +933,7 @@ cob_resolve_cobol (const char *name, const int fold_case, const int errind)
 	char	*entry;
 	char	*dirent;
 
+	cobglobptr->cob_exception_code = 0;
 	entry = cob_chk_call_path (name, &dirent);
 	p = cob_resolve_internal (entry, dirent, fold_case);
 	if (dirent) {
@@ -944,6 +945,7 @@ cob_resolve_cobol (const char *name, const int fold_case, const int errind)
 		}
 		cob_set_exception (COB_EC_PROGRAM_NOT_FOUND);
 	}
+	cobglobptr->cob_call_name_hash = cob_get_name_hash (name);
 	return p;
 }
 
@@ -1566,9 +1568,8 @@ cob_get_param_type (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_type");
 
-	if (f == NULL) {
+	if (f == NULL)
 		return -1;
-	}
 	if (f->attr->type == COB_TYPE_NUMERIC_BINARY) {
 		if (COB_FIELD_REAL_BINARY (f)) {
 			return COB_TYPE_NUMERIC_COMP5;
@@ -1587,9 +1588,8 @@ cob_get_param_size (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_size");
 
-	if (f == NULL) {
+	if (f == NULL)
 		return -1;
-	}
 	return (int)f->size;
 }
 
@@ -1597,9 +1597,8 @@ int
 cob_get_param_sign (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_sign");
-	if (f == NULL) {
+	if (f == NULL)
 		return -1;
-	}
 	if (COB_FIELD_HAVE_SIGN(f)) {
 		return 1;
 	}
@@ -1610,9 +1609,8 @@ int
 cob_get_param_scale (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_scale");
-	if (f == NULL) {
+	if (f == NULL) 
 		return -1;
-	}
 	return (int)f->attr->scale;
 }
 
@@ -1620,9 +1618,8 @@ int
 cob_get_param_digits (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_digits");
-	if (f == NULL) {
+	if (f == NULL) 
 		return -1;
-	}
 	return (int)f->attr->digits;
 }
 
@@ -1630,7 +1627,7 @@ int
 cob_get_param_constant (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_constant");
-	if (f == NULL) {
+	if (f == NULL) 
 		return -1;
 	if (COB_FIELD_CONTENT(f)) 
 		return 3;
@@ -1638,7 +1635,6 @@ cob_get_param_constant (int n)
 		return 2;
 	if (COB_FIELD_CONSTANT(f)) 
 		return 1;
-	}
 	return 0;
 }
 

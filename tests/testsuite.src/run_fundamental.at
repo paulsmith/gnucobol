@@ -5159,11 +5159,13 @@ AT_DATA([prog.cob], [
            SOURCE-COMPUTER. mine WITH DEBUGGING MODE.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
-       SELECT TEST-FILE ASSIGN "./TEST-FILE".
+       SELECT TEST-FILE ASSIGN "./TEST-FILE" FILE STATUS FS.
        DATA             DIVISION.
        FILE             SECTION.
        FD  TEST-FILE.
        01  TEST-REC     PIC X(40).
+       WORKING-STORAGE  SECTION.
+       01  FS           PIC X(2).
        PROCEDURE        DIVISION.
        DECLARATIVES.
        TEST-DEBUG SECTION.
@@ -5181,11 +5183,11 @@ AT_DATA([prog.cob], [
 ])
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([COB_SET_DEBUG=1 $COBCRUN_DIRECT ./prog], [0],
-[    21 TEST-FILE                                                                                |
-    23 TEST-FILE                                                                                |
-    24 TEST-FILE                                                                                |
-    25 TEST-FILE                                        DEF                                     |
+[    23 TEST-FILE                                                                                |
+    25 TEST-FILE                                                                                |
     26 TEST-FILE                                                                                |
+    27 TEST-FILE                                        DEF                                     |
+    28 TEST-FILE                                                                                |
 ], [])
 
 AT_CLEANUP

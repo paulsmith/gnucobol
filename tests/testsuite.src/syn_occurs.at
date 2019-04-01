@@ -440,9 +440,8 @@ AT_DATA([prog.cob], [
 
 ])
 
-AT_CHECK([$COMPILE_ONLY -std=mf prog.cob ], [1], [],
-[prog.cob:13: error: ODO-2 does not have a fixed location
-])
+AT_CHECK([$COMPILE_ONLY -std=mf prog.cob ], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=mf -fodoslide prog.cob ], [0], [], [])
 
 AT_CLEANUP
 

@@ -1,11 +1,16 @@
 
+2019-03-18 Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: FR #352 added national-character-literals option, set to warning
+	  for default/lax only as we still don't have a dialect file for Fujitsu
+
 2019-01-29 Simon Sobisch <simonsobisch@gnu.org>
 
 	* runtime.cfg: added COB_DISPLAY_PUNCH_FILE
 
 2019-01-05  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added json-generate option.
+	* general: added json-generate option
 
 2018-04-12  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -18,23 +23,14 @@
 
 2018-08-07  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added xml-generate and xml-generate-extra-phrases options.
-	* general: marked XML-CODE as implemented.
-
-2018-07-31  Ron Norman <rjn@inglenet.com>
-	* Added 'length-in-data-division' option
-
-2018-07-25  Ron Norman <rjn@inglenet.com>
-	* Added 'occurs-max-length-without-subscript' option
+	* general: added xml-generate and xml-generate-extra-phrases options
+	* general: marked XML-CODE as implemented
 
 2018-07-13  Simon Sobisch <simonsobisch@gnu.org>
 
 	* ibm.words: updated to Enterprise COBOL 6.1 documentation,
 	  added notes about coprocessor-only reserved words, made all phrases
 	  for XML GENERATE / XML PARSE statements context-sensitive
-
-2018-07-05  Ron Norman <rjn@inglenet.com>
-	* Added 'depending-on-not-fixed' option & error for MF
 
 2018-04-21  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -57,11 +53,6 @@
 	  into MOVE ZERO
 	* mf.conf: move-figurative-constant-to-numeric: warn
 	  move-non-numeric-lit-to-numeric-is-zero: yes
-
-2018-01-12  Ron Norman <rjn@inglenet.com>
-	* mf.conf ibm.conf mvs.conf now have
-	  move-figurative-constant-to-numeric: ok
-	  This retains MOVE HIGH-VALUES TO PIC 9 DISPLAY field
 
 2018-01-12  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -246,11 +237,6 @@
 
 	* general: added stop-identifier config option
 
-2017-04-07  Ron Norman <rjn@inglenet.com>
-
-	* Add mf_ls_nulls, mf_ls_validate, share_mode, retry_mode,
-	  retry_times, retry_seconds
-
 2016-12-26  Simon Sobisch <simonsobisch@gnu.org>
 
 	* runtime.conf: FR #191 added COB_EXIT_WAIT and COB_EXIT_MSG
@@ -352,13 +338,6 @@
 2015-09-23  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added numeric-boolean and acu-literals
-
-2015-07-07  Ron Norman
-
-	* DISPLAY ... UPON PRINTER can be redirected via
-	  the env var COBPRINTER similar to what Micro Focus supports
-	  In addtion COB_DISPLAY_PRINTER can be used as a file name and
-	  cob_display will do an fopen "a" and append to that file
 
 2015-07-07  Ron Norman <rjn@inglenet.com>
 

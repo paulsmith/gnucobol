@@ -185,11 +185,18 @@ CB_FLAG (cb_flag_optional_file, 1, "optional-file",
 	_("  -foptional-file       treat all files as OPTIONAL\n"
 	  "                        * unless NOT OPTIONAL specified"))
 
-#if 0 /* deactivated + untranslated for now, inspect later */
 CB_FLAG (cb_mf_ibm_comp, 1, "ibmcomp",
 	  "  -fibmcomp             Handle COMP fields like Micro Focus IBMCOMP\n"
 	  "                        * binary-size: 1--8 & synchronized-clause: ignore")
-#endif
+
+CB_FLAG (cb_mf_files, 1, "mf-files",
+	 _("Sequential & Relative files will match Micro Focus format"))
+
+CB_FLAG (cb_flag_arithmetic_osvs, 1, "arithmetic-osvs",
+	 _("Round down number of decimals in intermediate results\n\t\t\t = number of decimals in final result field\n\t\t\t- default: no rounding, More accurate "))
+
+CB_FLAG (cb_flag_move_ibm, 1, "move-ibm",
+	 _("MOVE operates as on IBM (left to right, byte by byte)\n\t\t\t default: no propagating move"))
 
 CB_FLAG_ON (cb_listing_with_header, 1, "theaders",
 	_("  -fno-theaders         suppress all headers and output of compilation\n"

@@ -9062,11 +9062,13 @@ procedure_param:
 		f->flag_is_pdiv_opt = 1;
 	}
 
+/* RJN. This should not be an error
 	if (call_mode == CB_CALL_BY_VALUE
 	    && CB_REFERENCE_P ($4)
 	    && CB_FIELD (cb_ref ($4))->flag_any_length) {
 		cb_error_x ($4, _("ANY LENGTH items may only be BY REFERENCE formal parameters"));
 	}
+*/
 
 	$$ = CB_BUILD_PAIR (cb_int (call_mode), x);
 	CB_SIZES ($$) = size_mode;
@@ -9084,7 +9086,6 @@ _procedure_type:
 	if (current_program->flag_chained) {
 		cb_error (_("%s not allowed in CHAINED programs"), "BY VALUE");
 	} else {
-		CB_UNFINISHED (_("parameters passed BY VALUE"));
 		call_mode = CB_CALL_BY_VALUE;
 	}
   }

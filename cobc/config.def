@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 /* Definitions of variables in config/xxx.conf files
@@ -96,7 +96,7 @@ CB_CONFIG_BOOLEAN (cb_complex_odo, "complex-odo",
 CB_CONFIG_BOOLEAN (cb_indirect_redefines, "indirect-redefines",
 	_("allow REDEFINES to other than last equal level number"))
 
-CB_CONFIG_BOOLEAN (cb_larger_redefines_ok, "larger-redefines-ok", /* TODO: change to CB_CONFIG_SUPPORT */
+CB_CONFIG_BOOLEAN (cb_larger_redefines_ok, "larger-redefines-ok", /* TO-DO: change to CB_CONFIG_SUPPORT */
 	_("allow larger REDEFINES items"))
 
 CB_CONFIG_BOOLEAN (cb_relaxed_syntax_checks, "relax-syntax-checks",
@@ -111,7 +111,7 @@ CB_CONFIG_BOOLEAN (cb_select_working, "select-working",
 CB_CONFIG_BOOLEAN (cb_sticky_linkage, "sticky-linkage",
 	_("LINKAGE-SECTION items remain allocated between invocations"))
 
-CB_CONFIG_BOOLEAN (cb_move_ibm, "move-ibm",	/* counterpart for MF''s BYTE-MODE-MOVE */
+CB_CONFIG_BOOLEAN (cb_move_ibm, "move-ibm",	/* counterpart for MF's BYTE-MODE-MOVE */
 	_("MOVE operates as on IBM (left to right, byte by byte)"))
 
 CB_CONFIG_BOOLEAN (cb_perform_osvs, "perform-osvs",
@@ -211,13 +211,11 @@ CB_CONFIG_SUPPORT (cb_entry_statement, "entry-statement",
 CB_CONFIG_SUPPORT (cb_move_noninteger_to_alphanumeric, "move-noninteger-to-alphanumeric",
 	_("move noninteger to alphanumeric"))
 
-/* config.def.merge-right.r2644: */
 CB_CONFIG_BOOLEAN (cb_occurs_max_length_without_subscript, "occurs-max-length-without-subscript",
-		  _("occurs max length without subscript"))
+	_("occurs max length without subscript"))
 
-/* config.def.merge-right.r2649 */
 CB_CONFIG_BOOLEAN (cb_length_in_data_division, "length-in-data-division",
-	_("length in data division"))
+      _("length in data division")) 
 
 CB_CONFIG_SUPPORT (cb_move_fig_constant_to_numeric, "move-figurative-constant-to-numeric",
 	_("move figurative constants to numeric"))
@@ -251,6 +249,9 @@ CB_CONFIG_SUPPORT (cb_national_literals, "national-literals",
 
 CB_CONFIG_SUPPORT (cb_national_hex_literals, "hexadecimal-national-literals",
 	_("hexadecimal-national literals (NX'265E')"))
+
+CB_CONFIG_SUPPORT (cb_nationalc_literals, "national-character-literals",
+	_("non-standard national literals (NC'UTF-16 string')"))
 
 CB_CONFIG_SUPPORT (cb_acu_literals, "acu-literals",
 	_("ACUCOBOL-GT literals (#B #O #H #X)"))
@@ -321,15 +322,5 @@ CB_CONFIG_SUPPORT (cb_xml_generate_extra_phrases, "xml-generate-extra-phrases",
 CB_CONFIG_SUPPORT (cb_json_generate, "json-generate",
 	_("JSON GENERATE statement"))
 
-/**** r2617: these look mergeworthy, but on compiling look to be duplicates 
-CB_CONFIG_STRING  (cb_config_name, "name", _("name"))
-CB_CONFIG_INT (cb_text_column, "text-column", _("text-column")) 
-CB_CONFIG_BOOLEAN (cb_relaxed_syntax_check, "relaxed-syntax-check", _("relaxed-syntax-check"))
-CB_CONFIG_BOOLEAN (cb_cobol85_reserved, "cobol85-reserved", _("cobol85-reserved"))
-CB_CONFIG_BOOLEAN (cb_move_non_numeric_lit_to_numeric_is_zero, "move-non-numeric-lit-to-numeric-is-zero", _("move-non-numeric-lit-to-numeric-is-zero"))
-CB_CONFIG_SUPPORT (cb_move_figurative_constant_to_numeric, "move-figurative-constant-to-numeric", _("move-figurative-constant-to-numeric"))
-CB_CONFIG_SUPPORT (cb_debugging_line, "debugging-line", _("debugging-line"))
-CB_CONFIG_SUPPORT (cb_eject_statement, "eject-statement", _("eject-statement"))
-****/
-
 CB_CONFIG_SUPPORT (cb_depending_on_not_fixed, "depending-on-not-fixed", _("depending-on-not-fixed"))
+

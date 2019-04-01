@@ -704,7 +704,7 @@ cob_move_display_to_edited (cob_field *f1, cob_field *f2)
 	  TO-DO: This is computed in cb_build_picture; add computed results to
 	  cb_field and use those.
 	*/
-	for (p = COB_FIELD_PIC (f2); p->symbol; ++p) {
+	for (p = COB_FIELD_PIC (f2); p && p->symbol; ++p) {
 		c = p->symbol;
 		repeat = p->times_repeated;
 		if (c == '9' || c == 'Z' || c == '*') {
@@ -730,7 +730,19 @@ cob_move_display_to_edited (cob_field *f1, cob_field *f2)
 	}
 
 	src = max - COB_FIELD_SCALE(f1) - count;
-	for (p = COB_FIELD_PIC (f2); p->symbol; ++p) {
+	if(COB_FIELD_PIC (f2) == NULL) {
+		/* There is no PIC present so assume all PIC 9s */
+		n = f2->size;
+		src = max - n;
+		for (; n > 0; n--, ++dst) {
+			*dst = (min <= src && src < max) ? *src++ : (src++, '0');
+			if (*dst != '0') {
+				is_zero = suppress_zero = 0;
+			}
+			suppress_zero = 0;
+		}
+	}
+	for (p = COB_FIELD_PIC (f2); p && p->symbol; ++p) {
 		c = p->symbol;
 		n = p->times_repeated;
 		for (; n > 0; n--, ++dst) {
