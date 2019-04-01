@@ -5317,7 +5317,7 @@ AT_CLEANUP
 AT_SETUP([SEQUENTIAL file with blocked lock])
 AT_KEYWORDS([runfile])
 
-AT_XFAIL_IF([false])
+AT_XFAIL_IF([true])
 
 AT_DATA([prog1.cob], [
        identification division.
