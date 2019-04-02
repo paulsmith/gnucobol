@@ -6113,18 +6113,17 @@ output_call (struct cb_call *p)
 	callname = NULL;
 
 	/* pass information about available ON EXCEPTION */
-	output_prefix ();
 	if (p->stmt1) {
-		output ("cob_glob_ptr->cob_stmt_exception = 1;\n");
-		output ("cob_glob_ptr->cob_exception_code = 0;\n");
+		output_line ("cob_glob_ptr->cob_stmt_exception = 1;\n");
+		output_line ("COB_RESET_EXCEPTION (0);"); 
 	} else {
-		output ("cob_glob_ptr->cob_stmt_exception = 0;\n");
+		output_line ("cob_glob_ptr->cob_stmt_exception = 0;\n");
 	}
 
 	/* ensure that we don't have a program exception set already
 	   as this will be checked directly when returning from CALL */
-	output_line ("if (unlikely((cob_glob_ptr->cob_exception_code & 0x%04x) == 0x%04x)) "
-		"cob_glob_ptr->cob_exception_code = 0;",
+	output_line ("if (unlikely((cob_global_exception & 0x%04x) == 0x%04x)) "
+			"cob_global_exception = 0;",
 		CB_EXCEPTION_CODE(COB_EC_PROGRAM), CB_EXCEPTION_CODE(COB_EC_PROGRAM));
 
 	/* Function name */

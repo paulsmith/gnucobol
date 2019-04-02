@@ -2308,12 +2308,20 @@ cob_module_enter (cob_module **module, cob_global **mglobal,
 		  const int auto_init)
 {
 	(void)cob_module_global_enter (module, mglobal, auto_init, 0, 0);
+	if(cobglobptr->cob_exception_code != 0) {
+		printf("DBG Enter %s: exception %d\n",COB_MODULE_PTR->module_name,cobglobptr->cob_exception_code);
+	}
 }
 
 void
 cob_module_leave (cob_module *module)
 {
 	COB_UNUSED (module);
+	if(cobglobptr->cob_exception_code == -1)
+		cobglobptr->cob_exception_code = 0;
+	if(cobglobptr->cob_exception_code != 0) {
+		printf("DBG Leave %s: exception %d\n",COB_MODULE_PTR->module_name,cobglobptr->cob_exception_code);
+	}
 	/* Pop module pointer */
 	COB_MODULE_PTR = COB_MODULE_PTR->next;
 	cobglobptr->cob_call_name_hash = 0;
