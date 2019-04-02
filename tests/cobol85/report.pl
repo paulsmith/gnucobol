@@ -136,7 +136,9 @@ $cobc_flags{NC302M} = "-Wobsolete";
 $raw_input{NC302M} = "\n";
 
 # DB304M tests the compiler flagging of obsolete features
-$cobc_flags{DB304M} = "-Wobsolete";
+# $cobc_flags{DB304M} = "-Wobsolete";
+# Skip programs using COMMUNICATION
+$skip{DB304M} = 1;
 
 # Compile only programs
 
@@ -157,7 +159,9 @@ $comp_only{RW301M} = 1;
 $comp_only{RW302M} = 1;
 
 # Until RECEIVE is implemented, DB205A contains an infinite loop.
-$comp_only{DB205A} = 1;
+# $comp_only{DB205A} = 1;
+# Skip programs using COMMUNICATION
+$skip{DB205A} = 1;
 
 # Programs that do not produce any meaningful test results
 # However they must execute successfully
