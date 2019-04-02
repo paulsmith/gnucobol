@@ -5230,7 +5230,6 @@ indexed_file_delete (cob_file *f, const char *filename)
 {
 #ifdef	WITH_ANY_ISAM
 	COB_UNUSED (f);
-	struct stat	st;
 
 	snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s.idx", filename);
 	file_open_buff[COB_FILE_MAX] = 0;
