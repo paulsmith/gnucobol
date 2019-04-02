@@ -6053,6 +6053,22 @@ cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 					use_rslt = 1;
 					break;
 				case CB_INTR_INTEGER:
+					rslt = xval;
+					if (rslt < 0) {
+						while (rscale > 0) {
+							rslt = rslt / 10;
+							rscale--;
+						}
+						if (lp->scale > 0)
+							rslt -= 1;
+					} else {
+						while (rscale > 0) {
+							rslt = rslt / 10;
+							rscale--;
+						}
+					}
+					use_rslt = 1;
+					break;
 				case CB_INTR_INTEGER_PART:
 					rslt = xval;
 					while (rscale > 0) {
