@@ -7878,12 +7878,9 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 	if (c1 == NULL) {
 		int old_line = cb_source_line;
 		const char *old_file = cb_source_file;
-		struct cb_tree_common dummy = {};
 
 		cb_source_line = stmt->source_line;
 		cb_source_file = stmt->source_file;
-		//// just for debugging message:
-		SET_SOURCE(&dummy, stmt->source_file, stmt->source_line); 
 
 		cb_emit (cb_build_comment ("WHEN OTHER"));
 		cb_emit (stmt);

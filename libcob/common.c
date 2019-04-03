@@ -324,7 +324,6 @@ static struct config_enum varseqopts[] = {{"0", "0"}, {"1", "1"}, {"2", "2"}, {"
 					  {"b4","4"},{"b32","4"},
 					  {"l4","6"},{"l32","6"},
 					  {NULL, NULL}};
-#if 0 && reportwriter
 /* Make sure the values here match up with those defined in common.h */
 static struct config_enum relopts[]	= {
 						{"0","0"},{"gc","10"},{"mf","11"},
@@ -333,7 +332,6 @@ static struct config_enum relopts[]	= {
 					   {NULL,NULL}};
 static char	varrel_dflt[8] = "gc";	/* Default Variable length Relative file format */
 static char	fixrel_dflt[8] = "gc";	/* Default Fixed length Relative file format */
-#endif
 static struct config_enum shareopts[]	= {{"none","0"},{"read","1"},{"all","2"},{"no","4"},{NULL,NULL}};
 static struct config_enum retryopts[]	= {{"none","0"},{"never","64"},{"forever","8"},{NULL,NULL}};
 static char	varseq_dflt[8] = "0";	/* varseq0: Default Variable length Sequential file format */
@@ -391,10 +389,8 @@ static struct config_tbl gc_conf[] = {
 	{"COB_FILE_PATH","file_path",		NULL,	NULL,GRP_FILE,ENV_PATH,SETPOS(cob_file_path)},
 	{"COB_LIBRARY_PATH","library_path",	NULL,	NULL,GRP_CALL,ENV_PATH,SETPOS(cob_library_path)}, /* default value set in cob_init_call() */
 	{"COB_MF_FILES","mf_files",		"false",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_files)},
-#if 0 && reportwriter //// r1250 or so
 	{"COB_FIXREL_FORMAT","fixrel_format",	fixrel_dflt,relopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_fixrel_type)},
 	{"COB_VARREL_FORMAT","varrel_format",	varrel_dflt,relopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_varrel_type)},
-#endif
 	{"COB_VARSEQ_FORMAT","varseq_format",	varseq_dflt,varseqopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_varseq_type)},
 	{"COB_LS_FIXED","ls_fixed",		"0",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_fixed)},
 	{"STRIP_TRAILING_SPACES","strip_trailing_spaces",		NULL,	NULL,GRP_HIDE,ENV_BOOL|ENV_NOT,SETPOS(cob_ls_fixed)},
@@ -596,33 +592,10 @@ cob_terminate_routines (void)
 		cobsetptr->cob_dump_file = NULL;
 	}
 
-#if 1 || reportwriter //// reject r1313
 	if (cobsetptr->cob_dump_file) {
 		fclose (cobsetptr->cob_dump_file);
 		cobsetptr->cob_dump_file = NULL;
 	}
-#else
-	if (cobsetptr->cob_trace_file 
-	&& !cobsetptr->external_trace_file
-	&& cobsetptr->cob_trace_file != stderr) {
-		fclose (cobsetptr->cob_trace_file);
-		cobsetptr->cob_trace_file = NULL;
-	}
-
-	cob_exit_screen ();
-	cob_exit_fileio ();
-	cob_exit_intrinsic ();
-	cob_exit_strings ();
-	cob_exit_numeric ();
-	cob_exit_call ();
-	cob_exit_reportio ();
-
-	if (cob_debug_file 
-	&& !cobsetptr->external_trace_file
-	&& cob_debug_file != cobsetptr->cob_trace_file) {
-		if(cob_debug_file_name != NULL
-		&& ftell(cob_debug_file) == 0) {
-#endif /* reportwriter r1313 not used */
 
 #ifdef COB_DEBUG_LOG
 	/* close debug log (delete file if empty) */
@@ -648,16 +621,13 @@ cob_terminate_routines (void)
 	}
 #endif
 
-#if 0 && reportwriter //// accept r1313, seems like an advance
 	if (cobsetptr->cob_trace_file
 	 && cobsetptr->cob_trace_file != stderr
 	 && !cobsetptr->external_trace_file	/* note: may include stdout */) {
 		fclose (cobsetptr->cob_trace_file);
 	}
-#endif
 	cobsetptr->cob_trace_file = NULL;
 
-	//// r1313: from here to end retained from trunk
 	/* close punch file if self-opened */
 	if (cobsetptr->cob_display_punch_file
 	 && cobsetptr->cob_display_punch_filename) {
@@ -2308,9 +2278,6 @@ cob_module_enter (cob_module **module, cob_global **mglobal,
 		  const int auto_init)
 {
 	(void)cob_module_global_enter (module, mglobal, auto_init, 0, 0);
-	if(cobglobptr->cob_exception_code != 0) {
-		printf("DBG Enter %s: exception %d\n",COB_MODULE_PTR->module_name,cobglobptr->cob_exception_code);
-	}
 }
 
 void
@@ -2319,13 +2286,10 @@ cob_module_leave (cob_module *module)
 	COB_UNUSED (module);
 	if(cobglobptr->cob_exception_code == -1)
 		cobglobptr->cob_exception_code = 0;
-	if(cobglobptr->cob_exception_code != 0) {
-		printf("DBG Leave %s: exception %d\n",COB_MODULE_PTR->module_name,cobglobptr->cob_exception_code);
-	}
 	/* Pop module pointer */
 	COB_MODULE_PTR = COB_MODULE_PTR->next;
 	cobglobptr->cob_call_name_hash = 0;
-	cobglobptr->cob_call_from_c = 0;
+	cobglobptr->cob_call_from_c = 1;
 }
 
 void

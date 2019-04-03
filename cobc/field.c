@@ -1717,8 +1717,8 @@ validate_elementary_item (struct cb_field *f)
 
 	/* TO-DO: Also move, this is not validation */
 	if (f->flag_blank_zero
-	    && f->pic
-	    && f->pic->category == CB_CATEGORY_NUMERIC) {
+	 && f->pic
+	 && f->pic->category == CB_CATEGORY_NUMERIC) {
 		/* Reconstruct the picture string */
 		if (f->pic->scale > 0) {
 			/* Size for genned string */
@@ -1735,12 +1735,11 @@ validate_elementary_item (struct cb_field *f)
 				pstr->times_repeated = 1;
 				++pstr;
 			}
-		} //// munged by merge with 1739
+		} 
 		cb_tree x = CB_TREE (f);
 
 		switch (f->usage) {
 		default:
-			/* just because r1739 */
 			break;
 		case CB_USAGE_DISPLAY:
 			if (current_program->flag_trailing_separate &&
@@ -1828,26 +1827,7 @@ validate_elementary_item (struct cb_field *f)
 			++pstr;
 
 			f->pic->size++;
-#if 0
-		//// borked by r1739
-		} else {
-			/* Size for genned string */
-			if (f->pic->have_sign) {
-				n = 2;
-			} else {
-				n = 1;
-			}
-			f->pic->str = cobc_parse_malloc ((size_t)n * sizeof(cob_pic_symbol));
-			pstr = f->pic->str;
-			if (f->pic->have_sign) {
-				pstr->symbol = '+';
-				pstr->times_repeated = 1;
-				++pstr;
-			}
-			pstr->symbol = '9';
-			pstr->times_repeated = f->pic->digits;
-		//// borked by r1739
-#endif
+			break;
 		}
 		f->pic->lenstr = n;
 		f->pic->category = CB_CATEGORY_NUMERIC_EDITED;

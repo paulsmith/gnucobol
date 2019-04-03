@@ -7093,9 +7093,13 @@ cob_file_unlock (cob_file *f)
 #elif	defined(WITH_DB) || defined(WITH_ANY_ISAM)
 			if (f->file) {
 #if	defined(WITH_DB)
-				if (bdb_env != NULL) {
+				if (bdb_env != NULL && f->file) {
 					struct indexed_file	*p = f->file;
-					//// borked merging 1278, deleted in ISAM refactor: unlock_record (f);
+					bdb_unlock_all (f);
+			                if(p->file_lock_set) {
+			               		bdb_env->lock_put (bdb_env, &p->bdb_file_lock);
+			                        p->file_lock_set = 0;
+			                }     
 					bdb_env->lock_put (bdb_env, &p->bdb_file_lock);
 				}
 #else

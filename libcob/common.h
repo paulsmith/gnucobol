@@ -1319,9 +1319,6 @@ typedef struct __cob_module {
 	unsigned char		flag_did_cancel;	/* Module has been canceled */
 	unsigned char		flag_dump_ready;	/* Module was compiled with -fdump */
 	unsigned char		flag_debug_trace;	/* Module debug/trace compile option */
-#if 0 /* currently unused */
-#define COB_MODULE_DEBUG	1
-#endif
 #define COB_MODULE_TRACE	2
 #define COB_MODULE_TRACEALL	4
 	unsigned char		unused[1];		/* Use these flags up later, added for alignment */
@@ -1329,7 +1326,6 @@ typedef struct __cob_module {
 	unsigned int		module_stmt;		/* Last statement executed */
 	const char		**module_sources;	/* Source module names compiled */
 
-	//// r1547:
 	unsigned int		param_buf_size;		/* Size of 'param_buf' */
 	unsigned int		param_buf_used;		/* amount used from 'param_buf' */
 	unsigned char		*param_buf;		/* BY VALUE parameters */
