@@ -71,8 +71,8 @@ use-for-debugging:			+obsolete
 listing-statements:			ok	# may be a user-defined word
 title-statement:			ok	# may be a user-defined word
 entry-statement:			ok
-depending-on-not-fixed:                 ok   
-length-in-data-division:		yes  
+depending-on-not-fixed:                 ok
+length-in-data-division:		yes
 goto-statement-without-name:		+obsolete
 label-records-clause:			+obsolete
 memory-size-clause:			+obsolete

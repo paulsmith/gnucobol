@@ -81,15 +81,7 @@ reserved:	COMMA
 reserved:	COMMON
 reserved:	COMMUNICATION
 reserved:	COMP
-reserved:	COMP-1
-reserved:	COMP-2
-reserved:	COMP-3
-reserved:	COMP-4
 reserved:	COMPUTATIONAL
-reserved:	COMPUTATIONAL-1
-reserved:	COMPUTATIONAL-2
-reserved:	COMPUTATIONAL-3
-reserved:	COMPUTATIONAL-4
 reserved:	COMPUTE
 reserved:	CONFIGURATION
 reserved:	CONTAINS
