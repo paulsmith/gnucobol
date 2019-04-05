@@ -2260,6 +2260,8 @@ cob_module_global_enter (cob_module **module, cob_global **mglobal,
 	/* Save parameter count, get number from argc if main program */
 	if (!COB_MODULE_PTR) {
 		cobglobptr->cob_call_params = cob_argc - 1;
+		if(cobglobptr->cob_call_params < 0)
+			cobglobptr->cob_call_params = 0;
 	}
 
 	(*module)->module_num_params = cobglobptr->cob_call_params;
@@ -2290,6 +2292,7 @@ cob_module_leave (cob_module *module)
 	COB_MODULE_PTR = COB_MODULE_PTR->next;
 	cobglobptr->cob_call_name_hash = 0;
 	cobglobptr->cob_call_from_c = 1;
+	cobglobptr->cob_call_params = 0;
 }
 
 void
@@ -7748,6 +7751,7 @@ cob_init (const int argc, char **argv)
 
 	/* Get global structure */
 	cobglobptr = cob_malloc (sizeof (cob_global));
+	cobglobptr->cob_call_params = 0;
 
 	/* Get settings structure */
 	cobsetptr = cob_malloc (sizeof (cob_settings));

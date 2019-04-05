@@ -1813,15 +1813,7 @@ output_local_implicit_fields (void)
 static void
 output_debugging_fields (struct cb_program *prog)
 {
-#if 0 /* only needed for compilation to GnuCOBOL 2.0-2.2 level (later addition) */
-      /* directly done in libcob now, see cob_glob_ptr->cob_debugging_mode */
-	if (prog->flag_debugging) {
-		output_local ("\n/* DEBUG runtime switch */\n");
-		output_local ("static int\tcob_debugging_mode = 0;\n");
-	}
-#else
 	COB_UNUSED (prog);
-#endif
 	if (need_save_exception) {
 		output_local ("\n/* DEBUG exception code save */\n");
 		output_local ("int\t\tsave_exception_code = 0;\n");
@@ -2150,14 +2142,19 @@ output_local_field_cache (struct cb_program *prog)
 	local_field_cache = list_cache_sort (local_field_cache,
 					     &field_cache_cmp);
 	for (field = local_field_cache; field; field = field->next) {
-		output ("static cob_field %s%d\t= ",
-			CB_PREFIX_FIELD, field->f->id);
 
 		if (!field->f->flag_local
-		 && !field->f->flag_external
-		 && !field->f->flag_chained) {
+		 && !field->f->flag_external) {
+			if (prog->flag_recursive
+			&& !field->f->flag_filler) {
+				output ("/* %s is not local */\n", field->f->name);
+			}
+			output ("static cob_field %s%d\t= ",
+				CB_PREFIX_FIELD, field->f->id);
 			output_field (field->x);
 		} else {
+			output ("%scob_field %s%d\t= ",prog->flag_recursive?"\t":"static ",
+						CB_PREFIX_FIELD, field->f->id);
 			output ("{");
 			output_size (field->x);
 			output (", NULL, ");
@@ -2325,27 +2322,9 @@ output_literals_figuratives_and_constants (void)
 
 	literal_cache = literal_list_reverse (literal_cache);
 	for (lit = literal_cache; lit; lit = lit->next) {
-#if	0	/* RXWRXW - Const */
-		output ("static const cob_fld_union %s%d\t= ",
-			CB_PREFIX_CONST, lit->id);
-		output ("{");
-		output_size (lit->x);
-		output (", ");
-		lp = CB_LITERAL (lit->x);
-		if (CB_TREE_CLASS (lit->x) == CB_CLASS_NUMERIC) {
-			output ("\"%s%s\"", (char *)lp->data,
-				(lp->sign < 0) ? "-" : (lp->sign > 0) ? "+" : "");
-		} else {
-			output_string (lp->data, (int) lp->size, lp->llit);
-		}
-		output (", ");
-		output_attr (lit->x);
-		output ("}");
-#else
 		output ("static const cob_field %s%d\t= ",
 			CB_PREFIX_CONST, lit->id);
 		output_field (lit->x);
-#endif
 		output (";\n");
 	}
 
@@ -3051,10 +3030,6 @@ output_integer (cb_tree x)
 	}
 }
 
-#if 0
-}
-#endif
-
 static void
 output_long_integer (cb_tree x)
 {
@@ -3272,11 +3247,6 @@ output_long_integer (cb_tree x)
 					return;
 				}
 			}
-#if	0	/* RXWRXW - unsigned */
-			if (f->pic->have_sign == 0) {
-				output ("(unsigned int)");
-			}
-#endif
 			break;
 
 		default:
@@ -3546,13 +3516,8 @@ output_param (cb_tree x, int id)
 		}
 		break;
 	case CB_TAG_FIELD:
-#if 0	/* TODO: remove me */
-		output_param (cb_build_field_reference (CB_FIELD (x), NULL), id);
-		break;
-#else	/* CHECKME: Is this actually used somewhere? */
 		x = cb_build_field_reference (CB_FIELD (x), NULL);
 		/* Fall through */
-#endif
 	case CB_TAG_REFERENCE:
 		r = CB_REFERENCE (x);
 		if (CB_LOCALE_NAME_P (r->value)) {
@@ -3755,13 +3720,7 @@ output_param (cb_tree x, int id)
 			/* LCOV_EXCL_STOP */
 			func = user_func_upper (CB_PROTOTYPE (l)->ext_name);
 			lookup_func_call (func);
-#if	0	/* RXWRXW Func */
-			output ("cob_user_function (func_%s, &cob_dyn_%u, ",
-				func, gen_dynamic);
-#else
-			output ("func_%s.funcfld (&cob_dyn_%u",
-				func, gen_dynamic);
-#endif
+			output ("func_%s.funcfld (&cob_dyn_%u", func, gen_dynamic);
 			gen_dynamic++;
 			if (ip->intr_field || ip->args) {
 				output (", ");
@@ -6088,18 +6047,6 @@ output_call (struct cb_call *p)
 		output (";\n");
 	}
 
-#if	0	/* RXWRXW - Clear params */
-	/* Clear extra parameters */
-	if (n > MAX_CALL_FIELD_PARAMS - 4) {
-		parmnum = MAX_CALL_FIELD_PARAMS - n;
-	} else {
-		parmnum = 4;
-	}
-	parmnum *= sizeof(cob_field *);
-	output_line ("memset (&(cob_procedure_params[%u]), 0, %u);",
-		     n, parmnum);
-#endif
-
 	/* Set number of parameters */
 	output_prefix ();
 	output ("cob_glob_ptr->cob_call_params = %u;\n", n);
@@ -6167,6 +6114,7 @@ output_call (struct cb_call *p)
 		}
 		output ("cob_glob_ptr->cob_call_name_hash = 0x%X;\n",
 				cob_get_name_hash(callname));
+		output_line ("COB_RESET_EXCEPTION (0);"); 
 		output_prefix ();
 		if (p->call_returning != cb_null) {
 			if (ret_ptr) {
@@ -7738,11 +7686,7 @@ output_stmt (cb_tree x)
 
 		/* Check for runtime debug flag */
 		if (current_prog->flag_debugging && lp->flag_is_debug_sect) {
-#if 0 /* only needed for compilation to GnuCOBOL 2.0-2.2 level (later addition) */
-			output_line ("if (!cob_debugging_mode)");
-#else
 			output_line ("if (!cob_glob_ptr->cob_debugging_mode)");
-#endif
 			output_line ("\tgoto %s%d;",
 				CB_PREFIX_LABEL, CB_LABEL (lp->exit_label)->id);
 		}
@@ -8773,11 +8717,6 @@ output_ml_generate_init (struct cb_ml_generate_tree *tree)
 static void
 compute_report_rcsz (struct cb_field *p)
 {
-#if 0 /* already checked: doesn't happen */
-	if (p == NULL) {
-		return;
-	}
-#endif
 	if (p->sister) {
 		compute_report_rcsz (p->sister);
 	}
@@ -8797,12 +8736,6 @@ output_report_data (struct cb_field *p)
 	int	prev_col_pos,idx;
 	struct cb_field *pp;
 	cb_tree	x, l;
-
-#if 0 /* already checked: doesn't happen */
-	if (p == NULL) {
-		return;
-	}
-#endif
 
 	if (p->storage == CB_STORAGE_REPORT) {
 		if (p->level == 1
@@ -9027,11 +8960,6 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 	unsigned int	i, j;
 	char		*val;
 
-#if 0 /* already checked: doesn't happen */
-	if (f == NULL) {
-		return;
-	}
-#endif
 	if(bgn == 1)
 		report_field_id = 0;
 
@@ -9362,11 +9290,6 @@ output_report_sum_counters (const int top, struct cb_field *f, struct cb_report 
 	int	rsid, rsseq, rsprv;
 	int	ctl_foot, sub_ttl, cross_foot;
 
-#if 0 /* already checked: doesn't happen */
-	if (f == NULL) {
-		return;
-	}
-#endif
 	n = f->sister;
 	c = f->children;
 	if(n
@@ -10148,31 +10071,28 @@ output_module_init (struct cb_program *prog)
 	output_newline ();
 }
 
-static void
-pickup_param (cb_tree l, int i, int setnull)
+/* Common setup logic for pickup_param routines */
+static struct cb_field *
+setup_param (cb_tree l, int *is_value_parm, int *is_any_numeric)
 {
-	char	wrk[64];
-	cb_tree	x;
 	FILE	*savetarget;
 	struct cb_field *f;
-	int	is_value_parm, is_any_numeric;
 
 	f = cb_code_field (CB_VALUE (l));
 	if (CB_PURPOSE (l)
 	 && (CB_PURPOSE_INT (l) == CB_CALL_BY_VALUE
 	  || CB_PURPOSE_INT (l) == CB_CALL_BY_CONTENT)) {
-		is_value_parm = 1;
+		*is_value_parm = 1;
 	} else {
-		is_value_parm = 0;
+		*is_value_parm = 0;
 	}
 	if (f->flag_any_numeric
 	 || (f->pic && f->pic->category == CB_CATEGORY_NUMERIC)) {
-		is_any_numeric = 1;
+		*is_any_numeric = 1;
 	} else {
-		is_any_numeric = 0;
+		*is_any_numeric = 0;
 	}
 
-	x = cb_build_field_reference (f, NULL);
 	/* Force PROCEDURE/ENTRY USING fields to cache */
 	if (!f->flag_field) {
 		savetarget = output_target;
@@ -10180,24 +10100,44 @@ pickup_param (cb_tree l, int i, int setnull)
 		output_param (CB_VALUE (l), 0);
 		output_target = savetarget;
 	}
+	return f;
+}
 
-	if(setnull) {
-		if (f->flag_any_length
-		 || is_value_parm
-		 || setnull == 2) {
-			output_line ("    %s%d.data = NULL;", CB_PREFIX_FIELD, f->id);
-		}
-		return;
+/* Set given parameter address to NULL */
+static void
+setnull_param (cb_tree l, char *cmt)
+{
+	struct cb_field *f;
+	f = cb_code_field (CB_VALUE (l));
+
+	if(*cmt >= ' ') {
+		output_line ("/* %s */",cmt);
+		*cmt = 0;
 	}
+	output_line ("%s%d.data = NULL;", CB_PREFIX_FIELD, f->id);
+	return;
+}
+
+/* Pickup parameter knowing the caller is COBOL */
+static void
+pickup_cob_param (cb_tree l, int i)
+{
+	char	wrk[64];
+	cb_tree	x;
+	struct cb_field *f;
+	int	is_value_parm, is_any_numeric;
+
+	f = setup_param (l, &is_value_parm, &is_any_numeric);
+
+	x = cb_build_field_reference (f, NULL);
+
+	f->flag_data_set = 0;
 	if (is_value_parm) {
-		f->flag_data_set = 0;
 		if (f->flag_any_length) {
 			sprintf(wrk,"module->next->cob_procedure_params[%d]->size",i);
 		} else {
 			strcpy(wrk,"0");
 		}
-		output_line ("if (cob_glob_ptr->cob_call_from_c == 0) {");
-		output_indent_level += 4;
 		output_line ("if (cob_glob_ptr->cob_call_params > %d) { /* BY VALUE %s */", i, f->name);
 		output_line ("    cob_alloc_move(%s[%d], &%s%d, %s);",
 				     "module->next->cob_procedure_params", i,
@@ -10207,80 +10147,177 @@ pickup_param (cb_tree l, int i, int setnull)
 			output_line ("    %s%d.data = NULL;", CB_PREFIX_FIELD, f->id);
 		}
 		output_line ("}");
-		output_indent_level -= 4;
-		output_line ("} else {");
-		output_prefix ();
-		output ("    %s%d.data = (cob_u8_t*)", CB_PREFIX_FIELD, f->id);
-		output_data (x);
-		output (";\n");
-		if (f->flag_any_length) {
-			output_line ("    if (cob_glob_ptr->cob_call_from_c != 0)");
-			output_line ("        %s%d.size = strlen((char*)%s%d.data);", 
-							CB_PREFIX_FIELD, f->id,
-							CB_PREFIX_FIELD, f->id);
-		}
-		output_line ("}");
-		f->flag_data_set = 1;
 	} else
 	if (f->flag_any_length) {
-		f->flag_data_set = 0;
-		output_line ("if (cob_glob_ptr->cob_call_from_c == 0) {");
-		output_indent_level += 4;
 		output_line ("if (cob_glob_ptr->cob_call_params > %d", i);
-		output_line (" && module->next");
+		output_line ("&&  module->next");
 		if (is_any_numeric) {
-			output_line (" && %s[%d]) { /* ANY NUMERIC %s */",
+			output_line ("&&  %s[%d]) { /* ANY NUMERIC %s */",
 					"module->next->cob_procedure_params", i, f->name);
+			output_indent_level += 2;
 			/* Copy complete structure */
 			output_line ("    %s%d = *(%s[%d]);",
 				     CB_PREFIX_FIELD, f->id,
 				     "module->next->cob_procedure_params", i);
 		} else {
-			output_line (" && %s[%d]) { /* BY REFERENCE %s */",
+			output_line ("&&  %s[%d]) { /* BY REFERENCE %s */",
 					"module->next->cob_procedure_params", i, f->name);
+			output_indent_level += 2;
 			/* Copy size */
-			output_line ("    %s%d.size = %s[%d]->size;",
+			output_line ("%s%d.size = %s[%d]->size;",
 				     CB_PREFIX_FIELD, f->id,
 				     "module->next->cob_procedure_params", i);
 			/* Copy data address */
-			output_line ("    %s%d.data = %s[%d]->data;",
+			output_line ("%s%d.data = %s[%d]->data;",
 				     CB_PREFIX_FIELD, f->id,
 				     "module->next->cob_procedure_params", i);
 		}
 		if (!cb_sticky_linkage) {
+			output_indent_level -= 2;
 			output_line ("} else {");
-			output_line ("    %s%d.data = NULL;", CB_PREFIX_FIELD, f->id);
+			output_indent_level += 2;
+			output_line ("%s%d.data = NULL;", CB_PREFIX_FIELD, f->id);
 		}
+		output_indent_level -= 2;
 		output_line ("}");
-		output_indent_level -= 4;
-		output_line ("} else {");
+	} else {
+		output_line ("if (cob_glob_ptr->cob_call_params > %d)", i);
+		output_indent_level += 2;
 		output_prefix ();
-		output ("    %s%d.data = (cob_u8_t*)", CB_PREFIX_FIELD, f->id);
+		output ("%s%d.data = (cob_u8_t*)", CB_PREFIX_FIELD, f->id);
+		output_data (x);
+		output ("; /* %s */\n",f->name);
+		output_indent_level -= 2;
+	}
+	f->flag_data_set = 1;
+}
+
+/* Pickup parameter size for ANY LENGTH */
+static void
+pickup_any_length (cb_tree l, int i)
+{
+	struct cb_field *f;
+	int	is_value_parm, is_any_numeric;
+
+	f = setup_param (l, &is_value_parm, &is_any_numeric);
+
+	if (f->flag_any_length) {
+		f->flag_data_set = 0;
+		output_line ("if (module->module_num_params > %d && "
+				 "module->next && "
+				 "module->next->cob_procedure_params[%d])",
+				i, i);
+		if (f->flag_any_numeric) {	/* Copy complete structure */
+			output_line ("  %s%d = *(module->next->cob_procedure_params[%d]);",
+					 CB_PREFIX_FIELD, f->id, i);
+		} else {			/* Copy size */
+			output_line ("  %s%d.size = module->next->cob_procedure_params[%d]->size;",
+					 CB_PREFIX_FIELD, f->id, i);
+		}
+		output_prefix ();
+		output ("%s%d.data = ", CB_PREFIX_FIELD, f->id);
+		output_data (CB_VALUE (l));
+		output (";\n");
+		f->flag_data_set = 1;
+	}
+}
+
+/* Pickup parameter knowing the caller is C */
+static void
+pickup_c_param (cb_tree l, int i)
+{
+	char	wrk[64];
+	cb_tree	x;
+	struct cb_field *f;
+	int	is_value_parm, is_any_numeric;
+
+	f = setup_param (l, &is_value_parm, &is_any_numeric);
+
+	x = cb_build_field_reference (f, NULL);
+
+	f->flag_data_set = 0;
+	if (is_value_parm) {
+		if (f->flag_any_length) {
+			sprintf(wrk,"module->next->cob_procedure_params[%d]->size",i);
+		} else {
+			strcpy(wrk,"0");
+		}
+		output_prefix ();
+		output ("%s%d.data = (cob_u8_t*)", CB_PREFIX_FIELD, f->id);
+		output_data (x);
+		output (";\n");
+		if (f->flag_any_length) {
+			output_line ("if (%s%d.data != NULL)",CB_PREFIX_FIELD, f->id);
+			output_line ("    %s%d.size = strlen((char*)%s%d.data);", 
+							CB_PREFIX_FIELD, f->id,
+							CB_PREFIX_FIELD, f->id);
+		}
+	} else
+	if (f->flag_any_length) {
+		output_prefix ();
+		output ("%s%d.data = (cob_u8_t*)", CB_PREFIX_FIELD, f->id);
 		output_data (x);
 		output (";\n");
 		if (is_any_numeric) {
-			output_line ("    if (cob_glob_ptr->cob_call_from_c != 0");
-			output_line ("     && %s%d.data != NULL) {", CB_PREFIX_FIELD, f->id);
-			output_line ("        %s%d.size = strlen((char*)%s%d.data);", 
+			output_line ("if (%s%d.data != NULL) {", CB_PREFIX_FIELD, f->id);
+			output_indent_level += 2;
+			output_line ("%s%d.size = strlen((char*)%s%d.data);", 
 							CB_PREFIX_FIELD, f->id,
 							CB_PREFIX_FIELD, f->id);
-			output_indent_level += 4;
-			output_line ("    if (%s%d.size > 0 && %s%d.size < 20)",
+			output_line ("if (%s%d.size > 0 && %s%d.size < 20)",
 						CB_PREFIX_FIELD, f->id,CB_PREFIX_FIELD, f->id);
-			output_line ("        %s%d.attr = cob_alloc_attr(COB_TYPE_NUMERIC_DISPLAY,%s%d.size,0,0);",
+			output_line ("  %s%d.attr = cob_alloc_attr(COB_TYPE_NUMERIC_DISPLAY,%s%d.size,0,0);",
 						CB_PREFIX_FIELD, f->id, CB_PREFIX_FIELD, f->id);
-			output_indent_level -= 4;
-			output_line ("    }");
+			output_indent_level -= 2;
+			output_line ("}");
 		} else {
-			output_line ("    if (cob_glob_ptr->cob_call_from_c != 0");
-			output_line ("     && %s%d.data != NULL)", CB_PREFIX_FIELD, f->id);
-			output_line ("        %s%d.size = strlen((char*)%s%d.data);", 
+			output_line ("if (%s%d.data != NULL)", CB_PREFIX_FIELD, f->id);
+			output_line ("  %s%d.size = strlen((char*)%s%d.data);", 
 							CB_PREFIX_FIELD, f->id,
 							CB_PREFIX_FIELD, f->id);
 		}
-		output_line ("}");
-		f->flag_data_set = 1;
 	} else {
+		if(i == 0) {
+			output_line ("if (cob_glob_ptr->cob_call_params >= 0)");
+			output_indent_level += 2;
+		} else if(i > 0) {
+			output_line ("if (cob_glob_ptr->cob_call_params == 0");
+			output_line ("||  cob_glob_ptr->cob_call_params > %d)", i);
+			output_indent_level += 2;
+		}
+		output_prefix ();
+		output ("%s%d.data = (cob_u8_t*)", CB_PREFIX_FIELD, f->id);
+		output_data (x);
+		output ("; /* %s */\n",f->name);
+		if(i >= 0)
+			output_indent_level -= 2;
+	}
+	f->flag_data_set = 1;
+}
+
+static void
+pickup_param (cb_tree l, int i)
+{
+	char	wrk[64];
+	cb_tree	x;
+	struct cb_field *f;
+	int	is_value_parm, is_any_numeric;
+
+	f = setup_param (l, &is_value_parm, &is_any_numeric);
+
+	if (is_value_parm
+	 || f->flag_any_length) {
+		output_line ("if (cob_glob_ptr->cob_call_from_c) {");
+		output_indent_level += 2;
+		pickup_c_param (l, i);
+		output_indent_level -= 2;
+		output_line ("} else {");
+		output_indent_level += 2;
+		pickup_cob_param (l, i);
+		output_indent_level -= 2;
+		output_line ("}");
+	} else {
+		x = cb_build_field_reference (f, NULL);
 		f->flag_data_set = 0;
 		output_prefix ();
 		output ("%s%d.data = (cob_u8_t*)", CB_PREFIX_FIELD, f->id);
@@ -10308,7 +10345,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	struct literal_list	*m;
 	const char		*s;
 	char			fdname[48];
-	char			key_ptr[64];
+	char			key_ptr[64], comment[80];
 	int			i, j;
 	cob_u32_t		inc;
 	unsigned int		name_hash;
@@ -10318,15 +10355,9 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	recent_prog = prog;
 	/* Program function */
-#if	0	/* RXWRXW USERFUNC */
-	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
-		output ("static cob_field *\n%s_ (const int entry, cob_field **cob_parms",
-			prog->program_id);
-#else
 	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		output ("static cob_field *\n%s_ (const int entry",
 			prog->program_id);
-#endif
 	} else if (!prog->nested_level) {
 		output ("static int\n%s_ (const int entry",
 			prog->program_id);
@@ -10335,11 +10366,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			prog->program_id, prog->toplev_count);
 	}
 	parmnum = 0;
-#if	0	/* RXWRXW USERFUNC */
-	if (!prog->flag_chained && prog->prog_type != COB_MODULE_TYPE_FUNCTION) {
-#else
 	if (!prog->flag_chained) {
-#endif
 		for (l = parameter_list; l; l = CB_CHAIN (l)) {
 			if (l == parameter_list) {
 				output (", ");
@@ -10501,25 +10528,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_local ("\n");
 	}
 
-#if	0	/* RXWRXW USERFUNC */
-	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
-		/* USING parameters for user FUNCTION */
-		seen = 0;
-		for (l = parameter_list; l; l = CB_CHAIN (l)) {
-			f = cb_code_field (CB_VALUE (l));
-			if (!seen) {
-				seen = 1;
-				output_local ("\n/* USING parameters */\n");
-			}
-			output_local ("unsigned char\t*%s%d = NULL;  /* %s */\n",
-				     CB_PREFIX_BASE, f->id, f->name);
-		}
-		if (seen) {
-			output_local ("\n");
-		}
-	}
-#endif
-
 	/* Dangling linkage section items */
 	seen = 0;
 	for (f = prog->linkage_storage; f; f = f->sister) {
@@ -10564,24 +10572,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_ml_trees_definitions (prog->ml_trees);
 	}
 
-#if	0	/* RXWRXW - Any */
-	/* ANY LENGTH items */
-	valueseen = anyseen = 0;
-	for (l = parameter_list; l; l = CB_CHAIN (l)) {
-		f = cb_code_field (CB_VALUE (l));
-		if (f->flag_any_length) {
-			anyseen = 1;
-			output_local ("/* ANY LENGTH variable */\n");
-			output_local ("cob_field\t\t*cob_anylen;\n\n");
-			break;
-		}
-		if (CB_PURPOSE (l)
-		 && CB_PURPOSE_INT (l) == CB_CALL_BY_VALUE) {
-			valueseen = 1;
-		}
-	}
-#endif
-
 	/* Save variables for global callback */
 	if (prog->flag_global_use && parameter_list) {
 		output_local ("/* Parameter save */\n");
@@ -10592,14 +10582,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		}
 		output_local ("\n");
 	}
-
-#if 0 /* only needed for compilation to GnuCOBOL 2.0-2.2 level (later addition) */
-	/* Runtime DEBUGGING MODE variable */
-	if (prog->flag_debugging) {
-		output_line ("char\t\t*s;");
-		output_newline ();
-	}
-#endif
 
 	/* Start of function proper */
 	output_line ("/* Start of function code */");
@@ -10656,22 +10638,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 	output_line ("module->cob_procedure_params = cob_procedure_params;");
 	output_newline ();
-
-#if	0	/* RXWRXW USERFUNC */
-	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
-		parmnum = 0;
-		for (l = parameter_list; l; l = CB_CHAIN (l), parmnum++) {
-			f = cb_code_field (CB_VALUE (l));
-			output_line ("if (cob_parms[%d])", parmnum);
-			output_line (" %s%d = cob_parms[%d]->data;",
-				     CB_PREFIX_BASE, f->id, parmnum);
-			output_line ("else");
-			output_line (" %s%d = NULL;",
-				     CB_PREFIX_BASE, f->id);
-		}
-		output_newline ();
-	}
-#endif
 
 	output_line ("/* Set frame stack pointer */");
 	if (cb_flag_stack_on_heap || prog->flag_recursive) {
@@ -10846,84 +10812,58 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output_newline ();
 
 	if (!cb_sticky_linkage
+	 && !prog->flag_chained
+	 && prog->prog_type != COB_MODULE_TYPE_FUNCTION
 	 && cb_list_length(parameter_list) > 0) {
-		output_line ("/* No sticky-linkage so NULL %d LINKAGE addresses */",cb_list_length(parameter_list));
-		for (i = 0, l2 = parameter_list; l2; l2 = CB_CHAIN (l2), i++) {
-			pickup_param (l2, i, 1);
+		strcpy (comment,"No sticky-linkage so NULL LINKAGE addresses");
+		for (l2 = parameter_list; l2; l2 = CB_CHAIN (l2)) {
+			setnull_param (l2, comment);
 		}
 	}
 
 	/* Set up ANY length items */
-	i = 0;
-	anyseen = 0;
-	for (l = parameter_list; l; l = CB_CHAIN (l), i++) {
-		/* Force field cache */
-		FILE * savetarget = output_target;
-		output_target = NULL;
-		output_param (CB_VALUE (l), i);
-		output_target = savetarget;
-
-		f = cb_code_field (CB_VALUE (l));
-		if (f->flag_any_length) {
-			if (!anyseen) {
-				anyseen = 1;
-				output_line ("/* Initialize ANY LENGTH parameters */");
+	if (cb_list_length (prog->entry_list) <= 1
+	 && !prog->flag_chained) {
+		i = 0;
+		anyseen = 0;
+		for (l = parameter_list; l; l = CB_CHAIN (l), i++) {
+			f = cb_code_field (CB_VALUE (l));
+			if (f->flag_any_length) {
+				if (!anyseen) {
+					anyseen = 1;
+					output_line ("/* Initialize ANY LENGTH parameters */");
+				}
+				pickup_any_length (l, i);
 			}
-
-			output_line ("if (module->module_num_params > %d && "
-				         "module->next && "
-				         "module->next->cob_procedure_params[%d])",
-				i, i);
-			if (f->flag_any_numeric) {
-				/* Copy complete structure */
-				output_line ("  %s%d = *(module->next->cob_procedure_params[%d]);",
-						 CB_PREFIX_FIELD, f->id, i);
-			} else {
-				/* Copy size */
-				output_line ("  %s%d.size = module->next->cob_procedure_params[%d]->size;",
-						 CB_PREFIX_FIELD, f->id, i);
-			}
-			output_prefix ();
-			output ("%s%d.data = ", CB_PREFIX_FIELD, f->id);
-			output_data (CB_VALUE (l));
-			output (";\n");
 		}
+		if(anyseen)
+			output_newline ();
 	}
-	output_newline ();
 
-	if (cb_list_length (prog->entry_list) <= 1) {
+	if (cb_list_length (prog->entry_list) <= 1
+	 && !prog->flag_chained
+	 && cb_list_length (parameter_list) > 0
+	 && prog->prog_type != COB_MODULE_TYPE_FUNCTION) {
 		name_hash = cob_get_name_hash (prog->orig_program_id);
 		output_line ("if (cob_glob_ptr->cob_call_name_hash != 0x%X) {", name_hash);
-		output_line ("    cob_glob_ptr->cob_call_from_c = 1;");
 		output_indent_level += 2;
+		output_line ("cob_glob_ptr->cob_call_from_c = 1; /* Called by C */");
 		for (i = 0, l = parameter_list; l; l = CB_CHAIN (l), i++) {
-			pickup_param (l, i, 0);
+			pickup_c_param (l, i);
 		}
 		output_indent_level -= 2;
 		output_line ("} else {");
-		output_line ("    cob_glob_ptr->cob_call_from_c = 0;");
 		output_indent_level += 2;
+		output_line ("cob_glob_ptr->cob_call_from_c = 0; /* Called by COBOL */");
 		for (i = 0, l = parameter_list; l; l = CB_CHAIN (l), i++) {
-#if 0
-			output_line ("if(module->module_num_params < %d) {",i+1);
-			output_indent_level += 2;
-			pickup_param (l, i, 2);
-			output_indent_level -= 2;
-			output_line ("} else {");
-#endif
-			output_indent_level += 2;
-			pickup_param (l, i, 0);
-#if 0
-			output_line ("}");
-#endif
-			output_indent_level -= 2;
+			pickup_cob_param (l, i);
 		}
 		output_indent_level -= 2;
 		output_line ("}");
 	}
 
-	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION &&
-		CB_FIELD_PTR(prog->returning)->storage == CB_STORAGE_LINKAGE) {
+	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION 
+	 && CB_FIELD_PTR(prog->returning)->storage == CB_STORAGE_LINKAGE) {
 		output_line ("/* Storage for returning item */");
 		output_prefix ();
 		output_data (prog->returning);
@@ -10962,30 +10902,29 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("if (module->next == NULL)");
 		output_line ("    cob_glob_ptr->cob_call_from_c = 1;");
 		output_newline ();
-		output_line ("switch (entry)");
-		output_line ("  {");
-		for (i = 0, l = prog->entry_list; l; l = CB_CHAIN (l)) {
+		output_line ("switch (entry) {");
+		for (i = 0, l = prog->entry_list; l; l = CB_CHAIN (l), i++) {
 			using_list = CB_VALUE (CB_VALUE (l));
-			output_line ("  case %d:", i++);
-			output_indent_level += 4;
 			if (using_list) {
-				output_line ("/* Initialize %d parameters for '%s' */",
+				output_line ("case %d: /* Initialize %d parameters for '%s' */",i,
 						cb_list_length(using_list),CB_LABEL (CB_PURPOSE (l))->name);
-				name_hash = cob_get_name_hash (CB_LABEL (CB_PURPOSE (l))->name);
-				output_line ("if (cob_glob_ptr->cob_call_name_hash == 0x%X)",name_hash);
-				output_line ("    cob_glob_ptr->cob_call_from_c = 0;");
+				output_indent_level += 4;
+				output_line ("module->module_name = \"%s\";", CB_LABEL (CB_PURPOSE (l))->name);
 				for (j=0,l2 = using_list; l2; l2 = CB_CHAIN (l2), j++) {
-					pickup_param (l2, j, 0);
+					pickup_param (l2, j);
 				}
+				output_indent_level -= 4;
 			} else {
-				output_line ("/* No parameters for '%s' */",
+				output_line ("case %d: /* No parameters for '%s' */",i,
 						CB_LABEL (CB_PURPOSE (l))->name);
+				output_indent_level += 4;
+				output_line ("module->module_name = \"%s\";", CB_LABEL (CB_PURPOSE (l))->name);
+				output_indent_level -= 4;
 			}
-			output_indent_level -= 4;
 			output_line ("    goto %s%d;", CB_PREFIX_LABEL,
 				     CB_LABEL (CB_PURPOSE (l))->id);
 		}
-		output_line ("  }");
+		output_line ("}");
 		output_line ("/* This should never be reached */");
 		output_line ("cob_fatal_error (COB_FERROR_MODULE);");
 	} else {
@@ -11194,42 +11133,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	/* Program initialization */
 
-#if	0	/* RXWRXW WS */
-	if (prog->working_storage) {
-		for (f = prog->working_storage; f; f = f->sister) {
-			if (f->flag_item_based || f->flag_local_alloced) {
-				continue;
-			}
-			if (f->redefines || f->flag_external) {
-				continue;
-			}
-#if	0	/* RXWRXW - Check global */
-			if (f->flag_is_global) {
-				continue;
-			}
-#endif
-			if (f->flag_no_init && !f->count) {
-				continue;
-			}
-			/* LCOV_EXCL_START */
-			if (f->flag_item_78) {
-				cobc_err_msg (_("unexpected CONSTANT item"));
-				COBC_ABORT ();
-			}
-			/* LCOV_EXCL_STOP */
-			if (f->flag_is_global) {
-				f->mem_offset = working_mem;
-				working_mem += ((f->memory_size + COB_MALLOC_ALIGN) &
-						~COB_MALLOC_ALIGN);
-			} else {
-				f->mem_offset = local_working_mem;
-				local_working_mem += ((f->memory_size + COB_MALLOC_ALIGN) &
-						~COB_MALLOC_ALIGN);
-			}
-		}
-	}
-#endif
-
 	output_newline ();
 	output_line ("/* Program initialization */");
 	output_line ("P_initialize:");
@@ -11258,23 +11161,10 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 
 
-#if 0 /* only needed for compilation to GnuCOBOL 2.0-2.2 level (later addition) */
-	/* Check runtime DEBUGGING MODE variable, nowadays done directly in libcob */
-	if (prog->flag_debugging) {
-		output_line ("if ((s = getenv (\"COB_SET_DEBUG\")) && (*s == 'Y' || *s == 'y' || *s == '1'))");
-		output_line ("\tcob_debugging_mode = 1;");
-		output_newline ();
-	}
-#endif
 
 	/* Setup up CANCEL callback */
 	if (!prog->nested_level && prog->prog_type == COB_MODULE_TYPE_PROGRAM) {
 		output_line ("/* Initialize cancel callback */");
-#if	0	/* RXWRXW CA */
-		if (!cb_flag_implicit_init) {
-			output_line ("if (module->next)");
-		}
-#endif
 		output_line ("cob_set_cancel (module);");
 		output_newline ();
 	}
@@ -11558,13 +11448,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		}
 	}
 
-#if 0 /* directly done in libcob now, see cob_glob_ptr->cob_debugging_mode */
-	/* Reset DEBUGGING mode */
-	if (prog->flag_debugging) {
-		output_line ("cob_debugging_mode = 0;");
-	}
-#endif
-
 	/* Clear CALL pointers */
 	for (clp = call_cache; clp; clp = clp->next) {
 		output_line ("call_%s.funcvoid = NULL;", clp->call_name);
@@ -11677,11 +11560,11 @@ output_function_entry_function (struct cb_program *prog, cb_tree entry,
 
 	output_indent ("{");
 	output_line ("struct cob_func_loc\t*floc;");
+	output_line ("cob_field\t*ret = NULL;");
 	output_newline ();
 	output_line ("/* Save environment */");
 	output_prefix ();
-	output ("floc = cob_save_func (cob_fret, cob_pam, %u",
-		parmnum);
+	output ("floc = cob_save_func (cob_fret, cob_pam, %u", parmnum);
 
 	for (n = 0; n < parmnum; ++n) {
 		output (", f%u", n);
@@ -11700,11 +11583,14 @@ output_function_entry_function (struct cb_program *prog, cb_tree entry,
 		}
 	}
 	output (");\n");
-	output_line ("**cob_fret = *floc->ret_fld;");
+	output_line ("if (floc->ret_fld != NULL) {");
+	output_line ("    **cob_fret = *floc->ret_fld;");
+	output_line ("    ret = *cob_fret;");
+	output_line ("}");
 	output_newline ();
 	output_line ("/* Restore environment */");
 	output_line ("cob_restore_func (floc);");
-	output_line ("return *cob_fret;");
+	output_line ("return ret;");
 	output_indent ("}");
 	output_newline ();
 }
@@ -11865,7 +11751,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	}
 
 	if (gencode) {
-		output ("/* ENTRY '%s' */\n\n", entry_name);
+		output ("/* ENTRY '%s' */\n", entry_name);
 #if	(defined(_WIN32) || defined(__CYGWIN__)) && !defined(__clang__)
 	} else {
 		if (!prog->nested_level) {
@@ -11934,32 +11820,6 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		}
 	}
 
-#if 0 /* RJN: this seems like a bad idea */
-	/* For calling into a module, cob_call_params may not be known */
-	if (using_list) {
-		parmnum = 0;
-		for (l = using_list; l; l = CB_CHAIN (l)) {
-			parmnum++;
-		}
-		if (entry_convention & CB_CONV_COBOL) {
-			output_line("/* Get current number of call parameters,");
-			output_line("   if the parameter count is unknown, set it to all */");
-			if (cb_flag_implicit_init) {
-				output_line ("if (cob_is_initialized () && cob_get_global_ptr ()->cob_current_module) {");
-			} else {
-				output_line ("if (cob_get_global_ptr ()->cob_current_module) {");
-			}
-			output_line ("\tcob_call_params = cob_get_global_ptr ()->cob_call_params;");
-			output_line ("} else {");
-			output_line ("\tcob_call_params = %d;", parmnum);
-			output_line ("};");
-		} else {
-			output_line ("/* Set current number of call parameters to max */");
-			output_line (" cob_call_params = %d;", parmnum);
-		}
-		output_newline();
-	}
-#endif
 
 	/*
 	  We have to cater for sticky-linkage here at the entry point
@@ -11996,30 +11856,34 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 
 	/* Sticky linkage set up */
 	if (cb_sticky_linkage && using_list) {
-		output_line ("/* Set the parameter list */");
-		parmnum = 0;
-		output_line ("switch (cob_get_global_ptr()->cob_call_params) {");
-		for (l = using_list; l; l = CB_CHAIN (l), parmnum++) {
-			output_prefix ();
-			output ("case %u:\n", parmnum);
-			for (n = 0; n < parmnum; ++n) {
-				if (sticky_nonp[n]) {
-					output_line ("\tcob_parm_l_%d = %s%d;",
-						sticky_ids[n], CB_PREFIX_BASE,
-						sticky_ids[n]);
-					output_line ("\tcob_parm_%d = (cob_u8_ptr)&cob_parm_l_%d;",
-						sticky_ids[n],
-						sticky_ids[n]);
-				} else {
-					output_line ("\tcob_parm_%d = %s%d;",
-						sticky_ids[n], CB_PREFIX_BASE,
-						sticky_ids[n]);
+		if ((parmnum = cb_list_length(using_list)) > 1) {
+			parmnum = 0;
+			output_line ("/* Set the parameter list */");
+			output_line ("switch (cob_get_global_ptr()->cob_call_params) {");
+			for (l = using_list; l; l = CB_CHAIN (l), parmnum++) {
+				if(parmnum == 0)
+					continue;
+				output_prefix ();
+				output ("case %u:\n", parmnum);
+				for (n = 0; n < parmnum; ++n) {
+					if (sticky_nonp[n]) {
+						output_line ("\tcob_parm_l_%d = %s%d;",
+							sticky_ids[n], CB_PREFIX_BASE,
+							sticky_ids[n]);
+						output_line ("\tcob_parm_%d = (cob_u8_ptr)&cob_parm_l_%d;",
+							sticky_ids[n],
+							sticky_ids[n]);
+					} else {
+						output_line ("\tcob_parm_%d = %s%d;",
+							sticky_ids[n], CB_PREFIX_BASE,
+							sticky_ids[n]);
+					}
 				}
+				output_line ("\tbreak;");
 			}
-			output_line ("\tbreak;");
+			output_prefix ();
+			output ("default:\n");
 		}
-		output_prefix ();
-		output ("default:\n");
 		for (n = 0; n < parmnum; ++n) {
 			if (sticky_nonp[n]) {
 				output_line ("\tcob_parm_l_%d = %s%d;",
@@ -12034,8 +11898,10 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 					sticky_ids[n]);
 			}
 		}
-		output_line ("\tbreak;");
-		output ("}\n");
+		if (cb_list_length(using_list) > 1) {
+			output_line ("\tbreak;");
+			output_line ("}");
+		}
 	}
 
 	if (cb_sticky_linkage) {
@@ -12046,9 +11912,9 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 
 	for (l2 = using_list; l2; l2 = CB_CHAIN (l2)) {
 		f2 = cb_code_field (CB_VALUE (l2));
-		if (CB_PURPOSE_INT (l2) == CB_CALL_BY_VALUE &&
-		    (f2->usage == CB_USAGE_POINTER ||
-		     f2->usage == CB_USAGE_PROGRAM_POINTER)) {
+		if (CB_PURPOSE_INT (l2) == CB_CALL_BY_VALUE 
+		 && (f2->usage == CB_USAGE_POINTER 
+		  || f2->usage == CB_USAGE_PROGRAM_POINTER)) {
 			output_line ("ptr_%d = %s%d;",
 				f2->id, s_prefix, f2->id);
 		}

@@ -2007,7 +2007,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([ASSIGN with BASED data item])
+AT_SETUP([ASSIGN with BASED data item and CHAINING])
 AT_KEYWORDS([runfile status])
 
 AT_DATA([TEST-FILE],
@@ -6220,7 +6220,7 @@ AT_DATA([prog2.cob], [
        working-storage section.
        1    fs pic xx.
        procedure division.
-           open i-o file1.
+           open input file1.
            move "X" to file1-key.
            read file1.
            if fs not = "00"
@@ -6241,7 +6241,6 @@ AT_SETUP([INDEXED file with LOCK MANUAL])
 AT_KEYWORDS([runfile])
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
-AT_XFAIL_IF([true])
 
 AT_DATA([prog1.cob], [
        identification division.
@@ -6309,11 +6308,11 @@ AT_DATA([prog2.cob], [
        1    fs pic xx.
        procedure division.
            open i-o file1.
-           move "X" to file1-key.
-           read file1.
            if fs not = "61"
               display "FAILED 2::r " fs
            end-if.
+           move "X" to file1-key.
+           read file1.
            close file1
            stop run.
 ])
@@ -11304,8 +11303,7 @@ Output file: foxasg.txt - 00 #0001.
 Output file: foozzz.txt - 00 #0001.
 Extend file: fooasg.txt - 00 #0002.
 Extend file: foxasg.txt - 00 #0002.
-], [libcob: ERROR FILE f has ASSIGN field with NULL address
-])
+], [])
 
 AT_CLEANUP
 

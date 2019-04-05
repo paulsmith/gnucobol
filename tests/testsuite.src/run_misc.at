@@ -3560,7 +3560,6 @@ int callee (char *, char *);
 int
 main (int argc, char **argv)
 {
-   cob_global *cobol_global;
    /* for storing COBOL return code */
    int cob_ret;
 
@@ -3571,8 +3570,7 @@ main (int argc, char **argv)
    cob_init(argc, argv);
 
    /* setup for COBOL parameter handling */
-   cobol_global = cob_get_global_ptr ();
-   cobol_global->cob_call_params = 1;
+   cob_set_num_params (1);
 
    /* call COBOL program */
    cob_ret = callee (p1, NULL);
@@ -3700,6 +3698,7 @@ cprog (void *cb)
    char *p3 = "CALLBACK";
 
    p1 = p3;
+   cob_set_num_params (3);
    ((int (*)(char *, int, char *))cb)(p1, p2, p3);
    return 0;
 }
@@ -3766,6 +3765,7 @@ cprog (void *cb)
    char *p3 = "CALLBACK";
 
    p1 = p3;
+   cob_set_num_params (3);
    ((int (*)(char *, int, char *))cb)(p1, p2, p3);
    return 0;
 }
@@ -13683,8 +13683,8 @@ AT_DATA([prog.cob], [
                DISPLAY "Error " CUST-STAT " instead of 02"
                                 UPON CONSOLE
            ELSE
-               DISPLAY "ReWrite: " CM-CUST-NUM " got "
-                         CUST-STAT " as expected"
+               DISPLAY "ReWrite: " CM-CUST-NUM " got 00/02"
+                         " as expected"
                          UPON CONSOLE
            END-IF.
            MOVE DATA-CUST-NUM      (6)       TO CM-CUST-NUM.
@@ -13698,8 +13698,8 @@ AT_DATA([prog.cob], [
                DISPLAY "Error " CUST-STAT " instead of 02"
                                 UPON CONSOLE
            ELSE
-               DISPLAY "ReWrite: " CM-CUST-NUM " got "
-                         CUST-STAT " as expected"
+               DISPLAY "ReWrite: " CM-CUST-NUM " got 00/02"
+                         " as expected"
                          UPON CONSOLE
            END-IF.
            CLOSE TSPFILE.
@@ -13747,8 +13747,8 @@ Ky2: GIB00000 is GIBRALTER LIFE INSURANCE  Mach=UNI-80/6.
    Read: GAM00000 got 00 as expected 00075 terminals
 ReWrite: GAM00000 got 00 as expected 00080 terminals
    Read: BET00000 got 00 as expected 00034 terminals
-ReWrite: GAM00000 got 02 as expected
-ReWrite: FOR00000 got 02 as expected
+ReWrite: GAM00000 got 00/02 as expected
+ReWrite: FOR00000 got 00/02 as expected
 Expected ERROR 39 opening TSTFILE, Record size different
 ], [])
 
@@ -14453,7 +14453,7 @@ Program-Id: prog
  Line:    320           STOP RUN
 ])
 
-AT_CHECK([gcdiff reference trace.txt], [0], [], [])
+AT_CHECK([gcdiff -I'WRITE TSPFILE Status' reference trace.txt], [0], [], [])
 
 AT_CLEANUP
 
