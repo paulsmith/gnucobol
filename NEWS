@@ -41,6 +41,7 @@ NEWS - user visible changes				-*- outline -*-
    against libcob and need cob_decimal include it yourself before - otherwise you
    do not need it in your include path any more
 
+
 * New build features
 
 ** The modules and test programs in the NIST COBOL-85 test suite (tests/cobol85)
@@ -60,6 +61,13 @@ NEWS - user visible changes				-*- outline -*-
 
 ** new configure options --with-cjson / -without-cjson to explicit force/disable
    JSON runtime support, otherwise it will be included if found as working
+
+** Any time after `make` you can call `pre-inst-env` script to use the still-
+   uninstalled binaries. Samples:
+   pre-inst-env cobc -xj prog.cob
+   pre-inst-env cobcrun -M prog start
+   pre-inst-env may also be called without parameters to start a new shell
+   session with the environment adjusted to use the uninstalled version.
 
 * Too much bug fixes to list here (please check ChangeLogs for full details).
 
@@ -140,6 +148,7 @@ NEWS - user visible changes				-*- outline -*-
    to fully control the program flow.
    ** Please report if you have a need for this option as it will be **
    ** removed permanently in the next release of GnuCOBOL otherwise. **
+
 
 * Changes in the COBOL runtime (libcob)
 

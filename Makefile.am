@@ -39,9 +39,12 @@ DISTCLEANFILES = $(BUILT_SOURCES)
 # CLEANFILES = $(bin_SCRIPTS)
 dist_noinst_SCRIPTS = autogen.sh build_aux/bootstrap po/update_linguas.sh
 
+# wrapper for the build environment
+noinst_SCRIPTS = pre-inst-env
+
 EXTRA_DIST = gnucobol.spec
 
-# Add rules for code-coverage testing, as defined by AX_CODE_COVERAGE
+# add rules for code-coverage testing, as defined by AX_CODE_COVERAGE
 CODE_COVERAGE_BRANCH_COVERAGE=1
 @CODE_COVERAGE_RULES@
 

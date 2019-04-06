@@ -1,5 +1,11 @@
 
-2019-09-23  Simon Sobisch <simonsobisch@gnu.org>
+2019-04-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am, atlocal.in: splitted some make targets and added new
+	  localcheck target, which runs the testsuite using the current
+	  environment (whatever GnuCOBOL version is in PATH)
+
+2019-03-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_fundamental.at, testsuite.src/run_misc.at:
 	  adjusted C test sources in the testsuite to include stdio.h

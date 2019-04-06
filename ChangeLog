@@ -1,4 +1,11 @@
 
+2019-04-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (noinst_SCRIPTS) add pre-inst-env
+	* configure.ac (AC_CONFIG_FILES): add pre-inst-env (template file
+	  build_aux/pre-inst-env.in) and split existing entries to initialize
+	  scripts to be executable
+
 2019-03-15  Simon Sobisch <simonsobisch@gnu.org>
 
 	* autogen.sh: fixed to work correctly when called as "./autogen.sh"

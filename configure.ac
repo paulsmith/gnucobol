@@ -35,11 +35,15 @@ AC_CONFIG_TESTDIR([tests])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build_aux])
 
-AC_CONFIG_FILES([bin/cob-config Makefile libcob/Makefile lib/Makefile
-	cobc/Makefile bin/Makefile po/Makefile.in doc/Makefile
-	config/Makefile copy/Makefile
-	tests/atlocal tests/Makefile tests/cobol85/Makefile
+AC_CONFIG_FILES([Makefile libcob/Makefile lib/Makefile cobc/Makefile
+	bin/Makefile po/Makefile.in doc/Makefile config/Makefile
+	copy/Makefile tests/Makefile tests/cobol85/Makefile
 	extras/Makefile])
+
+AC_CONFIG_FILES([bin/cob-config], [chmod +x bin/cob-config])
+AC_CONFIG_FILES([pre-inst-env:build_aux/pre-inst-env.in],
+  [chmod +x pre-inst-env])
+AC_CONFIG_FILES([tests/atlocal], [chmod +x tests/atlocal])
 
 # Note for SUN Solaris (gcc)
 # export/setenv CFLAGS "-m64 -mptr64"

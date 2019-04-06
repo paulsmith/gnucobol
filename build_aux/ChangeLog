@@ -1,4 +1,9 @@
 
+2019-04-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* pre-inst-env.in: new file, for launching programs 
+	  from build directory, after Mathieu Lirzin (automake)
+
 2019-03-19  Simon Sobisch <simonsobisch@gnu.org>
 
 	* config.guess, config.sub, texinfo.tex:
