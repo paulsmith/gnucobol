@@ -10298,7 +10298,6 @@ pickup_c_param (cb_tree l, int i)
 static void
 pickup_param (cb_tree l, int i)
 {
-	char	wrk[64];
 	cb_tree	x;
 	struct cb_field *f;
 	int	is_value_parm, is_any_numeric;

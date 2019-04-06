@@ -1573,7 +1573,7 @@ cob_set_num_params ( int n )
 	/* note: same message in call.c */
 	cob_runtime_warning_external ("cob_set_num_params", 1,
 		_("cob_init() has not been called"));
-	return -1;
+	return;
 }
 
 int
