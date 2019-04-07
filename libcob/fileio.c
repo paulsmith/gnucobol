@@ -135,7 +135,6 @@
 #ifdef	WITH_DISAM
 #ifndef DISAM_NO_ISCONFIG
 #include <isconfig.h>
-#include <isport.h>
 #ifndef ISCOBOL_STATS
 #undef	COB_WITH_STATUS_02
 #endif

@@ -4100,7 +4100,8 @@ cob_setenv (const char *name, const char *value, int overwrite) {
 int
 cob_unsetenv (const char *name) {
 #if defined(HAVE_SETENV) && HAVE_SETENV
-	return unsetenv (name);
+	unsetenv (name);
+	return 0;
 #else
 	char	*env;
 
