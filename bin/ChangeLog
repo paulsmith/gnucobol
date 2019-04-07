@@ -1,4 +1,8 @@
 
+2019-04-07  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (COBCRUN): use pre-inst-env ensuring to use the built version
+
 2019-03-19  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c: use of COB_MAX_NAMELEN

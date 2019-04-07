@@ -1,4 +1,10 @@
 
+2019-04-07  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (COBC): use pre-inst-env ensuring to use the built version
+	* Makefile.am: disabled "AM_YFLAGS -Wno-yacc" as this breaks older bison
+	  versions
+
 2019-03-26  Simon Sobisch <simonsobisch@gnu.org>
 
 	* tree.c, tree.h: added cb_int7, cb_int8, cb_int16

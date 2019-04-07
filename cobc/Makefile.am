@@ -31,10 +31,11 @@ AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)
 cobc_LDADD = $(COBC_LIBS) $(top_builddir)/libcob/libcob.la $(top_builddir)/lib/libsupport.a \
 	$(CODE_COVERAGE_LIBS)
 # Only bison is supported, so drop yacc-compatibility warnings
-AM_YFLAGS = -Wno-yacc
+# note: that breaks old Bison versions which we still support, so disabled for now...
+# AM_YFLAGS = -Wno-yacc
 
 dist_man_MANS = cobc.1
-COBC = $(top_builddir)/cobc/cobc$(EXEEXT)
+COBC = $(top_builddir)/pre-inst-env cobc$(EXEEXT)
 
 # sources that needs to be built *before* any other file
 # note: we actually want their header files...
