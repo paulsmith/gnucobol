@@ -1121,7 +1121,7 @@ AT_DATA([prog.cob], [
            EXIT .
 ])
 
-AT_CHECK([cobc -x -std=mf -w -fodoslide prog.cob ], [0], [], [])
+AT_CHECK([$COMPILE -std=mf -w -fodoslide prog.cob], [0], [], [])
 
 AT_CHECK([./prog], [0], ['123-TRAILER             '
 Write SEQ 01, DEP-X = 02 & DEP-Y = 05, TSTREC len:053
@@ -1254,7 +1254,7 @@ AT_DATA([prog.cob], [
        END PROGRAM IBM-ODO-TEST.
 ])
 
-AT_CHECK([cobc -x -std=ibm -w -fodoslide prog.cob ], [0], [], [])
+AT_CHECK([$COMPILE -std=ibm -w -fodoslide prog.cob], [0], [], [])
 
 AT_CHECK([./prog], [0],
 [Length is +0000000222 with 03, 04, 00, 06, 01
