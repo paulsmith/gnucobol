@@ -17070,3 +17070,42 @@ counter is +1024
 
 AT_CLEANUP
 
+AT_SETUP([Test HEX String])
+AT_KEYWORDS([Numeric])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  var9      PIC 9(5).
+       01  varb      PIC 9(4) COMP-4.
+       01  varx REDEFINES varb PIC XX.
+          88 MAXVAL VALUE X"7FFF".
+
+       PROCEDURE DIVISION.
+
+           SET MAXVAL TO TRUE.
+           MOVE varb TO var9.
+           DISPLAY varb " vs " var9.
+           MOVE HIGH-VALUES TO varx.
+           MOVE varb TO var9.
+           DISPLAY varb " vs " var9.
+
+           STOP RUN.
+])
+
+AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [2767 vs 32767
+5535 vs 65535
+], [])
+
+AT_CHECK([cobc -x -std=mf -fnotrunc -w prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [32767 vs 32767
+65535 vs 65535
+], [])
+
+AT_CLEANUP
+
