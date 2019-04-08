@@ -576,8 +576,13 @@ output_string (const unsigned char *s, const int size, const cob_u32_t llit)
 	output ("\"");
 	for (i = 0; i < size; i++) {
 		c = s[i];
-		if (!isprint (c) || c >= 0x7F) {
-			output ("\\x%02X", c);
+#ifndef	COB_EBCDIC_MACHINE
+		if (c >= 0x7F) {
+			output ("\\%03o", c);
+		} else
+#endif
+		if (!isprint (c)) {
+			output ("\\%03o", c);
 		} else if (c == '\"') {
 			output ("\\%c", c);
 		} else if ((c == '\\' || c == '?') && !llit) {
