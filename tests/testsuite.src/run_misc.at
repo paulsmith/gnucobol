@@ -6602,7 +6602,7 @@ CAPI(void *p1, ...)
 }
 ]])
 
-AT_CHECK([cobc -x -std=mf -Wall -debug prog.cob cmod.c], [0], [], [prog.cob:37: warning: BY CONTENT assumed for alphanumeric item 'NE'
+AT_CHECK([cobc -x -std=mf -Wall -debug -fstatic-call prog.cob cmod.c], [0], [], [prog.cob:37: warning: BY CONTENT assumed for alphanumeric item 'NE'
 prog.cob:38: warning: BY CONTENT assumed for alphanumeric item 'NE'
 prog.cob:52: warning: BY CONTENT assumed for alphanumeric item 'CHRX'
 prog.cob:53: warning: BY CONTENT assumed for alphanumeric item 'CHRX'
