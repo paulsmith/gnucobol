@@ -4127,7 +4127,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:5: error: STATIC CALL and ON EXCEPTION are mutually exclusive
 ])
 AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
-AT_CHECK([$COMPILE_ONLY -static prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -fstatic-call prog2.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [],
 [prog3.cob:6: warning: STATIC CALL convention ignored because of ON EXCEPTION
 ])
@@ -6352,9 +6352,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([cobc -x -std=ibm prog.cob ], [1], [],
-[prog.cob:14: error: LENGTH OF 'MY-DATA' not allowed outside of Procedure Division
-prog.cob:14: error: constant item 'MY-LEN' requires a VALUE clause
-prog.cob:21: error: LENGTH OF 'ODO-DATA' not allowed outside of Procedure Division
+[prog.cob:21: error: variable length item not allowed here
 prog.cob:21: error: constant item 'ODO-LEN' requires a VALUE clause
 prog.cob:30: warning: subscript missing for 'MY-ELEMENT-1' - defaulting to 1
 ])
@@ -6364,6 +6362,12 @@ AT_CHECK([cobc -x -std=ibm-strict -w prog.cob ], [1], [],
 prog.cob:14: error: 78 VALUE does not conform to IBM COBOL
 prog.cob:21: error: LENGTH OF 'ODO-DATA' not allowed outside of Procedure Division
 prog.cob:21: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:30: error: 'MY-ELEMENT-1' requires one subscript
+])
+
+AT_CHECK([cobc -x prog.cob ], [1], [],
+[prog.cob:21: error: variable length item not allowed here
+prog.cob:21: error: constant item 'ODO-LEN' requires a VALUE clause
 prog.cob:30: error: 'MY-ELEMENT-1' requires one subscript
 ])
 
