@@ -624,6 +624,27 @@ cb_validate_list (cb_tree l)
 	return 0;
 }
 
+static int
+is_unbounded (struct cb_field *fld)
+{
+	struct cb_field		*f;
+
+	if (fld->flag_unbounded) {
+		return 1;
+	}
+	for (f = fld->children; f; f = f->sister) {
+		if (is_unbounded (f)) {
+			return 1;
+		}
+	}
+	for (f = fld->sister; f; f = f->sister) {
+		if (is_unbounded (f)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
 static cb_tree
 cb_check_group_name (cb_tree x)
 {
@@ -2131,18 +2152,21 @@ cb_build_identifier (cb_tree x, const int subchk)
 
 		/* Run-time check */
 		if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_REF_MOD)) {
-			if (f->flag_any_length || !CB_LITERAL_P (r->offset) ||
-			    (r->length && !CB_LITERAL_P (r->length))) {
-				e1 = CB_BUILD_FUNCALL_4 ("cob_check_ref_mod",
-							 cb_build_cast_int (r->offset),
-							 r->length ?
-							  cb_build_cast_int (r->length) :
-							  cb_int1,
-							 f->flag_any_length ?
-							  CB_BUILD_CAST_LENGTH (v) :
-							  cb_int (pseudosize),
-							 CB_BUILD_STRING0 (f->name));
-				r->check = cb_list_add (r->check, e1);
+			if (f->flag_any_length 
+			 || !CB_LITERAL_P (r->offset) 
+			 || (r->length && !CB_LITERAL_P (r->length))) {
+				if(!is_unbounded(f)) {
+					e1 = CB_BUILD_FUNCALL_4 ("cob_check_ref_mod",
+								 cb_build_cast_int (r->offset),
+								 r->length ?
+								  cb_build_cast_int (r->length) :
+								  cb_int1,
+								 f->flag_any_length ?
+								  CB_BUILD_CAST_LENGTH (v) :
+								  cb_int (pseudosize),
+								 CB_BUILD_STRING0 (f->name));
+					r->check = cb_list_add (r->check, e1);
+				}
 			}
 		}
 	}
