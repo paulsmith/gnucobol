@@ -54,10 +54,15 @@
 #include <ncurses/ncurses.h>
 #define COB_GEN_SCREENIO
 #elif defined(HAVE_PDCURSES_H)
+/* will internally define NCURSES_MOUSE_VERSION
+   with a recent version, otherwise define manually: */
+#define PDC_NCMOUSE		/* use ncurses compatible mouse API */
 #include <pdcurses.h>
 #define COB_GEN_SCREENIO
 #elif defined(HAVE_CURSES_H)
+#define PDC_NCMOUSE	/* see comment above */
 #include <curses.h>
+#undef PDC_NCMOUSE
 #define COB_GEN_SCREENIO
 #endif
 
