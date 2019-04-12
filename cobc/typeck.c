@@ -539,6 +539,7 @@ static const struct optim_table	align_bin_sub_funcs[] = {
 
 /* Functions */
 static void cb_walk_cond (cb_tree x);
+static cb_tree cb_build_length_1 (cb_tree x);
 
 static cb_tree
 cb_check_needs_break (cb_tree stmt)
@@ -624,27 +625,6 @@ cb_validate_list (cb_tree l)
 	return 0;
 }
 
-static int
-is_unbounded (struct cb_field *fld)
-{
-	struct cb_field		*f;
-
-	if (fld->flag_unbounded) {
-		return 1;
-	}
-	for (f = fld->children; f; f = f->sister) {
-		if (is_unbounded (f)) {
-			return 1;
-		}
-	}
-	for (f = fld->sister; f; f = f->sister) {
-		if (is_unbounded (f)) {
-			return 1;
-		}
-	}
-	return 0;
-}
-
 static cb_tree
 cb_check_group_name (cb_tree x)
 {
@@ -722,6 +702,22 @@ cb_check_numeric_edited_name (cb_tree x)
 	cb_error_x (x, _("'%s' is not a numeric or numeric-edited name"), cb_name (x));
 	return cb_error_node;
 }
+
+int
+cb_is_field_unbounded (struct cb_field *fld)
+{
+	struct cb_field         *f;
+
+	if (fld->flag_unbounded) {
+		return 1;
+	}
+	for (f = fld->children; f; f = f->sister) {
+		if (cb_is_field_unbounded (f)) {
+			return 1;
+		}
+	}
+	return 0;
+}                       
 
 cb_tree
 cb_check_sum_field (cb_tree x)
@@ -2116,7 +2112,8 @@ cb_build_identifier (cb_tree x, const int subchk)
 	}
 	if (r->offset) {
 		/* Compile-time check */
-		if (CB_LITERAL_P (r->offset)) {
+		if (CB_LITERAL_P (r->offset)
+	 	 && !cb_is_field_unbounded (f)) {
 			offset = cb_get_int (r->offset);
 			if (f->flag_any_length) {
 				if (offset < 1) {
@@ -2141,7 +2138,8 @@ cb_build_identifier (cb_tree x, const int subchk)
 					}
 				}
 			}
-		} else if (r->length && CB_LITERAL_P (r->length)) {
+		} else if (r->length && CB_LITERAL_P (r->length)
+	 	 		&& !cb_is_field_unbounded (f)) {
 			length = cb_get_int (r->length);
 			/* FIXME: needs to be supported for zero length literals */
 			if (length < 1 || length > pseudosize) {
@@ -2153,20 +2151,29 @@ cb_build_identifier (cb_tree x, const int subchk)
 		/* Run-time check */
 		if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_REF_MOD)) {
 			if (f->flag_any_length 
+			 || cb_field_variable_size (f)
 			 || !CB_LITERAL_P (r->offset) 
 			 || (r->length && !CB_LITERAL_P (r->length))) {
-				if(!is_unbounded(f)) {
-					e1 = CB_BUILD_FUNCALL_4 ("cob_check_ref_mod",
-								 cb_build_cast_int (r->offset),
-								 r->length ?
-								  cb_build_cast_int (r->length) :
-								  cb_int1,
-								 f->flag_any_length ?
-								  CB_BUILD_CAST_LENGTH (v) :
-								  cb_int (pseudosize),
-								 CB_BUILD_STRING0 (f->name));
-					r->check = cb_list_add (r->check, e1);
+				cb_tree temp = NULL;
+				if( cb_field_variable_size (f) ) {
+					temp = cb_build_index (cb_build_filler (), NULL, 0, NULL);
+					CB_FIELD (cb_ref (temp))->usage = CB_USAGE_LENGTH;
+					CB_FIELD (cb_ref (temp))->count++;
+					CB_FIELD (cb_ref (temp))->pic->have_sign = 0;	/* LENGTH is UNSIGNED */
+					cb_emit (cb_build_assign (temp, cb_build_length_1 (cb_build_field_reference (f, NULL))));
 				}
+				e1 = CB_BUILD_FUNCALL_4 ("cob_check_ref_mod",
+							 cb_build_cast_int (r->offset),
+							 r->length ?
+							  cb_build_cast_int (r->length) :
+							  cb_int1,
+							 cb_field_variable_size (f) ?
+							  cb_build_cast_int (temp) :
+							 f->flag_any_length ?
+							  CB_BUILD_CAST_LENGTH (f) :
+							  cb_int (pseudosize),
+							 CB_BUILD_STRING0 (f->name));
+				r->check = cb_list_add (r->check, e1);
 			}
 		}
 	}
@@ -2218,8 +2225,7 @@ cb_build_length_1 (cb_tree x)
 				size = cb_build_binary_op (size, '*', f->depending);
 			}
 		} else if (f->occurs_max > 1) {
-			size = cb_build_binary_op (size, '*',
-						   cb_int (f->occurs_max));
+			size = cb_build_binary_op (size, '*', cb_int (f->occurs_max));
 		}
 		e = e ? cb_build_binary_op (e, '+', size) : size;
 	}
