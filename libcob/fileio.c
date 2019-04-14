@@ -7039,7 +7039,7 @@ update_file_to_fcd (cob_file *f, FCD3 *fcd, unsigned char *fnstatus)
 		memcpy (fcd->fileStatus, fnstatus, 2);
 	else
 		memcpy (fcd->fileStatus,"00",2);
-	// FIXME: use switch here
+	/* FIXME: use switch here */
 	if (f->open_mode == COB_OPEN_CLOSED)
 		fcd->openMode = OPEN_NOT_OPEN;
 	else if( f->open_mode == COB_OPEN_INPUT)
@@ -7070,7 +7070,7 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 	KDB	*kdb;
 	EXTKEY	*key;
 
-	// FIXME: use switch here
+	/* FIXME: use switch here */
 	if(f->access_mode == COB_ACCESS_SEQUENTIAL)
 		fcd->accessFlags = ACCESS_SEQ;
 	else if(f->access_mode == COB_ACCESS_RANDOM)
@@ -7255,9 +7255,9 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 
 #if 0 /* FIXME */
 	if (fcd->recordMode == REC_MODE_FIXED) {
-		// ..
+		/* TODO */
 	} else {
-		// ..
+		/* TODO */
 	}
 #endif
 
