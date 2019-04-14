@@ -3411,7 +3411,7 @@ cob_get_current_date_and_time_from_os (void)
 	if (!time_as_filetime_func) {
 		get_function_ptr_for_precise_time ();
 	}
-#pragma warning(suppress: 6011) // the function pointer is always set by get_function_ptr_for_precise_time
+#pragma warning(suppress: 6011) /* the function pointer is always set by get_function_ptr_for_precise_time */
 	(time_as_filetime_func) (&filetime);
 	/* fallback to GetLocalTime if one of the following does not work */
 	if (FileTimeToSystemTime (&filetime, &utc_time) &&
@@ -4665,12 +4665,12 @@ cob_sys_system (const void *cmdline)
 				memcpy (buff + 1, cmd, (size_t)(i + 1));
 				buff[i + 1] = '"';
 			} else {
-#endif // _WIN32
+#endif /* _WIN32 */
 				buff = cob_malloc ((size_t) (i + 2));
 				memcpy (buff, cmd, (size_t) (i + 1));
 #ifdef _WIN32
 			}
-#endif // _WIN32
+#endif 
 			if (cobglobptr->cob_screen_initialized) {
 				cob_screen_set_mode (0);
 			}
@@ -7266,7 +7266,7 @@ print_info (void)
 	puts (_("build information"));
 	var_print (_("build environment"), 	COB_BLD_BUILD, "", 0);
 	var_print ("CC", COB_BLD_CC, "", 0);
-	// Note: newline because most compilers define a long version string (> 30 characters)
+	/* Note: newline because most compilers define a long version string (> 30 characters) */
 	snprintf (versbuff, 55, "%s%s", GC_C_VERSION_PRF, GC_C_VERSION);
 	var_print ("C version", versbuff, "", 0);
 	var_print ("CPPFLAGS", COB_BLD_CPPFLAGS, "", 0);

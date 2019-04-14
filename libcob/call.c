@@ -375,7 +375,7 @@ do_cancel_module (struct call_hash *p, struct call_hash **base_hash,
 		nocancel = 1;
 	}
 #ifdef _MSC_VER
-#pragma warning(suppress: 4113) // funcint is a generic function prototype
+#pragma warning(suppress: 4113) /* funcint is a generic function prototype */
 	cancel_func = p->module->module_cancel.funcint;
 #else
 	cancel_func = p->module->module_cancel.funcint;
@@ -1096,7 +1096,7 @@ cob_cancel_field (const cob_field *f, const struct cob_call_struct *cs)
 		if (!strcmp (entry, s->cob_cstr_name)) {
 			if (s->cob_cstr_cancel.funcvoid) {
 #ifdef _MSC_VER
-#pragma warning(suppress: 4113) // funcint is a generic function prototype
+#pragma warning(suppress: 4113) /* funcint is a generic function prototype */
 				cancel_func = s->cob_cstr_cancel.funcint;
 #else
 				cancel_func = s->cob_cstr_cancel.funcint;
@@ -1693,11 +1693,11 @@ cob_get_s64_param (int n)
 		return cob_get_s64_comp3 (cbl_data, size);
 	case COB_TYPE_NUMERIC_FLOAT:
 		dbl = cob_get_comp1 (cbl_data);
-		val = (cob_s64_t)dbl; // possible data loss is explicit requested
+		val = (cob_s64_t)dbl; /* possible data loss is explicit requested */
 		return val;
 	case COB_TYPE_NUMERIC_DOUBLE:
 		dbl = cob_get_comp2 (cbl_data);
-		val = (cob_s64_t)dbl; // possible data loss is explicit requested
+		val = (cob_s64_t)dbl; /* possible data loss is explicit requested */
 		return val;
 	case COB_TYPE_NUMERIC_EDITED:
 		return cob_get_s64_pic9 (cbl_data, size);
@@ -1746,11 +1746,11 @@ cob_get_u64_param (int n)
 
 	case COB_TYPE_NUMERIC_FLOAT:
 		dbl = cob_get_comp1 (cbl_data);
-		val = (cob_u64_t)dbl; // possible data loss is explicit requested
+		val = (cob_u64_t)dbl; /* possible data loss is explicit requested */
 		return val;
 	case COB_TYPE_NUMERIC_DOUBLE:
 		dbl = cob_get_comp2 (cbl_data);
-		val = (cob_u64_t)dbl; // possible data loss is explicit requested
+		val = (cob_u64_t)dbl; /* possible data loss is explicit requested */
 		return val;
 	case COB_TYPE_NUMERIC_EDITED:
 		return cob_get_u64_pic9 (cbl_data, size);
@@ -1819,12 +1819,12 @@ cob_put_s64_param (int n, cob_s64_t val)
 		return;
 
 	case COB_TYPE_NUMERIC_FLOAT:
-		flt = (float)val;  // possible data loss is explicit requested
+		flt = (float)val;  /* possible data loss is explicit requested */
 		cob_put_comp1 (flt, cbl_data);
 		return;
 
 	case COB_TYPE_NUMERIC_DOUBLE:
-		dbl = (double)val; // possible data loss is explicit requested
+		dbl = (double)val; /* possible data loss is explicit requested */
 		cob_put_comp2 (dbl, cbl_data);
 		return;
 	default:	/* COB_TYPE_NUMERIC_EDITED, ... */
@@ -1881,12 +1881,12 @@ cob_put_u64_param (int n, cob_u64_t val)
 		return;
 
 	case COB_TYPE_NUMERIC_FLOAT:
-		flt = (float)val;  // possible data loss is explicit requested
+		flt = (float)val;  /* possible data loss is explicit requested */
 		cob_put_comp1 (flt, cbl_data);
 		return;
 
 	case COB_TYPE_NUMERIC_DOUBLE:
-		dbl = (double)val;  // possible data loss is explicit requested
+		dbl = (double)val;  /* possible data loss is explicit requested */
 		cob_put_comp2 (dbl, cbl_data);
 		return;
 	default:	/* COB_TYPE_NUMERIC_EDITED, ... */

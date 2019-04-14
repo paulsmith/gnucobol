@@ -8169,7 +8169,7 @@ screen_option:
   }
 | CLINE screen_line_number
   {
-	//check_repeated ("CLINE", SYN_CLAUSE_5000, &check_pic_duplicate);
+	/*check_repeated ("CLINE", SYN_CLAUSE_5000, &check_pic_duplicate);*/
   }
 | column_or_col_or_position_or_pos screen_col_number
   {
@@ -8177,7 +8177,7 @@ screen_option:
   }
 | CCOL screen_col_number
   {
-	//check_repeated ("CCOL", SYN_CLAUSE_5001, &check_pic_duplicate);
+	/*check_repeated ("CCOL", SYN_CLAUSE_5001, &check_pic_duplicate);*/
   }
 | COLOR _is num_id_or_lit
   {
@@ -8735,7 +8735,7 @@ control_property_name_web_browser:
 | GO_HOME                  /* WBP-GO-HOME                  --> 4099 */
 | GO_SEARCH                /* WBP-GO-SEARCH                --> 4100 */
 | REFRESH                  /* WBP-REFRESH                  --> 4101 */
-//| STOP                     /* WBP-STOP                     --> 4102 */
+/*| STOP                      WBP-STOP                     --> 4102 */
 | PRINT                    /* WBP-PRINT                    --> 4103 */
 | PRINT_NO_PROMPT          /* WBP-PRINT-NO-PROMPT          --> 4104 */
 | PRINT_PREVIEW            /* WBP-PRINT-PREVIEW            --> 4105 */
@@ -8787,7 +8787,7 @@ control_style_type:
 /* note: these match to the property_type_names, see comments there */
 control_property_type:
   integer
-//| identifier /* logic conflict because of _in_equal control_property_type */
+/*| identifier /+ logic conflict because of _in_equal control_property_type */
 ;
 
 changeable_control_properties:
@@ -13721,7 +13721,7 @@ set_to:
   {
 	cb_emit_set_to ($1, $3);
   }
-| target_x_list TO SIZE OF x	// ACUCOBOL extension, cater for dialect setting later
+| target_x_list TO SIZE OF x	/* ACUCOBOL extension, cater for dialect setting later */
   {
 	cb_emit_move (cb_build_length ($5), $1);
   }
