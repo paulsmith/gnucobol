@@ -3,6 +3,7 @@
 
 	* screenio.c: define ALT_DEL, ALT_LEFT, ALT_RIGHT
 	  using \033 for Escape instead of \E to avoid C compiler problems
+	* fileio.c: Fix RELATIVE file I/O bug for use on big-endian system
 
 2019-03-12  Simon Sobisch <simonsobisch@gnu.org>
 

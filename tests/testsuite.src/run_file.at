@@ -3828,6 +3828,8 @@ AT_DATA([prog.cob], [
            88  V-OK     VALUE "00" "05".
            88  V-ZERO   VALUE "00".
        PROCEDURE        DIVISION.
+           OPEN OUTPUT TEST-FILE.
+           CLOSE TEST-FILE.
            OPEN  I-O   TEST-FILE.
            IF NOT V-OK
               DISPLAY "OPEN " TESTSTAT

@@ -3469,7 +3469,7 @@ lineseq_rewrite (cob_file *f, const int opt)
 static int
 relative_read_size (cob_file *f, off_t off, int *isdeleted)
 {
-	int	relsize = 0;
+	size_t	relsize = 0;
 	unsigned char rechdr[8];
 
 	*isdeleted = 0;
@@ -3677,7 +3677,7 @@ relative_read_off (cob_file *f, off_t off)
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
 
-	if (read (f->fd, f->record->data, relsize) != (int)relsize) {
+	if (read (f->fd, f->record->data, (size_t)relsize) != relsize) {
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
 	f->record->size = relsize;
@@ -3763,6 +3763,7 @@ relative_read_next (cob_file *f, const int read_opts)
 	cob_u32_t	moveback;
 	struct stat	st;
 	int		relnum,errsts;
+	size_t	relsize;
 
 #ifdef	WITH_SEQRA_EXTFH
 	int		extfh_ret;
@@ -3778,7 +3779,7 @@ relative_read_next (cob_file *f, const int read_opts)
 		lseek (f->fd, (off_t)0, SEEK_CUR);
 	}
 
-	size_t relsize = f->record_max + (cob_s64_t)sizeof (f->record->size);
+	relsize = f->record_max + (cob_s64_t)sizeof (f->record->size);
 	if (fstat (f->fd, &st) != 0 || st.st_size == 0) {
 		return COB_STATUS_10_END_OF_FILE;
 	}
