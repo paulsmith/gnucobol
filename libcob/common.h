@@ -23,9 +23,6 @@
 #define COB_COMMON_H
 #include <stdio.h> 
 
-/* needed for off_t */
-#include <sys/types.h>
-
 /* General type defines */
 #define	cob_c8_t		char
 #define	cob_s8_t		signed char
