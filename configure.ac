@@ -1302,6 +1302,8 @@ elif test "$COB_USES_XLC_ONLY" = "yes"; then
 	# allow nonstandard usage - CHECKME where do we need this ???
 	# do we need the additional check for __IBMC__ >= 700 we had in cobc?
 	COB_CFLAGS="$COB_CFLAGS -qlanglvl=extended"
+	# Suppress compiler warning about MAXMEM optimization
+	COB_CFLAGS="$COB_CFLAGS -qsuppress=1500-030"
 fi
 
 if test "$COB_USES_GCC_NO_ICC" = "yes"; then
@@ -1313,6 +1315,7 @@ fi
 
 # Check gcc 4 pointer sign option (at least available with "recent" clang, too)
 #if test "$COB_USES_GCC_NO_ICC" = "yes"; then
+if test "$COB_USES_XLC_ONLY" != "yes"; then
 	MYOLDCFLAGS="$CFLAGS"
 	CFLAGS="$CFLAGS -Wno-pointer-sign"
 	AC_MSG_CHECKING([for gcc pointer sign option])
@@ -1320,6 +1323,7 @@ fi
 		[COB_CFLAGS="$COB_CFLAGS -Wno-pointer-sign"; AC_MSG_RESULT([yes])],
 		[AC_MSG_RESULT([no])])
 	CFLAGS="$MYOLDCFLAGS"
+fi
 #fi
 
 if test "$COB_USES_CLANG_ONLY" = "yes"; then
