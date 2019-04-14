@@ -2205,7 +2205,7 @@ cobc_print_info (void)
 	puts (_("build information"));
 	cobc_var_print (_("build environment"),	COB_BLD_BUILD, 0);
 	cobc_var_print ("CC", COB_BLD_CC, 0);
-	// Note: newline because most compilers define a long version string (> 30 characters)
+	/* Note: newline because most compilers define a long version string (> 30 characters) */
 	snprintf (versbuff, 55, "%s%s", GC_C_VERSION_PRF, GC_C_VERSION);
 	cobc_var_print ("C version", versbuff, 0);
 	cobc_var_print ("CPPFLAGS",		COB_BLD_CPPFLAGS, 0);
@@ -7427,7 +7427,7 @@ process_assemble (struct filename *fn)
 			 cobc_cc, cobc_cflags, cobc_include,
 			 COB_PIC_FLAGS, fn->object, fn->translate);
 	} else {
-		// Only for CB_LEVEL_EXECUTABLE
+		/* Only for CB_LEVEL_EXECUTABLE */
 		sprintf (cobc_buffer, "%s -c %s %s -o \"%s\" \"%s\"",
 			 cobc_cc, cobc_cflags, cobc_include,
 			 fn->object, fn->translate);
