@@ -513,15 +513,15 @@ cob_screen_init (void)
 #ifdef COB_NEW_KEY
 #ifndef ALT_DEL
 #define ALT_DEL                 COB_NEW_KEY(1)
-	define_key("\E[3;3~", ALT_DEL);
+	define_key("\033[3;3~", ALT_DEL);
 #endif
 #ifndef ALT_LEFT
 #define ALT_LEFT                COB_NEW_KEY(2)
-	define_key("\E[1;3D", ALT_LEFT);
+	define_key("\033[1;3D", ALT_LEFT);
 #endif
 #ifndef ALT_RIGHT
 #define ALT_RIGHT               COB_NEW_KEY(3)
-	define_key("\E[1;3C", ALT_RIGHT);
+	define_key("\033[1;3C", ALT_RIGHT);
 #endif
 #else
 #ifndef ALT_DEL

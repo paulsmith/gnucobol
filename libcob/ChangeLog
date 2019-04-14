@@ -1,4 +1,9 @@
 
+2018-04-14  Ron Norman <rjn@inglenet.com>
+
+	* screenio.c: define ALT_DEL, ALT_LEFT, ALT_RIGHT
+	  using \033 for Escape instead of \E to avoid C compiler problems
+
 2019-03-12  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (print_info): changed msgid for "file handler" and
