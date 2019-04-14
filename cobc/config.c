@@ -597,7 +597,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				/* check if name.words exists and store the resolved name to words_file */
 				if (cb_load_conf_file (buff, CB_INCLUDE_RESOLVE_WORDS) != 0) {
 					configuration_error (fname, line, 1, _("Could not access word list for '%s'"), val);
-					//cb_perror (1, "%s: %s", words_file, cb_get_strerror ());
+					/*cb_perror (1, "%s: %s", words_file, cb_get_strerror ()); */
 					return -1;
 				};
 			}

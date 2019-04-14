@@ -1,4 +1,16 @@
 
+2019-04-14  Ron Norman <rjn@inglenet.com>
+
+	* configure.ac [__xlc__]: suppress compiler warning about MAXMEM
+	  optimization
+
+2019-04-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (noinst_SCRIPTS) add pre-inst-env
+	* configure.ac (AC_CONFIG_FILES): add pre-inst-env (template file
+	  build_aux/pre-inst-env.in) and split existing entries to initialize
+	  scripts to be executable
+
 2019-04-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am (noinst_SCRIPTS) add pre-inst-env
