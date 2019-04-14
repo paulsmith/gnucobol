@@ -2170,7 +2170,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 							 cb_field_variable_size (f) ?
 							  cb_build_cast_int (temp) :
 							 f->flag_any_length ?
-							  CB_BUILD_CAST_LENGTH (f) :
+							  CB_BUILD_CAST_LENGTH (v) :
 							  cb_int (pseudosize),
 							 CB_BUILD_STRING0 (f->name));
 				r->check = cb_list_add (r->check, e1);
