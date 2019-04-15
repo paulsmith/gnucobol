@@ -22,6 +22,10 @@
 if test "$GNUCOBOL_ENV_SETUP" != "1" -a "$GNUCOBOL_TEST_LOCAL" != "1"; then
 	COBC="${abs_top_builddir}/cobc/cobc@COB_EXE_EXT@"
 	COBCRUN="${abs_top_builddir}/bin/cobcrun@COB_EXE_EXT@"
+	# prepend PATH with the actual binaries to let the testsuite find them for
+	# general check and version output, nomally not needed
+	PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${abs_top_builddir}/libcob/.libs:${PATH}"
+	export PATH
 else
 	COBC="cobc@COB_EXE_EXT@"
 	COBCRUN="cobcrun@COB_EXE_EXT@"
