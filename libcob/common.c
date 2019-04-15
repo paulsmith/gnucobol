@@ -5455,14 +5455,19 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	 * Write data back to COBOL
 	 */
 #ifdef	WORDS_BIGENDIAN
-	if (temp[3] == '?' || temp[3] == ':' || temp[3] == 'W' 
-		|| temp[3] == 0) exit_status = temp[3] & 0xFF;
-	else if(temp[3] == -1) exit_status = -1;
-	else exit_status = 3;
+	if (temp[3] == '?' 
+	 || temp[3] == ':' 
+	 || temp[3] == 'W' 
+	 || temp[3] == 0) 
+		exit_status = temp[3] & 0xFF;
+	else if(return_value == -1) 
+		exit_status = -1;
+	else 
+		exit_status = 3;
 	 /* cob_getopt_long_long sometimes returns and 'int' value and sometimes a 'x   ' in the int */
-	if(temp[0] == 0x00
-	&& temp[1] == 0x00
-	&& temp[2] == 0x00) {
+	if (temp[0] == 0x00
+	 && temp[1] == 0x00
+	 && temp[2] == 0x00) {
 		temp[0] = temp[3];		/* Move option value to 1st byte and SPACE fill the 'int' */
 		temp[1] = temp[2] = temp[3] = ' ';
 	}
