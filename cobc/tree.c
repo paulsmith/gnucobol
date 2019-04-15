@@ -4670,13 +4670,13 @@ error:
 	return cb_error_node;
 }
 
-COB_INLINE COB_A_INLINE cb_tree
+cb_tree
 cb_ref (cb_tree x)
 {
 	return cb_ref_internal (x, 1);
 }
 
-COB_INLINE COB_A_INLINE cb_tree
+cb_tree
 cb_try_ref (cb_tree x)
 {
 	return cb_ref_internal (x, 0);
