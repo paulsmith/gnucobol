@@ -5633,6 +5633,22 @@ cob_sys_open_file (unsigned char *file_name, unsigned char *file_access,
 
 	COB_CHK_PARMS (CBL_OPEN_FILE, 5);
 
+#ifdef	WORDS_BIGENDIAN
+	/* if value is passed as numeric literal, it becomes an 'int' so value is in 4th byte */
+	if (file_access[0] == 0
+	 && file_access[1] == 0
+	 && file_access[2] == 0)
+		file_access += 3;
+	if (file_lock[0] == 0
+	 && file_lock[1] == 0
+	 && file_lock[2] == 0)
+		file_lock += 3;
+	if (file_dev[0] == 0
+	 && file_dev[1] == 0
+	 && file_dev[2] == 0)
+		file_dev += 3;
+#endif
+
 	return open_cbl_file (file_name, file_access, file_handle, 0);
 }
 
@@ -5647,14 +5663,30 @@ cob_sys_create_file (unsigned char *file_name, unsigned char *file_access,
 	 * @param: file_dev : not implemented, set 0
 	 */
 
+	COB_CHK_PARMS (CBL_CREATE_FILE, 5);
+
+#ifdef	WORDS_BIGENDIAN
+	/* if value is passed as numeric literal, it becomes an 'int' so value is in 4th byte */
+	if (file_access[0] == 0
+	 && file_access[1] == 0
+	 && file_access[2] == 0)
+		file_access += 3;
+	if (file_lock[0] == 0
+	 && file_lock[1] == 0
+	 && file_lock[2] == 0)
+		file_lock += 3;
+	if (file_dev[0] == 0
+	 && file_dev[1] == 0
+	 && file_dev[2] == 0)
+		file_dev += 3;
+#endif
+
 	if (*file_lock != 0) {
 		cob_runtime_warning (_("call to CBL_CREATE_FILE with wrong file_lock: %d"), *file_lock);
 	}
 	if (*file_dev != 0) {
 		cob_runtime_warning (_("call to CBL_CREATE_FILE with wrong file_dev: %d"), *file_dev);
 	}
-
-	COB_CHK_PARMS (CBL_CREATE_FILE, 5);
 
 	return open_cbl_file (file_name, file_access, file_handle, O_CREAT | O_TRUNC);
 }

@@ -1574,6 +1574,8 @@
 2015-03-03  Ron Norman
 
 	* common.c (cob_sys_getopt_long_long): fix ENDIAN problem with CBL_GC_GETOPT
+	* fileio.c (cob_sys_create_file, cob_sys_open_file):
+	  fix ENDIAN problem with CBL_CREATE_FILE, CBL_OPEN_FILE
 
 2015-03-01  Ron Norman <rjn@inglenet.com>
 
