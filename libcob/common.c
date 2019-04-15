@@ -1527,24 +1527,6 @@ set_cob_time_ns_from_filetime (const FILETIME filetime, struct cob_time *cb_time
 
 /* Global functions */
 
-COB_INLINE int
-cob_min_int (const int x, const int y)
-{
-	if (x < y) {
-		return x;
-	}
-	return y;
-}
-
-COB_INLINE int
-cob_max_int (const int x, const int y)
-{
-	if (x > y) {
-		return x;
-	}
-	return y;
-}
-
 /* get last exception (or 0 if not active) */
 int
 cob_get_last_exception_code (void)

@@ -189,8 +189,6 @@ static	int	prev_expr_tf[EXPR_WARN_PER_LINE] = {0,0,0,0,0,0,0,0};
 static struct cb_report *report_checked = NULL;
 
 /* function prototypes */
-COB_INLINE COB_A_INLINE cb_tree	cb_ref (cb_tree x);
-COB_INLINE COB_A_INLINE cb_tree	cb_try_ref (cb_tree x);
 
 /* Local functions */
 
@@ -4534,13 +4532,13 @@ error:
 	return cb_error_node;
 }
 
-COB_INLINE COB_A_INLINE cb_tree
+cb_tree
 cb_ref (cb_tree x)
 {
 	return cb_ref_internal (x, 1);
 }
 
-COB_INLINE COB_A_INLINE cb_tree
+cb_tree
 cb_try_ref (cb_tree x)
 {
 	return cb_ref_internal (x, 0);
