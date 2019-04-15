@@ -5,6 +5,9 @@
 	  size_t for relsize (which should be no problem as it used cob_s64_t
 	  before)
 	* fileio.c: adjusted some counters to use size_t instead of casting them
+	* common.c, coblocal.h (cob_min_int, cob_max_int): moved smaller helper
+	  functions that were defined as both inline and extern as static inline
+	  to coblocal.h
 
 2019-04-14  Ron Norman <rjn@inglenet.com>
 

@@ -420,10 +420,24 @@ COB_HIDDEN char		*cob_int_to_formatted_bytestring	(int, char*);
 COB_HIDDEN char		*cob_strcat		(char*, char*, int);
 COB_HIDDEN char		*cob_strjoin		(char**, int, char*);
 
-COB_HIDDEN int		cob_min_int		(const int, const int);
-COB_HIDDEN int		cob_max_int		(const int, const int);
-
 COB_HIDDEN void	cob_set_field_to_uint	(cob_field *, const cob_u32_t);
+
+/* static inline of smaller helpers */
+
+static COB_INLINE int
+cob_min_int(const int x, const int y)
+{
+	if (x < y) return x;
+	return y;
+}
+
+static COB_INLINE int
+cob_max_int(const int x, const int y)
+{
+	if (x > y) return x;
+	return y;
+}
+
 
 #ifdef __cplusplus
 }
