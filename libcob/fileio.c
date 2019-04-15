@@ -1879,7 +1879,6 @@ lineseq_write (cob_file *f, const int opt)
 	unsigned char		*p;
 	cob_linage		*lingptr;
 	size_t			size;
-	int			i;
 	int			ret;
 
 #ifdef	WITH_SEQRA_EXTFH
@@ -1895,16 +1894,19 @@ lineseq_write (cob_file *f, const int opt)
 	if (unlikely (cobsetptr->cob_ls_fixed != 0)) {
 		size = f->record->size;
 	} else {
-		for (i = (int)f->record->size - 1; i >= 0; --i) {
+		size_t i;
+		for (i = f->record->size - 1; i > 0; --i) {
 			if (f->record->data[i] != ' ') {
+				i++;
 				break;
 			}
 		}
-		size = i + 1;
+		size = i;
 	}
 
 	if (unlikely (f->flag_select_features & COB_SELECT_LINAGE)) {
 		if (f->flag_needs_top) {
+			int i;
 			f->flag_needs_top = 0;
 			lingptr = f->linorkeyptr;
 			for (i = 0; i < lingptr->lin_top; ++i) {
@@ -1924,8 +1926,9 @@ lineseq_write (cob_file *f, const int opt)
 	/* Write to the file */
 	if (size) {
 		if (unlikely (cobsetptr->cob_ls_nulls != 0)) {
+			size_t i;
 			p = f->record->data;
-			for (i = 0; i < (int)size; ++i, ++p) {
+			for (i = 0; i < size; ++i, ++p) {
 				if (*p < ' ') {
 					COB_CHECKED_PUTC (0, (FILE *)f->file);
 				}
@@ -2149,7 +2152,7 @@ static int
 relative_read_next (cob_file *f, const int read_opts)
 {
 	off_t		curroff;
-	cob_s64_t	relsize;
+	size_t	relsize;
 	int		relnum;
 	int		bytesread;
 	cob_u32_t	moveback;
@@ -5533,9 +5536,7 @@ cob_str_from_fld (const cob_field *f)
 {
 	void		*mptr;
 	unsigned char	*s;
-	int		i;
-	int		n;
-	int		j;
+	size_t		i, n, j;
 #if	0	/* Quotes in file */
 	int		quote_switch;
 
@@ -5545,14 +5546,14 @@ cob_str_from_fld (const cob_field *f)
 	if (!f) {
 		return cob_malloc ((size_t)1);
 	}
-	for (i = (int) f->size - 1; i >= 0; --i) {
+	for (i = f->size - 1; i > 0; --i) {
 		if (f->data[i] != ' ' && f->data[i] != 0) {
+			i++;
 			break;
 		}
 	}
-	i++;
 	/* i is 0 or > 0 */
-	mptr = cob_malloc ((size_t)(i + 1));
+	mptr = cob_malloc (i + 1);
 	s = mptr;
 	j = 0;
 	for (n = 0; n < i; ++n) {

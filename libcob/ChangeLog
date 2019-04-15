@@ -1,4 +1,11 @@
 
+2019-04-15  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c (relative_read_next): change only place that did not use
+	  size_t for relsize (which should be no problem as it used cob_s64_t
+	  before)
+	* fileio.c: adjusted some counters to use size_t instead of casting them
+
 2019-04-14  Ron Norman <rjn@inglenet.com>
 
 	* screenio.c: define ALT_DEL, ALT_LEFT, ALT_RIGHT
@@ -6,7 +13,7 @@
 
 2019-04-12  Simon Sobisch <simonsobisch@gnu.org>
 
-	* screenio.c: define PDC_NCMOUSE to use NCURSES compatible mouse api
+	* screenio.c: define PDC_NCMOUSE to use ncurses compatible mouse api
 
 2019-03-25  Simon Sobisch <simonsobisch@gnu.org>
 
