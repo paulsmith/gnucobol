@@ -1571,6 +1571,10 @@
 	* call.c, common.c, intrinsic.c, numeric.c: fix segfault on early exit
 	  during runtime initialisation
 
+2015-03-03  Ron Norman
+
+	* common.c (cob_sys_getopt_long_long): fix ENDIAN problem with CBL_GC_GETOPT
+
 2015-03-01  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c updated to return correct status codes for WRITE/REWRITE

@@ -5275,9 +5275,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 
 	COB_CHK_PARMS (CBL_GC_GETOPT, 6);
 
-	/*
-	 * Read in sizes of some parameters
-	 */
+	/* read in sizes of some parameters */
 	if (COB_MODULE_PTR->cob_procedure_params[1]) {
 		lo_size = COB_MODULE_PTR->cob_procedure_params[1]->size;
 	}
@@ -5288,9 +5286,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 		opt_val_size = COB_MODULE_PTR->cob_procedure_params[5]->size;
 	}
 
-	/*
-	 * Buffering longoptions (COBOL), target format (struct option)
-	 */
+	/* buffering longoptions (COBOL), target format (struct option) */
 	if (lo_size % sizeof (longoption_def) == 0) {
 		lo_amount = (int)lo_size / sizeof (longoption_def);
 		longoptions_root = (struct option*) cob_malloc (sizeof (struct option) * (lo_amount + 1U));
@@ -5305,9 +5301,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	}
 	longind = cob_get_int (COB_MODULE_PTR->cob_procedure_params[2]);
 
-	/*
-	 * Add 0-termination to strings.
-	 */
+	/* add 0-termination to strings */
 	shortoptions = cob_malloc (so_size + 1U);
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
 		cob_field_to_string (COB_MODULE_PTR->cob_procedure_params[0], shortoptions, so_size);
@@ -5333,9 +5327,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 		longoptions = longoptions + 1;
 	}
 
-	/*
-	 * Appending final record, so getopt can spot the end of longoptions
-	 */
+	/* appending final record, so getopt can spot the end of longoptions */
 	longoptions->name = NULL;
 	longoptions->has_arg = 0;
 	longoptions->flag = NULL;
@@ -5348,17 +5340,42 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	return_value = cob_getopt_long_long (cob_argc, cob_argv, shortoptions, longoptions, &longind, long_only);
 	temp = (char *) &return_value;
 
-	/*
-	 * Write data back to COBOL
-	 */
-	if (temp[0] == '?' || temp[0] == ':' || temp[0] == 'W'
-		|| temp[0] == -1 || temp[0] == 0) exit_status = return_value;
-	else exit_status = 3;
+	/* write data back to COBOL */
+#ifdef	WORDS_BIGENDIAN
+	if (temp[3] == '?'
+	 || temp[3] == ':'
+	 || temp[3] == 'W'
+	 || temp[3] == 0) {
+		exit_status = temp[3] & 0xFF;
+	} else if (return_value == -1) {
+		exit_status = -1;
+	} else {
+		exit_status = 3;
+	}
+	 /* cob_getopt_long_long sometimes returns and 'int' value and sometimes a 'x   ' in the int */
+	if (temp[0] == 0
+	 && temp[1] == 0
+	 && temp[2] == 0) {
+		/* Move option value to 1st byte and SPACE fill the 'int' */
+		temp[0] = temp[3];
+		temp[1] = temp[2] = temp[3] = ' ';
+	}
+#else
+	if (temp[0] == '?'
+	 || temp[0] == ':'
+	 || temp[0] == 'W'
+	 || temp[0] == -1
+	 || temp[0] == 0) {
+		exit_status = return_value;
+	} else {
+		exit_status = 3;
+	}
 
 	for (i = 3; i > 0; i--) {
-		if (temp[i] == 0x00) temp[i] = 0x20;
+		if (temp[i] == 0) temp[i] = ' ';
 		else break;
 	}
+#endif
 
 	cob_set_int (COB_MODULE_PTR->cob_procedure_params[2], longind);
 	memcpy (return_char, &return_value, 4);
