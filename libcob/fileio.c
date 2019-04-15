@@ -3659,7 +3659,7 @@ static int
 relative_read_off (cob_file *f, off_t off)
 {
 	unsigned char recmark[2];
-	int	relsize = 0;
+	size_t	relsize = 0;
 	int	relnum,isdeleted=0;
 
 	relsize = relative_read_size(f, off, &isdeleted);
@@ -3939,7 +3939,7 @@ static int
 relative_write (cob_file *f, const int opt)
 {
 	off_t	off;
-	int	relsize;
+	size_t	relsize;
 	int	i,isdeleted=0;
 	int	kindex,rcsz;
 	struct stat	st;
@@ -4027,7 +4027,7 @@ static int
 relative_rewrite (cob_file *f, const int opt)
 {
 	off_t	off;
-	int	relsize;
+	size_t	relsize;
 	int	relnum,isdeleted=0,errsts;
 #ifdef	WITH_SEQRA_EXTFH
 	int	extfh_ret;
@@ -4117,7 +4117,7 @@ static int
 relative_delete (cob_file *f)
 {
 	off_t	off;
-	int	relsize;
+	size_t	relsize;
 	unsigned char rechdr[8];
 	int	relnum,isdeleted,errsts;
 #ifdef	WITH_SEQRA_EXTFH
@@ -5442,9 +5442,7 @@ indexed_open (cob_file *f, char *filename, const int mode, const int sharing)
 dobuild:
 		isfd = isbuild ((void *)filename, (int)f->record_max, &fh->key[0],
 				vmode | ISINOUT | ISEXCLLOCK);
-#if 0 /* activate on later merge of locking enhancements */
 		f->flag_file_lock = 1;
-#endif
 		if (ISERRNO == EEXIST
 #if 1 /* CHECKME: guard added by Simon, needed ? */
 		 && omode == ISOUTPUT
@@ -5454,9 +5452,7 @@ dobuild:
 			iserase ((void *)filename);
 			isfd = isbuild ((void *)filename, (int)f->record_max, &fh->key[0],
 					vmode | ISINOUT | ISEXCLLOCK);
-#if 0 /* activate on later merge of locking enhancements */
 			f->flag_file_lock = 1;
-#endif
 		}
 	} else {
 		if (lmode == ISAUTOLOCK
@@ -10167,14 +10163,10 @@ org_handling:
 			f->open_mode = COB_OPEN_INPUT;
 		}
 		update_file_to_fcd(f,fcd,fnstatus);
-#if 0 /* Simon: general mapping needed, depending
-                on a compile time switch (also for other dialects)
-                --> no "single place extension" here */
 		if (f->organization == COB_ORG_INDEXED
 		 && memcmp(f->file_status,"61",1) == 0) {/* 61 --> 9A for MF */
 			memcpy(fcd->fileStatus,"9A",2);
 		}
-#endif
 		break;
 
 	case OP_OPEN_OUTPUT:
@@ -10185,6 +10177,10 @@ org_handling:
 			f->open_mode = COB_OPEN_OUTPUT;
 		}
 		update_file_to_fcd(f,fcd,fnstatus);
+		if (f->organization == COB_ORG_INDEXED
+		 && memcmp(f->file_status,"61",1) == 0) {/* 61 --> 9A for MF */
+			memcpy(fcd->fileStatus,"9A",2);
+		}
 		break;
 
 	case OP_OPEN_IO:
@@ -10196,6 +10192,10 @@ org_handling:
 			f->open_mode = COB_OPEN_I_O;
 		}
 		update_file_to_fcd(f,fcd,fnstatus);
+		if (f->organization == COB_ORG_INDEXED
+		 && memcmp(f->file_status,"61",1) == 0) {/* 61 --> 9A for MF */
+			memcpy(fcd->fileStatus,"9A",2);
+		}
 		break;
 
 	case OP_OPEN_EXTEND:
@@ -10205,6 +10205,10 @@ org_handling:
 			f->open_mode = COB_OPEN_EXTEND;
 		}
 		update_file_to_fcd(f,fcd,fnstatus);
+		if (f->organization == COB_ORG_INDEXED
+		 && memcmp(f->file_status,"61",1) == 0) {/* 61 --> 9A for MF */
+			memcpy(fcd->fileStatus,"9A",2);
+		}
 		break;
 
 	case OP_CLOSE:
