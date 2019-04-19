@@ -4635,14 +4635,14 @@ cob_sys_system (const void *cmdline)
 			*/
 			if (i > 2 && cmd[0] == '"' && cmd[i] == '"'
 			&& (cmd[1] != '"' || cmd[i - 1] != '"')) {
-				buff = cob_malloc ((size_t)(i + 4));
+				buff = cob_malloc ((size_t)i + 4);
 				buff[0] = '"';
-				memcpy (buff + 1, cmd, (size_t)(i + 1));
+				memcpy (buff + 1, cmd, (size_t)i + 1);
 				buff[i + 1] = '"';
 			} else {
 #endif /* _WIN32 */
-				buff = cob_malloc ((size_t) (i + 2));
-				memcpy (buff, cmd, (size_t) (i + 1));
+				buff = cob_malloc ((size_t)i + 2);
+				memcpy (buff, cmd, (size_t)i + 1);
 #ifdef _WIN32
 			}
 #endif 
@@ -5275,7 +5275,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 
 	COB_CHK_PARMS (CBL_GC_GETOPT, 6);
 
-	/* read in sizes of some parameters */
+	/* Read in sizes of some parameters */
 	if (COB_MODULE_PTR->cob_procedure_params[1]) {
 		lo_size = COB_MODULE_PTR->cob_procedure_params[1]->size;
 	}
@@ -5289,7 +5289,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	/* buffering longoptions (COBOL), target format (struct option) */
 	if (lo_size % sizeof (longoption_def) == 0) {
 		lo_amount = (int)lo_size / sizeof (longoption_def);
-		longoptions_root = (struct option*) cob_malloc (sizeof (struct option) * (lo_amount + 1U));
+		longoptions_root = (struct option*) cob_malloc (sizeof (struct option) * ((size_t)lo_amount + 1U));
 	} else {
 		cob_runtime_error (_("Call to CBL_GC_GETOPT with wrong longoption size."));
 		cob_stop_run (1);
@@ -5340,7 +5340,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	return_value = cob_getopt_long_long (cob_argc, cob_argv, shortoptions, longoptions, &longind, long_only);
 	temp = (char *) &return_value;
 
-	/* write data back to COBOL */
+	/* Write data back to COBOL */
 #ifdef	WORDS_BIGENDIAN
 	if (temp[3] == '?'
 	 || temp[3] == ':'
@@ -5381,7 +5381,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	memcpy (return_char, &return_value, 4);
 
 	if (cob_optarg != NULL) {
-		memset (opt_val, 0x00, opt_val_size);
+		memset (opt_val, 0, opt_val_size);
 
 		optlen = strlen (cob_optarg);
 		if (optlen > opt_val_size) {
@@ -5391,7 +5391,6 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 		}
 		memcpy (opt_val, cob_optarg, optlen);
 	}
-
 
 	cob_free (shortoptions);
 	cob_free (longoptions_root);
@@ -5828,7 +5827,7 @@ cob_expand_env_string (char *strval)
 	unsigned int	i;
 	unsigned int	j = 0;
 	unsigned int	k = 0;
-	unsigned int	envlen = 1280;
+	size_t	envlen = 1280;
 	char		*env;
 	char		*str = strval;
 	char		ename[128] = { '\0' };
@@ -5874,9 +5873,9 @@ cob_expand_env_string (char *strval)
 				}
 			}
 			if (penv != NULL) {
-				if ((j + strlen (penv)) > (unsigned int)(envlen - 128)) {
+				if ((strlen (penv) + j) > (envlen - 128)) {
 					env = cob_realloc (env, envlen, strlen (penv) + 256);
-					envlen = (unsigned int)strlen (penv) + 256;
+					envlen = strlen (penv) + 256;
 				}
 				j += sprintf (&env[j], "%s", penv);
 				penv = NULL;

@@ -1,4 +1,8 @@
 
+2019-04-19  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c: fixed some bad/misplaced casts to size_t
+
 2019-04-15  Simon Sobisch <simonsobisch@gnu.org>
 
 	* fileio.c (relative_read_next): change only place that did not use
@@ -7,7 +11,7 @@
 	* fileio.c: adjusted some counters to use size_t instead of casting them
 	* common.c, coblocal.h (cob_min_int, cob_max_int): moved smaller helper
 	  functions that were defined as both inline and extern as static inline
-	  to coblocal.h
+	  in coblocal.h
 
 2019-04-14  Ron Norman <rjn@inglenet.com>
 
