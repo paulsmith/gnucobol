@@ -44,7 +44,6 @@
 	* mlio.c, numeric.c, coblocal.h: moved duplicated code from mlio.c
 	  to numeric.c as separate function cob_set_field_to_uint
 	* coblocal.h [COB_WITHOUT_DECIMAL]: allow inclusion without gmp header
-	* intrinsic.h: function-statement cobol 202x 63
 
 2019-03-15  Simon Sobisch <simonsobisch@gnu.org>
 
