@@ -87,9 +87,17 @@
 #elif defined (HAVE_NCURSES_NCURSES_H)
 #include <ncurses/ncurses.h>
 #elif defined (HAVE_PDCURSES_H)
+/* will internally define NCURSES_MOUSE_VERSION with
+   a recent version (for older version define manually): */
+#define PDC_NCMOUSE		/* use ncurses compatible mouse API */
 #include <pdcurses.h>
+#define COB_GEN_SCREENIO
 #elif defined (HAVE_CURSES_H)
+#define PDC_NCMOUSE	/* see comment above */
 #include <curses.h>
+#ifndef PDC_MOUSE_MOVED
+#undef PDC_NCMOUSE
+#endif
 #endif
 
 #if defined (HAVE_LIBXML_XMLVERSION_H) && HAVE_LIBXML_XMLVERSION_H
@@ -347,6 +355,8 @@ static struct config_tbl gc_conf[] = {
 	{"COB_SCREEN_EXCEPTIONS", "screen_exceptions", "0", NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_extended_status)},
 	{"COB_TIMEOUT_SCALE", "timeout_scale", 	"0", 	timeopts, GRP_SCREEN, ENV_INT, SETPOS (cob_timeout_scale)},
 	{"COB_INSERT_MODE", "insert_mode", "0", NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_insert_mode)},
+	{"COB_MOUSE_FLAGS", "mouse_flags", "1", NULL, GRP_SCREEN, ENV_INT, SETPOS (cob_mouse_flags)},
+	{"MOUSE_FLAGS", "mouse_flags", NULL, NULL, GRP_HIDE, ENV_INT, SETPOS (cob_mouse_flags)},
 	{"COB_SET_DEBUG", "debugging_mode", 		"0", 	NULL, GRP_MISC, ENV_BOOL | ENV_RESETS, SETPOS (cob_debugging_mode)},
 	{"COB_SET_TRACE", "set_trace", 		"0", 	NULL, GRP_MISC, ENV_BOOL, SETPOS (cob_line_trace)},
 	{"COB_TRACE_FILE", "trace_file", 		NULL, 	NULL, GRP_MISC, ENV_FILE, SETPOS (cob_trace_filename)},
@@ -3482,8 +3492,8 @@ check_current_date()
 	char		nanoseconds[10];
 	char		*iso_timezone_ptr = (char *)&iso_timezone;
 
-	if(cobsetptr == NULL
-	|| cobsetptr->cob_date == NULL) {
+	if (cobsetptr == NULL
+	 || cobsetptr->cob_date == NULL) {
 		return;
 	}
 
@@ -3492,16 +3502,16 @@ check_current_date()
 
 	/* skip non-digits like quotes */
 	while (cobsetptr->cob_date[j] != 0
-	&&     cobsetptr->cob_date[j] != 'Y'
-	&&     !isdigit(cobsetptr->cob_date[j])) {
+	    && cobsetptr->cob_date[j] != 'Y'
+	    && !isdigit(cobsetptr->cob_date[j])) {
 		 j++;
 	}
 
 	/* extract date */
 	if (cobsetptr->cob_date[j] != 0) {
 		yr = 0;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 			 	yr = yr * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3513,7 +3523,7 @@ check_current_date()
 		}
 		if (i != 2 && i != 4) {
 			if (cobsetptr->cob_date[j] == 'Y') {
-				while(cobsetptr->cob_date[j] == 'Y') j++;
+				while (cobsetptr->cob_date[j] == 'Y') j++;
 			} else {
 				ret = 1;
 			}
@@ -3521,14 +3531,15 @@ check_current_date()
 		} else if (yr < 100) {
 			yr += 2000;
 		}
-		while(cobsetptr->cob_date[j] == '/'
-		||    cobsetptr->cob_date[j] == '-')
+		while (cobsetptr->cob_date[j] == '/'
+		    || cobsetptr->cob_date[j] == '-') {
 			j++;
+		}
 	}
 	if (cobsetptr->cob_date[j] != 0) {
 		mm = 0;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				mm = mm * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3540,7 +3551,7 @@ check_current_date()
 		}
 		if (i != 2) {
 			if (cobsetptr->cob_date[j] == 'M') {
-				while(cobsetptr->cob_date[j] == 'M') j++;
+				while (cobsetptr->cob_date[j] == 'M') j++;
 			} else {
 				ret = 1;
 			}
@@ -3548,14 +3559,15 @@ check_current_date()
 		} else if (mm < 1 || mm > 12) {
 			ret = 1;
 		}
-		while(cobsetptr->cob_date[j] == '/'
-		||    cobsetptr->cob_date[j] == '-')
+		while (cobsetptr->cob_date[j] == '/'
+		    || cobsetptr->cob_date[j] == '-') {
 			j++;
+		}
 	}
 	if (cobsetptr->cob_date[j] != 0) {
 		dd = 0;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				dd = dd * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3567,7 +3579,7 @@ check_current_date()
 		}
 		if (i != 2) {
 			if (cobsetptr->cob_date[j] == 'D') {
-				while(cobsetptr->cob_date[j] == 'D') j++;
+				while (cobsetptr->cob_date[j] == 'D') j++;
 			} else {
 				ret = 1;
 			}
@@ -3580,9 +3592,9 @@ check_current_date()
 	/* extract time */
 	if (cobsetptr->cob_date[j] != 0) {
 		hh = 0;
-		while(isspace(cobsetptr->cob_date[j])) j++;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		while (isspace (cobsetptr->cob_date[j])) j++;
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				hh = hh * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3595,7 +3607,7 @@ check_current_date()
 
 		if (i != 2) {
 			if (cobsetptr->cob_date[j] == 'H') {
-				while(cobsetptr->cob_date[j] == 'H') j++;
+				while (cobsetptr->cob_date[j] == 'H') j++;
 			} else {
 				ret = 1;
 			}
@@ -3603,14 +3615,14 @@ check_current_date()
 		} else if (hh > 23) {
 			ret = 1;
 		}
-		while(cobsetptr->cob_date[j] == ':'
-		||    cobsetptr->cob_date[j] == '-')
+		while (cobsetptr->cob_date[j] == ':'
+		    || cobsetptr->cob_date[j] == '-')
 			j++;
 	}
 	if (cobsetptr->cob_date[j] != 0) {
 		mi = 0;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				mi = mi * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3630,18 +3642,19 @@ check_current_date()
 		} else if (mi > 59) {
 			ret = 1;
 		}
-		while(cobsetptr->cob_date[j] == ':'
-		||    cobsetptr->cob_date[j] == '-')
+		while (cobsetptr->cob_date[j] == ':'
+		    || cobsetptr->cob_date[j] == '-') {
 			j++;
+		}
 	}
 
 	if (cobsetptr->cob_date[j] != 0
-	&&	cobsetptr->cob_date[j] != 'Z'
-	&&	cobsetptr->cob_date[j] != '+'
-	&&	cobsetptr->cob_date[j] != '-') {
+	 && cobsetptr->cob_date[j] != 'Z'
+	 && cobsetptr->cob_date[j] != '+'
+	 && cobsetptr->cob_date[j] != '-') {
 		ss = 0;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				ss = ss * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3653,29 +3666,29 @@ check_current_date()
 		}
 		if (i != 2) {
 			if (cobsetptr->cob_date[j] == 'S') {
-				while(cobsetptr->cob_date[j] == 'S') j++;
+				while (cobsetptr->cob_date[j] == 'S') j++;
 			} else {
 				ret = 1;
 			}
 			ss = -1;
 		/* leap second would be 60 */
-		} else  if (ss > 60) {
+		} else if (ss > 60) {
 			ret = 1;
 		}
 	}
 
 	if (cobsetptr->cob_date[j] != 0
-	&&	cobsetptr->cob_date[j] != 'Z'
-	&&	cobsetptr->cob_date[j] != '+'
-	&&	cobsetptr->cob_date[j] != '-') {
+	 && cobsetptr->cob_date[j] != 'Z'
+	 && cobsetptr->cob_date[j] != '+'
+	 && cobsetptr->cob_date[j] != '-') {
 		ns = 0;
 		if (cobsetptr->cob_date[j] == '.'
-		||  cobsetptr->cob_date[j] == ':') {
+		 || cobsetptr->cob_date[j] == ':') {
 			j++;
 		}
-		strcpy(nanoseconds, "000000000");
+		strcpy (nanoseconds, "000000000");
 		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				nanoseconds[i] = cobsetptr->cob_date[j];
 			} else {
 				break;
@@ -3693,7 +3706,7 @@ check_current_date()
 		offset = 0;
 		iso_timezone[0] = 'Z';
 	} else if (cobsetptr->cob_date[j] == '+'
-		|| cobsetptr->cob_date[j] == '-') {
+	        || cobsetptr->cob_date[j] == '-') {
 		strncpy (iso_timezone_ptr, cobsetptr->cob_date + j, 6);
 		iso_timezone[6] = 0;	/* just to keep the analyzer happy */
 		if (strlen (iso_timezone_ptr) == 3) {
@@ -3702,7 +3715,7 @@ check_current_date()
 			strncpy (iso_timezone_ptr + 3, cobsetptr->cob_date + j + 4, 3);
 		}
 		for (i=1; iso_timezone[i] != 0; i++) {
-			if (!isdigit(iso_timezone[i])) {
+			if (!isdigit (iso_timezone[i])) {
 				break;
 			}
 			if (++i == 4) {
@@ -5817,7 +5830,6 @@ var_print (const char *msg, const char *val, const char *default_val,
 
 }
 
-
 /*
  Expand a string with environment variable in it. Return malloced string.
 */
@@ -6099,10 +6111,13 @@ set_config_val (char *value, int pos)
 		}
 
 		/* call internal routines that do post-processing */
-		if (strcmp(gc_conf[pos].env_name, "COB_CURRENT_DATE") == 0) {
+		if (strcmp (gc_conf[pos].env_name, "COB_CURRENT_DATE") == 0) {
 			check_current_date ();
-		} else if (strcmp(gc_conf[pos].env_name, "COB_TRACE_FILE") == 0) {
+		} else if (strcmp (gc_conf[pos].env_name, "COB_TRACE_FILE") == 0) {
 			cob_new_trace_file ();
+		} else if (strcmp (gc_conf[pos].env_name, "COB_INSERT_MODE") == 0
+		        || strcmp (gc_conf[pos].env_name, "COB_MOUSE_FLAGS") == 0) {
+			cob_settings_screenio ();;
 		}
 
 	} else if ((data_type & ENV_CHAR)) {	/* 'char' field inline */
@@ -7285,6 +7300,17 @@ print_info (void)
 	snprintf (versbuff2, 114, "%s (CHTYPE=%d, WIDE=%d)", versbuff,
 		(int)sizeof (chtype) * 8, wide);
 #endif
+#endif
+#ifdef NCURSES_MOUSE_VERSION
+	// needed? initscr ();
+	if (has_mouse ()) {
+		var_print (_("mouse support"), 	_("yes"), "", 0);
+	} else {
+		var_print (_("mouse support"), 	_("no"), "", 0);
+	}
+	// needed? endwin ();
+#else
+	var_print (_("mouse support"), 		_("disabled"), "", 0);
 #endif
 
 	snprintf (buff, sizeof (buff), "%d", WITH_VARSEQ);

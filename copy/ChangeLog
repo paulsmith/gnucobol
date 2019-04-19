@@ -1,4 +1,9 @@
 
+2019-04-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* screenio.cpy: added exception values for mouse and
+	  mouse mask definitions
+
 2018-12-31  Simon Sobisch <simonsobisch@gnu.org>
 
 	* xfhfcd3.cpy: new copy for EXTFH call from COBOL
@@ -13,7 +18,7 @@
 
 2015-06-22  Luke Smith <cobcoder@users.sourceforge.net>
 
-	* screenio.cpy: Add COB-SCR-TAB, COB-SCR-BACK-TAB,
+	* screenio.cpy: add COB-SCR-TAB, COB-SCR-BACK-TAB,
 	  COB-SCR-KEY-LEFT and COB-SCR-KEY-RIGHT
 
 2010-06-28  Roger While <simrw@sim-basis.de>
@@ -23,31 +28,31 @@
 
 20??-??-??  Roger While <simrw@sim-basis.de>
 
-	* screenio.cpy: Added COB-SCR-MAX-FIELD
+	* screenio.cpy: added COB-SCR-MAX-FIELD
 
 2009-??-??  Roger While <simrw@sim-basis.de>
 
-	* screenio.cpy: Added COB-SCR-TIME-OUT
+	* screenio.cpy: added COB-SCR-TIME-OUT
 
 2008-08-09  Roger While <simrw@sim-basis.de>
 
-	* Add color definitions  to screenio.cpy
+	* screenio.cpy: added color definitions
 
 2008-07-05  Roger While <simrw@sim-basis.de>
 
-	* Extend screenio.cpy
+	* screenio.cpy: extend 
 
 2008-06-24  Roger While <simrw@sim-basis.de>
 
-	* Add screenio.cpy
+	* screenio.cpy: new file
 
 2008-04-16  Roger While <simrw@sim-basis.de>
 
-	* New directory "copy" for OC supplied COPY elements
+	* new directory "copy" for OC supplied COPY elements
 	* Add Makefile*, ChangeLog, sqlca.cpy, sqlda.cpy
 
 
-Copyright 2008-2010,2015,2016,2018 Free Software Foundation, Inc.
+Copyright 2008-2010,2015,2016,2018-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

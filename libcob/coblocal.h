@@ -194,7 +194,9 @@
 #define	COB_DISP_TO_STDERR	cobsetptr->cob_disp_to_stderr
 #define	COB_BEEP_VALUE		cobsetptr->cob_beep_value
 #define	COB_TIMEOUT_SCALE	cobsetptr->cob_timeout_scale
+#define	COB_INSERT_MODE		cobsetptr->cob_insert_mode
 #define	COB_EXTENDED_STATUS	cobsetptr->cob_extended_status
+#define	COB_MOUSE_FLAGS	cobsetptr->cob_mouse_flags
 #define	COB_USE_ESC		cobsetptr->cob_use_esc
 
 #ifdef __cplusplus
@@ -252,6 +254,7 @@ typedef struct __cob_settings {
 	unsigned int	cob_disp_to_stderr;	/* Redirect to stderr */
 	unsigned int	cob_beep_value;		/* Bell disposition */
 	unsigned int	cob_extended_status;	/* Extended status */
+	unsigned int	cob_mouse_flags;	/* Mouse flags to mask to COBOL, values according to ACUCOBOL */
 	unsigned int	cob_use_esc;		/* Check ESC key */
 	unsigned int	cob_timeout_scale;	/* timeout scale */
 	unsigned int	cob_insert_mode;	/* insert toggle, 0=off, 1=on */
@@ -372,6 +375,7 @@ COB_HIDDEN void		cob_print_realbin	(const cob_field *, FILE *,
 						 const int);
 
 COB_HIDDEN void		cob_screen_set_mode	(const cob_u32_t);
+COB_HIDDEN void		cob_settings_screenio (void);
 COB_HIDDEN int		cob_get_last_exception_code	(void);
 COB_HIDDEN int		cob_check_env_true	(char*);
 COB_HIDDEN int		cob_check_env_false	(char*);
