@@ -1,7 +1,7 @@
 #!/bin/sh
 # cobcinfo.sh gnucobol/doc
 #
-# Copyright (C) 2010,2012, 2016-2018 Free Software Foundation, Inc.
+# Copyright (C) 2010,2012, 2016-2019 Free Software Foundation, Inc.
 # Written by Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -105,23 +105,28 @@ _create_file () {
 			;;
 		"cbconf.tex")
 			echo "@verbatim"               > $1
-			cat $confdir/default.conf \
-			| $GREP -A9999 "https://www.gnu.org/licenses/" \
+			$GREP -A9999 "https://www.gnu.org/licenses/" \
+			  $confdir/default.conf \
 			| tail -n +2 \
 			                               >>$1
 			echo "@end verbatim"           >>$1
 			;;
 		"cbrunt.tex")
 			# First section, as it is formatted different
-			cat $confdir/runtime.cfg \
-			| $GREP -A400 -m1 "##" \
+			$GREP -A400 -m1 "##" \
+			  $confdir/runtime.cfg \
+			| $GREP -B400 -m2 "##" \
 			| cut -b2- \
-			| sed -e 's/^#\( .*\)/@section\1\n/g' \
+			| sed -e 's/\r//g' \
+			| sed -e 's/^#$//g' \
+			      -e 's/^#\( .*\)/@section\1\n/g' \
 			      -e 's/^ //g' \
 			      -e 's/{/@{/g' \
 			      -e 's/}/@}/g' \
-			      -e 's/  \([^ ].*\)  / @code{\1} /g' \
-			      -e 's/  \([^ ].*\)$/ @code{\1}/g' \
+			      -e 's/\(Example:\)  \(.*\)$/\n{\1} @code{\2}/g' \
+			      -e 's/  \([^ ][^(]*\)  \([,.]\)/ @code{\1}\2/g' \
+			      -e 's/  \([^ ][^(]*\)  / @code{\1} /g' \
+			      -e 's/  \([^ ][^(]*\)$/ @code{\1}/g' \
 			      -e 's/^$/@\*/g' \
 			                               > $1
 			lines=`cat $1 | wc -l`
@@ -130,8 +135,9 @@ _create_file () {
 			echo "@verbatim"               >>$1
 			tail -n +$lines $confdir/runtime.cfg \
 			| cut -b2- \
-			| sed -e 's/^#\( .*\)/@end verbatim\n@section\1\n@verbatim/g' \
-			       -e 's/^ //g' \
+			| sed -e 's/\r//g' \
+			      -e 's/^#\( .*\)/@end verbatim\n@section\1\n@verbatim/g' \
+			      -e 's/^ //g' \
 			                               >>$1
 			echo "@end verbatim"           >>$1
 			;;
