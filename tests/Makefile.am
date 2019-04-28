@@ -74,7 +74,7 @@ EXTRA_DIST = $(srcdir)/package.m4 $(TESTSUITE) $(TESTSUITE_MANUAL) \
 DISTCLEANFILES = atconfig
 
 check-local: prereq-testsuite
-	@TESTENVIRONMENT="" $(TESTSUITE) $(TESTSUITEFLAGS) || rm -f testsuite.dir/at-job-fifo
+	@GNUCOBOL_TEST_LOCAL="" $(TESTSUITE) $(TESTSUITEFLAGS) || rm -f testsuite.dir/at-job-fifo
 	@rm -f testsuite.dir/at-job-fifo
 
 localcheck: prereq-testsuite
