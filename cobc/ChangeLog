@@ -1,4 +1,9 @@
 
+2019-04-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (line_keyword_clause): added missing RW line syntax variants
+	* parser.y (_acu_size): initial parsing for size specification on pointers
+
 2019-04-15  Simon Sobisch <simonsobisch@gnu.org>
 
 	* tree.c: removed superfluous inline prototypes for cb_ref/cb_try_ref

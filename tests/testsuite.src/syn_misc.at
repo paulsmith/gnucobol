@@ -3484,6 +3484,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [1], [],
 [prog.cob:6: error: 'float' is not defined, but is a reserved word in another dialect
@@ -3657,6 +3658,20 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
+[prog.cob: in paragraph 'MAIN':
+prog.cob:11: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:15: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:21: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:22: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:24: error: HANDLE must be either a generic or a WINDOW HANDLE or X(10)
+prog.cob:27: warning: GRAPHICAL CONTROL is not implemented
+prog.cob:28: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:33: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:38: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:44: warning: GRAPHICAL CONTROL is not implemented
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
 prog.cob:11: warning: GRAPHICAL WINDOW is not implemented
 prog.cob:15: warning: GRAPHICAL WINDOW is not implemented

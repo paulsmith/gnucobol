@@ -4776,7 +4776,7 @@ alternative_record_key_clause:
 		}
 	}
 
-	/* add to the end of list */
+	/* Add to the end of list */
 	if (current_file->alt_key_list == NULL) {
 		current_file->alt_key_list = p;
 	} else {
@@ -7854,7 +7854,8 @@ line_clause:
 ;
 
 line_keyword_clause:
-  LINE _number_is
+  LINE _number_or_numbers _is_are
+| LINES _are
 ;
 
 _line_clause_options:
@@ -7939,7 +7940,7 @@ column_clause:
 ;
 
 col_keyword_clause:
-  column_or_cols _numbers _orientation _is_are
+  column_or_cols _number_or_numbers _orientation _is_are
 ;
 
 _orientation:
@@ -9267,7 +9268,7 @@ procedure_param_list:
 ;
 
 procedure_param:
-  _procedure_type _size_optional _procedure_optional WORD
+  _procedure_type _size_optional _procedure_optional WORD _acu_size
   {
 	cb_tree		x;
 	struct cb_field	*f;
@@ -9279,8 +9280,8 @@ procedure_param:
 	}
 
 	if (call_mode == CB_CALL_BY_VALUE
-	    && CB_REFERENCE_P ($4)
-	    && CB_FIELD (cb_ref ($4))->flag_any_length) {
+	 && CB_REFERENCE_P ($4)
+	 && CB_FIELD (cb_ref ($4))->flag_any_length) {
 		cb_error_x ($4, _("ANY LENGTH items may only be BY REFERENCE formal parameters"));
 	}
 
@@ -9371,6 +9372,16 @@ size_is_integer:
 			break;
 		}
 	}
+  }
+;
+
+/* The [MEMORY] SIZE phrase is used when the parameter in the USING phrase is a memory address (pointer to memory)
+  and you need to specify the size of the piece of memory that is located at that address. */
+_acu_size:
+  /* empty */
+| _with MEMORY SIZE _is positive_id_or_lit
+  {
+	CB_PENDING_X ($4, _("MEMORY SIZE phrase in CALL statement"));
   }
 ;
 
@@ -10318,7 +10329,7 @@ accp_attr:
 	check_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_27, &check_duplicate);
 	set_attribs (NULL, $3, NULL, NULL, NULL, NULL, 0);
   }
-| SCROLL UP _scroll_lines
+| SCROLL _up _scroll_lines
   {
 	check_repeated ("SCROLL UP", SYN_CLAUSE_28, &check_duplicate);
 	set_attribs_with_conflict (NULL, NULL, $3, NULL, NULL, NULL,
@@ -11749,7 +11760,7 @@ disp_attr:
 	check_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_18, &check_duplicate);
 	set_attribs (NULL, $3, NULL, NULL, NULL, NULL, 0);
   }
-| SCROLL UP _scroll_lines
+| SCROLL _up _scroll_lines
   {
 	check_repeated ("SCROLL UP", SYN_CLAUSE_19, &check_duplicate);
 	set_attribs_with_conflict (NULL, NULL, $3, NULL, NULL, NULL,
@@ -17011,7 +17022,8 @@ unsigned_pos_integer:
 	 || CB_LITERAL ($1)->sign
 	 || CB_LITERAL ($1)->scale) {
 		cb_error (_("unsigned positive integer value expected"));
-		$$ = cb_int1;	} else {
+		$$ = cb_int1;
+	} else {
 		n = cb_get_int ($1);
 		if (n < 1) {
 			cb_error (_("unsigned positive integer value expected"));
@@ -17640,8 +17652,7 @@ _message:	| MESSAGE ;
 _mode:		| MODE ;
 _new:		| NEW ;
 _number:	| NUMBER ;
-_number_is:	| NUMBER IS | NUMBER ;
-_numbers:	| NUMBER | NUMBERS ;
+_number_or_numbers:	_number | NUMBERS ;
 _of:		| OF ;
 _on:		| ON ;
 _on_for:	| ON | FOR ;
@@ -17666,7 +17677,8 @@ _terminal:		| TERMINAL ;
 _then:		| THEN ;
 _times:		| TIMES ;
 _to:		| TO ;
-_to_using:	| TO | USING;
+_to_using:	| TO | USING ;
+_up:		| UP ;
 _when:		| WHEN ;
 _when_set_to:	| WHEN SET TO ;
 _with:		| WITH ;
