@@ -1338,7 +1338,7 @@ struct cb_statement {
 #define CB_STATEMENT(x)		(CB_TREE_CAST (CB_TAG_STATEMENT, struct cb_statement, x))
 #define CB_STATEMENT_P(x)	(CB_TREE_TAG (x) == CB_TAG_STATEMENT)
 
-/* CONTINUE */
+/* CONTINUE (*not* CONTINUE AFTER exp SECONDS) */
 
 struct cb_continue {
 	struct cb_tree_common	common;		/* Common values */
@@ -2056,7 +2056,7 @@ extern void		cb_emit_call (cb_tree, cb_tree, cb_tree, cb_tree,
 extern void		cb_emit_cancel (cb_tree);
 extern void		cb_emit_close (cb_tree, cb_tree);
 extern void		cb_emit_commit (void);
-extern void		cb_emit_continue (void);
+extern void		cb_emit_continue (cb_tree);
 extern void		cb_emit_delete (cb_tree);
 extern void		cb_emit_delete_file (cb_tree);
 

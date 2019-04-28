@@ -291,6 +291,24 @@ begin_statement (const char *name, const unsigned int term)
 	main_statement = current_statement;
 }
 
+static void
+begin_statement_from_backup_pos (const char *name, const unsigned int term)
+{
+	current_paragraph->flag_statement = 1;
+	current_statement = cb_build_statement (name);
+	CB_TREE (current_statement)->source_file = backup_source_file;
+	CB_TREE (current_statement)->source_line =backup_source_line;
+	current_statement->flag_in_debug = in_debugging;
+	emit_statement (CB_TREE (current_statement));
+	if (term) {
+		term_array[term]++;
+	}
+	main_statement = current_statement;
+	if (check_unreached) {
+		cb_warning_x (cb_warn_unreachable, CB_TREE (current_statement), _("unreachable statement '%s'"), name);
+	}
+}
+
 /* create a new statement with base attributes of current_statement
    and set this as new current_statement */
 static void
@@ -11010,14 +11028,33 @@ commit_statement:
 continue_statement:
   CONTINUE
   {
-	size_t	save_unreached;
+	backup_current_pos ();
+  }
+  _continue_after_phrase
+  {
+	if (!$3) {
+		/* Do not check unreached for CONTINUE without after phrase */
+		unsigned int	save_unreached = check_unreached;
+		check_unreached = 0;
+		begin_statement_from_backup_pos ("CONTINUE", 0);
+		cb_emit_continue (NULL);
+		check_unreached = save_unreached;
+	} else {
+		begin_statement_from_backup_pos ("CONTINUE AFTER", 0);
+		cb_emit_continue ($3);
+	}
+  }
+;
 
-	/* Do not check unreached for CONTINUE */
-	save_unreached = check_unreached;
-	check_unreached = 0;
-	begin_statement ("CONTINUE", 0);
-	cb_emit_continue ();
-	check_unreached = (unsigned int) save_unreached;
+_continue_after_phrase:
+  /* empty */	{ $$ = NULL;}
+| AFTER {
+	/* FIXME: hack - fake cs for  context-sensitive SECONDS */
+	cobc_cs_check = CB_CS_RETRY;
+  }
+  exp SECONDS
+  {
+	$$ = $3;
   }
 ;
 
@@ -11111,7 +11148,7 @@ _enable_disable_key:
   /* empty */
 | _with KEY id_or_lit
   {
-	  /* Add cb_verify for <= COBOL-85 */
+	/* Add cb_verify for <= COBOL-85 */
   }
 ;
 

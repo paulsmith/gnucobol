@@ -232,6 +232,9 @@ static int			cannot_check_subscript = 0;
 
 static const cob_field_attr	const_alpha_attr =
 				{COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL};
+static const cob_field_attr	const_bin_nano_attr =
+				{COB_TYPE_NUMERIC_BINARY, 20, 9,
+				 COB_FLAG_HAVE_SIGN, NULL};
 
 static char			*cob_local_env = NULL;
 static int			current_arg = 0;
@@ -406,7 +409,9 @@ static struct config_tbl gc_conf[] = {
 #define FUNC_NAME_IN_DEFAULT NUM_CONFIG + 1
 
 /* Local functions */
-static int		translate_boolean_to_int (const char* ptr);
+static int		translate_boolean_to_int	(const char* ptr);
+static cob_s64_t	get_sleep_nanoseconds	(cob_field *decimal_seconds);
+static void		internal_nanosleep	(cob_s64_t nsecs);
 
 static int		set_config_val	(char *value, int pos);
 static char		*get_config_val	(char *value, int pos, char *orgvalue);
@@ -4181,6 +4186,19 @@ cob_chain_setup (void *data, const size_t parm, const size_t size)
 }
 
 void
+cob_continue_after (cob_field *decimal_seconds)
+{
+	cob_s64_t	nanoseconds = get_sleep_nanoseconds (decimal_seconds);
+
+	if (nanoseconds < 0) {
+		/* TODO: current COBOL 20xx change proposal
+		   specifies EC-CONTINUE-LESS-THAN-ZERO (NF) here... */
+		return;
+	}
+	internal_nanosleep (nanoseconds);
+}
+
+void
 cob_allocate (unsigned char **dataptr, cob_field *retptr,
 	      cob_field *sizefld, cob_field *initialize)
 {
@@ -5017,46 +5035,96 @@ cob_sys_tolower (void *p1, const int length)
 	return 0;
 }
 
+static cob_s64_t
+get_sleep_nanoseconds (cob_field *decimal_seconds) {
+
+#define MAX_SLEEP_TIME 3600*24*7
+	cob_s64_t	seconds = cob_get_llint (decimal_seconds);
+
+	if (seconds < 0) {
+		return -1;
+	}
+	if (seconds >= MAX_SLEEP_TIME) {
+		return (cob_s64_t)MAX_SLEEP_TIME * 1000000000;
+	} else {
+		cob_s64_t	nanoseconds;
+		cob_field	temp;
+		temp.size = 8;
+		temp.data = (unsigned char *)&nanoseconds;
+		temp.attr = &const_bin_nano_attr;
+		cob_move (decimal_seconds, &temp);
+		return nanoseconds;
+	}
+}
+
+static void
+internal_nanosleep (cob_s64_t nsecs)
+{
+#ifdef	HAVE_NANO_SLEEP
+	struct timespec	tsec;
+
+	tsec.tv_sec = nsecs / 1000000000;
+	tsec.tv_nsec = nsecs % 1000000000;
+	nanosleep (&tsec, NULL);
+
+#else
+
+	unsigned int	msecs;
+#if	defined (__370__) || defined (__OS400__)
+	msecs = (unsigned int)(nsecs / 1000000000);
+	if (msecs > 0) {
+		sleep (msecs);
+	}
+#elif	defined (_WIN32)
+	msecs = (unsigned int)(nsecs / 1000000);
+	if (msecs > 0) {
+		Sleep (msecs);
+	}
+#else
+	msecs = (unsigned int)(nsecs / 1000000000);
+	if (msecs > 0) {
+		sleep (msecs);
+	}
+#endif
+#endif
+}
+
+/* CBL_GC_NANOSLEEP / CBL_OC_NANOSLEEP, origin: OpenCOBOL */
 int
 cob_sys_oc_nanosleep (const void *data)
 {
-	cob_s64_t	nsecs;
-#ifdef	HAVE_NANO_SLEEP
-	struct timespec	tsec;
-#else
-	unsigned int	msecs;
-#endif
-
 	COB_UNUSED (data);
-
 	COB_CHK_PARMS (CBL_GC_NANOSLEEP, 1);
 
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
-		nsecs = cob_get_llint (COB_MODULE_PTR->cob_procedure_params[0]);
+		cob_s64_t nsecs
+			= get_sleep_nanoseconds (COB_MODULE_PTR->cob_procedure_params[0]);
 		if (nsecs > 0) {
-#ifdef	HAVE_NANO_SLEEP
-			tsec.tv_sec = nsecs / 1000000000;
-			tsec.tv_nsec = nsecs % 1000000000;
-			nanosleep (&tsec, NULL);
-#elif	defined (__370__) || defined (__OS400__)
-			msecs = (unsigned int)(nsecs / 1000000000);
-			if (msecs > 0) {
-				sleep (msecs);
-			}
-#elif	defined (_WIN32)
-			msecs = (unsigned int)(nsecs / 1000000);
-			if (msecs > 0) {
-				Sleep (msecs);
-			}
-#else
-			msecs = (unsigned int)(nsecs / 1000000000);
-			if (msecs > 0) {
-				sleep (msecs);
-			}
-#endif
+			internal_nanosleep (nsecs);
 		}
+		return 0;
 	}
-	return 0;
+	return -1;
+}
+
+/* C$SLEEP, origin: ACUCOBOL */
+int
+cob_sys_sleep (const void *data)
+{
+	COB_UNUSED (data);
+	COB_CHK_PARMS (C$SLEEP, 1);
+
+	if (COB_MODULE_PTR->cob_procedure_params[0]) {
+		cob_s64_t	nanoseconds
+			= get_sleep_nanoseconds (COB_MODULE_PTR->cob_procedure_params[0]);
+		if (nanoseconds < 0) {
+			/* ACUCOBOL specifies a runtime error here... */
+			return -1;
+		}
+		internal_nanosleep (nanoseconds);
+		return 0;
+	}
+	return 0;	/* CHECKME */
 }
 
 int
@@ -5409,33 +5477,6 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	cob_free (longoptions_root);
 
 	return exit_status;
-
-}
-
-int
-cob_sys_sleep (const void *data)
-{
-#define MAX_SLEEP_TIME 3600*24*7
-	int	n;
-
-	COB_UNUSED (data);
-
-	COB_CHK_PARMS (C$SLEEP, 1);
-
-	if (COB_MODULE_PTR->cob_procedure_params[0]) {
-		n = cob_get_int (COB_MODULE_PTR->cob_procedure_params[0]);
-		if (n > MAX_SLEEP_TIME) {
-			n = MAX_SLEEP_TIME;
-		}
-		if (n > 0) {
-#ifdef	_WIN32
-			Sleep ((DWORD)(n*1000));
-#else
-			sleep (n);
-#endif
-		}
-	}
-	return 0;
 }
 
 int

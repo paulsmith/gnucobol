@@ -1,4 +1,10 @@
 
+2019-04-07 Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: FR #354 added continue-after option, set to ok
+	  for default/lax only as we won't have a dialect file for COBOL 202x
+	  until its final working draft and release date is available
+
 2019-03-18 Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: FR #352 added national-character-literals option, set to warning

@@ -26,6 +26,13 @@
 
 	* screenio.c: define PDC_NCMOUSE to use ncurses compatible mouse api
 
+2019-04-07  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (get_sleep_nanoseconds, internal_nanosleep): new functions;
+	  moved the actual sleep code from cob_sys_oc_nanosleep and cob_sys_sleep
+	  to a common place and finally allow fractions of seconds in C$SLEEP
+	* common.c, common.h (cob_continue_after): new function for FR #354
+
 2019-03-25  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (print_info): output endianess and native EBCDIC

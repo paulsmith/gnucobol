@@ -1062,12 +1062,20 @@ AT_DATA([prog.cob], [
            DISPLAY "INVALID"
            END-DISPLAY.
        P02.
+           GO TO P03
+           CONTINUE.  *> explicit no unreachable warning
+       P03.
+           GO TO P04
+           CONTINUE AFTER 2 SECONDS.  *> that's one again
+       P04.
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY -Wunreachable prog.cob], [0], [],
 [prog.cob: in paragraph 'P01':
 prog.cob:26: warning: unreachable statement 'DISPLAY'
+prog.cob: in paragraph 'P03':
+prog.cob:33: warning: unreachable statement 'CONTINUE AFTER'
 ])
 
 AT_CLEANUP
@@ -6246,7 +6254,7 @@ AT_DATA([prog.cob], [
                SUPPRESS bool-item WHEN LOW-VALUES,
                    zoned-decimal WHEN HIGH-VALUE
            *> (For generic WHEN phrases, invalid items above are ignored.)
-           .
+           GOBACK.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
@@ -6305,3 +6313,106 @@ prog.cob:153: error: SUPPRESS WHEN HIGH-VALUE item must be an integer
 prog.cob:152: error: SUPPRESS WHEN LOW-VALUE item must be USAGE DISPLAY or NATIONAL
 ])
 AT_CLEANUP
+
+
+AT_SETUP([BASED clause, ALLOCATE / FREE statements])
+AT_KEYWORDS([BASED])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  str.
+           03  str-1  PIC XX BASED.
+       01  str-2 BASED.
+           03  str-2a PIC X SYNC.
+           03  str-2b PIC 9.
+       01  one        PIC XX BASED.
+       77  seven      PIC 9 BASED.
+       77  var        PIC 9.
+       77  ptr        USAGE POINTER.
+       SCREEN-STORAGE SECTION.
+       01  scrn      BASED.
+           03  scrn-field pic x.
+
+       PROCEDURE DIVISION.
+           ALLOCATE one
+           ALLOCATE seven INITIALIZED
+           ALLOCATE seven CHARACTERS.
+           ALLOCATE seven CHARACTERS RETURNING ptr.
+           ALLOCATE 1 + 2 * 3 CHARACTERS RETURNING ptr.
+           ALLOCATE 1 + one * 3 CHARACTERS RETURNING ptr.
+           ALLOCATE one   CHARACTERS RETURNING ptr.
+           ALLOCATE seven CHARACTERS INITIALIZED RETURNING ptr.
+           ALLOCATE var
+           FREE var
+           FREE ADDRESS OF var
+           FREE one
+           FREE ADDRESS OF seven
+           MOVE ADDRESS OF seven TO ptr
+           FREE ptr
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:8: error: BASED only allowed at 01/77 level
+prog.cob:16: error: PROCEDURE DIVISION header missing
+prog.cob:16: error: syntax error, unexpected Identifier
+prog.cob:17: error: unknown statement '01'
+prog.cob:18: error: unknown statement '03'
+prog.cob:20: error: syntax error, unexpected PROCEDURE
+prog.cob:23: error: ALLOCATE CHARACTERS requires RETURNING clause
+prog.cob:26: error: 'one' is not a numeric value
+prog.cob:27: error: amount must be specified as a numeric expression
+prog.cob:29: error: target of ALLOCATE is not a BASED item
+prog.cob:30: error: target 1 of FREE is not a BASED data item
+prog.cob:31: error: target 1 of FREE is not a BASED data item
+])
+AT_CLEANUP
+
+
+AT_SETUP([CONTINUE statement])
+AT_KEYWORDS([BASED])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  one        PIC X.
+       77  seven      PIC 9 BASED.
+       77  var        PIC 9.
+       77  ptr        USAGE POINTER.
+       PROCEDURE DIVISION.
+           CONTINUE
+           PERFORM VARYING var FROM 1 BY 1 UNTIL var = 4
+              CONTINUE
+           END-PERFORM
+           CONTINUE AFTER 42 SECONDS
+           CONTINUE AFTER 4 + 2 SECONDS
+           CONTINUE AFTER var + 2 SECONDS
+           CONTINUE AFTER '1' SECONDS
+           CONTINUE AFTER ptr SECONDS
+           CONTINUE AFTER one SECONDS
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:19: error: amount must be specified as a numeric expression
+prog.cob:20: error: amount must be specified as a numeric expression
+prog.cob:21: error: amount must be specified as a numeric expression
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob:16: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+prog.cob:17: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+prog.cob:18: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+prog.cob:19: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+prog.cob:20: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+prog.cob:21: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+])
+AT_CLEANUP
+

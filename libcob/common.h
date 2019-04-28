@@ -1667,6 +1667,7 @@ COB_EXPIMP void	cob_chain_setup			(void *, const size_t,
 COB_EXPIMP void	cob_allocate			(unsigned char **, cob_field *,
 						 cob_field *, cob_field *);
 COB_EXPIMP void	cob_free_alloc			(unsigned char **, unsigned char *);
+COB_EXPIMP void	cob_continue_after		(cob_field *);
 COB_EXPIMP int	cob_extern_init			(void);
 COB_EXPIMP int	cob_tidy			(void);
 COB_EXPIMP char	*cob_command_line		(int, int *, char ***,

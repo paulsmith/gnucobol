@@ -7867,6 +7867,8 @@ output_stmt (cb_tree x)
 	case CB_TAG_PERFORM:
 		output_perform (CB_PERFORM (x));
 		break;
+	/* "common" CONTINUE, note:
+	   CONTINUE AFTER exp SECONDS is already translated into a funcall */
 	case CB_TAG_CONTINUE:
 		output_prefix ();
 		output (";\n");

@@ -11,6 +11,9 @@ NEWS - user visible changes				-*- outline -*-
 
 ** JSON GENERATE statement
    (note: runtime support needs additional library cJSON)
+   
+** CONTINUE AFTER statement (COBOL 202x) implemented, also handle fractions
+   of seconds in C$SLEEP now
 
 ** Improved support for different compiler extensions (ACUCOBOL, IBM,
    Fujitsu, MicroFocus COBOL, Microsoft COBOL, RM/COBOL and more)

@@ -501,6 +501,7 @@ test.conf: missing definitions:
 	no definition of 'xml-generate'
 	no definition of 'xml-generate-extra-phrases'
 	no definition of 'json-generate'
+	no definition of 'continue-after'
 ])
 
 AT_CLEANUP

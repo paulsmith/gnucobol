@@ -6611,7 +6611,7 @@ cb_emit_allocate (cb_tree target1, cb_tree target2, cb_tree size,
 	if (size) {
 		if (CB_TREE_CLASS (size) != CB_CLASS_NUMERIC) {
 			cb_error_x (CB_TREE(current_statement),
-				_("the CHARACTERS field of ALLOCATE must be numeric"));
+				_("amount must be specified as a numeric expression"));
 			return;
 		}
 	}
@@ -6998,8 +6998,24 @@ cb_emit_commit (void)
 /* CONTINUE statement */
 
 void
-cb_emit_continue (void)
+cb_emit_continue (cb_tree continue_after)
 {
+	if (continue_after) {
+		/* CONTINUE AFTER exp SECONDS */
+		if (!cb_verify (cb_continue_after, _("AFTER phrase in CONTINUE statement"))
+		 || cb_validate_one (continue_after)) {
+			return;
+		}
+		if (CB_TREE_CLASS (continue_after) != CB_CLASS_NUMERIC) {
+			cb_error_x (CB_TREE(current_statement),
+				_("amount must be specified as a numeric expression"));
+			return;
+		}
+		cb_emit (CB_BUILD_FUNCALL_1 ("cob_continue_after",
+			 continue_after));
+		return;
+	}
+	/* "common" CONTINUE */
 	cb_emit (cb_build_continue ());
 }
 
@@ -7124,7 +7140,7 @@ cb_emit_display_window (cb_tree type, cb_tree own_handle, cb_tree upon_handle,
 	   otherwise it is an INITIAL WINDOW type:
 	   cb_int1 = INITIAL, cb_int2 = STANDARD, cb_int3 = INDEPENDENT */
 	if ((type == cb_int1 || type == cb_int2) && line_column != NULL) {
-			cb_error_x (line_column, _("positions cannot be specified for main windows"));
+		cb_error_x (line_column, _("positions cannot be specified for main windows"));
 	}
 
 	/* Validate line_column and the attributes */
@@ -7776,13 +7792,8 @@ evaluate_test (cb_tree s, cb_tree o)
 static void
 build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 {
-	cb_tree		c1;
-	cb_tree		c2;
-	cb_tree		c3;
-	cb_tree		subjs;
-	cb_tree		whens;
-	cb_tree		objs;
-	cb_tree		stmt;
+	cb_tree		whens, stmt;
+	cb_tree		c1, c2, c3;
 
 	if (case_list == NULL) {
 		return;
@@ -7795,6 +7806,7 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 
 	/* For each WHEN sequence */
 	for (; whens; whens = CB_CHAIN (whens)) {
+		cb_tree		subjs, objs;
 		c2 = NULL;
 		/* Single WHEN test */
 		for (subjs = subject_list, objs = CB_VALUE (whens);
