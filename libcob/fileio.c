@@ -1895,13 +1895,12 @@ lineseq_write (cob_file *f, const int opt)
 		size = f->record->size;
 	} else {
 		size_t i;
-		for (i = f->record->size - 1; i > 0; --i) {
+		for (i = f->record->size - 1; i >= 0; --i) {
 			if (f->record->data[i] != ' ') {
-				i++;
 				break;
 			}
 		}
-		size = i;
+		size = i + 1;
 	}
 
 	if (unlikely (f->flag_select_features & COB_SELECT_LINAGE)) {
