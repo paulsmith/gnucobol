@@ -36,7 +36,7 @@ if test ! -f $MAINPATH/$me; then
 fi
 
 olddir_autogen=`pwd`
-cd $MAINPATH/build_aux && chmod u+x ./bootstrap && ./bootstrap; ret=$?
+cd $MAINPATH/build_aux && (chmod -f u+x ./bootstrap; ./bootstrap); ret=$?
 cd $olddir_autogen
 
 if test $ret -ne 0; then

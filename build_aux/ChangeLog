@@ -1,4 +1,10 @@
 
+2019-05-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* bootstrap: only set executable bit for current user,
+	  suppress most error messages (that can also occur if
+	  execution rights are already available but we can't set them)
+
 2019-04-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* pre-inst-env.in: new file, for launching programs 

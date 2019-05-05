@@ -1,4 +1,9 @@
 
+2019-05-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* autogen.sh: suppress most error messages (that can also occur if
+	  execution rights are already available but we can't set them)
+
 2019-04-14  Ron Norman <rjn@inglenet.com>
 
 	* configure.ac [__xlc__]: suppress compiler warning about MAXMEM
