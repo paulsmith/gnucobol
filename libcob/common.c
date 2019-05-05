@@ -7669,7 +7669,8 @@ cob_common_init (void *setptr)
 			} else
 			if (*s == 'Y' || *s == 'y' ||
 			    *s == 'O' || *s == 'o' ||
-			    *s == 'T' || *s == 't') {
+			    *s == 'T' || *s == 't' ||
+			    *s == '1') {
 				use_unix_lf = 1;
 			}
 		}
