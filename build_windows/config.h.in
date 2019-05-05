@@ -285,6 +285,9 @@
 /* Define to 1 if you have the <gmp.h> header file. */
 #define HAVE_GMP_H 1
 
+/* curses has has_mouse function */
+/* #undef HAVE_HAS_MOUSE */
+
 /* Define if you have the iconv() function and it works. */
 #if CONFIGURED_XML == XML2
 #define HAVE_ICONV 1

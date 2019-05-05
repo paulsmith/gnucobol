@@ -7342,14 +7342,25 @@ print_info (void)
 		(int)sizeof (chtype) * 8, wide);
 #endif
 #endif
-#ifdef NCURSES_MOUSE_VERSION
-	// needed? initscr ();
-	if (has_mouse ()) {
-		var_print (_("mouse support"), 	_("yes"), "", 0);
-	} else {
-		var_print (_("mouse support"), 	_("no"), "", 0);
+#ifdef HAVE_HAS_MOUSE
+	{
+		int mouse_available = 0;
+		initscr ();
+		mousemask (ALL_MOUSE_EVENTS, NULL);
+		if (has_mouse () == TRUE) mouse_available = 1;
+		endwin ();
+		if (mouse_available) {
+			var_print (_("mouse support"), 	_("yes"), "", 0);
+		} else {
+			var_print (_("mouse support"), 	_("no"), "", 0);
+		}
 	}
-	// needed? endwin ();
+#elif defined (NCURSES_MOUSE_VERSION)
+#if defined (__PDCURSES__)
+	var_print (_("mouse support"),		_("yes"), "", 0);
+#else
+	var_print (_("mouse support"),		_("unknown"), "", 0);
+#endif
 #else
 	var_print (_("mouse support"), 		_("disabled"), "", 0);
 #endif

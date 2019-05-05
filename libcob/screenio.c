@@ -1363,8 +1363,10 @@ mouse_to_exception_code (mmask_t mask) {
 	else if (mask & BUTTON3_RELEASED) fret = 2048;
 	else if (mask & BUTTON3_DOUBLE_CLICKED) fret = 2048;
 	else if (mask & BUTTON3_TRIPLE_CLICKED) fret = 2048;
+#if defined BUTTON5_PRESSED	/* added in NCURSES_MOUSE_VERSION 2 */
 	else if (mask & BUTTON4_PRESSED) fret = 2080;
 	else if (mask & BUTTON5_PRESSED) fret = 2081;
+#endif
 	else fret = 2040;	// mouse-moved (assumed)
 
 	if (mask & BUTTON_SHIFT) {

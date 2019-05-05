@@ -3,6 +3,7 @@
 
 	* autogen.sh: suppress most error messages (that can also occur if
 	  execution rights are already available but we can't set them)
+	* configure.ac: check for curses has_mouse
 
 2019-04-14  Ron Norman <rjn@inglenet.com>
 
