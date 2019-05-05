@@ -11625,7 +11625,6 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 	}
 	if (f->organization == COB_ORG_LINE_SEQUENTIAL 
 	&&  opt == cb_int0) {
-		static const int cb_mf_files = 0;
 		if(cb_mf_files) {
 			/* Micro Focus has omission of ADVANCING default to 
 			 *   BEFORE ADVANCING 1 LINE
