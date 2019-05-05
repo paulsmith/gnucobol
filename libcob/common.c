@@ -7342,6 +7342,8 @@ print_info (void)
 		(int)sizeof (chtype) * 8, wide);
 #endif
 #endif
+	var_print (_("extended screen I/O"), 	versbuff2, "", 0);
+
 #ifdef HAVE_HAS_MOUSE
 	{
 		int mouse_available = 0;
