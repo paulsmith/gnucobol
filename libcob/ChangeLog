@@ -1,4 +1,8 @@
 
+2019-05-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.h: increased COB_MAX_WORDLEN to 63 per COBOL 202x
+
 2019-04-19  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c: fixed some bad/misplaced casts to size_t
