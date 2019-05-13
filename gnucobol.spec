@@ -2,7 +2,7 @@
 # Adjust/activate "Packager" tag as necessary
 
 Name:		gnucobol
-Version:	2.2
+Version:	3.1
 Release:	1%{?dist}
 Summary:	GnuCOBOL - COBOL compiler and runtime library
 

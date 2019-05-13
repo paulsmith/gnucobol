@@ -1,4 +1,8 @@
 
+2019-05-13  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac, gnucobol.spec: version dump to 3.1-dev
+
 2019-05-05  Simon Sobisch <simonsobisch@gnu.org>
 
 	* autogen.sh: suppress most error messages (that can also occur if
