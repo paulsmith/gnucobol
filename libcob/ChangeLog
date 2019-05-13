@@ -33,7 +33,7 @@
 
 2019-04-12  Simon Sobisch <simonsobisch@gnu.org>
 
-	* screenio.c: define PDC_NCMOUSE to use ncurses compatible mouse api
+	* screenio.c: define PDC_NCMOUSE to use NCURSES compatible mouse api
 
 2019-04-07  Simon Sobisch <simonsobisch@gnu.org>
 
