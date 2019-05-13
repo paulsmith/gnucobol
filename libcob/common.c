@@ -7069,20 +7069,28 @@ cob_fatal_error (const enum cob_fatal_error fatal_error)
 			 */
 			cob_field_to_string (cobglobptr->cob_error_file->assign,
 				err_cause, (size_t)COB_FILE_MAX);
-			cob_runtime_error (_("%s (status = %02d) file: '%s'"),
-				msg, status, err_cause);
-			cob_free (err_cause);
 		} else {
-			cob_runtime_error (_("%s (status = %02d) file: '%s'"),
-				msg, status, cobglobptr->cob_error_file->select_name);
 			cob_runtime_error ("ASSIGN field with NULL address");
+			err_cause = (char *) cobglobptr->cob_error_file->select_name;
+		}
+		/* FIXME: additional check if referenced program has active code location */
+		if (!cobglobptr->last_exception_statement) {
+			cob_runtime_error (_ ("%s (status = %02d) file: '%s'"),
+				msg, status, err_cause);
+		} else {
+			cob_runtime_error (_("%s (status = %02d) file: '%s' on %s"),
+				msg, status, err_cause,
+				cobglobptr->last_exception_statement);
+		}
+		if (err_cause != cobglobptr->cob_error_file->select_name) {
+			cob_free (err_cause);
 		}
 		break;
 	/* LCOV_EXCL_START */
 	case COB_FERROR_FUNCTION:
 		cob_runtime_error (_("attempt to use non-implemented function"));
 		break;
-        case COB_FERROR_XML:
+	case COB_FERROR_XML:
 		cob_runtime_error (_("attempt to use non-implemented XML I/O"));
 		break;
 	case COB_FERROR_JSON:

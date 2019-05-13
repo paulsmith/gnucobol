@@ -2062,7 +2062,7 @@ AT_CHECK([test -f "../FILENAMEX" && rm -f "../FILENAMEX"], [0], [], [])
 
 # FIXME: on OPEN we should also output the full filename (if any) leading to the error
 AT_CHECK([COB_FILE_PATH="./nosubhere" $COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:13: permanent file error (status = 30) file: 'FILENAMEX'
+[libcob: prog.cob:13: permanent file error (status = 30) file: 'FILENAMEX' on OPEN
 ])
 
 AT_CLEANUP

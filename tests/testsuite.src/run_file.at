@@ -1300,11 +1300,16 @@ AT_DATA([prog2.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob])
+AT_CHECK([$COBC -x prog.cob])
 AT_CHECK([$COBCRUN_DIRECT ./prog X], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:23: inconsistant file name (status = 31) file: 'test-file'
-libcob: prog.cob:23: ASSIGN field with NULL address
+[libcob: ASSIGN field with NULL address
+libcob: inconsistant file name (status = 31) file: 'test-file'
+])
+AT_CHECK([$COMPILE prog.cob])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
+[libcob: prog.cob:23: ASSIGN field with NULL address
+libcob: prog.cob:23: inconsistant file name (status = 31) file: 'test-file' on OPEN
 ])
 
 AT_CHECK([$COMPILE prog2.cob])
@@ -1479,8 +1484,8 @@ Extend file: foxasg.txt - 00 #0002.
 AT_CHECK([$COMPILE prog2.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog2], [1], [],
-[libcob: prog2.cob:32: inconsistant file name (status = 31) file: 'f'
-libcob: prog2.cob:32: ASSIGN field with NULL address
+[libcob: prog2.cob:32: ASSIGN field with NULL address
+libcob: prog2.cob:32: inconsistant file name (status = 31) file: 'f' on OPEN
 ])
 
 AT_CLEANUP
