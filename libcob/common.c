@@ -100,13 +100,13 @@
 #endif
 #endif
 
-#if defined (HAVE_LIBXML_XMLVERSION_H) && HAVE_LIBXML_XMLVERSION_H
+#ifdef	HAVE_LIBXML_XMLVERSION_H
 #include <libxml/xmlversion.h>
-#if defined (HAVE_LIBXML_XMLWRITER_H) && HAVE_LIBXML_XMLWRITER_H
+#ifdef	HAVE_LIBXML_XMLWRITER_H
 #include <libxml/xmlwriter.h>
 #endif
 #endif
-#if defined (HAVE_CJSON_CJSON_H) && HAVE_CJSON_CJSON_H
+#ifdef	HAVE_CJSON_CJSON_H
 #include <cjson/cJSON.h>
 #endif
 /* end of library headers */
