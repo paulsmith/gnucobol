@@ -1,4 +1,8 @@
 
+2019-05-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: don't error on bad libxml2 if not explicit requested
+
 2019-05-13  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac, gnucobol.spec: version dump to 3.1-dev

@@ -525,14 +525,19 @@ AS_IF([test "$with_xml2" = "yes" -o "$with_xml2" = "check"], [
 	LIBS="$LIBS $XML2_LIBS"
 	AC_CHECK_HEADERS([libxml/xmlversion.h libxml/uri.h libxml/xmlwriter.h],
 		[AX_CHECK_DEFINE([libxml/xmlwriter.h], [LIBXML_WRITER_ENABLED], [],
-		   AC_MSG_ERROR([libxml2 is required to be configured with xmlWriter]))
+		   [if test "$with_xml2" = "yes"; then
+		      AC_MSG_ERROR([libxml2 is required to be configured with xmlWriter])
+		   else
+		      AC_MSG_WARN([libxml2 is required to be configured with xmlWriter])
+		      with_xml2=no
+		   fi])
 		],
 		[if test "$with_xml2" = "yes"; then 
 		   AC_MSG_ERROR([Headers for libxml2 are required for --with-xml2, you may adjust XML2_CFLAGS])
 		else
 		   with_xml2=no
 		fi])
-	if test "$with_xml2" != "no"; then 
+	if test "$with_xml2" != "no"; then
 		AC_MSG_CHECKING([if linking against libxml2 with "$XML2_LIBS" works])
 		AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <libxml/xmlwriter.h>]],
 		  [[xmlNewTextWriterFilename (NULL, 0);]])],
