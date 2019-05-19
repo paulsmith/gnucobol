@@ -31,24 +31,22 @@
 #include "libcob.h"
 #include "coblocal.h"
 
-#if !defined (WITH_XML2)
-#define WITH_XML2 0
+/* note: checked library instead of headers as those may not be usable! */
+#ifdef WITH_XML2
+#if !defined (HAVE_LIBXML_XMLVERSION_H) || \
+    !defined (HAVE_LIBXML_XMLWRITER_H) || \
+	!defined (HAVE_LIBXML_URI_H)
+#error XML2 without necessary headers
 #endif
-#if !defined (WITH_CJSON)
-#define WITH_CJSON 0
-#endif
-
-#if defined (HAVE_LIBXML_XMLVERSION_H) && HAVE_LIBXML_XMLVERSION_H
 #include <libxml/xmlversion.h>
-#if defined (HAVE_LIBXML_XMLWRITER_H) && HAVE_LIBXML_XMLWRITER_H
 #include <libxml/xmlwriter.h>
-#endif
-#if defined (HAVE_LIBXML_URI_H) && HAVE_LIBXML_URI_H
 #include <libxml/uri.h>
 #endif
-#endif
 
-#if defined (HAVE_CJSON_CJSON_H) && HAVE_CJSON_CJSON_H
+#ifdef WITH_CJSON
+#ifndef HAVE_CJSON_CJSON_H
+#error CJSON without necessary header
+#endif
 #include <cjson/cJSON.h>
 #endif
 

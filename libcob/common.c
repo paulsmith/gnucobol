@@ -100,13 +100,20 @@
 #endif
 #endif
 
-#ifdef	HAVE_LIBXML_XMLVERSION_H
+/* note: checked library instead of headers as those may not be usable! */
+#ifdef WITH_XML2
+#if !defined (HAVE_LIBXML_XMLVERSION_H) || \
+    !defined (HAVE_LIBXML_XMLWRITER_H)
+#error XML2 without necessary headers
+#endif
 #include <libxml/xmlversion.h>
-#ifdef	HAVE_LIBXML_XMLWRITER_H
 #include <libxml/xmlwriter.h>
 #endif
+
+#ifdef WITH_CJSON
+#ifndef HAVE_CJSON_CJSON_H
+#error CJSON without necessary header
 #endif
-#ifdef	HAVE_CJSON_CJSON_H
 #include <cjson/cJSON.h>
 #endif
 /* end of library headers */
