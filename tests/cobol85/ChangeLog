@@ -1,4 +1,8 @@
 
+2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: setting of DIFF_FLAGS now done by configure
+
 2019-03-16  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: new DIFF_FLAGS initialized to --strip-trailing-cr to allow

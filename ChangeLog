@@ -1,4 +1,9 @@
 
+2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: set YFLAGS and DIFF_FLAGS depending on
+	  available/requested options
+
 2019-05-17  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: don't error on bad libxml2 if not explicit requested

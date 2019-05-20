@@ -235,6 +235,54 @@ AM_PROG_CC_C_O
 AM_PROG_LEX
 AC_PROG_YACC
 
+# only GNU Bison is supported, so drop yacc-compatibility warnings if possible
+# note: that breaks old Bison versions which we still support,
+#       if that changes the test may be obsolete
+AC_MSG_CHECKING([how to disable yacc compatibility warnings])
+case "$YACC $YFLAGS $AM_YFLAGS" in 
+  *-Wno-yacc*)
+   AC_MSG_RESULT([already specified])
+  ;;
+  *-Wyacc*)
+   AC_MSG_RESULT([explicit enabled])
+  ;;
+  *)
+   $YACC $AM_YFLAGS $YFLAGS -Wno-yacc -V 1>/dev/null  2>&1
+   if test $? -eq 0; then
+      AC_MSG_RESULT([-Wno-yacc])
+      if test -z "$YFLAGS"; then
+         YFLAGS="-Wno-yacc"
+      else
+         YFLAGS="$YFLAGS -Wno-yacc"
+      fi
+   else
+      AC_MSG_RESULT([not supported])
+   fi
+  ;;
+esac
+
+AC_ARG_VAR(DIFF_FLAGS, arguments passed to diff)
+AC_MSG_CHECKING([for diff arguments])
+case "$DIFF_FLAGS" in 
+  *--strip-trailing-cr*)
+   AC_MSG_RESULT([specified as $DIFF_FLAGS])
+  ;;
+  *)
+   diff $DIFF_FLAGS --strip-trailing-cr --version 1>/dev/null  2>&1
+   if test $? -eq 0; then
+      if test -z "$DIFF_FLAGS"; then
+         DIFF_FLAGS="--strip-trailing-cr"
+      else
+         DIFF_FLAGS="$DIFF_FLAGS --strip-trailing-cr"
+      fi
+      AC_MSG_RESULT([$DIFF_FLAGS])
+   else
+      AC_MSG_RESULT([not supported])
+   fi
+  ;;
+esac
+AC_SUBST(DIFF_FLAGS)
+
 # Stop tests for C++ and Fortran
 AC_DEFUN([AC_PROG_F77], [])
 AC_DEFUN([AC_PROG_CXX], [])

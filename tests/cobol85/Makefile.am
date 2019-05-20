@@ -43,7 +43,7 @@ EXTRA_DIST = EXEC85.conf.in expand.pl report.pl summary.pl summary.txt \
 
 COB85DIR = "`cd $(srcdir) && pwd`"
 WGET_FLAGS = -t1 -T5
-DIFF_FLAGS = --strip-trailing-cr
+DIFF_FLAGS = @DIFF_FLAGS@
 
 # MAKEFLAGS = --no-print-directory
 

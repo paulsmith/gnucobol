@@ -1,4 +1,8 @@
 
+2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: setting of YFLAGS by configure instead of fixed AM_YFLAGS
+
 2019-04-28  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y (line_keyword_clause): added missing RW line syntax variants
@@ -11,8 +15,6 @@
 2019-04-07  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am (COBC): use pre-inst-env ensuring to use the built version
-	* Makefile.am: disabled "AM_YFLAGS -Wno-yacc" as this breaks older bison
-	  versions
 	* parser.y, typeck.c, tree.h, config.def: FR #354 added CONTINUE AFTER
 	  to suspend runtime execution
 	* parser.y (begin_statement_from_backup_pos): new function used for postponed
