@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/doc
 #
-# Copyright (C) 2003-2012, 2015-2018 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2015-2019 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -60,6 +60,12 @@ cbhelp.tex cbchelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
 	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) "fixtimestamps"
 endif
+
+touch-tex:
+	$(COBCINFOSH) "fixtimestamps" "includes"
+
+touch:
+	$(COBCINFOSH) "fixtimestamps"
 
 EXTRA_DIST = gnucobol.pdf
 dist_noinst_SCRIPTS = cobcinfo.sh

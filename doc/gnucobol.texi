@@ -58,14 +58,15 @@ Updated for GnuCOBOL @value{VERSION} @*
 @value{UPDATED} @*
 
 GnuCOBOL (formerly OpenCOBOL) is a free COBOL compiler and runtime.
-@code{cobc} translates COBOL source to executable using intermediate C
+@command{cobc} translates COBOL source to executable using intermediate C
 together with a designated C compiler and linker.
+@command{cobcrun} is a module loader to run generated modules,
 @code{libcob} provides the necessary runtime.
 @sp 2
 This manual corresponds to GnuCOBOL @value{VERSION}.
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2002-2012, 2014-2018 Free Software Foundation, Inc.@*
+Copyright @copyright{} 2002-2012, 2014-2019 Free Software Foundation, Inc.@*
 Written by Keisuke Nishida, Roger While, Brian Tiffin, Simon Sobisch.
 
 @insertcopying
@@ -91,7 +92,10 @@ Welcome to the GnuCOBOL @value{VERSION} manual.
 * Appendices::                  List of supported features and options,
                                 Compiler and Runtime Configuration,
                                 Documentation License
+@ignore
 * Index::                       Index
+@end ignore
+
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -167,13 +171,13 @@ System Routines
 
 Appendices
 
-* Appendix A                    @code{cobc --help}
-* Appendix B                    @code{cobc --list-reserved}
-* Appendix C                    @code{cobc --list-intrinsics}
-* Appendix D                    @code{cobc --list-system}
-* Appendix E                    @code{cobc --list-mnemonics}
+* Appendix A                    Compiler @command{cobc} options
+* Appendix B                    Reserved Words
+* Appendix C                    Intrinsic Functions
+* Appendix D                    System routines
+* Appendix E                    System names
 * Appendix F                    Compiler Configuration
-* Appendix G                    @code{cobcrun --help}
+* Appendix G                    Module loader @command{cobcrun} options
 * Appendix H                    Runtime configuration
 * Appendix I                    GNU Free Documentation License
 
@@ -203,7 +207,7 @@ This is a sample program that displays ``Hello, world!'':
 ----------------------------------------
 @end example
 
-@*The compiler, @code{cobc}, is executed as follows:
+@*The compiler, @command{cobc}, is executed as follows:
 
 @example
 $ cobc -x hello.cob
@@ -215,7 +219,7 @@ Hello, world!
 determined by removing the extension from the source file name.
 
 @*You can specify the executable file name by specifying the compiler
-option @code{-o} as follows:
+option @option{-o} as follows:
 
 @example
 $ cobc -x -o hello-world hello.cob
@@ -239,7 +243,7 @@ goback.
 ----------------------------------
 @end example
 
-To compile free-format code, you must use the @code{-free} compiler option.
+To compile free-format code, you must use the compiler option @option{-free}.
 
 @example
 $ cobc -x -free hellonew.cob
@@ -263,9 +267,9 @@ This chapter describes how to compile COBOL programs using GnuCOBOL.
 @section Compiler options
 
 The compiler @code{cobc} accepts the options described in this section.
-The compiler arguments follow the general syntax @code{cobc} [options]
-file [file @dots{}].
-A complete list of options can be displayed by using the help option.
+The compiler arguments follow the general syntax @code{cobc @var{options}
+@var{file} [@var{file} @dots{}]}.
+A complete list of options can be displayed by using the option @option{--help}.
 
 @menu
 * Help options::                Help options
@@ -290,7 +294,7 @@ No further actions will be taken.
 
 @item --version
 Display compiler version, author package date and executable build
-date.  @code{-V} will also display version. No further actions will be taken.
+date.  @option{-V} will also display version. No further actions will be taken.
 
 @item --info
 Display build information along with the default and current compiler
@@ -301,10 +305,10 @@ Verbosely display the programs invoked during compilation.
 
 @item --list-reserved
 Display reserved words (@pxref{Appendix B}).
-A Y/N field shows if the word is supported.
-@footnote{Support may be partial or complete.}
-The given options for reserved words specified for example by @code{-std}
-will be taken into account.
+A Yes/No output shows if the word is supported
+@footnote{Support may be partial or complete.}, context sensitive and its aliases.
+The given options for reserved words specified for example by
+option @option{-std=@var{dialect}} will be taken into account.
 No further actions will be taken except for further display options.
 
 @item --list-intrinsics
@@ -325,7 +329,7 @@ No further actions will be taken except for further display options.
 @node Build target
 @subsection Build target
 
-The @code{cobc} compiler treats files like @file{*.cob}, @file{*.cbl} as
+The compiler @command{cobc} treats files like @file{*.cob}, @file{*.cbl} as
 COBOL source code, @file{*.c} as C source code, @file{*.o} as
 object code, @file{*.i} as preprocessed code and @file{*.so}
 as dynamic modules and knows how to handle such files in the generation,
@@ -365,7 +369,7 @@ This is the default behaviour.
 
 @item -b
 Compile, assemble, and combine all input files into a single
-dynamically loadable module.  Unless @code{-o} is also used,
+dynamically loadable module.  Unless @option{-o} is also used,
 the output is saved using the first filename as @file{*.so}.
 
 @item -x
@@ -373,28 +377,28 @@ Include the main function in the output, creating an executable
 image.  The main entry point being the first program in the file.
 
 This option takes effect at the translation stage.
-If you give this option with @code{-C}, you will see the main
+If you give this option with @option{-C}, you will see the main
 function at the end of the generated C file.
 
-@item -j(=<args>), -job(=<args>)
-Run job after compilation.  Either from executable with @code{-x}, or with
-@code{cobcrun} when compiling a module.  Optional arguments, if given, are
-passed to the program or module command line.
+@item -j, -job, -j=@var{args}, -job=@var{args}
+Run job after compilation.  Either from executable with @option{-x}, or with
+@command{cobcrun} when compiling a module.  Optional arguments @var{args},
+if given, are passed to the program or module command line.
 
-@item -I <directory>
-Add <directory> to copy/include search path.
+@item -I @var{directory}
+Add @var{directory} to copy/include search path.
 
-@item -L <directory>
-Add <directory> to library search path.
+@item -L @var{directory}
+Add @var{directory} to library search path.
 
-@item -l <lib>
-Link the library <lib>.
+@item -l @var{lib}
+Link the library @var{lib}.
 
-@item -D <define>
-Pass <define> to the COBOL compiler.
+@item -D @var{define}
+Pass @var{define} to the COBOL compiler.
 
-@item -o <file>
-Place the output into <file>.
+@item -o @var{file}
+Place the output into @var{file}.
 
 @end table
 
@@ -427,19 +431,25 @@ format was based on 80-character punch cards.}
 @table @code
 @item -W
 Enable every possible warning.  This includes more information
-than @code{-Wall} would normally provide.
+than @option{-Wall} would normally provide.
 
 @item -Wall
 Enable all common warnings.
+
+@item -W@var{warning}
+Enable single warning @var{warning}.
+
+@item -Wno-@var{warning}
+Disable single warning @var{warning}.
 
 @item -Warchaic
 Warn if archaic features are used, such as continuation lines or the @code{NEXT SENTENCE} statement.
 
 @item -Wcall-params
-Warn if non-01/77-level items are used as arguments in a @code{CALL} statement. This is @emph{not} set with @code{-Wall}.
+Warn if non-01/77-level items are used as arguments in a @code{CALL} statement. This is @emph{not} set with @option{-Wall}.
 
 @item -Wcolumn-overflow
-Warn if text after column 72 in FIXED format. This is @emph{not} set with @code{-Wall}.
+Warn if text after column 72 in FIXED format. This is @emph{not} set with @option{-Wall}.
 
 @item -Wconstant
 @comment{TODO: Clarify!}
@@ -450,7 +460,7 @@ Warn if implicitly defined data items are used.
 
 @item -Wlinkage
 @comment{TODO: Define "dangling".}
-Warn dangling @code{LINKAGE} items. This is @emph{not} set with @code{-Wall}.
+Warn dangling @code{LINKAGE} items. This is @emph{not} set with @option{-Wall}.
 
 @item -Wobsolete
 Warn if obsolete features are used.
@@ -465,21 +475,21 @@ Warn about incompatible redefinitions of data items.
 Warn about type mismatch strictly.
 
 @item -Wterminator
-Warn about the lack of scope terminator END-XXX. This is @emph{not} set with @code{-Wall}.
+Warn about the lack of scope terminator END-XXX. This is @emph{not} set with @option{-Wall}.
 
 @item -Wtruncate
-Warn on possible field truncation. This is @emph{not} set with @code{-Wall}.
+Warn on possible field truncation. This is @emph{not} set with @option{-Wall}.
 
 @item -Wunreachable
-Warn if statements are unreachable. This is @emph{not} set with @code{-Wall}.
+Warn if statements are unreachable. This is @emph{not} set with @option{-Wall}.
 @end table
 
 @node Configuration options
 @subsection Configuration options
 
 @table @code
-@item -std=<dialect>
-Compiler uses the given dialect to determine certain compiler features
+@item -std=@var{dialect}
+Compiler uses the given @var{dialect} to determine certain compiler features
 and warnings.@*
 @xref{Appendix F, Compiler Configuration, Compiler Configuration}, and @file{config/*.conf}.@*
 Note: The GnuCOBOL compiler tries to limit both the feature-set and reserved words
@@ -491,7 +501,9 @@ With the "non-strict" dialects GnuCOBOL will activate the complete feature-set
 where it doesn't directly conflict with the specified dialect, including reserved words.
 COBOL sources compiled with these dialects therefore may work only with GnuCOBOL.
 COBOL sources may need a change because of reserved words in GnuCOBOL, otherwise
-offending words may be removed by @code{-fno-reserved=word}.@*
+offending words @var{word-1} and @var{word-2} may be removed by
+@option{-fno-reserved=@var{word-1},@var{word-1}}.@*
+
 COBOL-85, X/Open COBOL, @w{COBOL 2002} and @w{COBOL 2014} are always "strict".
 
 @item -std=default
@@ -499,14 +511,18 @@ GnuCOBOL dialect, supporting many of the @w{COBOL 2002} and @w{COBOL 2014} featu
 many extensions found in other dialects and its own feature-set
 
 @item -std=cobol85
-COBOL-85 without any extensions other than the amendment Intrinsic Function Module (1989), source compiled with this dialect is likely to compile with most COBOL compilers
+COBOL-85 without any extensions other than the amendment Intrinsic Function
+Module (1989), source compiled with this dialect is likely to compile with
+most COBOL compilers
 
 @item -std=xopen
-X/Open COBOL (based on COBOL-85) without any vendor extensions, source compiled with this dialect is likely to compile with most COBOL compilers, will warn items that "should not be used in a conforming X/Open COBOL source program"
+X/Open COBOL (based on COBOL-85) without any vendor extensions, source compiled
+with this dialect is likely to compile with most COBOL compilers; will warn
+items that "should not be used in a conforming @w{X/Open COBOL} source program"
 
 @item -std=cobol2002, -std=cobol2014
-COBOL 2002 / COBOL 2014 without any vendor extensions, use @code{-Warchaic} and @code{-Wobsolete} if
-archaic/obsolete features should be flagged
+@w{COBOL 2002} / @w{COBOL 2014} without any vendor extensions, use @option{-Warchaic}
+and @option{-Wobsolete} if archaic/obsolete features should be flagged
 
 @item -std=ibm-strict, -std=ibm
 IBM compatible
@@ -527,7 +543,7 @@ ACUCOBOL-GT compatible
 RM/COBOL compatible
 
 @item -conf=<file>
-User-defined dialect configuration. See @code{-std=} above.@*
+User-defined dialect configuration. See @option{-std=@var{dialect}} above.@*
 
 @end table
 
@@ -542,20 +558,20 @@ Examples:
 @item -fnot-reserved=CHAIN,SCREEN
 @item -ftab-width=4
 @end table
-@xref{Appendix A, @code{cobc --help}, @code{cobc --help}}.
+@xref{Appendix A, Compiler @command{cobc} options, Compiler @command{cobc} options}.
 
 @node Listing options
 @subsection Listing options
 
 @table @code
 
-@item -t=<file>
-Generate and place the standard print listing into @file{*.lst}.
+@item -t=@var{file}
+Generate and place the standard print listing into @file{@var{file}}.
 
-@item -T=<file>
-Generate and place a wide print listing into @file{*.lst}.
+@item -T=@var{file}
+Generate and place a wide print listing into @file{*@var{file}}.
 
-@item --tlines=<lines>
+@item --tlines=@var{lines}
 Specify lines per page in print listing, default = 55.
 Set to zero for no additional page breaks.
 
@@ -572,8 +588,9 @@ Suppress warning and error summary from listing.
 Suppress actual source from listing (for example to only produce the
 cross-reference).
 
-@item -P(=<dir or file>)
-Generate and place a preprocessed listing (old format) into @file{*.lst}.
+@item -P, -P@var{directory}, -P=@var{file}
+Generate and place a preprocessed listing (old format) into @file{@var{filename}.lst},
+@file{@var{directory}/@var{filename}.lst}, @file{@var{file}}.
 
 @item -Xref
 @item -X
@@ -581,12 +598,12 @@ Generate cross reference in the listing.
 
 @end table
 
-Here is an example program listing with the -t -ftsymbols option:
+Here is an example program listing with the options @code{-t -ftsymbols}:
 
 @example
 GnuCOBOL 3.0.0   test.cbl                   Mon May 14 10:23:45 2018  Page 0001
 
-LINE    PG/LN  A...B............................................................
+LINE    PG/LN  A...B...........................................................
 
 000001         IDENTIFICATION   DIVISION.
 000002         PROGRAM-ID.      prog.
@@ -623,10 +640,10 @@ LINE    PG/LN  A...B............................................................
 
 The first part of the listing lists the program text.  If the program text is
 a COPY the line number reflects the COPY line number and is appended with
-a 'C'.
+a '@code{C}'.
 
-When the wide list option is specified (-T), the SEQUENCE columns are included
-in the listing.
+When the wide list option @option{-T} is specified, the @code{SEQUENCE}
+columns (for fixed-form reference-format) are included in the listing.
 
 
 The second part of the listing file is the listing of the Symbol Table:
@@ -657,11 +674,12 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0004 ALPHANUMERIC   05     FLD4                         X(4)
 @end example
 
-If the symbol redefines another variable the TYPE is marked with 'R'. If the
-symbol is an array the OCCURS phrase is in the PICTURE field.
+If the symbol redefines another variable the @code{TYPE} is marked with '@code{R}'.
+If the symbol is an array the @code{OCCURS} phrase is in the @code{PICTURE} field.
 
 
-The last part of the listing file is the summary of warnings an error in the compilation group:
+The last part of the listing file is the summary of warnings an error in the
+compilation group:
 
 @example
 0 warnings in compilation group
@@ -687,10 +705,10 @@ Generate trace code (log executed procedures and statements,
 if tracing is enabled).
 
 @item -fsource-location
-Generate source location code (implied by @code{-debug} or @code{-g}).
+Generate source location code (implied by @option{-debug} or @option{-g}).
 
 @item -fstack-check
-Enable @code{PERFORM} stack checking (implied by @code{-debug} or @code{-g}).
+Enable @code{PERFORM} stack checking (implied by @option{-debug} or @option{-g}).
 
 @item -fdebugging-line
 Enable debugging lines (@code{D} in indicator column; >>D directive).
@@ -722,7 +740,8 @@ Add default file extension.
 Check syntax only; don't emit any output.
 
 @item -fmfcomment
-Treat lines with @code{*} or @code{/} in column 1 as comment (fixed-format only).
+Treat lines with @code{*} or @code{/} in column 1 as comment
+(fixed-form reference-format only).
 
 @item -acucomment
 Treat @code{|} as an inline comment marker.
@@ -832,14 +851,15 @@ will be generated:
 subr(X);
 @end example
 
-Note that this option only takes effect when the called program name
+Please notice that this option only takes effect when the called program name
 is in a literal (like @code{CALL "subr"}).  With a data name (like
 @code{CALL SUBR}), the program is still called dynamically.
 
 @node Dynamic linking
 @subsection Dynamic linking
 
-There are two methods to achieve this: a driver program, or compiling the main program and subprograms separately.
+There are two methods to achieve this: a driver program, or compiling
+the main program and subprograms separately.
 
 @subsubsection Driver program
 
@@ -847,7 +867,8 @@ Compile all programs with the option @code{-m}:
 @example
 $ cobc -m main.cob subr.cob
 @end example
-This creates the shared object files @file{main.so subr.so}.@footnote{The extension used depends on your operating system.}
+This creates the shared object files @file{main.so} and @file{subr.so}.
+@footnote{The extension used depends on your operating system.}
 
 Before running the main program, install the module files in your
 library directory:
@@ -859,8 +880,10 @@ to your library directory, and run the main program:
 @example
 $ export COB_LIBRARY_PATH=/your/cobol/lib
 @end example
-(Note: You may set the variable via a runtime configuration file, @pxref{Appendix H, Runtime Configuration, Runtime Configuration}.
-You may also set the variable to directly point to the directory where you compiled the sources.)
+(@emph{Please notice:} You may set the variable via a runtime configuration file,
+@pxref{Appendix H, Runtime Configuration, Runtime Configuration}.
+You may also set the variable to directly point to the directory
+where you compiled the sources.)
 
 Now execute your program:
 @example
@@ -878,7 +901,8 @@ Subprograms are compiled with the option @code{-m}:
 @example
 $ cobc -m subr.cob
 @end example
-This creates a module file @file{subr.so}@footnote{The extension used depends on your operating system.}.
+This creates a module file @file{subr.so}@footnote{The extension
+used depends on your operating system.}.
 
 Before running the main program, install the module files in your
 library directory:
@@ -886,7 +910,7 @@ library directory:
 $ cp subr.so /your/cobol/lib
 @end example
 
-Now, set the environment variable @code{COB_LIBRARY_PATH}
+Now, set the environment variable @env{COB_LIBRARY_PATH}
 to your library directory, and run the main program:
 @example
 $ export COB_LIBRARY_PATH=/your/cobol/lib
@@ -943,9 +967,12 @@ This chapter describes how to combine C programs with COBOL programs.
 @node Main C program
 @subsection Writing Main Program in C
 
-Include @file{libcob.h} in your C program and call @code{cob_init} before using any COBOL module.
-Do a cleanup afterwards, either by calling @code{cob_stop_run} (if your program should terminate)
-or by calling @code{cob_tidy} (if your program should go on without any further COBOL calls).
+Include @file{libcob.h} in your C program and call @code{cob_init} before
+using any COBOL module.
+Do a cleanup afterwards, either by calling @code{cob_stop_run} (if your
+program should terminate) or by calling @code{cob_tidy} (if your program
+should execute further on without any more COBOL calls, calling both
+functions in this sequence can be done multiple times).
 
 @example
 #include <libcob.h>
@@ -1175,8 +1202,9 @@ Hello, world!
 @node Interface functions for C
 @subsection Redirecting output to a (FILE *)
 
-From a module written in C you may call cob_set_runtime_option to set the exact (FILE *) which trace
-data is to be written to. In common.h is the following:
+From a module written in C you can call @code{cob_set_runtime_option}
+to set the exact @code{(FILE *)} which is used to write trace data to.
+In @file{common.h} is the following:
 @example
 enum cob_runtime_option_switch @{
    COB_SET_RUNTIME_TRACE_FILE              /* 'p' is  FILE *  */
@@ -1242,10 +1270,11 @@ environment or by a runtime configuration file.
 To set the global runtime configuration file export @code{COB_RUNTIME_CONFIG}
 to point to your configuration file.
 To set an explicit runtime configuration file for a single run via
-@code{cobcrun} you can use its option @code{-c <file>, -config=<file>}.
+@command{cobcrun} you can use its option @option{-c @var{file}},
+@option{--config=@var{file}}.
 
 For displaying the current runtime settings you can use the option
-@code{-r, -runtime-env} of @code{cobcrun}.
+@option{-r}, @option{--runtime-env} of @command{cobcrun}.
 
 For a complete list of runtime variables, aliases, their default values and options
 to set them @pxref{Appendix H, Runtime Configuration, Runtime Configuration}.
@@ -1262,14 +1291,15 @@ to set them @pxref{Appendix H, Runtime Configuration, Runtime Configuration}.
 @node Optimize options
 @section Optimize options
 
-There are three compiler options for optimization: @code{-O}, @code{-Os}
-and @code{-O2}.  These options enable optimization at both translation
+There are five compiler options for optimization:
+@option{-O0}, @option{-O}, @option{-Os}, @option{-O2}, @option{-O3}.
+These options enable optimization at both translation
 (from COBOL to C) and compilation (C to assembly) levels.
 
 Currently, there is no difference between these optimization options at
 the translation level.
 
-The option @code{-O}, @code{-Os} or @code{-O2} is passed to the
+The option @option{-O}, @option{-Os} or @option{-O2} is passed to the
 C compiler as is and used for C level optimization.
 
 @node Optimize call
@@ -1304,7 +1334,7 @@ In addition, setting the option @code{binary-size} to @code{2-4-8} or
 @node Debug options
 @section Debug options
 
-The compiler option @code{-debug} can be used during the development
+The compiler option @option{-debug} can be used during the development
 of your programs.  It enables all run-time error checking, such as
 subscript boundary checks and numeric data checks, and displays
 run-time errors with source locations.
@@ -1340,16 +1370,16 @@ or a file in an environment variable.
 Assign to a literal file.
 
 @example
-Select <file> assign to "/tmp/myfile.txt".
+Select @var{file} assign to "/tmp/myfile.txt".
 @end example
 
 
 @subsection <variable>
 
-Assign to a file in a variable.
+Assign to a file which name is read from a variable.
 
 @example
-Select <file> assign to my-file.
+Select @var{file} assign to my-file.
 
 01  my-file            pic x(512).
 
@@ -1365,7 +1395,7 @@ Assign to a file in an environment variable.
 @example
 export myfile=/tmp/myfile.txt
 
-Select <file> assign to external myfile.
+Select @var{file} assign to external myfile.
 @end example
 
 
@@ -1390,23 +1420,23 @@ All commands following @code{WITH} are optional.
 
 @example
 
-ACCEPT variable-1
-   LINE variable-2 | literal-1 COLUMN variable-3 | literal-2
+ACCEPT @var{variable-1}
+   LINE @var{variable-2} | @var{literal-1} COLUMN @var{variable-3} | @var{literal-2}
    WITH
       AUTO-SKIP | AUTO
-      BACKGROUND-COLOR variable-4 | literal-3
+      BACKGROUND-COLOR @var{variable-4 }| @var{literal-3}
       BELL | BEEP
       BLINK
-      FOREGROUND-COLOR variable-5 | literal-4
+      FOREGROUND-COLOR @var{variable-5} | @var{literal-4}
       LOWLIGHT | HIGHLIGHT
       PROMPT
       PROTECTED
-      SIZE [IS] variable-6 | literal-5
+      SIZE [IS] @var{variable-6} | @var{literal-5}
       UPDATE
    ON EXCEPTION
-      <exception processing>
+      @var{exception processing}
    NOT ON EXCEPTION
-      <normal processing>
+      @var{normal processing}
 END-ACCEPT.
 
 @end example
@@ -1415,13 +1445,13 @@ END-ACCEPT.
 @subsection LINE
 @cindex @code{LINE}
 
-The line number of variable-2 or literal-1 to accept the field.
+The line number of @var{variable-2} or @var{literal-1} to accept the field.
 
 
 @subsection COLUMN
 @cindex @code{COLUMN}
 
-The column number of variable-3 or literal-2 to accept the field.
+The column number of @var{variable-3} or @var{literal-2} to accept the field.
 
 
 @subsection AUTO-SKIP
@@ -1449,8 +1479,9 @@ The Alt-Right-Arrow and Alt-Left-Arrow keys never @code{AUTO-SKIP}.
 
 The background color is the color used behind the characters.
 
-Variable-4 or literal-3 must be numeric.
-See screenio.cpy for the color assignments to variable-4 or literal-3.
+@var{Variable-4} or @var{literal-3} must be numeric.
+See file @file{screenio.cpy} for the color assignments to @var{variable-4}
+or @var{literal-3}.
 
 
 @subsection BELL
@@ -1476,15 +1507,16 @@ This can help small menu selection fields to stand out.
 
 The foreground color is the color used for the characters.
 
-Variable-5 or literal-4 must be numeric.
-See screenio.cpy for the color assignments to variable-5 or literal-4.
+@var{Variable-5} or @var{literal-4} must be numeric.
+See file @file{screenio.cpy} for the color assignments to @var{variable-5}
+or @var{literal-4}.
 
 
 @subsection LOWLIGHT
 @cindex @code{LOWLIGHT}
 @cindex @code{HIGHLIGHT}
 
-The @code{LOWLIGHT} and @code{HIGHLIGHT} commands vary the intensity of the field.
+The @code{LOWLIGHT} and @code{HIGHLIGHT} phrases vary the intensity of the field.
 
 @code{LOWLIGHT} displays with lower intensity
 and @code{HIGHLIGHT} displays with higher intensity.
@@ -1509,25 +1541,26 @@ Display the field with prompt characters as the cursor moves to accept from this
 @subsection SIZE
 @cindex @code{SIZE}
 
-The size of variable-1 to accept from the screen.
+The size of @var{variable-1} to accept from the screen.
 
-Variable-6 or literal-5 must be numeric.
+@var{Variable-6} or @var{literal-5} must be numeric.
 
 @vtable @option
 
 @item @code{SIZE} <greater than zero>
 
-If variable-6 or literal-5 is less than the length of variable-1 then only the @code{SIZE}
-number of characters accept into the field.
-Variable-1 pads with spaces after @code{SIZE} to the end of the field.
+If @var{variable-6} or @var{literal-5} is less than the length of
+@var{variable-1} then only the @code{SIZE} number of characters accept
+into the field.
+@var{Variable-1} pads with spaces after @code{SIZE} to the end of the field.
 
-If variable-6 or literal-5 is greater than variable-1, then the screen pads with spaces
-after variable-1 to the @code{SIZE} length.
+If @var{variable-6} or @var{literal-5} is greater than @var{variable-1},
+then the screen pads with spaces after @var{variable-1} to the @code{SIZE} length.
 
 @item @code{SIZE ZERO}
 @itemx <@code{SIZE} option not specified>
 
-The variable-1 accepts to its field length.
+The @var{variable-1} accepts to its field length.
 
 @end vtable
 
@@ -1653,12 +1686,12 @@ Items display by line and column positioning.
 
 @example
 
-DISPLAY variable-1 | literal-1 | figurative constant
-   LINE <line> COLUMN <column>
+DISPLAY @var{variable-1} | @var{literal-1} | @var{figurative constant}
+   LINE @var{line} COLUMN @var{column}
    WITH BELL
         BLANK LINE | SCREEN
         ERASE EOL | EOS
-        SIZE [IS] variable-2 | literal-2
+        SIZE [IS] @var{variable-2} | @var{literal-2}
 END-DISPLAY.
 
 @end example
@@ -1714,18 +1747,18 @@ Clear the screen from LINE and COLUMN to the end of the screen.
 @subsection SIZE
 @cindex @code{SIZE}
 
-The size of variable-1, literal-1, or figurative constant
+The size of @var{variable-1}, @var{literal-1}, or @var{figurative-constant}
 to display onto the screen.
 It is optional.
 
 @vtable @option
 
-@item @code{SIZE} <greater than zero>
+@item @code{SIZE} @var{positive-integer}
 
-If @code{SIZE} is less than the length of variable-1 or literal-1
+If @code{SIZE} is less than the length of @var{variable-1} or @var{literal-1}
 then only the @code{SIZE} number of characters display.
 
-If @code{SIZE} is greater than the length of variable-1 or literal-1,
+If @code{SIZE} is greater than the length of @var{variable-1} or @var{literal-1},
 then the screen pads with spaces after the field to the @code{SIZE} length.
 
 Figurative constants display repeatedly the number of times in @code{SIZE}.
@@ -1734,7 +1767,7 @@ Except that @code{LOW-VALUES} always positions the cursor (see @code{SIZE} ZERO 
 @item @code{SIZE ZERO}
 @itemx <@code{SIZE} option not specified>
 
-Variable-1 or literal-1 displays with the field length.
+@var{Variable-1} or @var{literal-1} displays with the field length.
 
 @end vtable
 
@@ -1829,7 +1862,7 @@ optional length. Reference modification of result allowed.
 @chapter System Routines
 
 For a complete list of supported system routines,
-@pxref{Appendix D, ,cobc --list-system}.
+@pxref{Appendix D, ,System routines}.
 
 @menu
 * CBL_GC_GETOPT::               GETOPT for Cobol
@@ -2184,42 +2217,70 @@ is not available on the current system.
         END-DISPLAY
 @end example
 
+@ignore
 @node Appendices, Index, System Routines, Top
+@end ignore
+@node Appendices, , System Routines, Top
 
 @menu
-* Appendix A::                  @code{cobc --help}
-* Appendix B::                  @code{cobc --list-reserved}
-* Appendix C::                  @code{cobc --list-intrinsics}
-* Appendix D::                  @code{cobc --list-system}
-* Appendix E::                  @code{cobc --list-mnemonics}
+* Appendix A::                  Compiler @command{cobc} options
+* Appendix B::                  Reserved Words
+* Appendix C::                  Intrinsic Functions
+* Appendix D::                  System routines
+* Appendix E::                  System names
 * Appendix F::                  Compiler Configuration
-* Appendix G::                  @code{cobcrun --help}
+* Appendix G::                  Module loader @command{cobcrun} options
 * Appendix H::                  Runtime configuration
 * Appendix I::                  GNU Free Documentation License
 @end menu
 
 @node Appendix A, Appendix B, Appendices, Appendices
-@appendix @code{cobc --help}
+@appendix Compiler @command{cobc} options
+
+The following list of options was extracted from
+@code{cobc --help} and shows all available compiler options
+with a short description.
 
 @include cbhelp.tex
 
 @node Appendix B, Appendix C, Appendix A, Appendices
-@appendix @code{cobc --list-reserved}
+@appendix Reserved Words
+
+The following list of reserved words was extracted from
+@code{cobc --list-reserved} and shows the reserved words, an implementation
+
+@strong{Please notice:} This list is highly specific to the option
+@option{-std=@var{dialect}} and reserved word options
+(@option{-freserved=@var{word}}, @option{-fno-reserved=@var{word}}) in effect.
+You can get the list for a given @var{dialect} by calling
+@code{cobc -std=@var{dialect} --list-reserved}.
 
 @include cbrese.tex
 
 @node Appendix C, Appendix D, Appendix B, Appendices
-@appendix @code{cobc --list-intrinsics}
+@appendix Intrinsic Functions
+
+The following list of intrinsic functions was extracted from
+@code{cobc --list-intrinsics} and shows the names of the available
+functions, an implementation note and the number of parameters.
 
 @include cbintr.tex
 
 @node Appendix D, Appendix E, Appendix C, Appendices
-@appendix @code{cobc --list-system}
+@appendix System routines
+
+The following list of system routines was extracted from
+@code{cobc --list-system} and shows the names of the available
+system routines along with the number of parameters.
 
 @include cbsyst.tex
 
 @node Appendix E, Appendix F, Appendix D, Appendices
-@appendix @code{cobc --list-mnemonics}
+@appendix System names
+
+The following list of system names was extracted from
+@code{cobc --list-mnemonics} and shows the system names categorized
+by their type.
 
 @include cbmnem.tex
 
@@ -2228,10 +2289,14 @@ is not available on the current system.
 
 The following list was extracted from @file{config/default.conf}.
 
-@include cbconf.tex
+@verbatiminclude cbconf.tex
 
 @node Appendix G, Appendix H, Appendix F, Appendices
-@appendix @code{cobcrun --help}
+@appendix Module loader @command{cobcrun} options
+
+The following list of options was extracted from
+@code{cobcrun --help} and shows all available options
+for the module loader with a short description.
 
 @include cbchelp.tex
 
@@ -2249,10 +2314,13 @@ The following list was extracted from @file{config/runtime.cfg}.
 
 @include fdl.texi
 
+
+@ignore
 @comment Create index.
 @node Index, , Appendices, Top
 @unnumbered Index
 @printindex cp
+@end ignore
 
 @comment End info file.
 @bye
