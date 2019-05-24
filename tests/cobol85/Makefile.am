@@ -96,24 +96,24 @@ modules: $(MODULES_ALL)
 
 test: $(MODULES_RUN)
 	@echo
-	@perl $(srcdir)/summary.pl $(MODULES) > summary.log
+	@perl "$(srcdir)/summary.pl" $(MODULES) > summary.log
 	$(MAKE) diff-summary
 
 summary.log:
-	@perl $(srcdir)/summary.pl $(MODULES) > summary.log
+	@perl "$(srcdir)/summary.pl" $(MODULES) > summary.log
 
 diff: summary.log
 	@for m in $(MODULES); do \
-		(diff $(DIFF_FLAGS) $(srcdir)/$$m.txt $$m/report.txt) \
+		(diff $(DIFF_FLAGS) "$(srcdir)/$$m.txt" "$$m/report.txt") \
 	done
 	$(MAKE) diff-summary
 
 diff-summary:
 	@echo "Comparing total test results"
 if COB_MAKE_IX
-	diff $(DIFF_FLAGS) $(srcdir)/summary.txt summary.log
+	diff $(DIFF_FLAGS) "$(srcdir)/summary.txt" "summary.log"
 else
-	diff $(DIFF_FLAGS) $(srcdir)/summarynoix.txt summary.log
+	diff $(DIFF_FLAGS) "$(srcdir)/summarynoix.txt" "summary.log"
 endif
 	@echo
 
@@ -213,4 +213,4 @@ EXEC85.cob: newcob.val
 
 EXEC85$(EXEEXT): EXEC85.cob
 	@echo "Compiling EXEC85 program"
-	@. ../atconfig && . ../atlocal EXEC85 && $$COBC -std=cobol85 -x $<
+	@. ../atconfig && . ../atlocal EXEC85 && $$COBC -debug -std=cobol85 -x $<

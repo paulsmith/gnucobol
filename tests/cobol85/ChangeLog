@@ -2,6 +2,8 @@
 2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: setting of DIFF_FLAGS now done by configure
+	* Makefile.am: use quotes for filenames in external commands,
+	  run testsuite with active runtime checks
 
 2019-03-16  Simon Sobisch <simonsobisch@gnu.org>
 

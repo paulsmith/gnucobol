@@ -1,4 +1,8 @@
 
+2019-05-24  Simon Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in: early unset of COB_ variables (before we set them...)
+
 2019-04-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am, atlocal.in: splitted some make targets and added new
