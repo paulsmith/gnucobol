@@ -1,4 +1,8 @@
 
+2019-05-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* expand.pl: added checks for input arguments and valid file
+
 2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: setting of DIFF_FLAGS now done by configure
