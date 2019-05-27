@@ -2098,6 +2098,11 @@ cob_field_to_string (const cob_field *f, void *str, const size_t maxsize)
 	size_t		count;
 	size_t		i;
 
+	if (unlikely (f == NULL)) {
+		strncpy (str, _ ("NULL field"), maxsize);
+		return;
+	}
+
 	count = 0;
 	if (unlikely (f->size == 0)) {
 		return;
@@ -2382,10 +2387,10 @@ cob_check_version (const char *prog, const char *packver_prog, const int patchle
 	if (status != 2 || major_prog > major_cob
 	 || (major_prog == major_cob && minor_prog > minor_cob)
 	 || (major_prog == major_cob && minor_prog == minor_cob && patchlev_prog > PATCH_LEVEL)) {
-		cob_runtime_error (_("error: version mismatch"));
-		cob_runtime_error (_("%s has version %s.%d"), prog,
+		cob_runtime_error (_("version mismatch"));
+		cob_runtime_hint (_("%s has version %s.%d"), prog,
 				   packver_prog, patchlev_prog);
-		cob_runtime_error (_("%s has version %s.%d"), "libcob",
+		cob_runtime_hint (_("%s has version %s.%d"), "libcob",
 				   PACKAGE_VERSION, PATCH_LEVEL);
 		cob_stop_run (1);
 	}
@@ -3149,9 +3154,9 @@ cob_check_odo (const int i, const int min,
 		cob_runtime_error (_("OCCURS DEPENDING ON '%s' out of bounds: %d"),
 					dep_name, i);
 		if (i > max) {
-			cob_runtime_error (_("maximum subscript for '%s': %d"), name, max);
+			cob_runtime_hint (_("maximum subscript for '%s': %d"), name, max);
 		} else {
-			cob_runtime_error (_("minimum subscript for '%s': %d"), name, min);
+			cob_runtime_hint (_("minimum subscript for '%s': %d"), name, min);
 		}
 		cob_stop_run (1);
 	}
@@ -3184,10 +3189,10 @@ cob_check_subscript (const int i, const int max,
 		cob_runtime_error (_("subscript of '%s' out of bounds: %d"), name, i);
 		if (i >= 1) {
 			if (odo_item) {
-				cob_runtime_error (_("current maximum subscript for '%s': %d"),
+				cob_runtime_hint (_("current maximum subscript for '%s': %d"),
 							name, max);
 			} else {
-				cob_runtime_error (_("maximum subscript for '%s': %d"),
+				cob_runtime_hint (_("maximum subscript for '%s': %d"),
 							name, max);
 			}
 		}
@@ -3749,7 +3754,7 @@ check_current_date()
 	}
 
 	if (ret != 0) {
-		cob_runtime_error (_("COB_CURRENT_DATE '%s' is invalid"), cobsetptr->cob_date);
+		cob_runtime_warning (_("COB_CURRENT_DATE '%s' is invalid"), cobsetptr->cob_date);
 	}
 
 	/* get local time, allocate tmptr */
@@ -6051,7 +6056,7 @@ set_config_val (char *value, int pos)
 			}
 		}
 		if ((data_type & ENV_ENUM || data_type & ENV_ENUMVAL)	/* Must be one of the 'enum' values */
-		&& gc_conf[pos].enums[i].match == NULL) {
+		 && gc_conf[pos].enums[i].match == NULL) {
 			conf_runtime_error_value (ptr, pos);
 			fprintf (stderr, _("should be one of the following values: %s"), "");
 			for (i = 0; gc_conf[pos].enums[i].match != NULL; i++) {
@@ -6799,6 +6804,24 @@ cob_runtime_warning (const char *fmt, ...)
 }
 
 void
+cob_runtime_hint (const char *fmt, ...)
+{
+	va_list args;
+
+	/* Prefix */
+	fprintf (stderr, "\t");
+
+	/* Body */
+	va_start (args, fmt);
+	vfprintf (stderr, fmt, args);
+	va_end (args);
+
+	/* Postfix */
+	putc ('\n', stderr);
+	fflush (stderr);
+}
+
+void
 cob_runtime_error (const char *fmt, ...)
 {
 	struct handlerlist	*h;
@@ -6896,6 +6919,7 @@ cob_runtime_error (const char *fmt, ...)
 		}
 		fputc (' ', stderr);
 	}
+	fprintf (stderr, "%s: ", _("error"));
 
 	/* Body */
 	va_start (ap, fmt);
@@ -7068,29 +7092,15 @@ cob_fatal_error (const enum cob_fatal_error fatal_error)
 			break;
 		/* LCOV_EXCL_STOP */
 		}
-		if (cobglobptr->cob_error_file->assign
-		 && cobglobptr->cob_error_file->assign->data) {
-			err_cause = cob_malloc ((size_t)COB_FILE_BUFF);
-			/* FIXME: for OPEN: provide both assign name and
-			   full name (including COB_FILE_PATH / filename mapping)
-			 */
-			cob_field_to_string (cobglobptr->cob_error_file->assign,
-				err_cause, (size_t)COB_FILE_MAX);
-		} else {
-			cob_runtime_error ("ASSIGN field with NULL address");
-			err_cause = (char *) cobglobptr->cob_error_file->select_name;
-		}
+		err_cause = cob_get_filename_print (cobglobptr->cob_error_file, 1);
 		/* FIXME: additional check if referenced program has active code location */
 		if (!cobglobptr->last_exception_statement) {
-			cob_runtime_error (_ ("%s (status = %02d) file: '%s'"),
+			cob_runtime_error (_ ("%s (status = %02d) for file %s"),
 				msg, status, err_cause);
 		} else {
-			cob_runtime_error (_("%s (status = %02d) file: '%s' on %s"),
+			cob_runtime_error (_("%s (status = %02d) for file %s on %s"),
 				msg, status, err_cause,
 				cobglobptr->last_exception_statement);
-		}
-		if (err_cause != cobglobptr->cob_error_file->select_name) {
-			cob_free (err_cause);
 		}
 		break;
 	/* LCOV_EXCL_START */

@@ -555,7 +555,7 @@ AT_CHECK([$COBCRUN -q -prog], [1], [],
 [cobcrun: unrecognized option '-prog'
 ])
 AT_CHECK([$COBCRUN noprog], [1], [],
-[libcob: module 'noprog' not found
+[libcob: error: module 'noprog' not found
 ])
 AT_CHECK([$COBCRUN -q -M], [1], [],
 [cobcrun: option requires an argument -- M

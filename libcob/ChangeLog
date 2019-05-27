@@ -1,4 +1,19 @@
 
+2019-05-26  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_runtime_hint), coblocal.h: new function for output additional
+	  information to a warning/error directly called before, especially important
+	  for (cob_runtime_error) which invokes the error handlers,
+	  used for this scenario throughout common.c
+	* common.c (cob_field_to_string): explicit check for field address
+	* fileio.c (cob_get_filename_print), coblocal.h: new function to provide a
+	  filename for output with filename, assign and possible file mapping
+	* fileio.c (cob_exit_fileio), common.c (cob_fatal_error):
+	  use of (cob_get_filename_print)
+	* fileio.c (cob_delete_file): check errno after unlink/indexed_file_delete
+	* reportio.c (cob_report_terminate, cob_report_generate): halt on fatal
+	  error COB_EC_REPORT_INACTIVE
+
 2019-05-19  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c, mlio.c: check for WITH_XML2/WITH_CJSON before including

@@ -5529,7 +5529,7 @@ cob_delete_file (cob_file *f, cob_field *fnstatus)
 		indexed_file_delete (f, file_open_name);
 #endif
 	}
-	save_status (f, fnstatus, COB_STATUS_00_SUCCESS);
+	save_status (f, fnstatus, errno_cob_sts(COB_STATUS_00_SUCCESS));
 }
 
 /* System routines */
@@ -6941,6 +6941,28 @@ cob_file_return (cob_file *f)
 	save_status (f, fnstatus, COB_STATUS_30_PERMANENT_ERROR);
 }
 
+char *
+cob_get_filename_print (cob_file* file, const int show_resolved_name)
+{
+	/* Obtain the file name */
+	cob_field_to_string (file->assign, file_open_env, (size_t)COB_FILE_MAX);
+	if (show_resolved_name) {
+		strncpy (file_open_name, file_open_env, (size_t)COB_FILE_MAX);
+		file_open_name[COB_FILE_MAX] = 0;
+		cob_chk_file_mapping ();
+	}
+
+	if (show_resolved_name
+	 && strcmp (file_open_env, file_open_name)) {
+		sprintf (runtime_buffer, "%s ('%s' => %s)",
+			file->select_name, file_open_env, file_open_name);
+	} else {
+		sprintf (runtime_buffer, "%s ('%s')",
+			file->select_name, file_open_env);
+	}
+	return runtime_buffer;
+}
+
 /* Initialization/Termination
    cobsetpr-values with type ENV_PATH or ENV_STR
    like bdb_home and cob_file_path are taken care in cob_exit_common()!
@@ -6961,11 +6983,8 @@ cob_exit_fileio (void)
 			}
 			cob_close (l->file, NULL, COB_CLOSE_NORMAL, 0);
 			if (cobsetptr->cob_display_warn) {
-				cob_field_to_string (l->file->assign,
-						     runtime_buffer,
-						     (size_t)COB_FILE_MAX);
-				cob_runtime_warning (_("implicit CLOSE of %s ('%s')"),
-					l->file->select_name, runtime_buffer);
+				cob_runtime_warning (_("implicit CLOSE of %s"),
+					cob_get_filename_print (l->file, 0));
 			}
 		}
 	}

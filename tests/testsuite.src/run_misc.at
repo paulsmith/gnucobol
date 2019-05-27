@@ -517,7 +517,7 @@ libcob: callee.cob:8: warning: EXTERNAL item 'EXT-VAR' previously allocated with
 
 AT_CHECK([$COMPILE smaller.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./smaller], [1], [],
-[libcob: callee.cob:6: EXTERNAL item 'WRK-VAR' previously allocated with size 5, requested size is 8
+[libcob: callee.cob:6: error: EXTERNAL item 'WRK-VAR' previously allocated with size 5, requested size is 8
 ])
 
 AT_CLEANUP
@@ -1006,7 +1006,7 @@ AT_CHECK([$COBCRUN_DIRECT ./unchecked_prog], [0],
 [test over
 ], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:20: 'X-NUM' (Type: NUMERIC DISPLAY) not numeric: '0\000\001123'
+[libcob: prog.cob:20: error: 'X-NUM' (Type: NUMERIC DISPLAY) not numeric: '0\000\001123'
 ])
 
 AT_CHECK([$COMPILE prog2.cob], [0], [], [])
@@ -1015,7 +1015,7 @@ AT_CHECK([$COBCRUN_DIRECT ./unchecked_prog2], [0],
 [test over
 ], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog2], [1], [],
-[libcob: prog2.cob:15: 'X-NUM' (Type: PACKED-DECIMAL) not numeric: '0x000a123f'
+[libcob: prog2.cob:15: error: 'X-NUM' (Type: PACKED-DECIMAL) not numeric: '0x000a123f'
 ])
 
 AT_CLEANUP
@@ -1312,7 +1312,7 @@ AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee2.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [1], [],
-[libcob: callee2.cob:5: recursive CALL from callee2 to callee which is NOT RECURSIVE
+[libcob: callee2.cob:5: error: recursive CALL from callee2 to callee which is NOT RECURSIVE
 ])
 
 AT_CLEANUP
@@ -3752,7 +3752,7 @@ main (int argc, char **argv)
 
 AT_CHECK([$COMPILE -o caller caller.c callee.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [1], [],
-[libcob: cob_init() has not been called
+[libcob: error: cob_init() has not been called
 ])
 
 AT_CHECK([$COMPILE -fimplicit-init -o caller caller.c callee.cob], [0], [], [])
@@ -4047,10 +4047,10 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COMPILE prog2.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:8: BASED/LINKAGE item 'X' has NULL address
+[libcob: prog.cob:8: error: BASED/LINKAGE item 'X' has NULL address
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog2], [1], [],
-[libcob: prog2.cob:9: BASED/LINKAGE item 'X' (accessed by 'Y') has NULL address
+[libcob: prog2.cob:9: error: BASED/LINKAGE item 'X' (accessed by 'Y') has NULL address
 ])
 
 AT_CLEANUP
@@ -4092,7 +4092,7 @@ AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./caller], [1], [],
-[libcob: callee.cob:9: LINKAGE item 'X' (accessed by 'Y') not passed by caller
+[libcob: callee.cob:9: error: LINKAGE item 'X' (accessed by 'Y') not passed by caller
 ])
 
 AT_CLEANUP
@@ -9018,7 +9018,7 @@ $COBCRUN_DIRECT ./prog], [1],
 [X is 000000001
 X is 000005441
 ],
-[libcob: cpyabrt:4: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
+[libcob: cpyabrt:4: error: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
 libcob: cpyabrt:4: warning: implicit CLOSE of FLATFILE ('RELFIX')
 ])
 
@@ -9154,7 +9154,7 @@ $COBCRUN_DIRECT ./prog_fdls], [1],
 [X is 000000001
 X is 000005441
 ],
-[libcob: cpyabrt:4: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
+[libcob: cpyabrt:4: error: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
 libcob: cpyabrt:4: warning: implicit CLOSE of FLATFILE ('RELFIX')
 ])
 
@@ -9949,7 +9949,7 @@ AT_DATA([prog.cob], [
 # Safe run with runtime checks
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:23: subscript of 'TSTY' out of bounds: 0
+[libcob: prog.cob:23: error: subscript of 'TSTY' out of bounds: 0
 ])
 
 # Runtime checks disable, subscript may be zero or even negative

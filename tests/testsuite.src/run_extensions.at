@@ -2062,7 +2062,7 @@ AT_CHECK([test -f "../FILENAMEX" && rm -f "../FILENAMEX"], [0], [], [])
 
 # FIXME: on OPEN we should also output the full filename (if any) leading to the error
 AT_CHECK([COB_FILE_PATH="./nosubhere" $COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:13: permanent file error (status = 30) file: 'FILENAMEX' on OPEN
+[libcob: prog.cob:13: error: permanent file error (status = 30) for file TEST-FILE ('FILENAMEX' => ./nosubhere/FILENAMEX) on OPEN
 ])
 
 AT_CLEANUP
@@ -2360,7 +2360,7 @@ AT_CHECK([$COBCRUN prog3 X ABCD], [0], [], [])
 
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller X ABCD], [1], [],
-[libcob: caller.cob:6: CALL of program with CHAINING clause
+[libcob: caller.cob:6: error: CALL of program with CHAINING clause
 ])
 
 AT_CHECK([$COMPILE init.cob], [0], [], [])
@@ -4105,7 +4105,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog4 --static --dynamic --usage=boringandtoolongtex
 # Return code 1 is sufficient as proof of hard return (as wanted).
 AT_CHECK([$COMPILE prog5.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog5 --static], [1], [],
-[libcob: prog5.cob:37: Call to CBL_GC_GETOPT with wrong longoption size.
+[libcob: prog5.cob:37: error: Call to CBL_GC_GETOPT with wrong longoption size.
 ])
 
 AT_CLEANUP
@@ -4522,7 +4522,7 @@ Error: DemoErrProc; S1; 19-
        EC-PROGRAM-NOT-FOUND           -
 -*- Returning to Standard Error Routine -*-
 ],
-[libcob: prog.cob:19: module 'Tilt' not found
+[libcob: prog.cob:19: error: module 'Tilt' not found
 ])
 
 AT_CHECK([$COBC -x -o prog_noloc prog.cob], [0], [], [])
@@ -4538,7 +4538,7 @@ Error:  -
        EC-PROGRAM-NOT-FOUND           -
 -*- Returning to Standard Error Routine -*-
 ],
-[libcob: module 'Tilt' not found
+[libcob: error: module 'Tilt' not found
 ])
 
 AT_CLEANUP

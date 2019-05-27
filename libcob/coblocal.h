@@ -343,6 +343,7 @@ struct config_tbl {
 COB_HIDDEN void		cob_init_numeric	(cob_global *);
 COB_HIDDEN void		cob_init_termio		(cob_global *, cob_settings *);
 COB_HIDDEN void		cob_init_fileio		(cob_global *, cob_settings *);
+COB_HIDDEN char		*cob_get_filename_print	(cob_file *, const int);
 COB_HIDDEN void		cob_init_reportio	(cob_global *, cob_settings *);
 COB_HIDDEN void		cob_init_call		(cob_global *, cob_settings *, const int);
 COB_HIDDEN void		cob_init_intrinsic	(cob_global *);
@@ -383,6 +384,7 @@ COB_HIDDEN const char	*cob_get_last_exception_name	(void);
 COB_HIDDEN void		cob_field_to_string	(const cob_field *, void *,
 						 const size_t);
 COB_HIDDEN void		cob_parameter_check	(const char *, const int);
+COB_HIDDEN void		cob_runtime_hint	(const char *, ...) COB_A_FORMAT12;
 COB_HIDDEN void		cob_runtime_error	(const char *, ...) COB_A_FORMAT12;
 COB_HIDDEN void		cob_runtime_warning_external	(const char *, const int,
 						const char *, ...) COB_A_FORMAT34;
@@ -429,14 +431,14 @@ COB_HIDDEN void	cob_set_field_to_uint	(cob_field *, const cob_u32_t);
 /* static inline of smaller helpers */
 
 static COB_INLINE int
-cob_min_int(const int x, const int y)
+cob_min_int (const int x, const int y)
 {
 	if (x < y) return x;
 	return y;
 }
 
 static COB_INLINE int
-cob_max_int(const int x, const int y)
+cob_max_int (const int x, const int y)
 {
 	if (x > y) return x;
 	return y;
