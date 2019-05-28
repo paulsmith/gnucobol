@@ -7,6 +7,13 @@
 set arch=x86
 set arch_full=x86
 
+:: restore old PATH to not expand it endlessly
+if not "%COB_OLD_PATH%" == "" (
+   set "PATH=%COB_OLD_PATH%"
+   set "COB_OLD_PATH=%PATH%"
+)
+
+
 echo Setup Visual Studio (%arch%/%arch_full%)...
 echo.
 
@@ -144,8 +151,36 @@ color 07
 :: check if cl.exe is already in path
 where cl.exe 1>nul 2>nul
 if "%errorlevel%" == "0" (
-   echo cl.exe now in PATH:
+   echo cl.exe that will be used by cobc:
    cl.exe 1>nul
 ) else (
    echo ERROR: cl.exe not found!
 )
+
+echo.
+echo.
+:: Now the stuff for GnuCOBOL
+echo Setting environment for GnuCOBOL.
+
+:: Get the main dir from the batch's position
+set "COB_MAIN_DIR=%~dp0"
+
+:: Set the necessary folders for cobc
+set "COB_CONFIG_DIR=%COB_MAIN_DIR%config"
+set "COB_COPY_DIR=%COB_MAIN_DIR%copy"
+
+set "LOCALEDIR=%COB_MAIN_DIR%locale"
+
+:: Set the necessary options for MSC compiler
+set "COB_CFLAGS=/I "%COB_MAIN_DIR%include""
+set "COB_LIB_PATHS=/LIBPATH:"%COB_MAIN_DIR%lib""
+::if "%COB_LIBS%"       EQU "" (
+::   if exist "%COB_MAIN_DIR%lib\mpir.lib"	set COB_LIBS=libcob.lib mpir.lib
+::   if exist "%COB_MAIN_DIR%lib\libgmp.lib" 	set COB_LIBS=libcob.lib libgmp.lib
+::)
+
+:: save current PATH and add the bin path of GnuCOBOL to PATH for further references
+if "%COB_OLD_PATH%" == "" (
+   set "COB_OLD_PATH=%PATH%"
+)
+set "PATH=%COB_MAIN_DIR%bin;%PATH%"
