@@ -1666,8 +1666,9 @@ start:
 		/* Invalid indicator */
 		cb_plex_error (newline_count,
 				_("invalid indicator '%c' at column 7"), buff[6]);
+		/* Note: Treat as comment line to allow further parsing
+		         instead of aborting compilation */
 		newline_count++;
-		/* Treat as comment line instead of aborting compilation */
 		goto start;
 	}
 
