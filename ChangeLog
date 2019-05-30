@@ -1,4 +1,11 @@
 
+2019-05-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: fix bug #599 avoid useless dependencies (all but libm,
+	  needs to be inspected later) by not copying LIBCOB_LIBS to COB_LIBS
+	  and resetting LIBS after XML2/CJSON check;
+	  now substituting LIBCOB_CPPFLAGS
+
 2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: set YFLAGS and DIFF_FLAGS depending on

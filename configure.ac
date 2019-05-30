@@ -423,6 +423,7 @@ fi
 if test "$COB_USES_ICC_ONLY" = "yes"; then
 	LIBCOB_LIBS="-limf -lm"
 else
+	# FIXME: -lm should only be used if needed (which it often is not), see Bug #559
 	LIBCOB_LIBS="-lm"
 fi
 
@@ -439,111 +440,6 @@ PKG_PROG_PKG_CONFIG
 
 
 # Configure options part II (needing compilation)
-AC_ARG_WITH([curses],
-  [AS_HELP_STRING([[--with-curses[=ARG]]],
-    [(GnuCOBOL) Use curses library for extended SCREEN I/O, where ARG may be:
-     check (default), ncursesw, ncurses, pdcurses, curses, no])],
-  [case "$with_curses" in
-    ncursesw | ncurses | pdcurses | curses | check | no)
-		USE_NCURSES="$with_curses"
-		;;
-	"yes")
-		USE_NCURSES="check"
-		;;
-    *)
-		AC_MSG_ERROR([invalid value "$with_curses" for --with-curses,
-  must be one of the following:
-  ncursesw, ncurses, pdcurses, curses  (use only the specified library)
-  check  (use whatever curses library is usable, disable if no one usable)
-  no  (disable curses usage)])
-		;;
-  esac],
-  [USE_NCURSES="check"])
-
-AC_ARG_WITH([seqra-extfh],
-  [AS_HELP_STRING([--with-seqra-extfh],
-    [(GnuCOBOL) Use external SEQ/RAN file handler])],
-  [ if test "$with_seqra_extfh" = "yes"; then
-	AC_DEFINE([WITH_SEQRA_EXTFH], [1])
-    fi ],
-  [])
-
-AC_ARG_WITH([cisam],
-  [AS_HELP_STRING([--with-cisam],
-    [(GnuCOBOL) Use CISAM for ISAM I/O])],
-  [ if test "$with_cisam" = "yes"; then
-	AC_CHECK_HEADERS([isam.h], [],
-		AC_MSG_ERROR([isam.h is required for CISAM]))
-	AC_CHECK_LIB([ifisam], [isopen],
-		[AC_DEFINE([WITH_CISAM], [1])
-		LIBCOB_LIBS="$LIBCOB_LIBS -lifisam -lifisamx"],
-		AC_MSG_ERROR([libifisam is required for CISAM]), [-lifisamx])
-    fi ],
-  [])
-
-if test "$with_cisam" != "yes"; then
-  AC_ARG_WITH([disam],
-  [AS_HELP_STRING([--with-disam],
-    [(GnuCOBOL) Use DISAM for ISAM I/O])],
-  [ if test "$with_disam" = "yes"; then
-	AC_CHECK_HEADERS([disam.h], [],
-		AC_MSG_ERROR([disam.h is required for DISAM]))
-
-	for cobdisam in disam disam8 disam72 disam71 disam7
-	do
-		AC_CHECK_LIB([$cobdisam], [isopen],
-			[AC_DEFINE([WITH_DISAM], [1])
-			LIBCOB_LIBS="$LIBCOB_LIBS -l$cobdisam"]
-			cob_got_disam=yes
-			break,
-			[], [])
-	done
-	if test "$cob_got_disam" = "yes"; then
-		AC_MSG_NOTICE([DISAM library found as -l$cobdisam])
-	else
-		AC_MSG_ERROR([DISAM library not found])
-	fi
-	unset cobdisam
-	unset cob_got_disam
-    fi ],
-  [])
-fi
-
-if test "$with_cisam" != "yes" -a "$with_disam" != "yes"; then
-  AC_ARG_WITH([vbisam],
-  [AS_HELP_STRING([--with-vbisam],
-    [(GnuCOBOL) Use VBISAM for ISAM I/O])],
-  [ if test "$with_vbisam" = "yes"; then
-	AC_CHECK_HEADERS([vbisam.h], [],
-		AC_MSG_ERROR([vbisam.h is required for VBISAM]))
-	# note: isfullclose is available since 2.0, isopen since 1.0
-	AC_CHECK_LIB([vbisam], [isfullclose],
-		[AC_DEFINE([WITH_VBISAM], [1])
-		LIBCOB_LIBS="$LIBCOB_LIBS -lvbisam"],
-		AC_MSG_ERROR([libvbisam >= 2.0 is required for VBISAM]), [])
-    fi ],
-  [])
-fi
-
-if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes"; then
-  AC_ARG_WITH([index-extfh],
-  [AS_HELP_STRING([--with-index-extfh],
-    [(GnuCOBOL) Use external ISAM file handler])],
-  [ if test "$with_index_extfh" = "yes"; then
-	AC_DEFINE([WITH_INDEX_EXTFH], [1])
-    fi ],
-  [])
-fi
-
-if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes" -a "$with_index_extfh" != "yes"; then
-  AC_ARG_WITH([db],
-  [AS_HELP_STRING([--with-db],
-    [(GnuCOBOL) Use Berkeley DB >= 4.1 for ISAM I/O (default)])],
-  [],
-  [with_db=yes])
-fi
-
-
 AC_ARG_WITH([xml2],
   [AS_HELP_STRING([--with-xml2],
     [(GnuCOBOL) Use libxml2 as XML handler (default)])],
@@ -591,18 +487,20 @@ AS_IF([test "$with_xml2" = "yes" -o "$with_xml2" = "check"], [
 		  [[xmlNewTextWriterFilename (NULL, 0);]])],
 		  [AC_DEFINE([WITH_XML2], [1]) AC_MSG_RESULT([yes])
 		   with_xml2=yes
+		   LIBCOB_CPPFLAGS="$LIBCOB_CPPFLAGS $XML2_CFLAGS"
 		   LIBCOB_LIBS="$LIBCOB_LIBS $XML2_LIBS"],
 		  [AC_MSG_RESULT([no])
 		   if test "$with_xml2" = "yes"; then
 		     AC_MSG_ERROR([[xml library is required for --with-xml2, you may adjust XML2_LIBS]])
 		   else
 		     AC_MSG_WARN([xml library not found, you may adjust XML2_LIBS])
-		     with_xml2=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+		     with_xml2=no
 		   fi])
 	else
 		AC_MSG_WARN([Headers for libxml2 missing, you may adjust XML2_CFLAGS])
-		 with_xml2=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+		with_xml2=no
 	fi
+	LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
 ])
 
 
@@ -637,13 +535,13 @@ AS_IF([test "$with_cjson" = "yes" -o "$with_cjson" = "local" -o "$with_cjson" = 
 			      if test "$with_cjson" = "yes"; then 
 			         AC_MSG_ERROR([Headers for libcjson are required for --with-cjson, you may adjust CJSON_CFLAGS])
 			      else
-			         with_cjson=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+			         with_cjson=no
 			      fi
 			   else
 			      AC_MSG_NOTICE([local cJSON is used])
 			      AC_DEFINE([HAVE_CJSON_H], 1)
 			      AC_DEFINE([WITH_CJSON], 1)
-			      with_cjson=local; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+			      with_cjson=local
 			   fi]
 			)])
 	if test "$with_cjson" != "no"; then 
@@ -653,19 +551,21 @@ AS_IF([test "$with_cjson" = "yes" -o "$with_cjson" = "local" -o "$with_cjson" = 
 		  [[cJSON_CreateNull ();]])],
 		  [AC_DEFINE([WITH_CJSON], [1]) AC_MSG_RESULT([yes])
 		   with_cjson=yes
+		   LIBCOB_CPPFLAGS="$LIBCOB_CPPFLAGS $CJSON_CFLAGS"
 		   LIBCOB_LIBS="$LIBCOB_LIBS $CJSON_LIBS"],
 		  [AC_MSG_RESULT([no])
 		   if test "$with_cjson" = "yes"; then
 		     AC_MSG_ERROR([[cJSON library is required for --with-cjson, you may adjust CJSON_LIBS]])
 		   else
 		     AC_MSG_WARN([xml library not found, you may adjust CJSON_LIBS])
-		     with_cjson=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+		     with_cjson=no
 		   fi])
 	  fi
 	else
 		AC_MSG_WARN([Headers for libcjson missing, you may adjust CJSON_CFLAGS or put cJSON sources in $srcdir])
-		 with_cjson=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+		 with_cjson=no
 	fi
+	LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
 ])
 
 
@@ -864,6 +764,27 @@ AM_LANGINFO_CODESET
 # Checks for ncurses/pdcurses/curses.
 AC_MSG_NOTICE([Checks for curses ...])
 
+AC_ARG_WITH([curses],
+  [AS_HELP_STRING([[--with-curses[=ARG]]],
+    [(GnuCOBOL) Use curses library for extended SCREEN I/O, where ARG may be:
+     check (default), ncursesw, ncurses, pdcurses, curses, no])],
+  [case "$with_curses" in
+    ncursesw | ncurses | pdcurses | curses | check | no)
+		USE_NCURSES="$with_curses"
+		;;
+	"yes")
+		USE_NCURSES="check"
+		;;
+    *)
+		AC_MSG_ERROR([invalid value "$with_curses" for --with-curses,
+  must be one of the following:
+  ncursesw, ncurses, pdcurses, curses  (use only the specified library)
+  check  (use whatever curses library is usable, disable if no one usable)
+  no  (disable curses usage)])
+		;;
+  esac],
+  [USE_NCURSES="check"])
+
 if test "$USE_NCURSES" = "ncursesw" -o "$USE_NCURSES" = "check"; then
   AC_CHECK_LIB([ncursesw], [initscr], [], [], [])
   if test "x$ac_cv_lib_ncursesw_initscr" = "xyes"; then
@@ -1046,6 +967,89 @@ if test "$USE_NCURSES" != "no" -a "$USE_NCURSES" != "not_found"; then
 	[AC_DEFINE([HAVE_HAS_MOUSE], [1]) AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])],
 	[])
+fi
+
+AC_ARG_WITH([seqra-extfh],
+  [AS_HELP_STRING([--with-seqra-extfh],
+    [(GnuCOBOL) Use external SEQ/RAN file handler])],
+  [ if test "$with_seqra_extfh" = "yes"; then
+	AC_DEFINE([WITH_SEQRA_EXTFH], [1])
+    fi ],
+  [])
+
+AC_ARG_WITH([cisam],
+  [AS_HELP_STRING([--with-cisam],
+    [(GnuCOBOL) Use CISAM for ISAM I/O])],
+  [ if test "$with_cisam" = "yes"; then
+	AC_CHECK_HEADERS([isam.h], [],
+		AC_MSG_ERROR([isam.h is required for CISAM]))
+	AC_CHECK_LIB([ifisam], [isopen],
+		[AC_DEFINE([WITH_CISAM], [1])
+		LIBCOB_LIBS="$LIBCOB_LIBS -lifisam -lifisamx"],
+		AC_MSG_ERROR([libifisam is required for CISAM]), [-lifisamx])
+    fi ],
+  [])
+
+if test "$with_cisam" != "yes"; then
+  AC_ARG_WITH([disam],
+  [AS_HELP_STRING([--with-disam],
+    [(GnuCOBOL) Use DISAM for ISAM I/O])],
+  [ if test "$with_disam" = "yes"; then
+	AC_CHECK_HEADERS([disam.h], [],
+		AC_MSG_ERROR([disam.h is required for DISAM]))
+
+	for cobdisam in disam disam8 disam72 disam71 disam7
+	do
+		AC_CHECK_LIB([$cobdisam], [isopen],
+			[AC_DEFINE([WITH_DISAM], [1])
+			LIBCOB_LIBS="$LIBCOB_LIBS -l$cobdisam"]
+			cob_got_disam=yes
+			break,
+			[], [])
+	done
+	if test "$cob_got_disam" = "yes"; then
+		AC_MSG_NOTICE([DISAM library found as -l$cobdisam])
+	else
+		AC_MSG_ERROR([DISAM library not found])
+	fi
+	unset cobdisam
+	unset cob_got_disam
+    fi ],
+  [])
+fi
+
+if test "$with_cisam" != "yes" -a "$with_disam" != "yes"; then
+  AC_ARG_WITH([vbisam],
+  [AS_HELP_STRING([--with-vbisam],
+    [(GnuCOBOL) Use VBISAM for ISAM I/O])],
+  [ if test "$with_vbisam" = "yes"; then
+	AC_CHECK_HEADERS([vbisam.h], [],
+		AC_MSG_ERROR([vbisam.h is required for VBISAM]))
+	# note: isfullclose is available since 2.0, isopen since 1.0
+	AC_CHECK_LIB([vbisam], [isfullclose],
+		[AC_DEFINE([WITH_VBISAM], [1])
+		LIBCOB_LIBS="$LIBCOB_LIBS -lvbisam"],
+		AC_MSG_ERROR([libvbisam >= 2.0 is required for VBISAM]), [])
+    fi ],
+  [])
+fi
+
+if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes"; then
+  AC_ARG_WITH([index-extfh],
+  [AS_HELP_STRING([--with-index-extfh],
+    [(GnuCOBOL) Use external ISAM file handler])],
+  [ if test "$with_index_extfh" = "yes"; then
+	AC_DEFINE([WITH_INDEX_EXTFH], [1])
+    fi ],
+  [])
+fi
+
+if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes" -a "$with_index_extfh" != "yes"; then
+  AC_ARG_WITH([db],
+  [AS_HELP_STRING([--with-db],
+    [(GnuCOBOL) Use Berkeley DB >= 4.1 for ISAM I/O (default)])],
+  [],
+  [with_db=yes])
 fi
 
 # Checks for db.
@@ -1309,7 +1313,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],
 
 # GnuCOBOL Configuration
 
-COB_LIBS="-L$libdir -lcob ${LIBCOB_LIBS}"
+COB_LIBS="-L$libdir -lcob"
 COB_LDFLAGS=""
 if test "x$LDFLAGS" != "x"; then
 	COB_LIBS="$LDFLAGS $COB_LIBS"
@@ -1659,6 +1663,7 @@ AC_SUBST([COB_MODULE_EXT])
 AC_SUBST([COB_EXE_EXT])
 AC_SUBST([COBC_LIBS])
 AC_SUBST([LIBCOB_LIBS])
+AC_SUBST([LIBCOB_CPPFLAGS])
 AC_SUBST([COB_EXPORT_DYN])
 AC_SUBST([COB_PIC_FLAGS])
 AC_SUBST([COB_SHARED_OPT])

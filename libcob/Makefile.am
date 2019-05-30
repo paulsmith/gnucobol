@@ -39,7 +39,7 @@ endif
 
 MAINTAINERCLEANFILES = $(SOURCES_CJSON)
 
-AM_CPPFLAGS = -I$(top_srcdir)
+AM_CPPFLAGS = -I$(top_srcdir) $(LIBCOB_CPPFLAGS)
 AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)
 libcob_la_LIBADD = $(LIBCOB_LIBS) $(CODE_COVERAGE_LIBS)
 libcob_la_LDFLAGS = $(COB_FIX_LIBTOOL) -version-info 4:0:0 -no-undefined

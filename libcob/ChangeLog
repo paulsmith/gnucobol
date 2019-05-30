@@ -1,4 +1,8 @@
 
+2019-05-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (AM_CPPFLAGS): include new substituted LIBCOB_CPPFLAGS
+
 2019-05-26  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_runtime_hint), coblocal.h: new function for output additional
