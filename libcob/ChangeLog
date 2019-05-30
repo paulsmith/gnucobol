@@ -25,6 +25,10 @@
 
 	* common.c (cob_fatal_error): added statement (if available) for
 	  COB_FERROR_FILE
+	* common.c, mlio.c: adjusted to handle HAVE_CJSON_H as an alternative
+	  to HAVE_CJSON_CJSON_H
+	* Makefile.am: handle LOCAL_CJSON (copying its sources to builddir) and
+	  adding cJSON.c to the compiled sources
 
 2019-05-11  Simon Sobisch <simonsobisch@gnu.org>
 

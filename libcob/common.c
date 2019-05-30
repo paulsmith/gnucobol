@@ -111,10 +111,13 @@
 #endif
 
 #ifdef WITH_CJSON
-#ifndef HAVE_CJSON_CJSON_H
+#if defined HAVE_CJSON_CJSON_H
+#include <cjson/cJSON.h>
+#elif defined HAVE_CJSON_H
+#include <cJSON.h>
+#else
 #error CJSON without necessary header
 #endif
-#include <cjson/cJSON.h>
 #endif
 /* end of library headers */
 

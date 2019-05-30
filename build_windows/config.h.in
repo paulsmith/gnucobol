@@ -188,11 +188,13 @@
 /* #undef HAVE_CFPREFERENCESCOPYAPPVALUE */
 
 /* Define to 1 if you have the <cjson/cJSON.h> header file. */
-
-#if CONFIGURED_JSON == CJSON
-#define HAVE_CJSON_CJSON_H 1
-#else
 /* #undef HAVE_CJSON_CJSON_H */
+
+/* Define to 1 if you have the <cJSON.h> header file. */
+#if CONFIGURED_JSON == CJSON
+#define HAVE_CJSON_H 1
+#else
+/* #undef HAVE_CJSON_H */
 #endif
 
 /* Has clock_gettime function and CLOCK_REALTIME */

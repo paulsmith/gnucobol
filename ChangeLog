@@ -11,6 +11,11 @@
 2019-05-13  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac, gnucobol.spec: version dump to 3.1-dev
+	* configure.ac: --with-cjson=local added (defines `LOCAL_CJSON`),
+	  allowing to built-in cjson into libcob when the local folder cJSON
+	  exists in srcdir, also used as fallback if cJSON cannot be found by
+	  means of pkg-config and/or CJSON_CFLAGS and CJSON_LIBS;
+	  checks/defines HAVE_CJSON_H as an alternative to HAVE_CJSON_CJSON_H
 
 2019-05-05  Simon Sobisch <simonsobisch@gnu.org>
 

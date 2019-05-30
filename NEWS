@@ -64,6 +64,9 @@ NEWS - user visible changes				-*- outline -*-
 
 ** new configure options --with-cjson / -without-cjson to explicit force/disable
    JSON runtime support, otherwise it will be included if found as working
+   Note: As a special case you may built-in cJSON by putting its source in
+   a sub-directory cJSON. If there is no working cJSON in the system or explicit
+   specified by --with-cjson=local this version will be compiled into libcob.
 
 ** Any time after `make` you can call `pre-inst-env` script to use the still-
    uninstalled binaries. Samples:
