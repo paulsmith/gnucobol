@@ -1,7 +1,7 @@
 #!/bin/sh
 # create_win_dist.sh gnucobol
 #
-# Copyright (C) 2016-2017 Free Software Foundation, Inc.
+# Copyright (C) 2016-2017,2019 Free Software Foundation, Inc.
 # Written by Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -22,9 +22,9 @@
 
 # This shell script needs to be sourced from Makefile processing,
 # otherwise set EXTSRCDIR and EXTDISTDIR before calling this script
-# AND make sure EXTDISTDIR exists with the right content
+# AND make sure EXTDISTDIR exists with the right content.
 
-# Check necessary vars:
+# check necessary vars:
 
 if test "x$EXTDISTDIR" = "x"; then
 	echo "EXTDISTDIR" not set, aborting $0
@@ -62,7 +62,7 @@ if test ! -d "$TMPDIR"; then
 fi
 export TMPDIR
 
-# Create temporary folder as we don't want to change the EXTDISTDIR's content
+# create temporary folder as we don't want to change the EXTDISTDIR's content
 WINTMP=$TMPDIR/win-dist-$(date +%s)
 
 rm -r -f $WINTMP
@@ -72,7 +72,7 @@ mkdir $WINTMP
 echo cp -p -r  $EXTDISTDIR $WINTMP
 cp -p -r $EXTDISTDIR $WINTMP || exit 1
 
-# Add content only necessary for windows dist zip
+# add content only necessary for windows dist zip
 echo cp -p -r $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR/
 cp -p -r $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR/ || exit 2
 echo cp $EXTSRCDIR/tests/atlocal_win $WINTMP/$EXTDISTDIR/tests/atlocal_win
@@ -87,15 +87,15 @@ mv "config.h.in"   "config.h"
 mv "defaults.h.in" "defaults.h"
 cd ..
 
-# Remove content not necessary for windows dist zip --> breaks make dist[check]
+# remove content not necessary for windows dist zip --> breaks make dist[check]
 # rm -r -f m4
 
-# Change line ending for files in zip-file
-
+# change line ending for files in zip-file
 find -regextype posix-egrep -regex ".*(\.([chyl]|def|cpy|cob|conf|cfg)|(README|ChangeLog|AUTHORS|ABOUT-NLS|NEWS|THANKS|TODO|COPYING.*))$" \
  -exec sed -i -e 's/\r*$/\r/' {} \;
  
 # fix timestamps again
+chmod +x ./doc/cobcinfo.sh
 ./doc/cobcinfo.sh "fixtimestamps"
 touch "./bin/cobcrun.1"
 touch "./cobc/cobc.1"
@@ -115,12 +115,12 @@ done
 cd .. # back in win-dist
 
 
-# Create windows dist zip
+# create windows dist zip
 rm -f $EXTDISTDIR"_win.zip"
 zip -rq $olddir/$EXTDISTDIR"_win.zip" $EXTDISTDIR
 
 cd $olddir # back in starting directory
 
-# Remove temporary folder
+# remove temporary folder
 rm -r -f $WINTMP
 
