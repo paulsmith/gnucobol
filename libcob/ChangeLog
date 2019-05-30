@@ -2,7 +2,8 @@
 2019-05-30  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am (AM_CPPFLAGS): include new substituted LIBCOB_CPPFLAGS
-	* Makefile.am: handle LOCAL_CJSON (adds cJSON.c to libcob's sources)
+	* Makefile.am: handle LOCAL_CJSON by adding cJSON.c to libcob's nodist
+	  sources and cJSON.c + cJSON.h to DISTCLEANFILES
 
 2019-05-26  Simon Sobisch <simonsobisch@gnu.org>
 
