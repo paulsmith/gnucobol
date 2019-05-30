@@ -82,10 +82,15 @@ dist-hook:
 #	touch $(top_distdir)/libcob/libcob.3
 #	touch $(top_distdir)/bin/cobcrun.1
 #	touch $(top_distdir)/cobc/cobc.1
+
 # Create dist_win manually (dist-zip would have the same content as dist-gzip)
-	if test -f create_win_dist.sh; then \
-		EXTSRCDIR=$(srcdir) EXTDISTDIR=$(distdir) ./create_win_dist.sh; \
-	fi
+distwindir = $(distdir)_win
+distwin: distdir $(top_srcdir)/build_windows $(top_srcdir)/create_win_dist.sh
+	EXTSRCDIR=$(srcdir) EXTDISTDIR=$(distdir) EXTWINDISTDIR=$(distwindir) $(top_srcdir)/create_win_dist.sh
+
+distwin-zip: distwin
+	rm -f "$(distwindir).zip"
+	zip -rq "$(distwindir).zip" "$(distwindir)"
 
 defaults.h: Makefile.am $(top_builddir)/config.status
 	@echo "Creating defaults.h..."

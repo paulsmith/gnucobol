@@ -10,6 +10,11 @@
 	  linkable in folder libcob (both srcdir and builddir supported);
 	  takes precedence over search by means of pkg-config and/or
 	  CJSON_CFLAGS and CJSON_LIBS
+	* Makefile.am (dist-hook): moved creation of windows source zip to a
+	  separate target and make it work for out-of-tree builds, too
+	* create_win_dist.sh: all external paths are now specified by
+	  environment variables; use rsync with exclude filters for
+	  build_windows instead of plain cp
 
 2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
 
