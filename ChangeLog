@@ -5,6 +5,11 @@
 	  needs to be inspected later) by not copying LIBCOB_LIBS to COB_LIBS
 	  and resetting LIBS after XML2/CJSON check;
 	  now substituting LIBCOB_CPPFLAGS
+	* configure.ac: --with-cjson=local added (defines LOCAL_CJSON),
+	  allowing to built-in cjson into libcob when its sources are found and
+	  linkable in folder libcob (both srcdir and builddir supported);
+	  takes precedence over search by means of pkg-config and/or
+	  CJSON_CFLAGS and CJSON_LIBS
 
 2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -18,11 +23,8 @@
 2019-05-13  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac, gnucobol.spec: version dump to 3.1-dev
-	* configure.ac: --with-cjson=local added (defines `LOCAL_CJSON`),
-	  allowing to built-in cjson into libcob when the local folder cJSON
-	  exists in srcdir, also used as fallback if cJSON cannot be found by
-	  means of pkg-config and/or CJSON_CFLAGS and CJSON_LIBS;
-	  checks/defines HAVE_CJSON_H as an alternative to HAVE_CJSON_CJSON_H
+	* configure.ac: checks/defines HAVE_CJSON_H as an alternative to
+	  HAVE_CJSON_CJSON_H
 
 2019-05-05  Simon Sobisch <simonsobisch@gnu.org>
 

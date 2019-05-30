@@ -511,43 +511,62 @@ AC_ARG_WITH([cjson],
   [with_cjson=check])
 
 AS_IF([test "$with_cjson" = "yes" -o "$with_cjson" = "local" -o "$with_cjson" = "check"], [
+	AC_MSG_NOTICE([Checks for local cJSON ...])
 	curr_libs="$LIBS"; curr_cppflags="$CPPFLAGS"
-	PKG_CHECK_MODULES([CJSON], [libcjson], [], [#])
-	if test -n "$CJSON_CFLAGS"; then
-	  CPPFLAGS="$CPPFLAGS $CJSON_CFLAGS"
+	with_cjson_local=no
+	AC_CHECK_FILE([./libcob/cJSON.c],
+	  [AC_MSG_CHECKING([if linking of ./libcob/cJSON.c works])
+	   CPPFLAGS="$curr_cppflags -I./libcob"
+	   AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "cJSON.c"]],
+	    [[cJSON_CreateNull ();]])],
+	   [AC_MSG_RESULT([yes])
+	    with_cjson_local="yes (in ./libcob)"],
+	   [AC_MSG_RESULT([no])]
+	   )]
+	)
+	if test "$with_cjson_local" = "no"; then
+	  AC_CHECK_FILE([$srcdir/libcob/cJSON.c],
+	    [AC_MSG_CHECKING([if linking of $srcdir/libcob/cJSON.c works])
+	     CPPFLAGS="$curr_cppflags -I$srcdir/libcob"
+	     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "cJSON.c"]],
+	      [[cJSON_CreateNull ();]])],
+	     [AC_MSG_RESULT([yes])
+	      with_cjson_local="yes (in $srcdir/libcob)"],
+	     [AC_MSG_RESULT([no])]
+	     )]
+	  )
 	fi
-	if test -z "$CJSON_LIBS"; then
-	  CJSON_LIBS="-lcjson"
-	fi
-	LIBS="$LIBS $CJSON_LIBS"
-	AC_CHECK_HEADERS([cJSON.h],
-		[],
-		[AC_CHECK_HEADERS([cjson/cJSON.h], [],
-			[AC_MSG_NOTICE([Checks for local cJSON ...])
-			with_cjson_local=no
-			AC_CHECK_FILE([$srcdir/cJSON/cJSON.c],
-			  [AC_CHECK_FILE([$srcdir/cJSON/cJSON.h], [with_cjson_local=yes])])
-			   if test "$with_cjson_local" = "no"; then
-			      AC_MSG_NOTICE([no local cJSON found])
-			      if test "$with_cjson" = "local"; then 
-			         AC_MSG_ERROR([[cJSON source is required in "cJSON" for --with-cjson=local]])
-			      fi
-			      if test "$with_cjson" = "yes"; then 
-			         AC_MSG_ERROR([Headers for libcjson are required for --with-cjson, you may adjust CJSON_CFLAGS])
-			      else
-			         with_cjson=no
-			      fi
-			   else
-			      AC_MSG_NOTICE([local cJSON is used])
-			      AC_DEFINE([HAVE_CJSON_H], 1)
-			      AC_DEFINE([WITH_CJSON], 1)
-			      with_cjson=local
-			   fi]
-			)])
-	if test "$with_cjson" != "no"; then 
-	  if test "$with_cjson" != "local"; then 
-		AC_MSG_CHECKING([if linking against libcjson with "$CJSON_LIBS" works])
-		AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <cjson/cJSON.h>]],
+	CPPFLAGS="$curr_cppflags"
+	if test "$with_cjson_local" = "no"; then
+		AC_MSG_NOTICE([using local cJSON: no])
+		if test "$with_cjson" = "local"; then 
+		  AC_MSG_ERROR([[cJSON source is required in directory "libcob" for --with-cjson=local]])
+		fi
+		PKG_CHECK_MODULES([CJSON], [libcjson], [], [#])
+		if test -n "$CJSON_CFLAGS"; then
+		  CPPFLAGS="$CPPFLAGS $CJSON_CFLAGS"
+		fi
+		if test -z "$CJSON_LIBS"; then
+		  CJSON_LIBS="-lcjson"
+		fi
+		LIBS="$LIBS $CJSON_LIBS"
+		AC_CHECK_HEADERS([cJSON.h], [],
+			[AC_CHECK_HEADERS([cjson/cJSON.h], [],
+			[if test "$with_cjson" = "yes"; then 
+			    AC_MSG_ERROR([Headers for libcjson are required for --with-cjson, you may adjust CJSON_CFLAGS])
+			 else
+				AC_MSG_WARN([Headers for libcjson missing, you may adjust CJSON_CFLAGS or put cJSON sources in "libcob"])
+			    with_cjson=no
+			 fi]
+		)])
+		if test "$with_cjson" != "no"; then
+		 AC_MSG_CHECKING([if linking against libcjson with "$CJSON_LIBS" works])
+		 AC_LINK_IFELSE([AC_LANG_PROGRAM([
+		 [#if defined HAVE_CJSON_CJSON_H
+		  #include <cjson/cJSON.h>
+		  #elif defined HAVE_CJSON_H
+		  #include <cJSON.h>
+		  #endif]],
 		  [[cJSON_CreateNull ();]])],
 		  [AC_DEFINE([WITH_CJSON], [1]) AC_MSG_RESULT([yes])
 		   with_cjson=yes
@@ -560,10 +579,12 @@ AS_IF([test "$with_cjson" = "yes" -o "$with_cjson" = "local" -o "$with_cjson" = 
 		     AC_MSG_WARN([xml library not found, you may adjust CJSON_LIBS])
 		     with_cjson=no
 		   fi])
-	  fi
+		fi
 	else
-		AC_MSG_WARN([Headers for libcjson missing, you may adjust CJSON_CFLAGS or put cJSON sources in $srcdir])
-		 with_cjson=no
+		AC_MSG_NOTICE([using local cJSON: $with_cjson_local])
+		with_cjson="local"
+		AC_DEFINE([WITH_CJSON], [1])
+		AC_DEFINE([HAVE_CJSON_H], [1])
 	fi
 	LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
 ])

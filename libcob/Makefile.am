@@ -24,20 +24,11 @@ libcob_la_SOURCES = common.c move.c numeric.c strings.c \
 	fileio.c call.c intrinsic.c termio.c screenio.c reportio.c cobgetopt.c \
 	mlio.c
 if LOCAL_CJSON
-CJSON_DIR = $(top_srcdir)/cJSON
-SOURCES_CJSON = $(builddir)/cJSON.c $(builddir)/cJSON.h
-BUILT_SOURCES = $(SOURCES_CJSON)
-libcob_la_SOURCES += $(SOURCES_CJSON)
-$(builddir)/cJSON.c: $(CJSON_DIR)/cJSON.c
-	cp -p $< $@
-$(builddir)/cJSON.h: $(CJSON_DIR)/cJSON.h
-	cp -p $< $@
+libcob_la_SOURCES += cJSON.c
 endif
 #ToDo Man Page
 #dist_man_MANS = libcob.3
 #COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)
-
-MAINTAINERCLEANFILES = $(SOURCES_CJSON)
 
 AM_CPPFLAGS = -I$(top_srcdir) $(LIBCOB_CPPFLAGS)
 AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)

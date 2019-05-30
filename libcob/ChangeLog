@@ -2,6 +2,7 @@
 2019-05-30  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am (AM_CPPFLAGS): include new substituted LIBCOB_CPPFLAGS
+	* Makefile.am: handle LOCAL_CJSON (adds cJSON.c to libcob's sources)
 
 2019-05-26  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -31,8 +32,6 @@
 	  COB_FERROR_FILE
 	* common.c, mlio.c: adjusted to handle HAVE_CJSON_H as an alternative
 	  to HAVE_CJSON_CJSON_H
-	* Makefile.am: handle LOCAL_CJSON (copying its sources to builddir) and
-	  adding cJSON.c to the compiled sources
 
 2019-05-11  Simon Sobisch <simonsobisch@gnu.org>
 
