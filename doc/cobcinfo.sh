@@ -251,7 +251,7 @@ _create_file () {
 		;;
 	"cbconf.tex")
 		$GREP -A9999 "https://www.gnu.org/licenses/" \
-		  $confdir/default.conf \
+		  "$confdir/default.conf" \
 		| tail -n +2                   >$1
 		;;
 	"cbrunt.tex")
@@ -274,7 +274,7 @@ _create_file () {
 		lines=`expr 20 + $lines`
 		# All other sections
 		echo "@verbatim"               >>$1
-		tail -n +$lines $confdir/runtime.cfg | \
+		tail -n +$lines "$confdir/runtime.cfg" | \
 			cut -b2- | \
 			sed -e 's/\r//g' \
 			    -e 's/^#\( .*\)/@end verbatim\n@section\1\n@verbatim/g' \
@@ -284,8 +284,8 @@ _create_file () {
   esac
 }
 
-docdir=`dirname $0`
-confdir=$docdir/../config
+docdir="`dirname $0`"
+confdir="$docdir/../config"
 created_texfiles="cbhelp.tex cbchelp.tex cbrese.tex cbintr.tex cbsyst.tex"
 created_texfiles="$created_texfiles cbmnem.tex cbconf.tex cbrunt.tex"
 

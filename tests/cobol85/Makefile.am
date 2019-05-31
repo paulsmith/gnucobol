@@ -44,6 +44,7 @@ EXTRA_DIST = EXEC85.conf.in expand.pl report.pl summary.pl summary.txt \
 COB85DIR = "`cd $(srcdir) && pwd`"
 WGET_FLAGS = -t1 -T5
 DIFF_FLAGS = @DIFF_FLAGS@
+COBC_FLAGS = -std=cobol85 -debug
 
 # MAKEFLAGS = --no-print-directory
 
@@ -181,7 +182,7 @@ $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 	else \
 		export NEWCOB_VAL=$<; \
 	fi; \
-	. ../atconfig && . ../atlocal NIST_EXEC85_$@ && cd $@ && $$COBCRUN_DIRECT ../EXEC85$(EXEEXT)
+	cd $@ && $(abs_top_builddir)/pre-inst-env ../EXEC85$(EXEEXT)
 	@perl $(srcdir)/expand.pl $@/newcob.tmp $@
 #	@rm -f ./$@/newcob.tmp ./$@/newcob.log ./$@/EXEC85.conf
 	@export CBL_LIST="`  ls $@/*.CBL | cut -b4- | tr "\n" " "`"  && \
@@ -213,4 +214,4 @@ EXEC85.cob: newcob.val
 
 EXEC85$(EXEEXT): EXEC85.cob
 	@echo "Compiling EXEC85 program"
-	@. ../atconfig && . ../atlocal EXEC85 && $$COBC -debug -std=cobol85 -x $<
+	@$(abs_top_builddir)/pre-inst-env cobc$(EXEEXT) $(COBC_FLAGS) -x $<

@@ -19,17 +19,20 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
-if COB_MAKE_RUN_BINARIES
-COBCINFOSH = . $(top_builddir)/tests/atconfig && . $(top_builddir)/tests/atlocal && \
-	GREP=$(GREP) $(top_srcdir)/doc/cobcinfo.sh
-else
-COBCINFOSH = GREP=$(GREP) $(top_srcdir)/doc/cobcinfo.sh
-endif
-	
+COBC = cobc$(EXEEXT)
+COBCRUN = cobcrun$(EXEEXT)
+PASSED_OPTIONS = GREP=$(GREP) COBC=$(COBC) COBCRUN=$(COBCRUN)
+COBCINFOSH = $(PASSED_OPTIONS) $(abs_top_builddir)/pre-inst-env \
+	$(top_srcdir)/doc/cobcinfo.sh
+
 info_TEXINFOS = gnucobol.texi
 GENINCLUDES = cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex \
-	 cbconf.tex cbchelp.tex cbrunt.tex
+	cbconf.tex cbchelp.tex cbrunt.tex
 gnucobol_TEXINFOS = $(GENINCLUDES) fdl.texi
+BUILT_SOURCES = $(GENINCLUDES)
+
+# targets that are only logical targets instead of files
+.PHONY: touch touch-tex clean-tex
 
 if COB_MAKE_RUN_BINARIES
 cbhelp.tex: $(top_srcdir)/cobc/cobc.c $(top_srcdir)/configure.ac \
@@ -66,6 +69,9 @@ touch-tex:
 
 touch:
 	$(COBCINFOSH) "fixtimestamps"
+
+clean-tex:
+	rm -rf $(GENINCLUDES)
 
 EXTRA_DIST = gnucobol.pdf
 dist_noinst_SCRIPTS = cobcinfo.sh
