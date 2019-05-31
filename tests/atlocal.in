@@ -20,16 +20,15 @@
 # along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 if test "$GNUCOBOL_ENV_SETUP" != "1" -a "$GNUCOBOL_TEST_LOCAL" != "1"; then
-	COBC="${abs_top_builddir}/cobc/cobc@COB_EXE_EXT@"
-	COBCRUN="${abs_top_builddir}/bin/cobcrun@COB_EXE_EXT@"
+	ABS_COBC="${abs_top_builddir}/cobc/cobc@COB_EXE_EXT@"
+	ABS_COBCRUN="${abs_top_builddir}/bin/cobcrun@COB_EXE_EXT@"
 	# prepend PATH with the actual binaries to let the testsuite find them for
 	# general check and version output, nomally not needed
 	PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${abs_top_builddir}/libcob/.libs:${PATH}"
 	export PATH
-else
-	COBC="cobc@COB_EXE_EXT@"
-	COBCRUN="cobcrun@COB_EXE_EXT@"
 fi
+COBC="cobc@COB_EXE_EXT@"
+COBCRUN="cobcrun@COB_EXE_EXT@"
 COBCRUN_DIRECT="" # used for running created executables through tools
 
 # be sure to use the English messages
@@ -62,7 +61,7 @@ _unset_option () {
 # for runtime configuration
 COB_RUNTIME_CONFIG="${abs_top_srcdir}/config/runtime_empty.cfg"
 export COB_RUNTIME_CONFIG
-for cobenv in `$COBCRUN --runtime-conf | grep COB_ | cut -d: -f2 | cut -d= -f1`; \
+for cobenv in `"${abs_top_builddir}/pre-inst-env" cobcrun@COB_EXE_EXT@ --runtime-conf | grep COB_ | cut -d: -f2 | cut -d= -f1`; \
 	do _unset_option $cobenv; \
 done
 

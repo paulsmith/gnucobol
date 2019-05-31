@@ -182,7 +182,7 @@ $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 	else \
 		export NEWCOB_VAL=$<; \
 	fi; \
-	cd $@ && $(abs_top_builddir)/pre-inst-env ../EXEC85$(EXEEXT)
+	cd $@ && "$(abs_top_builddir)/pre-inst-env" ../EXEC85$(EXEEXT)
 	@perl $(srcdir)/expand.pl $@/newcob.tmp $@
 #	@rm -f ./$@/newcob.tmp ./$@/newcob.log ./$@/EXEC85.conf
 	@export CBL_LIST="`  ls $@/*.CBL | cut -b4- | tr "\n" " "`"  && \
@@ -214,4 +214,4 @@ EXEC85.cob: newcob.val
 
 EXEC85$(EXEEXT): EXEC85.cob
 	@echo "Compiling EXEC85 program"
-	@$(abs_top_builddir)/pre-inst-env cobc$(EXEEXT) $(COBC_FLAGS) -x $<
+	@"$(top_builddir)/pre-inst-env" cobc$(EXEEXT) $(COBC_FLAGS) -x $<
