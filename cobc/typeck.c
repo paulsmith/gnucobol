@@ -7800,7 +7800,7 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 	}
 
 	whens = CB_VALUE (case_list);
-	stmt = CB_VALUE (whens);
+	stmt  = CB_VALUE (whens);
 	whens = CB_CHAIN (whens);
 	c1 = NULL;
 
@@ -7827,7 +7827,7 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 			}
 		}
 		if (subjs || objs) {
-			cb_error_x (case_list, _("wrong number of WHEN parameters"));
+			cb_error_x (whens, _("wrong number of WHEN parameters"));
 		}
 		/* Connect multiple WHEN's */
 		if (c1 == NULL) {

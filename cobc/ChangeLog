@@ -1,4 +1,10 @@
 
+2019-05-31  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (restore_backup_pos): extracted for common use
+	* parser.y (evaluate_when_list), typeck.c (build_evaluate): assign and
+	  use position of the WHEN clause for better error handling
+
 2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: setting of YFLAGS by configure instead of fixed AM_YFLAGS

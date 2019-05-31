@@ -292,12 +292,18 @@ begin_statement (const char *name, const unsigned int term)
 }
 
 static void
+restore_backup_pos (cb_tree item)
+{
+	item->source_file = backup_source_file;
+	item->source_line = backup_source_line;
+}
+
+static void
 begin_statement_from_backup_pos (const char *name, const unsigned int term)
 {
 	current_paragraph->flag_statement = 1;
 	current_statement = cb_build_statement (name);
-	CB_TREE (current_statement)->source_file = backup_source_file;
-	CB_TREE (current_statement)->source_line =backup_source_line;
+	restore_backup_pos (CB_TREE (current_statement));
 	current_statement->flag_in_debug = in_debugging;
 	emit_statement (CB_TREE (current_statement));
 	if (term) {
@@ -12031,15 +12037,25 @@ evaluate_other:
 ;
 
 evaluate_when_list:
-  WHEN evaluate_object_list
+  WHEN
   {
-	$$ = CB_LIST_INIT ($2);
+	backup_current_pos ();
+  }
+  evaluate_object_list
+  {
+	$$ = CB_LIST_INIT ($3);
+	restore_backup_pos ($$);
 	eval_inc2 = 0;
   }
 | evaluate_when_list
-  WHEN evaluate_object_list
+  WHEN
   {
-	$$ = cb_list_add ($1, $3);
+	backup_current_pos ();
+  }
+  evaluate_object_list
+  {
+	$$ = cb_list_add ($1, $4);
+	restore_backup_pos ($$);
 	eval_inc2 = 0;
   }
 ;
