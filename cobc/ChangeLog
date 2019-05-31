@@ -4,6 +4,7 @@
 	* parser.y (restore_backup_pos): extracted for common use
 	* parser.y (evaluate_when_list), typeck.c (build_evaluate): assign and
 	  use position of the WHEN clause for better error handling
+	* flag.def: don't suppress static call flags in help
 
 2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
 
