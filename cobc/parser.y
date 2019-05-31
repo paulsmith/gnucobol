@@ -10588,7 +10588,11 @@ call_body:
 	}
 	call_conv = current_call_convention;
 	if ($6) {
-		call_conv_local = CB_INTEGER ($6)->val;
+		if (current_call_convention & CB_CONV_STATIC_LINK) {
+			call_conv = CB_INTEGER ($6)->val | CB_CONV_STATIC_LINK;
+		} else {
+			call_conv = CB_INTEGER ($6)->val;
+		}
 		if ($1) {
 			/* note: $1 is likely to be a reference to SPECIAL-NAMES */
 			cb_error_x ($6, _("%s and %s are mutually exclusive"),
