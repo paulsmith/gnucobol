@@ -2080,6 +2080,7 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %token BUTTONS
 %token BY
 %token BYTE_LENGTH		"BYTE-LENGTH"
+%token C
 %token CALENDAR_FONT	"CALENDAR-FONT"
 %token CALL
 %token CANCEL
@@ -2555,6 +2556,7 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %token OVERLINE
 %token PACKED_DECIMAL		"PACKED-DECIMAL"
 %token PADDING
+%token PASCAL
 %token PAGE
 %token PAGE_COUNTER		"PAGE-COUNTER"
 %token PAGE_SETUP		"PAGE-SETUP"
@@ -3797,9 +3799,11 @@ mnemonic_choices:
 			CB_CHAIN_PAIR (current_program->mnemonic_spec_list,
 					$3, save_tree);
 			/* remove non-standard context-sensitive words when identical to mnemonic */
-			if (strcasecmp (CB_NAME($3), "EXTERN") == 0 ||
+			if (strcasecmp (CB_NAME($3), "EXTERN" ) == 0 ||
 			    strcasecmp (CB_NAME($3), "STDCALL") == 0 ||
-			    strcasecmp (CB_NAME($3), "STATIC") == 0) {
+			    strcasecmp (CB_NAME($3), "STATIC" ) == 0 ||
+			    strcasecmp (CB_NAME($3), "C"      ) == 0 ||
+			    strcasecmp (CB_NAME($3), "PASCAL" ) == 0) {
 				remove_context_sensitivity (CB_NAME($3), CB_CS_CALL);
 			}
 		}
@@ -9157,13 +9161,22 @@ _procedure_division:
 	cb_set_system_names ();
 	backup_current_pos ();
   }
-  _mnemonic_conv _procedure_using_chaining _procedure_returning TOK_DOT
+  _mnemonic_conv _conv_linkage _procedure_using_chaining _procedure_returning TOK_DOT
   {
-	if ($4) {
+	cb_tree call_conv = $4;
+	if ($5) {
+		call_conv = $5;
+		if ($4) {
+			/* note: $4 is likely to be a reference to SPECIAL-NAMES */
+			cb_error_x ($5, _ ("%s and %s are mutually exclusive"),
+				"CALL-CONVENTION", "WITH LINKAGE");
+		}
+	}
+	if (call_conv) {
 		if (current_program->entry_convention) {
 			cb_warning (COBC_WARN_FILLER, _("overriding convention specified in ENTRY-CONVENTION"));
 		}
-		current_program->entry_convention = $4;
+		current_program->entry_convention = call_conv;
 	} else if (!current_program->entry_convention) {
 		current_program->entry_convention = cb_int (CB_CONV_COBOL);
 	}
@@ -9172,14 +9185,14 @@ _procedure_division:
   _procedure_declaratives
   {
 	if (current_program->flag_main
-	 && !current_program->flag_chained && $5) {
+	 && !current_program->flag_chained && $6) {
 		cb_error (_("executable program requested but PROCEDURE/ENTRY has USING clause"));
 	}
 	/* Main entry point */
-	emit_entry (current_program->program_id, 0, $5, NULL);
-	current_program->num_proc_params = cb_list_length ($5);
+	emit_entry (current_program->program_id, 0, $6, NULL);
+	current_program->num_proc_params = cb_list_length ($6);
 	if (current_program->source_name) {
-		emit_entry (current_program->source_name, 1, $5, NULL);
+		emit_entry (current_program->source_name, 1, $6, NULL);
 	}
   }
   _procedure_list
@@ -10558,6 +10571,7 @@ call_body:
 	cobc_allow_program_name = 0;
   }
   _thread_handle
+  _conv_linkage
   call_using
   call_returning
   call_exception_phrases
@@ -10573,7 +10587,15 @@ call_body:
 		current_program->flag_recursive = 1;
 	}
 	call_conv = current_call_convention;
-	if ((CB_PAIR_X ($8) != NULL)
+	if ($6) {
+		call_conv_local = CB_INTEGER ($6)->val;
+		if ($1) {
+			/* note: $1 is likely to be a reference to SPECIAL-NAMES */
+			cb_error_x ($6, _("%s and %s are mutually exclusive"),
+				"CALL-CONVENTION", "WITH LINKAGE");
+		}
+	}
+	if ((CB_PAIR_X ($9) != NULL)
 	 && (call_conv & CB_CONV_STATIC_LINK)) {
 		cb_warning_x (COBC_WARN_FILLER, $3,
 		    _("STATIC CALL convention ignored because of ON EXCEPTION"));
@@ -10582,7 +10604,7 @@ call_body:
 	if ($1) {
 		if (CB_INTEGER_P ($1)) {
 			call_conv_local = CB_INTEGER ($1)->val;
-			if ((CB_PAIR_X ($8) != NULL)
+			if ((CB_PAIR_X ($9) != NULL)
 			 && (call_conv_local & CB_CONV_STATIC_LINK)) {
 				cb_error_x ($1, _("%s and %s are mutually exclusive"),
 					"STATIC CALL", "ON EXCEPTION");
@@ -10602,8 +10624,43 @@ call_body:
 	if (call_nothing) {
 		call_conv |= CB_CONV_NO_RET_UPD;
 	}
-	cb_emit_call ($3, $6, $7, CB_PAIR_X ($8), CB_PAIR_Y ($8),
+	cb_emit_call ($3, $7, $8, CB_PAIR_X ($9), CB_PAIR_Y ($9),
 		      cb_int (call_conv), $2, $5, backup_source_line);
+  }
+;
+
+_conv_linkage:
+  /* empty */
+  {
+	$$ = NULL;
+  }
+| WITH
+  {
+	/* FIXME: hack - fake cs for context-sensitive WITH ... LINKAGE */
+	cobc_cs_check |= CB_CS_OPTIONS;
+	backup_current_pos ();
+  }
+  conv_linkage_option LINKAGE
+  {
+	$$ = $3;
+	restore_backup_pos ($$);
+	cobc_cs_check ^= CB_CS_OPTIONS;
+	cb_verify_x ($$, cb_call_convention_linkage, "WITH ... LINKAGE");
+  }
+;
+
+conv_linkage_option:
+  STDCALL
+  {
+	$$ = cb_int (CB_CONV_STDCALL);
+  }
+| C
+  {
+	$$ = cb_int (CB_CONV_C);
+  }
+| PASCAL
+  {
+	$$ = cb_int (CB_CONV_PASCAL);
   }
 ;
 
@@ -10612,7 +10669,15 @@ _mnemonic_conv:
   {
 	$$ = NULL;
   }
-| STATIC	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
+| mnemonic_conv
+  {
+	cb_verify (cb_call_convention_mnemonic, "CALL-/ENTRY-CONVENTION");
+	$$ = $1;
+  }
+;
+
+mnemonic_conv:
+  STATIC	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
   {
 	if (current_call_convention & CB_CONV_COBOL) {
 		$$ = cb_int (CB_CONV_STATIC_LINK | CB_CONV_COBOL);
@@ -10624,9 +10689,17 @@ _mnemonic_conv:
   {
 	$$ = cb_int (CB_CONV_STDCALL);
   }
+| C	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
+  {
+	$$ = cb_int (CB_CONV_C);
+  }
 | TOK_EXTERN	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
   {
-	$$ = cb_int0;
+	$$ = cb_int (CB_CONV_C);
+  }
+| PASCAL	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
+  {
+	$$ = cb_int (CB_CONV_PASCAL);
   }
 | MNEMONIC_NAME
   {
@@ -11066,7 +11139,7 @@ continue_statement:
 _continue_after_phrase:
   /* empty */	{ $$ = NULL;}
 | AFTER {
-	/* FIXME: hack - fake cs for  context-sensitive SECONDS */
+	/* FIXME: hack - fake cs for context-sensitive SECONDS */
 	cobc_cs_check = CB_CS_RETRY;
   }
   exp SECONDS
@@ -11864,15 +11937,24 @@ entry_statement:
 ;
 
 entry_body:
-  _mnemonic_conv LITERAL call_using
+  _mnemonic_conv LITERAL _conv_linkage call_using
   {
 	if (current_program->nested_level) {
 		cb_error (_("%s is invalid in nested program"), "ENTRY");
 	} else if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("%s is invalid in a user FUNCTION"), "ENTRY");
 	} else if (cb_verify (cb_entry_statement, "ENTRY")) {
+		cb_tree call_conv = $1;
+		if ($3) {
+			call_conv = $3;
+			if ($1) {
+				/* note: $1 is likely to be a reference to SPECIAL-NAMES */
+				cb_error_x ($3, _("%s and %s are mutually exclusive"),
+					"CALL-CONVENTION", "WITH LINKAGE");
+			}
+		}
 		if (!cobc_check_valid_name ((char *)(CB_LITERAL ($2)->data), ENTRY_NAME)) {
-			emit_entry ((char *)(CB_LITERAL ($2)->data), 1, $3, $1);
+			emit_entry ((char *)(CB_LITERAL ($2)->data), 1, $4, call_conv);
 		}
 	}
   }

@@ -509,6 +509,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "BYTE-LENGTH",		0, 1, BYTE_LENGTH,		/* 2002 (C/S) */
 				0, CB_CS_CONSTANT
   },
+  { "C",			0, 1, C,			/* Extension: implicit defined CALL-CONVENTION */
+				0, CB_CS_CALL | CB_CS_OPTIONS
+  },
   { "CALENDAR-FONT",		0, 1, CALENDAR_FONT,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
@@ -2003,6 +2006,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "PARSE",			0, 1, PARSE,			/* IBM extension */
    				0, 0
+  },
+  {"PASCAL",			0, 1, PASCAL,			/* Extension: implicit defined CALL-CONVENTION */
+				0, CB_CS_CALL | CB_CS_OPTIONS
   },
   { "PASSWORD",			0, 1, PASSWORD,			/* IBM extension */
 				0, CB_CS_SELECT

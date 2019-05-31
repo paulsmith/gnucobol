@@ -4118,7 +4118,7 @@ AT_CLEANUP
 
 
 AT_SETUP([NOT ON EXCEPTION with STATIC CALL convention])
-AT_KEYWORDS([misc])
+AT_KEYWORDS([misc CALL-CONVENTION])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4584,7 +4584,7 @@ AT_CLEANUP
 
 
 AT_SETUP([conflicting entry conventions])
-AT_KEYWORDS([misc ENTRY-CONVENTION])
+AT_KEYWORDS([misc ENTRY-CONVENTION CALL-CONVENTION LINKAGE])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION  DIVISION.
@@ -4596,12 +4596,87 @@ AT_DATA([prog.cob], [
        SPECIAL-NAMES.
            CALL-CONVENTION 0 IS EXTERN.
 
-       PROCEDURE       DIVISION EXTERN.
+       PROCEDURE     DIVISION EXTERN.
            CONTINUE
            .
 ])
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob:11: warning: overriding convention specified in ENTRY-CONVENTION
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog2.
+       OPTIONS.
+           ENTRY-CONVENTION COBOL.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+
+       PROCEDURE     DIVISION WITH C LINKAGE.
+           CONTINUE
+           .
+])
+AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [],
+[prog2.cob:9: warning: overriding convention specified in ENTRY-CONVENTION
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog3.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CALL-CONVENTION 0 IS EXTERN.
+
+       PROCEDURE     DIVISION
+           EXTERN
+           WITH C LINKAGE.
+           CONTINUE
+       ENTRY 'ANOTHERSTATEMENT'.
+           CONTINUE
+       ENTRY EXTERN 'ANOTHERSTATEMENT2'.
+           CONTINUE
+       ENTRY 'ANOTHERSTATEMENT3' WITH C LINKAGE.
+           CONTINUE
+       ENTRY
+           EXTERN
+           'ANOTHERSTATEMENT4'
+           WITH C LINKAGE.
+           CONTINUE
+           .
+])
+AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
+[prog3.cob:11: error: CALL-CONVENTION and WITH LINKAGE are mutually exclusive
+prog3.cob:22: error: CALL-CONVENTION and WITH LINKAGE are mutually exclusive
+])
+AT_CLEANUP
+
+
+AT_SETUP([conflicting call conventions])
+AT_KEYWORDS([misc CALL-CONVENTION LINKAGE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       PROCEDURE     DIVISION.
+           CALL EXTERN 'callee'.
+           CALL 'callee' WITH C LINKAGE.
+           CALL
+              EXTERN
+              'callee'
+              WITH C LINKAGE
+              .
+           GOBACK.
+])
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:10: error: CALL-CONVENTION and WITH LINKAGE are mutually exclusive
+])
+AT_CHECK([$COMPILE_ONLY -std=cobol85 -freserved=EXTERN,C prog.cob], [1], [],
+[prog.cob:5: error: CALL-/ENTRY-CONVENTION does not conform to COBOL 85
+prog.cob:6: error: WITH ... LINKAGE does not conform to COBOL 85
+prog.cob:8: error: CALL-/ENTRY-CONVENTION does not conform to COBOL 85
+prog.cob:10: error: WITH ... LINKAGE does not conform to COBOL 85
+prog.cob:10: error: CALL-CONVENTION and WITH LINKAGE are mutually exclusive
 ])
 AT_CLEANUP
 

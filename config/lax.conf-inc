@@ -101,8 +101,10 @@ symbolic-constant:			+warning
 constant-78:				ok
 constant-01:				ok
 perform-varying-without-by:		ok
-program-prototypes:			ok
 reference-out-of-declaratives:		+warning
+program-prototypes:			ok
+call-convention-mnemonic:		ok
+call-convention-linkage:		ok
 numeric-value-for-edited-item:		+warning
 incorrect-conf-sec-order:		+warning
 define-constant-directive:		+obsolete

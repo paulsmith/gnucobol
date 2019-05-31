@@ -6,6 +6,15 @@
 	  use position of the WHEN clause for better error handling
 	* flag.def: don't suppress static call flags in help
 
+2019-05-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, reserved.c, tree.h, config.def: FR #311 added Fujitsu
+	  specification of call convention by WITH ... LINKAGE,
+	  added the two new c/s words PASCAL and C to the additional
+	  implementor defined call-convention;
+	  added configuration options for both extensions for specifying the
+	  call-convention
+
 2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: setting of YFLAGS by configure instead of fixed AM_YFLAGS

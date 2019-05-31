@@ -274,11 +274,17 @@ CB_CONFIG_SUPPORT (cb_constant_01, "constant-01",
 CB_CONFIG_SUPPORT (cb_perform_varying_without_by, "perform-varying-without-by",
 	_("PERFORM VARYING without BY phrase (implies BY 1)"))
 
+CB_CONFIG_SUPPORT (cb_reference_out_of_declaratives, "reference-out-of-declaratives",
+	_("references to sections not in DECLARATIVES from within DECLARATIVES"))
+
 CB_CONFIG_SUPPORT (cb_program_prototypes, "program-prototypes",
 	_("CALL/CANCEL with program-prototype-name"))
 
-CB_CONFIG_SUPPORT (cb_reference_out_of_declaratives, "reference-out-of-declaratives",
-	_("references to sections not in DECLARATIVES from within DECLARATIVES"))
+CB_CONFIG_SUPPORT (cb_call_convention_mnemonic, "call-convention-mnemonic",
+	_("specifying call-convention by mnemonic"))
+
+CB_CONFIG_SUPPORT (cb_call_convention_linkage, "call-convention-linkage",
+	_("specifying call-convention by WITH ... LINKAGE"))
 
 CB_CONFIG_SUPPORT (cb_numeric_value_for_edited_item, "numeric-value-for-edited-item",
 	_("numeric literals in VALUE clause of numeric-edited items"))
