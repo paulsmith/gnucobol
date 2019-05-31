@@ -372,92 +372,6 @@ cob_screen_attr (cob_field *fgc, cob_field *bgc, const cob_flags_t attr,
 	}
 }
 
-/* check and handle adjustments to settings concerning screenio */
-void
-cob_settings_screenio (void)
-{
-#ifdef	COB_GEN_SCREENIO
-	if (!cobglobptr || !cobglobptr->cob_screen_initialized) {
-		return;
-	}
-
-	/* Extended ACCEPT status returns */
-	if (cobsetptr->cob_extended_status == 0) {
-		cobsetptr->cob_use_esc = 0;
-	}
-	
-	if (curr_setting_insert_mode != COB_INSERT_MODE) {
-		/* Depending on insert mode set vertical bar cursor (on)
-		   or square cursor (off) - note: the cursor change may has no
-		   effect in all curses implementations / terminals */
-		if (COB_INSERT_MODE == 0) {
-			(void)curs_set(2);	/* set square cursor */
-		} else {
-			(void)curs_set(1);	/* set vertical bar cursor */
-		}
-		curr_setting_insert_mode = COB_INSERT_MODE;
-	}
-
-#ifdef NCURSES_MOUSE_VERSION
-	if (curr_setting_mouse_flags != COB_MOUSE_FLAGS) {
-		mmask_t 	mask;
-		if (COB_MOUSE_FLAGS) {
-			// note: currently missing in the accept handling:
-			// click+drag within a field to mark it (should be
-			// done in general when the SHIFT key + cursor is
-			// used) [shown by reverse-video those positions]
-			// and by delete remove the marked characters,
-			// by typing removing them before adding the new ones
-			// remove marker when positioning key is used or
-			// mouse click into any field occurs
-			cob_mask = 0;
-			if (COB_MOUSE_FLAGS & 2) {
-				cob_mask |= BUTTON1_PRESSED;
-			}
-			if (COB_MOUSE_FLAGS & 4) {
-				cob_mask |= BUTTON1_RELEASED;
-			}
-			if (COB_MOUSE_FLAGS & 8) {
-				cob_mask |= BUTTON1_DOUBLE_CLICKED;
-			}
-			if (COB_MOUSE_FLAGS & 16) {
-				cob_mask |= BUTTON2_PRESSED;
-			}
-			if (COB_MOUSE_FLAGS & 32) {
-				cob_mask |= BUTTON2_RELEASED;
-			}
-			if (COB_MOUSE_FLAGS & 64) {
-				cob_mask |= BUTTON2_DOUBLE_CLICKED;
-			}
-			if (COB_MOUSE_FLAGS & 128) {
-				cob_mask |= BUTTON3_PRESSED;
-			}
-			if (COB_MOUSE_FLAGS & 256) {
-				cob_mask |= BUTTON3_RELEASED;
-			}
-			if (COB_MOUSE_FLAGS & 512) {
-				cob_mask |= BUTTON3_DOUBLE_CLICKED;
-			}
-			if (COB_MOUSE_FLAGS & 1024) {
-				cob_mask |= REPORT_MOUSE_POSITION;
-			}
-			// 2048 cursor shape, seems irrelevant
-			// 16384 all windows,
-			// only relevant when adding multiple windows
-			mask = cob_mask | BUTTON1_PRESSED
-				// note: not done by ACUCOBOL (ENTER translation):
-				|| BUTTON1_DOUBLE_CLICKED
-				;
-		} else {
-			mask = 0;
-		}
-		mousemask (mask, NULL);
-		curr_setting_mouse_flags = COB_MOUSE_FLAGS;
-	}
-#endif
-#endif
-}
-
 static void
 cob_screen_init (void)
 {
@@ -1303,7 +1217,7 @@ cob_toggle_insert ()
 	else {
 		COB_INSERT_MODE = 0;     /* off */
 	}
-	cob_settings_screenio();
+	cob_settings_screenio ();
 }
 
 #define SET_FLD_AND_DATA_REFS(curr_index,structure,scrdef,sline,scolumn,right_pos,field_data) \
@@ -3467,6 +3381,93 @@ cob_get_scr_lines (void)
 	return 24;
 #endif
 }
+
+/* check and handle adjustments to settings concerning screenio */
+void
+cob_settings_screenio (void)
+{
+#ifdef	COB_GEN_SCREENIO
+	if (!cobglobptr || !cobglobptr->cob_screen_initialized) {
+		return;
+	}
+
+	/* Extended ACCEPT status returns */
+	if (cobsetptr->cob_extended_status == 0) {
+		cobsetptr->cob_use_esc = 0;
+	}
+
+	if (curr_setting_insert_mode != COB_INSERT_MODE) {
+		/* Depending on insert mode set vertical bar cursor (on)
+		   or square cursor (off) - note: the cursor change may has no
+		   effect in all curses implementations / terminals */
+		if (COB_INSERT_MODE == 0) {
+			(void)curs_set (2);	/* set square cursor */
+		} else {
+			(void)curs_set (1);	/* set vertical bar cursor */
+		}
+		curr_setting_insert_mode = COB_INSERT_MODE;
+	}
+
+#ifdef NCURSES_MOUSE_VERSION
+	if (curr_setting_mouse_flags != COB_MOUSE_FLAGS) {
+		mmask_t 	mask;
+		if (COB_MOUSE_FLAGS) {
+			// note: currently missing in the accept handling:
+			// click+drag within a field to mark it (should be
+			// done in general when the SHIFT key + cursor is
+			// used) [shown by reverse-video those positions]
+			// and by delete remove the marked characters,
+			// by typing removing them before adding the new ones
+			// remove marker when positioning key is used or
+			// mouse click into any field occurs
+			cob_mask = 0;
+			if (COB_MOUSE_FLAGS & 2) {
+				cob_mask |= BUTTON1_PRESSED;
+			}
+			if (COB_MOUSE_FLAGS & 4) {
+				cob_mask |= BUTTON1_RELEASED;
+			}
+			if (COB_MOUSE_FLAGS & 8) {
+				cob_mask |= BUTTON1_DOUBLE_CLICKED;
+			}
+			if (COB_MOUSE_FLAGS & 16) {
+				cob_mask |= BUTTON2_PRESSED;
+			}
+			if (COB_MOUSE_FLAGS & 32) {
+				cob_mask |= BUTTON2_RELEASED;
+			}
+			if (COB_MOUSE_FLAGS & 64) {
+				cob_mask |= BUTTON2_DOUBLE_CLICKED;
+			}
+			if (COB_MOUSE_FLAGS & 128) {
+				cob_mask |= BUTTON3_PRESSED;
+			}
+			if (COB_MOUSE_FLAGS & 256) {
+				cob_mask |= BUTTON3_RELEASED;
+			}
+			if (COB_MOUSE_FLAGS & 512) {
+				cob_mask |= BUTTON3_DOUBLE_CLICKED;
+			}
+			if (COB_MOUSE_FLAGS & 1024) {
+				cob_mask |= REPORT_MOUSE_POSITION;
+			}
+			// 2048 cursor shape, seems irrelevant
+			// 16384 all windows,
+			// only relevant when adding multiple windows
+			mask = cob_mask | BUTTON1_PRESSED
+				// note: not done by ACUCOBOL (ENTER translation):
+				|| BUTTON1_DOUBLE_CLICKED
+				;
+		} else {
+			mask = 0;
+		}
+		mousemask (mask, NULL);
+		curr_setting_mouse_flags = COB_MOUSE_FLAGS;
+	}
+#endif
+#endif
+}
+
 
 void
 cob_init_screenio (cob_global *lptr, cob_settings *sptr)
