@@ -1,4 +1,5 @@
-      *>  Copyright (C) 2008-2012, 2015-2016, 2019 Free Software Foundation, Inc.
+      *>  Copyright (C) 2008-2012, 2015-2016,
+      *>  2019 Free Software Foundation, Inc.
       *>  Written by Roger While, Simon Sobisch
       *>
       *>  This file is part of GnuCOBOL.

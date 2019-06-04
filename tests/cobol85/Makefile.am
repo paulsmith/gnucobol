@@ -185,7 +185,7 @@ $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 	cd $@ && "$(abs_top_builddir)/pre-inst-env" ../EXEC85$(EXEEXT)
 	@perl $(srcdir)/expand.pl $@/newcob.tmp $@
 #	@rm -f ./$@/newcob.tmp ./$@/newcob.log ./$@/EXEC85.conf
-	@export CBL_LIST="`  ls $@/*.CBL | cut -b4- | tr "\n" " "`"  && \
+	@export CBL_LIST="`ls $@/*.CBL | cut -b4- | tr "\n" " "`"  && \
 	 sed -e 's/##MODULE##/'"$@"'/'            \
 	     -e 's|##COB85DIR##|'"$(COB85DIR)"'|' \
 	     -e 's|##TESTS##|'"` echo $$CBL_LIST | sed -e 's/\.CBL//g'`"'|' \
