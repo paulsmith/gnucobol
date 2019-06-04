@@ -7735,7 +7735,7 @@ next_group_plus:
 	}
 	current_field->next_group_line = cb_get_int ($1);
   }
-| PLUS integer
+| plus integer
   {
 	current_field->report_flag |= COB_REPORT_NEXT_GROUP_PLUS;
 	current_field->next_group_line = cb_get_int($2);
@@ -17029,7 +17029,7 @@ qualified_word:
 
 unqualified_word:
   {
-	start_tree = NULL;	// actually not needed - initialized for clarity only
+	start_tree = NULL;	/* actually not needed - initialized for clarity only */
   }
   unqualified_word_check
   {

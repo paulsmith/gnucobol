@@ -29,8 +29,8 @@
 #define COB_WITHOUT_DECIMAL
 #else
 typedef __mpz_struct mpz_t[1];
-#endif // !__GNU_MP__
-#endif // !__GMP_H__
+#endif
+#endif
 
 
 /* General type defines */
@@ -297,6 +297,12 @@ Note: also defined together with __clang__ in both frontends:
 #define COB_BSWAP_16(val) (_byteswap_ushort (val))
 #define COB_BSWAP_32(val) (_byteswap_ulong (val))
 #define COB_BSWAP_64(val) (_byteswap_uint64 (val))
+
+#elif defined(__ORANGEC__)
+
+#define COB_BSWAP_16(val) (COB_BSWAP_16_CONSTANT (val))
+#define COB_BSWAP_32(val) (__builtin_bswap32 (val))
+#define COB_BSWAP_64(val) (__builtin_bswap64 (val))
 
 #else /* Generic */
 

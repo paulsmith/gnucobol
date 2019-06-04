@@ -1928,6 +1928,7 @@ extern int			cb_list_map (cb_tree (*) (cb_tree), cb_tree);
 /* error.c */
 extern void		cb_warning_x (int, cb_tree, const char *, ...) COB_A_FORMAT34;
 extern void		cb_error_x (cb_tree, const char *, ...) COB_A_FORMAT23;
+extern unsigned int	cb_verify (const enum cb_support, const char *);
 extern unsigned int	cb_verify_x (cb_tree, const enum cb_support,
 				     const char *);
 extern void		listprint_suppress (void);

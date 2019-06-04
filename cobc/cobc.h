@@ -604,7 +604,6 @@ extern char *		cb_get_strerror (void);
 extern void		cb_add_error_to_listing (const char *, int, const char *, char *);
 DECLNORET extern void		flex_fatal_error (const char *, const char *,
 					 const int) COB_A_NORETURN;
-extern unsigned int	cb_verify (const enum cb_support, const char *);
 
 /* reserved.c */
 extern struct reserved_word_list	*cobc_user_res_list;

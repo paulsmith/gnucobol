@@ -2098,7 +2098,7 @@ cb_int_hex (const int n)
 }
 
 
-#else	// ! CACHED_INTEGERS
+#else	/* ! CACHED_INTEGERS */
 
 cb_tree
 cb_int (const int n)
@@ -2133,7 +2133,7 @@ cb_int_hex (const int n)
 #endif
 }
 
-#endif // ! CACHED_INTEGERS
+#endif /* ! CACHED_INTEGERS */
 
 /* String */
 

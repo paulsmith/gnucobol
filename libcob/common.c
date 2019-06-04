@@ -6173,7 +6173,7 @@ set_config_val (char *value, int pos)
 			cob_new_trace_file ();
 		} else if (strcmp (gc_conf[pos].env_name, "COB_INSERT_MODE") == 0
 		        || strcmp (gc_conf[pos].env_name, "COB_MOUSE_FLAGS") == 0) {
-			cob_settings_screenio ();;
+			cob_settings_screenio ();
 		}
 
 	} else if ((data_type & ENV_CHAR)) {	/* 'char' field inline */

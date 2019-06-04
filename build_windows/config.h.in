@@ -1,6 +1,6 @@
 
 /* config.h, tested with x86/x64 VS2005-2019
-   and OrangeC 6.0.40.1 (which ignores the lib comments) */
+   and OrangeC 6.0.41.1 (which ignores the lib comments) */
 
 #define NOISAM   0
 #define BDB      1
@@ -177,7 +177,11 @@
 /* #undef HAVE_ATTRIBUTE_ALIGNED */
 
 /* Define to 1 if you have the `canonicalize_file_name' function. */
+#if defined(__ORANGEC__)
+#define HAVE_CANONICALIZE_FILE_NAME 1
+#else
 /* #undef HAVE_CANONICALIZE_FILE_NAME */
+#endif
 
 /* Define to 1 if you have the Mac OS X function CFLocaleCopyCurrent in the
    CoreFoundation framework. */
@@ -272,7 +276,11 @@
 /* #undef HAVE_FINITE_IEEEFP_H */
 
 /* Define to 1 if you have the `getexecname' function. */
+#if defined(__ORANGEC__)
+#define HAVE_GETEXECNAME 1
+#else
 /* #undef HAVE_GETEXECNAME */
+#endif
 
 /* Define if the GNU gettext() function is already present or preinstalled. */
 /* #undef HAVE_GETTEXT */
@@ -414,7 +422,11 @@
 /* #undef HAVE_READLINK */
 
 /* Define to 1 if you have the `realpath' function. */
+#if defined(__ORANGEC__)
+#define HAVE_REALPATH 1
+#else
 /* #undef HAVE_REALPATH */
+#endif
 
 /* Define to 1 if you have the `setenv' function. */
 /* MSC does *NOT* has `setenv' (!)
@@ -429,7 +441,11 @@
 #define HAVE_SETLOCALE 1
 
 /* Define to 1 if you have the `sigaction' function. */
+#if defined(__ORANGEC__)
+#define HAVE_SIGACTION 1
+#else
 /* #undef HAVE_SIGACTION */
+#endif
 
 /* Define to 1 if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1

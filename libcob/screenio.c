@@ -1281,7 +1281,7 @@ mouse_to_exception_code (mmask_t mask) {
 	else if (mask & BUTTON4_PRESSED) fret = 2080;
 	else if (mask & BUTTON5_PRESSED) fret = 2081;
 #endif
-	else fret = 2040;	// mouse-moved (assumed)
+	else fret = 2040;	/* mouse-moved (assumed) */
 
 	if (mask & BUTTON_SHIFT) {
 		if (fret < 2080) {
@@ -1340,7 +1340,7 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 	cob_screen_attr (s->foreg, s->backg, s->attr, ACCEPT_STATEMENT);
 
 #ifdef NCURSES_MOUSE_VERSION
-	// prevent warnings about not intialized structure
+	/* prevent warnings about not intialized structure */
 	memset (&mevent, 0, sizeof (MEVENT));
 #endif
 
@@ -1603,7 +1603,7 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 			/* handle depending on state */
 			if (mevent.bstate & BUTTON1_PRESSED) {
 				size_t fld_index = -1;
-				// if in current field, just move
+				/* if in current field, just move */
 				if (mevent.x == cline) {
 					if (mevent.y >= scolumn
 					 && mevent.y <= right_pos) {
@@ -2260,7 +2260,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	origin_y = 0;
 	origin_x = 0;
 #ifdef NCURSES_MOUSE_VERSION
-	// prevent warnings about not intialized structure
+	/* prevent warnings about not intialized structure */
 	memset (&mevent, 0, sizeof (MEVENT));
 #endif
 
@@ -2745,7 +2745,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 		case KEY_MOUSE:
 			/* handle depending on state */
 			if (mevent.bstate & BUTTON1_PRESSED) {
-				// if in current field, just move
+				/* if in current field, just move */
 				if (mevent.x == cline) {
 					if (mevent.y >= scolumn
 					 && mevent.y <= right_pos) {
@@ -2755,7 +2755,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 						continue;
 					}
 				}
-				// shouldn't we have a finalize here?
+				/* CHECKME: shouldn't we have a finalize here? */
 			}
 			mevent.bstate &= cob_mask;
 			if (mevent.bstate != 0) {
@@ -3412,14 +3412,14 @@ cob_settings_screenio (void)
 	if (curr_setting_mouse_flags != COB_MOUSE_FLAGS) {
 		mmask_t 	mask;
 		if (COB_MOUSE_FLAGS) {
-			// note: currently missing in the accept handling:
-			// click+drag within a field to mark it (should be
-			// done in general when the SHIFT key + cursor is
-			// used) [shown by reverse-video those positions]
-			// and by delete remove the marked characters,
-			// by typing removing them before adding the new ones
-			// remove marker when positioning key is used or
-			// mouse click into any field occurs
+			/* note: currently missing in the accept handling:
+			   click+drag within a field to mark it (should be
+			   done in general when the SHIFT key + cursor is
+			   used) [shown by reverse-video those positions]
+			   and by delete remove the marked characters,
+			   by typing removing them before adding the new ones
+			   remove marker when positioning key is used or
+			   mouse click into any field occurs */
 			cob_mask = 0;
 			if (COB_MOUSE_FLAGS & 2) {
 				cob_mask |= BUTTON1_PRESSED;
@@ -3451,11 +3451,11 @@ cob_settings_screenio (void)
 			if (COB_MOUSE_FLAGS & 1024) {
 				cob_mask |= REPORT_MOUSE_POSITION;
 			}
-			// 2048 cursor shape, seems irrelevant
-			// 16384 all windows,
-			// only relevant when adding multiple windows
+			/* 2048 cursor shape, seems irrelevant
+			   16384 all windows,
+			   only relevant when adding multiple windows */
 			mask = cob_mask | BUTTON1_PRESSED
-				// note: not done by ACUCOBOL (ENTER translation):
+				/* note: not done by ACUCOBOL (ENTER translation): */
 				|| BUTTON1_DOUBLE_CLICKED
 				;
 		} else {

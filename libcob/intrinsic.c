@@ -2070,7 +2070,7 @@ get_iso_week_one (const int day_num, const int day_of_year)
 
 /*
  * Derived from "Calculating the ISO week number for a date" by Julian M.
- * Bucknall (http://www.boyet.com/articles/publishedarticles/calculatingtheisoweeknumb.html).
+ * Bucknall (https://www.boyet.com/articles/publishedarticles/calculatingtheisoweeknumb.html).
  */
 static void
 get_iso_week (const int day_num, int *year, int *week)
