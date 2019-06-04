@@ -382,7 +382,7 @@ main (int argc, char **argv)
 	}
 
 	if (strlen (argv[arg_shift]) > COB_MAX_NAMELEN) {
-		// note: we allow up to COB_MAX_WORDLEN for relaxed syntax...
+		/* note: we allow up to COB_MAX_WORDLEN for relaxed syntax... */
 		fprintf (stderr, _("%s: PROGRAM name exceeds %d characters"), argv[0], COB_MAX_NAMELEN);
 		putc ('\n', stderr);
 		fflush (stderr);
