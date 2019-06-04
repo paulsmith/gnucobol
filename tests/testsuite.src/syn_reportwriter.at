@@ -166,8 +166,8 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:18: error: invalid COLUMN integer; must be > 0
-prog.cob:24: error: positive integer value expected
-prog.cob:25: error: positive integer value expected
+prog.cob:24: error: unsigned integer value expected
+prog.cob:25: error: unsigned integer value expected
 ])
 
 AT_CLEANUP

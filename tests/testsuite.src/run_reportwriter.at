@@ -349,9 +349,9 @@ AT_DATA([prog.cob], [
        RD  rp PAGE LIMIT 3.
 
        01  rp-detail TYPE DE.
-         02  LINE +1.
+         02  LINE + 1.
          03     COL 1; SOURCE foo, PIC X(30).
-         03     COL +1             PIC X(6) VALUE "<--->".
+         03     COL + 1            PIC X(6) VALUE "<--->".
 
        PROCEDURE DIVISION.
            OPEN OUTPUT report-file.
@@ -409,9 +409,9 @@ AT_DATA([prog.cob], [
        RD  rp PAGE LIMIT 3 LINES.
 
        01  rp-detail TYPE DE.
-         02  LINE +1.
+         02  LINE + 1.
          03            SOURCE foo, PIC X(30).
-         03     COL +1             PIC X(6) VALUE "<--->".
+         03     COL + 1            PIC X(6) VALUE "<--->".
 
        PROCEDURE DIVISION.
            OPEN OUTPUT report-file.
@@ -2455,7 +2455,7 @@ AT_DATA([prog.cob], [
                03  COLUMN 95   PIC X(03) VALUE 'PAY'.
       
        01  DEPT-HEAD TYPE CONTROL HEADING PRR-DEPARTMENT-NUMBER
-           NEXT GROUP +1.
+           NEXT GROUP + 1.
            02  LINE PLUS 1.
                03  COLUMN 01   PIC X(18) VALUE
                      'DEPARTMENT NUMBER:'.
@@ -2463,7 +2463,7 @@ AT_DATA([prog.cob], [
                03  COLUMN 24   PIC X(15) SOURCE DE-NAME (DE-IX).
       
        01  EMPLOYEE-DETAIL TYPE DETAIL.
-           02  LINE +1.
+           02  LINE + 1.
                03  COLUMN 01   PIC X(27) SOURCE PRR-EMPLOYEE-KEY.
                03  COLUMN 30   PIC X(5) VALUE "Hello"
                                PRESENT AFTER NEW PRR-EMPLOYEE-KEY
@@ -4142,9 +4142,9 @@ AT_DATA([prog.cob], [
             05  COLUMN 1      PIC X(50) VALUE 
                 "12345678901234567890123456789012345678901234567890".
 
-       01  RP-DTL1 TYPE DETAIL, LINE + 1.
-            03  NUMS  COLUMN 1  PIC 999 OCCURS 3 TIMES STEP 10.
-            03  MARK  COLUMN +2 PIC X(4).
+       01  RP-DTL1 TYPE DETAIL,  LINE + 1.
+            03  NUMS  COLUMN 1   PIC 999 OCCURS 3 TIMES STEP 10.
+            03  MARK  COLUMN + 2 PIC X(4).
 
        01  rp-dtl2 TYPE DETAIL, LINE + 1.
             03  grps  COLUMN 1 OCCURS 3 TIMES.
@@ -4158,9 +4158,9 @@ AT_DATA([prog.cob], [
             03  TAGP  COLUMN PLUS 3 PIC X(4).
 
        01  RP-DTL4 TYPE DETAIL, LINE + 1.
-            03  NUM4A               PIC 999.
-            03  NUM4B COLUMN PLUS 7 PIC 999 OCCURS 3.
-            03  MRK4  COLUMN +2     PIC X(4).
+            03  NUM4A                PIC 999.
+            03  NUM4B COLUMN PLUS 7  PIC 999 OCCURS 3.
+            03  MRK4  COLUMN + 2     PIC X(4).
 
        PROCEDURE DIVISION.
            OPEN OUTPUT rp-file
@@ -4261,9 +4261,9 @@ AT_DATA([progv.cob], [
                   VARYING IDX1 FROM 1 BY 1. 
                 10  FILLER    PIC X(10) SOURCE DIGS (IDX1).
 
-       01  RP-DTL1 TYPE DETAIL, LINE + 1.
-            03  NUMS  COLUMN 1  PIC 999 OCCURS 3 TIMES STEP 10.
-            03  MARK  COLUMN +2 PIC X(4).
+       01  RP-DTL1 TYPE DETAIL,  LINE + 1.
+            03  NUMS  COLUMN 1   PIC 999 OCCURS 3 TIMES STEP 10.
+            03  MARK  COLUMN + 2 PIC X(4).
 
        01  RP-DTL2 TYPE DETAIL, LINE + 1.
             03  GRPS  COLUMN 1 OCCURS 3 TIMES.
@@ -4279,7 +4279,7 @@ AT_DATA([progv.cob], [
        01  RP-DTL4 TYPE DETAIL, LINE + 1.
             03  NUM4A               PIC 999.
             03  NUM4B COLUMN PLUS 7 PIC 999 OCCURS 3.
-            03  MRK4  COLUMN +2     PIC X(4).
+            03  MRK4  COLUMN + 2    PIC X(4).
 
        PROCEDURE DIVISION.
            OPEN OUTPUT RP-FILE
@@ -4358,8 +4358,8 @@ AT_DATA([progl.cob], [
                 10  FILLER    PIC X(10) SOURCE DIGS (IDX1).
 
        01  RP-DTL1 TYPE DETAIL, LINE + 1.
-            03  NUMS  COLUMN 1  PIC 999 OCCURS 3 TIMES STEP 10.
-            03  MARK  COLUMN +2 PIC X(4).
+            03  NUMS  COLUMN 1   PIC 999 OCCURS 3 TIMES STEP 10.
+            03  MARK  COLUMN + 2 PIC X(4).
 
        01  RP-DTL2 TYPE DETAIL, LINE + 1.
             03  GRPS  COLUMN 1 OCCURS 3 TIMES.
@@ -4375,7 +4375,7 @@ AT_DATA([progl.cob], [
        01  RP-DTL4 TYPE DETAIL, LINE + 1.
             03  NUM4A               PIC 999.
             03  NUM4B COLUMN PLUS 7 PIC 999 OCCURS 3.
-            03  MRK4  COLUMN +2     PIC X(4).
+            03  MRK4  COLUMN + 2    PIC X(4).
 
        PROCEDURE DIVISION.
            OPEN OUTPUT RP-FILE
@@ -4463,9 +4463,9 @@ AT_DATA([prog.cob], [
        RD  rp PAGE LIMIT 3.
 
        01  rp-detail TYPE DE.
-         02  LINE +1.
+         02  LINE + 1.
          03     COL 1; SOURCE foo, PIC X(30).
-         03     COL +1             PIC X(6) VALUE "<--->".
+         03     COL + 1            PIC X(6) VALUE "<--->".
 
        PROCEDURE DIVISION.
            OPEN OUTPUT report-file.
@@ -4529,9 +4529,9 @@ AT_DATA([prog.cob], [
        RD  rp PAGE LIMIT 3.
 
        01  rp-detail TYPE DE.
-         02  LINE +1.
+         02  LINE + 1.
          03     COL 1; SOURCE foo, PIC X(30).
-         03     COL +1             PIC X(6) VALUE "<--->".
+         03     COL + 1            PIC X(6) VALUE "<--->".
 
        PROCEDURE DIVISION.
            OPEN OUTPUT report-file.
@@ -4589,9 +4589,9 @@ AT_DATA([prog.cob], [
        RD  rp PAGE LIMIT 3.
 
        01  rp-detail TYPE DE.
-         02  LINE +1.
+         02  LINE + 1.
          03     COL 1; SOURCE foo, PIC X(30).
-         03     COL +1             PIC X(6) VALUE "<--->".
+         03     COL + 1            PIC X(6) VALUE "<--->".
 
        PROCEDURE DIVISION.
            OPEN OUTPUT report-file.

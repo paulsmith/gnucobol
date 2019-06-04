@@ -1995,6 +1995,51 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 	prepend_to_ml_suppress_list (suppress_type);
 }
 
+static void
+set_record_size (cb_tree min, cb_tree max)
+{
+	int record_min, record_max;
+
+	if (min) {
+		record_min = cb_get_int (min);
+		if (record_min < 0) {
+			/* already handled by integer check */
+		} else {
+			current_file->record_min = record_min;
+		}
+	} else {
+		record_min = 0;
+	}
+	if (!max) return;
+	record_max = cb_get_int (max);
+	if (record_max < 0) {
+		/* already handled by integer check */
+		return;
+	} else if (record_max == 0) {
+		/* Note: standard COBOL does not allow zero at all, use the related
+		         configuration option */
+		if (cb_records_mismatch_record_clause >= CB_ERROR) {
+			cb_error (_("non-zero value expected"));
+		}
+		return;
+	}
+	if (current_file->organization == COB_ORG_INDEXED
+	 && record_max > MAX_FD_RECORD_IDX)  {
+		cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"),
+			MAX_FD_RECORD_IDX);
+		current_file->record_max = MAX_FD_RECORD_IDX;
+	} else if (record_max > MAX_FD_RECORD)  {
+		cb_error (_("RECORD size exceeds maximum allowed (%d)"),
+			MAX_FD_RECORD);
+		current_file->record_max = MAX_FD_RECORD;
+	} else {
+		if (record_max <= record_min)  {
+			cb_error (_("RECORD clause invalid"));
+		}
+		current_file->record_max = record_max;
+	}
+}
+
 %}
 
 %token TOKEN_EOF 0 "end of file"
@@ -5522,102 +5567,25 @@ record_clause:
 	if (current_file->organization == COB_ORG_LINE_SEQUENTIAL) {
 		cb_warning (warningopt, _("RECORD clause ignored for LINE SEQUENTIAL"));
 	} else {
-		current_file->record_max = cb_get_int ($3);
-		if (current_file->record_max < 1)  {
-			current_file->record_max = 1;
-			cb_error (_("RECORD clause invalid"));
-		}
-		if (current_file->organization == COB_ORG_INDEXED) {
-			if (current_file->record_max > MAX_FD_RECORD_IDX)  {
-				current_file->record_max = MAX_FD_RECORD_IDX;
-				cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"),
-					  MAX_FD_RECORD_IDX);
-			}
-		} else if (current_file->record_max > MAX_FD_RECORD)  {
-			current_file->record_max = MAX_FD_RECORD;
-			cb_error (_("RECORD size exceeds maximum allowed (%d)"),
-				  MAX_FD_RECORD);
-		}
+		set_record_size (NULL, $3);
 	}
   }
 | RECORD _contains integer TO integer _characters
   {
-	int	error_ind = 0;
-
 	check_repeated ("RECORD", SYN_CLAUSE_4, &check_duplicate);
 	if (current_file->organization == COB_ORG_LINE_SEQUENTIAL) {
 		cb_warning (warningopt, _("RECORD clause ignored for LINE SEQUENTIAL"));
 	} else {
-		current_file->record_min = cb_get_int ($3);
-		current_file->record_max = cb_get_int ($5);
-		if (current_file->record_min < 0)  {
-			current_file->record_min = 0;
-			error_ind = 1;
-		}
-		if (current_file->record_max < 1)  {
-			current_file->record_max = 1;
-			error_ind = 1;
-		}
-		if (current_file->organization == COB_ORG_INDEXED) {
-			if (current_file->record_max > MAX_FD_RECORD_IDX)  {
-				current_file->record_max = MAX_FD_RECORD_IDX;
-				cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"),
-					  MAX_FD_RECORD_IDX);
-				error_ind = 1;
-			}
-		} else if (current_file->record_max > MAX_FD_RECORD)  {
-			current_file->record_max = MAX_FD_RECORD;
-			cb_error (_("RECORD size exceeds maximum allowed (%d)"),
-				  MAX_FD_RECORD);
-			error_ind = 1;
-		}
-		if (current_file->record_max <= current_file->record_min)  {
-			error_ind = 1;
-		}
-		if (error_ind) {
-			cb_error (_("RECORD clause invalid"));
-		}
+		set_record_size ($3, $5);
 	}
   }
 | RECORD _is VARYING _in _size _from_integer _to_integer _characters
   _record_depending
   {
-	int	error_ind = 0;
-
 	check_repeated ("RECORD", SYN_CLAUSE_4, &check_duplicate);
-	current_file->record_min = $6 ? cb_get_int ($6) : 0;
-	current_file->record_max = $7 ? cb_get_int ($7) : 0;
+	set_record_size ($6, $7);
 	current_file->flag_check_record_varying_limits =
 		current_file->record_min == 0 || current_file->record_max == 0;
-	if ($6 && current_file->record_min < 0)  {
-		current_file->record_min = 0;
-		error_ind = 1;
-	}
-	if ($7 && current_file->record_max < 1)  {
-		current_file->record_max = 1;
-		error_ind = 1;
-	}
-	if ($7) {
-		if (current_file->organization == COB_ORG_INDEXED) {
-			if (current_file->record_max > MAX_FD_RECORD_IDX)  {
-				current_file->record_max = MAX_FD_RECORD_IDX;
-				cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"),
-					  MAX_FD_RECORD_IDX);
-				error_ind = 1;
-			}
-		} else if (current_file->record_max > MAX_FD_RECORD)  {
-			current_file->record_max = MAX_FD_RECORD;
-			cb_error (_("RECORD size exceeds maximum allowed (%d)"),
-				  MAX_FD_RECORD);
-			error_ind = 1;
-		}
-	}
-	if (($6 || $7) && current_file->record_max <= current_file->record_min)  {
-		error_ind = 1;
-	}
-	if (error_ind) {
-		cb_error (_("RECORD clause invalid"));
-	}
   }
 ;
 
@@ -7441,7 +7409,7 @@ page_limit_clause:
 ;
 
 page_line_column:
-  report_int_ident _line_or_lines
+  integer_or_zero_or_ident _line_or_lines
   {
 	if (CB_LITERAL_P ($1)) {
 		current_report->lines = cb_get_int ($1);
@@ -7453,7 +7421,7 @@ page_line_column:
 	}
   }
 | page_limit_cols
-| report_int_ident line_or_lines page_limit_cols
+| integer_or_zero_or_ident line_or_lines page_limit_cols
   {
 	if (CB_LITERAL_P ($1)) {
 		current_report->lines = cb_get_int ($1);
@@ -7467,7 +7435,7 @@ page_line_column:
 ;
 
 page_limit_cols:
-  report_int_ident columns_or_cols
+  integer_or_zero_or_ident columns_or_cols
   {
 	/* may be repeated later by page detail */
 	check_repeated ("LINE LIMIT", SYN_CLAUSE_5, &check_duplicate);
@@ -7479,8 +7447,8 @@ page_limit_cols:
   }
 ;
 
-report_int_ident:
-  report_integer
+integer_or_zero_or_ident:
+  integer_or_zero
 | identifier
 ;
 
@@ -7495,7 +7463,7 @@ page_detail:
 | last_heading
 | last_detail
 | footing_clause
-| LINE_LIMIT _is report_int_ident
+| LINE_LIMIT _is integer_or_zero_or_ident
   {
 	check_repeated ("LINE LIMIT", SYN_CLAUSE_5, &check_duplicate);
 	if (CB_LITERAL_P ($3)) {
@@ -7507,7 +7475,7 @@ page_detail:
 ;
 
 heading_clause:
-  HEADING _is report_int_ident
+  HEADING _is integer_or_zero_or_ident
   {
 	check_repeated ("HEADING", SYN_CLAUSE_6, &check_duplicate);
 	error_if_no_page_lines_limit ("HEADING");
@@ -7521,7 +7489,7 @@ heading_clause:
 ;
 
 first_detail:
-  FIRST detail_keyword _is report_int_ident
+  FIRST detail_keyword _is integer_or_zero_or_ident
   {
 	check_repeated ("FIRST DETAIL", SYN_CLAUSE_7, &check_duplicate);
 	error_if_no_page_lines_limit ("FIRST DETAIL");
@@ -7535,7 +7503,7 @@ first_detail:
 ;
 
 last_heading:
-  LAST ch_keyword _is report_int_ident
+  LAST ch_keyword _is integer_or_zero_or_ident
   {
 	check_repeated ("LAST CONTROL HEADING", SYN_CLAUSE_8, &check_duplicate);
 	error_if_no_page_lines_limit ("LAST CONTROL HEADING");
@@ -7549,7 +7517,7 @@ last_heading:
 ;
 
 last_detail:
-  LAST detail_keyword _is report_int_ident
+  LAST detail_keyword _is integer_or_zero_or_ident
   {
 	check_repeated ("LAST DETAIL", SYN_CLAUSE_9, &check_duplicate);
 	error_if_no_page_lines_limit ("LAST DETAIL");
@@ -7563,7 +7531,7 @@ last_detail:
 ;
 
 footing_clause:
-  FOOTING _is report_int_ident
+  FOOTING _is integer_or_zero_or_ident
   {
 	check_repeated ("FOOTING", SYN_CLAUSE_10, &check_duplicate);
 	error_if_no_page_lines_limit ("FOOTING");
@@ -7740,11 +7708,6 @@ next_group_plus:
 	current_field->report_flag |= COB_REPORT_NEXT_GROUP_PLUS;
 	current_field->next_group_line = cb_get_int($2);
   }
-| TOK_PLUS integer
-  {
-	current_field->report_flag |= COB_REPORT_NEXT_GROUP_PLUS;
-	current_field->next_group_line = cb_get_int($2);
-  }
 | next_page
   {
 	current_field->report_flag |= COB_REPORT_NEXT_GROUP_PAGE;
@@ -7874,60 +7837,17 @@ _line_clause_options:
 ;
 
 line_clause_option:
-  line_clause_integer
-  {
-	if (current_field->report_line == 0) {
-		CB_PENDING ("LINE 0");
-	}
-  }
-| NEXT_PAGE	/* token contains optional ON */
+  NEXT_PAGE	/* token contains optional ON */
   {
 	current_field->report_flag |= COB_REPORT_LINE_NEXT_PAGE;
   }
-| PLUS report_integer
+| _plus integer_or_zero
   {
-	current_field->report_flag |= COB_REPORT_LINE_PLUS;
 	current_field->report_line = cb_get_int ($2);
-	if ($2 != cb_int0 &&
-	    $2 != cb_int1) {
-		if ((CB_LITERAL_P($2) && CB_LITERAL ($2)->sign < 0)
-		|| current_field->report_line < 0) {
-			cb_error (_("positive integer value expected"));
-		}
-	}
-	if (current_field->report_line == 0) {
-		CB_PENDING ("LINE PLUS 0");
-	}
-  }
-| TOK_PLUS report_integer
-  {
-	current_field->report_flag |= COB_REPORT_LINE_PLUS;
-	current_field->report_line = cb_get_int ($2);
-	if($2 != cb_int0
-	&& $2 != cb_int1) {
-		if ((CB_LITERAL_P($2) && CB_LITERAL ($2)->sign < 0)
-		|| current_field->report_line < 0) {
-			cb_error (_("positive integer value expected"));
-		}
-	}
-	if (current_field->report_line == 0) {
-		CB_PENDING ("LINE PLUS 0");
-	}
-  }
-;
-
-line_clause_integer:
-  report_integer
-  {
-	current_field->report_line = cb_get_int ($1);
-	if ($1 != cb_int0) {
-		if (CB_LITERAL_P($1) && CB_LITERAL ($1)->sign > 0) {
-			current_field->report_flag |= COB_REPORT_LINE_PLUS;
-		} else if ((CB_LITERAL_P($1) && CB_LITERAL ($1)->sign < 0)
-			|| current_field->report_line < 0) {
-			cb_error (_("positive integer value expected"));
-			current_field->report_line = 1;
-			current_field->report_flag |= COB_REPORT_LINE_PLUS;
+	if ($1) {
+		current_field->report_flag |= COB_REPORT_LINE_PLUS;
+		if (current_field->report_line == 0) {
+			CB_PENDING ("LINE PLUS 0");
 		}
 	}
   }
@@ -7974,13 +7894,12 @@ _left_right_center:
 ;
 
 col_or_plus:
-  plus_plus report_integer
+  plus integer_or_zero
   {
-	int colnum;
-	colnum = cb_get_int ($2);
-	if (colnum > 0) {
-		if(current_field->parent
-		&& current_field->parent->children == current_field) {
+	int colnum = cb_get_int ($2);
+	if (colnum != 0) {
+		if (current_field->parent
+		 && current_field->parent->children == current_field) {
 			cb_warning (COBC_WARN_FILLER, _("PLUS is ignored on first field of line"));
 			if (current_field->step_count == 0)
 				current_field->step_count = colnum;
@@ -7990,8 +7909,9 @@ col_or_plus:
 	} else {
 		colnum = 0;
 	}
-	if(current_field->report_column == 0)
+	if (current_field->report_column == 0) {
 		current_field->report_column = colnum;
+	}
 	current_field->report_num_col++;
   }
 | column_integer_list
@@ -8003,33 +7923,22 @@ column_integer_list:
 ;
 
 column_integer:
-  report_integer
+  integer
   {
 	int colnum;
 	colnum = cb_get_int ($1);
-	if (CB_LITERAL_P($1) && CB_LITERAL ($1)->sign > 0) {
-		if(current_field->parent
-		&& current_field->parent->children == current_field) {
-			cb_warning (COBC_WARN_FILLER, _("PLUS is ignored on first field of line"));
-		} else {
-			current_field->report_flag |= COB_REPORT_COLUMN_PLUS;
-		}
+	if (colnum < 0) {
+		/* already handled by integer check */
+	} else if (colnum == 0) {
+		cb_error (_("invalid COLUMN integer; must be > 0"));
+	} else if (colnum <= current_field->report_column) {
+		cb_warning (COBC_WARN_FILLER, _("COLUMN numbers should increase"));
 	}
-	if($1 != cb_int1
-	&& $1 != cb_int0) {
-		if (colnum <= 0
-		|| (CB_LITERAL_P($1) && CB_LITERAL ($1)->sign < 0)) {
-			cb_error (_("invalid COLUMN integer; must be > 0"));
-			colnum = 0;
-			$$ = cb_int0;
-		} else if(colnum <= current_field->report_column) {
-			cb_warning (COBC_WARN_FILLER, _("COLUMN numbers should increase"));
-		}
-		current_field->report_column_list =
-				cb_list_append (current_field->report_column_list, CB_LIST_INIT ($1));
-	}
-	if(current_field->report_column == 0)
+	current_field->report_column_list =
+			cb_list_append (current_field->report_column_list, CB_LIST_INIT ($1));
+	if (current_field->report_column == 0) {
 		current_field->report_column = colnum;
+	}
 	current_field->report_num_col++;
   }
 ;
@@ -9050,14 +8959,25 @@ eos:
 | _end_of SCREEN /* FIXME: this SCREEN is optional! */
 ;
 
-plus_plus:
-  PLUS
-| TOK_PLUS
+_plus:
+  /* empty */ { $$ = NULL; }
+| plus        { $$ = $1; }
 ;
 
-minus_minus:
-  MINUS
-| TOK_MINUS
+plus:
+  plus_tokens { $$ = cb_int0; }
+;
+
+plus_tokens:
+  PLUS | TOK_PLUS
+;
+
+minus:
+  minus_tokens { $$ = cb_int1; }
+;
+
+minus_tokens:
+  MINUS | TOK_MINUS
 ;
 
 control_size:
@@ -9085,11 +9005,11 @@ screen_line_number:
 
 _screen_line_plus_minus:
   /* empty */
-| plus_plus
+| plus
   {
 	current_field->screen_flag |= COB_SCREEN_LINE_PLUS;
   }
-| minus_minus
+| minus
   {
 	current_field->screen_flag |= COB_SCREEN_LINE_MINUS;
   }
@@ -9109,11 +9029,11 @@ _screen_col_plus_minus:
   {
 	/* Nothing */
   }
-| plus_plus
+| plus
   {
 	current_field->screen_flag |= COB_SCREEN_COLUMN_PLUS;
   }
-| minus_minus
+| minus
   {
 	current_field->screen_flag |= COB_SCREEN_COLUMN_MINUS;
   }
@@ -17080,9 +17000,9 @@ integer:
   {
 	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC
 	    || !CB_LITERAL_P($1)
-	    || CB_LITERAL ($1)->sign < 0
+	    || CB_LITERAL ($1)->sign
 	    || CB_LITERAL ($1)->scale) {
-		cb_error (_("non-negative integer value expected"));
+		cb_error (_("unsigned integer value expected"));
 		$$ = cb_build_numeric_literal(-1, "1", 0);
 	} else {
 		$$ = $1;
@@ -17137,19 +17057,10 @@ unsigned_pos_integer:
   }
 ;
 
-report_integer:
-  LITERAL
+integer_or_zero:
+  integer
   {
-	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC) {
-		cb_error (_("Integer value expected"));
-		$$ = cb_int1;
-	} else if (!CB_LITERAL_P($1) ||
-	    CB_LITERAL ($1)->sign < 0 || CB_LITERAL ($1)->scale) {
-		cb_error (_("positive integer value expected"));
-		$$ = cb_int1;
-	} else {
-		$$ = $1;
-	}
+	$$ = $1;
   }
 | ZERO
   {

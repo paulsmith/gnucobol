@@ -1,5 +1,9 @@
 
-2019-30-05 Simon Sobisch <simonsobisch@gnu.org>
+2019-06-02 Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: added option records-mismatch-record-clause
+
+2019-05-30 Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: FR #311 added options call-convention-mnemonic and
 	  call-convention-linkage

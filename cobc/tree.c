@@ -1580,7 +1580,7 @@ cb_get_int (const cb_tree x)
 	unsigned int	size, i;
 	int			val;
 
-	if (x == NULL)		return 0;
+	if (x == NULL || x == cb_error_node)	return 0;
 	if (CB_INTEGER_P(x)) return CB_INTEGER(x)->val;
 
 	/* LCOV_EXCL_START */
@@ -2320,6 +2320,23 @@ cb_build_numeric_literal (int sign, const void *data, const int scale)
 	/* using an intermediate char pointer for pointer arithmetic */
 	const char	*data_chr_ptr = data;
 
+#if 0 /* CHECKME - shouldn't this be what we want? */
+	if (*data_chr_ptr == '-') {
+		if (sign < 1) {
+			sign = 1;
+		} else {
+			sign = -1;
+		}
+		data_chr_ptr++;
+	} else if (*data_chr_ptr == '+') {
+		if (sign < 1) {
+			sign = -1;
+		} else {
+			sign = 1;
+		}
+		data_chr_ptr++;
+	}
+#else
 	if (*data_chr_ptr == '-') {
 		sign = -1;
 		data_chr_ptr++;
@@ -2327,6 +2344,7 @@ cb_build_numeric_literal (int sign, const void *data, const int scale)
 		sign = 1;
 		data_chr_ptr++;
 	}
+#endif
 	data = data_chr_ptr;
 	p = build_literal (CB_CATEGORY_NUMERIC, data, strlen (data));
 	p->sign = (short)sign;
@@ -4178,16 +4196,50 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	for (p = records; p; p = p->sister) {
 		if (f->record_min > 0) {
 			if (p->size < f->record_min) {
-				cb_error_x (CB_TREE(p),
-					_("size of record '%s' (%d) smaller than minimum of file '%s' (%d)"),
-					 p->name, p->size, f->name, f->record_min);
+				if (cb_records_mismatch_record_clause == CB_OK && warningopt < 2) {
+					// nothing to do
+				} else if (cb_records_mismatch_record_clause < CB_ERROR) {
+					cb_warning_x (COBC_WARN_FILLER, CB_TREE (p),
+						_("size of record '%s' (%d) smaller than minimum of file '%s' (%d)"),
+						  p->name, p->size, f->name, f->record_min);
+					cb_warning_x (COBC_WARN_FILLER, CB_TREE (p), _("file size adjusted"));
+				} else {
+					cb_error_x (CB_TREE (p),
+						_("size of record '%s' (%d) smaller than minimum of file '%s' (%d)"),
+						  p->name, p->size, f->name, f->record_min);
+				}
+				f->record_min = p->size;
 			}
 		}
 		if (f->record_max > 0) {
+			/* IBM docs: When the maximum record length determined
+			   from the record description entries does not match
+			   the length specified in the RECORD clause,
+			   the maximum will be used. */
 			if (p->size > f->record_max) {
-				cb_error_x (CB_TREE(p),
-					_("size of record '%s' (%d) larger than maximum of file '%s' (%d)"),
-					 p->name, p->size, f->name, f->record_max);
+				if (cb_records_mismatch_record_clause == CB_OK && warningopt < 2) {
+					// nothing to do
+				} else if (cb_records_mismatch_record_clause < CB_ERROR) {
+					cb_warning_x (COBC_WARN_FILLER, CB_TREE (p),
+						_("size of record '%s' (%d) larger than maximum of file '%s' (%d)"),
+					 	  p->name, p->size, f->name, f->record_max);
+					if (cb_records_mismatch_record_clause > CB_OK || warningopt >= 2) {
+						cb_warning_x (COBC_WARN_FILLER, CB_TREE (p), _("file size adjusted"));
+					}
+				} else {
+					cb_error_x (CB_TREE (p),
+						_("size of record '%s' (%d) larger than maximum of file '%s' (%d)"),
+					 	  p->name, p->size, f->name, f->record_max);
+				}
+				if (f->organization == COB_ORG_INDEXED
+				 && p->size > MAX_FD_RECORD_IDX) {
+					cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"), MAX_FD_RECORD_IDX);
+					p->size = MAX_FD_RECORD_IDX;
+				} else if (p->size > MAX_FD_RECORD) {
+					cb_error (_("RECORD size exceeds maximum allowed (%d)"), MAX_FD_RECORD);
+					p->size = MAX_FD_RECORD;
+				}
+				f->record_max = p->size;
 			}
 		}
 	}

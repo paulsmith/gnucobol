@@ -276,13 +276,16 @@ AT_DATA([prog.cob], [
        01 FILLER.
          02 G-2         PIC X OCCURS -1 TO 1 DEPENDING ON I.
        01 FILLER.
-         02 G-3         PIC X OCCURS  0 TO 1 DEPENDING ON I.
+         02 G-3         PIC X OCCURS +1 TO 1 DEPENDING ON I.
+       01 FILLER.
+         02 G-4         PIC X OCCURS  0 TO 1 DEPENDING ON I.
        01 I             PIC 9.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:7: error: OCCURS TO must be greater than OCCURS FROM
-prog.cob:9: error: non-negative integer value expected
+prog.cob:9: error: unsigned integer value expected
+prog.cob:11: error: unsigned integer value expected
 ])
 
 AT_CLEANUP

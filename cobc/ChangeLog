@@ -1,4 +1,17 @@
 
+2019-06-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* tree.c (cb_get_int): return 0 for cb_error_node not raise errors
+	  on fields that got an error raised before
+	* parser.y: removed duplicate parts for integer handling,
+	  disabled the non-standard "COL/LINE +1/-1" variant (which is not supported
+	  by any known COBOL dialect, must be "COL/LINE + 1 / - 1")
+	* parser.y (set_record_size): extracted from (record_clause) variants
+	* config.def: added records-mismatch-record-clause
+	* parser.y (set_record_size), tree.c (finalize_file): handle record sizes
+	  that don't match the record clause (auto-adjust file min/max) via
+	  records-mismatch-record-clause as it is effectively a comment for IBM
+
 2019-05-31  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y (restore_backup_pos): extracted for common use

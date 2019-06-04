@@ -1,6 +1,6 @@
 NEWS - user visible changes				-*- outline -*-
 
- GnuCOBOL 3.1-rc1/final to be released (in May 2019)
+ GnuCOBOL 3.1-rc1/final to be released (in June 2019)
 
 * New GnuCOBOL features
 
@@ -28,6 +28,14 @@ NEWS - user visible changes				-*- outline -*-
    The external file handler can also be directly invoked from COBOL, too,
    using `CALL "EXTFH"`.
    ** Note: Not all flags contained in the FCD3 are handled already **
+
+
+* Removed functions
+
+** SCREEN SECTION, REPORT-WRITER module: removed non-standard extension
+   "LINE / COL signed-integer" (inadvertently available since 2.2/3.0rc1);
+   which will now raise an error "unsigned integer expected";
+   if used replace by standard "LINE / COL +/- integer"
 
 
 * Changed cobc options:
