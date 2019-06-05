@@ -1,4 +1,9 @@
 
+2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: gcdiff - removed extra link and compiler flags fixing
+	  build on systems that don't link via -lcob
+
 2018-07-16  Brian Tiffin <btiffin@gnu.org>
 
 	* Makefile.am: add cob-config.1 to dist_man
