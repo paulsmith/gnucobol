@@ -955,7 +955,7 @@ AT_CLEANUP
 
 
 AT_SETUP([DEPENDING ON with ODOSLIDE])
-AT_KEYWORDS([nested DEPENDING ON])
+AT_KEYWORDS([nested ODO])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -1121,9 +1121,13 @@ AT_DATA([prog.cob], [
            EXIT .
 ])
 
-AT_CHECK([$COMPILE -std=mf -w -fodoslide prog.cob], [0], [], [])
+# FIXME: odo-checks (-debug) must be adjusted, either with -fodoslide or with a possibly new
+#        compiler configuration flag as IBM seems to only check against the field-founder's
+#        bounds, not the subscript (which is the reason to use "$COBC -x" instead of "$COMPILE")
+AT_CHECK([$COBC -x -fodoslide prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], ['123-TRAILER             '
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+['123-TRAILER             '
 Write SEQ 01, DEP-X = 02 & DEP-Y = 05, TSTREC len:053
 Group1: ' 1 2<>  ' len:008
   Data: ' 1 2<>  01***Abcde. 344502***Abcde. 4556<>'
@@ -1153,7 +1157,8 @@ Read SEQ 04, DEP-X = 03 & DEP-Y = 10, TSTREC len:101
 
 AT_CAPTURE_FILE(./SEQODO)
 
-AT_DATA([reference], [010205Howdy 1 2<>  01***Abcde. 344502***Abcde. 4556<>
+AT_DATA([reference],
+[010205Howdy 1 2<>  01***Abcde. 344502***Abcde. 4556<>
 020102Howdy 1<>  01***Ab. 3<>
 030303Howdy 1 2 3<>  01***Abc. 34545656702***Abc. 45656767803***Abc. 567678789<>
 040310Howdy 1 2 3<>  01***Abcdefghij. 34545656702***Abcdefghij. 45656767803***Abcdefghij. 567678789<>
@@ -1163,8 +1168,9 @@ AT_CHECK([diff reference SEQODO], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([DEPENDING ON with ODOSLIDE for IBM])
-AT_KEYWORDS([OCCURS])
+AT_KEYWORDS([OCCURS ODO])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -1253,10 +1259,12 @@ AT_DATA([prog.cob], [
            DISPLAY '"' BASE '"'.
        END PROGRAM IBM-ODO-TEST.
 ])
+# FIXME: odo-checks (-debug) must be adjusted, either with -fodoslide or with a possibly new
+#        compiler configuration flag as IBM seems to only check against the field-founder's
+#        bounds, not the subscript (which is the reason to use "$COBC -x" instead of "$COMPILE")
+AT_CHECK([$COBC -x -std=ibm -fodoslide prog.cob], [0], [], [])
 
-AT_CHECK([$COMPILE -std=ibm -w -fodoslide prog.cob], [0], [], [])
-
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [Length is +0000000222 with 03, 04, 00, 06, 01
 "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567.901234567890123456789012345+++901234567890123456789--2345678901234567890123456789012345678901234567890123456789012345678901"
 Length is +0000000134 with 02, 03, 01, 04, 00
