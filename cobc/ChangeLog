@@ -1,4 +1,8 @@
 
+2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* tree.h: allow compilation with compilers that don't have __func__
+
 2019-04-12  Ron Norman <rjn@inglenet.com>
 
 	* typeck.c: If field has children with OCCURS UNBOUNDED then do

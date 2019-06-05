@@ -1901,7 +1901,7 @@ add_contained_prog (struct nested_list *parent_list, struct cb_program *child_pr
 }
 
 void
-cb_tree_source_set( const char func[], int line, cb_tree tree, 
+cb_tree_source_set (const char func[], int line, cb_tree tree,
 		    const char source_file[], int source_line )
 {
 	tree->source_file = source_file;

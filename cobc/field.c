@@ -1085,7 +1085,8 @@ validate_pic (struct cb_field *f)
 		if (f->usage == CB_USAGE_DISPLAY
 		 && f->pic
 		 && f->pic->category == CB_CATEGORY_NUMERIC) {
-			for (struct cb_field *p = f->parent; p; p = p->parent) {
+			struct cb_field *p;
+			for (p = f->parent; p; p = p->parent) {
 				if (p->usage != CB_USAGE_DISPLAY) {
 					f->usage = p->usage;
 					break;
@@ -1110,7 +1111,8 @@ validate_pic (struct cb_field *f)
 		    || f->usage == CB_USAGE_FP_BIN64
 		    || f->usage == CB_USAGE_FP_BIN128
 		    || f->usage == CB_USAGE_LONG_DOUBLE)) {
-			for (struct cb_field *p = f->parent; p; p = p->parent) {
+			struct cb_field *p;
+			for (p = f->parent; p; p = p->parent) {
 				if (p->flag_synchronized) {
 					f->flag_synchronized = 1;
 					break;
@@ -1121,7 +1123,8 @@ validate_pic (struct cb_field *f)
 		&&  f->pic->category == CB_CATEGORY_NUMERIC
 		&&  f->flag_sign_separate == 0
 		&&  f->flag_sign_leading == 0) {
-			for (struct cb_field *p = f->parent; p; p = p->parent) {
+			struct cb_field *p;
+			for (p = f->parent; p; p = p->parent) {
 				if (p->flag_sign_separate
 				 || p->flag_sign_leading) {
 					f->flag_sign_separate = p->flag_sign_separate;
@@ -1719,6 +1722,7 @@ validate_elementary_item (struct cb_field *f)
 	if (f->flag_blank_zero
 	 && f->pic
 	 && f->pic->category == CB_CATEGORY_NUMERIC) {
+		cb_tree x;
 		/* Reconstruct the picture string */
 		if (f->pic->scale > 0) {
 			/* Size for genned string */
@@ -1736,7 +1740,7 @@ validate_elementary_item (struct cb_field *f)
 				++pstr;
 			}
 		} 
-		cb_tree x = CB_TREE (f);
+		x = CB_TREE (f);
 
 		switch (f->usage) {
 		default:
