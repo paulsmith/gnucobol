@@ -40,9 +40,9 @@ GNUCOBOL_ENV_SETUP=1
 export GNUCOBOL_ENV_SETUP
 
 # options that are also used in atlocal (always add to both)
-COB_CFLAGS="-I\"${abs_top_srcdir}\" -I\"${abs_top_srcdir}/libcob\" @COB_CFLAGS@"
+COB_CFLAGS="-I${abs_top_srcdir} @COB_CFLAGS@"
 COB_LDFLAGS="@COB_LDFLAGS@"
-COB_LIBS="-L\"${abs_top_builddir}/libcob/.libs\" -lcob @LIBCOB_LIBS@"
+COB_LIBS="-L${abs_top_builddir}/libcob/.libs -lcob @LIBCOB_LIBS@"
 COB_CONFIG_DIR="${abs_top_srcdir}/config"
 COB_COPY_DIR="${abs_top_srcdir}/copy"
 LD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$LD_LIBRARY_PATH"
