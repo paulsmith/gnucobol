@@ -19,7 +19,7 @@
 */
 
 
-#include "config.h"
+#include <config.h>
 
 #define _LFS64_LARGEFILE		1
 #define _LFS64_STDIO			1

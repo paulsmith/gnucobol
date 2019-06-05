@@ -73,7 +73,7 @@ static int ppwrap (void) {
 	requires_listing_line = 1;					\
 	comment_allowed = 1;
 
-#include "config.h"
+#include <config.h>
 
 #ifdef	HAVE_UNISTD_H
 #include <unistd.h>
@@ -87,7 +87,7 @@ static int ppwrap (void) {
 #define	COB_IN_PPLEX	1
 #include "cobc.h"
 #include "tree.h"
-#include "ppparse.h"
+#include <ppparse.h>
 
 /* ignore unused functions here as flex generates unused ones */
 #ifdef	__GNUC__

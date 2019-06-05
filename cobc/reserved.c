@@ -19,7 +19,7 @@
 */
 
 
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +29,7 @@
 
 #include "cobc.h"
 #include "tree.h"
-#include "parser.h"
+#include <parser.h>
 
 /* Local variables */
 

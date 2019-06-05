@@ -18,8 +18,8 @@
    along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "config.h"
-#include "defaults.h"
+#include <config.h>
+#include <defaults.h>
 
 #include <stdio.h>
 #include <stdlib.h>

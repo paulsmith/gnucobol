@@ -19,8 +19,8 @@
 */
 
 
-#include "config.h"
-#include "defaults.h"
+#include <config.h>
+#include <defaults.h>
 
 #ifndef	_GNU_SOURCE
 #define _GNU_SOURCE	1

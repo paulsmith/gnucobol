@@ -20,7 +20,7 @@
 */
 
 
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,10 +40,9 @@
 #endif
 #endif
 
-
 #include "cobc.h"
 #include "tree.h"
-#include "parser.h"
+#include <parser.h>
 
 #define PIC_ALPHABETIC		0x01
 #define PIC_NUMERIC		0x02

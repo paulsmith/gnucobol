@@ -19,8 +19,8 @@
 */
 
 
-#include "config.h"
-#include "defaults.h"
+#include <config.h>
+#include <defaults.h>
 
 #include <stdio.h>
 #include <stdlib.h>
