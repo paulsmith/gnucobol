@@ -2838,6 +2838,7 @@ cob_file_close (cob_file *f, const int opt)
 				COB_CHECKED_WRITE (f->fd, "\n", 1);
 			}
 		}
+#ifdef	HAVE_FCNTL
 		/* Unlock the file */
 		if (f->fd >= 0) {
 			struct flock lock;
@@ -2848,6 +2849,7 @@ cob_file_close (cob_file *f, const int opt)
 			lock.l_len = 0;
 			fcntl (f->fd, F_SETLK, &lock);
 		}
+#endif
 #endif
 		/* Close the file */
 		if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
@@ -7069,6 +7071,7 @@ cob_file_unlock (cob_file *f)
 			if (f->fd >= 0) {
 				fdcobsync (f->fd);
 			}
+#ifdef	HAVE_FCNTL
 			if (f->flag_file_lock) {
 				/* Unlock the file */
 				if (f->fd >= 0) {
@@ -7081,6 +7084,7 @@ cob_file_unlock (cob_file *f)
 					fcntl (f->fd, F_SETLK, &lock);
 				}
 			}
+#endif
 
 #endif
 		} else {

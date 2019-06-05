@@ -1,10 +1,8 @@
 
 2019-04-12  Ron Norman <rjn@inglenet.com>
-	* typeck.c: If field has children with OCCURS UNBOUNDED then do 
-	            do cob_check_ref_mod at runtime and not compile time
 
-2019-04-11  Ron Norman <rjn@inglenet.com>
-	* run_extensions: Fixed test case 'OCCURS UNBOUNDED (2)' accordingly
+	* typeck.c: If field has children with OCCURS UNBOUNDED then do
+	  cob_check_ref_mod at runtime and not compile time
 
 2019-03-14  Simon Sobisch <simonsobisch@gnu.org>
 

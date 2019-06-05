@@ -1,5 +1,10 @@
 
-2018-04-14  Ron Norman <rjn@inglenet.com>
+2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c (cob_file_close, cob_file_unlock) [!HAVE_FCNTL]: fixed
+	  missing check for fcntl availability
+
+2019-04-14  Ron Norman <rjn@inglenet.com>
 
 	* screenio.c: define ALT_DEL, ALT_LEFT, ALT_RIGHT
 	  using \033 for Escape instead of \E to avoid C compiler problems
@@ -7,9 +12,8 @@
 
 2019-03-12  Simon Sobisch <simonsobisch@gnu.org>
 
-	* common.c (print_info): changed msgid for "file handler" and
-	  already output if RTD-version of VB-ISAM is used (even if this
-	  wouldn't work currently), partially after Ron Norman
+	* common.c (print_info): changed msgid for "file handler" and output
+	  if RTD-version of VB-ISAM is used, partially after Ron Norman
 
 2015-03-03  Ron Norman
 
