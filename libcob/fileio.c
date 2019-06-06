@@ -663,9 +663,9 @@ struct indexed_file {
 	DBT		key;
 	DBT		data;
 	size_t		key_index;
+	unsigned int	bdb_lock_id;
 	int		write_cursor_open;
 	int		filenamelen;
-	int		bdb_lock_id;
 	int		bdb_lock_num;
 	int		bdb_lock_max;
 	int		file_lock_set;
@@ -4849,7 +4849,7 @@ indexed_write_internal (cob_file *f, const int rewrite, const int opt)
 {
 	struct indexed_file	*p;
 	cob_u32_t		i, len;
-	unsigned int		dupno;
+	unsigned int		dupno = 0;
 	cob_u32_t		flags = 0;
 	int			close_cursor, ret;
 
@@ -4882,17 +4882,13 @@ indexed_write_internal (cob_file *f, const int rewrite, const int opt)
 		if (rewrite && ! p->rewrite_sec_key[i]) {
 			continue;
 		}
-		if (bdb_suppresskey (f, i)) {
+		if (bdb_suppresskey (f, i))
 			continue;
-		}
 		bdb_setkey (f, i);
 		memset(&p->data,0,sizeof(p->data));
 		if (f->keys[i].tf_duplicates) {
 			flags =  0;
 			dupno = get_dupno(f, i);
-			if (dupno > 1) {
-				return COB_STATUS_02_SUCCESS_DUPLICATE;
-			}
 			dupno = COB_DUPSWAP (dupno);
 			len = bdb_savekey(f, p->temp_key, f->record->data, 0);
 			p->data.data = p->temp_key;
@@ -4920,18 +4916,19 @@ indexed_write_internal (cob_file *f, const int rewrite, const int opt)
 		}
 	}
 
-	if (opt & COB_WRITE_LOCK) {
-		if (bdb_env != NULL) {
-			bdb_setkey (f, 0);
-			if (bdb_lock_record (f, p->key.data, p->key.size)) {
-				if (close_cursor) {
-					p->cursor[0]->c_close (p->cursor[0]);
-					p->cursor[0] = NULL;
-					p->write_cursor_open = 0;
-				}
-				return COB_STATUS_51_RECORD_LOCKED;
-			}
+	if (close_cursor)
+		bdb_close_cursor (f);
+
+	if ((opt & COB_WRITE_LOCK)
+	 && bdb_env != NULL) {
+		bdb_setkey (f, 0);
+		if (bdb_lock_record (f, p->key.data, p->key.size)) {
+			bdb_close_cursor (f);
+			return COB_STATUS_51_RECORD_LOCKED;
 		}
+	}
+	if (dupno > 0) {
+		return COB_STATUS_02_SUCCESS_DUPLICATE;
 	}
 	return COB_STATUS_00_SUCCESS;
 }
@@ -5735,7 +5732,7 @@ dobuild:
 			case ENOENT:
 				if (mode == COB_OPEN_EXTEND 
 				 || mode == COB_OPEN_OUTPUT) {
-					return COB_STATUS_30_PERMANENT_ERROR;
+					return COB_STATUS_35_NOT_EXISTS;
 				}
 				if (f->flag_optional) {
 					if (mode == COB_OPEN_I_O) {
@@ -5772,6 +5769,9 @@ dobuild:
 	p->filename = cob_malloc (strlen (filename) + 1);
 	strcpy (p->filename, filename);
 	p->write_cursor_open = 0;
+	if (bdb_env != NULL) {
+		bdb_env->lock_id (bdb_env, &p->bdb_lock_id);
+	}
 
 	bdb_setkey(f, 0);
 	p->db[0]->cursor (p->db[0], NULL, &p->cursor[0], 0);
@@ -5872,6 +5872,9 @@ indexed_close (cob_file *f, const int opt)
 	cob_free (p->rewrite_sec_key);
 	cob_free (p->filename);
 	cob_free (p->cursor);
+	if (bdb_env != NULL) {
+		bdb_env->lock_id_free (bdb_env, p->bdb_lock_id);
+	}
 	cob_free (p);
 
 	return COB_STATUS_00_SUCCESS;
@@ -6490,8 +6493,7 @@ indexed_read_next (cob_file *f, const int read_opts)
 		/* Data is read in indexed_open or indexed_start */
 		if (p->data.data == NULL
 		 || (f->flag_first_read == 2 && nextprev == DB_PREV)) {
-			p->cursor[p->key_index]->c_close (p->cursor[p->key_index]);
-			p->cursor[p->key_index] = NULL;
+			bdb_close_index (f, p->key_index);
 			if (p->key_index != 0) {
 				bdb_close_cursor (f);
 			}
@@ -9238,8 +9240,10 @@ cob_fork_fileio (cob_global *lptr, cob_settings *sptr)
 	COB_UNUSED (sptr);
 #ifdef	WITH_DB
 	bdb_lock_id = 0;
-	bdb_env->lock_id (bdb_env, &bdb_lock_id);
-	bdb_env->set_lk_detect (bdb_env, DB_LOCK_DEFAULT);
+	if(bdb_env) {
+		bdb_env->lock_id (bdb_env, &bdb_lock_id);
+		bdb_env->set_lk_detect (bdb_env, DB_LOCK_DEFAULT);
+	}
 #endif
 }
 
