@@ -86,7 +86,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\..;$(SolutionDir)..\..\cobc</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -210,6 +210,7 @@
     <ClCompile Include="..\..\cobc\config.c" />
     <ClCompile Include="..\..\cobc\error.c" />
     <ClCompile Include="..\..\cobc\field.c" />
+    <ClCompile Include="..\..\cobc\help.c" />
     <ClCompile Include="..\..\cobc\reserved.c" />
     <ClCompile Include="..\..\cobc\tree.c" />
     <ClCompile Include="..\..\cobc\typeck.c" />

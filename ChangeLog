@@ -1,4 +1,13 @@
 
+2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: include all (possibly) generated headers by '#include <header>'
+	  (search "system directories" [which in all known compilers are pre-fixed
+	  with the ones specified with '-I', which is done for the builddir
+	  already]) instead of '#include "header"' (which is searched next to the
+	  including file first). This applies to all files that include config.h,
+	  defaults.h, tarstamp.h, parser.h, ppparse.h.
+
 2019-05-30  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: fix bug #599 avoid useless dependencies (all but libm,

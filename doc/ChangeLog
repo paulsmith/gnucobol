@@ -1,4 +1,8 @@
 
+2019-06-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: adjusted dependencies for latest changes
+
 2019-05-22  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobcinfo.sh: completely adjusted the generation of the appendices

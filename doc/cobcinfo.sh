@@ -252,11 +252,12 @@ _create_file () {
 	"cbconf.tex")
 		$GREP -A9999 "https://www.gnu.org/licenses/" \
 		  "$confdir/default.conf" \
+		| sed -e 's/\r//g'  \
 		| tail -n +2                   >$1
 		;;
 	"cbrunt.tex")
 		# First section, as it is formatted different
-		$GREP -A400 -m1 "##" $confdir/runtime.cfg | \
+		$GREP -A400 -m1 "##" "$confdir/runtime.cfg" | \
 			$GREP -B400 -m2 "##" | \
 			cut -b2- | \
 			sed -e 's/\r//g'  \

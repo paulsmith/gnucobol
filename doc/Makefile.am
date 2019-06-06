@@ -35,12 +35,13 @@ BUILT_SOURCES = $(GENINCLUDES)
 .PHONY: touch touch-tex clean-tex
 
 if COB_MAKE_RUN_BINARIES
-cbhelp.tex: $(top_srcdir)/cobc/cobc.c $(top_srcdir)/configure.ac \
-	$(top_srcdir)/cobc/flag.def $(top_srcdir)/cobc/warning.def \
+cbhelp.tex: $(top_srcdir)/cobc/help.c \
+	$(top_srcdir)/cobc/warning.def $(top_srcdir)/cobc/flag.def \
+	$(top_srcdir)/cobc/config.def \
 	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
-cbchelp.tex: $(top_srcdir)/bin/cobcrun.c $(top_srcdir)/configure.ac \
+cbchelp.tex: $(top_srcdir)/bin/cobcrun.c \
 	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 endif
@@ -55,7 +56,7 @@ cbrunt.tex: $(top_srcdir)/config/runtime.cfg \
 
 if COB_MAKE_RUN_BINARIES
 cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
-	$(top_srcdir)/cobc/cobc.c $(top_srcdir)/cobc/reserved.c \
+	$(top_srcdir)/cobc/reserved.c \
 	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 else

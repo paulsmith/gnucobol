@@ -485,6 +485,14 @@ DECLNORET extern void		cobc_too_many_errors (void) COB_A_NORETURN;
 extern size_t			cobc_check_valid_name (const char *,
 						       const enum cobc_name_type);
 
+/* help.c (used only within cobc.c) */
+
+extern void		cobc_print_usage (char *);
+extern void		cobc_print_usage_common_options (void);
+extern void		cobc_print_usage_dialect (void);
+extern void		cobc_print_usage_warnings (void);
+extern void		cobc_print_usage_flags (void);
+
 /* config.c */
 
 #define	CB_CONFIG_ANY(type,var,name,doc)	\

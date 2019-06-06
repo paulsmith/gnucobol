@@ -1,4 +1,11 @@
 
+2019-06-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* help.c: new file, extracted from cobc.c to limit the generation of docs
+	  to actual changes in the help output; also separated help parts into one
+	  function per help section
+	* Makefile.am, cobc.c, cobc.h: adjustments for help.c
+
 2019-06-02  Simon Sobisch <simonsobisch@gnu.org>
 
 	* tree.c (cb_get_int): return 0 for cb_error_node not raise errors

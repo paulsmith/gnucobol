@@ -1,4 +1,13 @@
 
+2019-06-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* general (cobc project files): added reference for new help.c
+	* *.vcxproj: always use $(DefaultPlatformToolset) instead of a fixed one,
+	  adjusted AdditionalIncludeDirectories according to Makefiles
+	* config.h.in: adjustments for latest OrangeC version
+	* ocide: changed output files according to VS version;
+	  compile+link cJSON directly
+
 2019-02-09  Simon Sobisch <simonsobisch@gnu.org>
 
 	* ocide (OrangeC IDE), vs2019: added

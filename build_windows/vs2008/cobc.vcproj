@@ -367,6 +367,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\cobc\help.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\cobc\parser.y"
 				>
 				<FileConfiguration

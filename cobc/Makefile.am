@@ -21,7 +21,7 @@
 
 bin_PROGRAMS = cobc
 cobc_SOURCES = cobc.c cobc.h ppparse.y pplex.c parser.y scanner.c config.c \
-	reserved.c error.c tree.c tree.h field.c typeck.c codegen.c \
+	reserved.c error.c tree.c tree.h field.c typeck.c codegen.c help.c \
 	config.def flag.def warning.def codeoptim.def ppparse.def codeoptim.c
 
 #cobc_SOURCES = cobc.c cobc.h ppparse.y pplex.l parser.y scanner.l config.c
@@ -47,7 +47,7 @@ CLEANFILES = parser.output ppparse.output
 CODE_COVERAGE_BRANCH_COVERAGE=1
 CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 
-cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac | cobc$(EXEEXT)
+cobc.1: help.c config.def flag.def warning.def $(top_srcdir)/configure.ac | cobc$(EXEEXT)
 	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) "$(COBC) -q"
 
 .l.c:
