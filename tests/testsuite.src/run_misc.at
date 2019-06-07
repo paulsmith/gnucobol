@@ -13142,7 +13142,7 @@ AT_DATA([prog.cob], [
       
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT OPTIONAL TSPFILE 
+           SELECT TSPFILE 
            ASSIGN TO "testisam"
            ORGANIZATION INDEXED ACCESS DYNAMIC
            RECORD KEY IS CM-CUST-NUM

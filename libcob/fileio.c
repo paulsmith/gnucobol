@@ -611,6 +611,7 @@ static const char	**bdb_data_dir = NULL;
 static void		*record_lock_object = NULL;
 static size_t		rlo_size = 0;
 static unsigned int	bdb_lock_id = 0;
+static int		bdb_join = 1;
 
 #define DB_PUT(db,flags)	db->put (db, NULL, &p->key, &p->data, flags)
 #define DB_GET(db,flags)	db->get (db, NULL, &p->key, &p->data, flags)
@@ -4485,6 +4486,13 @@ join_environment (void)
 	int		ret;
 
 	if (cobsetptr->bdb_home == NULL) {
+		/* Default to the current directory */
+		cobsetptr->bdb_home = strdup(".");
+	} else if (cobsetptr->bdb_home[0] <= ' '
+		|| strcasecmp(cobsetptr->bdb_home,"no") == 0
+		|| strcasecmp(cobsetptr->bdb_home,"false") == 0) {
+		/* This effectively disables record/file locking */
+		/* But prevents the BDB control files from being created */
 		return;
 	}
 	ret = db_env_create (&bdb_env, 0);
@@ -4493,16 +4501,9 @@ join_environment (void)
 				   "env_create", ret, db_strerror (ret));
 		cob_stop_run (1);
 	}
-#if	0	/* RXWRXW - BDB msg */
-	bdb_env->set_errcall (bdb_env, bdb_errcall_set);
-#if (DB_VERSION_MAJOR > 4) || ((DB_VERSION_MAJOR == 4) && (DB_VERSION_MINOR > 2))
-	bdb_env->set_msgcall (bdb_env, bdb_msgcall_set);
-#endif
-#else
 	bdb_env->set_errfile (bdb_env, stderr);
 #if (DB_VERSION_MAJOR > 4) || ((DB_VERSION_MAJOR == 4) && (DB_VERSION_MINOR > 2))
 	bdb_env->set_msgfile (bdb_env, stderr);
-#endif
 #endif
 	bdb_env->set_cachesize (bdb_env, 0, 2*1024*1024, 0);
 	bdb_env->set_alloc (bdb_env, cob_malloc, realloc, cob_free);
@@ -5593,9 +5594,9 @@ dobuild:
 	int			nonexistent;
 
 	f->share_mode = sharing;
-	if (cobsetptr->bdb_home != NULL
-	 && bdb_env == NULL) {		/* Join BDB, on first OPEN of INDEXED file */
+	if (bdb_join) {			/* Join BDB, on first OPEN of INDEXED file */
 		join_environment ();
+		bdb_join = 0;
 	}
 	cob_chk_file_mapping (f);
 	set_file_format(f);		/* Set file options */

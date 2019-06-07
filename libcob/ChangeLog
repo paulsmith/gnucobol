@@ -1,4 +1,10 @@
 
+2019-06-07  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: If DB_HOME is not defined, then default to "."
+	            If DB_HOME is 'no' or 'false' then disable record/file
+		    locking
+
 2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
 
 	* fileio.c (cob_file_close, cob_file_unlock) [!HAVE_FCNTL]: fixed
