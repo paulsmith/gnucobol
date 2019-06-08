@@ -1,4 +1,10 @@
 
+2019-06-08  Simon Sobisch <simonsobisch@gnu.org>
+
+	* config.def, parser.y: removed compiler support options cb_json_generate
+	  and cb_xml_generate, as soon as those words are reserved we take those
+	  statements as supported
+
 2019-06-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* help.c: new file, extracted from cobc.c to limit the generation of docs

@@ -12828,7 +12828,6 @@ json_generate_statement:
   JSON GENERATE
   {
 	begin_statement ("JSON GENERATE", TERM_JSON);
-	cb_verify (cb_json_generate, _("JSON GENERATE"));
 	cobc_in_json_generate_body = 1;
 	cobc_cs_check = CB_CS_JSON_GENERATE;
   }
@@ -15082,7 +15081,6 @@ xml_generate_statement:
   XML GENERATE
   {
 	begin_statement ("XML GENERATE", TERM_XML);
-	cb_verify (cb_xml_generate, _("XML GENERATE"));
 	cobc_in_xml_generate_body = 1;
 	cobc_cs_check = CB_CS_XML_GENERATE;
   }

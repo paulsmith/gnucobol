@@ -1,4 +1,9 @@
 
+2019-06-08 Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: removed options json-generate and xml-generate (support is
+	  now only depending on the reserved words)
+
 2019-06-02 Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: added option records-mismatch-record-clause
