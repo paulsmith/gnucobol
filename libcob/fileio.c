@@ -2164,8 +2164,8 @@ relative_read (cob_file *f, cob_field *k, const int read_opts)
 static int
 relative_read_next (cob_file *f, const int read_opts)
 {
-	off_t		curroff;
-	size_t	relsize;
+	off_t	curroff;
+	off_t	relsize;
 	int		relnum;
 	int		bytesread;
 	cob_u32_t	moveback;
@@ -2185,7 +2185,7 @@ relative_read_next (cob_file *f, const int read_opts)
 		lseek (f->fd, (off_t)0, SEEK_CUR);
 	}
 
-	relsize = f->record_max + (cob_s64_t)sizeof (f->record->size);
+	relsize = f->record_max + sizeof (f->record->size);
 	if (fstat (f->fd, &st) != 0 || st.st_size == 0) {
 		return COB_STATUS_10_END_OF_FILE;
 	}
@@ -7171,7 +7171,7 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 		cob_field_to_string (f->assign, assignto, sizeof(assignto)-1);
 	} else {
 		strncpy (assignto, f->select_name, sizeof(assignto)-1);
-		assignto[sizeof(assignto)] = 0;
+		assignto[sizeof(assignto)-1] = 0;
 	}
 	STCOMPX2(sizeof(FCD3),fcd->fcdLen);
 	fcd->fcdVer = FCD_VER_64Bit;

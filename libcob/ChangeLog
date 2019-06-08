@@ -1,11 +1,14 @@
 
+2019-06-09  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c: adjustments to fix issues reported by static code analyzer
+
 2019-06-07  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (print_runtime_conf): fixed theoretical buffer overflow for bad
 	  translation ("via" translated as very long string)
 	* common.h: new define MAX_FILE_KEYS (currently at 255) with main purpose
 	  to limit allocation of external provided key definition
-	* fileio.c: adjustments to fix issues reported by coverity static analyzer
 
 2019-05-31  Simon Sobisch <simonsobisch@gnu.org>
 
