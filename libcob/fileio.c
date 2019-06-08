@@ -752,6 +752,11 @@ bdb_cmpkey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx,
 
 	if (partlen <= 0) {
 		partlen = bdb_keylen(f, idx);
+		if (partlen <= 0) {
+			cob_runtime_error (_("invalid internal call of %s"), "bdb_cmpkey");
+			cob_runtime_error (_("Please report this!"));
+			cob_stop_run (1);
+		}
 	}
 	if (f->keys[idx].count_components > 0) {
 		totlen = 0;
@@ -1560,7 +1565,7 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 
 #ifdef	HAVE_FCNTL
 	/* Lock the file */
-	if (memcmp (filename, "/dev/", (size_t)5)) {
+	if (fp && memcmp (filename, "/dev/", (size_t)5)) {
 		struct flock		lock;
 		memset ((void *)&lock, 0, sizeof (struct flock));
 		if (mode != COB_OPEN_INPUT) {
@@ -1571,7 +1576,7 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 		lock.l_whence = SEEK_SET;
 		lock.l_start = 0;
 		lock.l_len = 0;
-		if (fcntl (fileno (fp), F_SETLK, &lock) < 0) {
+		if (fcntl (f->fd, F_SETLK, &lock) < 0) {
 			int ret = errno;
 			fclose (fp);
 			switch (ret) {
@@ -1609,7 +1614,7 @@ cob_file_close (cob_file *f, const int opt)
 		/* meaning (not file-sharing related):
 		   file may not be opened in *this runtime unit* again */
 		/* TODO: set flag here */
-		/* fall-thru */
+		/* Fall through */
 	case COB_CLOSE_NORMAL:
 	case COB_CLOSE_NO_REWIND:
 		if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
@@ -1633,7 +1638,12 @@ cob_file_close (cob_file *f, const int opt)
 			lock.l_whence = SEEK_SET;
 			lock.l_start = 0;
 			lock.l_len = 0;
-			fcntl (f->fd, F_SETLK, &lock);
+			if (fcntl (f->fd, F_SETLK, &lock) == -1) {
+#if 1 /* CHECKME - What is the correct thing to do here? */
+				/* not translated as "testing only" */
+				cob_runtime_warning ("issue during unlock (%s), errno: %d", "cob_file_close", errno);
+#endif
+			}
 		}
 #endif
 		/* Close the file */
@@ -2232,7 +2242,8 @@ relative_read_next (cob_file *f, const int read_opts)
 				cob_set_int (f->keys[0].field, 0);
 				if (cob_add_int (f->keys[0].field, relnum,
 						 COB_STORE_KEEP_ON_OVERFLOW) != 0) {
-					lseek (f->fd, curroff, SEEK_SET);
+					/* reset position after read */
+					(void) lseek (f->fd, curroff, SEEK_SET);
 					return COB_STATUS_14_OUT_OF_KEY_RANGE;
 				}
 			}
@@ -2298,7 +2309,10 @@ relative_write (cob_file *f, const int opt)
 	} else {
 		off = lseek (f->fd, (off_t)0, SEEK_CUR);
 	}
-	lseek (f->fd, off, SEEK_SET);
+	/* reset position after read;
+	   TODO: add a test case (when disabled: internal tests pass,
+	   NIST IX fail) */
+	(void)lseek (f->fd, off, SEEK_SET);
 
 	COB_CHECKED_WRITE (f->fd, &f->record->size, sizeof (f->record->size));
 	COB_CHECKED_WRITE (f->fd, f->record->data, f->record_max);
@@ -2381,7 +2395,10 @@ relative_delete (cob_file *f)
 		 != sizeof (f->record->size)) {
 			return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
-	lseek (f->fd, off, SEEK_SET);
+	/* reset position after read;
+	   TODO: add a test case (when disabled: internal tests pass,
+	   NIST IX fail) */
+	(void)lseek (f->fd, off, SEEK_SET);
 
 	f->record->size = 0;
 	COB_CHECKED_WRITE (f->fd, &f->record->size, sizeof (f->record->size));
@@ -2953,8 +2970,14 @@ indexed_start_internal (cob_file *f, const int cond, cob_field *key,
 		if (p->key_index == 0) {
 			memcpy (p->last_readkey[0], p->key.data, p->primekeylen);
 		} else {
+			int keylen = bdb_keylen (f, p->key_index);
+			if (partlen <= 0) {
+				cob_runtime_error (_("invalid internal call of %s"), "indexed_start_internal/bdb_keylen");
+				cob_runtime_error (_("Please report this!"));
+				cob_stop_run (1);
+			}
 			memcpy (p->last_readkey[p->key_index],
-				    p->temp_key, bdb_keylen(f,p->key_index));
+				    p->temp_key, keylen);
 			memcpy (p->last_readkey[p->key_index + f->nkeys], p->key.data, p->primekeylen);
 			if (f->keys[p->key_index].tf_duplicates) {
 				p->last_dupno[p->key_index] = dupno;
@@ -4904,7 +4927,13 @@ cob_file_unlock (cob_file *f)
 					lock.l_whence = SEEK_SET;
 					lock.l_start = 0;
 					lock.l_len = 0;
-					fcntl (f->fd, F_SETLK, &lock);
+					if (fcntl (f->fd, F_SETLK, &lock) == -1) {
+#if 1 /* CHECKME - What is the correct thing to do here? */
+						/* not translated as "testing only" */
+						cob_runtime_warning ("issue during unlock (%s), errno: %d",
+							"cob_file_unlock", errno);
+#endif
+					}
 				}
 			}
 #endif
@@ -6982,10 +7011,8 @@ cob_exit_fileio (void)
 				continue;
 			}
 			cob_close (l->file, NULL, COB_CLOSE_NORMAL, 0);
-			if (cobsetptr->cob_display_warn) {
-				cob_runtime_warning (_("implicit CLOSE of %s"),
-					cob_get_filename_print (l->file, 0));
-			}
+			cob_runtime_warning (_("implicit CLOSE of %s"),
+				cob_get_filename_print (l->file, 0));
 		}
 	}
 #ifdef	WITH_DB
@@ -7126,34 +7153,36 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 	EXTKEY	*key;
 
 	/* FIXME: use switch here */
-	if(f->access_mode == COB_ACCESS_SEQUENTIAL)
+	if (f->access_mode == COB_ACCESS_SEQUENTIAL)
 		fcd->accessFlags = ACCESS_SEQ;
-	else if(f->access_mode == COB_ACCESS_RANDOM)
+	else if (f->access_mode == COB_ACCESS_RANDOM)
 		fcd->accessFlags = ACCESS_RANDOM;
-	else if(f->access_mode == COB_ACCESS_DYNAMIC)
+	else if (f->access_mode == COB_ACCESS_DYNAMIC)
 		fcd->accessFlags = ACCESS_DYNAMIC;
-	if((f->flag_select_features & COB_SELECT_EXTERNAL))
+	if (f->flag_select_features & COB_SELECT_EXTERNAL)
 		fcd->otherFlags |= OTH_EXTERNAL;
-	if(f->flag_optional)
+	if (f->flag_optional)
 		fcd->otherFlags |= OTH_OPTIONAL;
-	if(f->flag_line_adv)
+	if (f->flag_line_adv)
 		fcd->otherFlags |= OTH_LINE_ADVANCE;
 
 	/* CHECKME: is this still needed? */
 	if (f->assign) {
 		cob_field_to_string (f->assign, assignto, sizeof(assignto)-1);
 	} else {
-		strcpy (assignto, f->select_name);
+		strncpy (assignto, f->select_name, sizeof(assignto)-1);
+		assignto[sizeof(assignto)] = 0;
 	}
 	STCOMPX2(sizeof(FCD3),fcd->fcdLen);
 	fcd->fcdVer = FCD_VER_64Bit;
 	fcd->gcFlags |= MF_CALLFH_GNUCOBOL;
-	if(f->record_min != f->record_max)
+	if (f->record_min != f->record_max) {
 		fcd->recordMode = REC_MODE_VARIABLE;
-	else
+	} else {
 		fcd->recordMode = REC_MODE_FIXED;
+	}
 	fnlen = strlen(assignto);
-	if(fcd->fnamePtr != NULL) {
+	if (fcd->fnamePtr != NULL) {
 		cob_free ((void*)fcd->fnamePtr);
 	}
 	fcd->fnamePtr = strdup(assignto);
@@ -7368,7 +7397,7 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 		f->assign->attr = &alnum_attr;
 	}
 	if (f->select_name == NULL) {
-		char	fdname[48];
+		char	fdname[49];
 		f->select_name = (char*)f->assign->data;
 		for (k=0; k < f->assign->size; k++) {
 			if (f->assign->data[k] == '/') {
@@ -7387,6 +7416,12 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 			/* Copy Key information from FCD to cob_file,
 			   CHECKME: possibly only for ORG_DETERMINE ? */
 			f->nkeys = LDCOMPX2(fcd->kdbPtr->nkeys);
+			if (f->nkeys > MAX_FILE_KEYS) {
+				/* CHECKME - Should this result in any error handling? */
+				cob_runtime_warning (_("maximum keys (%d/%d) exceeded for file '%s'"),
+					(int)f->nkeys, MAX_FILE_KEYS, cob_get_filename_print (f->file, 0));
+				f->nkeys = MAX_FILE_KEYS;
+			}
 			f->keys = cob_malloc (sizeof(cob_file_key) * f->nkeys);
 			for (k=0; k < f->nkeys; k++) {
 				parts = LDCOMPX2(fcd->kdbPtr->key[k].count);
@@ -7873,7 +7908,7 @@ EXTFH (unsigned char *opcode, FCD3 *fcd)
 	fs->data = fnstatus;
 	fs->size = sizeof(fnstatus);
 	fs->attr = &alnum_attr;
-	memset (fnstatus, '0', 2);
+	memcpy (fnstatus, "00", 2);
 	memcpy (fcd->fileStatus, "00", 2);
 
 	if (cobglobptr == NULL) {	/* Auto Init GnuCOBOL runtime */
@@ -7900,7 +7935,7 @@ org_handling:
 	switch (fcd->fileOrg) {
 	case ORG_INDEXED:
 		k = LDCOMPX2(fcd->refKey);
-		if (k >= 0) {
+		if (k >= 0 && k <= f->nkeys) {
 			if (f->keys[k].count_components <= 1) {
 				key->size = f->keys[k].field->size;
 				key->attr = f->keys[k].field->attr;
@@ -7947,6 +7982,7 @@ org_handling:
 #endif
 			}
 		}
+		/* Fall through */
 	default:
 		fcd->fileStatus[0] = '9';
 		fcd->fileStatus[1] = 161;

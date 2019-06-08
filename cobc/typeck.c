@@ -3137,24 +3137,19 @@ validate_relative_key_field (struct cb_file *file)
 void
 cb_validate_program_data (struct cb_program *prog)
 {
-	cb_tree			l;
-	cb_tree			x, xerr;
-	cb_tree			assign;
+	cb_tree			l, x;
 	struct cb_field		*p;
 	struct cb_field		*q;
-	struct cb_field		*depfld;
 	struct cb_field		*field;
 	struct cb_file		*file;
-	struct cb_report	*rep;
 	unsigned char		*c;
 	char			buff[COB_MINI_BUFF];
-	unsigned int		odo_level;
 
 	prog->report_list = cb_list_reverse (prog->report_list);
 
 	for (l = prog->report_list; l; l = CB_CHAIN (l)) {
 		/* Set up LINE-COUNTER / PAGE-COUNTER */
-		rep = CB_REPORT (CB_VALUE (l));
+		struct cb_report	*rep = CB_REPORT (CB_VALUE (l));
 		if (rep->line_counter == NULL) {
 			snprintf (buff, (size_t)COB_MINI_MAX,
 				  "LINE-COUNTER %s", rep->cname);
@@ -3191,7 +3186,7 @@ cb_validate_program_data (struct cb_program *prog)
 	/* Build undeclared assignment name now */
 	if (cb_assign_clause == CB_ASSIGN_MF) {
 		for (l = prog->file_list; l; l = CB_CHAIN (l)) {
-			assign = CB_FILE (CB_VALUE (l))->assign;
+			cb_tree assign = CB_FILE (CB_VALUE (l))->assign;
 			if (!assign) {
 				continue;
 			}
@@ -3229,11 +3224,10 @@ cb_validate_program_data (struct cb_program *prog)
 			}
 			if (CB_REFERENCE_P (assign)) {
 				x = cb_ref (assign);
-				if (CB_FIELD_P (x)) {
-					if (CB_FIELD (x)->level == 88) {
-						cb_error_x (assign, _("ASSIGN data item '%s' is invalid"),
-							CB_NAME (assign));
-					}
+				if (CB_FIELD_P (x)
+				 && CB_FIELD (x)->level == 88) {
+					cb_error_x (assign, _("ASSIGN data item '%s' is invalid"),
+						CB_NAME (assign));
 				}
 			}
 		}
@@ -3281,24 +3275,21 @@ cb_validate_program_data (struct cb_program *prog)
 
 	/* Check ODO items */
 	for (l = cb_depend_check; l; l = CB_CHAIN (l)) {
-		xerr = NULL;
-		x = CB_VALUE(l);
+		struct cb_field		*depfld = NULL;
+		unsigned int		odo_level = 0;
+		cb_tree	xerr = NULL;
+		x = CB_VALUE (l);
 		if (x == NULL || x == cb_error_node) {
 			continue;
 		}
 		q = CB_FIELD_PTR (x);
 		if (cb_validate_one (q->depending)) {
 			q->depending = cb_error_node;
-			depfld = NULL;
 		} else if (cb_ref (q->depending) != cb_error_node) {
 			depfld = CB_FIELD_PTR (q->depending);
-		} else {
-			depfld = NULL;
 		}
 		/* The data item that contains a OCCURS DEPENDING clause must be
 		   the last data item in the group */
-		odo_level = 0;
-
 		for (p = q; ; p = p->parent) {
 			if (p->depending) {
 				if (odo_level > 0
@@ -3317,9 +3308,9 @@ cb_validate_program_data (struct cb_program *prog)
 			for (; p->sister; p = p->sister) {
 				if (p->sister == depfld && x != xerr) {
 					xerr = x;
-						cb_error_x (x,
-							    _("'%s' OCCURS DEPENDING ON field item invalid here"),
-							    p->sister->name);
+					cb_error_x (x,
+					    _("'%s' OCCURS DEPENDING ON field item invalid here"),
+						    p->sister->name);
 				}
 				if (!p->sister->redefines) {
 					if (!cb_complex_odo
@@ -3388,7 +3379,7 @@ cb_validate_program_data (struct cb_program *prog)
 			if (x != cb_error_node && !CB_LOCALE_NAME_P(x)) {
 				cb_error_x (alphabet->custom_list, _("'%s' is not a locale-name"),
 					cb_name(x));
-				x = cb_error_node;
+				alphabet->custom_list = cb_error_node;
 			}
 		}
 	}
@@ -3396,14 +3387,14 @@ cb_validate_program_data (struct cb_program *prog)
 	/* Resolve APPLY COMMIT  */
 	if (CB_VALID_TREE(prog->apply_commit)) {
 		for (l = prog->apply_commit; l; l = CB_CHAIN(l)) {
-			cb_tree		l2 = CB_VALUE (l);
+			cb_tree	l2 = CB_VALUE (l);
 			x = cb_ref (l2);
 			for (l2 = prog->apply_commit; l2 != l; l2 = CB_CHAIN(l2)) {
-				if (cb_ref (CB_VALUE(l2)) == x) {
+				if (cb_ref (CB_VALUE (l2)) == x) {
 					if (x != cb_error_node) {
 						cb_error_x (l,
 							_("duplicate APPLY COMMIT target: '%s'"),
-							cb_name (CB_VALUE(l)));
+							cb_name (CB_VALUE (l)));
 						x = cb_error_node;
 						break;
 					}
@@ -11209,8 +11200,8 @@ check_valid_key (const struct cb_file *cbf, const struct cb_field *f)
 			return 0;
 		}
 	}
-	if(cbf->component_list != NULL
-	&& CB_FIELD_PTR (cbf->key) == f) {
+	if (cbf->component_list != NULL
+	 && CB_FIELD_PTR (cbf->key) == f) {
 		return 0;
 	}
 

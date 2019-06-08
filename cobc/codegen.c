@@ -3305,7 +3305,7 @@ get_prev_ml_tree_entry (const struct cb_ml_generate_tree * const s)
 			return s->prev_sibling;
 		}
 	} else if (s->attrs) {
-		return get_last_attr (s->prev_sibling);
+		return get_last_attr (s);
 	} else if (s->parent) {
 		return s->parent;
 	} else {

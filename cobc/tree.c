@@ -1869,6 +1869,18 @@ cb_list_map (cb_tree (*func) (cb_tree x), cb_tree l)
 	return ret;
 }
 
+unsigned int
+cb_next_length (struct cb_next_elem *l)
+{
+	unsigned int	n;
+
+	n = 0;
+	for (; l; l = l->next) {
+		n++;
+	}
+	return n;
+}
+
 /* Link value into the reference */
 
 const char *
@@ -4033,6 +4045,12 @@ validate_file (struct cb_file *f, cb_tree name)
 	case COB_ORG_INDEXED:
 		if (f->key == NULL) {
 			file_error (name, "RECORD KEY", CB_FILE_ERR_REQUIRED);
+		} else if (f->alt_key_list) {
+			int keynum = cb_next_length ((struct cb_next_elem *)f->alt_key_list) + 1;
+			if (keynum > MAX_FILE_KEYS) {
+				cb_error_x (name, _("maximum keys (%d/%d) exceeded for file '%s'"),
+					keynum, MAX_FILE_KEYS, CB_NAME (name));
+			}
 		}
 		break;
 	case COB_ORG_RELATIVE:

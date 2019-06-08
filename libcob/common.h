@@ -655,6 +655,11 @@ only usable with COB_USE_VC2013_OR_GREATER */
 /* TODO: add compiler configuration for limiting this */
 #define	MAX_FD_RECORD_IDX	65535
 
+/* Maximum amount of keys per file */
+/* TODO: define depending on used ISAM */
+/* TODO: add compiler configuration for limiting this */
+#define	MAX_FILE_KEYS	255
+
 /* Maximum number of field digits */
 #define	COB_MAX_DIGITS		38
 

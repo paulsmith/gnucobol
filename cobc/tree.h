@@ -519,6 +519,11 @@ typedef struct cb_tree_common	*cb_tree;
 #define CB_TREE_CAST(tg,ty,x)	((ty *) (x))
 #endif
 
+/* any next */
+struct cb_next_elem {
+	struct cb_next_elem	*next;
+};
+
 /* xref entries */
 struct cb_xref_elem {
 	struct cb_xref_elem	*next;
@@ -1855,6 +1860,7 @@ extern cb_tree			cb_pair_add (cb_tree, cb_tree, cb_tree);
 extern cb_tree			cb_list_append (cb_tree, cb_tree);
 extern cb_tree			cb_list_reverse (cb_tree);
 extern unsigned int		cb_list_length (cb_tree);
+extern unsigned int		cb_next_length (struct cb_next_elem *);
 
 extern struct cb_report		*build_report (cb_tree);
 extern void			finalize_report (struct cb_report *, struct cb_field *);

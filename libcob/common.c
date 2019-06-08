@@ -6973,7 +6973,8 @@ cob_fatal_error (const enum cob_fatal_error fatal_error)
 		break;
 	/* LCOV_EXCL_START */
 	case COB_FERROR_CODEGEN:
-		cob_runtime_error (_("codegen error - Please report this!"));
+		cob_runtime_error ("codegen error");	/* not translated by intent */
+		cob_runtime_error (_("Please report this!"));
 		break;
 	/* LCOV_EXCL_STOP */
 	/* Note: can be simply tested; therefore no exclusion */
@@ -7505,7 +7506,8 @@ print_runtime_conf ()
 	printf ("%s %s.%d ", PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
 	puts (_("runtime configuration"));
 	if (cobsetptr->cob_config_file) {
-		strcpy (value, _("via"));
+		strncpy (value, _("via"), (size_t)COB_MEDIUM_MAX);
+		value[COB_MEDIUM_MAX] = 0;
 		hdlen = (unsigned int)strlen (value) + 3;
 
 		/* output path of main configuration file */

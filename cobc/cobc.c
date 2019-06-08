@@ -496,7 +496,7 @@ static const char	*const cob_csyns[] = {
 #endif
 };
 
-#define COB_NUM_CSYNS	sizeof(cob_csyns) / sizeof(char *)
+#define COB_NUM_CSYNS	sizeof(cob_csyns) / sizeof(cob_csyns[0])
 
 static const char short_options[] = "hVivqECScbmxjdFROPgwo:t:T:I:L:l:D:K:k:";
 
@@ -1580,7 +1580,7 @@ cobc_check_valid_name (const char *name, const enum cobc_name_type prechk)
 
 	/* Check name is not a C keyword. */
 	if (bsearch (name, cob_csyns, COB_NUM_CSYNS,
-		     sizeof (char *), cobc_bcompare)) {
+		     sizeof (name), cobc_bcompare)) {
 		cobc_error_name (name, prechk, C_KEYWORD);
 		return 1;
 	}

@@ -5,6 +5,19 @@
 	  and cb_xml_generate, as soon as those words are reserved we take those
 	  statements as supported
 
+2019-06-07  Simon Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (get_prev_ml_tree_entry): fixed null-pointer access with code
+	  similar to use in other places
+	* tree.c, tree.h: added struct cb_next_elem to be used for any structure
+	  that has a next pointer as first entry, to be used by (cb_next_length)
+	  to get the size of the complete entry (only reasonable to call with the
+	  "main" entry normally attached to a program)
+	* typeck.c (cb_validate_program_data): set alphabet->custom_list to error
+	  node once seen as bad, partially limitted variable scope
+	* tree.c (validate_file): explicit check for number of keys (limited
+	  to MAX_FILE_KEYS, currently 255, per file)
+
 2019-06-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* help.c: new file, extracted from cobc.c to limit the generation of docs
