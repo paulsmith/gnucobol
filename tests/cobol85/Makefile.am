@@ -22,6 +22,8 @@
 # FIXME: doesn't work when EXEC85$(EXEEXT) exists in sourcedir but not
 #        in builddir
 
+RM = rm -rf
+
 MODULES_ALL = NC SM IC SQ RL ST SG OB IF RW DB IX DBNOIX CM
 
 # currently untested modules: CM
@@ -168,9 +170,9 @@ newcob.val:
 	fi
 
 clean-local:
-	rm -rf copy copyalt $(MODULES_ALL) EXEC85$(EXEEXT) summary.log EXEC85.cob
+	$(RM) copy copyalt $(MODULES_ALL) EXEC85$(EXEEXT) summary.log EXEC85.cob
 
-$(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
+$(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in Makefile.module.in
 	@echo "Building module directory $@ ..."
 	@mkdir -p ./$@
 	@echo "*SELECT-MODULE `echo $@ | sed 's/\(..\).*/\1/'`" > ./$@/EXEC85.conf
@@ -184,7 +186,7 @@ $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 	fi; \
 	cd $@ && "$(abs_top_builddir)/pre-inst-env" ../EXEC85$(EXEEXT)
 	@perl $(srcdir)/expand.pl $@/newcob.tmp $@
-#	@rm -f ./$@/newcob.tmp ./$@/newcob.log ./$@/EXEC85.conf
+#	@$(RM) ./$@/newcob.tmp ./$@/newcob.log ./$@/EXEC85.conf
 	@export CBL_LIST="`ls $@/*.CBL | cut -b4- | tr "\n" " "`"  && \
 	 sed -e 's/##MODULE##/'"$@"'/'            \
 	     -e 's|##COB85DIR##|'"$(COB85DIR)"'|' \
@@ -210,7 +212,7 @@ EXEC85.cob: newcob.val
 	    -e 's/^003400.*/           "unused"./'                                   \
 	    -e 's/^003700.*/           "newcob.log"./'                               \
 	    -e 's/^004000.*/           "EXEC85.conf" ORGANIZATION LINE SEQUENTIAL./' \
-	    "$$NEWCOB_VAL" > EXEC85.cob
+	    "$$NEWCOB_VAL" > EXEC85.cob || ($(RM) EXEC85.cob && false)
 
 EXEC85$(EXEEXT): EXEC85.cob
 	@echo "Compiling EXEC85 program"

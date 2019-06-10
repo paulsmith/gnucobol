@@ -85,14 +85,14 @@ my $REMOVE_COMMANDS;
 if ($^O ne "MSWin32" && $^O ne "dos") {
 	$TRAP = "trap 'exit 77' INT QUIT TERM PIPE;";
 	$REMOVE_COMMANDS = "$TRAP  rm -rf $REMOVE";
-	if ($ENV{'DB_HOME'}) {
+	if ($ENV{'DB_HOME'} && $ENV{'DB_HOME'} ne ".") {
 		$REMOVE_COMMANDS = "$REMOVE_COMMANDS $ENV{'DB_HOME'}/$REMOVE";
 	}
 	$cobcrun_direct = "$cobcrun_direct./";
 } else {
 	$TRAP = "";
 	$REMOVE_COMMANDS = "ERASE /F /Q $REMOVE &&";
-	if ($ENV{'DB_HOME'}) {
+	if ($ENV{'DB_HOME'} && $ENV{'DB_HOME'} ne ".") {
 		$REMOVE_COMMANDS = "$REMOVE_COMMANDS $ENV{'DB_HOME'}\\$REMOVE &&";
 	}
 	$REMOVE_COMMANDS = "$REMOVE_COMMANDS " .

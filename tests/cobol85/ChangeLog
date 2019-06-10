@@ -1,4 +1,12 @@
 
+2019-06-10  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am ($(MODULES)): missing dependency Makefile.module.in added,
+	* Makefile.am (EXEC85.cob): delete in case of issues during sed ensuring
+	  to not end with a partial source
+	* Makefile.module.in (clean, clean-db): targets added
+	* report.pl: only delete files in DB_HOME if it does not equal to "."
+
 2019-05-25  Simon Sobisch <simonsobisch@gnu.org>
 
 	* expand.pl: added checks for input arguments and valid file
