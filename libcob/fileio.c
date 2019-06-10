@@ -4591,13 +4591,27 @@ bdb_lock_record (cob_file *f, const char *key, const unsigned int keylen)
 {
 	struct indexed_file	*p;
 	size_t			len;
-	int			j, k, ret;
+	int			j, k, ret, retry, interval;
 	DBT			dbt;
 
 	if (bdb_env == NULL) 
 		return 0;
 	p = f->file;
 	ret = 0;
+	retry = interval = 0;
+	if ((f->retry_mode & COB_RETRY_FOREVER)) {
+		retry = -1;
+	} else
+	if ((f->retry_mode & COB_RETRY_SECONDS)) {
+		retry = 1;
+		interval = f->retry_seconds>0?f->retry_seconds:
+			(cobsetptr->cob_retry_seconds>0?cobsetptr->cob_retry_seconds:1);
+	} else
+	if ((f->retry_mode & COB_RETRY_TIMES)) {
+		retry = f->retry_times>0?f->retry_times:
+			(cobsetptr->cob_retry_times>0?cobsetptr->cob_retry_times:1);
+		interval = cobsetptr->cob_retry_seconds>0?cobsetptr->cob_retry_seconds:1;
+	}
 
 	len = keylen + p->filenamelen + 1;
 	if (len > rlo_size) {
@@ -4605,15 +4619,33 @@ bdb_lock_record (cob_file *f, const char *key, const unsigned int keylen)
 		record_lock_object = cob_malloc (len);
 		rlo_size = len;
 	}
-	memcpy ((char *)record_lock_object, p->filename,
-		(size_t)(p->filenamelen + 1));
-	memcpy ((char *)record_lock_object + p->filenamelen + 1, key,
-		(size_t)keylen);
-	memset (&dbt, 0, sizeof (dbt));
-	dbt.size = (cob_dbtsize_t) len;
-	dbt.data = record_lock_object;
-	ret = bdb_env->lock_get (bdb_env, p->bdb_lock_id, DB_LOCK_NOWAIT,
-				&dbt, DB_LOCK_WRITE, &p->bdb_record_lock);
+	memcpy ((char *)record_lock_object, p->filename, (size_t)(p->filenamelen + 1));
+	memcpy ((char *)record_lock_object + p->filenamelen + 1, key, (size_t)keylen);
+
+	if(retry > 0) {
+		retry = retry * interval * COB_RETRY_PER_SECOND;
+		interval = 1000 / COB_RETRY_PER_SECOND;
+	}
+
+	do {
+		memset(&dbt,0,sizeof(dbt));
+		dbt.size = (cob_dbtsize_t) len;
+		dbt.data = record_lock_object;
+		ret = bdb_env->lock_get (bdb_env, bdb_lock_id, retry==-1?0:DB_LOCK_NOWAIT,
+					&dbt, DB_LOCK_WRITE, &p->bdb_record_lock);
+		if (ret == 0)
+			break;
+		if (ret == DB_LOCK_DEADLOCK)
+			return COB_STATUS_52_DEAD_LOCK;
+		if(ret != DB_LOCK_NOTGRANTED) {
+			break;
+		}
+		if (retry > 0) {
+			retry--;
+			cob_sys_sleep_msec(interval);
+		}
+	} while (ret != 0 && retry != 0);
+
 	if (!ret) {
 		if (p->bdb_lock_max == 0) {
 			p->bdb_lock_max = COB_MAX_BDB_LOCKS;
@@ -4655,7 +4687,7 @@ bdb_test_record_lock (cob_file *f, const char *key, const unsigned int keylen)
 {
 	struct indexed_file	*p;
 	size_t			len;
-	int			j, k, ret;
+	int			j, k, ret, retry, interval;
 	DBT			dbt;
 	DB_LOCK			test_lock;
 
@@ -4663,22 +4695,52 @@ bdb_test_record_lock (cob_file *f, const char *key, const unsigned int keylen)
 		return 0;
 	p = f->file;
 	ret = 0;
-
+	retry = interval = 0;
+	if ((f->retry_mode & COB_RETRY_FOREVER)) {
+		retry = -1;
+	} else
+	if ((f->retry_mode & COB_RETRY_SECONDS)) {
+		retry = 1;
+		interval = f->retry_seconds>0?f->retry_seconds:
+			(cobsetptr->cob_retry_seconds>0?cobsetptr->cob_retry_seconds:1);
+	} else
+	if ((f->retry_mode & COB_RETRY_TIMES)) {
+		retry = f->retry_times>0?f->retry_times:
+			(cobsetptr->cob_retry_times>0?cobsetptr->cob_retry_times:1);
+		interval = cobsetptr->cob_retry_seconds>0?cobsetptr->cob_retry_seconds:1;
+	}
 	len = keylen + p->filenamelen + 1;
 	if (len > rlo_size) {
 		cob_free (record_lock_object);
 		record_lock_object = cob_malloc (len);
 		rlo_size = len;
 	}
-	memcpy ((char *)record_lock_object, p->filename,
-		(size_t)(p->filenamelen + 1));
-	memcpy ((char *)record_lock_object + p->filenamelen + 1, key,
-		(size_t)keylen);
-	memset (&dbt, 0, sizeof (dbt));
-	dbt.size = (cob_dbtsize_t) len;
-	dbt.data = record_lock_object;
-	ret = bdb_env->lock_get (bdb_env, p->bdb_lock_id, DB_LOCK_NOWAIT,
-				&dbt, DB_LOCK_WRITE, &test_lock);
+	memcpy ((char *)record_lock_object, p->filename, (size_t)(p->filenamelen + 1));
+	memcpy ((char *)record_lock_object + p->filenamelen + 1, key, (size_t)keylen);
+	memset(&test_lock,0,sizeof(test_lock));
+	if(retry > 0) {
+		retry = retry * interval * COB_RETRY_PER_SECOND ;
+		interval = 1000 / COB_RETRY_PER_SECOND ;
+	}
+	do {
+		memset(&dbt,0,sizeof(dbt));
+		dbt.size = (cob_dbtsize_t) len;
+		dbt.data = record_lock_object;
+		ret = bdb_env->lock_get (bdb_env, bdb_lock_id, DB_LOCK_NOWAIT,
+					&dbt, DB_LOCK_WRITE, &test_lock);
+		if (ret == 0)
+			break;
+		if (ret == DB_LOCK_DEADLOCK)
+			return COB_STATUS_52_DEAD_LOCK;
+		if(ret != DB_LOCK_NOTGRANTED) {
+			break;
+		}
+		if (retry > 0) {
+			retry--;
+			cob_sys_sleep_msec(interval);
+		}
+	} while (ret != 0 && retry != 0);
+
 	if (!ret) {
 		if (p->bdb_lock_num > 0) {
 			for(k = 0; k < p->bdb_lock_num; k++) {

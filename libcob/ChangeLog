@@ -1,4 +1,8 @@
 
+2019-06-10  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Merged BDB record lock retry logic from reportwriter
+
 2019-06-07  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: If DB_HOME is not defined, then default to "."
