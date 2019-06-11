@@ -481,6 +481,8 @@ static const int	status_exception[] = {
 	COB_EC_I_O_IMP			/* 9x */
 };
 
+static int		chk_file_path = 1;
+static const char	**file_paths = NULL;
 static const char	* const prefix[] = { "DD_", "dd_", "" };
 #define NUM_PREFIX	sizeof (prefix) / sizeof (char *)
 
@@ -608,8 +610,6 @@ extern int extfh_relative_delete	(cob_file *);
 static DB_ENV		*bdb_env = NULL;
 static char		*bdb_buff = NULL;
 static const char	**bdb_data_dir = NULL;
-static int		chk_file_path = 1;
-static const char	**file_paths = NULL;
 static void		*record_lock_object = NULL;
 static size_t		rlo_size = 0;
 static unsigned int	bdb_lock_id = 0;
