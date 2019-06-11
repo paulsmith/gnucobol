@@ -55,10 +55,13 @@ NEWS - user visible changes				-*- outline -*-
 
 * New build features
 
+** Running the internal tests by make check now fails if the testsuite has any
+   unexpected result.
+
 ** The modules and test programs in the NIST COBOL-85 test suite (tests/cobol85)
    may now be build and/or tested and/or the test results checked separately.
-   You now may also run the tests with a previous installed (or with
-   a temporary manual setup prepared) version of GnuCOBOL.
+   You now may also run the tests with a previous installed version of GnuCOBOL
+   (or a version specified by a manual temporary setup).
    For details see tests/cobol85/README.
 
 ** To adjust configure to use libxml2 you may use the new variables XML2_CFLAGS
@@ -82,6 +85,7 @@ NEWS - user visible changes				-*- outline -*-
    pre-inst-env cobcrun -M prog start
    pre-inst-env may also be called without parameters to start a new shell
    session with the environment adjusted to use the uninstalled version.
+
 
 * Too much bug fixes to list here (please check ChangeLogs for full details).
 

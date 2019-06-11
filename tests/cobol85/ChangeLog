@@ -1,4 +1,15 @@
 
+2019-06-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: added some additional output to show current status
+	* Makefile.am (summary.log): now always rebuild (.PHONY)
+	* Makefile.am (diff): ensure that results of all modules are compared
+	  (now only fails early if there's an actual error during diff)
+	* Makefile.am: moved dependency on summary.log from diff to diff-summary
+	* report.pl: create additional file in each module directory: duration.txt
+	  showing the duration in fractional seconds for each test (system time!)
+	* Makefile.am (duration.log): new target collecting rough durations
+
 2019-06-10  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am ($(MODULES)): missing dependency Makefile.module.in added,

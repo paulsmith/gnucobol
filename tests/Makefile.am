@@ -74,11 +74,11 @@ EXTRA_DIST = $(srcdir)/package.m4 $(TESTSUITE) $(TESTSUITE_MANUAL) \
 DISTCLEANFILES = atconfig
 
 check-local: prereq-testsuite
-	@GNUCOBOL_TEST_LOCAL="" $(TESTSUITE) $(TESTSUITEFLAGS) || rm -f testsuite.dir/at-job-fifo
+	@GNUCOBOL_TEST_LOCAL=""  $(TESTSUITE) $(TESTSUITEFLAGS) || (rm -f testsuite.dir/at-job-fifo; exit 1)
 	@rm -f testsuite.dir/at-job-fifo
 
 localcheck: prereq-testsuite
-	@GNUCOBOL_TEST_LOCAL="1" $(TESTSUITE) $(TESTSUITEFLAGS) || rm -f testsuite.dir/at-job-fifo
+	@GNUCOBOL_TEST_LOCAL="1" $(TESTSUITE) $(TESTSUITEFLAGS) || (rm -f testsuite.dir/at-job-fifo; exit 1)
 	@rm -f testsuite.dir/at-job-fifo
 	
 prereq-check:
@@ -98,7 +98,7 @@ clean-local:
 	@cp $(srcdir)/run_prog_manual.sh.in $@
 
 checkmanual: prereq-manual ./run_prog_manual.sh
-	@$(TESTSUITE_MANUAL) $(TESTSUITEFLAGS) || rm -f testsuite_manual.dir/at-job-fifo
+	@$(TESTSUITE_MANUAL) $(TESTSUITEFLAGS) || (rm -f testsuite_manual.dir/at-job-fifo; exit 1)
 	@rm -f testsuite_manual.dir/at-job-fifo
 
 # targets that are only logical targets instead of files

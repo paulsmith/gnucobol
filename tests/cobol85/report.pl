@@ -101,6 +101,15 @@ if ($^O ne "MSWin32" && $^O ne "dos") {
 	$cobcrun_direct = "$cobcrun_direct.\\";
 }
 
+# for obsolete systems use duration in seconds, otherwise get nanos from system
+# (the better Time::HiRes is only a core module since Perl 5.7.3)
+sub time_since_epoch {
+	if ($^O ne "MSWin32" && $^O ne "dos") {
+		return `date +%s.%N`;
+	} else {
+		return time;
+	}
+}
 # temporary directory (used for fifos, currently not active)
 # my $tmpdir = $ENV{"TMPDIR"};
 # if (!defined $tmpdir) {
@@ -223,9 +232,13 @@ if (!defined $single_test) {
 	open (LOG_FH, "> report.txt") or die;
 	print LOG_FH "Filename    total pass fail deleted inspect\n";
 	print LOG_FH "--------    ----- ---- ---- ------- -------\n";
+	open (LOG_TIME, "> duration.txt") or die;
+	print LOG_TIME "Filename    Duration\n";
+	print LOG_TIME "--------    --------\n";
 } else {
 	*LOG_FH = *STDERR;
 }
+my $global_start = time_since_epoch ();
 
 my $in;
 
@@ -247,6 +260,7 @@ if (defined $single_test) {
 foreach $in (sort (glob("*.{CBL,SUB}"))) {
 	run_test ($in);
 }
+my $global_end = time_since_epoch ();
 
 print  LOG_FH ("--------    ----- ---- ---- ------- -------\n");
 printf LOG_FH ("Total       %5s %4s %4s %7s %7s\n\n",
@@ -258,10 +272,13 @@ printf LOG_FH ("Successfully executed: %2s\n", $total_ok);
 printf LOG_FH ("Compile error:         %2s\n", $compile_error);
 printf LOG_FH ("Execute error:         %2s\n", $execute_error);
 
+print LOG_TIME "--------    --------\n";
+printf LOG_TIME ("Total       %8.4f\n\n", ($global_end - $global_start));
 
 sub compile_lib {
 	my $in = $_[0];
 	print "$compile_module $in\n";
+	my $local_start = time_since_epoch ();
 	$ret = system ("$TRAP  $compile_module $in");
 	if ($ret != 0) {
 		if (($ret >> 8) == 77) {
@@ -269,6 +286,8 @@ sub compile_lib {
 		}
 		print "Unexpected status $ret for module $in\n";
 	}
+	my $local_end = time_since_epoch ();
+	printf LOG_TIME ("%-11s %8.4f\n", (substr $in, 4), ($local_end - $local_start));
 }
 
 sub run_test {
@@ -326,6 +345,7 @@ sub run_test {
 	my $deleted = 0;
 	my $inspect = 0;
 
+	my $local_start = time_since_epoch ();
 	$ret = system ("$TRAP  $compile_current");
 	if ($ret != 0) {
 		if (($ret >> 8) == 77) {
@@ -333,6 +353,8 @@ sub run_test {
 		}
 		$compile_error++;
 		print LOG_FH ("$line_prefix  ***** compile error *****\n");
+		my $local_end = time_since_epoch ();
+		printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 		return;
 	}
 
@@ -354,6 +376,8 @@ sub run_test {
 	if ($comp_only{$exe}) {
 		print LOG_FH ("$line_prefix     0    0    0       0       0 OK\n");
 		$total_ok++;
+		my $local_end = time_since_epoch ();
+		printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 		return;
 	}
 
@@ -394,6 +418,8 @@ testrepeat:
 			die "Interrupted\n";
 		}
 		$execute_error++;
+		my $local_end = time_since_epoch ();
+		printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 		print LOG_FH ("$line_prefix  ***** execute error $ret *****\n");
 		return;
 	}
@@ -544,5 +570,7 @@ testrepeat:
 		print "Reexecution with runtime DEBUG off ./DB103M\n";
 		goto testrepeat;
 	}
+	my $local_end = time_since_epoch ();
+	printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 	unlink "$exe.out" if (-s "$exe.out" == 0);
 }

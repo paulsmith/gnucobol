@@ -31,10 +31,12 @@ if COB_MAKE_IX
 MODULES = NC SM IC SQ RL ST SG OB IF RW DB IX
 MODULES_RUN = NC_RUN SM_RUN IC_RUN SQ_RUN RL_RUN \
 	ST_RUN SG_RUN OB_RUN IF_RUN RW_RUN DB_RUN IX_RUN
+SUMMARY = summary.txt
 else
 MODULES = NC SM IC SQ RL ST SG OB IF RW DBNOIX
 MODULES_RUN = NC_RUN SM_RUN IC_RUN SQ_RUN RL_RUN \
 	ST_RUN SG_RUN OB_RUN IF_RUN RW_RUN DBNOIX_RUN
+SUMMARY = summarynoix.txt
 endif
 
 EXTRA_DIST = EXEC85.conf.in expand.pl report.pl summary.pl summary.txt \
@@ -51,7 +53,7 @@ COBC_FLAGS = -std=cobol85 -debug
 # MAKEFLAGS = --no-print-directory
 
 # targets that are only logical targets instead of files
-.PHONY: test diff-summary diff $(MODULES_RUN) unpack-Z unpack-gz
+.PHONY: test diff-summary diff summary.log $(MODULES_RUN) unpack-Z unpack-gz
 
 NC_RUN: NC
 	@cd NC && $(MAKE) -k
@@ -97,28 +99,40 @@ CM_RUN: CM
 
 modules: $(MODULES_ALL)
 
+duration.log:
+	@echo "Collecting durations for each module..."
+	@echo "Duration for modules: $(MODULES)" > $@
+	@echo "" >> $@
+	@for m in $(MODULES); do \
+		cat "$$m/duration.txt" >> $@; \
+	done
+	@echo Done
+
 test: $(MODULES_RUN)
 	@echo
-	@perl "$(srcdir)/summary.pl" $(MODULES) > summary.log
 	$(MAKE) diff-summary
 
 summary.log:
-	@perl "$(srcdir)/summary.pl" $(MODULES) > summary.log
+	@echo "Computing total test results..."
+	@perl "$(srcdir)/summary.pl" $(MODULES) > $@
 
-diff: summary.log
-	@for m in $(MODULES); do \
-		(diff $(DIFF_FLAGS) "$(srcdir)/$$m.txt" "$$m/report.txt") \
-	done
+diff:
+	@echo "Comparing test results for each module"
+	@retd=0; for m in $(MODULES); do \
+		echo "diff $$m/report.txt..."; \
+		diff $(DIFF_FLAGS) "$(srcdir)/$$m.txt" "$$m/report.txt"; \
+		ret=$$? && if test $$ret -gt $$retd; then retd=$$ret; fi \
+	done; \
+		if test $$retd -gt 1; then exit $$retd; fi
+	@echo Done
 	$(MAKE) diff-summary
 
 diff-summary:
-	@echo "Comparing total test results"
-if COB_MAKE_IX
-	diff $(DIFF_FLAGS) "$(srcdir)/summary.txt" "summary.log"
-else
-	diff $(DIFF_FLAGS) "$(srcdir)/summarynoix.txt" "summary.log"
-endif
-	@echo
+	$(MAKE) summary.log
+	@echo "Comparing total test results..."
+	@echo "diff $(SUMMARY)..."
+	@diff $(DIFF_FLAGS) "$(srcdir)/$(SUMMARY)" "summary.log"
+	@echo Done
 
 newcob.val.Z:
 	@echo "Trying to download newcob.val.Z..."

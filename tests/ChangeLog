@@ -1,4 +1,9 @@
 
+2019-06-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (check, checkmanual): now fails if the testsuite reports
+	  any unexpected result (exit with non-zero return)
+
 2019-05-24  Simon Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in: early unset of COB_ variables (before we set them...)
