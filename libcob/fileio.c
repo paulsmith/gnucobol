@@ -608,6 +608,8 @@ extern int extfh_relative_delete	(cob_file *);
 static DB_ENV		*bdb_env = NULL;
 static char		*bdb_buff = NULL;
 static const char	**bdb_data_dir = NULL;
+static int		chk_file_path = 1;
+static const char	**file_paths = NULL;
 static void		*record_lock_object = NULL;
 static size_t		rlo_size = 0;
 static unsigned int	bdb_lock_id = 0;
@@ -1016,6 +1018,7 @@ cob_chk_file_mapping (cob_file *f)
 	char		*saveptr;
 	char		*orig;
 	unsigned int	dollar;
+	int		k;
 
 	if (unlikely (!COB_MODULE_PTR->flag_filename_mapping)) {
 		return;
@@ -1042,12 +1045,33 @@ cob_chk_file_mapping (cob_file *f)
 		/* If not found, use as is including the dollar character */
 		if ((p = cob_chk_file_env (f,src)) != NULL) {
 			strncpy (file_open_name, p, (size_t)COB_FILE_MAX);
-		} else if (cobsetptr->cob_file_path) {
-			snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s%c%s",
-				  cobsetptr->cob_file_path, SLASH_CHAR, file_open_name);
-			file_open_buff[COB_FILE_MAX] = 0;
-			strncpy (file_open_name, file_open_buff,
-				 (size_t)COB_FILE_MAX);
+		} else if (file_paths) {
+			for(k=0; file_paths[k] != NULL; k++) {
+				snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s%c%s",
+					  file_paths[k], SLASH_CHAR, file_open_name);
+				file_open_buff[COB_FILE_MAX] = 0;
+				if (access (file_open_buff, F_OK) == 0) {
+					break;
+				}
+#if defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
+				/* ISAM may append '.dat' to file name */
+				snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s%c%s.dat",
+					  file_paths[k], SLASH_CHAR, file_open_name);
+				file_open_buff[COB_FILE_MAX] = 0;
+				if (access (file_open_buff, F_OK) == 0) {
+					snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s%c%s",
+						  file_paths[k], SLASH_CHAR, file_open_name);
+					file_open_buff[COB_FILE_MAX] = 0;
+					break;
+				}
+#endif
+			}
+			if (file_paths[k] == NULL) {
+				snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s%c%s",
+					  file_paths[0], SLASH_CHAR, file_open_name);
+				file_open_buff[COB_FILE_MAX] = 0;
+			}
+			strncpy (file_open_name, file_open_buff, (size_t)COB_FILE_MAX);
 		}
 		return;
 	}
@@ -4483,7 +4507,7 @@ static void
 join_environment (void)
 {
 	cob_u32_t	flags;
-	int		ret;
+	int		ret, k;
 
 	if (cobsetptr->bdb_home == NULL) {
 		/* Default to the current directory */
@@ -4504,6 +4528,11 @@ join_environment (void)
 	bdb_env->set_errfile (bdb_env, stderr);
 #if (DB_VERSION_MAJOR > 4) || ((DB_VERSION_MAJOR == 4) && (DB_VERSION_MINOR > 2))
 	bdb_env->set_msgfile (bdb_env, stderr);
+	if (file_paths) {
+		for(k=0; file_paths[k] != NULL; k++) {
+			ret = bdb_env->set_data_dir (bdb_env, file_paths[k]);
+		}
+	}
 #endif
 	bdb_env->set_cachesize (bdb_env, 0, 2*1024*1024, 0);
 	bdb_env->set_alloc (bdb_env, cob_malloc, realloc, cob_free);
@@ -9235,6 +9264,8 @@ cob_exit_fileio (void)
 void
 cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 {
+	char	*p;
+	int	i,k;
 
 	cobglobptr = lptr;
 	cobsetptr  = sptr;
@@ -9282,6 +9313,27 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 	rlo_size = 1024;
 	bdb_buff = cob_malloc ((size_t)COB_SMALL_BUFF+1);
 #endif
+
+	if(chk_file_path) {
+		chk_file_path = 0;
+		if (cobsetptr->cob_file_path) {
+			for(i=k=0; cobsetptr->cob_file_path[i] != 0; i++) {
+				if(cobsetptr->cob_file_path[i] == ':')
+					k++;
+			}
+			/* Split list of paths apart */
+			file_paths = cob_malloc (sizeof(void*) * (k+2));
+			p = cob_strdup (cobsetptr->cob_file_path);
+			file_paths[0] = p;
+			for(i=k=0; p[i] != 0; i++) {
+				if(p[i] == ':') {
+					p[i] = 0;
+					file_paths[++k] = &p[i+1];
+				}
+			}
+			file_paths[++k] = NULL;
+		}
+	}
 
 #ifdef VB_RTD
 	if (vbisam_rtd == NULL) {	/* VB-ISAM 2.1.1 run-time pointer */
