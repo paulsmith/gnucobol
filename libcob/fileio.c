@@ -4503,6 +4503,24 @@ bdb_errcall_set (DB_ENV *dbe, const char *prefix, const char *err)
 }
 #endif
 
+static int
+bdb_err_event(DB_ENV *env, u_int32_t event, void *info)
+{
+	char	*msg = "BDB Error";
+	if (event == DB_EVENT_FAILCHK_PANIC)
+		msg = "FailChk_Panic";
+	else if(event == DB_EVENT_MUTEX_DIED)
+		msg = "Mutex Died";
+	else if(event == DB_EVENT_MUTEX_DIED)
+		msg = "Panic";
+	if (event == DB_EVENT_FAILCHK_PANIC
+	 || event == DB_EVENT_MUTEX_DIED
+	 || event == DB_EVENT_PANIC) {
+		cob_runtime_error (_("BDB (%s), error: %d %s"),"error event",event,msg);
+		exit(-1);
+	} 
+}
+
 static void
 join_environment (void)
 {
@@ -4550,6 +4568,7 @@ join_environment (void)
 #endif
 	bdb_env->lock_id (bdb_env, &bdb_lock_id);
 	bdb_env->set_lk_detect (bdb_env, DB_LOCK_DEFAULT);
+	bdb_env->set_event_notify(bdb_env, bdb_err_event);
 }
 
 /* Impose lock on 'file' using BDB locking */

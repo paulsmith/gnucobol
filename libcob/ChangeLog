@@ -1,4 +1,9 @@
 
+2019-06-13  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Use bdb_env->set_event_notify to catch fatal BDB errors
+	            and exit the program 
+
 2019-06-11  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: COB_FILE_PATH may be a colon separated list of directories
