@@ -4506,17 +4506,22 @@ bdb_errcall_set (DB_ENV *dbe, const char *prefix, const char *err)
 static int
 bdb_err_event(DB_ENV *env, u_int32_t event, void *info)
 {
-	char	*msg = "BDB Error";
+	char	msg[20];
+	memset(msg,0,sizeof(msg));
+#ifdef DB_EVENT_FAILCHK_PANIC
 	if (event == DB_EVENT_FAILCHK_PANIC)
-		msg = "FailChk_Panic";
-	else if(event == DB_EVENT_MUTEX_DIED)
-		msg = "Mutex Died";
-	else if(event == DB_EVENT_MUTEX_DIED)
-		msg = "Panic";
-	if (event == DB_EVENT_FAILCHK_PANIC
-	 || event == DB_EVENT_MUTEX_DIED
-	 || event == DB_EVENT_PANIC) {
-		cob_runtime_error (_("BDB (%s), error: %d %s"),"error event",event,msg);
+		strcpy(msg,"FailChk_Panic");
+#endif
+#ifdef DB_EVENT_EVENT_MUTEX_DIED
+	if (event == DB_EVENT_MUTEX_DIED)
+		strcpy(msg,"Mutex Died");
+#endif
+#ifdef DB_EVENT_EVENT_PANIC
+	if (event == DB_EVENT_PANIC)
+		strcpy(msg,"Panic");
+#endif
+	if (msg[0] >= ' ') {
+		cob_runtime_error (_("BDB (%s), error: %d %s"),"fatal error",event,msg);
 		exit(-1);
 	} 
 }
