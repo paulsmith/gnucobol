@@ -4483,6 +4483,7 @@ isread_retry(cob_file *f, void *data, int mode)
 
 #ifdef	WITH_DB
 
+/* LCOV_EXCL_START */
 #if	0	/* RXWRXW - BDB msg */
 static void
 bdb_msgcall_set (DB_ENV *dbe, const char *err)
@@ -4503,28 +4504,44 @@ bdb_errcall_set (DB_ENV *dbe, const char *prefix, const char *err)
 }
 #endif
 
-static int
-bdb_err_event(DB_ENV *env, u_int32_t event, void *info)
+static int bdb_err_tear_down = 0;
+
+static void
+bdb_err_event (DB_ENV *env, u_int32_t event, void *info)
 {
-	char	msg[20];
-	memset(msg,0,sizeof(msg));
+	const char	*msg = NULL;
+	
+	if (bdb_err_tear_down) return;
+
+	COB_UNUSED (env);
+	COB_UNUSED (info);
+	
+	switch (event) {
 #ifdef DB_EVENT_FAILCHK_PANIC
-	if (event == DB_EVENT_FAILCHK_PANIC)
-		strcpy(msg,"FailChk_Panic");
+	case DB_EVENT_FAILCHK_PANIC:
+		msg = "FailChk_Panic";
+		/* fall-thru */
 #endif
+	case DB_EVENT_PANIC:
+		if (msg != NULL) msg = "Panic";
+		/* unset BDB environment as we cannot do anything with it any more */
+		bdb_env = NULL;
+		bdb_err_tear_down = 1;
+		break;
 #ifdef DB_EVENT_EVENT_MUTEX_DIED
-	if (event == DB_EVENT_MUTEX_DIED)
-		strcpy(msg,"Mutex Died");
+	case DB_EVENT_MUTEX_DIED:
+		msg = "Mutex Died"; break;
 #endif
-#ifdef DB_EVENT_EVENT_PANIC
-	if (event == DB_EVENT_PANIC)
-		strcpy(msg,"Panic");
+#ifdef  DB_EVENT_WRITE_FAILED 
+	case DB_EVENT_WRITE_FAILED:
+		msg = "WriteFailed"; break;
 #endif
-	if (msg[0] >= ' ') {
-		cob_runtime_error (_("BDB (%s), error: %d %s"),"fatal error",event,msg);
-		exit(-1);
-	} 
+	default: msg = "unknown"; break;
+	}
+	cob_runtime_error (_("BDB (%s), error: %d %s"), "fatal error", event, msg);
+	cob_stop_run (1);
 }
+/* LCOV_EXCL_STOP */
 
 static void
 join_environment (void)
@@ -4973,14 +4990,12 @@ indexed_write_internal (cob_file *f, const int rewrite, const int opt)
 	close_cursor = bdb_open_cursor (f, 1);
 
 	/* Check duplicate alternate keys */
-	if (f->nkeys > 1 && !rewrite) {
-		if (check_alt_keys (f, 0)) {
+	if (!rewrite) {
+		if (f->nkeys > 1 && check_alt_keys (f, 0)) {
 			bdb_close_cursor (f);
 			return COB_STATUS_22_KEY_EXISTS;
 		}
 		bdb_setkey (f, 0);
-	} else if (!rewrite) {
-		bdb_setkey(f, 0);
 	}
 
 	/* Write data */
@@ -5956,19 +5971,21 @@ indexed_close (cob_file *f, const int opt)
 	p = f->file;
 	if (bdb_env != NULL) {
 		bdb_unlock_all (f);
-		if(p->file_lock_set) {
+		if (p->file_lock_set) {
 			bdb_env->lock_put (bdb_env, &p->bdb_file_lock);
 			p->file_lock_set = 0;
 		}
 	}
-	/* Close DB's */
-	for (i = 0; i < (int)f->nkeys; ++i) {
-		if (p->cursor[i]) {
-			bdb_close_index (f, i);
+	if (!bdb_err_tear_down) {
+		/* Close DB's */
+		for (i = 0; i < (int)f->nkeys; ++i) {
+			if (p->cursor[i]) {
+				bdb_close_index (f, i);
+			}
 		}
 	}
 	for (i = (int)f->nkeys - 1; i >= 0; --i) {
-		if (p->db[i]) {
+		if (p->db[i] && !bdb_err_tear_down) {
 			DB_CLOSE (p->db[i]);
 		}
 		cob_free (p->last_readkey[i]);

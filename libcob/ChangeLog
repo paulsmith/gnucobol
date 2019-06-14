@@ -1,13 +1,20 @@
 
+2019-06-14  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c (bdb_err_event): added DB_EVENT_WRITE_FAILED, call cob_stoprun
+	  for full tear-down, to no create loops in case of fatal errors unset
+	  bdb_env and use new guard bdb_err_tear_down;
+	  adjusted to remove compiler warnings
+
 2019-06-13  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Use bdb_env->set_event_notify to catch fatal BDB errors
-	            and exit the program 
+	  and exit the program 
 
 2019-06-11  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: COB_FILE_PATH may be a colon separated list of directories
-	    With BDB the COB_FILE_PATH is now passed to BDB using set_data_dir
+	  With BDB the COB_FILE_PATH is now passed to BDB using set_data_dir
 
 2019-06-10  Ron Norman <rjn@inglenet.com>
 
@@ -16,8 +23,11 @@
 2019-06-07  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: If DB_HOME is not defined, then default to "."
-	            If DB_HOME is 'no' or 'false' then disable record/file
-		    locking
+	  If DB_HOME is 'no' or 'false' then disable record/file locking
+
+2019-06-06  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Fix more merge issues for BDB
 
 2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
 
