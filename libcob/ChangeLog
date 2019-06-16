@@ -1,4 +1,10 @@
 
+2019-06-10  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (gc_conf, set_config_val, get_config_val), coblocal.h:
+	  split ENV_INT to ENV_UINT (all current options) and ENV_UINT (allowing
+	  a negative min_value), actually check for numeric values
+
 2019-06-09  Simon Sobisch <simonsobisch@gnu.org>
 
 	* fileio.c: adjustments to fix issues reported by static code analyzer

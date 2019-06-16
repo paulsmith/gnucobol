@@ -353,12 +353,12 @@ static const char *not_set;
    optional: Minimum accepted value, Maximum accepted value
  */
 static struct config_tbl gc_conf[] = {
-	{"COB_LOAD_CASE", "load_case", 		"0", 	lwrupr, GRP_CALL, ENV_INT | ENV_ENUMVAL, SETPOS (name_convert)},
+	{"COB_LOAD_CASE", "load_case", 		"0", 	lwrupr, GRP_CALL, ENV_UINT | ENV_ENUMVAL, SETPOS (name_convert)},
 	{"COB_PHYSICAL_CANCEL", "physical_cancel", 	"0", 	NULL, GRP_CALL, ENV_BOOL, SETPOS (cob_physical_cancel)},
 	{"default_cancel_mode", "default_cancel_mode", 	NULL, NULL, GRP_HIDE, ENV_BOOL | ENV_NOT, SETPOS (cob_physical_cancel)},
 	{"LOGICAL_CANCELS", "logical_cancels", 	NULL, NULL, GRP_HIDE, ENV_BOOL | ENV_NOT, SETPOS (cob_physical_cancel)},
 	{"COB_PRE_LOAD", "pre_load", 		NULL, 	NULL, GRP_CALL, ENV_STR, SETPOS (cob_preload_str)},
-	{"COB_BELL", "bell", 			"0", 	beepopts, GRP_SCREEN, ENV_INT | ENV_ENUMVAL, SETPOS (cob_beep_value)},
+	{"COB_BELL", "bell", 			"0", 	beepopts, GRP_SCREEN, ENV_UINT | ENV_ENUMVAL, SETPOS (cob_beep_value)},
 	{"COB_DEBUG_LOG", "debug_log", 		NULL, 	NULL, GRP_HIDE, ENV_FILE, SETPOS (cob_debug_log)},
 	{"COB_DISABLE_WARNINGS", "disable_warnings", "0", 	NULL, GRP_MISC, ENV_BOOL | ENV_NOT, SETPOS (cob_display_warn)},
 	{"COB_ENV_MANGLE", "env_mangle", 		"0", 	NULL, GRP_MISC, ENV_BOOL, SETPOS (cob_env_mangle)},
@@ -366,18 +366,18 @@ static struct config_tbl gc_conf[] = {
 	{"COB_REDIRECT_DISPLAY", "redirect_display", "0", 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_disp_to_stderr)},
 	{"COB_SCREEN_ESC", "screen_esc", 		"0", 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_use_esc)},
 	{"COB_SCREEN_EXCEPTIONS", "screen_exceptions", "0", NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_extended_status)},
-	{"COB_TIMEOUT_SCALE", "timeout_scale", 	"0", 	timeopts, GRP_SCREEN, ENV_INT, SETPOS (cob_timeout_scale)},
+	{"COB_TIMEOUT_SCALE", "timeout_scale", 	"0", 	timeopts, GRP_SCREEN, ENV_UINT, SETPOS (cob_timeout_scale)},
 	{"COB_INSERT_MODE", "insert_mode", "0", NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_insert_mode)},
-	{"COB_MOUSE_FLAGS", "mouse_flags", "1", NULL, GRP_SCREEN, ENV_INT, SETPOS (cob_mouse_flags)},
-	{"MOUSE_FLAGS", "mouse_flags", NULL, NULL, GRP_HIDE, ENV_INT, SETPOS (cob_mouse_flags)},
+	{"COB_MOUSE_FLAGS", "mouse_flags", "1", NULL, GRP_SCREEN, ENV_UINT, SETPOS (cob_mouse_flags)},
+	{"MOUSE_FLAGS", "mouse_flags", NULL, NULL, GRP_HIDE, ENV_UINT, SETPOS (cob_mouse_flags)},
 	{"COB_SET_DEBUG", "debugging_mode", 		"0", 	NULL, GRP_MISC, ENV_BOOL | ENV_RESETS, SETPOS (cob_debugging_mode)},
 	{"COB_SET_TRACE", "set_trace", 		"0", 	NULL, GRP_MISC, ENV_BOOL, SETPOS (cob_line_trace)},
 	{"COB_TRACE_FILE", "trace_file", 		NULL, 	NULL, GRP_MISC, ENV_FILE, SETPOS (cob_trace_filename)},
 	{"COB_TRACE_FORMAT", "trace_format",	"%P %S Line: %L", NULL,GRP_MISC, ENV_STR, SETPOS (cob_trace_format)},
 	{"COB_DUMP_FILE", "dump_file",		NULL,	NULL, GRP_MISC, ENV_FILE, SETPOS (cob_dump_filename)},
-	{"COB_DUMP_WIDTH", "dump_width",		"100",	NULL, GRP_MISC, ENV_INT, SETPOS (cob_dump_width)},
+	{"COB_DUMP_WIDTH", "dump_width",		"100",	NULL, GRP_MISC, ENV_UINT, SETPOS (cob_dump_width)},
 #ifdef  _WIN32
-	/* checked before configuration load if set from environment in cob_init() */
+	/* checked before configuration load if set from environment in cob_common_init() */
 	{"COB_UNIX_LF", "unix_lf", 		"0", 	NULL, GRP_FILE, ENV_BOOL, SETPOS (cob_unix_lf)},
 #endif
 	{"USERNAME", "username", 			NULL, 	NULL, GRP_SYSENV, ENV_STR, SETPOS (cob_user_name)},	/* default set in cob_init() */
@@ -394,7 +394,7 @@ static struct config_tbl gc_conf[] = {
 #endif
 	{"COB_FILE_PATH", "file_path", 		NULL, 	NULL, GRP_FILE, ENV_PATH, SETPOS (cob_file_path)},
 	{"COB_LIBRARY_PATH", "library_path", 	NULL, 	NULL, GRP_CALL, ENV_PATH, SETPOS (cob_library_path)}, /* default value set in cob_init_call() */
-	{"COB_VARSEQ_FORMAT", "varseq_format", 	varseq_dflt, varseqopts, GRP_FILE, ENV_INT | ENV_ENUM, SETPOS (cob_varseq_type)},
+	{"COB_VARSEQ_FORMAT", "varseq_format", 	varseq_dflt, varseqopts, GRP_FILE, ENV_UINT | ENV_ENUM, SETPOS (cob_varseq_type)},
 	{"COB_LS_FIXED", "ls_fixed", 		"0", 	NULL, GRP_FILE, ENV_BOOL, SETPOS (cob_ls_fixed)},
 	{"STRIP_TRAILING_SPACES", "strip_trailing_spaces", 		NULL, 	NULL, GRP_HIDE, ENV_BOOL | ENV_NOT, SETPOS (cob_ls_fixed)},
 	{"COB_LS_NULLS", "ls_nulls", 		"0", 	NULL, GRP_FILE, ENV_BOOL, SETPOS (cob_ls_nulls)},
@@ -6078,18 +6078,46 @@ set_config_val (char *value, int pos)
 		}
 	}
 
-	if ((data_type & ENV_INT) 				/* Integer data */
-	|| (data_type & ENV_SIZE) ) {				/* Size: integer with K, M, G */
-		for (; *ptr != 0 && (isdigit ((unsigned char)*ptr) || *ptr == ' '); ptr++) {
-			if (*ptr != ' ') {
-				numval = (numval * 10) + ((cob_s64_t)*ptr - '0');
+	if ((data_type & ENV_UINT) 				/* Integer data, unsigned */
+	 || (data_type & ENV_SINT) 				/* Integer data, signed */
+	 || (data_type & ENV_SIZE) ) {				/* Size: integer with K, M, G */
+		char sign = 0;
+		for (; *ptr != 0 && (*ptr == ' '); ptr++);	/* skip leading space */
+		if (*ptr == '-'
+		 || *ptr == '+') {
+			if ((data_type & ENV_SINT) == 0) {
+				conf_runtime_error_value (ptr, pos);
+				conf_runtime_error (1, _("should be unsiged"));
+				return 1;
 			}
+			sign = *ptr;
+			ptr++;
+		}
+		if (!isdigit ((unsigned char)*ptr)) {
+			conf_runtime_error_value (ptr, pos);
+			conf_runtime_error (1, _("should be numeric"));
+			return 1;
+		}
+		for (; *ptr != 0 && (isdigit ((unsigned char)*ptr)); ptr++) {
+			numval = (numval * 10) + ((cob_s64_t)*ptr - '0');
+		}
+		if (sign != 0
+		 && ( *ptr == '-'
+		   || *ptr == '+')) {
+			if ((data_type & ENV_SINT) == 0) {
+				conf_runtime_error_value (ptr, pos);
+				conf_runtime_error (1, _("should be unsiged"));
+				return 1;
+			}
+			sign = *ptr;
+			ptr++;
 		}
 		if ((data_type & ENV_SIZE)			/* Size: any K, M, G */
-		&& *ptr != 0) {
+		 && *ptr != 0) {
 			switch (toupper ((unsigned char)*ptr)) {
 			case 'K':
 				numval = numval * 1024;
+				ptr++;
 				break;
 			case 'M':
 				if (numval < 4001) {
@@ -6099,6 +6127,7 @@ set_config_val (char *value, int pos)
 					   to raise a warning as max value is limit to one less */
 					numval = 4294967295;
 				}
+				ptr++;
 				break;
 			case 'G':
 				if (numval < 4) {
@@ -6108,22 +6137,35 @@ set_config_val (char *value, int pos)
 					   to raise a warning as max value is limit to one less */
 					numval = 4294967295;
 				}
+				ptr++;
 				break;
 			}
 		}
+		for (; *ptr != 0 && (*ptr == ' '); ptr++);	/* skip trailing space */
+		if (*ptr != 0) {
+			conf_runtime_error_value (ptr, pos);
+			conf_runtime_error (1, _("should be numeric"));
+			return 1;
+		}
+		if (*value == '-') {
+			numval = -numval;
+		}
 		if (gc_conf[pos].min_value > 0
-		&& numval < gc_conf[pos].min_value) {
+		 && numval < gc_conf[pos].min_value) {
 			conf_runtime_error_value (value, pos);
 			conf_runtime_error (1, _("minimum value: %lu"), gc_conf[pos].min_value);
 			return 1;
 		}
 		if (gc_conf[pos].max_value > 0
-		&& numval > gc_conf[pos].max_value) {
+		 && numval > gc_conf[pos].max_value) {
 			conf_runtime_error_value (value, pos);
 			conf_runtime_error (1, _("maximum value: %lu"), gc_conf[pos].max_value);
 			return 1;
 		}
 		set_value (data, data_len, numval);
+		if (strcmp (gc_conf[pos].env_name, "COB_MOUSE_FLAGS") == 0) {
+			cob_settings_screenio ();
+		}
 
 	} else if ((data_type & ENV_BOOL)) {	/* Boolean: Yes/No, True/False,... */
 		numval = translate_boolean_to_int (ptr);
@@ -6133,29 +6175,30 @@ set_config_val (char *value, int pos)
 			conf_runtime_error_value (ptr, pos);
 			conf_runtime_error (1, _("should be one of the following values: %s"), "true, false");
 			return 1;
-		} else {
-			if ((data_type & ENV_NOT)) {	/* Negate logic for actual setting */
-				numval = !numval;
-			}
-			set_value (data, data_len, numval);
-			if ((data_type & ENV_RESETS)) {	/* Additional setup needed */
-				if (strcmp(gc_conf[pos].env_name, "COB_SET_DEBUG") == 0) {
-					/* Copy variables from settings (internal) to global structure, each time */
-					cobglobptr->cob_debugging_mode = cobsetptr->cob_debugging_mode;
-				}
+		}
+		if ((data_type & ENV_NOT)) {	/* Negate logic for actual setting */
+			numval = !numval;
+		}
+		set_value (data, data_len, numval);
+		if ((data_type & ENV_RESETS)) {	/* Additional setup needed */
+			if (strcmp(gc_conf[pos].env_name, "COB_SET_DEBUG") == 0) {
+				/* Copy variables from settings (internal) to global structure, each time */
+				cobglobptr->cob_debugging_mode = cobsetptr->cob_debugging_mode;
 			}
 		}
+		if (strcmp (gc_conf[pos].env_name, "COB_INSERT_MODE") == 0) {
+			cob_settings_screenio ();
+		}
 
-	} else if ((data_type & ENV_STR)
-		|| (data_type & ENV_FILE)
-		|| (data_type & ENV_PATH)) {	/* String/Path to be stored as a string */
+	} else if ((data_type & ENV_FILE)
+	        || (data_type & ENV_PATH)) {	/* Path (environment expanded) to be stored as a string */
 		memcpy (&str, data, sizeof (char *));
 		if (str != NULL) {
 			cob_free ((void *)str);
 		}
 		str = cob_expand_env_string (value);
 		if ((data_type & ENV_FILE)
-			&& strchr (str, PATHSEP_CHAR) != NULL) {
+		 && strchr (str, PATHSEP_CHAR) != NULL) {
 			conf_runtime_error_value (value, pos);
 			conf_runtime_error (1, _("should not contain '%c'"), PATHSEP_CHAR);
 			cob_free (str);
@@ -6167,13 +6210,24 @@ set_config_val (char *value, int pos)
 		}
 
 		/* call internal routines that do post-processing */
+		if (strcmp (gc_conf[pos].env_name, "COB_TRACE_FILE") == 0) {
+			cob_new_trace_file ();
+		}
+
+	} else if (data_type & ENV_STR) {	/* String (environment expanded) */
+		memcpy (&str, data, sizeof (char *));
+		if (str != NULL) {
+			cob_free ((void *)str);
+		}
+		str = cob_expand_env_string (value);
+		memcpy (data, &str, sizeof (char *));
+		if (data_loc == offsetof (cob_settings, cob_preload_str)) {
+			cobsetptr->cob_preload_str_set = cob_strdup(str);
+		}
+
+		/* call internal routines that do post-processing */
 		if (strcmp (gc_conf[pos].env_name, "COB_CURRENT_DATE") == 0) {
 			check_current_date ();
-		} else if (strcmp (gc_conf[pos].env_name, "COB_TRACE_FILE") == 0) {
-			cob_new_trace_file ();
-		} else if (strcmp (gc_conf[pos].env_name, "COB_INSERT_MODE") == 0
-		        || strcmp (gc_conf[pos].env_name, "COB_MOUSE_FLAGS") == 0) {
-			cob_settings_screenio ();
 		}
 
 	} else if ((data_type & ENV_CHAR)) {	/* 'char' field inline */
@@ -6237,7 +6291,11 @@ get_config_val (char *value, int pos, char *orgvalue)
 
 	strcpy (value, _("unknown"));
 	orgvalue[0] = 0;
-	if ((data_type & ENV_INT)) {				/* Integer data */
+	if (data_type & ENV_UINT) {				/* Integer data, unsigned */
+		numval = get_value (data, data_len);
+		sprintf (value, CB_FMT_LLU, numval);
+
+	} else if (data_type & ENV_SINT) {				/* Integer data, signed */
 		numval = get_value (data, data_len);
 		sprintf (value, CB_FMT_LLD, numval);
 
@@ -6416,7 +6474,7 @@ cb_config_entry (char *buf, int line)
 	if (strcasecmp (keyword, "setenv") == 0 ) {
 		/* collect additional value and push into environment */
 		strcpy (value2, "");
-		/*check for := in value 2 and split, if necessary*/
+		/* check for := in value 2 and split, if necessary */
 		k = 0; while (value[k] != '=' && value[k] != ':' && value[k] != '"' && value[k] != '\'' && value[k] != 0) k++;
 		if (value[k] == '=' || value[k] == ':') {
 			i = i - (int)strlen (value + k);

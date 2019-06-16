@@ -305,20 +305,21 @@ struct config_tbl {
 	int		data_len;		/* Length of referenced field */
 	int		config_num;		/* Set by which runtime.cfg file */
 	int		set_by;			/* value set by a different keyword */
-	unsigned long	min_value;		/* Minimum accepted value */
+	long	min_value;		/* Minimum accepted value */
 	unsigned long	max_value;		/* Maximum accepted value */
 };
 
 #define ENV_NOT		(1 << 1)		/* Negate True/False value setting */
-#define ENV_INT		(1 << 2)		/* an 'int' */
-#define ENV_SIZE	(1 << 3)		/* size; number with K - kb, M - mb, G - GB */
-#define ENV_BOOL	(1 << 4)		/* int boolean; Yes, True, 1, No, False, 0, ... */
-#define ENV_CHAR	(1 << 5)		/* inline 'char[]' field */
-#define ENV_STR		(1 << 6)		/* a pointer to a string */
-#define ENV_PATH	(1 << 7)		/* a pointer to one or more file system paths [fp1:fp2:fp3] */
-#define ENV_ENUM	(1 << 8)		/* Value must in 'enum' list as match */
-#define ENV_ENUMVAL	(1 << 9)		/* Value must in 'enum' list as match or value */
-#define ENV_FILE 	(1 << 10)		/* a pointer to a directory/file [single path] */
+#define ENV_UINT	(1 << 2)		/* an 'unsigned int' */
+#define ENV_SINT	(1 << 3)		/* a 'signed int' */
+#define ENV_SIZE	(1 << 4)		/* size; number with K - kb, M - mb, G - GB */
+#define ENV_BOOL	(1 << 5)		/* int boolean; Yes, True, 1, No, False, 0, ... */
+#define ENV_CHAR	(1 << 6)		/* inline 'char[]' field */
+#define ENV_STR		(1 << 7)		/* a pointer to a string */
+#define ENV_PATH	(1 << 8)		/* a pointer to one or more file system paths [fp1:fp2:fp3] */
+#define ENV_ENUM	(1 << 9)		/* Value must in 'enum' list as match */
+#define ENV_ENUMVAL	(1 << 10)		/* Value must in 'enum' list as match or value */
+#define ENV_FILE 	(1 << 11)		/* a pointer to a directory/file [single path] */
 
 #define ENV_RESETS 	(1 << 14)		/* Value setting needs additional code */
 
@@ -353,7 +354,6 @@ COB_HIDDEN void		cob_init_screenio	(cob_global *, cob_settings *);
 COB_HIDDEN void		cob_init_mlio		(cob_global * const);
 
 COB_HIDDEN void		cob_exit_screen		(void);
-
 COB_HIDDEN void		cob_exit_numeric	(void);
 COB_HIDDEN void		cob_exit_fileio		(void);
 COB_HIDDEN void		cob_exit_reportio	(void);
@@ -376,7 +376,7 @@ COB_HIDDEN void		cob_print_realbin	(const cob_field *, FILE *,
 						 const int);
 
 COB_HIDDEN void		cob_screen_set_mode	(const cob_u32_t);
-COB_HIDDEN void		cob_settings_screenio (void);
+COB_HIDDEN void		cob_settings_screenio	(void);
 COB_HIDDEN int		cob_get_last_exception_code	(void);
 COB_HIDDEN int		cob_check_env_true	(char*);
 COB_HIDDEN int		cob_check_env_false	(char*);
