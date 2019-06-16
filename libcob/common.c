@@ -5887,7 +5887,8 @@ var_print (const char *msg, const char *val, const char *default_val,
 }
 
 /*
- Expand a string with environment variable in it. Return malloced string.
+ Expand a string with environment variable in it.
+ Return malloced string.
 */
 char *
 cob_expand_env_string (char *strval)
@@ -6087,7 +6088,7 @@ set_config_val (char *value, int pos)
 		 || *ptr == '+') {
 			if ((data_type & ENV_SINT) == 0) {
 				conf_runtime_error_value (ptr, pos);
-				conf_runtime_error (1, _("should be unsiged"));
+				conf_runtime_error (1, _("should be unsigned"));
 				return 1;
 			}
 			sign = *ptr;
@@ -6106,7 +6107,7 @@ set_config_val (char *value, int pos)
 		   || *ptr == '+')) {
 			if ((data_type & ENV_SINT) == 0) {
 				conf_runtime_error_value (ptr, pos);
-				conf_runtime_error (1, _("should be unsiged"));
+				conf_runtime_error (1, _("should be unsigned"));
 				return 1;
 			}
 			sign = *ptr;
@@ -6147,7 +6148,7 @@ set_config_val (char *value, int pos)
 			conf_runtime_error (1, _("should be numeric"));
 			return 1;
 		}
-		if (*value == '-') {
+		if (sign == '-') {
 			numval = -numval;
 		}
 		if (gc_conf[pos].min_value > 0
