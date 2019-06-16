@@ -2,20 +2,21 @@
 /* config.h, tested with x86/x64 VS2005-2019
    and OrangeC 6.0.41.1 (which ignores the lib comments) */
 
-#define NOISAM   0
-#define BDB      1
-#define VBISAM   2
-#define CISAM    3
-#define DISAM    4
+#define NOISAM       0
+#define BDB          1
+#define VBISAM       2
+#define CISAM        3
+#define DISAM        4
 
-#define NOCURSES 0
-#define PDCURSES 1
+#define NOCURSES     0
+#define PDCURSES     1
 
-#define NOXML    0
-#define XML2     1
+#define NOXML        0
+#define XML2         1
 
-#define NOJSON   0
-#define CJSON    1
+#define NOJSON       0
+#define CJSON        1
+#define CJSON_CJSON  2	/* cJSON with header in CJSON_CJSON */
 
 #define MATHLIB_MPIR 1
 #define MATHLIB_GMP  2
@@ -95,7 +96,7 @@
 #pragma comment(lib, "zlib")
 #endif
 
-#if CONFIGURED_JSON == CJSON
+#if CONFIGURED_JSON == CJSON || CONFIGURED_JSON == CJSON_CJSON
 #pragma comment(lib, "cjson.lib")
 #endif
 
@@ -192,7 +193,11 @@
 /* #undef HAVE_CFPREFERENCESCOPYAPPVALUE */
 
 /* Define to 1 if you have the <cjson/cJSON.h> header file. */
+#if CONFIGURED_JSON == CJSON_CJSON
+#define HAVE_CJSON_CJSON_H 1
+#else
 /* #undef HAVE_CJSON_CJSON_H */
+#endif
 
 /* Define to 1 if you have the <cJSON.h> header file. */
 #if CONFIGURED_JSON == CJSON
@@ -620,7 +625,7 @@
 #endif
 
 /* Use cJSON as JSON handler */
-#if CONFIGURED_JSON == CJSON
+#if CONFIGURED_JSON == CJSON || CONFIGURED_JSON == CJSON_CJSON
 #define WITH_CJSON 1
 #else
 /* #undef WITH_CJSON */
@@ -725,6 +730,7 @@
 #undef CONFIGURED_XML
 #undef NOJSON
 #undef CJSON
+#undef CJSON_CJSON
 #undef CONFIGURED_JSON
 #undef MATHLIB_MPIR
 #undef MATHLIB_GMP

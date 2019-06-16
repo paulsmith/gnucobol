@@ -6672,6 +6672,7 @@ cob_load_config (void)
 	/* Get the name for the configuration file */
 	if ((env = getenv ("COB_RUNTIME_CONFIG")) != NULL && env[0]) {
 		strncpy (conf_file, env, (size_t)COB_MEDIUM_MAX);
+		conf_file[COB_MEDIUM_MAX] = 0;
 		is_optional = 0;			/* If declared then it is NOT optional */
 		if (strchr (conf_file, PATHSEP_CHAR) != NULL) {
 			conf_runtime_error (0, _("invalid value '%s' for configuration tag '%s'"), conf_file, "COB_RUNTIME_CONFIG");

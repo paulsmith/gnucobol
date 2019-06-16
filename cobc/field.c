@@ -664,7 +664,7 @@ create_implicit_picture (struct cb_field *f)
 	char			*pp;
 	struct cb_literal	*lp;
 	int			size_implied = 1;
-	int			is_numeric;
+	int			is_numeric = 0;
 	int			ret;
 	char			pic[24];
 
