@@ -1,4 +1,9 @@
 
+2019-06-16  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (tarstamp.h, $(top_distdir)/tarstamp.h): targets added
+	* Makefile.am: fixed SUBDIRS handling
+
 2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: include all (possibly) generated headers by '#include <header>'

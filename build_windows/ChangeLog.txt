@@ -1,4 +1,11 @@
 
+2019-06-16  Simon Sobisch <simonsobisch@gnu.org>
+
+	* vs2019: don't specify an explicit WindowsTargetPlatformVersion any more
+	* maketarstamp.ps1: new script to output tarstamp.h content on STDOUT
+	  as it is normally done on make dist (or now during make all/tarstamp.h)
+	* defaults.h.in: adjust for cJSON header in subfolder
+
 2019-06-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general (cobc project files): added reference for new help.c
