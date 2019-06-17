@@ -5,6 +5,8 @@
 	* maketarstamp.ps1: new script to output tarstamp.h content on STDOUT
 	  as it is normally done on make dist (or now during make all/tarstamp.h)
 	* defaults.h.in: adjust for cJSON header in subfolder
+	* makedist.bat: support for config.h in main dir;
+	  don't halt non-interactive processes on failure of cobc.exe
 
 2019-06-06  Simon Sobisch <simonsobisch@gnu.org>
 
