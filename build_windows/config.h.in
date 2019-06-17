@@ -43,7 +43,11 @@
 #define HAVE_GETUSERNAME 1
 */
 
-/* adjust the following linker pragmas if needed */
+/* adjust the following defines to override linker pragmas below */
+/* #undef LIB_MATHLIB */
+/* #undef LIB_CURSES  */
+/* #undef LIB_ISAM    */
+/* #undef LIB_JSON    */
 
 
 #ifdef WITHIN_LIBCOB
@@ -51,10 +55,14 @@
 #pragma comment(lib, "advapi32")
 #endif
 
+#ifdef LIB_MATHLIB
+#pragma comment(lib, LIB_MATHLIB)
+#else
 #if USED_MATHLIB == MATHLIB_MPIR
 #pragma comment(lib, "mpir")
 #elif USED_MATHLIB == MATHLIB_GMP
 #pragma comment(lib, "libgmp")
+#endif
 #endif
 
 #if CONFIGURED_CURSES == PDCURSES
@@ -68,9 +76,16 @@
                            even on non-WIDE versions (PDCurses 4.x only) */
 #endif
 #endif
+#ifdef LIB_CURSES
+#pragma comment(lib, LIB_CURSES)
+#else
 #pragma comment(lib, "pdcurses")
 #endif
+#endif
 
+#ifdef LIB_ISAM
+#pragma comment(lib, LIB_ISAM)
+#else
 #if CONFIGURED_ISAM == VBISAM
 #pragma comment(lib, "libvbisam")
 #elif CONFIGURED_ISAM == DISAM
@@ -84,20 +99,28 @@
 //#pragma comment(lib, "libdb62")
 #endif
 #endif /* CONFIGURED_ISAM */
+#endif
 
 #if CONFIGURED_XML == XML2
-//#pragma comment(lib, "libxml2.dll.a")
-//#pragma comment(lib, "libcharset.dll.a")
-//#pragma comment(lib, "libiconv.dll.a")
-//#pragma comment(lib, "libz.dll.a")
+#if 0 /* provided from mingw */
+#pragma comment(lib, "libxml2.dll.a")
+#pragma comment(lib, "libcharset.dll.a")
+#pragma comment(lib, "libiconv.dll.a")
+#pragma comment(lib, "libz.dll.a")
+#else
 #pragma comment(lib, "libxml2")
 #pragma comment(lib, "libcharset")
 #pragma comment(lib, "libiconv")
 #pragma comment(lib, "zlib")
 #endif
+#endif
 
+#ifdef LIB_JSON
+#pragma comment(lib, LIB_JSON)
+#else
 #if CONFIGURED_JSON == CJSON || CONFIGURED_JSON == CJSON_CJSON
-#pragma comment(lib, "cjson.lib")
+#pragma comment(lib, "cjson")
+#endif
 #endif
 
 #endif /* WITHIN_LIBCOB */

@@ -1,4 +1,8 @@
 
+2019-06-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* config.h.in: allow to override library names by define LIB_...
+
 2019-06-16  Simon Sobisch <simonsobisch@gnu.org>
 
 	* vs2019: don't specify an explicit WindowsTargetPlatformVersion any more
