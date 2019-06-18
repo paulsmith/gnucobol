@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 ##
 ## This file is part of GnuCOBOL.
@@ -4254,7 +4254,7 @@ AT_CLEANUP
 AT_SETUP([UDF with recursion])
 AT_KEYWORDS([functions LOCAL-STORAGE])
 
-AT_XFAIL_IF(true)	# see bug #222 and r2291 - postponed
+AT_SKIP_IF(true)	# see bug #222 and r2291 - postponed
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.

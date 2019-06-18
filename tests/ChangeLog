@@ -1,4 +1,10 @@
 
+2019-06-18  Simon Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in: explicit disable BDB internal locking by unsetting DB_HOME
+	  to work around issues in different environments and to not pollute the
+	  users's general BDB locking files
+
 2019-06-11  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am (check, checkmanual): now fails if the testsuite reports
