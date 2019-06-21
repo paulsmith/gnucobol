@@ -1,4 +1,8 @@
 
+2019-06-21  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Add cob_write_dict and cob_read_dict for data file description
+
 2019-06-14  Simon Sobisch <simonsobisch@gnu.org>
 
 	* fileio.c (bdb_err_event): added DB_EVENT_WRITE_FAILED, call cob_stoprun
@@ -14,7 +18,7 @@
 2019-06-11  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: COB_FILE_PATH may be a colon separated list of directories
-	  With BDB the COB_FILE_PATH is now passed to BDB using set_data_dir
+	    With BDB the COB_FILE_PATH is now passed to BDB using set_data_dir
 
 2019-06-10  Ron Norman <rjn@inglenet.com>
 

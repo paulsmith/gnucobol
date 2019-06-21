@@ -912,6 +912,334 @@ dummy_start (cob_file *f, const int cond, cob_field *key)
 	return COB_STATUS_91_NOT_AVAILABLE;
 }
 
+static char *file_format[8] = {"0","1","2","3","B32","B64","L32","L64"};
+static char *dict_ext = "dd";
+#ifdef	WITH_DB
+static char ix_type[3] = "DB";
+#elif defined(WITH_CISAM)
+static char ix_type[3] = "CI";
+#elif defined(WITH_DISAM)
+static char ix_type[3] = "DI";
+#elif defined(WITH_VBISAM)
+static char ix_type[3] = "VB";
+#else
+static char ix_type[3] = "IS";
+#endif
+
+/*
+ * Write data file description to a text file
+ */
+static int
+cob_write_dict (cob_file *f, char *filename)
+{
+	char	outdd[513];
+	FILE	*fo;
+	int		k, idx;
+
+	sprintf(outdd,"%s.%s",filename,dict_ext);
+	fo = fopen(outdd,"w");
+	if(fo == NULL) {
+		return 1;
+	}
+	if(f->organization == COB_ORG_INDEXED) {
+		fprintf(fo,"type=IX,%s",ix_type);
+	} else if(f->organization == COB_ORG_RELATIVE) {
+		fprintf(fo,"type=RL");
+		if(f->file_format == COB_FILE_IS_MF)
+			fprintf(fo,",MF");
+		else if(f->file_format == COB_FILE_IS_GC)
+			fprintf(fo,",GC");
+	} else if(f->organization == COB_ORG_SEQUENTIAL) {
+		fprintf(fo,"type=SQ");
+		if(f->file_format == COB_FILE_IS_MF)
+			fprintf(fo,",MF");
+		else if(f->file_format == COB_FILE_IS_GC)
+			fprintf(fo,",GC");
+		else if(f->file_format >= 0 && f->file_format <= 7)
+			fprintf(fo,",%s",file_format[f->file_format]);
+	} else if(f->organization == COB_ORG_LINE_SEQUENTIAL) {
+		if(f->flag_line_adv)
+			fprintf(fo,"type=LA");
+		else
+			fprintf(fo,"type=LS");
+		if((f->file_features & COB_FILE_LS_CRLF))
+			fprintf(fo,",crlf");
+		if((f->file_features & COB_FILE_LS_NULLS))
+			fprintf(fo,",nulls");
+		if((f->file_features & COB_FILE_LS_FIXED))
+			fprintf(fo,",fixed");
+	}
+	fprintf(fo," ");
+	fprintf(fo,"recsz=%d ",f->record_max);
+	if(f->record_min != f->record_max)
+		fprintf(fo,"minsz=%d ",f->record_min);
+
+	if (f->organization == COB_ORG_INDEXED) {
+		/* Write Key information from cob_file */
+		fprintf(fo,"nkeys=%d ",f->nkeys);
+		for(idx=0; idx < f->nkeys; idx++) {
+			fprintf(fo,"key%d=(",idx+1);
+			if(f->keys[idx].count_components <= 1) {
+				fprintf(fo,"%d:%d",f->keys[idx].offset,f->keys[idx].field->size);
+			} else {
+				for(k=0; k < f->keys[idx].count_components; k++) {
+					fprintf(fo,"%d:%d",f->keys[idx].component[k]->data - f->record->data,
+										f->keys[idx].component[k]->size);
+					if(k+1 < f->keys[idx].count_components)
+						fprintf(fo,",");
+				}
+			}
+			fprintf(fo,") ");
+			if(f->keys[idx].tf_duplicates) {
+				fprintf(fo,"dup%d=Y ",idx+1);
+			}
+			if(f->keys[idx].tf_suppress) {
+				if(isprint(f->keys[idx].char_suppress))
+					fprintf(fo,"sup%d='%c' ",idx+1,f->keys[idx].char_suppress);
+				else
+					fprintf(fo,"sup%d=x'%02X' ",idx+1,f->keys[idx].char_suppress);
+			}
+		}
+	}
+	fprintf(fo,"\r\n");
+	fclose(fo);
+	return 0;
+}
+
+static char *
+cob_dd_wrd ( char *p, char *wrd )
+{
+	while (*p == ' ') p++;
+	*wrd = 0;
+	if (!isalpha(*p))
+		return p;
+	while (*p !=  '=' && *p != 0 && *p != ' ')
+		*wrd++ = *p++;
+	*wrd = 0;
+	while (*p == ' ') p++;
+	if (*p == '=') p++;
+	while (*p == ' ') p++;
+	return p;
+}
+
+static char *
+cob_dd_prms ( char *p, char *p1, char *p2 )
+{
+	while (*p == ' ') p++;
+	*p1 = 0;
+	if (*p == '(') p++;
+	if (*p == ',') p++;
+	while (*p == ' ') p++;
+	while (*p != 0 && *p != ' ' 
+		&& *p != ',' && *p != ':'
+		&& *p != ')')
+		*p1++ = *p++;
+	*p1 = 0;
+	if (*p == ':') {
+		p++;
+		if (p2 != NULL) {
+			*p2 = 0;
+			while (*p != 0 && *p != ' ' && *p != ',')
+				*p2++ = *p++;
+			*p2 = 0;
+		}
+	}
+	while (*p == ' ') p++;
+	if (*p == ')') p++;
+	return p;
+}
+
+/*
+ * Read description of data file from text file and check it
+ */
+static int				/* Return 1 on mistmatch, else 0 */
+cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
+{
+	char	inpdd[513], ddbuf[1024], *p, wrd[16], p1[16], p2[16];
+	unsigned char subchr;
+	FILE	*fi;
+	int		k, idx, line, sts, ret;
+	int		nkeys, keyn, part, loc, len;
+
+	sprintf(inpdd,"%s.%s",filename,dict_ext);
+	fi = fopen(inpdd,"r");
+	if (fi == NULL) {		/* Not present so nothing can be done */
+		return 0;
+	}
+	line = 0;
+	sts = ret = 0;
+	if(retsts)
+		*retsts = 0;
+	nkeys = f->nkeys;
+	while (fgets (ddbuf, sizeof(ddbuf)-1, fi) != NULL) {
+		if (ddbuf[0] == '#')/* Skip Comment lines */
+			continue;
+		line++;
+		if (line == 1) {	/* All file format info on first data line */
+			for (p = ddbuf; *p != 0 && *p != '\r' && *p != '\n'; ) {
+				if(*p == ' ') {
+					p++;
+					continue;
+				}
+				p = cob_dd_wrd (p, wrd);
+				if (strcmp(wrd,"type") == 0) {
+					p = cob_dd_prms (p, p1, NULL);
+					p = cob_dd_prms (p, p2, NULL);
+					if (f->organization == COB_ORG_INDEXED) {
+						if(strcmp(p1,"IX") != 0) {
+							sts = 1;
+							break;
+						}
+						if(strcmp(p2,ix_type) != 0) {
+							sts = 1;
+							break;
+						}
+					}
+				} else if (strcmp(wrd,"recsz") == 0) {
+					p = cob_dd_prms (p, p1, NULL);
+					len = atoi (p1);
+					if (len != f->record_max) {
+						if (updt) {
+							f->record_max = len;
+						} else {
+							sts = 1;
+							break;
+						}
+					}
+				} else if (strcmp(wrd,"minsz") == 0) {
+					p = cob_dd_prms (p, p1, NULL);
+					len = atoi (p1);
+					if (len != f->record_min) {
+						if (updt) {
+							f->record_min = len;
+						} else {
+							sts = 1;
+							break;
+						}
+					}
+				} else if (strcmp(wrd,"nkeys") == 0) {
+					p = cob_dd_prms (p, p1, NULL);
+					nkeys = atoi (p1);
+					if (f->nkeys != nkeys
+					 && !updt
+					 && f->flag_keycheck) {
+						ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+						break;
+					}
+					if (nkeys < f->nkeys
+					 && !updt) {
+						sts = 1;
+						break;
+					}
+				} else if (memcmp(wrd,"key",3) == 0) {
+					keyn = atoi (&wrd[3]);
+					if (keyn > f->nkeys
+					 && !updt) {			/* Skip this key def */
+						do {
+							p = cob_dd_prms (p, p1, p2);
+						} while (*p == ',');
+						continue;
+					}
+					if(keyn > nkeys) {
+						sts = 1;
+						break;
+					}
+					idx = keyn - 1;
+					part = 0;
+					do {
+						p = cob_dd_prms (p, p1, p2);
+						loc = atoi (p1);
+						len = atoi (p2);
+						if(part > f->keys[idx].count_components) {
+							if (!updt) {
+								sts = 1;
+								break;
+							}
+						}
+						if(f->keys[idx].count_components <= 1) {
+							if (f->keys[idx].offset != loc
+							 || f->keys[idx].field->size != len) {
+								if (updt) {
+									f->keys[idx].offset = loc;
+									f->keys[idx].field->size = len;
+								} else {
+									sts = 1;
+									break;
+								}
+							}
+						} else {
+							if (f->keys[idx].component[part]->size != len
+							 || (f->keys[idx].component[part]->data - f->record->data) != loc) {
+								if (updt) {
+									f->keys[idx].component[part]->size = len;
+									f->keys[idx].component[part]->data = f->record->data + loc;
+								} else {
+									sts = 1;
+									break;
+								}
+							}
+						}
+						part++;
+					} while (*p == ',');
+					if(sts) break;
+					
+				} else if (memcmp(wrd,"dup",3) == 0) {
+					keyn = atoi (&wrd[3]);
+					if(keyn > nkeys) {
+						sts = 1;
+						break;
+					}
+					idx = keyn - 1;
+					p = cob_dd_prms (p, p1, NULL);
+					if (keyn > f->nkeys)		/* Skip this */
+						continue;
+
+					if (p1[0] == 'Y'
+					 && f->flag_keycheck
+					 && !f->keys[idx].tf_duplicates) {
+						sts = 1;
+						break;
+					}
+					if (p1[0] == 'Y')
+						f->keys[idx].tf_duplicates = 1;
+					else
+						f->keys[idx].tf_duplicates = 0;
+				} else if (memcmp(wrd,"sup",3) == 0) {
+					keyn = atoi (&wrd[3]);
+					if(keyn > nkeys) {
+						sts = 1;
+						break;
+					}
+					idx = keyn - 1;
+					if (*p == '\'') {
+						subchr = p[1];
+						p += 3;
+					} else if (*p == 'x') {
+						subchr = (unsigned char) strtol (&p[2], NULL, 16);
+						p += 5;
+					}
+					if (keyn > f->nkeys)		/* Skip this */
+						continue;
+					if (f->flag_keycheck
+					 && !f->keys[idx].tf_suppress) {
+						sts = 1;
+						break;
+					}
+					f->keys[idx].char_suppress = subchr;
+					f->keys[idx].tf_suppress = 1;
+				}
+			}
+		} else {
+			continue;		/* Provide for future additional info */
+		}
+	}
+	fclose(fi);
+
+	if(retsts)
+		*retsts = ret;
+	return sts;
+}
+
 static char *
 cob_chk_file_env (cob_file *f, const char *src)
 {
@@ -4483,7 +4811,6 @@ isread_retry(cob_file *f, void *data, int mode)
 
 #ifdef	WITH_DB
 
-/* LCOV_EXCL_START */
 #if	0	/* RXWRXW - BDB msg */
 static void
 bdb_msgcall_set (DB_ENV *dbe, const char *err)
@@ -4510,12 +4837,11 @@ static void
 bdb_err_event (DB_ENV *env, u_int32_t event, void *info)
 {
 	const char	*msg = NULL;
-	
-	if (bdb_err_tear_down) return;
-
 	COB_UNUSED (env);
 	COB_UNUSED (info);
 	
+	if (bdb_err_tear_down) return;
+
 	switch (event) {
 #ifdef DB_EVENT_FAILCHK_PANIC
 	case DB_EVENT_FAILCHK_PANIC:
@@ -4541,7 +4867,6 @@ bdb_err_event (DB_ENV *env, u_int32_t event, void *info)
 	cob_runtime_error (_("BDB (%s), error: %d %s"), "fatal error", event, msg);
 	cob_stop_run (1);
 }
-/* LCOV_EXCL_STOP */
 
 static void
 join_environment (void)
@@ -4590,7 +4915,7 @@ join_environment (void)
 #endif
 	bdb_env->lock_id (bdb_env, &bdb_lock_id);
 	bdb_env->set_lk_detect (bdb_env, DB_LOCK_DEFAULT);
-	bdb_env->set_event_notify(bdb_env, bdb_err_event);
+	bdb_env->set_event_notify(bdb_env, (void*)bdb_err_event);
 }
 
 /* Impose lock on 'file' using BDB locking */
@@ -5285,8 +5610,6 @@ indexed_delete_internal (cob_file *f, const int rewrite, int bdb_opts)
 	return COB_STATUS_00_SUCCESS;
 }
 
-/* Check if a file exists in bdb data dirs */
-
 static int
 is_absolute (const char *filename)
 {
@@ -5310,6 +5633,7 @@ is_absolute (const char *filename)
 #endif
 }
 
+/* Check if a file exists in bdb data dirs */
 static int
 bdb_nofile (const char *filename)
 {
@@ -5574,9 +5898,6 @@ dobuild:
 				vmode | ISINOUT | ISEXCLLOCK);
 		f->flag_file_lock = 1;
 		if (ISERRNO == EEXIST
-#if 1 /* CHECKME: guard added by Simon, needed ? */
-		 && omode == ISOUTPUT
-#endif
 		 && isfd < 0) {
 			/* Erase file and redo the 'isbuild' */
 			iserase ((void *)filename);
@@ -5791,6 +6112,14 @@ dobuild:
 			maxsize = j;
 	}
 	p->maxkeylen = maxsize;
+	if (mode != COB_OPEN_OUTPUT
+	 && bdb_nofile(filename) == 0
+	 && cob_read_dict (f, bdb_buff, 0, &ret)) {
+		return ret ? ret : COB_STATUS_39_CONFLICT_ATTRIBUTE;
+	} else if (mode != COB_OPEN_OUTPUT
+	 	&& cob_read_dict (f, filename, 0, &ret)) {
+		return ret ? ret : COB_STATUS_39_CONFLICT_ATTRIBUTE;
+	}
 
 	for (i = 0; i < f->nkeys; ++i) {
 		/* File name */
@@ -5837,6 +6166,12 @@ dobuild:
 			*/
 			ret = p->db[i]->open (p->db[i], NULL, runtime_buffer, NULL,
 						DB_BTREE, flags, COB_FILE_MODE);
+			if (ret == 0
+			 && i == 0
+			 && mode == COB_OPEN_OUTPUT
+			 && bdb_nofile(runtime_buffer) == 0) {
+				cob_write_dict(f, bdb_buff);
+			}
 		}
 		if (ret) {
 			for (j = 0; j < i; ++j) {
@@ -9466,7 +9801,6 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 	if(f->flag_line_adv)
 		fcd->otherFlags |= OTH_LINE_ADVANCE;
 
-	/* CHECKME: is this still needed? */
 	if (f->assign) {
 		cob_field_to_string (f->assign, assignto, sizeof(assignto)-1);
 	} else {
@@ -9720,8 +10054,7 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 	if (f->keys == NULL) {
 		if (fcd->kdbPtr != NULL
 		 && fcd->kdbPtr->nkeys > 0) {
-			/* Copy Key information from FCD to cob_file,
-			   CHECKME: possibly only for ORG_DETERMINE ? */
+			/* Copy Key information from FCD to cob_file */
 			f->nkeys = LDCOMPX2(fcd->kdbPtr->nkeys);
 			f->keys = cob_malloc (sizeof(cob_file_key) * f->nkeys);
 			for (k=0; k < f->nkeys; k++) {
