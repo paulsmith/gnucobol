@@ -1,4 +1,9 @@
 
+2019-06-23  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, codegen.c, pplex.l, ppparse.y, reserved.c, scanner.l, tree.c,
+	  typeck.c: fixed possible arithmetic overflow
+
 2019-06-08  Simon Sobisch <simonsobisch@gnu.org>
 
 	* config.def, parser.y: removed compiler support options cb_json_generate

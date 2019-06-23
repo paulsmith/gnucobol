@@ -1271,7 +1271,7 @@ set_print_replace_list (struct cb_replace_list *list)
 	struct cb_replace_list		*r;
 	const struct cb_text_list	*l;
 	struct list_replace		*repl;
-	int 				length;
+	size_t				length;
 
 	for (r = list; r; r = r->next) {
 		repl = cobc_malloc (sizeof (struct list_replace));
@@ -1280,7 +1280,7 @@ set_print_replace_list (struct cb_replace_list *list)
 		repl->lastline = cb_source_line;
 
 		for (l = r->old_text, length = 0; l; l = l->next) {
-			length += (int)strlen (l->text);
+			length += strlen (l->text);
 		}
 		repl->from = cobc_malloc (length + 2);
 		for (l = r->old_text; l; l = l->next) {
@@ -1288,7 +1288,7 @@ set_print_replace_list (struct cb_replace_list *list)
 		}
 
 		for (l = r->new_text, length = 0; l; l = l->next) {
-			length += (int)strlen (l->text);
+			length += strlen (l->text);
 		}
 		repl->to = cobc_malloc (length + 2);
 		for (l = r->new_text; l; l = l->next) {
@@ -1559,7 +1559,7 @@ start:
 		/* Directive - pass complete line with NL to ppparse */
 		if (newline_count) {
 			/* Move including NL and NULL byte */
-			memmove (buff + newline_count, buff, (size_t)(n + 1));
+			memmove (buff + newline_count, buff, (size_t)n + 1);
 			memset (buff, '\n', newline_count);
 			n += newline_count;
 			newline_count = 0;
@@ -1623,7 +1623,7 @@ start:
 	if (cb_source_format == CB_FORMAT_FREE) {
 		within_comment = 0;
 		if (newline_count) {
-			memmove (buff + newline_count, buff, (size_t)(n + 1));
+			memmove (buff + newline_count, buff, (size_t)n + 1);
 			memset (buff, '\n', newline_count);
 			n += newline_count;
 			newline_count = 0;

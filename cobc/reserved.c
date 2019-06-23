@@ -3835,7 +3835,7 @@ search_reserved_list (const char * const word, const int needs_uppercasing,
 		      const struct cobc_reserved * const list, size_t list_len)
 {
 	static char		upper_word[43];
-	int			word_len;
+	size_t			word_len;
 	const char		*sought_word;
 	struct cobc_reserved    to_find;
 
@@ -4262,7 +4262,7 @@ get_aliases (const unsigned int key, struct list_reserved_line *line)
 	}
 
 	/* Create array of aliases, then sort it. */
-	aliases = cobc_malloc (num_aliases * (COB_MAX_WORDLEN + 1) * sizeof (char));
+	aliases = cobc_malloc ((size_t)num_aliases * (COB_MAX_WORDLEN + 1) * sizeof (char));
 	j = 0;
 	for (i = 0; i < reserved_word_map_arr_size; ++i) {
 		if (i != key
@@ -4542,7 +4542,7 @@ lookup_intrinsic (const char *name, const int checkimpl)
 {
 	struct cb_intrinsic_table	*cbp;
 	static char	upper_name[43];
-	int		name_len = strlen (name);
+	size_t		name_len = strlen (name);
 
 	if (name_len > sizeof (upper_name) - 1) {
 		return NULL;
@@ -4643,7 +4643,7 @@ lookup_register (const char *name, const int checkimpl)
 {
 	size_t		i;
 	static char	upper_name[43];
-	int		name_len = strlen (name);
+	size_t		name_len = strlen (name);
 
 	if (name_len > sizeof (upper_name) - 1) {
 		return NULL;

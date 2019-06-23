@@ -4655,7 +4655,7 @@ output_initialize_one (struct cb_initialize *p, cb_tree x)
 			memcpy (litbuff, l->data, (size_t)size);
 		} else {
 			memcpy (litbuff, l->data, (size_t)l->size);
-			memset (litbuff + l->size, ' ', (size_t)(size - l->size));
+			memset (litbuff + l->size, ' ', (size_t)size - l->size);
 		}
 
 		buffchar = *(litbuff + size - 1);
@@ -4772,10 +4772,7 @@ output_initialize_compound (struct cb_initialize *p, cb_tree x)
 	struct cb_field	*f;
 	struct cb_field	*last_field;
 	cb_tree		c;
-	size_t		size;
 	int		type;
-	int		last_char;
-	int		i;
 
 	ff = cb_code_field (x);
 	for (f = ff->children; f; f = f->sister) {
@@ -4785,7 +4782,8 @@ output_initialize_compound (struct cb_initialize *p, cb_tree x)
 		switch (type) {
 		case INITIALIZE_NONE:
 			break;
-		case INITIALIZE_DEFAULT:
+		case INITIALIZE_DEFAULT: {
+			int		last_char;
 			last_field = f;
 			last_char = initialize_uniform_char (f, p);
 
@@ -4804,21 +4802,24 @@ output_initialize_compound (struct cb_initialize *p, cb_tree x)
 						}
 					}
 				}
+				{
+					int		size;
+					if (f->sister) {
+						size = f->sister->offset - last_field->offset;
+					} else {
+						size = ff->offset + ff->size - last_field->offset;
+					}
 
-				if (f->sister) {
-					size = f->sister->offset - last_field->offset;
-				} else {
-					size = ff->offset + ff->size - last_field->offset;
+					output_initialize_uniform (c, last_char, size);
 				}
-
-				output_initialize_uniform (c, last_char, (int) size);
 				break;
 			}
-			/* Fall through */
+		}
+		/* Fall through */
 		default:
 			if (f->flag_occurs) {
 				/* Begin occurs loop */
-				i = f->indexes;
+				int		i = f->indexes;
 				i_counters[i] = 1;
 				output_line ("for (i%d = 1; i%d <= %d; i%d++)",
 					     i, i, f->occurs_max, i);
@@ -8721,10 +8722,8 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 {
 	int		idx, colnum;
 	cb_tree		l, x;
-	struct cb_literal	*lit;
 	cb_tree		value;
 	unsigned int	i, j;
-	char		*val;
 
 #if 0 /* already checked: doesn't happen */
 	if (f == NULL) {
@@ -8831,31 +8830,37 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 		value = CB_VALUE (f->values);
 
 		if (CB_TREE_TAG (value) == CB_TAG_LITERAL) {
-			lit = CB_LITERAL (value);
+			char	*val;
+			size_t	ref_size;
+			struct cb_literal	*lit = CB_LITERAL (value);
 			if (lit->all) {
-				val = (char *)cobc_malloc(f->size * 2 + 2);
-				if(lit->data[0] == '"'
-				|| lit->data[0] == '\\') {	/* Fix string for C code */
-					for(i=j=0; j < (unsigned int)f->size; j++) {
+				ref_size = f->size;
+			} else {
+				ref_size = lit->size;
+			}
+			val = (char *)cobc_malloc (ref_size * 2 + 2);
+			if (lit->all) {
+				if (lit->data[0] == '"'
+				 || lit->data[0] == '\\') {	/* Fix string for C code */
+					for (i = j = 0; j < (unsigned int)f->size; j++) {
 						val[i++] = '\\';
 						val[i++] = lit->data[0];
 					}
-					val[i] = 0;
 				} else {
-					memset(val,lit->data[0],f->size);
+					memset (val, lit->data[0], f->size);
+					i = f->size;
 				}
-				output_local("\"%s\",%d,", val, (int)f->size);
 			} else {
-				val = (char *)cobc_malloc(lit->size * 2 + 2);
-				for(i=j=0; j < lit->size; j++) {
-					if(lit->data[j] == '"'
-					|| lit->data[j] == '\\')	/* Fix string for C code */
+				val = (char *)cobc_malloc (lit->size * 2 + 2);
+				for (i = j = 0; j < lit->size; j++) {
+					if (lit->data[j] == '"'
+					 || lit->data[j] == '\\')	/* Fix string for C code */
 						val[i++] = '\\';
 					val[i++] = lit->data[j];
 				}
-				val[i] = 0;
-				output_local("\"%s\",%d,", val, (int)lit->size);
 			}
+			val[i] = 0;
+			output_local("\"%s\",%d,", val, (int)ref_size);
 			cobc_free((void*) val);
 		} else {
 			output_local("NULL,0,");

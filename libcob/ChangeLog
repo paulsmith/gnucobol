@@ -1,4 +1,9 @@
 
+2019-06-23  Simon Sobisch <simonsobisch@gnu.org>
+
+	* mlio.c, move.c, numeric.c, reportio.c, termio.c: fixed possible
+	  arithmetic overflow (especially because of cast errors on x64)
+
 2019-06-10  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (gc_conf, set_config_val, get_config_val), coblocal.h:

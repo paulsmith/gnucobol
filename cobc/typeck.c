@@ -5067,8 +5067,9 @@ cb_build_optim_cond (struct cb_binary_op *p)
 	 ||	f->usage == CB_USAGE_HNDL_LM
 	 || f->usage == CB_USAGE_COMP_X
 	 || f->usage == CB_USAGE_COMP_N) {
-		n = (f->size - 1) + (8 * (f->pic->have_sign ? 1 : 0)) +
-			(16 * (f->flag_binary_swap ? 1 : 0));
+		n = ((size_t)f->size - 1)
+		  + (8 * (f->pic->have_sign ? 1 : 0))
+		  +	(16 * (f->flag_binary_swap ? 1 : 0));
 #if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER)
 		switch (f->size) {
 		case 2:
@@ -5508,8 +5509,9 @@ cb_build_optim_add (cb_tree v, cb_tree n)
 		  || f->usage == CB_USAGE_COMP_5
 		  || f->usage == CB_USAGE_COMP_X
 		  || f->usage == CB_USAGE_COMP_N)) {
-			z = (f->size - 1) + (8 * (f->pic->have_sign ? 1 : 0)) +
-				(16 * (f->flag_binary_swap ? 1 : 0));
+			z = ((size_t)f->size - 1)
+			  + (8 * (f->pic->have_sign ? 1 : 0))
+			  + (16 * (f->flag_binary_swap ? 1 : 0));
 #if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER)
 			switch (f->size) {
 			case 2:
@@ -5520,9 +5522,9 @@ cb_build_optim_add (cb_tree v, cb_tree n)
 #endif
 			case 4:
 			case 8:
-				if (f->storage != CB_STORAGE_LINKAGE &&
-				    f->indexes == 0 &&
-				    (f->offset % f->size) == 0) {
+				if (f->storage != CB_STORAGE_LINKAGE
+				 && f->indexes == 0
+				 && (f->offset % f->size) == 0) {
 					optimize_defs[align_bin_add_funcs[z].optim_val] = 1;
 					s = align_bin_add_funcs[z].optim_name;
 				} else {
@@ -5580,8 +5582,9 @@ cb_build_optim_sub (cb_tree v, cb_tree n)
 		  || f->usage == CB_USAGE_COMP_5
 		  || f->usage == CB_USAGE_COMP_X
 		  || f->usage == CB_USAGE_COMP_N)) {
-			z = (f->size - 1) + (8 * (f->pic->have_sign ? 1 : 0)) +
-				(16 * (f->flag_binary_swap ? 1 : 0));
+			z = ((size_t)f->size - 1)
+			  + (8 * (f->pic->have_sign ? 1 : 0))
+			  +	(16 * (f->flag_binary_swap ? 1 : 0));
 #if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER)
 			switch (f->size) {
 			case 2:
@@ -8022,7 +8025,7 @@ static size_t calc_reference_size (cb_tree xr)
 				}
 			} else {
 				if (CB_LITERAL_P (r->offset)) {
-					return CB_FIELD_PTR (xr)->size
+					return (size_t)CB_FIELD_PTR (xr)->size
 						- cb_get_int (r->offset) + 1;
 				}
 			}
@@ -12081,11 +12084,12 @@ syntax_check_ml_gen_count_in (cb_tree count)
 static int
 is_valid_uri (const struct cb_literal * const namespace)
 {
-	char	*copy = cob_malloc (namespace->size + 1);
+	size_t size = (size_t)namespace->size;
+	char	*copy = cob_malloc (size + 1);
 	int	is_valid;
 
-	memcpy (copy, namespace->data, namespace->size);
-	copy[namespace->size] = '\0';
+	memcpy (copy, namespace->data, size);
+	copy[size] = '\0';
 	is_valid = cob_is_valid_uri (copy);
 	cob_free (copy);
 

@@ -229,7 +229,7 @@ FILE			*cb_listing_file = NULL;
 #define CB_PRINT_LEN	132
 
 char	print_data[CB_PRINT_LEN + 1];
-int	pd_off;
+size_t	pd_off;
 
 #define IS_DEBUG_LINE(line) ((line)[CB_INDICATOR] == 'D')
 #define IS_CONTINUE_LINE(line) ((line)[CB_INDICATOR] == '-')
@@ -1445,7 +1445,7 @@ cobc_set_value (struct cb_define_struct *p, const char *value)
 		size++;
 	}
 
-	if (*s || size <= (dot_seen + sign_seen)) {
+	if (*s || size <= ((size_t)dot_seen + sign_seen)) {
 		/* Not numeric */
 #if	0	/* RXWRXW - Lit warn */
 		cb_warning (COBC_WARN_FILLER, _("assuming literal for unquoted '%s'"),
@@ -2182,7 +2182,7 @@ cobc_var_print (const char *msg, const char *val, const unsigned int env)
 	n = 0;
 	token = strtok (p, " ");
 	for (; token; token = strtok (NULL, " ")) {
-		toklen = (int)strlen (token) + 1;
+		toklen = strlen (token) + 1;
 		if ((n + toklen) > CB_IVAL_SIZE) {
 			if (n) {
 				printf ("\n%*.*s", CB_IMSG_SIZE + 3,
@@ -4606,9 +4606,9 @@ check_filler_name (char *name)
 }
 
 static int
-set_picture (struct cb_field *field, char *picture, int picture_len)
+set_picture (struct cb_field *field, char *picture, size_t picture_len)
 {
-	int usage_len;
+	size_t usage_len;
 	char picture_usage[CB_LIST_PICSIZE];
 
 	memset (picture, 0, CB_LIST_PICSIZE);
@@ -4783,7 +4783,7 @@ print_fields (struct cb_field *top, int *found)
 	int	get_cat;
 	int	got_picture;
 	int	old_level = 0;
-	int	picture_len = cb_listing_wide ? 64 : 24;
+	size_t	picture_len = cb_listing_wide ? 64 : 24;
 	char	type[20];
 	char	picture[CB_LIST_PICSIZE];
 	char	lcl_name[LCL_NAME_LEN];
@@ -5775,7 +5775,7 @@ print_errors_for_line (const struct list_error * const first_error,
 {
 	const struct list_error	*err;
 	const int	max_chars_on_line = cb_listing_wide ? 120 : 80;
-	int msg_off;
+	size_t msg_off;
 
 	for (err = first_error; err; err = err->next) {
 		if (err->line == line_num) {
@@ -5792,7 +5792,7 @@ print_errors_for_line (const struct list_error * const first_error,
 				}
 				print_data[pd_off] = '\0';
 				print_program_data (print_data);
-				msg_off = strlen(err->prefix);
+				msg_off = strlen (err->prefix);
 				pd_off = strlen (print_data) - msg_off;
 				if (msg_off < 2) msg_off = 2;
 				memset (print_data, ' ', msg_off - 1);

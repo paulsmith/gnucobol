@@ -78,10 +78,10 @@ static cob_global		*cobglobptr;
 #if WITH_XML2 || WITH_CJSON
 
 static void *
-get_trimmed_data (const cob_field * const f, void * (*strndup_func)(const char *, int))
+get_trimmed_data (const cob_field * const f, void * (*strndup_func)(const char *, size_t))
 {
 	char	*str = (char *) f->data;
-	int	len = (int) f->size;
+	size_t	len = f->size;
 
 	/* Trim leading/trailing spaces. If f is all spaces, leave one space. */
 	if (COB_FIELD_JUSTIFIED (f)) {
@@ -96,7 +96,7 @@ get_trimmed_data (const cob_field * const f, void * (*strndup_func)(const char *
 static cob_pic_symbol *
 get_pic_for_num_field (const size_t num_int_digits, const size_t num_dec_digits)
 {
-	size_t	num_pic_symbols = 2 + (2 * !!num_dec_digits) + 1;
+	size_t	num_pic_symbols = (size_t)2 + (2 * !!num_dec_digits) + 1;
 	cob_pic_symbol	*pic = cob_malloc (num_pic_symbols * sizeof (cob_pic_symbol));
 	cob_pic_symbol	*symbol = pic;
 
@@ -124,7 +124,7 @@ get_pic_for_num_field (const size_t num_int_digits, const size_t num_dec_digits)
 }
 
 static void *
-get_num (cob_field * const f, void * (*strndup_func)(const char *, int))
+get_num (cob_field * const f, void * (*strndup_func)(const char *, size_t))
 {
 	size_t		num_integer_digits
 		= cob_max_int (0, COB_FIELD_DIGITS (f) - COB_FIELD_SCALE (f));
@@ -189,7 +189,7 @@ is_all_spaces (const cob_field * const f)
 }
 
 static void *
-xmlCharStrndup_void (const char *str, const int size)
+xmlCharStrndup_void (const char *str, const size_t size)
 {
 	return (void *)xmlCharStrndup (str, size);
 }
@@ -565,7 +565,7 @@ set_json_exception (const unsigned int code)
 }
 
 static void *
-json_strndup (const char *str, const int size)
+json_strndup (const char *str, const size_t size)
 {
 	char	*dup = cob_malloc (size + 1);
 	memcpy (dup, str, size);

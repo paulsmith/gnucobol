@@ -1206,7 +1206,7 @@ read_literal (const char mark, const char *type)
 			if (unlikely (i == plex_size)) {
 				plex_size *= 2;
 				if (unlikely (plex_size > (cb_lit_length + 1))) {
-					plex_size = cb_lit_length + 1;
+					plex_size = (size_t)cb_lit_length + 1;
 				}
 				plex_buff = cobc_realloc (plex_buff, plex_size);
 			}
@@ -1747,7 +1747,7 @@ scan_numeric (const char *text)
 		scale = (int)strlen (s) - 1;
 		/* Remove decimal point */
 		/* Moves trailing null */
-		memmove (s, s + 1, (size_t)(scale + 1));
+		memmove (s, s + 1, (size_t)scale + 1);
 	} else {
 		scale = 0;
 	}
@@ -2151,7 +2151,7 @@ scan_define_options (const char *text)
 				goto freevar;
 			}
 			/* Remove decimal point */
-			memmove (q, q + 1, (size_t)(scale + 1));
+			memmove (q, q + 1, (size_t)scale + 1);
 		}
 		for (t = (unsigned char *)s; *t; ++t) {
 			if (*t < '0' || *t  > '9') {

@@ -827,17 +827,18 @@ print_field(cob_report_field *rf, char *rec)
 {
 	char	wrk[COB_SMALL_BUFF];
 	size_t	ln, k, i;
+	size_t	dest_pos = (size_t)rf->column - 1;
 
 	cob_field_to_string(rf->f, wrk, sizeof(wrk)-1);
 	wrk[COB_SMALL_MAX] = 0;	/* keep analyzer happy */
 	ln = strlen(wrk);
 	if(cobsetptr
-	&& !cobsetptr->cob_col_just_lrc) {		/* Data justify is turned off */
-		memcpy(&rec[rf->column-1], wrk, ln);
+	&& !cobsetptr->cob_col_just_lrc) {
+		/* Data justify is turned off, no adjustment */
 	} else
 	if((rf->flags & COB_REPORT_COLUMN_RIGHT)
 	&& ln < rf->f->size) {
-		memcpy(&rec[rf->column-1+rf->f->size-ln], wrk, ln);
+		dest_pos += rf->f->size - ln;
 	} else 
 	if((rf->flags & COB_REPORT_COLUMN_CENTER)) {
 		for(k=0; k < rf->f->size && wrk[0] == ' ' && ln > 0; k++) {	/* remove leading spaces */
@@ -845,20 +846,17 @@ print_field(cob_report_field *rf, char *rec)
 			ln--;
 		}
 		i = 1- (ln & 1);
-		if(ln < rf->f->size)
-			memcpy(&rec[rf->column-1+(rf->f->size-ln-i)/2], wrk, ln);
-		else
-			memcpy(&rec[rf->column-1], wrk, ln);
+		if (ln < rf->f->size) {
+			dest_pos += (rf->f->size - ln - i) / 2;
+		}
 	} else 
 	if((rf->flags & COB_REPORT_COLUMN_LEFT)) {
 		for(k=0; k < rf->f->size && wrk[0] == ' ' && ln > 0; k++) {	/* remove leading spaces */
 			memmove(wrk,&wrk[1],ln);
 			ln--;
 		}
-		memcpy(&rec[rf->column-1], wrk, ln);
-	} else {
-		memcpy(&rec[rf->column-1], wrk, ln);
 	}
+	memcpy (&rec[dest_pos], wrk, ln);
 }
 
 /*

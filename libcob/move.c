@@ -128,7 +128,7 @@ store_common_region (cob_field *f, const unsigned char *data,
 	gcf = cob_min_int (hf1, hf2);
 	memset (COB_FIELD_DATA (f), '0', COB_FIELD_SIZE (f));
 	if (gcf > lcf) {
-		csize = (size_t)(gcf - lcf);
+		csize = (size_t)gcf - lcf;
 		p = data + hf1 - gcf;
 		q = COB_FIELD_DATA (f) + hf2 - gcf;
 		for (cinc = 0; cinc < csize; ++cinc, ++p, ++q) {
@@ -495,12 +495,12 @@ cob_move_packed_to_display (cob_field *f1, cob_field *f2)
 
 	/* Unpack string */
 	data = f1->data;
+	offset = COB_FIELD_DIGITS(f1) % 2;
 	if (COB_FIELD_NO_SIGN_NIBBLE (f1)) {
 		sign = 0;
-		offset = COB_FIELD_DIGITS(f1) % 2;
 	} else {
 		sign = cob_packed_get_sign (f1);
-		offset = 1 - (COB_FIELD_DIGITS(f1) % 2);
+		offset = 1 - offset;
 	}
 	for (i = offset; i < COB_FIELD_DIGITS(f1) + offset; ++i) {
 		if (i % 2 == 0) {
@@ -651,7 +651,7 @@ cob_move_binary_to_display (cob_field *f1, cob_field *f2)
 	}
 
 	/* Store */
-	store_common_region (f2, (cob_u8_ptr)buff + i, (size_t)(20 - i),
+	store_common_region (f2, (cob_u8_ptr)buff + i, (size_t)20 - i,
 		COB_FIELD_SCALE(f1));
 
 	COB_PUT_SIGN (f2, sign);
@@ -1488,12 +1488,12 @@ cob_packed_get_int (cob_field *f1)
 	int		sign;
 
 	data = f1->data;
+	offset = COB_FIELD_DIGITS(f1) % 2;
 	if (COB_FIELD_NO_SIGN_NIBBLE (f1)) {
 		sign = 0;
-		offset = COB_FIELD_DIGITS(f1) % 2;
 	} else {
 		sign = cob_packed_get_sign (f1);
-		offset = 1 - (COB_FIELD_DIGITS(f1) % 2);
+		offset = 1 - offset;
 	}
 	for (i = offset; i < COB_FIELD_DIGITS(f1) - COB_FIELD_SCALE(f1) + offset; ++i) {
 		val *= 10;
@@ -1515,18 +1515,20 @@ cob_packed_get_long_long (cob_field *f1)
 	unsigned char	*data;
 	size_t		i;
 	size_t		offset;
+	size_t		field_data;
 	cob_s64_t	val = 0;
 	int		sign;
 
 	data = f1->data;
+	offset = COB_FIELD_DIGITS(f1) % 2;
 	if (COB_FIELD_NO_SIGN_NIBBLE (f1)) {
 		sign = 0;
-		offset = COB_FIELD_DIGITS(f1) % 2;
 	} else {
 		sign = cob_packed_get_sign (f1);
-		offset = 1 - (COB_FIELD_DIGITS(f1) % 2);
+		offset = 1 - offset;
 	}
-	for (i = offset; i < COB_FIELD_DIGITS(f1) - COB_FIELD_SCALE(f1) + offset; ++i) {
+	field_data = COB_FIELD_DIGITS(f1) - COB_FIELD_SCALE(f1);
+	for (i = offset; i < field_data + offset; ++i) {
 		val *= 10;
 		if (i % 2 == 0) {
 			val += data[i / 2] >> 4;

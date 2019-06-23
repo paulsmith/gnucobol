@@ -1148,7 +1148,7 @@ cb_name (cb_tree x)
 {
 	char	*s;
 	char	tmp[COB_NORMAL_BUFF] = { 0 };
-	int	tlen;
+	size_t	tlen;
 
 	tlen = cb_name_1 (tmp, x);
 
@@ -3788,6 +3788,8 @@ build_sum_counter (struct cb_report *r, struct cb_field *f)
 	struct cb_field *s;
 	char		buff[COB_MINI_BUFF],pic[30];
 	int		dec,dig;
+	size_t	num_sums_size = ((size_t)r->num_sums + 2) * sizeof (struct cb_field *) * 2;
+	size_t	num_sums_square = (size_t)r->num_sums * 2;
 
 	/* Set up SUM COUNTER */
 	if (f->flag_filler) {
@@ -3825,16 +3827,15 @@ build_sum_counter (struct cb_report *r, struct cb_field *f)
 	f->report_sum_counter = cb_build_field_reference (s, NULL);
 	CB_FIELD_ADD (current_program->working_storage, s);
 
-	if(r->sums == NULL) {
-		r->sums = cobc_parse_malloc((r->num_sums+2) * sizeof(struct cb_field *) * 2);
+	if (r->sums == NULL) {
+		r->sums = cobc_parse_malloc (num_sums_size);
 	} else {
-		r->sums = cobc_parse_realloc(r->sums,
-					(r->num_sums+2) * sizeof(struct cb_field *) * 2);
+		r->sums = cobc_parse_realloc (r->sums, num_sums_size);
 	}
-	r->sums[r->num_sums*2 + 0] = s;
-	r->sums[r->num_sums*2 + 1] = f;
-	r->sums[r->num_sums*2 + 2] = NULL;
-	r->sums[r->num_sums*2 + 3] = NULL;
+	r->sums[num_sums_square + 0] = s;
+	r->sums[num_sums_square + 1] = f;
+	r->sums[num_sums_square + 2] = NULL;
+	r->sums[num_sums_square + 3] = NULL;
 	r->num_sums++;
 }
 
@@ -3898,14 +3899,14 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		p->report = r;
 		if (p->storage == CB_STORAGE_REPORT
 		 && ((p->report_flag &  COB_REPORT_LINE) || p->level == 1)) {
+			size_t size = ((size_t)r->num_lines + 2) * sizeof(struct cb_field *);
 			if (r->rcsz < p->size) {
 				r->rcsz = p->size;
 			}
-			if(r->line_ids == NULL) {
-				r->line_ids = cobc_parse_malloc((r->num_lines+2) * sizeof(struct cb_field *));
+			if (r->line_ids == NULL) {
+				r->line_ids = cobc_parse_malloc (size);
 			} else {
-				r->line_ids = cobc_parse_realloc(r->line_ids,
-							(r->num_lines+2) * sizeof(struct cb_field *));
+				r->line_ids = cobc_parse_realloc (r->line_ids, size);
 			}
 			r->line_ids[r->num_lines++] = p;
 			r->line_ids[r->num_lines] = NULL;	/* Clear next entry */

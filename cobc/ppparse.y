@@ -447,7 +447,7 @@ ppp_check_needs_quote (const char *envval)
 		size++;
 	}
 
-	if (*s || size <= (dot_seen + sign_seen)) {
+	if (*s || size <= ((size_t)dot_seen + sign_seen)) {
 		return 1;
 	}
 	return 0;
