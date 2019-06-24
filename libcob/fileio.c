@@ -2292,7 +2292,7 @@ save_status (cob_file *f, cob_field *fnstatus, const int status)
 		} else {
 			cobglobptr->cob_exception_code = 0;
 		}
-		if (unlikely (cobsetptr->cob_do_sync)) {
+		if ((f->file_features & COB_FILE_SYNC)) {
 			cob_sync (f);
 		}
 	} else {

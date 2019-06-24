@@ -1,4 +1,9 @@
 
+2019-06-24  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Fixed to check file_features for COB_FILE_SYNC flag and then
+	cob_sync the file
+
 2019-06-21  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Add cob_write_dict and cob_read_dict for data file description
