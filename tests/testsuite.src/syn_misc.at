@@ -6485,7 +6485,7 @@ AT_DATA([prog.cob], [
            PERFORM VARYING var FROM 1 BY 1 UNTIL var = 4
               CONTINUE
            END-PERFORM
-           CONTINUE AFTER 42 SECONDS
+           CONTINUE AFTER 42 SECONDS      *> COBOL 202x
            CONTINUE AFTER 4 + 2 SECONDS
            CONTINUE AFTER var + 2 SECONDS
            CONTINUE AFTER '1' SECONDS
@@ -6507,6 +6507,65 @@ prog.cob:18: error: AFTER phrase in CONTINUE statement does not conform to COBOL
 prog.cob:19: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
 prog.cob:20: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
 prog.cob:21: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+])
+AT_CLEANUP
+
+
+AT_SETUP([conflict markers])
+AT_KEYWORDS([])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+      *> Verify that we report conflict markers correctly
+<<<<<<< HEAD
+       01  one-1      PIC X.
+======= there may be something here
+       01  one-2      PIC X.
+>>>>>>> some note
+      *> Verify that we don't have an issue with unmatched conflict markers
+       77  var        PIC 9.
+<<<<<<< HEAD
+       01  var2       PIC X.
+=======
+<<<<<<< HEAD
+      *> Verify that we only report conflict markers at the start of lines.
+ <<<<<<< HEAD
+       01  one        PIC X.
+ =======
+       01  two        PIC 9.
+ >>>>>>> some note
+       PROCEDURE DIVISION.
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:8: error: version control conflict marker in file
+prog.cob:10: error: version control conflict marker in file
+prog.cob:12: error: version control conflict marker in file
+prog.cob:15: error: version control conflict marker in file
+prog.cob:17: error: version control conflict marker in file
+prog.cob:18: error: version control conflict marker in file
+prog.cob:20: error: invalid indicator '<' at column 7
+prog.cob:22: error: invalid indicator '=' at column 7
+prog.cob:24: warning: ignoring invalid directive: '>> some'
+])
+
+AT_CHECK([$COMPILE_ONLY -free prog.cob], [1], [],
+[prog.cob:8: error: version control conflict marker in file
+prog.cob:10: error: version control conflict marker in file
+prog.cob:12: error: version control conflict marker in file
+prog.cob:15: error: version control conflict marker in file
+prog.cob:17: error: version control conflict marker in file
+prog.cob:18: error: version control conflict marker in file
+prog.cob:24: warning: ignoring invalid directive
+prog.cob:20: error: PROCEDURE DIVISION header missing
+prog.cob:20: error: syntax error, unexpected <
+prog.cob:22: error: syntax error, unexpected =
+prog.cob:25: error: syntax error, unexpected PROCEDURE
 ])
 AT_CLEANUP
 

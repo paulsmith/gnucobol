@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Dave Pitts
 
    This file is part of GnuCOBOL.
@@ -307,6 +307,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 			_("ignoring invalid directive: '%s'"), s);
 	skip_to_eol ();
 }
+
 ^[ ]*">>"		{
 	/* unknown 2002+ style directive */
 	cb_plex_warning (COBC_WARN_FILLER, newline_count,
@@ -1475,7 +1476,8 @@ start:
 						 _("line not terminated by a newline"));
 			} else if (line_overflow == 2) {
 				cb_plex_warning (COBC_WARN_FILLER, newline_count + 1,
-						 _("source text exceeds %d bytes, will be truncated"), PPLEX_BUFF_LEN);
+						 _("source text exceeds %d bytes, will be truncated"),
+						   PPLEX_BUFF_LEN);
 			}
 		} else {
 			if (line_overflow == 0) {
@@ -1483,12 +1485,32 @@ start:
 						 _("line not terminated by a newline"));
 			} else if (line_overflow == 2) {
 				cb_plex_warning (COBC_WARN_FILLER, newline_count,
-						 _("source text exceeds %d bytes, will be truncated"), PPLEX_BUFF_LEN);
+						 _("source text exceeds %d bytes, will be truncated"),
+						   PPLEX_BUFF_LEN);
 			}
 		}
 		buff[n++] = '\n';
 	}
 	buff[n] = 0;
+
+	/* check for vcs conflict marker */
+	if (n == 8 || (n > 8 && isspace(buff[7]))) {
+		if (memcmp("<<<<<<<", buff, 7) == 0
+		 || memcmp("=======", buff, 7) == 0
+		 || memcmp(">>>>>>>", buff, 7) == 0) {
+			/* FIXME: the different line numbers (see test "conflict markers" 
+			   are definitely a bug to solve in short time */
+			if (cb_source_format == CB_FORMAT_FREE) {
+				++newline_count;
+			}
+			cb_plex_error (newline_count,
+			_("version control conflict marker in file"));
+			if (cb_source_format != CB_FORMAT_FREE) {
+				++newline_count;
+			}
+			goto start;
+		}
+	}
 
 	if (cb_source_format == CB_FORMAT_FREE) {
 		bp = buff;

@@ -1,4 +1,8 @@
 
+2019-06-29  Simon Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l (ppinput): check for conflict markers (similar to GCC)
+
 2019-06-28  Simon Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l (ppcopy): ensure to have original errno, not the one from
