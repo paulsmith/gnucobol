@@ -956,6 +956,9 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 		ppin = stdin;
 	} else {
 		for (current_copy_info = copy_stack; current_copy_info; current_copy_info = current_copy_info->next) {
+			// FIXME: for WIN32 compare with cleaning / and \ (COPY "lib/file" vs COPY "lib\file"),
+			//        ideally open first, then check if we have thy physical same file
+			//        (could also fix symlinked files)
 			if (!strcmp (name, current_copy_info->dname)) {
 				x = cobc_malloc (sizeof (struct cb_tree_common));
 				x->source_file = name;
@@ -1069,7 +1072,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 
 	/* Locate and open COPY file */
 	if (lib) {
-		snprintf (plexbuff1, (size_t)COB_SMALL_MAX, "%s/%s", lib, name);
+		snprintf (plexbuff1, (size_t)COB_SMALL_MAX, "%s%c%s", lib, SLASH_CHAR, name);
 		plexbuff1[COB_SMALL_MAX] = 0;
 		s = plexbuff1;
 	} else {
@@ -1092,12 +1095,15 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 			goto err_handling;	/* LCOV_EXCL_LINE */
 		}
 	}
-
-	if (*s != '/') {
+#if defined (_WIN32) || defined (__DJGPP__)
+	if (*s != SLASH_CHAR && *s != '/' && *(s + 1) != ':') {
+#else
+	if (*s != SLASH_CHAR) {
+#endif
 		for (il = cb_include_list; il; il = il->next) {
 			for (el = cb_extension_list; el; el = el->next) {
 				snprintf (plexbuff2, (size_t)COB_SMALL_MAX,
-					  "%s/%s%s", il->text, name, el->text);
+					  "%s%c%s%s", il->text, SLASH_CHAR, name, el->text);
 				plexbuff2[COB_SMALL_MAX] = 0;
 				if (access (plexbuff2, R_OK) == 0) {
 					ret = ppopen (plexbuff2, replace_list);
@@ -1108,6 +1114,8 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 		}
 	}
 
+	/* ensure to have original errno, not the one from another file */
+	(void)access (s, R_OK);
 	/* pass file error as we have no more places to check */
 	cb_error ("%s: %s", s, cb_get_strerror ());
 

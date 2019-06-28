@@ -1,4 +1,13 @@
 
+2019-06-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l (ppcopy): ensure to have original errno, not the one from
+	  one of the files in search path
+	* pplex.l (ppcopy) [_WIN32]: fixed EINVAL for path argument access doesn't
+	  allow mixed slashes or anything before a partition identifier
+	* parser.y: extracted program_init_without_program_id
+	* parser.y: moved _options_paragraph references into _program_body
+
 2019-06-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, codegen.c, pplex.l, ppparse.y, reserved.c, scanner.l, tree.c,

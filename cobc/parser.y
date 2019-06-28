@@ -775,6 +775,26 @@ check_relaxed_syntax (const cob_flags_t lev)
 	}
 }
 
+static void
+program_init_without_program_id (void)
+{
+	cb_tree		l;
+
+	current_section = NULL;
+	current_paragraph = NULL;
+	l = cb_build_alphanumeric_literal (demangle_name,
+		strlen (demangle_name));
+	current_program->program_name = (char *)CB_LITERAL (l)->data;
+	current_program->program_id
+		= cb_build_program_id (current_program->program_name, 0);
+	current_program->prog_type = COB_MODULE_TYPE_PROGRAM;
+	if (!main_flag_set) {
+		main_flag_set = 1;
+		current_program->flag_main = cobc_flag_main;
+	}
+	check_relaxed_syntax (COBC_HD_PROGRAM_ID);
+}
+
 /* check if headers are present - return 0 if fine, 1 if missing
    Lev1 must always be present and is checked
    Lev2/3/4, if non-zero (forced) may be present
@@ -3122,21 +3142,7 @@ source_element:
 
 simple_prog:
   {
-	cb_tree		l;
-
-	current_section = NULL;
-	current_paragraph = NULL;
-	l = cb_build_alphanumeric_literal (demangle_name,
-					   strlen (demangle_name));
-	current_program->program_name = (char *)CB_LITERAL (l)->data;
-	current_program->program_id
-		= cb_build_program_id (current_program->program_name, 0);
-	current_program->prog_type = COB_MODULE_TYPE_PROGRAM;
-	if (!main_flag_set) {
-		main_flag_set = 1;
-		current_program->flag_main = cobc_flag_main;
-	}
-	check_relaxed_syntax (COBC_HD_PROGRAM_ID);
+	program_init_without_program_id ();
   }
   _program_body
   /* do cleanup */
@@ -3149,7 +3155,6 @@ simple_prog:
 program_definition:
   _identification_header
   program_id_paragraph
-  _options_paragraph
   _program_body
   _end_program_list
   /*
@@ -3161,7 +3166,6 @@ program_definition:
 function_definition:
   _identification_header
   function_id_paragraph
-  _options_paragraph
   _program_body
   end_function
 ;
@@ -3206,6 +3210,7 @@ end_function:
 /* PROGRAM body */
 
 _program_body:
+  _options_paragraph
   _environment_division
   {
 	cb_validate_program_environment (current_program);
@@ -3223,7 +3228,11 @@ _program_body:
 
 _identification_header:
   %prec SHIFT_PREFER
-| identification_or_id DIVISION TOK_DOT
+| identification_header
+;
+
+identification_header:
+  identification_or_id DIVISION TOK_DOT
   {
 	setup_program_start ();
 	setup_from_identification = 1;
@@ -5422,7 +5431,11 @@ _data_division:
 ;
 
 _data_division_header:
-| DATA DIVISION TOK_DOT
+| data_division_header
+;
+
+data_division_header:
+  DATA DIVISION TOK_DOT
   {
 	header_check |= COBC_HD_DATA_DIVISION;
   }
@@ -9071,7 +9084,11 @@ _procedure_division:
 		current_program->entry_convention = cb_int (CB_CONV_COBOL);
 	}
   }
-| PROCEDURE DIVISION
+| procedure_division
+;
+
+procedure_division:
+  PROCEDURE DIVISION
   {
 	current_section = NULL;
 	current_paragraph = NULL;
