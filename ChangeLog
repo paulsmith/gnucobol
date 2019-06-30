@@ -1,4 +1,9 @@
 
+2019-06-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: changed the manual test runner to be a script handled
+	  by autoconf instead of make
+
 2019-06-16  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am (tarstamp.h, $(top_distdir)/tarstamp.h): targets added

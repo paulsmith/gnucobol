@@ -44,6 +44,8 @@ AC_CONFIG_FILES([bin/cob-config], [chmod +x bin/cob-config])
 AC_CONFIG_FILES([pre-inst-env:build_aux/pre-inst-env.in],
   [chmod +x pre-inst-env])
 AC_CONFIG_FILES([tests/atlocal], [chmod +x tests/atlocal])
+AC_CONFIG_FILES([tests/run_prog_manual.sh],
+  [chmod +x tests/run_prog_manual.sh])
 
 # Note for SUN Solaris (gcc)
 # export/setenv CFLAGS "-m64 -mptr64"

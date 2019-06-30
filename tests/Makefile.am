@@ -68,7 +68,7 @@ testsuite_manual_sources = \
 
 EXTRA_DIST = $(srcdir)/package.m4 $(TESTSUITE) $(TESTSUITE_MANUAL) \
 	$(srcdir)/testsuite.at $(srcdir)/testsuite_manual.at \
-	$(srcdir)/listings-sed.sh $(srcdir)/run_prog_manual.sh.in \
+	$(srcdir)/listings-sed.sh \
 	$(testsuite_sources) $(testsuite_manual_sources)
 
 DISTCLEANFILES = atconfig
@@ -94,10 +94,7 @@ prereq-manual: $(TESTSUITE_MANUAL) prereq-check
 clean-local:
 	rm -rf *.dir *.log
 
-./run_prog_manual.sh: run_prog_manual.sh.in
-	@cp $(srcdir)/run_prog_manual.sh.in $@
-
-checkmanual: prereq-manual ./run_prog_manual.sh
+checkmanual: prereq-manual
 	@$(TESTSUITE_MANUAL) $(TESTSUITEFLAGS) || (rm -f testsuite_manual.dir/at-job-fifo; exit 1)
 	@rm -f testsuite_manual.dir/at-job-fifo
 

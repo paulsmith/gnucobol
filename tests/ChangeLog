@@ -1,4 +1,9 @@
 
+2019-06-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* run_prog_manual.sh.in, Makefile.am: changed the manual test runner
+	  to be a script handled by autoconf instead of make
+
 2019-06-18  Simon Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in: explicit disable BDB internal locking by unsetting DB_HOME
