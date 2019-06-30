@@ -216,7 +216,7 @@ cob_move_to_beg_of_last_line (void)
 {
 	int	max_y;
 	int	max_x;
-    
+
 	getmaxyx (stdscr, max_y, max_x);
 	/* We don't need to check for exceptions here; it will always be fine */
 	move (max_y, 0);
@@ -669,51 +669,91 @@ cob_convert_key (int *keyp, const cob_u32_t field_accept)
 }
 
 static void
-cob_check_pos_status (const int fret)
+handle_status (const int fret)
 {
-	cob_field	*f;
-	int		sline;
-	int		scolumn;
-	char		buff[23]; /* 10: make the compiler happy as "int" *could*
-						         have more digits than we "assume" */
-
 	if (fret) {
 		cob_set_exception (COB_EC_IMP_ACCEPT);
 	}
 	COB_ACCEPT_STATUS = fret;
-	if (!COB_MODULE_PTR) {
-		return;
-	}
-	if (COB_MODULE_PTR->crt_status) {
-		if (COB_FIELD_IS_NUMERIC (COB_MODULE_PTR->crt_status)) {
-			cob_set_int (COB_MODULE_PTR->crt_status, fret);
+
+	if (COB_MODULE_PTR && COB_MODULE_PTR->crt_status) {
+		cob_field	*status_field = COB_MODULE_PTR->crt_status;
+		if (COB_FIELD_IS_NUMERIC (status_field)) {
+			cob_set_int (status_field, fret);
 		} else {
-			sprintf(buff, "%4.4d", fret);
-			memcpy (COB_MODULE_PTR->crt_status->data, buff,
-				(size_t)4);
+			char	buff[23]; /* 10: make the compiler happy as "int" *could*
+						         have more digits than we "assume" */
+			sprintf (buff, "%4.4d", fret);
+			memcpy (status_field->data, buff, 4U);
 		}
 	}
-	if (COB_MODULE_PTR->cursor_pos) {
+}
+
+/* update field for the programs SPECIAL-NAMES CURSOR clause */
+static void
+pass_cursor_to_program (void)
+{
+	if (COB_MODULE_PTR && COB_MODULE_PTR->cursor_pos) {
+		cob_field	*cursor_field = COB_MODULE_PTR->cursor_pos;
+		int		sline;
+		int		scolumn;
 		getyx (stdscr, sline, scolumn);
-		f = COB_MODULE_PTR->cursor_pos;
-		if (COB_FIELD_IS_NUMERIC (f) &&
-		    COB_FIELD_TYPE (f) != COB_TYPE_NUMERIC_DISPLAY) {
+		sline++;	/* zero-based in curses */
+		if (COB_FIELD_IS_NUMERIC (cursor_field) &&
+			COB_FIELD_TYPE (cursor_field) != COB_TYPE_NUMERIC_DISPLAY) {
 			sline *= 1000;
 			sline += scolumn;
-			cob_set_int (f, sline);
+			cob_set_int (cursor_field, sline);
 		} else {
-			if (f->size < 6) {
+			char	buff[23]; /* 10: make the compiler happy as "int" *could*
+								 have more digits than we "assume" */
+			if (cursor_field->size < 6) {
 				sline *= 100;
 				sline += scolumn;
 				sprintf (buff, "%4.4d", sline);
-				memcpy (f->data, buff, (size_t)4);
+				memcpy (cursor_field->data, buff, 4U);
 			} else {
 				sline *= 1000;
 				sline += scolumn;
 				sprintf (buff, "%6.6d", sline);
-				memcpy (f->data, buff, (size_t)6);
+				memcpy (cursor_field->data, buff, 6U);
 			}
 		}
+	}
+}
+/* set given parameters to the programs SPECIAL-NAMES CURSOR clause or
+  -1 if not provided */
+static void
+get_cursor_from_program (int *line, int *column)
+{
+	if (COB_MODULE_PTR && COB_MODULE_PTR->cursor_pos) {
+		cob_field	*cursor_field = COB_MODULE_PTR->cursor_pos;
+		int cursor_pos;
+		if (COB_FIELD_IS_NUMERIC (cursor_field)) {
+			cursor_pos = cob_get_int (cursor_field);
+		} else {
+			char buff[7];
+			int maxsize = cursor_field->size;
+			/* LCOV_EXCL_START */
+			if (unlikely (maxsize != 4 && maxsize != 6)) {
+				cob_fatal_error (COB_FERROR_CODEGEN);
+			}
+			/* LCOV_EXCL_STOP */
+			memcpy (buff, cursor_field->data, maxsize);
+			buff[6] = 0;
+			if (unlikely (!sscanf (buff, "%d", &cursor_pos))) {
+				cob_fatal_error (COB_FERROR_CODEGEN);
+			}
+		}
+		if (cursor_field->size == 4) {
+			*line = (cursor_pos / 100) - 1;
+			*column = (cursor_pos % 100) - 1;
+		} else {
+			*line = (cursor_pos / 1000) - 1;
+			*column = (cursor_pos % 1000) - 1;
+		}
+	} else {
+		*column = *line = -1;
 	}
 }
 
@@ -1122,7 +1162,7 @@ valid_field_data (cob_field *field)
 		num_check = cob_check_numval (field, NULL, 1, 0);
 		/* test for all spaces which is valid in this case
 		   and change to a one zero instead */
-		if (num_check == field->size + 1) {
+		if (num_check == (int)field->size + 1) {
 			field->data[0] = '0';
 			return 1;
 		}
@@ -1235,10 +1275,9 @@ cob_toggle_insert ()
 	scolumn = structure->this_x;						\
 	right_pos = scolumn + (int)scrdef->field->size - 1
 
-#ifdef NCURSES_MOUSE_VERSION
 /* find field by position, returns index for field or -1 if not found */
-static size_t
-find_field_by_pos (const int initial_curs, const int x, const int y) {
+static int
+find_field_by_pos (const int initial_curs, const int line, const int column) {
 	struct cob_inp_struct	*sptr;
 	cob_screen		*s;
 	int			sline;
@@ -1249,15 +1288,16 @@ find_field_by_pos (const int initial_curs, const int x, const int y) {
 
 	for (idx = (size_t)initial_curs; idx < totl_index; idx++) {
 		SET_FLD_REFS (idx, sptr, s, sline, scolumn, right_pos);
-		if (x == sline
-		 && y >= scolumn
-		 && y <= right_pos) {
+		if (line == sline
+		 && column >= scolumn
+		 && column <= right_pos) {
 			return idx;
 		}
 	}
 	return -1;
 }
 
+#ifdef NCURSES_MOUSE_VERSION
 static int
 mouse_to_exception_code (mmask_t mask) {
 	int fret = -1;
@@ -1338,6 +1378,26 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 		pending_accept = 0;
 	}
 	cob_screen_attr (s->foreg, s->backg, s->attr, ACCEPT_STATEMENT);
+
+	/* position for the SPECIAL-NAMES CURSOR clause, if given */
+	{
+		int		cursor_clause_line;
+		int		cursor_clause_col;
+		get_cursor_from_program (&cursor_clause_line, &cursor_clause_col);
+		if (cursor_clause_line > 0) {
+			int		fld_index = find_field_by_pos (initial_curs, cursor_clause_line, cursor_clause_col);
+			if (fld_index >= 0) {
+				curr_index = fld_index;
+				SET_FLD_AND_DATA_REFS (curr_index, sptr, s, sline, scolumn, right_pos, p);
+				at_eof = 0;
+				cob_screen_attr (s->foreg, s->backg, s->attr, ACCEPT_STATEMENT);
+				cob_move_cursor (cursor_clause_line, cursor_clause_col);
+			} else {
+				/* note: COBOL 2002 states that in this case the CURSOR clause is ignored,
+				         while MicroFocus and ACUCOBOL-GT day "the nearest field" */
+			}
+		}
+	}
 
 #ifdef NCURSES_MOUSE_VERSION
 	/* prevent warnings about not intialized structure */
@@ -1602,7 +1662,7 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 		case KEY_MOUSE:
 			/* handle depending on state */
 			if (mevent.bstate & BUTTON1_PRESSED) {
-				size_t fld_index = -1;
+				int fld_index = -1;
 				/* if in current field, just move */
 				if (mevent.x == cline) {
 					if (mevent.y >= scolumn
@@ -1776,13 +1836,17 @@ cob_screen_moveyx (cob_screen *s)
 
 	if (s->line || s->column ||
 	    s->attr & (COB_SCREEN_LINE_PLUS | COB_SCREEN_LINE_MINUS |
-		       COB_SCREEN_COLUMN_PLUS |COB_SCREEN_COLUMN_MINUS)) {
+		       COB_SCREEN_COLUMN_PLUS | COB_SCREEN_COLUMN_MINUS)) {
 		getyx (stdscr, y, x);
-#if	1	/* RXWRXW - Column adjust */
-		if (x > 0) {
+		if (x < 0 || y < 0) {
+			/* not translated as "testing only" (should not happen) */
+			cob_runtime_warning ("negative values from getyx");
+			x = y = 0;
+		}
+		/* Column adjust */
+		if (x != 0) {
 			x--;
 		}
-#endif
 		if (!s->line) {
 			line = y;
 		} else {
@@ -2065,13 +2129,15 @@ screen_accept (cob_screen *s, const int line, const int column,
 
 	/* Prepare input fields */
 	if (cob_prep_input (s)) {
-		cob_check_pos_status (9001);
+		pass_cursor_to_program ();
+		handle_status (9001);
 		return;
 	}
 
 	/* No input field is an error */
 	if (!totl_index) {
-		cob_check_pos_status (8000);
+		pass_cursor_to_program ();
+		handle_status (8000);
 		return;
 	}
 
@@ -2125,7 +2191,8 @@ screen_accept (cob_screen *s, const int line, const int column,
 		initial_curs = 0;
 	}
 	cob_screen_get_all (initial_curs, get_timeout);
-	cob_check_pos_status (global_return);
+	pass_cursor_to_program ();
+	handle_status (global_return);
 }
 
 static void
@@ -2318,7 +2385,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 		}
 
 		raise_ec_on_truncation (size_accept);
-		for (count = 0; count < cob_min_int (size_accept, f->size); count++) {
+		for (count = 0; count < (size_t) cob_min_int (size_accept, f->size); count++) {
 			if (fattr & COB_SCREEN_SECURE) {
 				cob_addch_no_trunc_check (COB_CH_AS);
 			} else if (fattr & COB_SCREEN_NO_ECHO) {
@@ -2350,6 +2417,19 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 
 		accept_cursor_y = sline;
 		accept_cursor_x = scolumn + size_accept;
+
+		/* position for the SPECIAL-NAMES CURSOR clause, if given */
+		{
+			int		cursor_clause_line;
+			int		cursor_clause_col;
+			get_cursor_from_program (&cursor_clause_line, &cursor_clause_col);
+
+			if (cursor_clause_line == sline
+			 && cursor_clause_col > scolumn
+			 && cursor_clause_col < scolumn + (int)f->size) {
+				cob_move_cursor (cursor_clause_line, cursor_clause_col);
+			}
+		}
 
 		right_pos = scolumn + size_accept - 1;
 		p = COB_TERM_BUFF;
@@ -2869,15 +2949,13 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 		cob_beep ();
 	}
  field_return:
+	pass_cursor_to_program ();
+	handle_status (fret);
 	if (f) {
+		cob_move (&temp_field, f);
 		cob_move_cursor (sline, right_pos + 1);
 	}
 	refresh ();
-	cob_check_pos_status (fret);
-	if (!f) {
-		return;
-	}
-	cob_move (&temp_field, f);
 }
 
 static void

@@ -1,4 +1,13 @@
 
+2019-06-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c: split cob_check_pos_status into handle_status and
+	  pass_cursor_to_program
+	* screenio.c (pass_cursor_to_program): fix bug #483
+	  increment line number by one, pass actual column
+	* screenio.c (get_cursor_from_program, cob_screen_get_all, field_accept):
+	  fix bug #579 - use CURSOR clause in SPECIAL-NAMES also for positioning
+
 2019-06-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* mlio.c, move.c, numeric.c, reportio.c, termio.c: fixed possible
