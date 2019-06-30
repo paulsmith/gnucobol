@@ -3,6 +3,7 @@
 
 	* configure.ac: changed the manual test runner to be a script handled
 	  by autoconf instead of make
+	* configure.ac: check for HAVE_MOUSEINTERVAL
 
 2019-06-16  Simon Sobisch <simonsobisch@gnu.org>
 

@@ -7,6 +7,9 @@
 	  increment line number by one, pass actual column
 	* screenio.c (get_cursor_from_program, cob_screen_get_all, field_accept):
 	  fix bug #579 - use CURSOR clause in SPECIAL-NAMES also for positioning
+	* screenio.c: finished approach to add mouse support via COB_MOUSE_FLAGS
+	* screenio.c, common.c, coblocal.h: added COB_MOUSE_INTERVAL
+
 
 2019-06-23  Simon Sobisch <simonsobisch@gnu.org>
 

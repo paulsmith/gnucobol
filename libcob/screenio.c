@@ -77,7 +77,13 @@
 extern void	_nc_freeall (void);
 #endif
 #ifdef NCURSES_MOUSE_VERSION
-static mmask_t 	cob_mask;	/* mask that is returned to COBOL */
+static mmask_t 	cob_mask_accept;	/* mask that is returned to COBOL ACCEPT */
+static mmask_t 	cob_mask_routine;	/* mask that is returned to COBOL routines (reserved) */
+#if defined BUTTON5_PRESSED	/* added in NCURSES_MOUSE_VERSION 2 */
+#define COB_HAS_MOUSEWHEEL 1
+#else
+#undef COB_HAS_MOUSEWHEEL
+#endif
 #endif
 
 struct cob_inp_struct {
@@ -123,7 +129,9 @@ static int			accept_cursor_x;
 static int			pending_accept;
 static int			got_sys_char;
 static unsigned int	curr_setting_insert_mode = INT_MAX;
-static unsigned int	curr_setting_mouse_flags = INT_MAX;
+#ifdef NCURSES_MOUSE_VERSION
+static int	curr_setting_mouse_flags = INT_MAX;
+#endif
 #endif
 
 /* Local function prototypes when screenio activated */
@@ -1317,31 +1325,37 @@ mouse_to_exception_code (mmask_t mask) {
 	else if (mask & BUTTON3_RELEASED) fret = 2048;
 	else if (mask & BUTTON3_DOUBLE_CLICKED) fret = 2048;
 	else if (mask & BUTTON3_TRIPLE_CLICKED) fret = 2048;
-#if defined BUTTON5_PRESSED	/* added in NCURSES_MOUSE_VERSION 2 */
+#if defined COB_HAS_MOUSEWHEEL
 	else if (mask & BUTTON4_PRESSED) fret = 2080;
 	else if (mask & BUTTON5_PRESSED) fret = 2081;
 #endif
 	else fret = 2040;	/* mouse-moved (assumed) */
 
+#if defined COB_HAS_MOUSEWHEEL
 	if (mask & BUTTON_SHIFT) {
 		if (fret < 2080) {
-			fret = fret + 10;
+			fret += 10;
 		} else {
-			fret = fret + 4;
+			fret += 4;
 		}
 	} else if (mask & BUTTON_CTRL) {
 		if (fret < 2080) {
-			fret = fret + 20;
+			fret += 20;
 		} else {
-			fret = fret + 8;
+			fret += 8;
 		}
 	} else if (mask & BUTTON_ALT) {
 		if (fret < 2080) {
-			fret = fret + 30;
+			fret += 30;
 		} else {
-			fret = fret + 12;
+			fret += 12;
 		}
 	}
+#else
+	if (mask & BUTTON_SHIFT) fret += 10;
+	else if (mask & BUTTON_CTRL) fret += 20;
+	else if (mask & BUTTON_ALT) fret += 12;
+#endif
 
 	return fret;
 }
@@ -1436,7 +1450,7 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 			   always translate to ENTER in SCREEN ACCEPT;
 			   exception: user requested control of this */
 			if (mevent.bstate & BUTTON1_DOUBLE_CLICKED
-			 && !(cob_mask & BUTTON1_DOUBLE_CLICKED)) {
+			 && !(cob_mask_accept & BUTTON1_DOUBLE_CLICKED)) {
 				keyp = KEY_ENTER;
 			}
 		}
@@ -1661,13 +1675,16 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 #ifdef NCURSES_MOUSE_VERSION
 		case KEY_MOUSE:
 			/* handle depending on state */
-			if (mevent.bstate & BUTTON1_PRESSED) {
+			if (mevent.bstate & BUTTON1_PRESSED
+			 && COB_MOUSE_FLAGS & 1) {
 				int fld_index = -1;
+				int mline = mevent.y;
+				int mcolumn = mevent.x;
 				/* if in current field, just move */
-				if (mevent.x == cline) {
-					if (mevent.y >= scolumn
-					 && mevent.y <= right_pos) {
-						ccolumn = mevent.y;
+				if (mline == cline) {
+					if (mcolumn >= scolumn
+					 && mcolumn <= right_pos) {
+						ccolumn = mcolumn;
 						cob_move_cursor (cline, ccolumn);
 						p = s->field->data + ccolumn - scolumn;
 						continue;
@@ -1675,18 +1692,17 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 				}
 				finalize_field_input (s);
 
-				fld_index = find_field_by_pos (initial_curs, mevent.x, mevent.y);
+				fld_index = find_field_by_pos (initial_curs, mline, mcolumn);
 				if (fld_index >= 0) {
 					curr_index = fld_index;
 					SET_FLD_AND_DATA_REFS (curr_index, sptr, s, sline, scolumn, right_pos, p);
 					at_eof = 0;
-					cob_move_cursor (sline, scolumn);
 					cob_screen_attr (s->foreg, s->backg, s->attr, ACCEPT_STATEMENT);
-					cob_move_cursor (mevent.x, mevent.y);
+					cob_move_cursor (mline, mcolumn);
 					continue;
 				}
 			}
-			mevent.bstate &= cob_mask;
+			mevent.bstate &= cob_mask_accept;
 			if (mevent.bstate != 0) {
 				global_return = mouse_to_exception_code (mevent.bstate);
 				goto screen_return;
@@ -2299,7 +2315,6 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	size_t		right_pos;
 	int		at_eof = 0;
 	unsigned char	move_char;      /* data shift character */
-	int		get_timeout;
 	int		status;
 	chtype		prompt_char;    /* prompt character */
 	chtype		default_prompt_char;
@@ -2339,14 +2354,6 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	}
 	init_cob_screen_if_needed ();
 
-	if (ftimeout) {
-		get_timeout = cob_get_int (ftimeout) * COB_TIMEOUT_SCALE;
-		if (get_timeout >= 0 && get_timeout < 500) {
-			get_timeout = 500;
-		}
-	} else {
-		get_timeout = -1;
-	}
 
 	if (fscroll) {
 		keyp = cob_get_int (fscroll);
@@ -2439,6 +2446,16 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	}
 	count = 0;
 
+	if (ftimeout) {
+		int get_timeout = cob_get_int (ftimeout) * COB_TIMEOUT_SCALE;
+		if (get_timeout >= 0 && get_timeout < 500) {
+			get_timeout = 500;
+		}
+		timeout (get_timeout);
+	} else {
+		timeout (-1);
+	}
+
 	/* Get characters from keyboard, processing each one. */
 	for (; ;) {
 		/* Show prompt characters. */
@@ -2498,7 +2515,6 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			refresh ();
 		}
 		errno = 0;
-		timeout (get_timeout);
 
 		/* Get a character. */
 		keyp = getch ();
@@ -2529,7 +2545,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			   always translate to ENTER in SCREEN ACCEPT;
 			   exception: user requested control of this */
 			if (mevent.bstate & BUTTON1_DOUBLE_CLICKED
-			 && !(cob_mask & BUTTON1_DOUBLE_CLICKED)) {
+			 && !(cob_mask_accept & BUTTON1_DOUBLE_CLICKED)) {
 				keyp = KEY_ENTER;
 			}
 		}
@@ -2824,12 +2840,15 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 #ifdef NCURSES_MOUSE_VERSION
 		case KEY_MOUSE:
 			/* handle depending on state */
-			if (mevent.bstate & BUTTON1_PRESSED) {
+			if (mevent.bstate & BUTTON1_PRESSED
+			 && COB_MOUSE_FLAGS & 1) {
+				int mline = mevent.y;
+				int mcolumn = mevent.x;
 				/* if in current field, just move */
-				if (mevent.x == cline) {
-					if (mevent.y >= scolumn
-					 && mevent.y <= right_pos) {
-						ccolumn = mevent.y;
+				if (mline == cline) {
+					if (mcolumn >= scolumn
+					 && mcolumn <= (int)right_pos) {
+						ccolumn = mcolumn;
 						cob_move_cursor (cline, ccolumn);
 						p = COB_TERM_BUFF + ccolumn - scolumn;
 						continue;
@@ -2837,7 +2856,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 				}
 				/* CHECKME: shouldn't we have a finalize here? */
 			}
-			mevent.bstate &= cob_mask;
+			mevent.bstate &= cob_mask_accept;
 			if (mevent.bstate != 0) {
 				fret = mouse_to_exception_code (mevent.bstate);
 				goto field_return;
@@ -3486,11 +3505,15 @@ cob_settings_screenio (void)
 		curr_setting_insert_mode = COB_INSERT_MODE;
 	}
 
+#ifdef HAVE_MOUSEINTERVAL
+	mouseinterval (COB_MOUSE_INTERVAL);
+#endif
 #ifdef NCURSES_MOUSE_VERSION
 	if (curr_setting_mouse_flags != COB_MOUSE_FLAGS) {
-		mmask_t 	mask;
+		mmask_t 	mask_applied = cob_mask_routine;
 		if (COB_MOUSE_FLAGS) {
-			/* note: currently missing in the accept handling:
+			/* COB_MOUSE_FLAGS & 1 --> auto-handling active
+			   note: currently missing in the accept handling:
 			   click+drag within a field to mark it (should be
 			   done in general when the SHIFT key + cursor is
 			   used) [shown by reverse-video those positions]
@@ -3498,48 +3521,49 @@ cob_settings_screenio (void)
 			   by typing removing them before adding the new ones
 			   remove marker when positioning key is used or
 			   mouse click into any field occurs */
-			cob_mask = 0;
+			if (COB_MOUSE_FLAGS & 1) {
+				mask_applied |= BUTTON1_PRESSED
+					/* note: not done by ACUCOBOL (ENTER translation): */
+					| BUTTON1_DOUBLE_CLICKED
+					;
+				}
+			}
 			if (COB_MOUSE_FLAGS & 2) {
-				cob_mask |= BUTTON1_PRESSED;
+				cob_mask_accept |= BUTTON1_PRESSED;
 			}
 			if (COB_MOUSE_FLAGS & 4) {
-				cob_mask |= BUTTON1_RELEASED;
+				cob_mask_accept |= BUTTON1_RELEASED;
 			}
 			if (COB_MOUSE_FLAGS & 8) {
-				cob_mask |= BUTTON1_DOUBLE_CLICKED;
+				cob_mask_accept |= BUTTON1_DOUBLE_CLICKED;
 			}
 			if (COB_MOUSE_FLAGS & 16) {
-				cob_mask |= BUTTON2_PRESSED;
+				cob_mask_accept |= BUTTON2_PRESSED;
 			}
 			if (COB_MOUSE_FLAGS & 32) {
-				cob_mask |= BUTTON2_RELEASED;
+				cob_mask_accept |= BUTTON2_RELEASED;
 			}
 			if (COB_MOUSE_FLAGS & 64) {
-				cob_mask |= BUTTON2_DOUBLE_CLICKED;
+				cob_mask_accept |= BUTTON2_DOUBLE_CLICKED;
 			}
 			if (COB_MOUSE_FLAGS & 128) {
-				cob_mask |= BUTTON3_PRESSED;
+				cob_mask_accept |= BUTTON3_PRESSED;
 			}
 			if (COB_MOUSE_FLAGS & 256) {
-				cob_mask |= BUTTON3_RELEASED;
+				cob_mask_accept |= BUTTON3_RELEASED;
 			}
 			if (COB_MOUSE_FLAGS & 512) {
-				cob_mask |= BUTTON3_DOUBLE_CLICKED;
+				cob_mask_accept |= BUTTON3_DOUBLE_CLICKED;
 			}
 			if (COB_MOUSE_FLAGS & 1024) {
-				cob_mask |= REPORT_MOUSE_POSITION;
+				cob_mask_accept |= REPORT_MOUSE_POSITION;
 			}
 			/* 2048 cursor shape, seems irrelevant
 			   16384 all windows,
 			   only relevant when adding multiple windows */
-			mask = cob_mask | BUTTON1_PRESSED
-				/* note: not done by ACUCOBOL (ENTER translation): */
-				|| BUTTON1_DOUBLE_CLICKED
-				;
-		} else {
-			mask = 0;
+			mask_applied |= cob_mask_accept;
 		}
-		mousemask (mask, NULL);
+		mousemask (mask_applied, NULL);
 		curr_setting_mouse_flags = COB_MOUSE_FLAGS;
 	}
 #endif

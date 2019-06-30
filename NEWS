@@ -28,6 +28,9 @@ NEWS - user visible changes				-*- outline -*-
    The external file handler can also be directly invoked from COBOL, too,
    using `CALL "EXTFH"`.
    ** Note: Not all flags contained in the FCD3 are handled already **
+   
+** screen i/o: initial mouse support (for details see runtime.cfg),
+   use of CURSOR clause in SPECIAL-NAMES for positioning on ACCEPT
 
 
 * Removed functions
