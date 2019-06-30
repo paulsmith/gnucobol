@@ -1674,12 +1674,13 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 
 #ifdef NCURSES_MOUSE_VERSION
 		case KEY_MOUSE:
+		{
+			int mline = mevent.y;
+			int mcolumn = mevent.x;
 			/* handle depending on state */
 			if (mevent.bstate & BUTTON1_PRESSED
 			 && COB_MOUSE_FLAGS & 1) {
 				int fld_index = -1;
-				int mline = mevent.y;
-				int mcolumn = mevent.x;
 				/* if in current field, just move */
 				if (mline == cline) {
 					if (mcolumn >= scolumn
@@ -1705,9 +1706,11 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 			mevent.bstate &= cob_mask_accept;
 			if (mevent.bstate != 0) {
 				global_return = mouse_to_exception_code (mevent.bstate);
+				cob_move_cursor (mline, mcolumn);	// move cursor to pass position
 				goto screen_return;
 			}
 			continue;
+		}
 #endif
 		default:
 			break;
@@ -2839,11 +2842,12 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			
 #ifdef NCURSES_MOUSE_VERSION
 		case KEY_MOUSE:
+		{
+			int mline = mevent.y;
+			int mcolumn = mevent.x;
 			/* handle depending on state */
 			if (mevent.bstate & BUTTON1_PRESSED
 			 && COB_MOUSE_FLAGS & 1) {
-				int mline = mevent.y;
-				int mcolumn = mevent.x;
 				/* if in current field, just move */
 				if (mline == cline) {
 					if (mcolumn >= scolumn
@@ -2859,9 +2863,11 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			mevent.bstate &= cob_mask_accept;
 			if (mevent.bstate != 0) {
 				fret = mouse_to_exception_code (mevent.bstate);
+				cob_move_cursor (mline, mcolumn);	// move cursor to pass position
 				goto field_return;
 			}
 			continue;
+		}
 #endif
 		default:
 			break;
