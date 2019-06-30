@@ -3526,7 +3526,6 @@ cob_settings_screenio (void)
 					/* note: not done by ACUCOBOL (ENTER translation): */
 					| BUTTON1_DOUBLE_CLICKED
 					;
-				}
 			}
 			if (COB_MOUSE_FLAGS & 2) {
 				cob_mask_accept |= BUTTON1_PRESSED;
