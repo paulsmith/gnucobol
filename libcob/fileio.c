@@ -608,6 +608,7 @@ extern int extfh_relative_delete	(cob_file *);
 #ifdef	WITH_DB
 
 static DB_ENV		*bdb_env = NULL;
+static char		*bdb_home_dir = NULL;
 static char		*bdb_buff = NULL;
 static const char	**bdb_data_dir = NULL;
 static void		*record_lock_object = NULL;
@@ -4884,6 +4885,8 @@ join_environment (void)
 		/* But prevents the BDB control files from being created */
 		return;
 	}
+	if(cobsetptr->bdb_home)
+		bdb_home_dir = cob_strdup(cobsetptr->bdb_home);
 	ret = db_env_create (&bdb_env, 0);
 	if (ret) {
 		cob_runtime_error (_("cannot join BDB environment (%s), error: %d %s"),
@@ -9602,6 +9605,13 @@ cob_exit_fileio (void)
 		bdb_env->lock_vec (bdb_env, bdb_lock_id, 0, lckreq, 1, NULL);
 		bdb_env->lock_id_free (bdb_env, bdb_lock_id);
 		bdb_env->close (bdb_env, 0);
+		if (bdb_home_dir != NULL
+		 && db_env_create (&bdb_env, 0) == 0) {
+			bdb_env->remove (bdb_env, bdb_home_dir, 0);
+		}
+		if(bdb_home_dir)
+			cob_free(bdb_home_dir);
+		bdb_home_dir = NULL;
 		bdb_env = NULL;
 	}
 	if (record_lock_object) {

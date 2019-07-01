@@ -1,4 +1,10 @@
 
+2019-07-01  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Use DB_ENV->remove to clean up the BDB environment in
+	cob_exit_fileio. This make test cases using INDEXED files repeatable with
+	DB_HOME defined and/or defaulting to "./"
+
 2019-06-24  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Fixed to check file_features for COB_FILE_SYNC flag and then
