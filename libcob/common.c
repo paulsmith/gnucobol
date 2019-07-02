@@ -423,7 +423,8 @@ static struct config_tbl gc_conf[] = {
 
 /* Local functions */
 static int		translate_boolean_to_int	(const char* ptr);
-static cob_s64_t	get_sleep_nanoseconds	(cob_field *decimal_seconds);
+static cob_s64_t	get_sleep_nanoseconds	(cob_field *nano_seconds);
+static cob_s64_t	get_sleep_nanoseconds_from_seconds	(cob_field *decimal_seconds);
 static void		internal_nanosleep	(cob_s64_t nsecs);
 
 static int		set_config_val	(char *value, int pos);
@@ -4206,7 +4207,7 @@ cob_chain_setup (void *data, const size_t parm, const size_t size)
 void
 cob_continue_after (cob_field *decimal_seconds)
 {
-	cob_s64_t	nanoseconds = get_sleep_nanoseconds (decimal_seconds);
+	cob_s64_t	nanoseconds = get_sleep_nanoseconds_from_seconds (decimal_seconds);
 
 	if (nanoseconds < 0) {
 		/* TODO: current COBOL 20xx change proposal
@@ -5053,8 +5054,26 @@ cob_sys_tolower (void *p1, const int length)
 	return 0;
 }
 
+/* maximúm sleep time in seconds, currently 7 days */
+#define MAX_SLEEP_TIME 3600*24*7
+
 static cob_s64_t
-get_sleep_nanoseconds (cob_field *decimal_seconds) {
+get_sleep_nanoseconds (cob_field *nano_seconds) {
+
+	cob_s64_t	nanoseconds = cob_get_llint (nano_seconds);
+
+	if (nanoseconds < 0) {
+		return -1;
+	}
+	if (nanoseconds >= ((cob_s64_t)MAX_SLEEP_TIME * 1000000000)) {
+		return (cob_s64_t)MAX_SLEEP_TIME * 1000000000;
+	} else {;
+		return nanoseconds;
+	}
+}
+
+static cob_s64_t
+get_sleep_nanoseconds_from_seconds (cob_field *decimal_seconds) {
 
 #define MAX_SLEEP_TIME 3600*24*7
 	cob_s64_t	seconds = cob_get_llint (decimal_seconds);
@@ -5064,7 +5083,7 @@ get_sleep_nanoseconds (cob_field *decimal_seconds) {
 	}
 	if (seconds >= MAX_SLEEP_TIME) {
 		return (cob_s64_t)MAX_SLEEP_TIME * 1000000000;
-	} else {
+} else {
 		cob_s64_t	nanoseconds;
 		cob_field	temp;
 		temp.size = 8;
@@ -5134,7 +5153,7 @@ cob_sys_sleep (const void *data)
 
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
 		cob_s64_t	nanoseconds
-			= get_sleep_nanoseconds (COB_MODULE_PTR->cob_procedure_params[0]);
+			= get_sleep_nanoseconds_from_seconds (COB_MODULE_PTR->cob_procedure_params[0]);
 		if (nanoseconds < 0) {
 			/* ACUCOBOL specifies a runtime error here... */
 			return -1;
@@ -6091,7 +6110,7 @@ set_config_val (char *value, int pos)
 		 || *ptr == '+') {
 			if ((data_type & ENV_SINT) == 0) {
 				conf_runtime_error_value (ptr, pos);
-				conf_runtime_error (1, _("should be unsigned"));
+				conf_runtime_error (1, _("should be unsigned")); // cob_runtime_warning
 				return 1;
 			}
 			sign = *ptr;

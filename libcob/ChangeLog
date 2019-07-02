@@ -1,4 +1,9 @@
 
+2019-07-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_sys_oc_nanosleep): fixed by splitting get_sleep_nanoseconds
+	  into an additional function get_sleep_nanoseconds_from_seconds
+
 2019-06-30  Simon Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c: split cob_check_pos_status into handle_status and
@@ -9,7 +14,6 @@
 	  fix bug #579 - use CURSOR clause in SPECIAL-NAMES also for positioning
 	* screenio.c: finished approach to add mouse support via COB_MOUSE_FLAGS
 	* screenio.c, common.c, coblocal.h: added COB_MOUSE_INTERVAL
-
 
 2019-06-23  Simon Sobisch <simonsobisch@gnu.org>
 
