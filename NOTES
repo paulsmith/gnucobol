@@ -1,4 +1,35 @@
 
+FIXME (issues open in both pangaea and trunk):
+* odoslide should very likely be moved from flag.def to config.def
+* runtime checks for out-of-bounds ref-mod and subscript access must be recompared and
+  likely adjusted with -std=ibm, maybe also for =mf, at least with -fodoslide as the use
+  of "invalid" subscripts (less then min, more than max) is actually one of the use-cases
+  of -fodoslide - instead of the hard subscript check check for real_field_founder's
+  bounds
+* locking tests are still skipped because of timing issues
+
+TODO (things to clean):
+COB_MF_FILES (conflicts with other settings), COB_MF_LS_NULLS + COB_MF_LS_SPLIT (can be set
+              globally via non-MF version and always per file)
+-fmf-files
+    * _discussion_: if used then the file attributes should be passed
+      in the generated program [we don't want to break files when extending
+      the handling of the matching file flags)
+    * if used the file can "magically" only be adjusted by IO_filename,
+      while all others are pre-set by "general flags"
+    * if used then should also be available for GC22 (the last place where the flags
+      where adjusted: -ffix-file-format=mf,gc22)
+    --> better: add a dialect flag for each option (varrel,fixrel,...)
+    This would leave the "common runtime settings" to programs compiled with an older version
+    and only be possible to override by manual setting.
+
+---more to come---
+
+tree.c: SET_SOURCE_CB  --> change to inline function
+
+-------------------------------------------------------------
+Merge notes jkl (to be removed later) after file comparisions
+
 r506
 --- Merging r506 into '.':
 U    cobc/codegen.c   (declined)

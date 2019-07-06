@@ -14423,7 +14423,7 @@ $COBCRUN_DIRECT ./prog], [1],
 [X is 000000001
 X is 000005441
 ],
-[libcob: cpyabrt:4:  error: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
+[libcob: cpyabrt:4: error: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
 libcob: cpyabrt:4: warning: implicit CLOSE of FLATFILE ('RELFIX')
 ])
 
@@ -14559,7 +14559,7 @@ $COBCRUN_DIRECT ./prog_fdls], [1],
 [X is 000000001
 X is 000005441
 ],
-[libcob: cpyabrt:4: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
+[libcob: cpyabrt:4: error: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
 libcob: cpyabrt:4: warning: implicit CLOSE of FLATFILE ('RELFIX')
 ])
 
