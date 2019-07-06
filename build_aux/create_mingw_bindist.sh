@@ -39,14 +39,13 @@ fi
 if test "x$EXTSRCDIR" = "x"; then
 	EXTSRCDIR="."
 	echo "EXTSRCDIR" not set, "." assumed
-	exit 1
 fi
-if test ! -d "$EXTBUILDDIR"; then
-	echo "$EXTBUILDDIR" does not exist, aborting $0
+if test ! -f "$EXTBUILDDIR/config.log"; then
+	echo "$EXTBUILDDIR/config.log" does not exist, aborting $0
 	exit 5
 fi
-if test ! -d "$EXTSRCDIR"; then
-	echo "$EXTSRCDIR" does not exist, aborting $0
+if test ! -f "$EXTSRCDIR/configure"; then
+	echo "$EXTSRCDIR/configure" does not exist, aborting $0
 	exit 5
 fi
 
