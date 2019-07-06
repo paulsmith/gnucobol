@@ -21,7 +21,6 @@
 
 #ifndef COB_COMMON_H
 #define COB_COMMON_H
-#include <stdio.h> 
 
 /* General type defines */
 #define	cob_c8_t		char
@@ -2453,11 +2452,10 @@ typedef struct {
 /*******************************/
 /* Functions in termio.c */
 
-COB_EXPIMP void cob_display(const int, const int, const int, ...);
-COB_EXPIMP void cob_dump_field (const int, const char *, cob_field *, const int, const int, ...);
-COB_EXPIMP void cob_print_field (FILE *, cob_field *, int, int );
-COB_EXPIMP void cob_accept(cob_field *);
-COB_EXPIMP void cob_field_int_display (cob_field *i, cob_field *f);
+COB_EXPIMP void cob_display	(const int, const int, const int, ...);
+COB_EXPIMP void cob_dump_field	(const int, const char *, cob_field *, const int, const int, ...);
+COB_EXPIMP void cob_accept	(cob_field *);
+COB_EXPIMP void cob_field_int_display	(cob_field *i, cob_field *f);
 
 /*******************************/
 /* Functions in fileio.c */

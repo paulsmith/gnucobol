@@ -971,20 +971,20 @@ cob_write_dict (cob_file *f, char *filename)
 			fprintf(fo,",fixed");
 	}
 	fprintf(fo," ");
-	fprintf(fo,"recsz=%d ",f->record_max);
+	fprintf(fo,"recsz=%ld ",f->record_max);
 	if(f->record_min != f->record_max)
-		fprintf(fo,"minsz=%d ",f->record_min);
+		fprintf(fo,"minsz=%ld ",f->record_min);
 
 	if (f->organization == COB_ORG_INDEXED) {
 		/* Write Key information from cob_file */
-		fprintf(fo,"nkeys=%d ",f->nkeys);
+		fprintf(fo,"nkeys=%ld ",f->nkeys);
 		for(idx=0; idx < f->nkeys; idx++) {
 			fprintf(fo,"key%d=(",idx+1);
 			if(f->keys[idx].count_components <= 1) {
-				fprintf(fo,"%d:%d",f->keys[idx].offset,f->keys[idx].field->size);
+				fprintf(fo,"%d:%ld",f->keys[idx].offset,f->keys[idx].field->size);
 			} else {
 				for(k=0; k < f->keys[idx].count_components; k++) {
-					fprintf(fo,"%d:%d",f->keys[idx].component[k]->data - f->record->data,
+					fprintf(fo,"%ld:%ld",f->keys[idx].component[k]->data - f->record->data,
 										f->keys[idx].component[k]->size);
 					if(k+1 < f->keys[idx].count_components)
 						fprintf(fo,",");
@@ -1059,7 +1059,7 @@ cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
 	char	inpdd[513], ddbuf[1024], *p, wrd[16], p1[16], p2[16];
 	unsigned char subchr;
 	FILE	*fi;
-	int		k, idx, line, sts, ret;
+	int		idx, line, sts, ret;
 	int		nkeys, keyn, part, loc, len;
 
 	sprintf(inpdd,"%s.%s",filename,dict_ext);
@@ -1372,7 +1372,7 @@ cob_chk_file_mapping (cob_file *f)
 		}
 		/* Check for DD_xx, dd_xx, xx environment variables */
 		/* If not found, use as is including the dollar character */
-		if ((p = cob_chk_file_env (f,src)) != NULL) {
+		if ((p = cob_chk_file_env (f, src)) != NULL) {
 			strncpy (file_open_name, p, (size_t)COB_FILE_MAX);
 		} else if (file_paths) {
 			for(k=0; file_paths[k] != NULL; k++) {
@@ -1434,7 +1434,7 @@ cob_chk_file_mapping (cob_file *f)
 		file_open_buff[COB_FILE_MAX] = 0;
 		p = strtok (orig, "/\\");
 		orig = NULL;
-		if ((src = cob_chk_file_env (f,p)) != NULL) {
+		if ((src = cob_chk_file_env (f, p)) != NULL) {
 			strncpy (file_open_buff, src, (size_t)COB_FILE_MAX);
 			dollar = 0;
 		} else if (!dollar) {
@@ -1458,7 +1458,7 @@ cob_chk_file_mapping (cob_file *f)
 		} else {
 			orig = NULL;
 		}
-		if (*p == '$' && (src = cob_chk_file_env (f,p + 1)) != NULL) {
+		if (*p == '$' && (src = cob_chk_file_env (f, p + 1)) != NULL) {
 			strncat (file_open_buff, src, (size_t)COB_FILE_MAX);
 		} else {
 			strncat (file_open_buff, p, (size_t)COB_FILE_MAX);
@@ -3177,7 +3177,7 @@ cob_file_close (cob_file *f, const int opt)
 		/* meaning (not file-sharing related):
 		   file may not be opened in *this runtime unit* again */
 		/* TODO: set flag here */
-		/* fall-thru */
+		/* Fall through */
 	case COB_CLOSE_NORMAL:
 	case COB_CLOSE_NO_REWIND:
 		if (f->organization == COB_ORG_LINE_SEQUENTIAL) {

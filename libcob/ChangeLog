@@ -1,4 +1,9 @@
 
+2019-07-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.h: removed inclusion of stdio.h
+	* common.h, coblocal.h: moved definition of cob_print_field to local
+
 2019-07-01  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Use DB_ENV->remove to clean up the BDB environment in
