@@ -17,7 +17,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 copydir = @COB_COPY_DIR@
 copy_DATA = screenio.cpy sqlca.cpy sqlda.cpy xfhfcd.cpy xfhfcd3.cpy

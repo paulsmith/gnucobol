@@ -1,6 +1,7 @@
 /*
-   Copyright (C) 2002-2012, 2014-2017 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
+   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
+   Edwart Hard
 
    This file is part of GnuCOBOL.
 
@@ -15,11 +16,11 @@
    GNU Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,7 +36,6 @@
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
-
 #include "libcob.h"
 #include "coblocal.h"
 
@@ -128,7 +128,7 @@ store_common_region (cob_field *f, const unsigned char *data,
 	gcf = cob_min_int (hf1, hf2);
 	memset (COB_FIELD_DATA (f), '0', COB_FIELD_SIZE (f));
 	if (gcf > lcf) {
-		csize = (size_t)(gcf - lcf);
+		csize = (size_t)gcf - lcf;
 		p = data + hf1 - gcf;
 		q = COB_FIELD_DATA (f) + hf2 - gcf;
 		for (cinc = 0; cinc < csize; ++cinc, ++p, ++q) {
@@ -495,12 +495,12 @@ cob_move_packed_to_display (cob_field *f1, cob_field *f2)
 
 	/* Unpack string */
 	data = f1->data;
+	offset = COB_FIELD_DIGITS(f1) % 2;
 	if (COB_FIELD_NO_SIGN_NIBBLE (f1)) {
 		sign = 0;
-		offset = COB_FIELD_DIGITS(f1) % 2;
 	} else {
 		sign = cob_packed_get_sign (f1);
-		offset = 1 - (COB_FIELD_DIGITS(f1) % 2);
+		offset = 1 - offset;
 	}
 	for (i = offset; i < COB_FIELD_DIGITS(f1) + offset; ++i) {
 		if (i % 2 == 0) {
@@ -651,7 +651,7 @@ cob_move_binary_to_display (cob_field *f1, cob_field *f2)
 	}
 
 	/* Store */
-	store_common_region (f2, (cob_u8_ptr)buff + i, (size_t)(20 - i),
+	store_common_region (f2, (cob_u8_ptr)buff + i, (size_t)20 - i,
 		COB_FIELD_SCALE(f1));
 
 	COB_PUT_SIGN (f2, sign);
@@ -1183,8 +1183,9 @@ cob_move_ibm (void *dst, void *src, const int len)
 	char	*dest = dst;
 	char	*srce = src;
 	int	i;
-	for(i=0; i < len; i++)
+	for (i=0; i < len; i++) {
 		dest[i] = srce[i];
+	}
 }
 
 void
@@ -1214,16 +1215,16 @@ cob_move (cob_field *src, cob_field *dst)
 	}
 
 	/* Non-elementary move */
-	if (COB_FIELD_TYPE (src) == COB_TYPE_GROUP ||
-	    COB_FIELD_TYPE (dst) == COB_TYPE_GROUP) {
+	if (COB_FIELD_TYPE (src) == COB_TYPE_GROUP
+	 || COB_FIELD_TYPE (dst) == COB_TYPE_GROUP) {
 		cob_move_alphanum_to_alphanum (src, dst);
 		return;
 	}
 
 	opt = 0;
 	if (COB_FIELD_TYPE (dst) == COB_TYPE_NUMERIC_BINARY) {
-		if (COB_FIELD_BINARY_TRUNC (dst) &&
-		    !COB_FIELD_REAL_BINARY(dst)) {
+		if (COB_FIELD_BINARY_TRUNC (dst)
+		 && !COB_FIELD_REAL_BINARY (dst)) {
 			opt = COB_STORE_TRUNC_ON_OVERFLOW;
 		}
 	}
@@ -1255,12 +1256,12 @@ cob_move (cob_field *src, cob_field *dst)
 			cob_move_display_to_edited (src, dst);
 			return;
 		case COB_TYPE_ALPHANUMERIC_EDITED:
-			if (COB_FIELD_SCALE(src) < 0 ||
-			    COB_FIELD_SCALE(src) > COB_FIELD_DIGITS(src)) {
+			if (COB_FIELD_SCALE (src) < 0
+			 || COB_FIELD_SCALE (src) > COB_FIELD_DIGITS (src)) {
 				/* Expand P's */
 				indirect_move (cob_move_display_to_display, src, dst,
-					      (size_t)cob_max_int ((int)COB_FIELD_DIGITS(src), (int)COB_FIELD_SCALE(src)),
-					      cob_max_int (0, (int)COB_FIELD_SCALE(src)));
+						(size_t)cob_max_int ((int)COB_FIELD_DIGITS(src), (int)COB_FIELD_SCALE(src)),
+						cob_max_int (0, (int)COB_FIELD_SCALE(src)));
 				return;
 			} else {
 				cob_move_alphanum_to_edited (src, dst);
@@ -1322,13 +1323,13 @@ cob_move (cob_field *src, cob_field *dst)
 			return;
 		case COB_TYPE_NUMERIC_EDITED:
 			indirect_move (cob_move_binary_to_display, src, dst,
-				       (size_t)COB_MAX_DIGITS,
-				       COB_FIELD_SCALE(src));
+					(size_t)COB_MAX_DIGITS,
+					COB_FIELD_SCALE(src));
 			return;
 		default:
 			indirect_move (cob_move_binary_to_display, src, dst,
-				       (size_t)(COB_FIELD_DIGITS(src)),
-				       COB_FIELD_SCALE(src));
+					(size_t)(COB_FIELD_DIGITS(src)),
+					COB_FIELD_SCALE(src));
 			return;
 		}
 
@@ -1603,12 +1604,12 @@ cob_packed_get_int (cob_field *f1)
 	int		sign;
 
 	data = f1->data;
+	offset = COB_FIELD_DIGITS(f1) % 2;
 	if (COB_FIELD_NO_SIGN_NIBBLE (f1)) {
 		sign = 0;
-		offset = COB_FIELD_DIGITS(f1) % 2;
 	} else {
 		sign = cob_packed_get_sign (f1);
-		offset = 1 - (COB_FIELD_DIGITS(f1) % 2);
+		offset = 1 - offset;
 	}
 	for (i = offset; i < COB_FIELD_DIGITS(f1) - COB_FIELD_SCALE(f1) + offset; ++i) {
 		val *= 10;
@@ -1630,18 +1631,20 @@ cob_packed_get_long_long (cob_field *f1)
 	unsigned char	*data;
 	size_t		i;
 	size_t		offset;
+	size_t		field_data;
 	cob_s64_t	val = 0;
 	int		sign;
 
 	data = f1->data;
+	offset = COB_FIELD_DIGITS(f1) % 2;
 	if (COB_FIELD_NO_SIGN_NIBBLE (f1)) {
 		sign = 0;
-		offset = COB_FIELD_DIGITS(f1) % 2;
 	} else {
 		sign = cob_packed_get_sign (f1);
-		offset = 1 - (COB_FIELD_DIGITS(f1) % 2);
+		offset = 1 - offset;
 	}
-	for (i = offset; i < COB_FIELD_DIGITS(f1) - COB_FIELD_SCALE(f1) + offset; ++i) {
+	field_data = COB_FIELD_DIGITS(f1) - COB_FIELD_SCALE(f1);
+	for (i = offset; i < field_data + offset; ++i) {
 		val *= 10;
 		if (i % 2 == 0) {
 			val += data[i / 2] >> 4;

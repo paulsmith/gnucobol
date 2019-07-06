@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Dave Pitts
 
    This file is part of GnuCOBOL.
@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
@@ -73,7 +73,7 @@ static int ppwrap (void) {
 	requires_listing_line = 1;					\
 	comment_allowed = 1;
 
-#include "config.h"
+#include <config.h>
 
 #ifdef	HAVE_UNISTD_H
 #include <unistd.h>
@@ -87,7 +87,7 @@ static int ppwrap (void) {
 #define	COB_IN_PPLEX	1
 #include "cobc.h"
 #include "tree.h"
-#include "ppparse.h"
+#include <ppparse.h>
 
 /* ignore unused functions here as flex generates unused ones */
 #ifdef	__GNUC__
@@ -307,6 +307,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 			_("ignoring invalid directive: '%s'"), s);
 	skip_to_eol ();
 }
+
 ^[ ]*">>"		{
 	/* unknown 2002+ style directive */
 	cb_plex_warning (COBC_WARN_FILLER, newline_count,
@@ -956,6 +957,9 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 		ppin = stdin;
 	} else {
 		for (current_copy_info = copy_stack; current_copy_info; current_copy_info = current_copy_info->next) {
+			// FIXME: for WIN32 compare with cleaning / and \ (COPY "lib/file" vs COPY "lib\file"),
+			//        ideally open first, then check if we have thy physical same file
+			//        (could also fix symlinked files)
 			if (!strcmp (name, current_copy_info->dname)) {
 				x = cobc_malloc (sizeof (struct cb_tree_common));
 				x->source_file = name;
@@ -1069,7 +1073,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 
 	/* Locate and open COPY file */
 	if (lib) {
-		snprintf (plexbuff1, (size_t)COB_SMALL_MAX, "%s/%s", lib, name);
+		snprintf (plexbuff1, (size_t)COB_SMALL_MAX, "%s%c%s", lib, SLASH_CHAR, name);
 		plexbuff1[COB_SMALL_MAX] = 0;
 		s = plexbuff1;
 	} else {
@@ -1092,12 +1096,15 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 			goto err_handling;	/* LCOV_EXCL_LINE */
 		}
 	}
-
-	if (*s != '/') {
+#if defined (_WIN32) || defined (__DJGPP__)
+	if (*s != SLASH_CHAR && *s != '/' && *(s + 1) != ':') {
+#else
+	if (*s != SLASH_CHAR) {
+#endif
 		for (il = cb_include_list; il; il = il->next) {
 			for (el = cb_extension_list; el; el = el->next) {
 				snprintf (plexbuff2, (size_t)COB_SMALL_MAX,
-					  "%s/%s%s", il->text, name, el->text);
+					  "%s%c%s%s", il->text, SLASH_CHAR, name, el->text);
 				plexbuff2[COB_SMALL_MAX] = 0;
 				if (access (plexbuff2, R_OK) == 0) {
 					ret = ppopen (plexbuff2, replace_list);
@@ -1108,6 +1115,8 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 		}
 	}
 
+	/* ensure to have original errno, not the one from another file */
+	(void)access (s, R_OK);
 	/* pass file error as we have no more places to check */
 	cb_error ("%s: %s", s, cb_get_strerror ());
 
@@ -1271,7 +1280,7 @@ set_print_replace_list (struct cb_replace_list *list)
 	struct cb_replace_list		*r;
 	const struct cb_text_list	*l;
 	struct list_replace		*repl;
-	int 				length;
+	size_t				length;
 
 	for (r = list; r; r = r->next) {
 		repl = cobc_malloc (sizeof (struct list_replace));
@@ -1280,7 +1289,7 @@ set_print_replace_list (struct cb_replace_list *list)
 		repl->lastline = cb_source_line;
 
 		for (l = r->old_text, length = 0; l; l = l->next) {
-			length += (int)strlen (l->text);
+			length += strlen (l->text);
 		}
 		repl->from = cobc_malloc (length + 2);
 		for (l = r->old_text; l; l = l->next) {
@@ -1288,7 +1297,7 @@ set_print_replace_list (struct cb_replace_list *list)
 		}
 
 		for (l = r->new_text, length = 0; l; l = l->next) {
-			length += (int)strlen (l->text);
+			length += strlen (l->text);
 		}
 		repl->to = cobc_malloc (length + 2);
 		for (l = r->new_text; l; l = l->next) {
@@ -1467,7 +1476,8 @@ start:
 						 _("line not terminated by a newline"));
 			} else if (line_overflow == 2) {
 				cb_plex_warning (COBC_WARN_FILLER, newline_count + 1,
-						 _("source text exceeds %d bytes, will be truncated"), PPLEX_BUFF_LEN);
+						 _("source text exceeds %d bytes, will be truncated"),
+						   PPLEX_BUFF_LEN);
 			}
 		} else {
 			if (line_overflow == 0) {
@@ -1475,12 +1485,32 @@ start:
 						 _("line not terminated by a newline"));
 			} else if (line_overflow == 2) {
 				cb_plex_warning (COBC_WARN_FILLER, newline_count,
-						 _("source text exceeds %d bytes, will be truncated"), PPLEX_BUFF_LEN);
+						 _("source text exceeds %d bytes, will be truncated"),
+						   PPLEX_BUFF_LEN);
 			}
 		}
 		buff[n++] = '\n';
 	}
 	buff[n] = 0;
+
+	/* check for vcs conflict marker */
+	if (n == 8 || (n > 8 && isspace(buff[7]))) {
+		if (memcmp("<<<<<<<", buff, 7) == 0
+		 || memcmp("=======", buff, 7) == 0
+		 || memcmp(">>>>>>>", buff, 7) == 0) {
+			/* FIXME: the different line numbers (see test "conflict markers" 
+			   are definitely a bug to solve in short time */
+			if (cb_source_format == CB_FORMAT_FREE) {
+				++newline_count;
+			}
+			cb_plex_error (newline_count,
+			_("version control conflict marker in file"));
+			if (cb_source_format != CB_FORMAT_FREE) {
+				++newline_count;
+			}
+			goto start;
+		}
+	}
 
 	if (cb_source_format == CB_FORMAT_FREE) {
 		bp = buff;
@@ -1559,7 +1589,7 @@ start:
 		/* Directive - pass complete line with NL to ppparse */
 		if (newline_count) {
 			/* Move including NL and NULL byte */
-			memmove (buff + newline_count, buff, (size_t)(n + 1));
+			memmove (buff + newline_count, buff, (size_t)n + 1);
 			memset (buff, '\n', newline_count);
 			n += newline_count;
 			newline_count = 0;
@@ -1623,7 +1653,7 @@ start:
 	if (cb_source_format == CB_FORMAT_FREE) {
 		within_comment = 0;
 		if (newline_count) {
-			memmove (buff + newline_count, buff, (size_t)(n + 1));
+			memmove (buff + newline_count, buff, (size_t)n + 1);
 			memset (buff, '\n', newline_count);
 			n += newline_count;
 			newline_count = 0;
@@ -1666,8 +1696,9 @@ start:
 		/* Invalid indicator */
 		cb_plex_error (newline_count,
 				_("invalid indicator '%c' at column 7"), buff[6]);
+		/* Note: Treat as comment line to allow further parsing
+		         instead of aborting compilation */
 		newline_count++;
-		/* Treat as comment line instead of aborting compilation */
 		goto start;
 	}
 

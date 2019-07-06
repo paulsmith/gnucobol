@@ -24,13 +24,13 @@ This package contains the following subdirectories:
     po          International messages
     doc         'info' and 'pdf' files
     tests       Test suite (GnuCOBOL and framework for COBOL85)
-    extras      useful COBOL programs 
+    extras      useful COBOL programs
 
 All programs except those in lib and libcob are distributed under
 the GNU General Public License.  See COPYING for details.
 
 Programs in lib and libcob are distributed under the GNU Lesser
-General Public License.  See COPYING.LESSER for details. 
+General Public License.  See COPYING.LESSER for details.
 
 For any copyright year range specified as YYYY-ZZZZ in this package,
 that the range specifies every single year in that closed interval.
@@ -140,7 +140,7 @@ The following libraries ARE required WHEN :
     Ncurses is distributed under a BSD style license.
 
   o PDCurses (pdcurses) for MinGW/native windows ports
-    http://pdcurses.org/ or https://github.com/Bill-Gray/PDCurses/
+    https://pdcurses.org/ or https://github.com/Bill-Gray/PDCurses/
 
     PDCurses is distributed as Public Domain.
 
@@ -157,6 +157,9 @@ The following libraries ARE required WHEN :
 4) JSON runtime support is used
 
     BOTH runtime AND development components required.
+    As an alternative of an installed version you may place
+    cJSON.c and cJSON.h under "libcob" to include the used functions
+    directly in the COBOL runtime.
 
     cJSON >= 1.3.0 - https://github.com/DaveGamble/cJSON
 
@@ -210,7 +213,7 @@ To generate/install GnuCOBOL :
 ** NOTE **
    On some Red Hat (Fedora) installations and
    possibly other Linux distros, /usr/local/lib
-   is NOT automatically searched at runtime. 
+   is NOT automatically searched at runtime.
    Edit /etc/ld.so.conf (or the equivalent file) and add
    /usr/local/lib to the file.
    Rerun "ldconfig".
@@ -245,15 +248,14 @@ Tests
 
 ** NOTE **
    The language interpreter "perl" is required to run COBOL85 tests.
-   If you build in Cygwin/MSYS you must use a Cygwin/MSYS version of perl.
- 
+
 ** NOTE **
    Running "make test" will try to download the COBOL85
    testsuite if it is missing.
    For details see tests/cobol85/README.
 
  If you want to run both testsuites you can run
-    make checkall 
+    make checkall
 
 
 ============
@@ -265,53 +267,53 @@ options.
 There are many configure options (see configure --help for a full list),
 these are the most important ones:
 
-  --with-db			Use Berkeley DB >= 4.1 (libdb) (ISAM handler)
-				This is the default
+   --with-db             Use Berkeley DB >= 4.1 (libdb) (ISAM handler)
+                         This is the default
 
-  --without-db			Do neither use Berkeley DB nor any other ISAM handler
-				You will not be able to use indexed I/O
+   --without-db          Do neither use Berkeley DB nor any other ISAM handler
+                         You will not be able to use indexed I/O
 
-  --with-vbisam			Use VBISAM (libvbisam) (ISAM handler)
+   --with-vbisam         Use VBISAM (libvbisam) (ISAM handler)
 
-  --with-dl			Use the system dynamic linker
-				This is the default
+   --with-dl             Use the system dynamic linker
+                         This is the default
 
-  --without-dl			Use ltdl for dynamic program loading
+   --without-dl          Use ltdl for dynamic program loading
 
-  --with-patch-level=<n>	Set internal patch level to n (default 0)
+   --with-patch-level=<n>  Set internal patch level to n (default 0)
 
-  --with-varseq=<n>		Define the default format for variable
-				length sequential files.
+   --with-varseq=<n>     Define the default format for variable
+                         length sequential files.
 
-				The default may be overridden at run time by
-				setting the environment variable
-				COB_VARSEQ_FORMAT to 0, 1, 2, or 3.
+         The default may be overridden at run time by
+         setting the environment variable
+         COB_VARSEQ_FORMAT to 0, 1, 2, or 3.
 
-				For values of 0, 1 and 2, four bytes are
-				written preceding each record. The format of
-				these four bytes for values of 0, 1, 2 is
-				as follows :
-				n = 0 (default)
-					The first 2 bytes are the record length
-					in big-endian order. This is compatible
-					with mainframe. Bytes 3 and 4 are set
-					to binary 0.
-				n = 1
-					The 4 bytes are the record length in
-					big-endian order.
-				n = 2
-					The 4 bytes are the record length in
-					native machine order (int).
-					(This was previously the default)
+         For values of 0, 1 and 2, four bytes are
+         written preceding each record. The format of
+         these four bytes for values of 0, 1, 2 is
+         as follows :
+         n = 0 (default)
+           The first 2 bytes are the record length
+           in big-endian order. This is compatible
+           with mainframe. Bytes 3 and 4 are set
+           to binary 0.
+         n = 1
+           The 4 bytes are the record length in
+           big-endian order.
+         n = 2
+           The 4 bytes are the record length in
+           native machine order (int).
+           (This was previously the default)
 
-				For the value of 3, two bytes are written
-				preceding each record :
-				n = 3
-					The first 2 bytes are the record length
-					in big-endian order. The record follows
-					immediately after beginning at byte 3.
+         For the value of 3, two bytes are written
+         preceding each record :
+         n = 3
+           The first 2 bytes are the record length
+           in big-endian order. The record follows
+           immediately after beginning at byte 3.
 
-  --enable-debug		Add '-g' debug option to make
+   --enable-debug        Add '-g' debug option to make
 
 ============
 

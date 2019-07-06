@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -15,11 +15,11 @@
    GNU Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-#include "config.h"
+#include <config.h>
 
 #ifndef	_GNU_SOURCE
 #define _GNU_SOURCE	1
@@ -48,9 +48,9 @@
 #endif
 #endif
 
-/* Force symbol exports */
+/* Force symbol exports, include decimal definitions */
 #define	COB_LIB_EXPIMP
-
+#include "gmp.h"
 #include "libcob.h"
 #include "coblocal.h"
 
@@ -1022,7 +1022,7 @@ cob_decimal_set_packed (cob_decimal *d, cob_field *f)
 		}
 		if (*p) {
 			mpz_add_ui (d->value, d->value,
-				    (cob_uli_t)((*p >> 4U) * 10U) + (*p & 0x0FU));
+				    ((cob_uli_t)(*p >> 4U) * 10U) + (*p & 0x0FU));
 			nonzero = 1;
 		}
 	}
@@ -1503,39 +1503,55 @@ overflow:
 	return cobglobptr->cob_exception_code;
 }
 
+/* General uint -> field */
+
+void
+cob_set_field_to_uint (cob_field *field, const cob_u32_t data)
+{
+	cob_decimal	dec;
+
+	mpz_init2 (dec.value, COB_MPZ_DEF);
+	mpz_set_ui (dec.value, data);
+	dec.scale = 0;
+
+	cob_decimal_get_field (&dec, field, 0);
+
+	mpz_clear (dec.value);
+}
+
 /* General field */
 
 void
-cob_decimal_set_field (cob_decimal *d, cob_field *f)
+cob_decimal_set_field (cob_decimal *dec, cob_field *field)
 {
 	union {
 		double	dval;
 		float	fval;
 	} uval;
 
-	switch (COB_FIELD_TYPE (f)) {
+	switch (COB_FIELD_TYPE (field)) {
 	case COB_TYPE_NUMERIC_BINARY:
-		cob_decimal_set_binary (d, f);
+		cob_decimal_set_binary (dec, field);
 		break;
 	case COB_TYPE_NUMERIC_PACKED:
-		cob_decimal_set_packed (d, f);
+		cob_decimal_set_packed (dec, field);
 		break;
 	case COB_TYPE_NUMERIC_FLOAT:
-		memcpy ((void *)&uval.fval, f->data, sizeof(float));
-		cob_decimal_set_double (d, (double)uval.fval);
+		memcpy ((void *)&uval.fval, field->data, sizeof(float));
+		cob_decimal_set_double (dec, (double)uval.fval);
 		break;
 	case COB_TYPE_NUMERIC_DOUBLE:
-		memcpy ((void *)&uval.dval, f->data, sizeof(double));
-		cob_decimal_set_double (d, uval.dval);
+		memcpy ((void *)&uval.dval, field->data, sizeof(double));
+		cob_decimal_set_double (dec, uval.dval);
 		break;
 	case COB_TYPE_NUMERIC_FP_DEC64:
-		cob_decimal_set_ieee64dec (d, f);
+		cob_decimal_set_ieee64dec (dec, field);
 		break;
 	case COB_TYPE_NUMERIC_FP_DEC128:
-		cob_decimal_set_ieee128dec (d, f);
+		cob_decimal_set_ieee128dec (dec, field);
 		break;
 	default:
-		cob_decimal_set_display (d, f);
+		cob_decimal_set_display (dec, field);
 		break;
 	}
 }

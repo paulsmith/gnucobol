@@ -1,7 +1,43 @@
 
+2019-06-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: added some additional output to show current status
+	* Makefile.am (summary.log): now always rebuild (.PHONY)
+	* Makefile.am (diff): ensure that results of all modules are compared
+	  (now only fails early if there's an actual error during diff)
+	* Makefile.am: moved dependency on summary.log from diff to diff-summary
+	* report.pl: create additional file in each module directory: duration.txt
+	  showing the duration in fractional seconds for each test (system time!)
+	* Makefile.am (duration.log): new target collecting rough durations
+
+2019-06-10  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am ($(MODULES)): missing dependency Makefile.module.in added,
+	* Makefile.am (EXEC85.cob): delete in case of issues during sed ensuring
+	  to not end with a partial source
+	* Makefile.module.in (clean, clean-db): targets added
+	* report.pl: only delete files in DB_HOME if it does not equal to "."
+
+2019-05-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* expand.pl: added checks for input arguments and valid file
+
+2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: setting of DIFF_FLAGS now done by configure
+	* Makefile.am: use quotes for filenames in external commands,
+	  run testsuite with active runtime checks
+
+2019-03-16  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: new DIFF_FLAGS initialized to --strip-trailing-cr to allow
+	  valid test results also with unclean/unexpected EOL
+	* report.pl: reduced number of environment checks,
+	  adjusted to actually work with a MSWin32 port of perl
+
 2019-01-18  Simon Sobisch <simonsobisch@gnu.org>
 
-	* Makefile.am: fix for Bug #563: new WGETFLAGS initialized to "-t1 -T5"
+	* Makefile.am: fix for Bug #563: new WGET_FLAGS initialized to "-t1 -T5"
 	  to explicit specify the timeout and allow overriding these parameters
 
 2019-01-01  Simon Sobisch <simonsobisch@gnu.org>
@@ -142,7 +178,7 @@
 
 2016-08-28  Simon Sobisch <simonsobisch@gnu.org>
 
-	* Makefile.am: checking `perl` before running target "test"
+	* Makefile.am: checking perl binary before running target "test"
 
 2015-02-11  Simon Sobisch <simonsobisch@gnu.org>
 

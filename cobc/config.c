@@ -15,12 +15,12 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-#include "config.h"
-#include "defaults.h"
+#include <config.h>
+#include <defaults.h>
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -15,7 +15,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+## along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 ### GnuCOBOL Test Suite
 
@@ -517,7 +517,7 @@ libcob: callee.cob:8: warning: EXTERNAL item 'EXT-VAR' previously allocated with
 
 AT_CHECK([$COMPILE smaller.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./smaller], [1], [],
-[libcob: callee.cob:6: EXTERNAL item 'WRK-VAR' previously allocated with size 5, requested size is 8
+[libcob: callee.cob:6: error: EXTERNAL item 'WRK-VAR' previously allocated with size 5, requested size is 8
 ])
 
 AT_CLEANUP
@@ -1006,7 +1006,7 @@ AT_CHECK([$COBCRUN_DIRECT ./unchecked_prog], [0],
 [test over
 ], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:20: 'X-NUM' (Type: NUMERIC DISPLAY) not numeric: '0\000\001123'
+[libcob: prog.cob:20: error: 'X-NUM' (Type: NUMERIC DISPLAY) not numeric: '0\000\001123'
 ])
 
 AT_CHECK([$COMPILE prog2.cob], [0], [], [])
@@ -1015,7 +1015,7 @@ AT_CHECK([$COBCRUN_DIRECT ./unchecked_prog2], [0],
 [test over
 ], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog2], [1], [],
-[libcob: prog2.cob:15: 'X-NUM' (Type: PACKED-DECIMAL) not numeric: '0x000a123f'
+[libcob: prog2.cob:15: error: 'X-NUM' (Type: PACKED-DECIMAL) not numeric: '0x000a123f'
 ])
 
 AT_CLEANUP
@@ -1312,7 +1312,7 @@ AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee2.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [1], [],
-[libcob: callee2.cob:5: recursive CALL from callee2 to callee which is NOT RECURSIVE
+[libcob: callee2.cob:5: error: recursive CALL from callee2 to callee which is NOT RECURSIVE
 ])
 
 AT_CLEANUP
@@ -2969,7 +2969,6 @@ AT_CLEANUP
 
 
 AT_SETUP([SORT: table sort (3)])
-AT_SKIP_IF(true)
 
 AT_KEYWORDS([runmisc])
 
@@ -2987,31 +2986,83 @@ AT_DATA([prog.cob], [
                                   DESCENDING TAB1-NR.
              10 TAB1-NR     PIC 99.
              10 TAB-DATA    PIC X(5).
+       01 TAB2.
+          05 ROW2 OCCURS 1 TO 4 DEPENDING CNT1
+                                  ASCENDING ROW2.
+             10 TAB2-NR     PIC 99.
+             10 TAB2-DATA   PIC X(5).
 
        PROCEDURE DIVISION.
        A.
            PERFORM VARYING K FROM 1 BY 1 UNTIL K > 4
-             MOVE K TO TAB1-NR(K)
+             MOVE K     TO TAB1-NR (K)
              MOVE 'BLA' TO TAB-DATA(K)
            END-PERFORM
 
-           SORT ROW1.
+           SORT ROW1
 
            PERFORM VARYING K FROM 1 BY 1 UNTIL K > 4
              DISPLAY TAB1-NR(K) NO ADVANCING END-DISPLAY
+           END-PERFORM
+
+           MOVE TAB1 TO TAB2
+           SORT ROW2
+
+           PERFORM VARYING K FROM 1 BY 1 UNTIL K > 4
+             DISPLAY TAB2-NR(K) NO ADVANCING END-DISPLAY
+           END-PERFORM
+
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog2.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 K                 PIC 9(2).
+
+       01 CNT1              PIC 9(9) COMP-5 VALUE 4.
+       01 TAB1.
+          05 ROW1 OCCURS 5        DESCENDING TAB1-NR.
+             10 TAB1-NR     PIC 99 VALUE ZERO.
+             10 TAB-DATA    PIC X(5).
+       01 TAB2.
+          05 ROW1 OCCURS 1 TO 4 DEPENDING CNT1
+                                  DESCENDING TAB1-NR.
+             10 TAB1-NR     PIC 99.
+             10 TAB-DATA    PIC X(5).
+
+       PROCEDURE DIVISION.
+       A.
+           DISPLAY TAB1-NR OF TAB1 (2) NO ADVANCING END-DISPLAY
+
+           PERFORM VARYING K FROM 1 BY 1 UNTIL K > 4
+             MOVE K     TO TAB1-NR  OF TAB2(K)
+             MOVE 'BLA' TO TAB-DATA OF TAB2(K)
+           END-PERFORM
+
+           SORT ROW1 OF TAB2.
+
+           PERFORM VARYING K FROM 1 BY 1 UNTIL K > 4
+             DISPLAY TAB1-NR OF TAB2(K) NO ADVANCING END-DISPLAY
            END-PERFORM
 
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [04030201], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0403020101020304], [])
+
+AT_CHECK([$COMPILE prog2.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0], [0004030201], [])
 
 AT_CLEANUP
 
 
 AT_SETUP([SORT: EBCDIC table sort])
-AT_KEYWORDS([runmisc])
+AT_KEYWORDS([runmisc ALPHABET])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -3714,7 +3765,7 @@ AT_CLEANUP
 
 
 AT_SETUP([CALL C with callback, ENTRY-CONVENTION EXTERN])
-AT_KEYWORDS([runmisc])
+AT_KEYWORDS([runmisc CALL-CONVENTION LINKAGE])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -3778,6 +3829,90 @@ cprog (void *cb)
 AT_CHECK([$COMPILE -Wno-unfinished -o prog prog.cob cprog.c], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 CB            USAGE PROGRAM-POINTER.
+       PROCEDURE        DIVISION.
+           SET CB TO ENTRY "callback"
+           CALL STATIC "cprog" USING BY VALUE CB
+           END-CALL
+           EXIT PROGRAM.
+       END PROGRAM prog.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callback.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 P1            USAGE POINTER.
+       01 P2            USAGE BINARY-LONG.
+       01 P3            PIC X(8).
+       PROCEDURE        DIVISION WITH C LINKAGE
+                        USING BY VALUE P1 P2 BY REFERENCE P3.
+           IF P1 NOT EQUAL ADDRESS OF P3
+              DISPLAY P1
+              END-DISPLAY
+           END-IF
+           IF P2 NOT EQUAL 42
+              DISPLAY P2
+              END-DISPLAY
+           END-IF
+           IF P3 NOT EQUAL "CALLBACK"
+              DISPLAY P3
+              END-DISPLAY
+           END-IF
+           EXIT PROGRAM.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 CB            USAGE PROGRAM-POINTER.
+       PROCEDURE        DIVISION.
+           SET CB TO ENTRY "callback"
+           CALL STATIC "cprog" USING BY VALUE CB
+           END-CALL
+           EXIT PROGRAM.
+       END PROGRAM prog.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callback.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CALL-CONVENTION 0 IS EXTERN.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 P1            USAGE POINTER.
+       01 P2            USAGE BINARY-LONG.
+       01 P3            PIC X(8).
+       PROCEDURE        DIVISION EXTERN
+                        USING BY VALUE P1 P2 BY REFERENCE P3.
+           IF P1 NOT EQUAL ADDRESS OF P3
+              DISPLAY P1
+              END-DISPLAY
+           END-IF
+           IF P2 NOT EQUAL 42
+              DISPLAY P2
+              END-DISPLAY
+           END-IF
+           IF P3 NOT EQUAL "CALLBACK"
+              DISPLAY P3
+              END-DISPLAY
+           END-IF
+           EXIT PROGRAM.
+])
+
+AT_CHECK([$COMPILE -Wno-unfinished -o prog prog2.cob cprog.c], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CHECK([$COMPILE -Wno-unfinished -o prog prog3.cob cprog.c], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
 AT_CLEANUP
 
 
@@ -3824,7 +3959,7 @@ main (int argc, char **argv)
 
 AT_CHECK([$COMPILE -o caller caller.c callee.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [1], [],
-[libcob: cob_init() has not been called
+[libcob: error: cob_init() has not been called
 ])
 
 AT_CHECK([$COMPILE -fimplicit-init -o caller caller.c callee.cob], [0], [], [])
@@ -4119,10 +4254,10 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COMPILE prog2.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:8: BASED/LINKAGE item 'X' has NULL address
+[libcob: prog.cob:8: error: BASED/LINKAGE item 'X' has NULL address
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog2], [1], [],
-[libcob: prog2.cob:9: BASED/LINKAGE item 'X' (accessed by 'Y') has NULL address
+[libcob: prog2.cob:9: error: BASED/LINKAGE item 'X' (accessed by 'Y') has NULL address
 ])
 
 AT_CLEANUP
@@ -4164,7 +4299,7 @@ AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./caller], [1], [],
-[libcob: callee.cob:9: LINKAGE item 'X' (accessed by 'Y') not passed by caller
+[libcob: callee.cob:9: error: LINKAGE item 'X' (accessed by 'Y') not passed by caller
 ])
 
 AT_CLEANUP
@@ -6257,6 +6392,10 @@ AT_CLEANUP
 AT_SETUP([MF FIGURATIVE to NUMERIC])
 AT_KEYWORDS([MOVE])
 
+# FIXME: This test will NOT work on EBCDIC machines,
+#        either add it explicit here and split into two or add
+#        a pre-test and check the expected "native" result
+
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID. prog.
@@ -6302,12 +6441,16 @@ AT_DATA([prog.cob], [
            DISPLAY "MOVE HIGH-VALUES TO BIGFLT"
            MOVE HIGH-VALUES TO BIGFLT.
            PERFORM SHOW-BIG.
+           CALL "dump" USING BIGFLT.
            DISPLAY "MOVE QUOTE TO BIGFLT"
            MOVE QUOTE TO BIGFLT.
            PERFORM SHOW-BIG.
+           CALL "dump" USING BIGFLT.
            DISPLAY "MOVE ALL * TO BIGFLT"
            MOVE ALL '*' TO BIGFLT.
            PERFORM SHOW-BIG.
+      *>   Note: the next results are dependant on endianess
+      *>         therefore no dump here
            DISPLAY "MOVE ALL '21' TO BIGFLT"
            MOVE ALL '21' TO BIGFLT.
            PERFORM SHOW-BIG.
@@ -6316,7 +6459,6 @@ AT_DATA([prog.cob], [
            CALL "dump" USING MYFLD.
        SHOW-BIG.
            DISPLAY "BIGFLT is " BIGFLT.
-      *    CALL "dump" USING BIGFLT.
 ])
 
 AT_DATA([cmod.c], [[
@@ -6340,7 +6482,7 @@ prog.cob:28: warning: numeric value is expected
 prog.cob:6: warning: 'MYFLD' defined here as PIC 9(4)
 prog.cob:34: warning: numeric value is expected
 prog.cob:6: warning: 'MYFLD' defined here as PIC 9(4)
-prog.cob:50: warning: numeric value is expected
+prog.cob:52: warning: numeric value is expected
 prog.cob:7: warning: 'BIGFLT' defined here as USAGE FLOAT
 ])
 
@@ -6369,8 +6511,10 @@ MOVE HIGH-VALUES TO (1:)
 FFFFFFFF .
 MOVE HIGH-VALUES TO BIGFLT
 BIGFLT is NaN
+FFFFFFFF .
 MOVE QUOTE TO BIGFLT
 BIGFLT is 2.1973164E-18
+22222222 .
 MOVE ALL * TO BIGFLT
 BIGFLT is 5.4312347E+12
 MOVE ALL '21' TO BIGFLT
@@ -12002,7 +12146,7 @@ AT_DATA([prog.cob], [
 # Safe run with runtime checks
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:23: subscript of 'TSTY' out of bounds: 0
+[libcob: prog.cob:23: error: subscript of 'TSTY' out of bounds: 0
 ])
 
 # Runtime checks disable, subscript may be zero or even negative
@@ -14279,7 +14423,7 @@ $COBCRUN_DIRECT ./prog], [1],
 [X is 000000001
 X is 000005441
 ],
-[libcob: cpyabrt:4: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
+[libcob: cpyabrt:4:  error: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
 libcob: cpyabrt:4: warning: implicit CLOSE of FLATFILE ('RELFIX')
 ])
 

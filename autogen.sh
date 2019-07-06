@@ -19,22 +19,24 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 me=autogen.sh
 
 # get path to GnuCOBOL main directory
 if test "$0" = "./$me"; then
   MAINPATH=.
+  GCMAINPATH=".."
 else
   MAINPATH=$(dirname $(readlink -f "$0"))
+  GCMAINPATH="$MAINPATH"
 fi
 if test ! -f $MAINPATH/$me; then
-  echo; echo ERROR - cannot set main directory - aborting $me && exit 1
+  echo; echo "ERROR - cannot set main directory [checked $MAINPATH/build_aux/$me] - aborting $me" && exit 1
 fi
 
 olddir_autogen=`pwd`
-cd $MAINPATH/build_aux && chmod u+x ./bootstrap && GCMAINPATH=$MAINPATH ./bootstrap; ret=$?
+cd $MAINPATH/build_aux && (chmod -f u+x ./bootstrap; ./bootstrap); ret=$?
 cd $olddir_autogen
 
 if test $ret -ne 0; then

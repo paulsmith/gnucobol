@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/bin
 #
-# Copyright (C) 2001-2012, 2014, 2017-2018 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2014, 2017-2019 Free Software Foundation, Inc.
 # Written by Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -17,13 +17,13 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 bin_SCRIPTS = cob-config
 bin_PROGRAMS = cobcrun gcdiff
 cobcrun_SOURCES = cobcrun.c
 dist_man_MANS = cobcrun.1 cob-config.1
-COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)
+COBCRUN = "$(top_builddir)/pre-inst-env" cobcrun$(EXEEXT)
 gcdiff_SOURCES = gcdiff.c
 
 AM_LDFLAGS = $(COB_EXPORT_DYN)

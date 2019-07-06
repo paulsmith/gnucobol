@@ -15,11 +15,11 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +29,7 @@
 
 #include "cobc.h"
 #include "tree.h"
-#include "parser.h"
+#include <parser.h>
 
 /* Local variables */
 
@@ -508,6 +508,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "BYTE-LENGTH",		0, 1, BYTE_LENGTH,		/* 2002 (C/S) */
 				0, CB_CS_CONSTANT
+  },
+  { "C",			0, 1, C,			/* Extension: implicit defined CALL-CONVENTION */
+				0, CB_CS_CALL | CB_CS_OPTIONS
   },
   { "CALENDAR-FONT",		0, 1, CALENDAR_FONT,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -2004,6 +2007,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PARSE",			0, 1, PARSE,			/* IBM extension */
    				0, 0
   },
+  {"PASCAL",			0, 1, PASCAL,			/* Extension: implicit defined CALL-CONVENTION */
+				0, CB_CS_CALL | CB_CS_OPTIONS
+  },
   { "PASSWORD",			0, 1, PASSWORD,			/* IBM extension */
 				0, CB_CS_SELECT
   },
@@ -2757,7 +2763,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "U",			0, 1, U,			/* Extension */
 				0, CB_CS_RECORDING
   },
-  { "UCS-4",			0, 1, -1,			/* 2002 (C/S) */
+  { "UCS-4",			0, 1, UCS_4,			/* 2002 (C/S) */
 				0, CB_CS_ALPHABET
   },
   { "UNBOUNDED",		0, 1, UNBOUNDED,			/* IBM V5 */
@@ -2838,10 +2844,10 @@ static struct cobc_reserved default_reserved_words[] = {
   { "USING",			0, 0, USING,			/* 2002 */
 				0, 0
   },
-  { "UTF-16",			0, 1, -1,			/* 2002 (C/S) */
+  { "UTF-16",			0, 1, UTF_16,			/* 2002 (C/S) */
 				0, CB_CS_ALPHABET
   },
-  { "UTF-8",			0, 1, -1,			/* 2002 (C/S) */
+  { "UTF-8",			0, 1, UTF_8,			/* 2002 (C/S) */
 				0, CB_CS_ALPHABET
   },
   { "V",			0, 1, V,			/* Extension */
@@ -3829,7 +3835,7 @@ search_reserved_list (const char * const word, const int needs_uppercasing,
 		      const struct cobc_reserved * const list, size_t list_len)
 {
 	static char		upper_word[43];
-	int			word_len;
+	size_t			word_len;
 	const char		*sought_word;
 	struct cobc_reserved    to_find;
 
@@ -4256,7 +4262,7 @@ get_aliases (const unsigned int key, struct list_reserved_line *line)
 	}
 
 	/* Create array of aliases, then sort it. */
-	aliases = cobc_malloc (num_aliases * (COB_MAX_WORDLEN + 1) * sizeof (char));
+	aliases = cobc_malloc ((size_t)num_aliases * (COB_MAX_WORDLEN + 1) * sizeof (char));
 	j = 0;
 	for (i = 0; i < reserved_word_map_arr_size; ++i) {
 		if (i != key
@@ -4536,7 +4542,7 @@ lookup_intrinsic (const char *name, const int checkimpl)
 {
 	struct cb_intrinsic_table	*cbp;
 	static char	upper_name[43];
-	int		name_len = strlen (name);
+	size_t		name_len = strlen (name);
 
 	if (name_len > sizeof (upper_name) - 1) {
 		return NULL;
@@ -4637,7 +4643,7 @@ lookup_register (const char *name, const int checkimpl)
 {
 	size_t		i;
 	static char	upper_name[43];
-	int		name_len = strlen (name);
+	size_t		name_len = strlen (name);
 
 	if (name_len > sizeof (upper_name) - 1) {
 		return NULL;

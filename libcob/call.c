@@ -15,12 +15,12 @@
    GNU Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-#include "config.h"
-#include "defaults.h"
+#include <config.h>
+#include <defaults.h>
 
 #ifndef	_GNU_SOURCE
 #define _GNU_SOURCE	1
@@ -107,7 +107,6 @@ lt_dlerror (void)
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
-
 #include "libcob.h"
 #include "coblocal.h"
 
@@ -1557,6 +1556,7 @@ cob_get_num_params ( void )
 	if (cobglobptr) {
 		return cobglobptr->cob_call_params;
 	}
+
 	/* note: same message in call.c */
 	cob_runtime_warning_external ("cob_get_num_params", 1,
 		_("cob_init() has not been called"));

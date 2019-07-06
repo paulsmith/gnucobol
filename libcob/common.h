@@ -16,11 +16,22 @@
    GNU Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef COB_COMMON_H
 #define COB_COMMON_H
+
+/* Only define cob_decimal if we have the necessary mpz_t from gmp.h/mpir.h
+   (or can self-define it from mp.h) */
+#ifndef __GMP_H__
+#ifndef __GNU_MP__
+#define COB_WITHOUT_DECIMAL
+#else
+typedef __mpz_struct mpz_t[1];
+#endif
+#endif
+
 
 /* General type defines */
 #define	cob_c8_t		char
@@ -286,6 +297,12 @@ Note: also defined together with __clang__ in both frontends:
 #define COB_BSWAP_16(val) (_byteswap_ushort (val))
 #define COB_BSWAP_32(val) (_byteswap_ulong (val))
 #define COB_BSWAP_64(val) (_byteswap_uint64 (val))
+
+#elif defined(__ORANGEC__)
+
+#define COB_BSWAP_16(val) (COB_BSWAP_16_CONSTANT (val))
+#define COB_BSWAP_32(val) (__builtin_bswap32 (val))
+#define COB_BSWAP_64(val) (__builtin_bswap64 (val))
 
 #else /* Generic */
 
@@ -656,14 +673,19 @@ only usable with COB_USE_VC2013_OR_GREATER */
 /* TODO: add compiler configuration for limiting this */
 #define	MAX_FD_RECORD_IDX	65535
 
-/* Maximum number of parameters */
-#define	COB_MAX_FIELD_PARAMS	36
+/* Maximum amount of keys per file */
+/* TODO: define depending on used ISAM */
+/* TODO: add compiler configuration for limiting this */
+#define	MAX_FILE_KEYS	255
 
 /* Maximum number of field digits */
 #define	COB_MAX_DIGITS		38
 
 /* Maximum digits in binary field */
 #define	COB_MAX_BINARY		39
+
+/* Maximum exponent digits (both in literals and floating-point numeric-edited item */
+#define COB_FLOAT_DIGITS_MAX         36
 
 /* Maximum bytes in a single/group field,
    which doesn't contain UNBOUNDED items */
@@ -678,7 +700,10 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #define	COB_MAX_DEC_STRUCT	32
 
 /* Maximum length of COBOL words */
-#define	COB_MAX_WORDLEN		61
+#define	COB_MAX_WORDLEN		63
+
+/* Maximum length of COBOL program names */
+#define	COB_MAX_NAMELEN		31
 
 /* Maximum number of subscripts */
 #define COB_MAX_SUBSCRIPTS	16
@@ -1208,7 +1233,7 @@ typedef struct __cob_fp_128 {
 
 typedef struct __cob_decimal {
 	mpz_t		value;			/* GMP value definition */
-	int		scale;			/* Decimal scale */
+	int 		scale;			/* Decimal scale */
 } cob_decimal;
 #endif
 
@@ -1778,6 +1803,7 @@ COB_EXPIMP void	cob_chain_setup			(void *, const size_t,
 COB_EXPIMP void	cob_allocate			(unsigned char **, cob_field *,
 						 cob_field *, cob_field *);
 COB_EXPIMP void	cob_free_alloc			(unsigned char **, unsigned char *);
+COB_EXPIMP void	cob_continue_after		(cob_field *);
 COB_EXPIMP int	cob_extern_init			(void);
 COB_EXPIMP int	cob_tidy			(void);
 COB_EXPIMP char	*cob_command_line		(int, int *, char ***,

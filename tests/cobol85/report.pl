@@ -1,7 +1,7 @@
 #
 # gnucobol/tests/cobol85/report.pl
 #
-# Copyright (C) 2001-2012, 2016-2018 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2016-2019 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 #
 # This file is part of GnuCOBOL.
@@ -17,7 +17,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 use strict;
 use warnings;
@@ -72,25 +72,55 @@ if (defined $cobcrun_direct) {
 	$cobcrun_direct = "";
 }
 
-# temporary directory (used for fifos)
-my $tmpdir = $ENV{"TMPDIR"};
-if (!defined $tmpdir) {
-	$tmpdir = $ENV{"TEMP"};
-	if (!defined $tmpdir) {
-		$tmpdir = $ENV{"TMP"};
-		if (!defined $tmpdir) {
-			$tmpdir = "/tmp";
-		}
-	}
-}
-
-
 $compile_module = "$cobc -m";
 if ($force_cobcrun) {
 	$compile = $compile_module;
 } else {
 	$compile = "$cobc -x";
 }
+
+my $REMOVE = "XXXXX*";
+my $TRAP;
+my $REMOVE_COMMANDS;
+if ($^O ne "MSWin32" && $^O ne "dos") {
+	$TRAP = "trap 'exit 77' INT QUIT TERM PIPE;";
+	$REMOVE_COMMANDS = "$TRAP  rm -rf $REMOVE";
+	if ($ENV{'DB_HOME'} && $ENV{'DB_HOME'} ne ".") {
+		$REMOVE_COMMANDS = "$REMOVE_COMMANDS $ENV{'DB_HOME'}/$REMOVE";
+	}
+	$cobcrun_direct = "$cobcrun_direct./";
+} else {
+	$TRAP = "";
+	$REMOVE_COMMANDS = "ERASE /F /Q $REMOVE &&";
+	if ($ENV{'DB_HOME'} && $ENV{'DB_HOME'} ne ".") {
+		$REMOVE_COMMANDS = "$REMOVE_COMMANDS $ENV{'DB_HOME'}\\$REMOVE &&";
+	}
+	$REMOVE_COMMANDS = "$REMOVE_COMMANDS " .
+		"FOR /F %I IN ('DIR /A:D /B $REMOVE') DO RD /S /Q %I";
+	$REMOVE_COMMANDS = "$REMOVE_COMMANDS 1>NUL 2>&1";
+	$cobcrun_direct = "$cobcrun_direct.\\";
+}
+
+# for obsolete systems use duration in seconds, otherwise get nanos from system
+# (the better Time::HiRes is only a core module since Perl 5.7.3)
+sub time_since_epoch {
+	if ($^O ne "MSWin32" && $^O ne "dos") {
+		return `date +%s.%N`;
+	} else {
+		return time;
+	}
+}
+# temporary directory (used for fifos, currently not active)
+# my $tmpdir = $ENV{"TMPDIR"};
+# if (!defined $tmpdir) {
+# 	$tmpdir = $ENV{"TEMP"};
+# 	if (!defined $tmpdir) {
+# 		$tmpdir = $ENV{"TMP"};
+# 		if (!defined $tmpdir) {
+# 			$tmpdir = "/tmp";
+# 		}
+# 	}
+# }
 
 my $num_progs = 0;
 my $test_skipped = 0;
@@ -206,9 +236,13 @@ if (!defined $single_test) {
 	open (LOG_FH, "> report.txt") or die;
 	print LOG_FH "Filename    total pass fail deleted inspect\n";
 	print LOG_FH "--------    ----- ---- ---- ------- -------\n";
+	open (LOG_TIME, "> duration.txt") or die;
+	print LOG_TIME "Filename    Duration\n";
+	print LOG_TIME "--------    --------\n";
 } else {
 	*LOG_FH = *STDERR;
 }
+my $global_start = time_since_epoch ();
 
 my $in;
 
@@ -230,6 +264,7 @@ if (defined $single_test) {
 foreach $in (sort (glob("*.{CBL,SUB}"))) {
 	run_test ($in);
 }
+my $global_end = time_since_epoch ();
 
 print  LOG_FH ("--------    ----- ---- ---- ------- -------\n");
 printf LOG_FH ("Total       %5s %4s %4s %7s %7s\n\n",
@@ -241,17 +276,22 @@ printf LOG_FH ("Successfully executed: %2s\n", $total_ok);
 printf LOG_FH ("Compile error:         %2s\n", $compile_error);
 printf LOG_FH ("Execute error:         %2s\n", $execute_error);
 
+print LOG_TIME "--------    --------\n";
+printf LOG_TIME ("Total       %8.4f\n\n", ($global_end - $global_start));
 
 sub compile_lib {
 	my $in = $_[0];
 	print "$compile_module $in\n";
-	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile_module $in");
+	my $local_start = time_since_epoch ();
+	$ret = system ("$TRAP  $compile_module $in");
 	if ($ret != 0) {
 		if (($ret >> 8) == 77) {
 			die "Interrupted\n";
 		}
 		print "Unexpected status $ret for module $in\n";
 	}
+	my $local_end = time_since_epoch ();
+	printf LOG_TIME ("%-11s %8.4f\n", (substr $in, 4), ($local_end - $local_start));
 }
 
 sub run_test {
@@ -274,13 +314,13 @@ sub run_test {
 		if ($force_cobcrun) {
 			$cmd = "$cobcrun $exe < $exe.DAT";
 		} else {
-			$cmd = "$cobcrun_direct./$exe < $exe.DAT";
+			$cmd = "$cobcrun_direct$exe < $exe.DAT";
 		}
 	} else {
 		if ($force_cobcrun) {
 			$cmd = "$cobcrun $exe";
 		} else {
-			$cmd = "$cobcrun_direct./$exe";
+			$cmd = "$cobcrun_direct$exe";
 		}
 	}
 
@@ -309,13 +349,16 @@ sub run_test {
 	my $deleted = 0;
 	my $inspect = 0;
 
-	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile_current");
+	my $local_start = time_since_epoch ();
+	$ret = system ("$TRAP  $compile_current");
 	if ($ret != 0) {
 		if (($ret >> 8) == 77) {
 			die "Interrupted\n";
 		}
 		$compile_error++;
 		print LOG_FH ("$line_prefix  ***** compile error *****\n");
+		my $local_end = time_since_epoch ();
+		printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 		return;
 	}
 
@@ -337,16 +380,14 @@ sub run_test {
 	if ($comp_only{$exe}) {
 		print LOG_FH ("$line_prefix     0    0    0       0       0 OK\n");
 		$total_ok++;
+		my $local_end = time_since_epoch ();
+		printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 		return;
 	}
 
 
 	if ($in =~ /\.CBL/) {
-		if ($ENV{'DB_HOME'}) {
-			$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; rm -f XXXXX*; rm -f $ENV{'DB_HOME'}/XXXXX*");
-		} else {
-			$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; rm -f XXXXX*");
-		}
+		$ret = system ("$REMOVE_COMMANDS");
 		if (($ret >> 8) == 77) {
 			die "Interrupted\n";
 		}
@@ -371,9 +412,9 @@ sub run_test {
 
 testrepeat:
 	if (!$to_kill{$exe}) {
-		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $cmd > $exe.out");
+		$ret = system ("$TRAP  $cmd > $exe.out");
 	} else {
-		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $cmd > $exe.out 2>/dev/null");
+		$ret = system ("$TRAP  $cmd > $exe.out 2>/dev/null");
 	}
 
 	if ($ret != 0 && !($ret >> 2 && $to_kill{$exe})) {
@@ -381,6 +422,8 @@ testrepeat:
 			die "Interrupted\n";
 		}
 		$execute_error++;
+		my $local_end = time_since_epoch ();
+		printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 		print LOG_FH ("$line_prefix  ***** execute error $ret *****\n");
 		return;
 	}
@@ -531,5 +574,7 @@ testrepeat:
 		print "Reexecution with runtime DEBUG off ./DB103M\n";
 		goto testrepeat;
 	}
+	my $local_end = time_since_epoch ();
+	printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 	unlink "$exe.out" if (-s "$exe.out" == 0);
 }

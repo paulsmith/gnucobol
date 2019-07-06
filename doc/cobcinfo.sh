@@ -1,7 +1,7 @@
 #!/bin/sh
 # cobcinfo.sh gnucobol/doc
 #
-# Copyright (C) 2010,2012, 2016-2018 Free Software Foundation, Inc.
+# Copyright (C) 2010,2012, 2016-2019 Free Software Foundation, Inc.
 # Written by Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -17,7 +17,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 # use GREP from configure, passed when called from Makefile
 GREP_ORIG="$GREP";
@@ -51,14 +51,14 @@ if test "$1" != "fixtimestamps"; then
    ret=$?
    if test "$ret" -ne 0; then
      echo "error: cobc is not working, re-run with COBC=/path/to/cobc"
-	 echo "       and ensure that its dependencies can be found."
+     echo "       and ensure that its dependencies can be found."
      echo "       COBC is currently \"$COBC\""
      exit $ret
    fi
    $COBCRUN -V 2>/dev/null 1>&2
    if test "$ret" -ne 0; then
      echo "error: cobcrun is not working, re-run with COBCRUN=/path/to/cobcrun"
-	 echo "       and ensure that its dependencies can be found."
+     echo "       and ensure that its dependencies can be found."
      echo "       COBCRUN is currently \"$COBCRUN\""
      exit $ret
    fi
@@ -71,75 +71,222 @@ fi
 
 # Function for creating the actual file and check
 _create_file () {
-	echo "$0: creating $1"
-	case "$1" in
-		"cbhelp.tex")
-			echo "@verbatim"               > $1
-			$COBC -q --help                >>$1
-			echo "@end verbatim"           >>$1
-			;;
-		"cbchelp.tex")
-			echo "@verbatim"               > $1
-			$COBCRUN -q --help             >>$1
-			echo "@end verbatim"           >>$1
-			;;
-		"cbrese.tex")
-			echo "@verbatim"               > $1
-			$COBC -q --list-reserved       >>$1
-			echo "@end verbatim"           >>$1
-			;;
-		"cbintr.tex")
-			echo "@verbatim"               > $1
-			$COBC -q --list-intrinsics     >>$1
-			echo "@end verbatim"           >>$1
-			;;
-		"cbsyst.tex")
-			echo "@verbatim"               > $1
-			$COBC -q --list-system         >>$1
-			echo "@end verbatim"           >>$1
-			;;
-		"cbmnem.tex")
-			echo "@verbatim"               > $1
-			$COBC -q --list-mnemonics      >>$1
-			echo "@end verbatim"           >>$1
-			;;
-		"cbconf.tex")
-			echo "@verbatim"               > $1
-			cat $confdir/default.conf \
-			| $GREP -A9999 "http://www.gnu.org/licenses/" \
-			| tail -n +2 \
-			                               >>$1
-			echo "@end verbatim"           >>$1
-			;;
-		"cbrunt.tex")
-			# First section, as it is formatted different
-			cat $confdir/runtime.cfg \
-			| $GREP -A400 -m1 "##" \
-			| cut -b2- \
-			| sed -e 's/^#\( .*\)/@section\1\n/g' \
-			      -e 's/^ //g' \
-			      -e 's/{/@{/g' \
-			      -e 's/}/@}/g' \
-			      -e 's/  \([^ ].*\)  / @code{\1} /g' \
-			      -e 's/  \([^ ].*\)$/ @code{\1}/g' \
-			      -e 's/^$/@\*/g' \
-			                               > $1
-			lines=`cat $1 | wc -l`
-			lines=`expr 20 + $lines`
-			# All other sections
-			echo "@verbatim"               >>$1
-			tail -n +$lines $confdir/runtime.cfg \
-			| cut -b2- \
-			| sed -e 's/^#\( .*\)/@end verbatim\n@section\1\n@verbatim/g' \
-			       -e 's/^ //g' \
-			                               >>$1
-			echo "@end verbatim"           >>$1
-			;;
-	esac
+  echo "$0: creating $1"
+  case "$1" in
+	"cbhelp.tex")
+		rm -rf $1
+		$COBC -q --help | grep -E "ptions.*:" | cut -d: -f1 | \
+		while read section; do
+			header_found=""
+			$COBC -q --help                | \
+				$GREP    -A2000 "$section" | \
+				$GREP -E -B2000 "^$" -m 1  | \
+				sed -e 's/^\t/D\t/g'            \
+				    -e 's/* NOT \(.\+\)/; @emph{not \1}/g' \
+				    -e 's/* ALWAYS \(.\+\)/; @emph{always \1}/g' \
+				    -e 's/* /; /g' \
+				    -e 's/^    \+/D\t/g'         \
+				    -e 's/^ \+//g'                \
+				    -e 's/  \+/\t/g'               \
+				    -e 's/<\([^>]\+\)>/@var{\1}/g'| \
+			while read line; do
+				if test -z "$line"; then continue; fi
+				name=`echo "$line" | cut -f1`
+				desc=`echo "$line" | cut -f2`
+				if test -z "$header_found"; then
+					header_found=1
+					echo "@section $section"   >>$1
+					echo "@table @code"        >>$1
+				else
+					if test "$name" != "D"; then
+						echo "@item @code{$name}"  >>$1
+					fi
+					echo "$desc"      | \
+					sed -e 's/ \(-W[a-z]*\)/ @option{\1}/g'       \
+					    -e 's/ \([A-Z][A-Z -]*[A-Z]\)/ @code{\1}/g'   >>$1
+				fi
+			done
+			echo "@end table"          >>$1
+		done
+		;;
+	"cbchelp.tex")
+		rm -rf $1
+		header_found=""
+		$COBCRUN -q --help                | \
+			$GREP -E -A2000 -E "ptions.*:" | \
+			$GREP -E -B2000 "^$" -m 1       | \
+			sed -e 's/^    \+/D\t/g'         \
+			    -e 's/^ \+//g'                \
+			    -e 's/  \+/\t/g'               \
+			    -e 's/<\([^>]\+\)>/@var{\1}/g'| \
+		while read line; do
+			if test -z "$line"; then continue; fi
+			name=`echo "$line" | cut -f1`
+			desc=`echo "$line" | cut -f2`
+			if test -z "$header_found"; then
+				header_found=1
+				echo "@table @code"        >>$1
+			else
+				if test "$name" != "D"; then
+					echo "@item @code{$name}"  >>$1
+				fi
+				echo "$desc"          | \
+				sed -e 's/ -M/ @option{-M}/g' \
+				    -e 's/\(COB[A-Z_]\+\)/@env{\1}/g' >>$1
+			fi
+		done
+		echo "@end table"          >>$1
+		;;
+	"cbrese.tex")
+		echo "@section Common reserved words"   >$1
+		echo "@multitable @columnfractions .40 .20 .40"  >>$1
+		echo "@headitem Reserved word @tab Implemented @tab Aliases" >>$1
+		$COBC -q --list-reserved | \
+			$GREP -E -B9999 "^$" -m 2 | \
+			sed -e 's/  \+/\t/g' \
+			    -e 's/(Context sensitive/ (C\/S/g' \
+			    -e 's/(aliased with \([^)]*\))/\t@code{\1}/g' | \
+		while read line; do
+			if test -z "$line"; then continue; fi
+			name=`echo "$line"   | cut -f1`
+			impl=`echo "$line" | cut -f2 | sed -e 's/ /\t/g'`
+			aliases=`echo "$line" | cut -f3`
+			if test -z "$header_found"; then
+				header_found=1
+			else
+				echo "@item @code{$name} @tab $impl @tab $aliases"  >>$1
+			fi
+		done
+		echo "@end multitable" >>$1
+
+		needs_comma=""
+		header_found=""
+		$COBC -q --list-reserved    | \
+			$GREP    -A50 "Extra"   | \
+			$GREP -E -B50 "^$" -m 1 | \
+		while read line; do
+			if test -z "$line"; then continue; fi
+			if test -z "$header_found"; then
+				header_found=1
+				echo "@section $line"  >>$1
+			else
+				if test -z "$needs_comma"; then needs_comma=1
+				else printf ", " >>$1; fi
+				printf "@code{%s}" "$line" >>$1
+			fi
+		done
+		printf "\n\n" >>$1
+
+		header_found=""
+		echo "@section Internal registers"  >>$1
+		echo "@multitable @columnfractions .40 .20 .40"  >>$1
+		echo "@headitem Register @tab Implemented @tab Definition" >>$1
+		$COBC -q --list-reserved     | \
+			$GREP -A100 "registers"  | \
+			sed -e 's/  \+/\t/g'     | \
+		while read line; do
+			if test -z "$line"; then continue; fi
+			name=`echo "$line"   | cut -f1`
+			impl=`echo "$line" | cut -f2`
+			definition=`echo "$line" | cut -f3`
+			if test -z "$header_found"; then
+				header_found=1
+			else
+				echo "@item @code{$name} @tab $impl @tab @code{$definition}"  >>$1
+			fi
+		done
+		echo "@end multitable" >>$1
+		;;
+	"cbintr.tex")
+		echo "@multitable @columnfractions .40 .20 .40"  >$1
+		$COBC -q --list-intrinsics | \
+			sed -e 's/  \+/\t/g'   | \
+		while read line; do
+			if test -z "$line"; then continue; fi
+			name=`echo "$line"   | cut -f1`
+			impl=`echo "$line"   | cut -f2`
+			params=`echo "$line" | cut -f3`
+			if test -z "$header_found"; then
+				header_found=1
+				echo "@headitem $name @tab $impl @tab $params"  >>$1
+			else
+				echo "@item @code{$name} @tab $impl @tab $params"  >>$1
+			fi
+		done
+		echo "@end multitable" >>$1
+		;;
+	"cbsyst.tex")
+		echo "@multitable @columnfractions .40 .20"  >$1
+		$COBC -q --list-system     | \
+			sed -e 's/  \+/\t/g'   | \
+		while read line; do
+			if test -z "$line"; then continue; fi
+			name=`echo "$line"   | cut -f1`
+			params=`echo "$line" | cut -f2`
+			if test -z "$header_found"; then
+				header_found=1
+				echo "@headitem $name @tab $params"  >>$1
+			else
+				echo "@item @code{$name} @tab $params"  >>$1
+			fi
+		done
+		echo "@end multitable" >>$1
+		;;
+	"cbmnem.tex")
+		system_names="device feature switch"
+		section_prefix="System names"
+		rm -rf $1
+		for section in $system_names; do
+			needs_comma=""
+			echo "@section $section_prefix: $section"   >>$1
+			$COBC -q --list-mnemonics | \
+				$GREP "$section" | cut -d' ' -f1 |\
+			while read name; do
+				if test -z "$needs_comma"; then needs_comma=1
+				else printf ", " >>$1; fi
+				printf "@code{%s}" "$name" >>$1
+			done
+			printf "\n\n" >>$1
+		done
+		;;
+	"cbconf.tex")
+		$GREP -A9999 "https://www.gnu.org/licenses/" \
+		  "$confdir/default.conf" \
+		| sed -e 's/\r//g'  \
+		| tail -n +2                   >$1
+		;;
+	"cbrunt.tex")
+		# First section, as it is formatted different
+		$GREP -A400 -m1 "##" "$confdir/runtime.cfg" | \
+			$GREP -B400 -m2 "##" | \
+			cut -b2- | \
+			sed -e 's/\r//g'  \
+			    -e 's/^#$//g'  \
+			    -e 's/^#\( .*\)/@section\1\n/g' \
+			    -e 's/^ //g' \
+			    -e 's/{/@{/g' \
+			    -e 's/}/@}/g' \
+			    -e 's/\(Example:\)  \(.*\)$/\n\1 @code{\2}/g' \
+			    -e 's/  \([^ ][^(]*\)  \([,.]\)/ @code{\1}\2/g' \
+			    -e 's/  \([^ ][^(]*\)  / @code{\1} /g' \
+			    -e 's/  \([^ ][^(]*\)$/ @code{\1}/g' \
+			    -e 's/^$/@\*/g'          > $1
+		lines=`cat $1 | wc -l`
+		lines=`expr 20 + $lines`
+		# All other sections
+		echo "@verbatim"               >>$1
+		tail -n +$lines "$confdir/runtime.cfg" | \
+			cut -b2- | \
+			sed -e 's/\r//g' \
+			    -e 's/^#\( .*\)/@end verbatim\n@section\1\n@verbatim/g' \
+			    -e 's/^ //g'           >>$1
+		echo "@end verbatim"           >>$1
+		;;
+  esac
 }
 
-docdir=`dirname $0`
-confdir=$docdir/../config
+docdir="`dirname $0`"
+confdir="$docdir/../config"
 created_texfiles="cbhelp.tex cbchelp.tex cbrese.tex cbintr.tex cbsyst.tex"
 created_texfiles="$created_texfiles cbmnem.tex cbconf.tex cbrunt.tex"
 
@@ -197,12 +344,14 @@ case "${1##*/}" in
 			echo " touch $file"
 			touch $file
 		done
-		echo $0: touch tex-results
-		for file in $docdir/gnucobol.*; do
-			if test "$file" = "$docdir/gnucobol.texi"; then continue; fi
-			echo " touch $file"
-			touch $file
-		done
+		if test "$2" != "includes"; then
+			echo $0: touch tex-results
+			for file in $docdir/gnucobol.*; do
+				if test "$file" = "$docdir/gnucobol.texi"; then continue; fi
+				echo " touch $file"
+				touch $file
+			done
+		fi
 		;;
 	*)
 		echo "$0: ERROR: called with unsupported option $1"

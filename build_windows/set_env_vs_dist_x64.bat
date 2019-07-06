@@ -1,3 +1,25 @@
+:: Copyright (C) 2014-2019 Free Software Foundation, Inc.
+:: Written by Simon Sobisch, Edward Hart
+::
+:: This file is part of GnuCOBOL.
+::
+:: The GnuCOBOL compiler is free software: you can redistribute it
+:: and/or modify it under the terms of the GNU General Public License
+:: as published by the Free Software Foundation, either version 3 of the
+:: License, or (at your option) any later version.
+::
+:: GnuCOBOL is distributed in the hope that it will be useful,
+:: but WITHOUT ANY WARRANTY; without even the implied warranty of
+:: MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+:: GNU General Public License for more details.
+::
+:: You should have received a copy of the GNU General Public License
+:: along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
+
+:: Batch for preparing windows binary distribution folder
+:: By default, binaries use Release executable. To distribute a debug
+:: distributable (y tho), provide DEBUG as an argument.
+
 :: Batch for setting GnuCOBOL Environment in Windows with MSC compiler
 :: x64 version
 
@@ -209,9 +231,9 @@ color 07
 :gc
 
 :: check if cl.exe is already in path
-where cl.exe 1>nul 2>nul
+where cl.exe 2>nul
 if "%errorlevel%" == "0" (
-   echo cl.exe that will be used by cobc:
+   echo cl.exe now in PATH:
    cl.exe 1>nul
 ) else (
    echo ERROR: cl.exe not found!
@@ -244,3 +266,5 @@ if "%COB_OLD_PATH%" == "" (
    set "COB_OLD_PATH=%PATH%"
 )
 set "PATH=%COB_MAIN_DIR%bin_x64;%PATH%"
+
+echo finished.

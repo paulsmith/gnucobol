@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\.."
+				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\..;$(SolutionDir)..\..\cobc"
 				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -59,7 +59,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="$(SolutionDir)"
+				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\.."
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -125,7 +125,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\.."
+				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\..;$(SolutionDir)..\..\cobc"
 				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -137,7 +137,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="$(SolutionDir)"
+				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\.."
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -214,6 +214,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\.."
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -289,6 +290,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\.."
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -362,6 +364,10 @@
 			</File>
 			<File
 				RelativePath="..\..\cobc\field.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\cobc\help.c"
 				>
 			</File>
 			<File
@@ -563,23 +569,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\config.h"
-				>
-			</File>
-			<File
-				RelativePath="..\defaults.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcob.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tarstamp.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\cobc\cobc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob\cobgetopt.h"
 				>
 			</File>
 			<File
@@ -591,11 +585,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\config.h"
+				>
+			</File>
+			<File
+				RelativePath="..\defaults.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\cobc\flag.def"
 				>
 			</File>
 			<File
+				RelativePath="..\..\libcob.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\cobc\ppparse.def"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tarstamp.h"
 				>
 			</File>
 			<File
@@ -604,10 +614,6 @@
 			</File>
 			<File
 				RelativePath="..\..\cobc\warning.def"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcob\cobgetopt.h"
 				>
 			</File>
 		</Filter>

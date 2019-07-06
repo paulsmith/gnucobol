@@ -18,13 +18,13 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 /* #define DEBUG_REPLACE */
 
-#include "config.h"
-#include "defaults.h"
+#include <config.h>
+#include <defaults.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -234,7 +234,7 @@ FILE			*cb_listing_file = NULL;
 #define CB_PRINT_LEN	132
 
 char	print_data[CB_PRINT_LEN + 1];
-int	pd_off;
+size_t	pd_off;
 
 #define IS_DEBUG_LINE(line) ((line)[CB_INDICATOR] == 'D')
 #define IS_CONTINUE_LINE(line) ((line)[CB_INDICATOR] == '-')
@@ -501,7 +501,7 @@ static const char	*const cob_csyns[] = {
 #endif
 };
 
-#define COB_NUM_CSYNS	sizeof(cob_csyns) / sizeof(char *)
+#define COB_NUM_CSYNS	sizeof(cob_csyns) / sizeof(cob_csyns[0])
 
 static const char short_options[] = "hVivqECScbmxjdFROPgwo:t:T:I:L:l:D:K:k:";
 
@@ -766,6 +766,8 @@ cobc_enum_explain (const enum cb_tag tag)
 		return "ML OUTPUT TREE";
 	case CB_TAG_ML_SUPPRESS_CHECKS:
 		return "ML SUPPRESS CHECKS";
+	case CB_TAG_CD:
+		return "COMMUNICATION DESCRIPTION";
 	default:
 		break;
 	}
@@ -1448,7 +1450,7 @@ cobc_set_value (struct cb_define_struct *p, const char *value)
 		size++;
 	}
 
-	if (*s || size <= (dot_seen + sign_seen)) {
+	if (*s || size <= ((size_t)dot_seen + sign_seen)) {
 		/* Not numeric */
 #if	0	/* RXWRXW - Lit warn */
 		cb_warning (COBC_WARN_FILLER, _("assuming literal for unquoted '%s'"),
@@ -1496,8 +1498,8 @@ cobc_error_name (const char *name, const enum cobc_name_type type,
 	const char	*s;
 
 	switch (reason) {
-	case INVALID_LENGTH:
-		s = _(" - length is < 1 or > 31");
+	case INVALID_LENGTH:	/* <1 || > COB_MAX_NAMELEN ("normal mode ") || > COB_MAX_WORDLEN */
+		s = _(" - length is less than 1 or exceeds maximum");
 		break;
 	case SPACE_UNDERSCORE_FIRST_CHAR:
 		s = _(" - name cannot begin with space or underscore");
@@ -1556,9 +1558,16 @@ cobc_check_valid_name (const char *name, const enum cobc_name_type prechk)
 		cobc_error_name (name, prechk, INVALID_LENGTH);
 		return 1;
 	}
-	if (!cb_relaxed_syntax_checks && len > 31) {
-		cobc_error_name (name, prechk, INVALID_LENGTH);
-		return 1;
+	if (cb_flag_main || !cb_relaxed_syntax_checks) {
+		if (len > COB_MAX_NAMELEN) {
+			cobc_error_name (name, prechk, INVALID_LENGTH);
+			return 1;
+		}
+	} else {
+		if (len > COB_MAX_WORDLEN) {
+			cobc_error_name (name, prechk, INVALID_LENGTH);
+			return 1;
+		}
 	}
 
 	if (*name == '_' || *name == ' ') {
@@ -1576,7 +1585,7 @@ cobc_check_valid_name (const char *name, const enum cobc_name_type prechk)
 
 	/* Check name is not a C keyword. */
 	if (bsearch (name, cob_csyns, COB_NUM_CSYNS,
-		     sizeof (char *), cobc_bcompare)) {
+		     sizeof (name), cobc_bcompare)) {
 		cobc_error_name (name, prechk, C_KEYWORD);
 		return 1;
 	}
@@ -2092,7 +2101,7 @@ cobc_print_version (void)
 	printf ("cobc (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
 	puts ("Copyright (C) 2019 Free Software Foundation, Inc.");
-	puts (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"));
+	puts (_("License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>"));
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Written by %s\n"), "Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart");
@@ -2178,7 +2187,7 @@ cobc_var_print (const char *msg, const char *val, const unsigned int env)
 	n = 0;
 	token = strtok (p, " ");
 	for (; token; token = strtok (NULL, " ")) {
-		toklen = (int)strlen (token) + 1;
+		toklen = strlen (token) + 1;
 		if ((n + toklen) > CB_IVAL_SIZE) {
 			if (n) {
 				printf ("\n%*.*s", CB_IMSG_SIZE + 3,
@@ -2265,6 +2274,18 @@ cobc_print_info (void)
 	cobc_var_print ("BINARY-C-LONG",	_("4 bytes"), 0);
 #endif
 
+#ifdef WORDS_BIGENDIAN
+	cobc_var_print (_("endianness"),	_("big-endian"), 0);
+#else
+	cobc_var_print (_("endianness"),	_("little-endian"), 0);
+#endif
+
+#ifdef COB_EBCDIC_MACHINE
+	cobc_var_print (_("native EBCDIC"),	_("yes"), 0);
+#else
+	cobc_var_print (_("native EBCDIC"),	_("no"), 0);
+#endif
+
 	cobc_var_print (_("extended screen I/O"),	WITH_CURSES, 0);
 
 	snprintf (buff, sizeof(buff), "%d", WITH_VARSEQ);
@@ -2316,210 +2337,6 @@ cobc_print_info (void)
 #else
 	cobc_var_print (_("JSON library"),		_("disabled"), 0);
 #endif
-}
-
-static void
-cobc_print_active (const char *doc, const int print_help)
-{
-	if (!print_help) {
-		return;
-	}
-
-	puts (doc);
-}
-
-static void
-cobc_print_config_flag (const char *name, const char *doc,
-		 const char *odoc)
-{
-	char		buff[78];
-
-	if (!doc) {
-		return;
-	}
-	if (odoc) {
-		snprintf (buff, sizeof (buff) - 1, "%s=%s", name, odoc);
-		buff [77] = 0;	/* keep analyzer happy ... */
-		name = (const char *) &buff;
-	}
-	if (strlen (name) <= 19) {
-		printf ("  -f%-19s  %s\n", name, doc);
-	} else {
-		printf ("  -f%s\t%s\n", name, doc);
-	}
-}
-
-static void
-cobc_print_usage (char * prog)
-{
-	puts (_("GnuCOBOL compiler for most COBOL dialects with lots of extensions"));
-	putchar ('\n');
-	printf (_("Usage: %s [options]... file..."), prog);
-	putchar ('\n');
-	putchar ('\n');
-	puts (_("Options:"));
-	puts (_("  -h, -help             display this help and exit"));
-	puts (_("  -V, -version          display compiler version and exit"));
-	puts (_("  -i, -info             display compiler information (build/environment)\n" \
-	        "                        and exit"));
-	puts (_("  -v, -verbose          display compiler version and the commands\n" \
-	        "                        invoked by the compiler"));
-	puts (_("  -vv, -verbose=2       like -v but additional pass verbose option\n" \
-	        "                        to assembler/compiler"));
-	puts (_("  -vvv, -verbose=3      like -vv but additional pass verbose option\n" \
-	        "                        to linker"));
-	puts (_("  -q, -brief            reduced displays, commands invoked not shown"));
-	puts (_("  -###                  like -v but commands not executed"));
-	puts (_("  -x                    build an executable program"));
-	puts (_("  -m                    build a dynamically loadable module (default)"));
-	puts (_("  -j [<args>], -job[=<args>]\trun program after build, passing <args>"));
-	puts (_("  -std=<dialect>        warnings/features for a specific dialect\n"
-	        "                        <dialect> can be one of:\n"
-	        "                        default, cobol2014, cobol2002, cobol85, xopen,\n"
-	        "                        ibm-strict, ibm, mvs-strict, mvs,\n"
-	        "                        mf-strict, mf, bs2000-strict, bs2000,\n"
-	        "                        acu-strict, acu, rm-strict, rm;\n"
-	        "                        see configuration files in directory config"));
-	puts (_("  -F, -free             use free source format"));
-	puts (_("  -fixed                use fixed source format (default)"));
-	puts (_("  -O, -O2, -O3, -Os     enable optimization"));
-	puts (_("  -O0                   disable optimization"));
-	puts (_("  -g                    enable C compiler debug / stack check / trace"));
-	puts (_("  -d, -debug            enable all run-time error checking"));
-	puts (_("  -o <file>             place the output into <file>"));
-	puts (_("  -b                    combine all input files into a single\n"
-	        "                        dynamically loadable module"));
-	puts (_("  -E                    preprocess only; do not compile or link"));
-	puts (_("  -C                    translation only; convert COBOL to C"));
-	puts (_("  -S                    compile only; output assembly file"));
-	puts (_("  -c                    compile and assemble, but do not link"));
-	puts (_("  -T <file>             generate and place a wide program listing into <file>"));
-	puts (_("  -t <file>             generate and place a program listing into <file>"));
-	puts (_("  --tlines=<lines>      specify lines per page in listing, default = 55"));
-#if 0 /* to be hidden later, use -f[no-]tsymbols instead */
-	puts (_("  --tsymbols            specify symbols in listing, use -ftsymbols instead"));
-#endif
-	puts (_("  -P[=<dir or file>]    generate preprocessed program listing (.lst)"));
-#ifndef COB_INTERNAL_XREF
-	puts (_("  -Xref                 generate cross reference through 'cobxref'\n"
-	        "                        (V. Coen's 'cobxref' must be in path)"));
-#else
-	puts (_("  -Xref                 specify cross reference in listing"));
-#endif
-	puts (_("  -I <directory>        add <directory> to copy/include search path"));
-	puts (_("  -L <directory>        add <directory> to library search path"));
-	puts (_("  -l <lib>              link the library <lib>"));
-	puts (_("  -A <options>          add <options> to the C compile phase"));
-	puts (_("  -Q <options>          add <options> to the C link phase"));
-	puts (_("  -D <define>           define <define> for COBOL compilation"));
-	puts (_("  -K <entry>            generate CALL to <entry> as static"));
-	puts (_("  -conf=<file>          user-defined dialect configuration; see -std"));
-	puts (_("  -list-reserved        display reserved words"));
-	puts (_("  -list-intrinsics      display intrinsic functions"));
-	puts (_("  -list-mnemonics       display mnemonic names"));
-	puts (_("  -list-system          display system routines"));
-	puts (_("  -save-temps[=<dir>]   save intermediate files\n"
-	        "                        * default: current directory"));
-	puts (_("  -ext <extension>      add file extension for resolving COPY"));
-	putchar ('\n');
-
-	puts (_("Warning options:"));
-	puts (_("  -W                    enable all warnings"));
-	puts (_("  -Wall                 enable most warnings (all except as noted below)"));
-	puts (_("  -Wno-<warning>        disable warning enabled by -W or -Wall"));
-#define	CB_WARNDEF(var,name,doc)		\
-	puts (doc);
-#define	CB_ONWARNDEF(var,name,doc)		\
-	puts (doc);							\
-	/* TRANSLATORS: This msgid is appended to msgid for -Wno-pending and others */ \
-	puts (_("                        * ALWAYS active"));
-#define	CB_NOWARNDEF(var,name,doc)		\
-	puts (doc);							\
-	/* TRANSLATORS: This msgid is appended to msgid for -Wpossible-truncate and others */ \
-	puts (_("                        * NOT set with -Wall"));
-#include "warning.def"
-#undef	CB_WARNDEF
-#undef	CB_ONWARNDEF
-#undef	CB_NOWARNDEF
-	puts (_("  -Werror               treat all warnings as errors"));
-	puts (_("  -Werror=<warning>     treat specified <warning> as error"));
-	putchar ('\n');
-
-	puts (_("Compiler options:"));
-#define	CB_FLAG(var,print_help,name,doc)		\
-	cobc_print_active (doc, print_help);
-#define	CB_FLAG_ON(var,print_help,name,doc)		\
-	cobc_print_active (doc, print_help);
-#define	CB_FLAG_RQ(var,print_help,name,def,opt,doc)		\
-	cobc_print_active (doc, print_help);
-#define	CB_FLAG_NQ(print_help,name,opt,doc)		\
-	cobc_print_active (doc, print_help);
-#include "flag.def"
-#undef	CB_FLAG
-#undef	CB_FLAG_ON
-#undef	CB_FLAG_RQ
-#undef	CB_FLAG_NQ
-
-	putchar ('\n');
-	puts (_("Compiler dialect configuration options:"));
-#define	CB_CONFIG_STRING(var,name,doc)		\
-	cobc_print_config_flag (name, doc, _("<value>"));
-#define	CB_CONFIG_INT(var,name,min,max,odoc,doc)		\
-	cobc_print_config_flag (name, doc, odoc);
-#define	CB_CONFIG_ANY(type,var,name,doc)		\
-	cobc_print_config_flag (name, doc, _("<value>"));
-#define	CB_CONFIG_BOOLEAN(var,name,doc)		\
-	cobc_print_config_flag (name, doc, NULL);
-#define	CB_CONFIG_SUPPORT(var,name,doc)		\
-	cobc_print_config_flag (name, doc, _("<support>"));
-#include "config.def"
-#undef	CB_CONFIG_ANY
-#undef	CB_CONFIG_INT
-#undef	CB_CONFIG_STRING
-#undef	CB_CONFIG_BOOLEAN
-#undef	CB_CONFIG_SUPPORT
-	putchar ('\t');
-	puts (_("where <support> is one of the following:"));
-	putchar ('\t');
-	/* Note: separated as translators should be able to replace the single quote */
-	printf (_("'%s'"), "ok");
-	putchar (',');
-	putchar (' ');
-	printf (_("'%s'"), "warning");
-	putchar (',');
-	putchar (' ');
-	printf (_("'%s'"), "archaic");
-	putchar (',');
-	putchar (' ');
-	printf (_("'%s'"), "obsolete");
-	putchar (',');
-	putchar (' ');
-	printf (_("'%s'"), "skip");
-	putchar (',');
-	putchar (' ');
-	printf (_("'%s'"), "ignore");
-	putchar (',');
-	putchar (' ');
-	printf (_("'%s'"), "error");
-	putchar (',');
-	putchar (' ');
-	printf (_("'%s'"), "unconformable");
-	putchar ('\n');
-	cobc_print_config_flag ("not-reserved", _("word to be taken out of the reserved words list"), _("<word>"));
-	cobc_print_config_flag ("reserved", _("word to be added to reserved words list"), _("<word>"));
-	cobc_print_config_flag ("reserved", _("word to be added to reserved words list as alias"), _("<word>:<alias>"));
-	cobc_print_config_flag ("not-register", _("special register to disable"), _("<word>"));
-	cobc_print_config_flag ("register", _("special register to enable"), _("<word>"));
-
-	putchar ('\n');
-
-	putchar ('\n');
-	printf (_("Report bugs to: %s\n"
-	          "or (preferably) use the issue tracker via the home page."),
-			"bug-gnucobol@gnu.org");
-	putchar ('\n');
-	puts (_("GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>"));
-	puts (_("General help using GNU software: <http://www.gnu.org/gethelp/>"));
 }
 
 static void
@@ -3011,7 +2828,7 @@ process_command_line (const int argc, char **argv)
 			}
 			cobc_flag_library = 1;
 			no_physical_cancel = 1;
-			cb_flag_implicit_init = 1;
+			/* note: implied -fimplicit-init until GC 3.1 */
 			break;
 
 		case 'm':
@@ -4809,9 +4626,9 @@ check_filler_name (char *name)
 }
 
 static int
-set_picture (struct cb_field *field, char *picture, int picture_len)
+set_picture (struct cb_field *field, char *picture, size_t picture_len)
 {
-	int usage_len;
+	size_t usage_len;
 	char picture_usage[CB_LIST_PICSIZE];
 
 	memset (picture, 0, CB_LIST_PICSIZE);
@@ -4936,6 +4753,7 @@ set_category (int category, int usage, char *type)
 		break;
 	case CB_CATEGORY_NUMERIC:
 	case CB_CATEGORY_NUMERIC_EDITED:
+	case CB_CATEGORY_FLOATING_EDITED:
 		strcpy (type, "NUMERIC");
 		break;
 	case CB_CATEGORY_OBJECT_REFERENCE:
@@ -4985,7 +4803,7 @@ print_fields (struct cb_field *top, int *found)
 	int	get_cat;
 	int	got_picture;
 	int	old_level = 0;
-	int	picture_len = cb_listing_wide ? 64 : 24;
+	size_t	picture_len = cb_listing_wide ? 64 : 24;
 	char	type[20];
 	char	picture[CB_LIST_PICSIZE];
 	char	lcl_name[LCL_NAME_LEN];
@@ -5977,7 +5795,7 @@ print_errors_for_line (const struct list_error * const first_error,
 {
 	const struct list_error	*err;
 	const int	max_chars_on_line = cb_listing_wide ? 120 : 80;
-	int msg_off;
+	size_t msg_off;
 
 	for (err = first_error; err; err = err->next) {
 		if (err->line == line_num) {
@@ -5994,7 +5812,7 @@ print_errors_for_line (const struct list_error * const first_error,
 				}
 				print_data[pd_off] = '\0';
 				print_program_data (print_data);
-				msg_off = strlen(err->prefix);
+				msg_off = strlen (err->prefix);
 				pd_off = strlen (print_data) - msg_off;
 				if (msg_off < 2) msg_off = 2;
 				memset (print_data, ' ', msg_off - 1);

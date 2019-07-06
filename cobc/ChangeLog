@@ -1,16 +1,189 @@
 
+2019-06-29  Simon Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l (ppinput): check for conflict markers (similar to GCC)
+
+2019-06-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l (ppcopy): ensure to have original errno, not the one from
+	  one of the files in search path
+	* pplex.l (ppcopy) [_WIN32]: fixed EINVAL for path argument access doesn't
+	  allow mixed slashes or anything before a partition identifier
+	* parser.y: extracted program_init_without_program_id
+	* parser.y: moved _options_paragraph references into _program_body
+
+2019-06-23  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, codegen.c, pplex.l, ppparse.y, reserved.c, scanner.l, tree.c,
+	  typeck.c: fixed possible arithmetic overflow
+
+2019-06-08  Simon Sobisch <simonsobisch@gnu.org>
+
+	* config.def, parser.y: removed compiler support options cb_json_generate
+	  and cb_xml_generate, as soon as those words are reserved we take those
+	  statements as supported
+
+2019-06-07  Simon Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (get_prev_ml_tree_entry): fixed null-pointer access with code
+	  similar to use in other places
+	* tree.c, tree.h: added struct cb_next_elem to be used for any structure
+	  that has a next pointer as first entry, to be used by (cb_next_length)
+	  to get the size of the complete entry (only reasonable to call with the
+	  "main" entry normally attached to a program)
+	* typeck.c (cb_validate_program_data): set alphabet->custom_list to error
+	  node once seen as bad, partially limitted variable scope
+	* tree.c (validate_file): explicit check for number of keys (limited
+	  to MAX_FILE_KEYS, currently 255, per file)
+
+2019-06-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* help.c: new file, extracted from cobc.c to limit the generation of docs
+	  to actual changes in the help output; also separated help parts into one
+	  function per help section
+	* Makefile.am, cobc.c, cobc.h: adjustments for help.c
+
 2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
 
 	* tree.h: allow compilation with compilers that don't have __func__
+
+2019-06-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* tree.c (cb_get_int): return 0 for cb_error_node not raise errors
+	  on fields that got an error raised before
+	* parser.y: removed duplicate parts for integer handling,
+	  disabled the non-standard "COL/LINE +1/-1" variant (which is not supported
+	  by any known COBOL dialect, must be "COL/LINE + 1 / - 1")
+	* parser.y (set_record_size): extracted from (record_clause) variants
+	* config.def: added records-mismatch-record-clause
+	* parser.y (set_record_size), tree.c (finalize_file): handle record sizes
+	  that don't match the record clause (auto-adjust file min/max) via
+	  records-mismatch-record-clause as it is effectively a comment for IBM
+
+2019-05-31  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (restore_backup_pos): extracted for common use
+	* parser.y (evaluate_when_list), typeck.c (build_evaluate): assign and
+	  use position of the WHEN clause for better error handling
+	* flag.def: don't suppress static call flags in help
+
+2019-05-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, reserved.c, tree.h, config.def: FR #311 added Fujitsu
+	  specification of call convention by WITH ... LINKAGE,
+	  added the two new c/s words PASCAL and C to the additional
+	  implementor defined call-convention;
+	  added configuration options for both extensions for specifying the
+	  call-convention
+
+2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: setting of YFLAGS by configure instead of fixed AM_YFLAGS
+
+2019-04-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (line_keyword_clause): added missing RW line syntax variants
+	* parser.y (_acu_size): initial parsing for size specification on pointers
+
+2019-04-15  Simon Sobisch <simonsobisch@gnu.org>
+
+	* tree.c: removed superfluous inline prototypes for cb_ref/cb_try_ref
 
 2019-04-12  Ron Norman <rjn@inglenet.com>
 
 	* typeck.c: If field has children with OCCURS UNBOUNDED then do
 	  cob_check_ref_mod at runtime and not compile time
 
+2019-04-07  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (COBC): use pre-inst-env ensuring to use the built version
+	* parser.y, typeck.c, tree.h, config.def: FR #354 added CONTINUE AFTER
+	  to suspend runtime execution
+	* parser.y (begin_statement_from_backup_pos): new function used for postponed
+	  statement start
+
+2019-03-26  Simon Sobisch <simonsobisch@gnu.org>
+
+	* tree.c, tree.h: added cb_int7, cb_int8, cb_int16
+	* parser.y: replaced cb_int(0,4,8,16) by pre-created cb_int0-cb_int16
+	* typeck.c (cb_emit_open): replaced comparison of cached cb_int to compare
+	  the actual integer value
+	* tree.c (cb_int): minimized struct int_node and access providing minimal
+	  speed for integer lookup and minimal less memory consumption
+	* tree.c (cb_int_hex): fixed to not adjust hex-attribute of cached integers
+	  by using a different cache
+	* codgen.c, tree.c, tree.h: deactivated hex-attribute of CB_INTEGER for now
+	  (marked with USE_INT_HEX) as this increases the struct and we *should*
+	  pass the flags as constants in any case
+	* tree.c (cb_int, cb_int_hex): disabled caching of integer values (other
+	  than 0-8) for now (test, reactivate by defining CACHED_INTEGERS=1) as the
+	  necessary lookup can take much time with many different integer values
+
+2019-03-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* field.c (cb_is_expr, cb_evaluate_expr, create_implicit_picture): fixed
+	  check of literal type before accessing values as literals in some places
+	* cobc.c (cobc_print_info): output endianess and native EBCDIC
+
+2019-03-24  Simon Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_bin_field) [__SUNPRO_C]: split generated initialization
+	  of the field into two statements as some compilers don't allow an
+	  assignment of a local field there - after Ron Norman 2015
+
+2019-03-23  Simon Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (decimal_compute), tree.h: track if cob_decimal computations
+	  will be used with new flag_decimal_comp
+	* codegen.c (output_standard_includes): additional include gmp.h when
+	  cob_decimal is used in one of the generated (sub-)programs
+	* codegen.c (output_standard_includes): don't include currently unused
+	  stdlib.h, stddef.h, math.h
+	* typeck.c (cb_resolve_debug_refs): fixed bug #570 invalid tree cast for
+	  CD-entries with debug reference
+	* tree.c (cb_name_1), cobc.c (cobc_enum_explain): cater for CB_TAG_CD
+
+2019-03-19  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: use of COB_MAX_NAMELEN
+	* cobc.h: comment-explanation for cb_flag_main / cobc_flag_main
+
+2019-03-18  Simon Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l, config.def: FR #352 added national-character-literals setting
+	  and read of NC"" literals (identical to N"" literals)
+
+2019-03-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* tree.c: improved error handling for wrong PICTURE clause,
+	  including a new warning for uncommon parentheses and
+	  only error once for same invalid character
+	* tree.c, tree.h, scanner.l, typeck.c, codegen.c, cobc.c: added compiler
+	  part for floating-point numeric-edited item (libcob open)
+	* parser.y: added parsing for PICTURE clause locale-format
+
+2019-03-16  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: added unqualified_word which consumes qualification
+	  checking that it does not occur; used for INDEXED BY and OCCURS KEY
+	* parser.y, tree.h, reserved.c, typeck.c: added parsing for
+	  LOCALE/NATIONAL ALPHABET, NATIONAL COLLATING SEQUENCE and
+	  COLLATING SEQUENCE OF key
+
+2019-03-15  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: drop yacc-compatibility warnings via AM_YFLAGS -Wno-yacc
+	  as only bison is supported in any case
+
 2019-03-14  Simon Sobisch <simonsobisch@gnu.org>
 
-	* config.c: hand-merged change 2015-04-27 with an option to go back
+	* config.c: hand-merged change 2015-04-27 with an option to go back,
+	  see COBC_STORES_CONFIG_VALUES
+
+2019-03-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, typeck: implemented table SORT without specifying key,
+	  see Patch #42
 
 2019-03-11  Simon Sobisch <simonsobisch@gnu.org>
 

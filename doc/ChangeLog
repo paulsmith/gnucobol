@@ -1,4 +1,23 @@
 
+2019-06-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: adjusted dependencies for latest changes
+
+2019-05-22  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobcinfo.sh: completely adjusted the generation of the appendices
+	  (tex-includes) to not copy the output of cobc/cobcrun verbatim
+	  but to create readable tables with texinfo commands instead
+	* gnucobol.texi: added intro to the appendices, heavy adjustments
+	  to use of texinfo commands
+	* gnucobol.texi: disabled index generation as it has not enough entries
+	  to be useful
+	* Makefile.am (touch, touch-tex): targets added
+
+2019-04-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobcinfo.sh: improved output for runtime configuration
+
 2019-02-18  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: cleanup distribution rules

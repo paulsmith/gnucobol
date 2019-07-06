@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
@@ -85,12 +85,6 @@ CB_FLAG_NQ (1, "intrinsics", 10,
 /* Binary flags */
 
 /* Flags with suppressed help */
-CB_FLAG (cb_flag_static_call, 0, "static-call",
-	_("  -fstatic-call         output static function calls for the CALL statement"))
-
-CB_FLAG_ON (cb_flag_c_decl_for_static_call, 0, "gen-c-decl-static-call",
-	_("  -fno-gen-c-decl-static-call\tdisable generation of C function declations\n"
-	  "                        for subroutines with static CALL"))
 
 CB_FLAG_ON (cb_flag_recursive_check, 1, "recursive-check",
 	_("  -fno-recursive_check  disable check of recursive program call;\n"
@@ -185,9 +179,18 @@ CB_FLAG (cb_flag_optional_file, 1, "optional-file",
 	_("  -foptional-file       treat all files as OPTIONAL\n"
 	  "                        * unless NOT OPTIONAL specified"))
 
+#if 1 /* deactivated + untranslated for now, inspect later */
 CB_FLAG (cb_mf_ibm_comp, 1, "ibmcomp",
 	  "  -fibmcomp             Handle COMP fields like Micro Focus IBMCOMP\n"
 	  "                        * binary-size: 1--8 & synchronized-clause: ignore")
+#endif
+
+CB_FLAG (cb_flag_static_call, 1, "static-call",
+	_("  -fstatic-call         output static function calls for the CALL statement"))
+
+CB_FLAG_ON (cb_flag_c_decl_for_static_call, 1, "gen-c-decl-static-call",
+	_("  -fno-gen-c-decl-static-call\tdisable generation of C function declations\n"
+	  "                        for subroutines with static CALL"))
 
 CB_FLAG (cb_mf_files, 1, "mf-files",
 	 _("Sequential & Relative files will match Micro Focus format"))

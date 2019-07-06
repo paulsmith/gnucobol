@@ -16,11 +16,11 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1527,6 +1527,9 @@ output_attr (const cb_tree x)
 					flags |= COB_FLAG_IS_FP;
 					break;
 				default:
+					if (f->pic->category == CB_CATEGORY_FLOATING_EDITED) {
+						flags |= COB_FLAG_IS_FP;
+					}
 					break;
 				}
 
@@ -1609,7 +1612,7 @@ output_globext_cache (void)
 /* Headers */
 
 static void
-output_standard_includes (void)
+output_standard_includes (struct cb_program *prog)
 {
 #if !defined (_GNU_SOURCE) && defined (_XOPEN_SOURCE_EXTENDED)
 	output ("#ifndef\t_XOPEN_SOURCE_EXTENDED\n");
@@ -1617,10 +1620,7 @@ output_standard_includes (void)
 	output ("#endif\n");
 #endif
 	output ("#include <stdio.h>\n");
-	output ("#include <stdlib.h>\n");
-	output ("#include <stddef.h>\n");
 	output ("#include <string.h>\n");
-	output ("#include <math.h>\n");
 #ifdef	WORDS_BIGENDIAN
 	output ("#define  WORDS_BIGENDIAN 1\n");
 #endif
@@ -1630,6 +1630,9 @@ output_standard_includes (void)
 #endif
 	if (cb_flag_winmain) {
 		output ("#include <windows.h>\n");
+	}
+	if (prog->decimal_index_max || prog->flag_decimal_comp) {
+		output ("#include <gmp.h>\n");
 	}
 	output ("#include <libcob.h>\n\n");
 }
@@ -2760,11 +2763,16 @@ output_integer (cb_tree x)
 		}
 		break;
 	case CB_TAG_INTEGER:
+#ifdef USE_INT_HEX /* Simon: using this increases the struct and we
+		 *should* pass the flags as constants in any case... */
 		if (CB_INTEGER (x)->hexval) {
 			output ("0x%X", CB_INTEGER (x)->val);
 		} else {
 			output ("%d", CB_INTEGER (x)->val);
 		}
+#else
+		output ("%d", CB_INTEGER (x)->val);
+#endif
 		break;
 	case CB_TAG_LITERAL:
 		output ("%d", cb_get_int (x));
@@ -3053,11 +3061,16 @@ output_long_integer (cb_tree x)
 		}
 		break;
 	case CB_TAG_INTEGER:
+#ifdef USE_INT_HEX /* Simon: using this increases the struct and we
+		 *should* pass the flags as constants in any case... */
 		if (CB_INTEGER (x)->hexval) {
 			output ("0x%X", CB_INTEGER (x)->val);
 		} else {
 			output ("%d", CB_INTEGER (x)->val);
 		}
+#else
+		output ("%d", CB_INTEGER (x)->val);
+#endif
 		break;
 	case CB_TAG_LITERAL:
 		output (CB_FMT_LLD_F, cb_get_long_long (x));
@@ -3341,7 +3354,7 @@ get_prev_ml_tree_entry (const struct cb_ml_generate_tree * const s)
 			return s->prev_sibling;
 		}
 	} else if (s->attrs) {
-		return get_last_attr (s->prev_sibling);
+		return get_last_attr (s);
 	} else if (s->parent) {
 		return s->parent;
 	} else {
@@ -4331,6 +4344,7 @@ deduce_initialize_type (struct cb_initialize *p, struct cb_field *f,
 		case CB_CATEGORY_NUMERIC_EDITED:
 		case CB_CATEGORY_ALPHANUMERIC_EDITED:
 		case CB_CATEGORY_NATIONAL_EDITED:
+		case CB_CATEGORY_FLOATING_EDITED:
 			return INITIALIZE_ONE;
 		default:
 			if (cb_tree_type (CB_TREE (f), f) == COB_TYPE_NUMERIC_PACKED) {
@@ -4687,7 +4701,7 @@ output_initialize_one (struct cb_initialize *p, cb_tree x)
 			memcpy (litbuff, l->data, (size_t)size);
 		} else {
 			memcpy (litbuff, l->data, (size_t)l->size);
-			memset (litbuff + l->size, ' ', (size_t)(size - l->size));
+			memset (litbuff + l->size, ' ', (size_t)size - l->size);
 		}
 
 		buffchar = *(litbuff + size - 1);
@@ -4782,6 +4796,7 @@ output_initialize_one (struct cb_initialize *p, cb_tree x)
 		switch (CB_TREE_CATEGORY (x)) {
 		case CB_CATEGORY_NUMERIC:
 		case CB_CATEGORY_NUMERIC_EDITED:
+		case CB_CATEGORY_FLOATING_EDITED:
 			output_move (cb_zero, x);
 			break;
 		case CB_CATEGORY_ALPHANUMERIC:
@@ -4807,10 +4822,7 @@ output_initialize_compound (struct cb_initialize *p, cb_tree x)
 	struct cb_field	*f;
 	struct cb_field	*last_field;
 	cb_tree		c;
-	size_t		size;
 	int		type;
-	int		last_char;
-	int		i;
 
 	ff = cb_code_field (x);
 	for (f = ff->children; f; f = f->sister) {
@@ -4820,7 +4832,8 @@ output_initialize_compound (struct cb_initialize *p, cb_tree x)
 		switch (type) {
 		case INITIALIZE_NONE:
 			break;
-		case INITIALIZE_DEFAULT:
+		case INITIALIZE_DEFAULT: {
+			int		last_char;
 			last_field = f;
 			last_char = initialize_uniform_char (f, p);
 
@@ -4839,21 +4852,24 @@ output_initialize_compound (struct cb_initialize *p, cb_tree x)
 						}
 					}
 				}
+				{
+					int		size;
+					if (f->sister) {
+						size = f->sister->offset - last_field->offset;
+					} else {
+						size = ff->offset + ff->size - last_field->offset;
+					}
 
-				if (f->sister) {
-					size = f->sister->offset - last_field->offset;
-				} else {
-					size = ff->offset + ff->size - last_field->offset;
+					output_initialize_uniform (c, last_char, size);
 				}
-
-				output_initialize_uniform (c, last_char, (int) size);
 				break;
 			}
-			/* Fall through */
+		}
+		/* Fall through */
 		default:
 			if (f->flag_occurs) {
 				/* Begin occurs loop */
-				i = f->indexes;
+				int		i = f->indexes;
 				i_counters[i] = 1;
 				output_line ("for (i%d = 1; i%d <= %d; i%d++)",
 					     i, i, f->occurs_max, i);
@@ -5621,8 +5637,12 @@ output_bin_field (const cb_tree x, const cob_u32_t id)
 	}
 	aflags |= COB_FLAG_CONSTANT;
 	i = lookup_attr (COB_TYPE_NUMERIC_BINARY, digits, 0, aflags, NULL, 0);
-	output_line ("cob_field\tcontent_fb_%u = { %u, content_%u.data, &%s%d };",
-		     id, size, id, CB_PREFIX_ATTR, i);
+	/* Note: some C compilers (SUN for one) will not accept inline initialization
+	   with 'content_%u.data' because that is a local variable,
+	   therefore generate this part of the assignment separately */
+	output_line ("cob_field\tcontent_fb_%u = { %u, NULL, &%s%d };",
+		     id, size, CB_PREFIX_ATTR, i);
+	output_line ("content_fb_%u.data = content_%u.data;", id, id);
 }
 
 static COB_INLINE COB_A_INLINE int
@@ -8097,6 +8117,8 @@ output_stmt (cb_tree x)
 	case CB_TAG_PERFORM:
 		output_perform (CB_PERFORM (x));
 		break;
+	/* "common" CONTINUE, note:
+	   CONTINUE AFTER exp SECONDS is already translated into a funcall */
 	case CB_TAG_CONTINUE:
 		output_prefix ();
 		output (";\n");
@@ -8960,10 +8982,8 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 {
 	int		idx, colnum;
 	cb_tree		l, x;
-	struct cb_literal	*lit;
 	cb_tree		value;
 	unsigned int	i, j;
-	char		*val;
 
 	if(bgn == 1)
 		report_field_id = 0;
@@ -9065,31 +9085,37 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 		value = CB_VALUE (f->values);
 
 		if (CB_TREE_TAG (value) == CB_TAG_LITERAL) {
-			lit = CB_LITERAL (value);
+			char	*val;
+			size_t	ref_size;
+			struct cb_literal	*lit = CB_LITERAL (value);
 			if (lit->all) {
-				val = (char *)cobc_malloc(f->size * 2 + 2);
-				if(lit->data[0] == '"'
-				|| lit->data[0] == '\\') {	/* Fix string for C code */
-					for(i=j=0; j < (unsigned int)f->size; j++) {
+				ref_size = f->size;
+			} else {
+				ref_size = lit->size;
+			}
+			val = (char *)cobc_malloc (ref_size * 2 + 2);
+			if (lit->all) {
+				if (lit->data[0] == '"'
+				 || lit->data[0] == '\\') {	/* Fix string for C code */
+					for (i = j = 0; j < (unsigned int)f->size; j++) {
 						val[i++] = '\\';
 						val[i++] = lit->data[0];
 					}
-					val[i] = 0;
 				} else {
-					memset(val,lit->data[0],f->size);
+					memset (val, lit->data[0], f->size);
+					i = f->size;
 				}
-				output_local("\"%s\",%d,", val, (int)f->size);
 			} else {
-				val = (char *)cobc_malloc(lit->size * 2 + 2);
-				for(i=j=0; j < lit->size; j++) {
-					if(lit->data[j] == '"'
-					|| lit->data[j] == '\\')	/* Fix string for C code */
+				val = (char *)cobc_malloc (lit->size * 2 + 2);
+				for (i = j = 0; j < lit->size; j++) {
+					if (lit->data[j] == '"'
+					 || lit->data[j] == '\\')	/* Fix string for C code */
 						val[i++] = '\\';
 					val[i++] = lit->data[j];
 				}
-				val[i] = 0;
-				output_local("\"%s\",%d,", val, (int)lit->size);
 			}
+			val[i] = 0;
+			output_local("\"%s\",%d,", val, (int)ref_size);
 			cobc_free((void*) val);
 		} else {
 			output_local("NULL,0,");
@@ -12224,7 +12250,7 @@ codegen (struct cb_program *prog, const int subsequent_call)
 			}
 		}
 
-		output_standard_includes ();
+		output_standard_includes (prog);
 		/* string_buffer has formatted date from above */
 		output_gnucobol_defines (string_buffer, loctime);
 

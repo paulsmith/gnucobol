@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2010-2012, 2014-2016, 2018 Free Software Foundation, Inc.
+   Copyright (C) 2010-2012, 2014-2016, 2018-2019 Free Software Foundation, Inc.
    Modified for use in GnuCOBOL by Roger While, Simon Sobisch
 */
 
@@ -24,7 +24,7 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,7 +45,7 @@
 #define N_(msgid)		msgid
 #endif
 
-/* Force symbol exports */
+   /* Force symbol exports */
 #define	COB_LIB_EXPIMP
 #include "libcob.h"
 

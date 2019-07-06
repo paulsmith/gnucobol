@@ -1,4 +1,85 @@
 
+2019-06-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: changed the manual test runner to be a script handled
+	  by autoconf instead of make
+	* configure.ac: check for HAVE_MOUSEINTERVAL
+
+2019-06-16  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (tarstamp.h, $(top_distdir)/tarstamp.h): targets added
+	* Makefile.am: fixed SUBDIRS handling
+
+2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: include all (possibly) generated headers by '#include <header>'
+	  (search "system directories" [which in all known compilers are pre-fixed
+	  with the ones specified with '-I', which is done for the builddir
+	  already]) instead of '#include "header"' (which is searched next to the
+	  including file first). This applies to all files that include config.h,
+	  defaults.h, tarstamp.h, parser.h, ppparse.h.
+
+2019-05-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: fix bug #599 avoid useless dependencies (all but libm,
+	  needs to be inspected later) by not copying LIBCOB_LIBS to COB_LIBS
+	  and resetting LIBS after XML2/CJSON check;
+	  now substituting LIBCOB_CPPFLAGS
+	* configure.ac: --with-cjson=local added (defines LOCAL_CJSON),
+	  allowing to built-in cjson into libcob when its sources are found and
+	  linkable in folder libcob (both srcdir and builddir supported);
+	  takes precedence over search by means of pkg-config and/or
+	  CJSON_CFLAGS and CJSON_LIBS
+	* Makefile.am (dist-hook): moved creation of windows source zip to a
+	  separate target and make it work for out-of-tree builds, too
+	* create_win_dist.sh: all external paths are now specified by
+	  environment variables; use rsync with exclude filters for
+	  build_windows instead of plain cp
+
+2019-05-20  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: set YFLAGS and DIFF_FLAGS depending on
+	  available/requested options
+
+2019-05-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: don't error on bad libxml2 if not explicit requested
+
+2019-05-13  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac, gnucobol.spec: version dump to 3.1-dev
+	* configure.ac: checks/defines HAVE_CJSON_H as an alternative to
+	  HAVE_CJSON_CJSON_H
+
+2019-05-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* autogen.sh: suppress most error messages (that can also occur if
+	  execution rights are already available but we can't set them)
+	* configure.ac: check for curses has_mouse
+
+2019-04-14  Ron Norman <rjn@inglenet.com>
+
+	* configure.ac [__xlc__]: suppress compiler warning about MAXMEM
+	  optimization
+
+2019-04-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (noinst_SCRIPTS) add pre-inst-env
+	* configure.ac (AC_CONFIG_FILES): add pre-inst-env (template file
+	  build_aux/pre-inst-env.in) and split existing entries to initialize
+	  scripts to be executable
+
+2019-04-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (noinst_SCRIPTS) add pre-inst-env
+	* configure.ac (AC_CONFIG_FILES): add pre-inst-env (template file
+	  build_aux/pre-inst-env.in) and split existing entries to initialize
+	  scripts to be executable
+
+2019-03-15  Simon Sobisch <simonsobisch@gnu.org>
+
+	* autogen.sh: fixed to work correctly when called as "./autogen.sh"
+
 2019-02-18  Simon Sobisch <simonsobisch@gnu.org>
 
 	* autogen.sh: new, wrapper for build_aux/bootstrap

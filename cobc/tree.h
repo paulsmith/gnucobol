@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
@@ -137,11 +137,19 @@ enum cb_tag {
 	   cobc_enum_explain as well. */
 };
 
+/* Alphabet target */
+#define CB_ALPHABET_ALPHANUMERIC	0
+#define CB_ALPHABET_NATIONAL	1
+
 /* Alphabet type */
 #define CB_ALPHABET_NATIVE	0
 #define CB_ALPHABET_ASCII	1
 #define CB_ALPHABET_EBCDIC	2
 #define CB_ALPHABET_CUSTOM	3
+#define CB_ALPHABET_LOCALE	4
+#define CB_ALPHABET_UTF_8	5
+#define CB_ALPHABET_UTF_16	6
+#define CB_ALPHABET_UCS_4	7
 
 /* Call convention bits */
 /* Bit number	Meaning			Value */
@@ -189,6 +197,8 @@ enum cb_tag {
 #define CB_CONV_THUNK_16	(1 << 5)
 #define CB_CONV_STDCALL		(1 << 6)
 #define CB_CONV_COBOL	(1 << 15)
+#define CB_CONV_C	(0)
+#define CB_CONV_PASCAL	(CB_CONV_L_TO_R | CB_CONV_CALLEE_STACK)
 
 /* System category */
 enum cb_system_name_category {
@@ -293,7 +303,8 @@ enum cb_category {
 	CB_CATEGORY_NUMERIC_EDITED,		/* 9 */
 	CB_CATEGORY_OBJECT_REFERENCE,		/* 10 */
 	CB_CATEGORY_DATA_POINTER,		/* 11 */
-	CB_CATEGORY_PROGRAM_POINTER		/* 12 */
+	CB_CATEGORY_PROGRAM_POINTER,		/* 12 */
+	CB_CATEGORY_FLOATING_EDITED		/* 13 */
 };
 
 /* Storage sections */
@@ -527,6 +538,11 @@ typedef struct cb_tree_common	*cb_tree;
 #define CB_TREE_CAST(tg,ty,x)	((ty *) (x))
 #endif
 
+/* any next */
+struct cb_next_elem {
+	struct cb_next_elem	*next;
+};
+
 /* FIXME: HAVE_FUNC should be checked via configure and the others be a fallback */
 #if defined(NO_HAVE_FUNC)
   #define CURRENT_FUNCTION "unknown"
@@ -619,7 +635,10 @@ struct cb_debug_call {
 struct cb_integer {
 	struct cb_tree_common	common;		/* Common values */
 	int			val;		/* Integer value */
+#ifdef USE_INT_HEX /* Simon: using this increases the struct and we
+         *should* pass the flags as constants in any case... */
 	unsigned int		hexval;		/* Output hex value */
+#endif
 };
 
 #define CB_INTEGER(x)	(CB_TREE_CAST (CB_TAG_INTEGER, struct cb_integer, x))
@@ -642,7 +661,8 @@ struct cb_alphabet_name {
 	struct cb_tree_common	common;		/* Common values */
 	const char		*name;		/* Original name */
 	char			*cname;		/* Name used in C */
-	cb_tree			custom_list;	/* Custom ALPHABET */
+	cb_tree			custom_list;	/* Custom ALPHABET / LOCALE reference */
+	unsigned int		alphabet_target;	/* ALPHANUMERIC or NATIONAL */
 	unsigned int		alphabet_type;	/* ALPHABET type */
 	int			low_val_char;	/* LOW-VALUE */
 	int			high_val_char;	/* HIGH-VALUE */
@@ -962,6 +982,7 @@ struct cb_alt_key {
 	struct cb_alt_key	*next;			/* Pointer to next */
 	cb_tree			key;			/* Key item */
 	cb_tree			password;			/* Password item */
+	cb_tree			collating_sequence_key;	/* COLLATING */
 	int			duplicates;		/* DUPLICATES */
 	int			offset;			/* Offset from start */
 	int			tf_suppress;		/* !0 for SUPPRESS */
@@ -981,6 +1002,10 @@ struct cb_file {
 	cb_tree			password;			/* Password item for file or primary key */
 	struct cb_key_component	*component_list;	/* List of fields making up primary key */
 	struct cb_alt_key	*alt_key_list;		/* ALTERNATE RECORD KEY */
+	cb_tree			collating_sequence_key;	/* COLLATING */
+	cb_tree			collating_sequence;	/* COLLATING */
+	cb_tree			collating_sequence_n;	/* COLLATING FOR NATIONAL*/
+	cb_tree			collating_sequence_keys;	/* list of postponed COLLATING OF */
 	/* FD/SD */
 	struct cb_field		*record;		/* Record descriptions */
 	cb_tree			record_depending;	/* RECORD DEPENDING */
@@ -1364,7 +1389,7 @@ struct cb_statement {
 #define CB_STATEMENT(x)		(CB_TREE_CAST (CB_TAG_STATEMENT, struct cb_statement, x))
 #define CB_STATEMENT_P(x)	(CB_TREE_TAG (x) == CB_TAG_STATEMENT)
 
-/* CONTINUE */
+/* CONTINUE (*not* CONTINUE AFTER exp SECONDS) */
 
 struct cb_continue {
 	struct cb_tree_common	common;		/* Common values */
@@ -1580,8 +1605,8 @@ struct cb_program {
 
 	/* Internal variables */
 	int		loop_counter;			/* Loop counters */
-	unsigned int	decimal_index;			/* cob_decimal count */
-	unsigned int	decimal_index_max;		/* cob_decimal max */
+	unsigned int	decimal_index;			/* cob_decimal count of this program */
+	unsigned int	decimal_index_max;		/* program group's max cob_decimal */
 	int		nested_level;			/* Nested program level */
 	unsigned int	num_proc_params;		/* PROC DIV params */
 	int		toplev_count;			/* Top level source count */
@@ -1614,6 +1639,7 @@ struct cb_program {
 	unsigned int	flag_save_exception	: 1;	/* Save exception code */
 	unsigned int	flag_report		: 1;	/* Have REPORT SECTION */
 	unsigned int	flag_void		: 1;	/* void return for subprogram */
+	unsigned int	flag_decimal_comp	: 1;	/* program group has decimal computations */
 };
 
 #define CB_PROGRAM(x)	(CB_TREE_CAST (CB_TAG_PROGRAM, struct cb_program, x))
@@ -1715,6 +1741,9 @@ extern cb_tree			cb_int3;
 extern cb_tree			cb_int4;
 extern cb_tree			cb_int5;
 extern cb_tree			cb_int6;
+extern cb_tree			cb_int7;
+extern cb_tree			cb_int8;
+extern cb_tree			cb_int16;
 extern cb_tree			cb_i[COB_MAX_SUBSCRIPTS];
 extern cb_tree			cb_error_node;
 
@@ -1875,6 +1904,7 @@ extern cb_tree			cb_pair_add (cb_tree, cb_tree, cb_tree);
 extern cb_tree			cb_list_append (cb_tree, cb_tree);
 extern cb_tree			cb_list_reverse (cb_tree);
 extern unsigned int		cb_list_length (cb_tree);
+extern unsigned int		cb_next_length (struct cb_next_elem *);
 
 extern struct cb_report		*build_report (cb_tree);
 extern void			finalize_report (struct cb_report *, struct cb_field *);
@@ -1948,6 +1978,7 @@ extern int			cb_list_map (cb_tree (*) (cb_tree), cb_tree);
 /* error.c */
 extern void		cb_warning_x (int, cb_tree, const char *, ...) COB_A_FORMAT34;
 extern void		cb_error_x (cb_tree, const char *, ...) COB_A_FORMAT23;
+extern unsigned int	cb_verify (const enum cb_support, const char *);
 extern unsigned int	cb_verify_x (cb_tree, const enum cb_support,
 				     const char *);
 extern void		listprint_suppress (void);
@@ -2079,7 +2110,7 @@ extern void		cb_emit_call (cb_tree, cb_tree, cb_tree, cb_tree,
 extern void		cb_emit_cancel (cb_tree);
 extern void		cb_emit_close (cb_tree, cb_tree);
 extern void		cb_emit_commit (void);
-extern void		cb_emit_continue (void);
+extern void		cb_emit_continue (cb_tree);
 extern void		cb_emit_delete (cb_tree);
 extern void		cb_emit_delete_file (cb_tree);
 
@@ -2179,7 +2210,7 @@ extern cb_tree		cb_build_set_attribute (const struct cb_field *,
 						const cob_flags_t);
 extern void		cb_emit_set_last_exception_to_off (void);
 
-extern void		cb_emit_sort_init (cb_tree, cb_tree, cb_tree);
+extern void		cb_emit_sort_init (cb_tree, cb_tree, cb_tree, cb_tree);
 extern void		cb_emit_sort_using (cb_tree, cb_tree);
 extern void		cb_emit_sort_input (cb_tree);
 extern void		cb_emit_sort_giving (cb_tree, cb_tree);

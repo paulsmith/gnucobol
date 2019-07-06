@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
@@ -24,7 +24,7 @@
 %defines
 %error-verbose
 %verbose
-%name-prefix="pp" // recent versions want %api.prefix "pp", older cannot compile this
+%name-prefix="pp" /* recent versions want %api.prefix "pp", older cannot compile this */
 
 /* NOTE:
    support without = was added in Bison 2.4 (released 2008-11-02, we currently use 2.3),
@@ -32,7 +32,7 @@
 */
 
 %{
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -447,7 +447,7 @@ ppp_check_needs_quote (const char *envval)
 		size++;
 	}
 
-	if (*s || size <= (dot_seen + sign_seen)) {
+	if (*s || size <= ((size_t)dot_seen + sign_seen)) {
 		return 1;
 	}
 	return 0;

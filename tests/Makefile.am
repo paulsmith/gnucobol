@@ -17,7 +17,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 SUBDIRS = cobol85
 
@@ -68,29 +68,39 @@ testsuite_manual_sources = \
 
 EXTRA_DIST = $(srcdir)/package.m4 $(TESTSUITE) $(TESTSUITE_MANUAL) \
 	$(srcdir)/testsuite.at $(srcdir)/testsuite_manual.at \
-	$(srcdir)/listings-sed.sh $(srcdir)/run_prog_manual.sh.in \
+	$(srcdir)/listings-sed.sh \
 	$(testsuite_sources) $(testsuite_manual_sources)
 
 DISTCLEANFILES = atconfig
 
-check-local: $(TESTSUITE)
+check-local: prereq-testsuite
+	@GNUCOBOL_TEST_LOCAL=""  $(TESTSUITE) $(TESTSUITEFLAGS) || (rm -f testsuite.dir/at-job-fifo; exit 1)
+	@rm -f testsuite.dir/at-job-fifo
+
+localcheck: prereq-testsuite
+	@GNUCOBOL_TEST_LOCAL="1" $(TESTSUITE) $(TESTSUITEFLAGS) || (rm -f testsuite.dir/at-job-fifo; exit 1)
+	@rm -f testsuite.dir/at-job-fifo
+	
+prereq-check:
 	@echo testing for working diff && diff - "$(TESTSUITE)" < "$(TESTSUITE)" \
 		|| (echo "Error: no working 'diff' in PATH" && false)
-	@$(TESTSUITE) $(TESTSUITEFLAGS) || rm -f testsuite.dir/at-job-fifo
-	@rm -f testsuite.dir/at-job-fifo
+	
+prereq-testsuite: $(TESTSUITE) prereq-check
+	@rm -rf testsuite.dir
+	
+prereq-manual: $(TESTSUITE_MANUAL) prereq-check
+	@rm -rf testsuite_manual.dir
 
 clean-local:
 	rm -rf *.dir *.log
 
-./run_prog_manual.sh: run_prog_manual.sh.in
-	@cp $(srcdir)/run_prog_manual.sh.in $@
-
-checkmanual: $(TESTSUITE_MANUAL) ./run_prog_manual.sh
-	@$(TESTSUITE_MANUAL) $(TESTSUITEFLAGS) || rm -f testsuite_manual.dir/at-job-fifo
+checkmanual: prereq-manual
+	@$(TESTSUITE_MANUAL) $(TESTSUITEFLAGS) || (rm -f testsuite_manual.dir/at-job-fifo; exit 1)
 	@rm -f testsuite_manual.dir/at-job-fifo
 
 # targets that are only logical targets instead of files
-.PHONY: test checkall check-manual
+.PHONY: test checkall checkmanual localcheck \
+	prereq-check prereq-testsuite prereq-manual
 
 test:
 	@echo testing for perl && perl -v 1>/dev/null \

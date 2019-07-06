@@ -1,3 +1,21 @@
+:: Copyright (C) 2014-2019 Free Software Foundation, Inc.
+:: Written by Simon Sobisch, Edward Hart
+::
+:: This file is part of GnuCOBOL.
+::
+:: The GnuCOBOL compiler is free software: you can redistribute it
+:: and/or modify it under the terms of the GNU General Public License
+:: as published by the Free Software Foundation, either version 3 of the
+:: License, or (at your option) any later version.
+::
+:: GnuCOBOL is distributed in the hope that it will be useful,
+:: but WITHOUT ANY WARRANTY; without even the implied warranty of
+:: MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+:: GNU General Public License for more details.
+::
+:: You should have received a copy of the GNU General Public License
+:: along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
+
 :: Batch for preparing windows binary distribution folder
 :: By default, binaries use Release executable. To distribute a debug
 :: distributable (y tho), provide DEBUG as an argument.
@@ -20,24 +38,18 @@ set "cob_source_path=%COB_MAIN_DIR%..\"
 set "cob_header_path=%COB_MAIN_DIR%"
 
 :: Set directory with generated release files
-set "cob_release_path=%COB_MAIN_DIR%"
+set "cob_build_path=%COB_MAIN_DIR%"
 
-if exist "%cob_release_path%config.h" (
-   for /f "tokens=3 delims= " %%a in ('find "PACKAGE_NAME" "%cob_header_path%config.h"') do (
-      set PVTEMP=%%a
-   )
-   set PACKAGE_NAME=!PVTEMP:"=!
-   for /f "tokens=3 delims= " %%a in ('find "PACKAGE_VERSION" "%cob_header_path%config.h"') do (
-      set PVTEMP=%%a
-   )
-   set PACKAGE_VERSION=!PVTEMP:"=!
-   for /f "tokens=3 delims= " %%a in ('find "PACKAGE_TARNAME" "%cob_header_path%config.h"') do (
-      set PVTEMP=%%a
-   )
-   set PACKAGE_TARNAME=!PVTEMP:"=!
-   set PACKAGE_DIRECTORY=!PACKAGE_NAME!_!PACKAGE_VERSION!
+if exist "%cob_build_path%config.h" (
+   pushd "%cob_build_path%"
+   call :setver
+   popd
+) else if exist "%cob_source_path%config.h" (
+   echo WARNING: config.h not found as "%cob_build_path%config.h" but as "%cob_source_path%config.h"!
+   pushd "%cob_source_path%"
+   call :setver
+   popd
 ) else (
-   echo WARNING: config.h not found as "%cob_header_path%config.h"!
    set PACKAGE_DIRECTORY=GnuCOBOL
    set PACKAGE_TARNAME=gnucobol
 )
@@ -51,7 +63,7 @@ if /i "%1%"=="DEBUG" (
    set config=Release
 )
 
-if exist "%cob_release_path%Win32\%config%\cobc.exe" (
+if exist "%cob_build_path%Win32\%config%\cobc.exe" (
    set have_32=1
    echo 32-bit %config% binaries: found
    
@@ -60,7 +72,7 @@ if exist "%cob_release_path%Win32\%config%\cobc.exe" (
    echo 32-bit %config% binaries: not found
 )
 
-if exist "%cob_release_path%x64\%config%\cobc.exe" (
+if exist "%cob_build_path%x64\%config%\cobc.exe" (
    set have_64=1
    echo 64-bit %config% binaries: found
 ) else (
@@ -196,12 +208,12 @@ if exist "%ProgramFiles%\7-Zip\7z.exe" (
    echo 7-zip not found, "%DIST_PACKAGE%.7z" not created
    rem cd ..
    rem move dist PACKAGE 1>nul
-   ren echo.
-   echo %cob_release_path%%DIST_PACKAGE% ready for distribution; manual compression needed.
+   rem echo.
+   echo %cob_build_path%%DIST_PACKAGE% ready for distribution; manual compression needed.
    goto :end
 )
 echo.
-echo %cob_release_path%%DIST_PACKAGE%.7z ready for distribution.
+echo %cob_build_path%%DIST_PACKAGE%.7z ready for distribution.
 
 goto :end
 
@@ -211,25 +223,29 @@ echo Abort^^!
 :end
 popd
 
+call :pause_if_interactive
+exit /b %cb_errorlevel%
+
+
 :: pause if not started directly
+:pause_if_interactive
 echo %cmdcmdline% | find /i "%~0" >nul
 if %errorlevel% equ 0 (
    echo.
    pause
 )
-
-exit /b %cb_errorlevel%
+goto :eof
 
 
 :copy_exes_and_libs
 call :set_platform_and_ext %1%
 
-copy "%cob_release_path%set_env_vs_dist%platform_ext%.bat"	set_env_vs%platform_ext%.bat	1>nul
+copy "%cob_build_path%set_env_vs_dist%platform_ext%.bat"	set_env_vs%platform_ext%.bat	1>nul
 
 set copy_to_bin=bin%platform_ext%
 set copy_to_lib=lib%platform_ext%
 
-set "copy_from=%cob_release_path%%platform%\%config%"
+set "copy_from=%cob_build_path%%platform%\%config%"
 
 echo Copying binaries for %platform%...
 mkdir %copy_to_bin%
@@ -319,7 +335,8 @@ cobc -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
 if %errorlevel% neq 0 (
    echo.
    echo cobc had unexpected return value %errorlevel%, running verbose again...
-   pause
+   call :pause_if_interactive
+   where cobc.exe
    cobc -vv -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
    set cb_errorlevel=!errorlevel!
 )
@@ -331,6 +348,23 @@ goto :eof
 mkdir "locale\%~n1"
 mkdir "locale\%~n1\LC_MESSAGES"
 copy "%~f1" "locale\%~n1\LC_MESSAGES\%PACKAGE_TARNAME%.mo"	1>nul
+goto :eof
+
+
+:setver
+for /f "tokens=3 delims= " %%a in ('find "PACKAGE_NAME"    "config.h"') do (
+   set PVTEMP=%%a
+)
+set PACKAGE_NAME=!PVTEMP:"=!
+for /f "tokens=3 delims= " %%a in ('find "PACKAGE_VERSION" "config.h"') do (
+   set PVTEMP=%%a
+)
+set PACKAGE_VERSION=!PVTEMP:"=!
+for /f "tokens=3 delims= " %%a in ('find "PACKAGE_TARNAME" "config.h"') do (
+   set PVTEMP=%%a
+)
+set PACKAGE_TARNAME=!PVTEMP:"=!
+set PACKAGE_DIRECTORY=!PACKAGE_NAME!_!PACKAGE_VERSION!
 goto :eof
 
 

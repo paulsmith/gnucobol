@@ -1,4 +1,27 @@
 
+2019-07-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* create_mingw_bindist.sh: initial commit of script to generate binary
+	  distribution from MinGW environments
+	* create_win_dist.sh: moved from top_srcdir
+
+2019-05-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* bootstrap: only set executable bit for current user,
+	  suppress most error messages (that can also occur if
+	  execution rights are already available but we can't set them)
+
+2019-04-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* pre-inst-env.in: new file, for launching programs 
+	  from build directory, after Mathieu Lirzin (automake)
+
+2019-03-19  Simon Sobisch <simonsobisch@gnu.org>
+
+	* config.guess, config.sub, texinfo.tex:
+	  updated to recent version from
+	  https://git.savannah.gnu.org/cgit/gnulib.git/tree/build-aux/
+
 2019-02-18  Simon Sobisch <simonsobisch@gnu.org>
 
 	* bootstrap: additional user hints,
@@ -14,7 +37,7 @@
 
 	* config.guess, config.sub, install-sh, texinfo.tex:
 	  updated to recent version from
-	  http://git.savannah.gnu.org/cgit/gnulib.git/tree/build-aux/
+	  https://git.savannah.gnu.org/cgit/gnulib.git/tree/build-aux/
 
 2018-06-04  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -34,9 +57,9 @@
 
 	* compile, config.guess, config.sub, depcomp, install-sh, mdate-sh,
 	  texinfo.tex: updated to recent version from
-	  http://git.savannah.gnu.org/cgit/gnulib.git/tree/build-aux/
+	  https://git.savannah.gnu.org/cgit/gnulib.git/tree/build-aux/
 	* ylwrap, missing: updated to recent version from
-	  http://git.savannah.gnu.org/cgit/automake.git/tree/lib/
+	  https://git.savannah.gnu.org/cgit/automake.git/tree/lib/
 	* missing: adjusted perl_URL and flex_URL
 
 2017-08-13  Simon Sobisch <simonsobisch@gnu.org>

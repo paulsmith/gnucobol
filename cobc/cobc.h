@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
@@ -390,7 +390,6 @@ extern int			cb_literal_id;
 extern int			cb_field_id;
 extern int			cb_ml_attr_id;
 extern int			cb_ml_tree_id;
-extern int			cobc_flag_main;
 extern int			cb_flag_functions_all;
 
 extern int			cb_flag_dump;
@@ -402,7 +401,8 @@ extern int			cb_flag_dump;
 #define COB_DUMP_LS	0x0020
 #define COB_DUMP_ALL	(COB_DUMP_FD|COB_DUMP_WS|COB_DUMP_RD|COB_DUMP_SD|COB_DUMP_SC|COB_DUMP_LS)
 
-extern int			cb_flag_main;
+extern int			cb_flag_main;	/* set if "main" requested by -x */
+extern int			cobc_flag_main;	/* set only until first program compiled, for general: use cb_flag_main*/
 extern int			cobc_wants_debug;
 extern int			cb_listing_xref;
 extern int			cobc_seen_stdin;
@@ -484,6 +484,14 @@ DECLNORET extern void		cobc_too_many_errors (void) COB_A_NORETURN;
 
 extern size_t			cobc_check_valid_name (const char *,
 						       const enum cobc_name_type);
+
+/* help.c (used only within cobc.c) */
+
+extern void		cobc_print_usage (char *);
+extern void		cobc_print_usage_common_options (void);
+extern void		cobc_print_usage_dialect (void);
+extern void		cobc_print_usage_warnings (void);
+extern void		cobc_print_usage_flags (void);
 
 /* config.c */
 
@@ -604,7 +612,6 @@ extern char *		cb_get_strerror (void);
 extern void		cb_add_error_to_listing (const char *, int, const char *, char *);
 DECLNORET extern void		flex_fatal_error (const char *, const char *,
 					 const int) COB_A_NORETURN;
-extern unsigned int	cb_verify (const enum cb_support, const char *);
 
 /* reserved.c */
 extern struct reserved_word_list	*cobc_user_res_list;

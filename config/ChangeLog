@@ -1,4 +1,29 @@
 
+2019-06-08 Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: removed options json-generate and xml-generate (support is
+	  now only depending on the reserved words)
+
+2019-06-02 Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: added option records-mismatch-record-clause
+
+2019-05-30 Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: FR #311 added options call-convention-mnemonic and
+	  call-convention-linkage
+
+2019-05-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* default.conf, lax.conf-inc, mf-strict, rm-strict.conf:
+	  increased word-length to 63 per COBOL 202x
+
+2019-04-07 Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: FR #354 added continue-after option, set to ok
+	  for default/lax only as we won't have a dialect file for COBOL 202x
+	  until its final working draft and release date is available
+
 2019-03-18 Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: FR #352 added national-character-literals option, set to warning

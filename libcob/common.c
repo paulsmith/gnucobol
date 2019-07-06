@@ -15,12 +15,12 @@
    GNU Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "config.h"
-#include "defaults.h"
-#include "tarstamp.h"
+#include <config.h>
+#include <defaults.h>
+#include <tarstamp.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -87,19 +87,37 @@
 #elif defined (HAVE_NCURSES_NCURSES_H)
 #include <ncurses/ncurses.h>
 #elif defined (HAVE_PDCURSES_H)
+/* will internally define NCURSES_MOUSE_VERSION with
+   a recent version (for older version define manually): */
+#define PDC_NCMOUSE		/* use ncurses compatible mouse API */
 #include <pdcurses.h>
+#define COB_GEN_SCREENIO
 #elif defined (HAVE_CURSES_H)
+#define PDC_NCMOUSE	/* see comment above */
 #include <curses.h>
+#ifndef PDC_MOUSE_MOVED
+#undef PDC_NCMOUSE
+#endif
 #endif
 
-#if defined (HAVE_LIBXML_XMLVERSION_H) && HAVE_LIBXML_XMLVERSION_H
+/* note: checked library instead of headers as those may not be usable! */
+#ifdef WITH_XML2
+#if !defined (HAVE_LIBXML_XMLVERSION_H) || \
+    !defined (HAVE_LIBXML_XMLWRITER_H)
+#error XML2 without necessary headers
+#endif
 #include <libxml/xmlversion.h>
-#if defined (HAVE_LIBXML_XMLWRITER_H) && HAVE_LIBXML_XMLWRITER_H
 #include <libxml/xmlwriter.h>
 #endif
-#endif
-#if defined (HAVE_CJSON_CJSON_H) && HAVE_CJSON_CJSON_H
+
+#ifdef WITH_CJSON
+#if defined HAVE_CJSON_CJSON_H
 #include <cjson/cJSON.h>
+#elif defined HAVE_CJSON_H
+#include <cJSON.h>
+#else
+#error CJSON without necessary header
+#endif
 #endif
 /* end of library headers */
 
@@ -107,11 +125,18 @@
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
-
 #include "libcob.h"
 #include "coblocal.h"
 
 #include "libcob/cobgetopt.h"
+
+/* sanity checks */
+#if COB_MAX_WORDLEN > 255
+#error COB_MAX_WORDLEN is too big, must be less than 256
+#endif
+#if COB_MAX_NAMELEN > COB_MAX_WORDLEN
+#error COB_MAX_NAMELEN is too big, must be less than COB_MAX_WORDLEN
+#endif
 
 #define	CB_IMSG_SIZE	24
 #define	CB_IVAL_SIZE	(80 - CB_IMSG_SIZE - 4)
@@ -217,6 +242,9 @@ static int			cannot_check_subscript = 0;
 
 static const cob_field_attr	const_alpha_attr =
 				{COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL};
+static const cob_field_attr	const_bin_nano_attr =
+				{COB_TYPE_NUMERIC_BINARY, 20, 9,
+				 COB_FLAG_HAVE_SIGN, NULL};
 
 static char			*cob_local_env = NULL;
 static int			current_arg = 0;
@@ -346,12 +374,12 @@ static const char *not_set;
    optional: Minimum accepted value, Maximum accepted value
  */
 static struct config_tbl gc_conf[] = {
-	{"COB_LOAD_CASE", "load_case", 		"0", 	lwrupr, GRP_CALL, ENV_INT | ENV_ENUMVAL, SETPOS (name_convert)},
+	{"COB_LOAD_CASE", "load_case", 		"0", 	lwrupr, GRP_CALL, ENV_UINT | ENV_ENUMVAL, SETPOS (name_convert)},
 	{"COB_PHYSICAL_CANCEL", "physical_cancel", 	"0", 	NULL, GRP_CALL, ENV_BOOL, SETPOS (cob_physical_cancel)},
 	{"default_cancel_mode", "default_cancel_mode", 	NULL, NULL, GRP_HIDE, ENV_BOOL | ENV_NOT, SETPOS (cob_physical_cancel)},
 	{"LOGICAL_CANCELS", "logical_cancels", 	NULL, NULL, GRP_HIDE, ENV_BOOL | ENV_NOT, SETPOS (cob_physical_cancel)},
 	{"COB_PRE_LOAD", "pre_load", 		NULL, 	NULL, GRP_CALL, ENV_STR, SETPOS (cob_preload_str)},
-	{"COB_BELL", "bell", 			"0", 	beepopts, GRP_SCREEN, ENV_INT | ENV_ENUMVAL, SETPOS (cob_beep_value)},
+	{"COB_BELL", "bell", 			"0", 	beepopts, GRP_SCREEN, ENV_UINT | ENV_ENUMVAL, SETPOS (cob_beep_value)},
 	{"COB_DEBUG_LOG", "debug_log", 		NULL, 	NULL, GRP_HIDE, ENV_FILE, SETPOS (cob_debug_log)},
 	{"COB_DISABLE_WARNINGS", "disable_warnings", "0", 	NULL, GRP_MISC, ENV_BOOL | ENV_NOT, SETPOS (cob_display_warn)},
 	{"COB_ENV_MANGLE", "env_mangle", 		"0", 	NULL, GRP_MISC, ENV_BOOL, SETPOS (cob_env_mangle)},
@@ -359,19 +387,24 @@ static struct config_tbl gc_conf[] = {
 	{"COB_REDIRECT_DISPLAY", "redirect_display", "0", 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_disp_to_stderr)},
 	{"COB_SCREEN_ESC", "screen_esc", 		"0", 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_use_esc)},
 	{"COB_SCREEN_EXCEPTIONS", "screen_exceptions", "0", NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_extended_status)},
-	{"COB_TIMEOUT_SCALE", "timeout_scale", 	"0", 	timeopts, GRP_SCREEN, ENV_INT, SETPOS (cob_timeout_scale)},
+	{"COB_TIMEOUT_SCALE", "timeout_scale", 	"0", 	timeopts, GRP_SCREEN, ENV_UINT, SETPOS (cob_timeout_scale)},
 	{"COB_INSERT_MODE", "insert_mode", "0", NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_insert_mode)},
+	{"COB_MOUSE_FLAGS", "mouse_flags", "1", NULL, GRP_SCREEN, ENV_UINT, SETPOS (cob_mouse_flags)},
+	{"MOUSE_FLAGS", "mouse_flags", NULL, NULL, GRP_HIDE, ENV_UINT, SETPOS (cob_mouse_flags)},
+#ifdef HAVE_MOUSEINTERVAL	/* possibly add an internal option for mouse support, too */
+	{"COB_MOUSE_INTERVAL", "mouse_interval", "100", NULL, GRP_SCREEN, ENV_UINT, SETPOS (cob_mouse_interval), 0, 166},
+#endif
 	{"COB_SET_DEBUG", "debugging_mode", 		"0", 	NULL, GRP_MISC, ENV_BOOL | ENV_RESETS, SETPOS (cob_debugging_mode)},
 	{"COB_SET_TRACE", "set_trace", 		"0", 	NULL, GRP_MISC, ENV_BOOL, SETPOS (cob_line_trace)},
 	{"COB_TRACE_FILE", "trace_file", 		NULL, 	NULL, GRP_MISC, ENV_FILE, SETPOS (cob_trace_filename)},
 	{"COB_TRACE_FORMAT", "trace_format",	"%P %S Line: %L", NULL,GRP_MISC, ENV_STR, SETPOS (cob_trace_format)},
 	{"COB_TRACE_IO","trace_io",		NULL,	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_trace_io)},
 	{"COB_DUMP_FILE", "dump_file",		NULL,	NULL, GRP_MISC, ENV_FILE, SETPOS (cob_dump_filename)},
-	{"COB_DUMP_WIDTH", "dump_width",		"100",	NULL, GRP_MISC, ENV_INT, SETPOS (cob_dump_width)},
+	{"COB_DUMP_WIDTH", "dump_width",		"100",	NULL, GRP_MISC, ENV_UINT, SETPOS (cob_dump_width)},
 	{"COB_STATS_RECORD","stats_record",	NULL,	NULL,GRP_MISC,ENV_BOOL,SETPOS(cob_stats_record)},
 	{"COB_STATS_FILE","stats_file",		NULL,	NULL,GRP_MISC,ENV_FILE,SETPOS(cob_stats_filename)},
 #ifdef  _WIN32
-	/* checked before configuration load if set from environment in cob_init() */
+	/* checked before configuration load if set from environment in cob_common_init() */
 	{"COB_UNIX_LF", "unix_lf", 		"0", 	NULL, GRP_FILE, ENV_BOOL, SETPOS (cob_unix_lf)},
 #endif
 	{"USERNAME", "username", 			NULL, 	NULL, GRP_SYSENV, ENV_STR, SETPOS (cob_user_name)},	/* default set in cob_init() */
@@ -389,9 +422,9 @@ static struct config_tbl gc_conf[] = {
 	{"COB_FILE_PATH","file_path",		NULL,	NULL,GRP_FILE,ENV_PATH,SETPOS(cob_file_path)},
 	{"COB_LIBRARY_PATH","library_path",	NULL,	NULL,GRP_CALL,ENV_PATH,SETPOS(cob_library_path)}, /* default value set in cob_init_call() */
 	{"COB_MF_FILES","mf_files",		"false",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_files)},
-	{"COB_FIXREL_FORMAT","fixrel_format",	fixrel_dflt,relopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_fixrel_type)},
-	{"COB_VARREL_FORMAT","varrel_format",	varrel_dflt,relopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_varrel_type)},
-	{"COB_VARSEQ_FORMAT","varseq_format",	varseq_dflt,varseqopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_varseq_type)},
+	{"COB_FIXREL_FORMAT","fixrel_format",	fixrel_dflt,relopts,GRP_FILE,ENV_UINT|ENV_ENUM,SETPOS(cob_fixrel_type)},
+	{"COB_VARREL_FORMAT","varrel_format",	varrel_dflt,relopts,GRP_FILE,ENV_UINT|ENV_ENUM,SETPOS(cob_varrel_type)},
+	{"COB_VARSEQ_FORMAT","varseq_format",	varseq_dflt,varseqopts,GRP_FILE,ENV_UINT|ENV_ENUM,SETPOS(cob_varseq_type)},
 	{"COB_LS_FIXED","ls_fixed",		"0",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_fixed)},
 	{"STRIP_TRAILING_SPACES","strip_trailing_spaces",		NULL,	NULL,GRP_HIDE,ENV_BOOL|ENV_NOT,SETPOS(cob_ls_fixed)},
 	{"COB_LS_NULLS","ls_nulls",				"false",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_nulls)},
@@ -401,10 +434,10 @@ static struct config_tbl gc_conf[] = {
 	{"COB_MF_LS_SPLIT","mf_ls_split",		"true",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_ls_split)},
 	{"COB_MF_LS_VALIDATE","mf_ls_validate",	"false",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_ls_validate)},
 	{"COB_GC_FILES","gc_files",				"false",NULL,GRP_HIDE,ENV_BOOL,SETPOS(cob_gc_files)},
-	{"COB_SHARE_MODE","share_mode",			"none",shareopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_share_mode)},
-	{"COB_RETRY_MODE","retry_mode",			"none",retryopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_retry_mode)},
-	{"COB_RETRY_TIMES","retry_times",		"0",NULL,GRP_FILE,ENV_INT,SETPOS(cob_retry_times)},
-	{"COB_RETRY_SECONDS","retry_seconds",	"0",NULL,GRP_FILE,ENV_INT,SETPOS(cob_retry_seconds)},
+	{"COB_SHARE_MODE","share_mode",			"none",shareopts,GRP_FILE,ENV_UINT|ENV_ENUM,SETPOS(cob_share_mode)},
+	{"COB_RETRY_MODE","retry_mode",			"none",retryopts,GRP_FILE,ENV_UINT|ENV_ENUM,SETPOS(cob_retry_mode)},
+	{"COB_RETRY_TIMES","retry_times",		"0",NULL,GRP_FILE,ENV_UINT,SETPOS(cob_retry_times)},
+	{"COB_RETRY_SECONDS","retry_seconds",	"0",NULL,GRP_FILE,ENV_UINT,SETPOS(cob_retry_seconds)},
 	{"COB_SORT_CHUNK","sort_chunk",		"256K",	NULL,GRP_FILE,ENV_SIZE,SETPOS(cob_sort_chunk),(128 * 1024),(16 * 1024 * 1024)},
 	{"COB_SORT_MEMORY","sort_memory",	"128M",	NULL,GRP_FILE,ENV_SIZE,SETPOS(cob_sort_memory),(1024*1024),4294967294 /* max. guaranteed - 1 */},
 	{"COB_SYNC","sync",			"false",syncopts,GRP_FILE,ENV_BOOL,SETPOS(cob_do_sync)},
@@ -426,7 +459,10 @@ static struct config_tbl gc_conf[] = {
 #define FUNC_NAME_IN_DEFAULT NUM_CONFIG + 1
 
 /* Local functions */
-static int		translate_boolean_to_int (const char* ptr);
+static int		translate_boolean_to_int	(const char* ptr);
+static cob_s64_t	get_sleep_nanoseconds	(cob_field *nano_seconds);
+static cob_s64_t	get_sleep_nanoseconds_from_seconds	(cob_field *decimal_seconds);
+static void		internal_nanosleep	(cob_s64_t nsecs);
 
 static int		set_config_val	(char *value, int pos);
 static char		*get_config_val	(char *value, int pos, char *orgvalue);
@@ -1921,7 +1957,8 @@ cob_trace_print (char *val)
 			} else
 			if (toupper(cobsetptr->cob_trace_format[i]) == 'F') {
 				if (i != last_pos) {
-					fprintf (cobsetptr->cob_trace_file, "Source: %-31.31s", cob_last_sfile);
+					fprintf (cobsetptr->cob_trace_file, "Source: %-*.*s",
+						-COB_MAX_NAMELEN, COB_MAX_NAMELEN, cob_last_sfile);
 				} else {
 					fprintf (cobsetptr->cob_trace_file, "Source: %s", cob_last_sfile);
 				}
@@ -2109,6 +2146,11 @@ cob_field_to_string (const cob_field *f, void *str, const size_t maxsize)
 	unsigned char	*s;
 	size_t		count;
 	size_t		i;
+
+	if (unlikely (f == NULL)) {
+		strncpy (str, _ ("NULL field"), maxsize);
+		return;
+	}
 
 	count = 0;
 	if (unlikely (f->size == 0)) {
@@ -2403,10 +2445,10 @@ cob_check_version (const char *prog, const char *packver_prog, const int patchle
 	if (status != 2 || major_prog > major_cob
 	 || (major_prog == major_cob && minor_prog > minor_cob)
 	 || (major_prog == major_cob && minor_prog == minor_cob && patchlev_prog > PATCH_LEVEL)) {
-		cob_runtime_error (_("error: version mismatch"));
-		cob_runtime_error (_("%s has version %s.%d"), prog,
+		cob_runtime_error (_("version mismatch"));
+		cob_runtime_hint (_("%s has version %s.%d"), prog,
 				   packver_prog, patchlev_prog);
-		cob_runtime_error (_("%s has version %s.%d"), "libcob",
+		cob_runtime_hint (_("%s has version %s.%d"), "libcob",
 				   PACKAGE_VERSION, PATCH_LEVEL);
 		cob_stop_run (1);
 	}
@@ -3170,9 +3212,9 @@ cob_check_odo (const int i, const int min,
 		cob_runtime_error (_("OCCURS DEPENDING ON '%s' out of bounds: %d"),
 					dep_name, i);
 		if (i > max) {
-			cob_runtime_error (_("maximum subscript for '%s': %d"), name, max);
+			cob_runtime_hint (_("maximum subscript for '%s': %d"), name, max);
 		} else {
-			cob_runtime_error (_("minimum subscript for '%s': %d"), name, min);
+			cob_runtime_hint (_("minimum subscript for '%s': %d"), name, min);
 		}
 		cob_stop_run (1);
 	}
@@ -3205,10 +3247,10 @@ cob_check_subscript (const int i, const int max,
 		cob_runtime_error (_("subscript of '%s' out of bounds: %d"), name, i);
 		if (i >= 1) {
 			if (odo_item) {
-				cob_runtime_error (_("current maximum subscript for '%s': %d"),
+				cob_runtime_hint (_("current maximum subscript for '%s': %d"),
 							name, max);
 			} else {
-				cob_runtime_error (_("maximum subscript for '%s': %d"),
+				cob_runtime_hint (_("maximum subscript for '%s': %d"),
 							name, max);
 			}
 		}
@@ -3525,8 +3567,8 @@ check_current_date()
 	char		nanoseconds[10];
 	char		*iso_timezone_ptr = (char *)&iso_timezone;
 
-	if(cobsetptr == NULL
-	|| cobsetptr->cob_date == NULL) {
+	if (cobsetptr == NULL
+	 || cobsetptr->cob_date == NULL) {
 		return;
 	}
 
@@ -3535,16 +3577,16 @@ check_current_date()
 
 	/* skip non-digits like quotes */
 	while (cobsetptr->cob_date[j] != 0
-	&&     cobsetptr->cob_date[j] != 'Y'
-	&&     !isdigit(cobsetptr->cob_date[j])) {
+	    && cobsetptr->cob_date[j] != 'Y'
+	    && !isdigit(cobsetptr->cob_date[j])) {
 		 j++;
 	}
 
 	/* extract date */
 	if (cobsetptr->cob_date[j] != 0) {
 		yr = 0;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 			 	yr = yr * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3556,7 +3598,7 @@ check_current_date()
 		}
 		if (i != 2 && i != 4) {
 			if (cobsetptr->cob_date[j] == 'Y') {
-				while(cobsetptr->cob_date[j] == 'Y') j++;
+				while (cobsetptr->cob_date[j] == 'Y') j++;
 			} else {
 				ret = 1;
 			}
@@ -3564,14 +3606,15 @@ check_current_date()
 		} else if (yr < 100) {
 			yr += 2000;
 		}
-		while(cobsetptr->cob_date[j] == '/'
-		||    cobsetptr->cob_date[j] == '-')
+		while (cobsetptr->cob_date[j] == '/'
+		    || cobsetptr->cob_date[j] == '-') {
 			j++;
+		}
 	}
 	if (cobsetptr->cob_date[j] != 0) {
 		mm = 0;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				mm = mm * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3583,7 +3626,7 @@ check_current_date()
 		}
 		if (i != 2) {
 			if (cobsetptr->cob_date[j] == 'M') {
-				while(cobsetptr->cob_date[j] == 'M') j++;
+				while (cobsetptr->cob_date[j] == 'M') j++;
 			} else {
 				ret = 1;
 			}
@@ -3591,14 +3634,15 @@ check_current_date()
 		} else if (mm < 1 || mm > 12) {
 			ret = 1;
 		}
-		while(cobsetptr->cob_date[j] == '/'
-		||    cobsetptr->cob_date[j] == '-')
+		while (cobsetptr->cob_date[j] == '/'
+		    || cobsetptr->cob_date[j] == '-') {
 			j++;
+		}
 	}
 	if (cobsetptr->cob_date[j] != 0) {
 		dd = 0;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				dd = dd * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3610,7 +3654,7 @@ check_current_date()
 		}
 		if (i != 2) {
 			if (cobsetptr->cob_date[j] == 'D') {
-				while(cobsetptr->cob_date[j] == 'D') j++;
+				while (cobsetptr->cob_date[j] == 'D') j++;
 			} else {
 				ret = 1;
 			}
@@ -3623,9 +3667,9 @@ check_current_date()
 	/* extract time */
 	if (cobsetptr->cob_date[j] != 0) {
 		hh = 0;
-		while(isspace(cobsetptr->cob_date[j])) j++;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		while (isspace (cobsetptr->cob_date[j])) j++;
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				hh = hh * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3638,7 +3682,7 @@ check_current_date()
 
 		if (i != 2) {
 			if (cobsetptr->cob_date[j] == 'H') {
-				while(cobsetptr->cob_date[j] == 'H') j++;
+				while (cobsetptr->cob_date[j] == 'H') j++;
 			} else {
 				ret = 1;
 			}
@@ -3646,14 +3690,14 @@ check_current_date()
 		} else if (hh > 23) {
 			ret = 1;
 		}
-		while(cobsetptr->cob_date[j] == ':'
-		||    cobsetptr->cob_date[j] == '-')
+		while (cobsetptr->cob_date[j] == ':'
+		    || cobsetptr->cob_date[j] == '-')
 			j++;
 	}
 	if (cobsetptr->cob_date[j] != 0) {
 		mi = 0;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				mi = mi * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3673,18 +3717,19 @@ check_current_date()
 		} else if (mi > 59) {
 			ret = 1;
 		}
-		while(cobsetptr->cob_date[j] == ':'
-		||    cobsetptr->cob_date[j] == '-')
+		while (cobsetptr->cob_date[j] == ':'
+		    || cobsetptr->cob_date[j] == '-') {
 			j++;
+		}
 	}
 
 	if (cobsetptr->cob_date[j] != 0
-	&&	cobsetptr->cob_date[j] != 'Z'
-	&&	cobsetptr->cob_date[j] != '+'
-	&&	cobsetptr->cob_date[j] != '-') {
+	 && cobsetptr->cob_date[j] != 'Z'
+	 && cobsetptr->cob_date[j] != '+'
+	 && cobsetptr->cob_date[j] != '-') {
 		ss = 0;
-		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+		for (i = 0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				ss = ss * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
@@ -3696,29 +3741,29 @@ check_current_date()
 		}
 		if (i != 2) {
 			if (cobsetptr->cob_date[j] == 'S') {
-				while(cobsetptr->cob_date[j] == 'S') j++;
+				while (cobsetptr->cob_date[j] == 'S') j++;
 			} else {
 				ret = 1;
 			}
 			ss = -1;
 		/* leap second would be 60 */
-		} else  if (ss > 60) {
+		} else if (ss > 60) {
 			ret = 1;
 		}
 	}
 
 	if (cobsetptr->cob_date[j] != 0
-	&&	cobsetptr->cob_date[j] != 'Z'
-	&&	cobsetptr->cob_date[j] != '+'
-	&&	cobsetptr->cob_date[j] != '-') {
+	 && cobsetptr->cob_date[j] != 'Z'
+	 && cobsetptr->cob_date[j] != '+'
+	 && cobsetptr->cob_date[j] != '-') {
 		ns = 0;
 		if (cobsetptr->cob_date[j] == '.'
-		||  cobsetptr->cob_date[j] == ':') {
+		 || cobsetptr->cob_date[j] == ':') {
 			j++;
 		}
-		strcpy(nanoseconds, "000000000");
+		strcpy (nanoseconds, "000000000");
 		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
-			if (isdigit(cobsetptr->cob_date[j])) {
+			if (isdigit (cobsetptr->cob_date[j])) {
 				nanoseconds[i] = cobsetptr->cob_date[j];
 			} else {
 				break;
@@ -3736,7 +3781,7 @@ check_current_date()
 		offset = 0;
 		iso_timezone[0] = 'Z';
 	} else if (cobsetptr->cob_date[j] == '+'
-		|| cobsetptr->cob_date[j] == '-') {
+	        || cobsetptr->cob_date[j] == '-') {
 		strncpy (iso_timezone_ptr, cobsetptr->cob_date + j, 6);
 		iso_timezone[6] = 0;	/* just to keep the analyzer happy */
 		if (strlen (iso_timezone_ptr) == 3) {
@@ -3745,7 +3790,7 @@ check_current_date()
 			strncpy (iso_timezone_ptr + 3, cobsetptr->cob_date + j + 4, 3);
 		}
 		for (i=1; iso_timezone[i] != 0; i++) {
-			if (!isdigit(iso_timezone[i])) {
+			if (!isdigit (iso_timezone[i])) {
 				break;
 			}
 			if (++i == 4) {
@@ -3767,7 +3812,7 @@ check_current_date()
 	}
 
 	if (ret != 0) {
-		cob_runtime_error (_("COB_CURRENT_DATE '%s' is invalid"), cobsetptr->cob_date);
+		cob_runtime_warning (_("COB_CURRENT_DATE '%s' is invalid"), cobsetptr->cob_date);
 	}
 
 	/* get local time, allocate tmptr */
@@ -4212,6 +4257,19 @@ cob_chain_setup (void *data, const size_t parm, const size_t size)
 }
 
 void
+cob_continue_after (cob_field *decimal_seconds)
+{
+	cob_s64_t	nanoseconds = get_sleep_nanoseconds_from_seconds (decimal_seconds);
+
+	if (nanoseconds < 0) {
+		/* TODO: current COBOL 20xx change proposal
+		   specifies EC-CONTINUE-LESS-THAN-ZERO (NF) here... */
+		return;
+	}
+	internal_nanosleep (nanoseconds);
+}
+
+void
 cob_allocate (unsigned char **dataptr, cob_field *retptr,
 	      cob_field *sizefld, cob_field *initialize)
 {
@@ -4360,16 +4418,79 @@ cob_putenv (char *name)
 	}
 	return -1;
 }
+#if 0 /* debug only */
+void print_stat (const char *filename, struct stat sb)
+{
+	printf("File name:                ");
+	if (filename) {
+		printf ("%s\n", filename);
+	} else {
+		printf("- unknown -\n");
+	}
+	printf("File type:                ");
 
-#define check_valid_dir(x)	\
-	(   strlen (x) > COB_NORMAL_MAX \
-	 || stat (x, &st) != 0 || !(S_ISDIR (st.st_mode)))
+	switch (sb.st_mode & S_IFMT) {
+#ifdef S_IFBLK
+	case S_IFBLK:  printf("block device\n");            break;
+#endif
+#ifdef S_IFCHR
+	case S_IFCHR:  printf("character device\n");        break;
+#endif
+	case S_IFDIR:  printf("directory\n");               break;
+#ifdef S_IFIFO
+	case S_IFIFO:  printf("FIFO/pipe\n");               break;
+#endif
+#ifdef S_IFLNK
+	case S_IFLNK:  printf("symlink\n");                 break;
+#endif
+	case S_IFREG:  printf("regular file\n");            break;
+#ifdef S_IFSOCK
+	case S_IFSOCK: printf("socket\n");                  break;
+#endif
+	default:       printf("unknown?\n");                break;
+	}
+
+	printf("I-node number:            %ld\n", (long)sb.st_ino);
+
+	printf("Mode:                     %lo (octal)\n",
+		(unsigned long)sb.st_mode);
+
+	printf("Link count:               %ld\n", (long)sb.st_nlink);
+	printf("Ownership:                UID=%ld   GID=%ld\n",
+		(long)sb.st_uid, (long)sb.st_gid);
+	printf("File size:                %lld bytes\n",
+		(long long)sb.st_size);
+#if 0
+	printf("Preferred I/O block size: %ld bytes\n",
+		(long)sb.st_blksize);
+	printf("Blocks allocated:         %lld\n",
+		(long long)sb.st_blocks);
+#endif
+
+	printf("Last status change:       %s", ctime(&sb.st_ctime));
+	printf("Last file access:         %s", ctime(&sb.st_atime));
+	printf("Last file modification:   %s", ctime(&sb.st_mtime));
+}
+#endif
+
+static COB_INLINE int
+check_valid_dir (const char *dir)
+{
+	struct stat		sb;
+	if (strlen (dir) > COB_NORMAL_MAX) return 1;
+	if (stat (dir, &sb) || !(S_ISDIR (sb.st_mode))) return 1;
+
+#if 0
+	print_stat (dir, sb);
+#endif
+	
+	return 0;
+}
 
 static const char *
 check_valid_env_tmpdir (const char * envname)
 {
 	const char *dir;
-	struct stat		st;
 
 	dir = getenv (envname);
 	if (!dir || !dir[0]) {
@@ -4398,7 +4519,6 @@ cob_gettmpdir (void)
 #else
 		if ((tmpdir = check_valid_env_tmpdir ("TMP")) == NULL
 			&& (tmpdir = check_valid_env_tmpdir ("TEMP")) == NULL) {
-			struct stat		st;
 			if (!check_valid_dir ("/tmp")) {
 				tmp = cob_fast_malloc (5U);
 				strcpy (tmp, "/tmp");
@@ -4642,17 +4762,17 @@ cob_sys_system (const void *cmdline)
 			*/
 			if (i > 2 && cmd[0] == '"' && cmd[i] == '"'
 			&& (cmd[1] != '"' || cmd[i - 1] != '"')) {
-				buff = cob_malloc ((size_t)(i + 4));
+				buff = cob_malloc ((size_t)i + 4);
 				buff[0] = '"';
-				memcpy (buff + 1, cmd, (size_t)(i + 1));
+				memcpy (buff + 1, cmd, (size_t)i + 1);
 				buff[i + 1] = '"';
 			} else {
 #endif /* _WIN32 */
-				buff = cob_malloc ((size_t) (i + 2));
-				memcpy (buff, cmd, (size_t) (i + 1));
+				buff = cob_malloc ((size_t)i + 2);
+				memcpy (buff, cmd, (size_t)i + 1);
 #ifdef _WIN32
 			}
-#endif 
+#endif
 			if (cobglobptr->cob_screen_initialized) {
 				cob_screen_set_mode (0);
 			}
@@ -5081,53 +5201,114 @@ cob_sys_tolower (void *p1, const int length)
 	return 0;
 }
 
+/* maximúm sleep time in seconds, currently 7 days */
+#define MAX_SLEEP_TIME 3600*24*7
+
+static cob_s64_t
+get_sleep_nanoseconds (cob_field *nano_seconds) {
+
+	cob_s64_t	nanoseconds = cob_get_llint (nano_seconds);
+
+	if (nanoseconds < 0) {
+		return -1;
+	}
+	if (nanoseconds >= ((cob_s64_t)MAX_SLEEP_TIME * 1000000000)) {
+		return (cob_s64_t)MAX_SLEEP_TIME * 1000000000;
+	} else {;
+		return nanoseconds;
+	}
+}
+
+static cob_s64_t
+get_sleep_nanoseconds_from_seconds (cob_field *decimal_seconds) {
+
+#define MAX_SLEEP_TIME 3600*24*7
+	cob_s64_t	seconds = cob_get_llint (decimal_seconds);
+
+	if (seconds < 0) {
+		return -1;
+	}
+	if (seconds >= MAX_SLEEP_TIME) {
+		return (cob_s64_t)MAX_SLEEP_TIME * 1000000000;
+} else {
+		cob_s64_t	nanoseconds;
+		cob_field	temp;
+		temp.size = 8;
+		temp.data = (unsigned char *)&nanoseconds;
+		temp.attr = &const_bin_nano_attr;
+		cob_move (decimal_seconds, &temp);
+		return nanoseconds;
+	}
+}
+
+static void
+internal_nanosleep (cob_s64_t nsecs)
+{
+#ifdef	HAVE_NANO_SLEEP
+	struct timespec	tsec;
+
+	tsec.tv_sec = nsecs / 1000000000;
+	tsec.tv_nsec = nsecs % 1000000000;
+	nanosleep (&tsec, NULL);
+
+#else
+
+	unsigned int	msecs;
+#if	defined (__370__) || defined (__OS400__)
+	msecs = (unsigned int)(nsecs / 1000000000);
+	if (msecs > 0) {
+		sleep (msecs);
+	}
+#elif	defined (_WIN32)
+	msecs = (unsigned int)(nsecs / 1000000);
+	if (msecs > 0) {
+		Sleep (msecs);
+	}
+#else
+	msecs = (unsigned int)(nsecs / 1000000000);
+	if (msecs > 0) {
+		sleep (msecs);
+	}
+#endif
+#endif
+}
+
+/* CBL_GC_NANOSLEEP / CBL_OC_NANOSLEEP, origin: OpenCOBOL */
 int
 cob_sys_oc_nanosleep (const void *data)
 {
-	cob_s64_t	nsecs;
-#ifdef	HAVE_NANO_SLEEP
-	struct timespec	tsec;
-#else
-	unsigned int	msecs;
-#endif
-
 	COB_UNUSED (data);
-
 	COB_CHK_PARMS (CBL_GC_NANOSLEEP, 1);
 
-	nsecs = cob_get_s64_param (1);
-	if (nsecs > 0) {
-#ifdef	HAVE_NANO_SLEEP
-			tsec.tv_sec = nsecs / 1000000000;
-			tsec.tv_nsec = nsecs % 1000000000;
-			nanosleep (&tsec, NULL);
-#elif	defined (__370__) || defined (__OS400__)
-			msecs = (unsigned int)(nsecs / 1000000000);
-			if (msecs > 0) {
-				sleep (msecs);
-			}
-#elif	defined (_WIN32)
-		msecs = (unsigned int)(nsecs / 1000000);
-		if (msecs > 0) {
-			Sleep (msecs);
+	if (COB_MODULE_PTR->cob_procedure_params[0]) {
+		cob_s64_t nsecs
+			= get_sleep_nanoseconds (COB_MODULE_PTR->cob_procedure_params[0]);
+		if (nsecs > 0) {
+			internal_nanosleep (nsecs);
 		}
-#elif	defined(__370__) || defined(__OS400__)
-		msecs = (unsigned int)(nsecs / 1000000000);
-		if (msecs > 0) {
-			sleep (msecs);
-		}
-#elif	defined(HAVE_NANO_SLEEP)
-		tsec.tv_sec = nsecs / 1000000000;
-		tsec.tv_nsec = nsecs % 1000000000;
-		nanosleep (&tsec, NULL);
-#else
-		msecs = (unsigned int)(nsecs / 1000000000);
-		if (msecs > 0) {
-			sleep (msecs);
-		}
-#endif
+		return 0;
 	}
-	return 0;
+	return -1;
+}
+
+/* C$SLEEP, origin: ACUCOBOL */
+int
+cob_sys_sleep (const void *data)
+{
+	COB_UNUSED (data);
+	COB_CHK_PARMS (C$SLEEP, 1);
+
+	if (COB_MODULE_PTR->cob_procedure_params[0]) {
+		cob_s64_t	nanoseconds
+			= get_sleep_nanoseconds_from_seconds (COB_MODULE_PTR->cob_procedure_params[0]);
+		if (nanoseconds < 0) {
+			/* ACUCOBOL specifies a runtime error here... */
+			return -1;
+		}
+		internal_nanosleep (nanoseconds);
+		return 0;
+	}
+	return 0;	/* CHECKME */
 }
 
 int
@@ -5360,9 +5541,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 
 	COB_CHK_PARMS (CBL_GC_GETOPT, 6);
 
-	/*
-	 * Read in sizes of some parameters
-	 */
+	/* Read in sizes of some parameters */
 	if (COB_MODULE_PTR->cob_procedure_params[1]) {
 		lo_size = COB_MODULE_PTR->cob_procedure_params[1]->size;
 	}
@@ -5373,12 +5552,10 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 		opt_val_size = COB_MODULE_PTR->cob_procedure_params[5]->size;
 	}
 
-	/*
-	 * Buffering longoptions (COBOL), target format (struct option)
-	 */
+	/* buffering longoptions (COBOL), target format (struct option) */
 	if (lo_size % sizeof (longoption_def) == 0) {
 		lo_amount = (int)lo_size / sizeof (longoption_def);
-		longoptions_root = (struct option*) cob_malloc (sizeof (struct option) * (lo_amount + 1U));
+		longoptions_root = (struct option*) cob_malloc (sizeof (struct option) * ((size_t)lo_amount + 1U));
 	} else {
 		cob_runtime_error (_("Call to CBL_GC_GETOPT with wrong longoption size."));
 		cob_stop_run (1);
@@ -5390,9 +5567,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	}
 	longind = cob_get_int (COB_MODULE_PTR->cob_procedure_params[2]);
 
-	/*
-	 * Add 0-termination to strings.
-	 */
+	/* add 0-termination to strings */
 	shortoptions = cob_malloc (so_size + 1U);
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
 		cob_field_to_string (COB_MODULE_PTR->cob_procedure_params[0], shortoptions, so_size);
@@ -5418,9 +5593,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 		longoptions = longoptions + 1;
 	}
 
-	/*
-	 * Appending final record, so getopt can spot the end of longoptions
-	 */
+	/* appending final record, so getopt can spot the end of longoptions */
 	longoptions->name = NULL;
 	longoptions->has_arg = 0;
 	longoptions->flag = NULL;
@@ -5433,33 +5606,39 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	return_value = cob_getopt_long_long (cob_argc, cob_argv, shortoptions, longoptions, &longind, long_only);
 	temp = (char *) &return_value;
 
-	/*
-	 * Write data back to COBOL
-	 */
+	/* Write data back to COBOL */
 #ifdef	WORDS_BIGENDIAN
-	if (temp[3] == '?' 
-	 || temp[3] == ':' 
-	 || temp[3] == 'W' 
-	 || temp[3] == 0) 
+	if (temp[3] == '?'
+	 || temp[3] == ':'
+	 || temp[3] == 'W'
+	 || temp[3] == 0) {
 		exit_status = temp[3] & 0xFF;
-	else if(return_value == -1) 
+	} else if (return_value == -1) {
 		exit_status = -1;
-	else 
+	} else {
 		exit_status = 3;
+	}
 	 /* cob_getopt_long_long sometimes returns and 'int' value and sometimes a 'x   ' in the int */
-	if (temp[0] == 0x00
-	 && temp[1] == 0x00
-	 && temp[2] == 0x00) {
-		temp[0] = temp[3];		/* Move option value to 1st byte and SPACE fill the 'int' */
+	if (temp[0] == 0
+	 && temp[1] == 0
+	 && temp[2] == 0) {
+		/* Move option value to 1st byte and SPACE fill the 'int' */
+		temp[0] = temp[3];
 		temp[1] = temp[2] = temp[3] = ' ';
 	}
 #else
-	if (temp[0] == '?' || temp[0] == ':' || temp[0] == 'W' 
-		|| temp[0] == -1 || temp[0] == 0) exit_status = return_value;
-	else exit_status = 3;
+	if (temp[0] == '?'
+	 || temp[0] == ':'
+	 || temp[0] == 'W'
+	 || temp[0] == -1
+	 || temp[0] == 0) {
+		exit_status = return_value;
+	} else {
+		exit_status = 3;
+	}
 
 	for (i = 3; i > 0; i--) {
-		if (temp[i] == 0x00) temp[i] = 0x20;
+		if (temp[i] == 0) temp[i] = ' ';
 		else break;
 	}
 #endif
@@ -5468,7 +5647,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	memcpy (return_char, &return_value, 4);
 
 	if (cob_optarg != NULL) {
-		memset (opt_val, 0x00, opt_val_size);
+		memset (opt_val, 0, opt_val_size);
 
 		optlen = strlen (cob_optarg);
 		if (optlen > opt_val_size) {
@@ -5479,38 +5658,10 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 		memcpy (opt_val, cob_optarg, optlen);
 	}
 
-
 	cob_free (shortoptions);
 	cob_free (longoptions_root);
 
 	return exit_status;
-
-}
-
-int
-cob_sys_sleep (const void *data)
-{
-#define MAX_SLEEP_TIME 3600*24*7
-	int	n;
-
-	COB_UNUSED (data);
-
-	COB_CHK_PARMS (C$SLEEP, 1);
-
-	if (COB_MODULE_PTR->cob_procedure_params[0]) {
-		n = cob_get_int (COB_MODULE_PTR->cob_procedure_params[0]);
-		if (n > MAX_SLEEP_TIME) {
-			n = MAX_SLEEP_TIME;
-		}
-		if (n > 0) {
-#ifdef	_WIN32
-			Sleep ((DWORD)(n*1000));
-#else
-			sleep (n);
-#endif
-		}
-	}
-	return 0;
 }
 
 int
@@ -5903,9 +6054,9 @@ var_print (const char *msg, const char *val, const char *default_val,
 
 }
 
-
 /*
- Expand a string with environment variable in it. Return malloced string.
+ Expand a string with environment variable in it.
+ Return malloced string.
 */
 char *
 cob_expand_env_string (char *strval)
@@ -5913,7 +6064,7 @@ cob_expand_env_string (char *strval)
 	unsigned int	i;
 	unsigned int	j = 0;
 	unsigned int	k = 0;
-	unsigned int	envlen = 1280;
+	size_t	envlen = 1280;
 	char		*env;
 	char		*str = strval;
 	char		ename[128] = { '\0' };
@@ -5959,9 +6110,9 @@ cob_expand_env_string (char *strval)
 				}
 			}
 			if (penv != NULL) {
-				if ((j + strlen (penv)) > (unsigned int)(envlen - 128)) {
+				if ((strlen (penv) + j) > (envlen - 128)) {
 					env = cob_realloc (env, envlen, strlen (penv) + 256);
-					envlen = (unsigned int)strlen (penv) + 256;
+					envlen = strlen (penv) + 256;
 				}
 				j += sprintf (&env[j], "%s", penv);
 				penv = NULL;
@@ -6077,7 +6228,7 @@ set_config_val (char *value, int pos)
 			}
 		}
 		if ((data_type & ENV_ENUM || data_type & ENV_ENUMVAL)	/* Must be one of the 'enum' values */
-		&& gc_conf[pos].enums[i].match == NULL) {
+		 && gc_conf[pos].enums[i].match == NULL) {
 			conf_runtime_error_value (ptr, pos);
 			fprintf (stderr, _("should be one of the following values: %s"), "");
 			for (i = 0; gc_conf[pos].enums[i].match != NULL; i++) {
@@ -6096,18 +6247,46 @@ set_config_val (char *value, int pos)
 		}
 	}
 
-	if ((data_type & ENV_INT) 				/* Integer data */
-	|| (data_type & ENV_SIZE) ) {				/* Size: integer with K, M, G */
-		for (; *ptr != 0 && (isdigit ((unsigned char)*ptr) || *ptr == ' '); ptr++) {
-			if (*ptr != ' ') {
-				numval = (numval * 10) + ((cob_s64_t)*ptr - '0');
+	if ((data_type & ENV_UINT) 				/* Integer data, unsigned */
+	 || (data_type & ENV_SINT) 				/* Integer data, signed */
+	 || (data_type & ENV_SIZE) ) {				/* Size: integer with K, M, G */
+		char sign = 0;
+		for (; *ptr != 0 && (*ptr == ' '); ptr++);	/* skip leading space */
+		if (*ptr == '-'
+		 || *ptr == '+') {
+			if ((data_type & ENV_SINT) == 0) {
+				conf_runtime_error_value (ptr, pos);
+				conf_runtime_error (1, _("should be unsigned")); // cob_runtime_warning
+				return 1;
 			}
+			sign = *ptr;
+			ptr++;
+		}
+		if (!isdigit ((unsigned char)*ptr)) {
+			conf_runtime_error_value (ptr, pos);
+			conf_runtime_error (1, _("should be numeric"));
+			return 1;
+		}
+		for (; *ptr != 0 && (isdigit ((unsigned char)*ptr)); ptr++) {
+			numval = (numval * 10) + ((cob_s64_t)*ptr - '0');
+		}
+		if (sign != 0
+		 && ( *ptr == '-'
+		   || *ptr == '+')) {
+			if ((data_type & ENV_SINT) == 0) {
+				conf_runtime_error_value (ptr, pos);
+				conf_runtime_error (1, _("should be unsigned"));
+				return 1;
+			}
+			sign = *ptr;
+			ptr++;
 		}
 		if ((data_type & ENV_SIZE)			/* Size: any K, M, G */
-		&& *ptr != 0) {
+		 && *ptr != 0) {
 			switch (toupper ((unsigned char)*ptr)) {
 			case 'K':
 				numval = numval * 1024;
+				ptr++;
 				break;
 			case 'M':
 				if (numval < 4001) {
@@ -6117,6 +6296,7 @@ set_config_val (char *value, int pos)
 					   to raise a warning as max value is limit to one less */
 					numval = 4294967295;
 				}
+				ptr++;
 				break;
 			case 'G':
 				if (numval < 4) {
@@ -6126,22 +6306,35 @@ set_config_val (char *value, int pos)
 					   to raise a warning as max value is limit to one less */
 					numval = 4294967295;
 				}
+				ptr++;
 				break;
 			}
 		}
+		for (; *ptr != 0 && (*ptr == ' '); ptr++);	/* skip trailing space */
+		if (*ptr != 0) {
+			conf_runtime_error_value (ptr, pos);
+			conf_runtime_error (1, _("should be numeric"));
+			return 1;
+		}
+		if (sign == '-') {
+			numval = -numval;
+		}
 		if (gc_conf[pos].min_value > 0
-		&& numval < gc_conf[pos].min_value) {
+		 && numval < gc_conf[pos].min_value) {
 			conf_runtime_error_value (value, pos);
 			conf_runtime_error (1, _("minimum value: %lu"), gc_conf[pos].min_value);
 			return 1;
 		}
 		if (gc_conf[pos].max_value > 0
-		&& numval > gc_conf[pos].max_value) {
+		 && numval > gc_conf[pos].max_value) {
 			conf_runtime_error_value (value, pos);
 			conf_runtime_error (1, _("maximum value: %lu"), gc_conf[pos].max_value);
 			return 1;
 		}
 		set_value (data, data_len, numval);
+		if (strcmp (gc_conf[pos].env_name, "COB_MOUSE_FLAGS") == 0) {
+			cob_settings_screenio ();
+		}
 
 	} else if ((data_type & ENV_BOOL)) {	/* Boolean: Yes/No, True/False,... */
 		numval = translate_boolean_to_int (ptr);
@@ -6151,29 +6344,30 @@ set_config_val (char *value, int pos)
 			conf_runtime_error_value (ptr, pos);
 			conf_runtime_error (1, _("should be one of the following values: %s"), "true, false");
 			return 1;
-		} else {
-			if ((data_type & ENV_NOT)) {	/* Negate logic for actual setting */
-				numval = !numval;
-			}
-			set_value (data, data_len, numval);
-			if ((data_type & ENV_RESETS)) {	/* Additional setup needed */
-				if (strcmp(gc_conf[pos].env_name, "COB_SET_DEBUG") == 0) {
-					/* Copy variables from settings (internal) to global structure, each time */
-					cobglobptr->cob_debugging_mode = cobsetptr->cob_debugging_mode;
-				}
+		}
+		if ((data_type & ENV_NOT)) {	/* Negate logic for actual setting */
+			numval = !numval;
+		}
+		set_value (data, data_len, numval);
+		if ((data_type & ENV_RESETS)) {	/* Additional setup needed */
+			if (strcmp(gc_conf[pos].env_name, "COB_SET_DEBUG") == 0) {
+				/* Copy variables from settings (internal) to global structure, each time */
+				cobglobptr->cob_debugging_mode = cobsetptr->cob_debugging_mode;
 			}
 		}
+		if (strcmp (gc_conf[pos].env_name, "COB_INSERT_MODE") == 0) {
+			cob_settings_screenio ();
+		}
 
-	} else if ((data_type & ENV_STR)
-		|| (data_type & ENV_FILE)
-		|| (data_type & ENV_PATH)) {	/* String/Path to be stored as a string */
+	} else if ((data_type & ENV_FILE)
+	        || (data_type & ENV_PATH)) {	/* Path (environment expanded) to be stored as a string */
 		memcpy (&str, data, sizeof (char *));
 		if (str != NULL) {
 			cob_free ((void *)str);
 		}
 		str = cob_expand_env_string (value);
 		if ((data_type & ENV_FILE)
-			&& strchr (str, PATHSEP_CHAR) != NULL) {
+		 && strchr (str, PATHSEP_CHAR) != NULL) {
 			conf_runtime_error_value (value, pos);
 			conf_runtime_error (1, _("should not contain '%c'"), PATHSEP_CHAR);
 			cob_free (str);
@@ -6185,10 +6379,24 @@ set_config_val (char *value, int pos)
 		}
 
 		/* call internal routines that do post-processing */
-		if (strcmp(gc_conf[pos].env_name, "COB_CURRENT_DATE") == 0) {
-			check_current_date ();
-		} else if (strcmp(gc_conf[pos].env_name, "COB_TRACE_FILE") == 0) {
+		if (strcmp (gc_conf[pos].env_name, "COB_TRACE_FILE") == 0) {
 			cob_new_trace_file ();
+		}
+
+	} else if (data_type & ENV_STR) {	/* String (environment expanded) */
+		memcpy (&str, data, sizeof (char *));
+		if (str != NULL) {
+			cob_free ((void *)str);
+		}
+		str = cob_expand_env_string (value);
+		memcpy (data, &str, sizeof (char *));
+		if (data_loc == offsetof (cob_settings, cob_preload_str)) {
+			cobsetptr->cob_preload_str_set = cob_strdup(str);
+		}
+
+		/* call internal routines that do post-processing */
+		if (strcmp (gc_conf[pos].env_name, "COB_CURRENT_DATE") == 0) {
+			check_current_date ();
 		}
 
 	} else if ((data_type & ENV_CHAR)) {	/* 'char' field inline */
@@ -6252,7 +6460,11 @@ get_config_val (char *value, int pos, char *orgvalue)
 
 	strcpy (value, _("unknown"));
 	orgvalue[0] = 0;
-	if ((data_type & ENV_INT)) {				/* Integer data */
+	if (data_type & ENV_UINT) {				/* Integer data, unsigned */
+		numval = get_value (data, data_len);
+		sprintf (value, CB_FMT_LLU, numval);
+
+	} else if (data_type & ENV_SINT) {				/* Integer data, signed */
 		numval = get_value (data, data_len);
 		sprintf (value, CB_FMT_LLD, numval);
 
@@ -6431,7 +6643,7 @@ cb_config_entry (char *buf, int line)
 	if (strcasecmp (keyword, "setenv") == 0 ) {
 		/* collect additional value and push into environment */
 		strcpy (value2, "");
-		/*check for := in value 2 and split, if necessary*/
+		/* check for := in value 2 and split, if necessary */
 		k = 0; while (value[k] != '=' && value[k] != ':' && value[k] != '"' && value[k] != '\'' && value[k] != 0) k++;
 		if (value[k] == '=' || value[k] == ':') {
 			i = i - (int)strlen (value + k);
@@ -6687,6 +6899,7 @@ cob_load_config (void)
 	/* Get the name for the configuration file */
 	if ((env = getenv ("COB_RUNTIME_CONFIG")) != NULL && env[0]) {
 		strncpy (conf_file, env, (size_t)COB_MEDIUM_MAX);
+		conf_file[COB_MEDIUM_MAX] = 0;
 		is_optional = 0;			/* If declared then it is NOT optional */
 		if (strchr (conf_file, PATHSEP_CHAR) != NULL) {
 			conf_runtime_error (0, _("invalid value '%s' for configuration tag '%s'"), conf_file, "COB_RUNTIME_CONFIG");
@@ -6822,6 +7035,24 @@ cob_runtime_warning (const char *fmt, ...)
 }
 
 void
+cob_runtime_hint (const char *fmt, ...)
+{
+	va_list args;
+
+	/* Prefix */
+	fprintf (stderr, "\t");
+
+	/* Body */
+	va_start (args, fmt);
+	vfprintf (stderr, fmt, args);
+	va_end (args);
+
+	/* Postfix */
+	putc ('\n', stderr);
+	fflush (stderr);
+}
+
+void
 cob_runtime_error (const char *fmt, ...)
 {
 	struct handlerlist	*h;
@@ -6919,6 +7150,7 @@ cob_runtime_error (const char *fmt, ...)
 		}
 		fputc (' ', stderr);
 	}
+	fprintf (stderr, "%s: ", _("error"));
 
 	/* Body */
 	va_start (ap, fmt);
@@ -6969,7 +7201,8 @@ cob_fatal_error (const enum cob_fatal_error fatal_error)
 		break;
 	/* LCOV_EXCL_START */
 	case COB_FERROR_CODEGEN:
-		cob_runtime_error (_("codegen error - Please report this!"));
+		cob_runtime_error ("codegen error");	/* not translated by intent */
+		cob_runtime_error (_("Please report this!"));
 		break;
 	/* LCOV_EXCL_STOP */
 	/* Note: can be simply tested; therefore no exclusion */
@@ -7094,28 +7327,22 @@ cob_fatal_error (const enum cob_fatal_error fatal_error)
 			break;
 		/* LCOV_EXCL_STOP */
 		}
-		if (cobglobptr->cob_error_file->assign
-		 && cobglobptr->cob_error_file->assign->data) {
-			err_cause = cob_malloc ((size_t)COB_FILE_BUFF);
-			/* FIXME: for OPEN: provide both assign name and
-			   full name (including COB_FILE_PATH / filename mapping)
-			 */
-			cob_field_to_string (cobglobptr->cob_error_file->assign,
-				err_cause, (size_t)COB_FILE_MAX);
-			cob_runtime_error (_("%s (status = %02d) file: '%s'"),
+		err_cause = cob_get_filename_print (cobglobptr->cob_error_file, 1);
+		/* FIXME: additional check if referenced program has active code location */
+		if (!cobglobptr->last_exception_statement) {
+			cob_runtime_error (_ ("%s (status = %02d) for file %s"),
 				msg, status, err_cause);
-			cob_free (err_cause);
 		} else {
-			cob_runtime_error (_("%s (status = %02d) file: '%s'"),
-				msg, status, cobglobptr->cob_error_file->select_name);
-			cob_runtime_error ("ASSIGN field with NULL address");
+			cob_runtime_error (_("%s (status = %02d) for file %s on %s"),
+				msg, status, err_cause,
+				cobglobptr->last_exception_statement);
 		}
 		break;
 	/* LCOV_EXCL_START */
 	case COB_FERROR_FUNCTION:
 		cob_runtime_error (_("attempt to use non-implemented function"));
 		break;
-        case COB_FERROR_XML:
+	case COB_FERROR_XML:
 		cob_runtime_error (_("attempt to use non-implemented XML I/O"));
 		break;
 	case COB_FERROR_JSON:
@@ -7212,7 +7439,7 @@ print_version (void)
 
 	printf ("libcob (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2018 Free Software Foundation, Inc.");
+	puts ("Copyright (C) 2019 Free Software Foundation, Inc.");
 	puts (_("License LGPLv3+: GNU LGPL version 3 or later <http://gnu.org/licenses/lgpl.html>"));
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
@@ -7296,6 +7523,18 @@ print_info (void)
 	var_print ("BINARY-C-LONG", _("4 bytes"), "", 0);
 #endif
 
+#ifdef WORDS_BIGENDIAN
+	var_print (_("endianness"),		_("big-endian"), "", 0);
+#else
+	var_print (_("endianness"),		_("little-endian"), "", 0);
+#endif
+
+#ifdef COB_EBCDIC_MACHINE
+	var_print (_("native EBCDIC"),		_("yes"), "", 0);
+#else
+	var_print (_("native EBCDIC"),		_("no"), "", 0);
+#endif
+
 #if !defined (__PDCURSES__) && !defined (NCURSES_VERSION)
 	var_print (_("extended screen I/O"), 	WITH_CURSES, "", 0);
 #else
@@ -7362,6 +7601,30 @@ print_info (void)
 	snprintf (versbuff2, 114, "%s (CHTYPE=%d, WIDE=%d)", versbuff,
 		(int)sizeof (chtype) * 8, wide);
 #endif
+#endif
+	var_print (_("extended screen I/O"), 	versbuff2, "", 0);
+
+#ifdef HAVE_HAS_MOUSE
+	{
+		int mouse_available = 0;
+		initscr ();
+		mousemask (ALL_MOUSE_EVENTS, NULL);
+		if (has_mouse () == TRUE) mouse_available = 1;
+		endwin ();
+		if (mouse_available) {
+			var_print (_("mouse support"), 	_("yes"), "", 0);
+		} else {
+			var_print (_("mouse support"), 	_("no"), "", 0);
+		}
+	}
+#elif defined (NCURSES_MOUSE_VERSION)
+#if defined (__PDCURSES__)
+	var_print (_("mouse support"),		_("yes"), "", 0);
+#else
+	var_print (_("mouse support"),		_("unknown"), "", 0);
+#endif
+#else
+	var_print (_("mouse support"), 		_("disabled"), "", 0);
 #endif
 
 	snprintf (buff, sizeof (buff), "%d", WITH_VARSEQ);
@@ -7474,7 +7737,8 @@ print_runtime_conf ()
 	printf ("%s %s.%d ", PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
 	puts (_("runtime configuration"));
 	if (cobsetptr->cob_config_file) {
-		strcpy (value, _("via"));
+		strncpy (value, _("via"), (size_t)COB_MEDIUM_MAX);
+		value[COB_MEDIUM_MAX] = 0;
 		hdlen = (unsigned int)strlen (value) + 3;
 
 		/* output path of main configuration file */
@@ -7679,7 +7943,8 @@ cob_common_init (void *setptr)
 			} else
 			if (*s == 'Y' || *s == 'y' ||
 			    *s == 'O' || *s == 'o' ||
-			    *s == 'T' || *s == 't') {
+			    *s == 'T' || *s == 't' ||
+			    *s == '1') {
 				use_unix_lf = 1;
 			}
 		}
@@ -8084,13 +8349,13 @@ cob_dump_module (char *reason)
 			return;
 		}
 		fprintf(fp,"\n");
-		for(mod = COB_MODULE_PTR; mod; mod = mod->next) {
-			if(mod->module_cancel.funcint) {
+		for (mod = COB_MODULE_PTR; mod; mod = mod->next) {
+			if (mod->module_cancel.funcint) {
 				cancel_func = mod->module_cancel.funcint;
-				fprintf (fp,_("Dump Program-Id %s from %s compiled %s\n"),
-						mod->module_name,mod->module_source,mod->module_formatted_date);
+				fprintf (fp, _("Dump Program-Id %s from %s compiled %s\n"),
+						mod->module_name, mod->module_source, mod->module_formatted_date);
 				(void)cancel_func (-10);
-				fprintf(fp,"\n");
+				fprintf (fp,"\n");
 			}
 		}
 	}

@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
@@ -80,7 +80,7 @@ static int yywrap (void) {
 		pic_buff2 = cobc_malloc (pic2_size);		\
 	}
 
-#include "config.h"
+#include <config.h>
 
 #include <ctype.h>
 #include <limits.h>
@@ -103,7 +103,7 @@ static int yywrap (void) {
 #endif
 
 #define YYSTYPE			cb_tree
-#include "parser.h"
+#include <parser.h>
 
 #define RETURN_TOK(expr)			\
 	do {					\
@@ -333,6 +333,15 @@ N[''""] {
 	cobc_force_literal = 0;
 	/* TODO: national string - needs different handling */
 	read_literal (yytext [1], "N");
+	RETURN_TOK (LITERAL);
+}
+
+NC[''""] {
+	/* NC national character string literal (extension, but
+	   same handling as COBOL 2002 national string literal) */
+	cobc_force_literal = 0;
+	/* TODO: national string - needs different handling */
+	read_literal (yytext [2], "NC");
 	RETURN_TOK (LITERAL);
 }
 
@@ -1197,7 +1206,7 @@ read_literal (const char mark, const char *type)
 			if (unlikely (i == plex_size)) {
 				plex_size *= 2;
 				if (unlikely (plex_size > (cb_lit_length + 1))) {
-					plex_size = cb_lit_length + 1;
+					plex_size = (size_t)cb_lit_length + 1;
 				}
 				plex_buff = cobc_realloc (plex_buff, plex_size);
 			}
@@ -1224,15 +1233,15 @@ read_literal (const char mark, const char *type)
 			error_literal ("", plex_buff);
 		}
 	}
-	/* FIXME: Exact behaviour should depend on level of support:
-	    * "OK" => stanadard behaviour, e.g. normal items filled with spaces/
-                      zeroes, DYNAMIC LENGTH items made empty
-	    * "warning" => current implementation, interpret '' as SPACE/ZERO
-	    * "ignore" => assume a space without warning; make sure zero length
-                          items work everywhere (should do as we support zero
-                          lengths via ODO items already)
-	*/
 
+	/* FIXME: Exact behavior should depend on level of support:
+	    * "OK"      => standard behavior, e.g. normal items filled with spaces/
+	                   zeros, DYNAMIC LENGTH items made empty
+	    * "warning" => current implementation, interpret '' as SPACE/ZERO
+	    * "ignore"  => assume a space without warning; make sure zero length
+	                   items work everywhere (should do as we support zero
+	                   lengths via ODO items already)
+	*/
 	if (!i) {
 		cb_verify (cb_zero_length_lit, _("zero-length literal"));
 		cb_warning (COBC_WARN_FILLER,
@@ -1249,8 +1258,14 @@ read_literal (const char mark, const char *type)
 	if (type[0] != 'N') {
 		yylval = cb_build_alphanumeric_literal (plex_buff, i);
 	} else {
-		if (cb_verify (cb_national_literals, _("national literal"))) {
-			CB_UNFINISHED (_("national literal"));
+		if (type[1] != 'C') {
+			if (cb_verify (cb_national_literals, _("national literal"))) {
+				CB_UNFINISHED (_("national literal"));
+			}
+		} else {
+			if (cb_verify (cb_nationalc_literals, _("national-character literal"))) {
+				CB_UNFINISHED (_("national literal"));
+			}
 		}
 		yylval = cb_build_national_literal (plex_buff, i);
 	}
@@ -1732,7 +1747,7 @@ scan_numeric (const char *text)
 		scale = (int)strlen (s) - 1;
 		/* Remove decimal point */
 		/* Moves trailing null */
-		memmove (s, s + 1, (size_t)(scale + 1));
+		memmove (s, s + 1, (size_t)scale + 1);
 	} else {
 		scale = 0;
 	}
@@ -1779,10 +1794,13 @@ significand_is_zero (const char *int_part, const char *dec_part)
 		&& all_zeroes (dec_part);
 }
 
-	/* Note: Exponent *digits* in literals according to COBOL 202x: 36 */
-#define COB_FLOAT_DIGITS_MAX         36
-#define COB_FLOAT_DIGITS_CHCK_MAX    37
-#define COB_FLOAT_DIGITS_STR_MAX     38
+/* Note: Exponent *digits* in literals according to COBOL 202x: 36 */
+/* Note: Exponent *digits* in literals according to COBOL 202x: 36 */
+#if COB_FLOAT_DIGITS_MAX != 36
+#error COB_FLOAT_DIGITS_MAX adjustment needed, common.h must match scanner.l
+#endif
+#define COB_FLOAT_DIGITS_CHCK_MAX    38 /* incl. sign and comma */
+#define COB_FLOAT_DIGITS_STR_MAX     39
 
 #define COB_FLOAT_DIGITS_WIDTH	"%" CB_XSTRINGIFY(COB_FLOAT_DIGITS_STR_MAX)
 
@@ -1796,10 +1814,10 @@ scan_floating_numeric (const char *text)
 	int		scale;
 	int		exponent;
 	int		n;
-	char		significand_str[COB_FLOAT_DIGITS_STR_MAX + 1] = { '\0' };
+	char		significand_str[COB_FLOAT_DIGITS_STR_MAX] = { '\0' };
 	char		*significand_pos;
-	char		significand_dec[COB_FLOAT_DIGITS_STR_MAX + 1] = { '\0' };
-	char		significand_int[COB_FLOAT_DIGITS_STR_MAX + 1] = { '\0' };
+	char		significand_dec[COB_FLOAT_DIGITS_STR_MAX] = { '\0' };
+	char		significand_int[COB_FLOAT_DIGITS_STR_MAX] = { '\0' };
 	char		exponent_str[8] = { '\0' };
 	char		*exponent_pos;
 
@@ -1841,11 +1859,11 @@ scan_floating_numeric (const char *text)
 	if (n == 0) { /* no integer part, copy after decimal-point */
 		significand_int[0] = 0;
 		strncpy (significand_dec, significand_pos + 1, COB_FLOAT_DIGITS_STR_MAX);
-		significand_dec[COB_FLOAT_DIGITS_STR_MAX] = 0;
+		significand_dec[COB_FLOAT_DIGITS_STR_MAX - 1] = 0;
 	} else {
 	/* silencing some warnings */
-		significand_int[COB_FLOAT_DIGITS_STR_MAX] = 0;
-		significand_dec[COB_FLOAT_DIGITS_STR_MAX] = 0;
+		significand_int[COB_FLOAT_DIGITS_STR_MAX - 1] = 0;
+		significand_dec[COB_FLOAT_DIGITS_STR_MAX - 1] = 0;
 	}
 
 	/* Validation and exponent handling */
@@ -1854,6 +1872,7 @@ scan_floating_numeric (const char *text)
 	exponent = 0;
 
 	if (sig_int_len + sig_dec_len > COB_FLOAT_DIGITS_MAX) {
+		/* note: same message in tree.c for floating-point numeric-edited item */
 		snprintf (err_msg, COB_MINI_MAX,
 			_("significand has more than %d digits"), COB_FLOAT_DIGITS_MAX);
 		error_literal ("float", text);
@@ -1864,6 +1883,7 @@ scan_floating_numeric (const char *text)
 			error_literal ("float", text);
 		} else {
 			if (strlen (exponent_pos) > 4) {
+				/* note: same message in tree.c for floating-point numeric-edited item */
 				snprintf (err_msg, COB_MINI_MAX,
 					_("exponent has more than 4 digits"));
 				error_literal ("float", text);
@@ -2131,7 +2151,7 @@ scan_define_options (const char *text)
 				goto freevar;
 			}
 			/* Remove decimal point */
-			memmove (q, q + 1, (size_t)(scale + 1));
+			memmove (q, q + 1, (size_t)scale + 1);
 		}
 		for (t = (unsigned char *)s; *t; ++t) {
 			if (*t < '0' || *t  > '9') {

@@ -15,42 +15,44 @@
    GNU Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-#include "config.h"
+#include <config.h>
 
 #include <string.h>
+#include <stddef.h>
 #include <ctype.h>
 #include <stdio.h>
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
-
 #include "libcob.h"
 #include "coblocal.h"
 
-#if !defined (WITH_XML2)
-#define WITH_XML2 0
+/* note: checked library instead of headers as those may not be usable! */
+#ifdef WITH_XML2
+#if !defined (HAVE_LIBXML_XMLVERSION_H) || \
+    !defined (HAVE_LIBXML_XMLWRITER_H) || \
+	!defined (HAVE_LIBXML_URI_H)
+#error XML2 without necessary headers
 #endif
-#if !defined (WITH_CJSON)
-#define WITH_CJSON 0
-#endif
-
-#if defined (HAVE_LIBXML_XMLVERSION_H) && HAVE_LIBXML_XMLVERSION_H
 #include <libxml/xmlversion.h>
-#if defined (HAVE_LIBXML_XMLWRITER_H) && HAVE_LIBXML_XMLWRITER_H
 #include <libxml/xmlwriter.h>
-#endif
-#if defined (HAVE_LIBXML_URI_H) && HAVE_LIBXML_URI_H
 #include <libxml/uri.h>
 #endif
+
+#ifdef WITH_CJSON
+#if defined HAVE_CJSON_CJSON_H
+#include <cjson/cJSON.h>
+#elif defined HAVE_CJSON_H
+#include <cJSON.h>
+#else
+#error CJSON without necessary header
+#endif
 #endif
 
-#if defined (HAVE_CJSON_CJSON_H) && HAVE_CJSON_CJSON_H
-#include <cjson/cJSON.h>
-#endif
 
 /* Local variables */
 
@@ -76,10 +78,10 @@ static cob_global		*cobglobptr;
 #if WITH_XML2 || WITH_CJSON
 
 static void *
-get_trimmed_data (const cob_field * const f, void * (*strndup_func)(const char *, int))
+get_trimmed_data (const cob_field * const f, void * (*strndup_func)(const char *, size_t))
 {
 	char	*str = (char *) f->data;
-	int	len = (int) f->size;
+	size_t	len = f->size;
 
 	/* Trim leading/trailing spaces. If f is all spaces, leave one space. */
 	if (COB_FIELD_JUSTIFIED (f)) {
@@ -94,7 +96,7 @@ get_trimmed_data (const cob_field * const f, void * (*strndup_func)(const char *
 static cob_pic_symbol *
 get_pic_for_num_field (const size_t num_int_digits, const size_t num_dec_digits)
 {
-	size_t	num_pic_symbols = 2 + (2 * !!num_dec_digits) + 1;
+	size_t	num_pic_symbols = (size_t)2 + (2 * !!num_dec_digits) + 1;
 	cob_pic_symbol	*pic = cob_malloc (num_pic_symbols * sizeof (cob_pic_symbol));
 	cob_pic_symbol	*symbol = pic;
 
@@ -122,7 +124,7 @@ get_pic_for_num_field (const size_t num_int_digits, const size_t num_dec_digits)
 }
 
 static void *
-get_num (cob_field * const f, void * (*strndup_func)(const char *, int))
+get_num (cob_field * const f, void * (*strndup_func)(const char *, size_t))
 {
 	size_t		num_integer_digits
 		= cob_max_int (0, COB_FIELD_DIGITS (f) - COB_FIELD_SCALE (f));
@@ -164,19 +166,12 @@ get_num (cob_field * const f, void * (*strndup_func)(const char *, int))
 static void
 set_xml_code (const unsigned int code)
 {
-	cob_decimal	d;
-
 	/* if the COBOL module never checks the code it isn't generated,
 	   this also makes clear that we don't need to (and can't) set it */
 	if (!COB_MODULE_PTR->xml_code) {
 		return;
 	}
-
-	mpz_init2 (d.value, COB_MPZ_DEF);
-	mpz_set_ui (d.value, code);
-	d.scale = 0;
-	cob_decimal_get_field (&d, COB_MODULE_PTR->xml_code, 0);
-	mpz_clear (d.value);
+	cob_set_field_to_uint (COB_MODULE_PTR->xml_code, code);
 }
 
 static int
@@ -194,7 +189,7 @@ is_all_spaces (const cob_field * const f)
 }
 
 static void *
-xmlCharStrndup_void (const char *str, const int size)
+xmlCharStrndup_void (const char *str, const size_t size)
 {
 	return (void *)xmlCharStrndup (str, size);
 }
@@ -554,20 +549,12 @@ set_xml_exception (const unsigned int code)
 static void
 set_json_code (const unsigned int code)
 {
-	cob_decimal	d;
-
 	/* if the COBOL module never checks the code it isn't generated,
 	   this also makes clear that we don't need to (and can't) set it */
 	if (!COB_MODULE_PTR->json_code) {
 		return;
 	}
-
-	/* TO-DO: Duplication! */
-	mpz_init2 (d.value, COB_MPZ_DEF);
-	mpz_set_ui (d.value, code);
-	d.scale = 0;
-	cob_decimal_get_field (&d, COB_MODULE_PTR->json_code, 0);
-	mpz_clear (d.value);
+	cob_set_field_to_uint (COB_MODULE_PTR->json_code, code);
 }
 
 static void
@@ -578,7 +565,7 @@ set_json_exception (const unsigned int code)
 }
 
 static void *
-json_strndup (const char *str, const int size)
+json_strndup (const char *str, const size_t size)
 {
 	char	*dup = cob_malloc (size + 1);
 	memcpy (dup, str, size);

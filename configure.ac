@@ -19,12 +19,12 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.64])
 
 AC_INIT([GnuCOBOL],
-	[3.0-dev],
+	[3.x-dev],
 	[bug-gnucobol@gnu.org],
 	[gnucobol],
 	[https://www.gnu.org/software/gnucobol/])
@@ -35,11 +35,17 @@ AC_CONFIG_TESTDIR([tests])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build_aux])
 
-AC_CONFIG_FILES([bin/cob-config Makefile libcob/Makefile lib/Makefile
-	cobc/Makefile bin/Makefile po/Makefile.in doc/Makefile
-	config/Makefile copy/Makefile
-	tests/atlocal tests/Makefile tests/cobol85/Makefile
+AC_CONFIG_FILES([Makefile libcob/Makefile lib/Makefile cobc/Makefile
+	bin/Makefile po/Makefile.in doc/Makefile config/Makefile
+	copy/Makefile tests/Makefile tests/cobol85/Makefile
 	extras/Makefile])
+
+AC_CONFIG_FILES([bin/cob-config], [chmod +x bin/cob-config])
+AC_CONFIG_FILES([pre-inst-env:build_aux/pre-inst-env.in],
+  [chmod +x pre-inst-env])
+AC_CONFIG_FILES([tests/atlocal], [chmod +x tests/atlocal])
+AC_CONFIG_FILES([tests/run_prog_manual.sh],
+  [chmod +x tests/run_prog_manual.sh])
 
 # Note for SUN Solaris (gcc)
 # export/setenv CFLAGS "-m64 -mptr64"
@@ -101,6 +107,8 @@ AH_TEMPLATE([COB_64_BIT_POINTER], [Pointers are longer than 32 bits])
 AH_TEMPLATE([WITH_CURSES], [curses library for extended SCREEN I/O])
 AH_TEMPLATE([HAVE_COLOR_SET], [curses has color_set function])
 AH_TEMPLATE([HAVE_DEFINE_KEY], [curses has define_key function])
+AH_TEMPLATE([HAVE_MOUSEINTERVAL], [curses has mouseinterval function])
+AH_TEMPLATE([HAVE_HAS_MOUSE], [curses has has_mouse function])
 AH_TEMPLATE([HAVE_CURSES_FREEALL], [ncurses has _nc_freeall function])
 AH_TEMPLATE([HAVE_USE_LEGACY_CODING], [ncurses has use_legacy_coding function])
 AH_TEMPLATE([HAVE_DESIGNATED_INITS], [Has designated initializers])
@@ -229,6 +237,54 @@ AM_PROG_CC_C_O
 
 AM_PROG_LEX
 AC_PROG_YACC
+
+# only GNU Bison is supported, so drop yacc-compatibility warnings if possible
+# note: that breaks old Bison versions which we still support,
+#       if that changes the test may be obsolete
+AC_MSG_CHECKING([how to disable yacc compatibility warnings])
+case "$YACC $YFLAGS $AM_YFLAGS" in 
+  *-Wno-yacc*)
+   AC_MSG_RESULT([already specified])
+  ;;
+  *-Wyacc*)
+   AC_MSG_RESULT([explicit enabled])
+  ;;
+  *)
+   $YACC $AM_YFLAGS $YFLAGS -Wno-yacc -V 1>/dev/null  2>&1
+   if test $? -eq 0; then
+      AC_MSG_RESULT([-Wno-yacc])
+      if test -z "$YFLAGS"; then
+         YFLAGS="-Wno-yacc"
+      else
+         YFLAGS="$YFLAGS -Wno-yacc"
+      fi
+   else
+      AC_MSG_RESULT([not supported])
+   fi
+  ;;
+esac
+
+AC_ARG_VAR(DIFF_FLAGS, arguments passed to diff)
+AC_MSG_CHECKING([for diff arguments])
+case "$DIFF_FLAGS" in 
+  *--strip-trailing-cr*)
+   AC_MSG_RESULT([specified as $DIFF_FLAGS])
+  ;;
+  *)
+   diff $DIFF_FLAGS --strip-trailing-cr --version 1>/dev/null  2>&1
+   if test $? -eq 0; then
+      if test -z "$DIFF_FLAGS"; then
+         DIFF_FLAGS="--strip-trailing-cr"
+      else
+         DIFF_FLAGS="$DIFF_FLAGS --strip-trailing-cr"
+      fi
+      AC_MSG_RESULT([$DIFF_FLAGS])
+   else
+      AC_MSG_RESULT([not supported])
+   fi
+  ;;
+esac
+AC_SUBST(DIFF_FLAGS)
 
 # Stop tests for C++ and Fortran
 AC_DEFUN([AC_PROG_F77], [])
@@ -370,6 +426,7 @@ fi
 if test "$COB_USES_ICC_ONLY" = "yes"; then
 	LIBCOB_LIBS="-limf -lm"
 else
+	# FIXME: -lm should only be used if needed (which it often is not), see Bug #559
 	LIBCOB_LIBS="-lm"
 fi
 
@@ -386,111 +443,6 @@ PKG_PROG_PKG_CONFIG
 
 
 # Configure options part II (needing compilation)
-AC_ARG_WITH([curses],
-  [AS_HELP_STRING([[--with-curses[=ARG]]],
-    [(GnuCOBOL) Use curses library for extended SCREEN I/O, where ARG may be:
-     check (default), ncursesw, ncurses, pdcurses, curses, no])],
-  [case "$with_curses" in
-    ncursesw | ncurses | pdcurses | curses | check | no)
-		USE_NCURSES="$with_curses"
-		;;
-	"yes")
-		USE_NCURSES="check"
-		;;
-    *)
-		AC_MSG_ERROR([invalid value "$with_curses" for --with-curses,
-  must be one of the following:
-  ncursesw, ncurses, pdcurses, curses  (use only the specified library)
-  check  (use whatever curses library is usable, disable if no one usable)
-  no  (disable curses usage)])
-		;;
-  esac],
-  [USE_NCURSES="check"])
-
-AC_ARG_WITH([seqra-extfh],
-  [AS_HELP_STRING([--with-seqra-extfh],
-    [(GnuCOBOL) Use external SEQ/RAN file handler])],
-  [ if test "$with_seqra_extfh" = "yes"; then
-	AC_DEFINE([WITH_SEQRA_EXTFH], [1])
-    fi ],
-  [])
-
-AC_ARG_WITH([cisam],
-  [AS_HELP_STRING([--with-cisam],
-    [(GnuCOBOL) Use CISAM for ISAM I/O])],
-  [ if test "$with_cisam" = "yes"; then
-	AC_CHECK_HEADERS([isam.h], [],
-		AC_MSG_ERROR([isam.h is required for CISAM]))
-	AC_CHECK_LIB([ifisam], [isopen],
-		[AC_DEFINE([WITH_CISAM], [1])
-		LIBCOB_LIBS="$LIBCOB_LIBS -lifisam -lifisamx"],
-		AC_MSG_ERROR([libifisam is required for CISAM]), [-lifisamx])
-    fi ],
-  [])
-
-if test "$with_cisam" != "yes"; then
-  AC_ARG_WITH([disam],
-  [AS_HELP_STRING([--with-disam],
-    [(GnuCOBOL) Use DISAM for ISAM I/O])],
-  [ if test "$with_disam" = "yes"; then
-	AC_CHECK_HEADERS([disam.h], [],
-		AC_MSG_ERROR([disam.h is required for DISAM]))
-
-	for cobdisam in disam disam8 disam72 disam71 disam7
-	do
-		AC_CHECK_LIB([$cobdisam], [isopen],
-			[AC_DEFINE([WITH_DISAM], [1])
-			LIBCOB_LIBS="$LIBCOB_LIBS -l$cobdisam"]
-			cob_got_disam=yes
-			break,
-			[], [])
-	done
-	if test "$cob_got_disam" = "yes"; then
-		AC_MSG_NOTICE([DISAM library found as -l$cobdisam])
-	else
-		AC_MSG_ERROR([DISAM library not found])
-	fi
-	unset cobdisam
-	unset cob_got_disam
-    fi ],
-  [])
-fi
-
-if test "$with_cisam" != "yes" -a "$with_disam" != "yes"; then
-  AC_ARG_WITH([vbisam],
-  [AS_HELP_STRING([--with-vbisam],
-    [(GnuCOBOL) Use VBISAM for ISAM I/O])],
-  [ if test "$with_vbisam" = "yes"; then
-	AC_CHECK_HEADERS([vbisam.h], [],
-		AC_MSG_ERROR([vbisam.h is required for VBISAM]))
-	# note: isfullclose is available since 2.0, isopen since 1.0
-	AC_CHECK_LIB([vbisam], [isfullclose],
-		[AC_DEFINE([WITH_VBISAM], [1])
-		LIBCOB_LIBS="$LIBCOB_LIBS -lvbisam"],
-		AC_MSG_ERROR([libvbisam >= 2.0 is required for VBISAM]), [])
-    fi ],
-  [])
-fi
-
-if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes"; then
-  AC_ARG_WITH([index-extfh],
-  [AS_HELP_STRING([--with-index-extfh],
-    [(GnuCOBOL) Use external ISAM file handler])],
-  [ if test "$with_index_extfh" = "yes"; then
-	AC_DEFINE([WITH_INDEX_EXTFH], [1])
-    fi ],
-  [])
-fi
-
-if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes" -a "$with_index_extfh" != "yes"; then
-  AC_ARG_WITH([db],
-  [AS_HELP_STRING([--with-db],
-    [(GnuCOBOL) Use Berkeley DB >= 4.1 for ISAM I/O (default)])],
-  [],
-  [with_db=yes])
-fi
-
-
 AC_ARG_WITH([xml2],
   [AS_HELP_STRING([--with-xml2],
     [(GnuCOBOL) Use libxml2 as XML handler (default)])],
@@ -520,31 +472,38 @@ AS_IF([test "$with_xml2" = "yes" -o "$with_xml2" = "check"], [
 	LIBS="$LIBS $XML2_LIBS"
 	AC_CHECK_HEADERS([libxml/xmlversion.h libxml/uri.h libxml/xmlwriter.h],
 		[AX_CHECK_DEFINE([libxml/xmlwriter.h], [LIBXML_WRITER_ENABLED], [],
-		   AC_MSG_ERROR([libxml2 is required to be configured with xmlWriter]))
+		   [if test "$with_xml2" = "yes"; then
+		      AC_MSG_ERROR([libxml2 is required to be configured with xmlWriter])
+		   else
+		      AC_MSG_WARN([libxml2 is required to be configured with xmlWriter])
+		      with_xml2=no
+		   fi])
 		],
 		[if test "$with_xml2" = "yes"; then 
 		   AC_MSG_ERROR([Headers for libxml2 are required for --with-xml2, you may adjust XML2_CFLAGS])
 		else
 		   with_xml2=no
 		fi])
-	if test "$with_xml2" != "no"; then 
+	if test "$with_xml2" != "no"; then
 		AC_MSG_CHECKING([if linking against libxml2 with "$XML2_LIBS" works])
 		AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <libxml/xmlwriter.h>]],
 		  [[xmlNewTextWriterFilename (NULL, 0);]])],
 		  [AC_DEFINE([WITH_XML2], [1]) AC_MSG_RESULT([yes])
 		   with_xml2=yes
+		   LIBCOB_CPPFLAGS="$LIBCOB_CPPFLAGS $XML2_CFLAGS"
 		   LIBCOB_LIBS="$LIBCOB_LIBS $XML2_LIBS"],
 		  [AC_MSG_RESULT([no])
 		   if test "$with_xml2" = "yes"; then
 		     AC_MSG_ERROR([[xml library is required for --with-xml2, you may adjust XML2_LIBS]])
 		   else
 		     AC_MSG_WARN([xml library not found, you may adjust XML2_LIBS])
-		     with_xml2=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+		     with_xml2=no
 		   fi])
 	else
 		AC_MSG_WARN([Headers for libxml2 missing, you may adjust XML2_CFLAGS])
-		 with_xml2=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+		with_xml2=no
 	fi
+	LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
 ])
 
 
@@ -554,41 +513,83 @@ AC_ARG_WITH([cjson],
   [],
   [with_cjson=check])
 
-AS_IF([test "$with_cjson" = "yes" -o "$with_cjson" = "check"], [
-	PKG_CHECK_MODULES([CJSON], [libcjson], [], [#])
+AS_IF([test "$with_cjson" = "yes" -o "$with_cjson" = "local" -o "$with_cjson" = "check"], [
+	AC_MSG_NOTICE([Checks for local cJSON ...])
 	curr_libs="$LIBS"; curr_cppflags="$CPPFLAGS"
-	if test -n "$CJSON_CFLAGS"; then
-	  CPPFLAGS="$CPPFLAGS $CJSON_CFLAGS"
+	with_cjson_local=no
+	AC_CHECK_FILE([./libcob/cJSON.c],
+	  [AC_MSG_CHECKING([if linking of ./libcob/cJSON.c works])
+	   CPPFLAGS="$curr_cppflags -I./libcob"
+	   AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "cJSON.c"]],
+	    [[cJSON_CreateNull ();]])],
+	   [AC_MSG_RESULT([yes])
+	    with_cjson_local="yes (in ./libcob)"],
+	   [AC_MSG_RESULT([no])]
+	   )]
+	)
+	if test "$with_cjson_local" = "no"; then
+	  AC_CHECK_FILE([$srcdir/libcob/cJSON.c],
+	    [AC_MSG_CHECKING([if linking of $srcdir/libcob/cJSON.c works])
+	     CPPFLAGS="$curr_cppflags -I$srcdir/libcob"
+	     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "cJSON.c"]],
+	      [[cJSON_CreateNull ();]])],
+	     [AC_MSG_RESULT([yes])
+	      with_cjson_local="yes (in $srcdir/libcob)"],
+	     [AC_MSG_RESULT([no])]
+	     )]
+	  )
 	fi
-	if test -z "$CJSON_LIBS"; then
-	  CJSON_LIBS="-lcjson"
-	fi
-	LIBS="$LIBS $CJSON_LIBS"
-	AC_CHECK_HEADERS([cjson/cJSON.h],
-		[],
-		[if test "$with_cjson" = "yes"; then 
-		   AC_MSG_ERROR([Headers for libcjson are required for --with-cjson, you may adjust CJSON_CFLAGS])
-		else
-		   with_cjson=no
-		fi])
-	if test "$with_cjson" != "no"; then 
-		AC_MSG_CHECKING([if linking against libcjson with "$CJSON_LIBS" works])
-		AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <cjson/cJSON.h>]],
+	CPPFLAGS="$curr_cppflags"
+	if test "$with_cjson_local" = "no"; then
+		AC_MSG_NOTICE([using local cJSON: no])
+		if test "$with_cjson" = "local"; then 
+		  AC_MSG_ERROR([[cJSON source is required in directory "libcob" for --with-cjson=local]])
+		fi
+		PKG_CHECK_MODULES([CJSON], [libcjson], [], [#])
+		if test -n "$CJSON_CFLAGS"; then
+		  CPPFLAGS="$CPPFLAGS $CJSON_CFLAGS"
+		fi
+		if test -z "$CJSON_LIBS"; then
+		  CJSON_LIBS="-lcjson"
+		fi
+		LIBS="$LIBS $CJSON_LIBS"
+		AC_CHECK_HEADERS([cJSON.h], [],
+			[AC_CHECK_HEADERS([cjson/cJSON.h], [],
+			[if test "$with_cjson" = "yes"; then 
+			    AC_MSG_ERROR([Headers for libcjson are required for --with-cjson, you may adjust CJSON_CFLAGS])
+			 else
+				AC_MSG_WARN([Headers for libcjson missing, you may adjust CJSON_CFLAGS or put cJSON sources in "libcob"])
+			    with_cjson=no
+			 fi]
+		)])
+		if test "$with_cjson" != "no"; then
+		 AC_MSG_CHECKING([if linking against libcjson with "$CJSON_LIBS" works])
+		 AC_LINK_IFELSE([AC_LANG_PROGRAM([
+		 [#if defined HAVE_CJSON_CJSON_H
+		  #include <cjson/cJSON.h>
+		  #elif defined HAVE_CJSON_H
+		  #include <cJSON.h>
+		  #endif]],
 		  [[cJSON_CreateNull ();]])],
 		  [AC_DEFINE([WITH_CJSON], [1]) AC_MSG_RESULT([yes])
 		   with_cjson=yes
+		   LIBCOB_CPPFLAGS="$LIBCOB_CPPFLAGS $CJSON_CFLAGS"
 		   LIBCOB_LIBS="$LIBCOB_LIBS $CJSON_LIBS"],
 		  [AC_MSG_RESULT([no])
 		   if test "$with_cjson" = "yes"; then
 		     AC_MSG_ERROR([[cJSON library is required for --with-cjson, you may adjust CJSON_LIBS]])
 		   else
 		     AC_MSG_WARN([xml library not found, you may adjust CJSON_LIBS])
-		     with_cjson=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+		     with_cjson=no
 		   fi])
+		fi
 	else
-		AC_MSG_WARN([Headers for libcjson missing, you may adjust CJSON_CFLAGS])
-		 with_cjson=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+		AC_MSG_NOTICE([using local cJSON: $with_cjson_local])
+		with_cjson="local"
+		AC_DEFINE([WITH_CJSON], [1])
+		AC_DEFINE([HAVE_CJSON_H], [1])
 	fi
+	LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
 ])
 
 
@@ -787,6 +788,27 @@ AM_LANGINFO_CODESET
 # Checks for ncurses/pdcurses/curses.
 AC_MSG_NOTICE([Checks for curses ...])
 
+AC_ARG_WITH([curses],
+  [AS_HELP_STRING([[--with-curses[=ARG]]],
+    [(GnuCOBOL) Use curses library for extended SCREEN I/O, where ARG may be:
+     check (default), ncursesw, ncurses, pdcurses, curses, no])],
+  [case "$with_curses" in
+    ncursesw | ncurses | pdcurses | curses | check | no)
+		USE_NCURSES="$with_curses"
+		;;
+	"yes")
+		USE_NCURSES="check"
+		;;
+    *)
+		AC_MSG_ERROR([invalid value "$with_curses" for --with-curses,
+  must be one of the following:
+  ncursesw, ncurses, pdcurses, curses  (use only the specified library)
+  check  (use whatever curses library is usable, disable if no one usable)
+  no  (disable curses usage)])
+		;;
+  esac],
+  [USE_NCURSES="check"])
+
 if test "$USE_NCURSES" = "ncursesw" -o "$USE_NCURSES" = "check"; then
   AC_CHECK_LIB([ncursesw], [initscr], [], [], [])
   if test "x$ac_cv_lib_ncursesw_initscr" = "xyes"; then
@@ -948,6 +970,131 @@ if test "$USE_NCURSES" != "no" -a "$USE_NCURSES" != "not_found"; then
 	[AC_DEFINE([HAVE_DEFINE_KEY], [1]) AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])],
 	[])
+
+	AC_MSG_CHECKING([for curses mouseinterval function])
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+	#ifdef HAVE_NCURSESW_NCURSES_H
+	#include <ncursesw/ncurses.h>
+	#elif defined (HAVE_NCURSESW_CURSES_H)
+	#include <ncursesw/curses.h>
+	#elif defined (HAVE_NCURSES_H)
+	#include <ncurses.h>
+	#elif defined (HAVE_NCURSES_NCURSES_H)
+	#include <ncurses/ncurses.h>
+	#elif defined (HAVE_PDCURSES_H)
+	#include <pdcurses.h>
+	#elif defined (HAVE_CURSES_H)
+	#include <curses.h>
+	#endif]], [[
+	mouseinterval (-1);
+	]])],
+	[AC_DEFINE([HAVE_MOUSEINTERVAL], [1]) AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])],
+	[])
+
+	AC_MSG_CHECKING([for curses has_mouse function])
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+	#ifdef HAVE_NCURSESW_NCURSES_H
+	#include <ncursesw/ncurses.h>
+	#elif defined (HAVE_NCURSESW_CURSES_H)
+	#include <ncursesw/curses.h>
+	#elif defined (HAVE_NCURSES_H)
+	#include <ncurses.h>
+	#elif defined (HAVE_NCURSES_NCURSES_H)
+	#include <ncurses/ncurses.h>
+	#elif defined (HAVE_PDCURSES_H)
+	#include <pdcurses.h>
+	#elif defined (HAVE_CURSES_H)
+	#include <curses.h>
+	#endif]], [[
+	has_mouse ();
+	]])],
+	[AC_DEFINE([HAVE_HAS_MOUSE], [1]) AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])],
+	[])
+fi
+
+AC_ARG_WITH([seqra-extfh],
+  [AS_HELP_STRING([--with-seqra-extfh],
+    [(GnuCOBOL) Use external SEQ/RAN file handler])],
+  [ if test "$with_seqra_extfh" = "yes"; then
+	AC_DEFINE([WITH_SEQRA_EXTFH], [1])
+    fi ],
+  [])
+
+AC_ARG_WITH([cisam],
+  [AS_HELP_STRING([--with-cisam],
+    [(GnuCOBOL) Use CISAM for ISAM I/O])],
+  [ if test "$with_cisam" = "yes"; then
+	AC_CHECK_HEADERS([isam.h], [],
+		AC_MSG_ERROR([isam.h is required for CISAM]))
+	AC_CHECK_LIB([ifisam], [isopen],
+		[AC_DEFINE([WITH_CISAM], [1])
+		LIBCOB_LIBS="$LIBCOB_LIBS -lifisam -lifisamx"],
+		AC_MSG_ERROR([libifisam is required for CISAM]), [-lifisamx])
+    fi ],
+  [])
+
+if test "$with_cisam" != "yes"; then
+  AC_ARG_WITH([disam],
+  [AS_HELP_STRING([--with-disam],
+    [(GnuCOBOL) Use DISAM for ISAM I/O])],
+  [ if test "$with_disam" = "yes"; then
+	AC_CHECK_HEADERS([disam.h], [],
+		AC_MSG_ERROR([disam.h is required for DISAM]))
+
+	for cobdisam in disam disam8 disam72 disam71 disam7
+	do
+		AC_CHECK_LIB([$cobdisam], [isopen],
+			[AC_DEFINE([WITH_DISAM], [1])
+			LIBCOB_LIBS="$LIBCOB_LIBS -l$cobdisam"]
+			cob_got_disam=yes
+			break,
+			[], [])
+	done
+	if test "$cob_got_disam" = "yes"; then
+		AC_MSG_NOTICE([DISAM library found as -l$cobdisam])
+	else
+		AC_MSG_ERROR([DISAM library not found])
+	fi
+	unset cobdisam
+	unset cob_got_disam
+    fi ],
+  [])
+fi
+
+if test "$with_cisam" != "yes" -a "$with_disam" != "yes"; then
+  AC_ARG_WITH([vbisam],
+  [AS_HELP_STRING([--with-vbisam],
+    [(GnuCOBOL) Use VBISAM for ISAM I/O])],
+  [ if test "$with_vbisam" = "yes"; then
+	AC_CHECK_HEADERS([vbisam.h], [],
+		AC_MSG_ERROR([vbisam.h is required for VBISAM]))
+	# note: isfullclose is available since 2.0, isopen since 1.0
+	AC_CHECK_LIB([vbisam], [isfullclose],
+		[AC_DEFINE([WITH_VBISAM], [1])
+		LIBCOB_LIBS="$LIBCOB_LIBS -lvbisam"],
+		AC_MSG_ERROR([libvbisam >= 2.0 is required for VBISAM]), [])
+    fi ],
+  [])
+fi
+
+if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes"; then
+  AC_ARG_WITH([index-extfh],
+  [AS_HELP_STRING([--with-index-extfh],
+    [(GnuCOBOL) Use external ISAM file handler])],
+  [ if test "$with_index_extfh" = "yes"; then
+	AC_DEFINE([WITH_INDEX_EXTFH], [1])
+    fi ],
+  [])
+fi
+
+if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes" -a "$with_index_extfh" != "yes"; then
+  AC_ARG_WITH([db],
+  [AS_HELP_STRING([--with-db],
+    [(GnuCOBOL) Use Berkeley DB >= 4.1 for ISAM I/O (default)])],
+  [],
+  [with_db=yes])
 fi
 
 # Checks for db.
@@ -1199,16 +1346,19 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 #	CFLAGS="$MYOLDCFLAGS"
 #fi
 
-# Check if aligned attribute works
+# Check if aligned attribute seems to work
+# done:   does not raise an error
+# *TODO*: has same output as omitting it)
 AC_MSG_CHECKING([for aligned attribute])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],
 	[[char testchar[4] __attribute__((aligned));]])],
-	[AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], [1]) AC_MSG_RESULT([yes])],
+	[AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], [1]) AC_MSG_RESULT([yes])
+	],
 	[AC_MSG_RESULT([no])])
 
 # GnuCOBOL Configuration
 
-COB_LIBS="-L$libdir -lcob ${LIBCOB_LIBS}"
+COB_LIBS="-L$libdir -lcob"
 COB_LDFLAGS=""
 if test "x$LDFLAGS" != "x"; then
 	COB_LIBS="$LDFLAGS $COB_LIBS"
@@ -1232,8 +1382,8 @@ fi
 COB_OBJECT_EXT="$OBJEXT"
 LIBS="$save_libs"
 COB_EXPORT_DYN="`eval echo $export_dynamic_flag_spec`"
+# FIXME: lt_prog_compiler_pic is not always correct, for example with occ
 COB_PIC_FLAGS=`echo "$lt_prog_compiler_pic" | sed -e 's/^ //'`
-COB_SHARED_OPT="-shared"
 
 if test "$enable_cflags_setting" = "yes"; then
 
@@ -1375,6 +1525,11 @@ AH_VERBATIM([_XOPEN_SOURCE_EXTENDED],
 # undef _XOPEN_SOURCE_EXTENDED
 #endif])dnl
 
+# FIXME: COB_SHARED_OPT should at least be checked for "compiles";
+#        for example breaks with occ and other non-GCC compilers,
+#        *at least* check that compilation still works when using this option...
+COB_SHARED_OPT="-shared"
+
 COB_FIX_LIB="$COB_EXPORT_DYN"
 COB_FIX_LIBTOOL=""
 case $host_os in
@@ -1397,7 +1552,9 @@ case $host_os in
 	COB_FIX_LIB=""
 	;;
   darwin* | rhapsody*)
-	COB_SHARED_OPT="-bundle -flat_namespace -undefined suppress"
+	if test "$COB_USES_GCC" = "yes"; then
+		COB_SHARED_OPT="-bundle -flat_namespace -undefined suppress"
+	fi
 	;;
   hpux*)
 	if test "$COB_USES_GCC" != "yes"; then
@@ -1506,10 +1663,12 @@ else
 	COB_HAS_XML2=no
 fi
 
-if test "$with_cjson" = "yes"; then
+AM_CONDITIONAL([LOCAL_CJSON],[test "$with_cjson" = "local"])
+if test "$with_cjson" = "yes" -o "$with_cjson" = "local"; then
 	COB_HAS_CJSON=yes
 else
 	COB_HAS_CJSON=no
+	with_cjson=no
 fi
 
 unset COB_USES_GCC
@@ -1549,6 +1708,7 @@ AC_SUBST([COB_MODULE_EXT])
 AC_SUBST([COB_EXE_EXT])
 AC_SUBST([COBC_LIBS])
 AC_SUBST([LIBCOB_LIBS])
+AC_SUBST([LIBCOB_CPPFLAGS])
 AC_SUBST([COB_EXPORT_DYN])
 AC_SUBST([COB_PIC_FLAGS])
 AC_SUBST([COB_SHARED_OPT])
@@ -1634,5 +1794,5 @@ else
   AC_MSG_NOTICE([ ISAM I/O (no handler configured):            NO])
 fi
 AC_MSG_NOTICE([ Use libxml2 for XML I/O                      ${COB_HAS_XML2}])
-AC_MSG_NOTICE([ Use cJSON for JSON I/O                       ${COB_HAS_CJSON}])  
+AC_MSG_NOTICE([ Use cJSON for JSON I/O                       $with_cjson])  
 unset DEFINE_DL

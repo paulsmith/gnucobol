@@ -1,7 +1,7 @@
 #!/bin/sh
 # create_win_dist.sh gnucobol
 #
-# Copyright (C) 2016-2017 Free Software Foundation, Inc.
+# Copyright (C) 2016-2017,2019 Free Software Foundation, Inc.
 # Written by Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -17,14 +17,14 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 
 # This shell script needs to be sourced from Makefile processing,
-# otherwise set EXTSRCDIR and EXTDISTDIR before calling this script
-# AND make sure EXTDISTDIR exists with the right content
+# otherwise set EXTSRCDIR, EXTDISTDIR and EXTWINDISTDIR before calling
+# this script AND make sure EXTDISTDIR exists with the right content.
 
-# Check necessary vars:
+# check necessary vars:
 
 if test "x$EXTDISTDIR" = "x"; then
 	echo "EXTDISTDIR" not set, aborting $0
@@ -44,42 +44,26 @@ if test ! -d "$EXTSRCDIR/build_windows"; then
 	exit 5
 fi
 
-# check where to place temporary files
-if test "x$TMPDIR" = "x"; then
-	if test "x$TMP" = "x"; then
-		if test "x$TEMP" = "x"; then
-			TMPDIR=/tmp
-		else
-			TMPDIR=$TEMP
-		fi
-	else
-		TMPDIR=$TMP
-	fi
-fi
-if test ! -d "$TMPDIR"; then
-	echo "TMPDIR $TMPDIR" does not exist, aborting $0
+if test "x$EXTWINDISTDIR" = "x"; then
+	echo "EXTWINDISTDIR" not set, aborting $0
 	exit 1
 fi
-export TMPDIR
+if test -d "$EXTWINDISTDIR"; then
+	rm -rf "$EXTWINDISTDIR"
+fi
 
-# Create temporary folder as we don't want to change the EXTDISTDIR's content
-WINTMP=$TMPDIR/win-dist-$(date +%s)
+echo cp -p -r  "$EXTDISTDIR" "$EXTWINDISTDIR"
+cp -p -r "$EXTDISTDIR" "$EXTWINDISTDIR" || exit 1
 
-rm -r -f $WINTMP
-echo mkdir $WINTMP
-mkdir $WINTMP
+# add content only necessary for windows dist zip
 
-echo cp -p -r  $EXTDISTDIR $WINTMP
-cp -p -r $EXTDISTDIR $WINTMP || exit 1
+echo rsync -av "$EXTSRCDIR/build_windows" "$EXTWINDISTDIR/"
+rsync -a "$EXTSRCDIR/build_windows" "$EXTWINDISTDIR/" --exclude=x64 --exclude=Win32 --exclude=".vs" --exclude=".ncb"  --exclude=".bak" --exclude=distnew
+echo cp "$EXTSRCDIR/tests/atlocal_win" "$EXTWINDISTDIR/tests/atlocal_win"
+cp "$EXTSRCDIR/tests/atlocal_win" "$EXTWINDISTDIR/tests/atlocal_win" || exit 2
 
-# Add content only necessary for windows dist zip
-echo cp -p -r $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR/
-cp -p -r $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR/ || exit 2
-echo cp $EXTSRCDIR/tests/atlocal_win $WINTMP/$EXTDISTDIR/tests/atlocal_win
-cp $EXTSRCDIR/tests/atlocal_win $WINTMP/$EXTDISTDIR/tests/atlocal_win || exit 2
-
-olddir=$(pwd)
-cd $WINTMP/$EXTDISTDIR || exit 3
+olddir="$(pwd)"
+cd "$EXTWINDISTDIR" || exit 3
 
 # rename templates for faster setup
 cd build_windows || exit 5
@@ -87,16 +71,18 @@ mv "config.h.in"   "config.h"
 mv "defaults.h.in" "defaults.h"
 cd ..
 
-# Remove content not necessary for windows dist zip --> breaks make dist[check]
+# remove content not necessary for windows-only distribution --> breaks make dist[check]
 # rm -r -f m4
 
-# Change line ending for files in zip-file
-
+# change line ending for files in windows distribution
 find -regextype posix-egrep -regex ".*(\.([chyl]|def|cpy|cob|conf|cfg)|(README|ChangeLog|AUTHORS|ABOUT-NLS|NEWS|THANKS|TODO|COPYING.*))$" \
  -exec sed -i -e 's/\r*$/\r/' {} \;
  
 # fix timestamps again
-./doc/cobcinfo.sh "fixtimestamps"
+chmod +x ./doc/cobcinfo.sh
+cd doc
+./cobcinfo.sh "fixtimestamps"
+cd ..
 touch "./bin/cobcrun.1"
 touch "./cobc/cobc.1"
 touch "./cobc/ppparse.c"
@@ -104,6 +90,8 @@ touch "./cobc/parser.c"
 #touch "./cobc/pplex.c"
 #touch "./cobc/scanner.c"
 #touch "./libcob/libcob.3"
+touch "./tests/testsuite"
+touch "./tests/testsuite_manual"
 
 # bugfix for old _MSC versions that define __STDC_VERSION__ >= 199901L but don't work correct
 for file in "./cobc/pplex.c" "./cobc/scanner.c"; do
@@ -114,13 +102,5 @@ for file in "./cobc/pplex.c" "./cobc/scanner.c"; do
 done
 cd .. # back in win-dist
 
-
-# Create windows dist zip
-rm -f $EXTDISTDIR"_win.zip"
-zip -rq $olddir/$EXTDISTDIR"_win.zip" $EXTDISTDIR
-
-cd $olddir # back in starting directory
-
-# Remove temporary folder
-rm -r -f $WINTMP
+cd "$olddir" # back in starting directory
 

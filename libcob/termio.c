@@ -15,11 +15,11 @@
    GNU Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,7 +35,6 @@
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
-
 #include "libcob.h"
 #include "coblocal.h"
 
@@ -415,9 +414,9 @@ is_field_display (cob_field *f)
 }
 
 static void
-display_alnum_dump (cob_field *f, FILE *fp, int indent, int max_width)
+display_alnum_dump (cob_field *f, FILE *fp, unsigned int indent, unsigned int max_width)
 {
-	size_t	i, j, pos, lowv, highv, spacev, printv, delv, len, colsize;
+	unsigned int	i, j, pos, lowv, highv, spacev, printv, delv, len, colsize;
 	char	wrk[200];
 
 	lowv = highv = spacev = printv = delv = 0;
@@ -440,7 +439,7 @@ display_alnum_dump (cob_field *f, FILE *fp, int indent, int max_width)
 			|| f->data[i] == '\n'
 			|| f->data[i] == '\r'
 			|| f->data[i] == '\t') {
-			delv ++;
+			delv++;
 		}
 	}
 	for (len = f->size; len > 0 && f->data[len-1] == ' '; len--);
@@ -463,10 +462,10 @@ display_alnum_dump (cob_field *f, FILE *fp, int indent, int max_width)
 		for (len = f->size; len > 0 && f->data[len-1] == 0x00; len--);
 		if ((len+lowv) == f->size) {
 			for (i=0; len > colsize; i+=colsize,len-=colsize) {
-				fprintf(fp,"'%.*s'\n%*s",(unsigned int)colsize,&f->data[i],indent," ");
+				fprintf(fp,"'%.*s'\n%*s",colsize,&f->data[i],indent," ");
 			}
 			if (len <= colsize) {
-				fprintf(fp,"'%.*s'",(unsigned int)len,&f->data[i]);
+				fprintf(fp,"'%.*s'",len,&f->data[i]);
 			}
 			fprintf(fp,"\n%*s trailing LOW-VALUES",indent-8," ");
 			return;
@@ -475,10 +474,10 @@ display_alnum_dump (cob_field *f, FILE *fp, int indent, int max_width)
 
 	if (printv == f->size) {
 		for (i=0; len > colsize; i+=colsize,len-=colsize) {
-			fprintf(fp,"'%.*s'\n%*s",(unsigned int)colsize,&f->data[i],indent," ");
+			fprintf (fp, "'%.*s'\n%*s", colsize, &f->data[i], indent, " ");
 		}
 		if (len <= colsize) {
-			fprintf(fp,"'%.*s'",(unsigned int)len,&f->data[i]);
+			fprintf (fp, "'%.*s'", len, &f->data[i]);
 			return;
 		}
 	}
@@ -503,14 +502,16 @@ display_alnum_dump (cob_field *f, FILE *fp, int indent, int max_width)
 				else
 					fprintf(fp,"%c",f->data[i]);
 			}
-			if (i < f->size)
-				fprintf(fp,"\n%*s%5u : ",indent-8," ",(unsigned int)(i+1));
+			if (i < f->size) {
+				fprintf (fp, "\n%*s%5u : ", indent - 8, " ", i + 1);
+			}
 		}
 		return;
 	}
 
-	if (colsize > sizeof(wrk)-1)
-		colsize = sizeof(wrk) - 1;
+	if (colsize > sizeof (wrk) - 1) {
+		colsize = sizeof (wrk) - 1;
+	}
 	if (colsize > 9) {
 		colsize = colsize / 9;
 		colsize = colsize * 9;
@@ -537,9 +538,10 @@ display_alnum_dump (cob_field *f, FILE *fp, int indent, int max_width)
 				wrk[j+2] = 0;
 			}
 		}
-		fprintf(fp,"\n%*s%5u x %s",indent-8," ",(unsigned int)pos,wrk);
-		if (i < f->size)
-			fprintf(fp,"\n%*s",indent," ");
+		fprintf (fp, "\n%*s%5u x %s", indent-8, " ", pos, wrk);
+		if (i < f->size) {
+			fprintf (fp, "\n%*s", indent, " ");
+		}
 	}
 }
 

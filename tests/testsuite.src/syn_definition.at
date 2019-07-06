@@ -14,7 +14,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+## along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 ### GnuCOBOL Test Suite
 
@@ -1385,7 +1385,7 @@ AT_DATA([prog.cob], [
            03  PIC ++.++.
            03  PIC $(integer-constant).
            03  PIC $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-      -(integer-constant).
+      -(integer-constant).   *> CHECKME: should this be really valid?
 
 
        01  PC-COLOR-BACKGROUND-TABLE.
@@ -1427,11 +1427,10 @@ prog.cob:25: error: C must be followed by R
 prog.cob:26: error: D must be followed by B
 prog.cob:27: error: numeric field cannot be larger than 38 digits
 prog.cob:28: error: only up to 9 significant digits are permitted within parentheses
-prog.cob:29: error: '(100' is not defined
-prog.cob:29: error: invalid PICTURE character ')'
+prog.cob:29: error: parentheses must be preceded by a picture symbol
 prog.cob:30: error: unbalanced parentheses
-prog.cob:31: error: only one set of parentheses is permitted
-prog.cob:32: error: parentheses must contain (a constant-name defined as) a positive integer
+prog.cob:31: error: parentheses must be preceded by a picture symbol
+prog.cob:32: error: parentheses must contain an unsigned integer
 prog.cob:34: error: . cannot follow a P which is after the decimal point
 prog.cob:35: error: . cannot follow V
 prog.cob:36: error: cannot have both Z and * in PICTURE string
@@ -1470,6 +1469,7 @@ prog.cob:67: error: 'STR-CONSTANT' is not a numeric literal
 prog.cob:68: error: 'FLOAT-CONSTANT' is not an integer
 prog.cob:69: error: 'SIGNED-CONSTANT' is not unsigned
 prog.cob:70: error: 'UNSEEN-CONSTANT' is not defined
+prog.cob:81: warning: uncommon parentheses
 prog.cob:86: warning: USAGE BIT is not implemented
 prog.cob:87: warning: USAGE BIT is not implemented
 prog.cob:88: warning: USAGE BIT is not implemented
@@ -1505,11 +1505,10 @@ prog.cob:25: error: C must be followed by R
 prog.cob:26: error: D must be followed by B
 prog.cob:27: error: numeric field cannot be larger than 38 digits
 prog.cob:28: error: only up to 9 significant digits are permitted within parentheses
-prog.cob:29: error: '(100' is not defined
-prog.cob:29: error: invalid PICTURE character ')'
+prog.cob:29: error: parentheses must be preceded by a picture symbol
 prog.cob:30: error: unbalanced parentheses
-prog.cob:31: error: only one set of parentheses is permitted
-prog.cob:32: error: parentheses must contain (a constant-name defined as) a positive integer
+prog.cob:31: error: parentheses must be preceded by a picture symbol
+prog.cob:32: error: parentheses must contain an unsigned integer
 prog.cob:34: error: . cannot follow a P which is after the decimal point
 prog.cob:35: error: . cannot follow V
 prog.cob:36: error: cannot have both Z and * in PICTURE string
@@ -1548,6 +1547,7 @@ prog.cob:67: error: 'STR-CONSTANT' is not a numeric literal
 prog.cob:68: error: 'FLOAT-CONSTANT' is not an integer
 prog.cob:69: error: 'SIGNED-CONSTANT' is not unsigned
 prog.cob:70: error: 'UNSEEN-CONSTANT' is not defined
+prog.cob:81: warning: uncommon parentheses
 prog.cob:86: warning: USAGE BIT is not implemented
 prog.cob:87: warning: USAGE BIT is not implemented
 prog.cob:88: warning: USAGE BIT is not implemented

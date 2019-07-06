@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2015-2018 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2015-2019 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 ##
 ## This file is part of GnuCOBOL.
@@ -14,16 +14,17 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+## along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 ### GnuCOBOL Test Suite
 
 ### ISO+IEC+1989-2002 13.16.36 OCCURS clause
+### ISO+IEC+1989-202x 3rd WD 13.18.38 OCCURS clause
 
-## 13.16.36.2 Syntax rules
+## .2 Syntax rules
 
 
-# 1) DONE
+# 1a) level number rules (extended with level 78)
 
 AT_SETUP([OCCURS with level 01 and 77])
 #AT_KEYWORDS([occurs])
@@ -58,23 +59,27 @@ AT_CLEANUP
 
 
 # FIXME: should be a single test but the error recovery is broken
-# AT_SETUP([OCCURS with level 66 / 78 / 88])
-# AT_KEYWORDS([RENAMES])
-# 
-# AT_DATA([prog.cob], [
-#        IDENTIFICATION   DIVISION.
-#        PROGRAM-ID.      prog.
-#        DATA             DIVISION.
-#        WORKING-STORAGE  SECTION.
-#        01  x PIC X.
-#        66  y RENAMES x OCCURS 10.
-# ])
-# 
-# AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-# [prog.cob:7: error: syntax error, unexpected OCCURS, expecting .
-# prog.cob:8: error: syntax error, unexpected OCCURS, expecting .
-# prog.cob:10: error: syntax error, unexpected OCCURS, expecting .
-# ])
+#AT_SETUP([OCCURS with level 66 / 78 / 88])
+#AT_KEYWORDS([RENAMES])
+#
+#AT_DATA([prog.cob], [
+#       IDENTIFICATION   DIVISION.
+#       PROGRAM-ID.      prog.
+#       DATA             DIVISION.
+#       WORKING-STORAGE  SECTION.
+#       01  x PIC X.
+#       66  y RENAMES x OCCURS 10.
+#         88  y VALUE "a" OCCURS 10.
+#         78  y VALUE "a" OCCURS 10.
+#])
+#
+#AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+#[prog.cob:7: error: syntax error, unexpected OCCURS, expecting .
+#prog.cob:8: error: syntax error, unexpected OCCURS, expecting .
+#prog.cob:9: error: syntax error, unexpected OCCURS, expecting .
+#])
+#AT_CLEANUP
+
 
 AT_SETUP([OCCURS with level 66])
 AT_KEYWORDS([RENAMES])
@@ -131,6 +136,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 
 AT_CLEANUP
 
+# 1b) with ODO below (allowed with IBM extension)
 
 AT_SETUP([OCCURS with variable-occurrence data item])
 AT_KEYWORDS([nested depending extensions odo])
@@ -173,12 +179,39 @@ AT_CHECK([$COMPILE_ONLY -fcomplex-odo prog2.cob], [1], [],
 [prog2.cob:8: error: 'X' cannot have nested OCCURS DEPENDING
 ])
 
+AT_CHECK([$COMPILE_ONLY -fodoslide prog2.cob], [0], [], [])
+
 AT_CLEANUP
 
 
-# 2) TODO
+# 2) no subscript for key+index
 
-# 3) TODO
+AT_SETUP([OCCURS data-items for INDEXED and KEY])
+AT_KEYWORDS([ASCENDING DESCENDING])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TAB.
+           05  TAB-ENTRY1
+                  OCCURS 5 TIMES
+                  ASCENDING KEY IS X1
+                                OF TAB-ENTRY1
+                                OF TAB
+                  INDEXED BY IDX1 OF TAB.
+              10 X1 PIC 9.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:9: error: a subscripted data-item cannot be used here
+prog.cob:12: error: a subscripted data-item cannot be used here
+])
+
+AT_CLEANUP
+
+# 3) KEY specification
 
 # 4) TODO
 
@@ -243,13 +276,16 @@ AT_DATA([prog.cob], [
        01 FILLER.
          02 G-2         PIC X OCCURS -1 TO 1 DEPENDING ON I.
        01 FILLER.
-         02 G-3         PIC X OCCURS  0 TO 1 DEPENDING ON I.
+         02 G-3         PIC X OCCURS +1 TO 1 DEPENDING ON I.
+       01 FILLER.
+         02 G-4         PIC X OCCURS  0 TO 1 DEPENDING ON I.
        01 I             PIC 9.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:7: error: OCCURS TO must be greater than OCCURS FROM
-prog.cob:9: error: non-negative integer value expected
+prog.cob:9: error: unsigned integer value expected
+prog.cob:11: error: unsigned integer value expected
 ])
 
 AT_CLEANUP
@@ -413,6 +449,7 @@ grep "prog.cob:11: error: numeric literal '9223372036854775808' exceeds limit"],
 [0], ignore, [])
 
 AT_CLEANUP
+
 
 AT_SETUP([ODO not Fixed Loc])
 AT_KEYWORDS([ODO])

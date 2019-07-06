@@ -1,21 +1,22 @@
 
 /* config.h, tested with x86/x64 VS2005-2019
-   and OrangeC 6.0.40.1 (which ignores the lib comments) */
+   and OrangeC 6.0.41.1 (which ignores the lib comments) */
 
-#define NOISAM   0
-#define BDB      1
-#define VBISAM   2
-#define CISAM    3
-#define DISAM    4
+#define NOISAM       0
+#define BDB          1
+#define VBISAM       2
+#define CISAM        3
+#define DISAM        4
 
-#define NOCURSES 0
-#define PDCURSES 1
+#define NOCURSES     0
+#define PDCURSES     1
 
-#define NOXML    0
-#define XML2     1
+#define NOXML        0
+#define XML2         1
 
-#define NOJSON   0
-#define CJSON    1
+#define NOJSON       0
+#define CJSON        1
+#define CJSON_CJSON  2	/* cJSON with header in CJSON_CJSON */
 
 #define MATHLIB_MPIR 1
 #define MATHLIB_GMP  2
@@ -42,7 +43,11 @@
 #define HAVE_GETUSERNAME 1
 */
 
-/* adjust the following linker pragmas if needed */
+/* adjust the following defines to override linker pragmas below */
+/* #undef LIB_MATHLIB */
+/* #undef LIB_CURSES  */
+/* #undef LIB_ISAM    */
+/* #undef LIB_JSON    */
 
 
 #ifdef WITHIN_LIBCOB
@@ -50,10 +55,14 @@
 #pragma comment(lib, "advapi32")
 #endif
 
+#ifdef LIB_MATHLIB
+#pragma comment(lib, LIB_MATHLIB)
+#else
 #if USED_MATHLIB == MATHLIB_MPIR
 #pragma comment(lib, "mpir")
 #elif USED_MATHLIB == MATHLIB_GMP
 #pragma comment(lib, "libgmp")
+#endif
 #endif
 
 #if CONFIGURED_CURSES == PDCURSES
@@ -67,9 +76,16 @@
                            even on non-WIDE versions (PDCurses 4.x only) */
 #endif
 #endif
+#ifdef LIB_CURSES
+#pragma comment(lib, LIB_CURSES)
+#else
 #pragma comment(lib, "pdcurses")
 #endif
+#endif
 
+#ifdef LIB_ISAM
+#pragma comment(lib, LIB_ISAM)
+#else
 #if CONFIGURED_ISAM == VBISAM
 #pragma comment(lib, "libvbisam")
 #elif CONFIGURED_ISAM == DISAM
@@ -83,20 +99,28 @@
 //#pragma comment(lib, "libdb62")
 #endif
 #endif /* CONFIGURED_ISAM */
+#endif
 
 #if CONFIGURED_XML == XML2
-//#pragma comment(lib, "libxml2.dll.a")
-//#pragma comment(lib, "libcharset.dll.a")
-//#pragma comment(lib, "libiconv.dll.a")
-//#pragma comment(lib, "libz.dll.a")
+#if 0 /* provided from mingw */
+#pragma comment(lib, "libxml2.dll.a")
+#pragma comment(lib, "libcharset.dll.a")
+#pragma comment(lib, "libiconv.dll.a")
+#pragma comment(lib, "libz.dll.a")
+#else
 #pragma comment(lib, "libxml2")
 #pragma comment(lib, "libcharset")
 #pragma comment(lib, "libiconv")
 #pragma comment(lib, "zlib")
 #endif
+#endif
 
-#if CONFIGURED_JSON == CJSON
-#pragma comment(lib, "cjson.lib")
+#ifdef LIB_JSON
+#pragma comment(lib, LIB_JSON)
+#else
+#if CONFIGURED_JSON == CJSON || CONFIGURED_JSON == CJSON_CJSON
+#pragma comment(lib, "cjson")
+#endif
 #endif
 
 #endif /* WITHIN_LIBCOB */
@@ -177,7 +201,11 @@
 /* #undef HAVE_ATTRIBUTE_ALIGNED */
 
 /* Define to 1 if you have the `canonicalize_file_name' function. */
+#if defined(__ORANGEC__)
+#define HAVE_CANONICALIZE_FILE_NAME 1
+#else
 /* #undef HAVE_CANONICALIZE_FILE_NAME */
+#endif
 
 /* Define to 1 if you have the Mac OS X function CFLocaleCopyCurrent in the
    CoreFoundation framework. */
@@ -188,11 +216,17 @@
 /* #undef HAVE_CFPREFERENCESCOPYAPPVALUE */
 
 /* Define to 1 if you have the <cjson/cJSON.h> header file. */
-
-#if CONFIGURED_JSON == CJSON
+#if CONFIGURED_JSON == CJSON_CJSON
 #define HAVE_CJSON_CJSON_H 1
 #else
 /* #undef HAVE_CJSON_CJSON_H */
+#endif
+
+/* Define to 1 if you have the <cJSON.h> header file. */
+#if CONFIGURED_JSON == CJSON
+#define HAVE_CJSON_H 1
+#else
+/* #undef HAVE_CJSON_H */
 #endif
 
 /* Has clock_gettime function and CLOCK_REALTIME */
@@ -254,7 +288,11 @@
 /* #undef HAVE_DOPRNT */
 
 /* Define to 1 if you have the `fcntl' function. */
+#if defined(__ORANGEC__)
+#define HAVE_FCNTL 1
+#else
 /* #undef HAVE_FCNTL */
+#endif
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
@@ -266,7 +304,11 @@
 /* #undef HAVE_FINITE_IEEEFP_H */
 
 /* Define to 1 if you have the `getexecname' function. */
+#if defined(__ORANGEC__)
+#define HAVE_GETEXECNAME 1
+#else
 /* #undef HAVE_GETEXECNAME */
+#endif
 
 /* Define if the GNU gettext() function is already present or preinstalled. */
 /* #undef HAVE_GETTEXT */
@@ -280,6 +322,9 @@
 
 /* Define to 1 if you have the <gmp.h> header file. */
 #define HAVE_GMP_H 1
+
+/* curses has has_mouse function */
+/* #undef HAVE_HAS_MOUSE */
 
 /* Define if you have the iconv() function and it works. */
 #if CONFIGURED_XML == XML2
@@ -374,6 +419,13 @@
 /* Define to 1 if you have the `memset' function. */
 #define HAVE_MEMSET 1
 
+/* curses has mouseinterval function */
+#if CONFIGURED_CURSES != NOCURSES
+#define HAVE_MOUSEINTERVAL 1
+#else
+/* #undef HAVE_MOUSEINTERVAL */
+#endif
+
 /* Do we have mp_get_memory_functions in gmp */
 #define HAVE_MP_GET_MEMORY_FUNCTIONS 1
 
@@ -405,7 +457,11 @@
 /* #undef HAVE_READLINK */
 
 /* Define to 1 if you have the `realpath' function. */
+#if defined(__ORANGEC__)
+#define HAVE_REALPATH 1
+#else
 /* #undef HAVE_REALPATH */
+#endif
 
 /* Define to 1 if you have the `setenv' function. */
 /* MSC does *NOT* has `setenv' (!)
@@ -420,7 +476,11 @@
 #define HAVE_SETLOCALE 1
 
 /* Define to 1 if you have the `sigaction' function. */
+#if defined(__ORANGEC__)
+#define HAVE_SIGACTION 1
+#else
 /* #undef HAVE_SIGACTION */
+#endif
 
 /* Define to 1 if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1
@@ -497,6 +557,7 @@
 #endif
 
 /* Has timezone variable */
+/* note: MSC and ORANGEC have it as _timezone */
 #define HAVE_TIMEZONE 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
@@ -538,7 +599,7 @@
 #define PACKAGE_NAME "GnuCOBOL"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "GnuCOBOL 3.0-dev"
+#define PACKAGE_STRING "GnuCOBOL 3.1-dev"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "gnucobol"
@@ -547,7 +608,7 @@
 #define PACKAGE_URL "https://www.gnu.org/software/gnucobol/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.0-dev"
+#define PACKAGE_VERSION "3.1-dev"
 
 /* Define a patch level (numeric, max. 8 digits) */
 #define PATCH_LEVEL COB_NUM_TAR_DATE
@@ -584,7 +645,7 @@
 
 
 /* Version number of package */
-#define VERSION "3.0-dev"
+#define VERSION "3.1-dev"
 
 /* Use CISAM as ISAM handler */
 #if CONFIGURED_ISAM == CISAM
@@ -594,7 +655,7 @@
 #endif
 
 /* Use cJSON as JSON handler */
-#if CONFIGURED_JSON == CJSON
+#if CONFIGURED_JSON == CJSON || CONFIGURED_JSON == CJSON_CJSON
 #define WITH_CJSON 1
 #else
 /* #undef WITH_CJSON */
@@ -699,6 +760,7 @@
 #undef CONFIGURED_XML
 #undef NOJSON
 #undef CJSON
+#undef CJSON_CJSON
 #undef CONFIGURED_JSON
 #undef MATHLIB_MPIR
 #undef MATHLIB_GMP

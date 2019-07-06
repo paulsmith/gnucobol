@@ -4,6 +4,14 @@
 	* Makefile.am: gcdiff - removed extra link and compiler flags fixing
 	  build on systems that don't link via -lcob
 
+2019-04-07  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (COBCRUN): use pre-inst-env ensuring to use the built version
+
+2019-03-19  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c: use of COB_MAX_NAMELEN
+
 2018-07-16  Brian Tiffin <btiffin@gnu.org>
 
 	* Makefile.am: add cob-config.1 to dist_man
@@ -216,7 +224,7 @@
 	  then you can switch easily.
 
 
-Copyright 2004-2008,2010,2012,2014-2018 Free Software Foundation, Inc.
+Copyright 2004-2008,2010,2012,2014-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

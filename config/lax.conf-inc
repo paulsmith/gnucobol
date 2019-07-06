@@ -31,9 +31,9 @@
 
 # Value: int
 # Maximum word-length for COBOL words / Programmer defined words
-# current max (COB_MAX_WORDLEN): 61
+# current max (COB_MAX_WORDLEN): 63
 #word-length:			127
-word-length:			61
+word-length:			63
 literal-length:			8192
 numeric-literal-length:		38
 pic-length:			255
@@ -103,19 +103,22 @@ symbolic-constant:			+warning
 constant-78:				ok
 constant-01:				ok
 perform-varying-without-by:		ok
-program-prototypes:			ok
 reference-out-of-declaratives:		+warning
+program-prototypes:			ok
+call-convention-mnemonic:		ok
+call-convention-linkage:		ok
 numeric-value-for-edited-item:		+warning
 incorrect-conf-sec-order:		+warning
 define-constant-directive:		+obsolete
 free-redefines-position:		ok
+records-mismatch-record-clause	+warning
 record-delimiter:			ok
 sequential-delimiters:			ok
 record-delim-with-fixed-recs:		ok
 missing-statement:			+warning
 zero-length-literals:			ok
-xml-generate:				ok
 xml-generate-extra-phrases:		ok
+continue-after:				ok
 
 
 # use complete word list

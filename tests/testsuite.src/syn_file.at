@@ -1,4 +1,3 @@
-## Copyright (C) 2003-2012, 2014, 2016-2019 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Joe Robbins,
 ## Edward Hart
 ##
@@ -15,7 +14,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+## along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 ### GnuCOBOL Test Suite
 
@@ -684,9 +683,16 @@ prog2.cob:19: error: minimal record length 2 can not hold the key item 'TEST-P1'
 prog2.cob:21: error: minimal record length 2 can not hold the key item 'TEST-P3'; needs to be at least 9
 ])
 
-AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog3.cob], [1], [],
 [prog3.cob:13: error: size of record 'TEST-REC-1' (4) smaller than minimum of file 'TEST-FILE' (5)
 prog3.cob:15: error: size of record 'TEST-REC-2' (50) larger than maximum of file 'TEST-FILE' (10)
+])
+
+AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [],
+[prog3.cob:13: warning: size of record 'TEST-REC-1' (4) smaller than minimum of file 'TEST-FILE' (5)
+prog3.cob:13: warning: file size adjusted
+prog3.cob:15: warning: size of record 'TEST-REC-2' (50) larger than maximum of file 'TEST-FILE' (10)
+prog3.cob:15: warning: file size adjusted
 ])
 
 AT_CLEANUP
@@ -1422,6 +1428,7 @@ AT_DATA([prog.cob], [
            SELECT f1 ASSIGN "f1".
            SELECT f2 ASSIGN "f2".
            SELECT f3 ASSIGN "f3".
+           SELECT f4 ASSIGN "f4".
 
        DATA DIVISION.
        FILE SECTION.
@@ -1434,12 +1441,16 @@ AT_DATA([prog.cob], [
 
        FD  f3 RECORD 1 TO 1.
        01  f3-rec PIC X.
+       
+       FD  f4 RECORD IS VARYING IN SIZE.
+       01  f4-rec-1 PIC X.
+       01  f4-rec-2 PIC 99.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:18: error: file 'f1': RECORD VARYING specified without limits, but implied limits are equal
-prog.cob:18: error: RECORD clause invalid
-prog.cob:21: error: RECORD clause invalid
+AT_CHECK([$COMPILE_ONLY -frecords-mismatch-record-clause=error prog.cob], [1], [],
+[prog.cob:19: error: file 'f1': RECORD VARYING specified without limits, but implied limits are equal
+prog.cob:19: error: RECORD clause invalid
+prog.cob:22: error: RECORD clause invalid
 ])
 AT_CLEANUP
 

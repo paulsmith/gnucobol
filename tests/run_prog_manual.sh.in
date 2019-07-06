@@ -2,7 +2,7 @@
 #
 # run_prog_manual.sh gnucobol/tests
 #
-# Copyright (C) 2014-2018 Free Software Foundation, Inc.
+# Copyright (C) 2014-2019 Free Software Foundation, Inc.
 # Written by Edward Hart, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -18,7 +18,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 # Running test program "prog" in a detached terminal and pass its return
 # code to the testsuite after the terminal ends.
@@ -27,21 +27,14 @@
 # if you want to use a different terminal/terminal manager than xterm/screen
 # or different options for these.
 
+abs_top_builddir="@abs_top_builddir@"
 
 TIMEOUT=40        # timeout in seconds
 
 #SLEEP_SCALE=1    # always possible
 SLEEP_SCALE=0.1   # needs a "modern" sleep implementation
 
-TIMEOUT_CMD=
-
-timeout -version 2>/dev/null 1>&2
-if test $? -eq 0; then
-  TIMEOUT_CMD=
-fi
-
 _test_with_xterm () {
-   # timeout "$TIMEOUT" \_   # activate if you have a working timeout binary/script
    xterm -T 'GnuCOBOL Manual Test Run' \
         -fa 'Liberation Mono' -fs 14 \
         -e "bash -c '($COBCRUN_DIRECT ./prog 2>./syserr.log && echo $? > ./result) || echo 1 > ./result'"
@@ -49,14 +42,14 @@ _test_with_xterm () {
 
 
 # Note: when using screen manager you have to
-#       run `screen -r "GCTESTS" in a separate terminal
+#       run `screen -r "GCTESTS"` in a separate terminal
 #       within 5 seconds after starting the tests
 _test_with_screen () {
   # check if screen session already exists, setup if not 
   screen -S "GCTESTS" -X select . 2>/dev/null 1>&2
   if test $? -ne 0; then
      screen -dmS "GCTESTS"
-     screen -S "GCTESTS" -X stuff ". \"$PWD/../../atconfig\" && . \"$PWD/../../atlocal\"
+     screen -S "GCTESTS" -X stuff ". \"${abs_top_builddir}/tests/atconfig\" && . \"${abs_top_builddir}/tests/atlocal\"
 "
      sleep 5
   fi

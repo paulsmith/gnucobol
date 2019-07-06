@@ -15,7 +15,7 @@ following extra packages need to be installed with versions equal or greater.
 
 If you build from VCS the tools in the first 4 lists are always needed.
 
-For running autogen.sh (necessary after VCS checkout) / reconfigure:
+For running "autogen.sh" (necessary after VCS checkout) / reconfigure:
   o autoconf 2.64
   o automake 1.10.1
   o libtool 2.2.6
@@ -28,7 +28,7 @@ If you want to update to a newer automake/libtool version or get errors
 about wrong version numbers in m4 run "autoreconf -vfi -I m4" instead.
 
 For compiling (when changing flex/bison sources):
-  o Bison 2.3
+  o Bison 2.3     (will be changed to 3.x after release of GnuCOBOL 3.1)
   o Flex 2.5.35
 
 For generating the testsuite (when changing any .at files):
@@ -37,19 +37,19 @@ For generating the testsuite (when changing any .at files):
 For generating the translation files (when changing any msgid):
   o gettext 0.17
     ** NOTE **
-    If you don't need an up-to-date translation you can do 
-    `touch po/*.pot po/*.po po/*.gmo` instead.
+    If you don't need an up-to-date translation you can do
+    "touch po/*.pot po/*.po po/*.gmo" instead.
 
 For generating the documentation (necessary for preparing a distribution):
   o help2man 0.17
     ** NOTE **
-    If you don't need an up-to-date manpage you can do 
-    `touch cobc/cobc.1 bin/cobcrun.1` instead.
+    If you don't need an up-to-date manpage you can do
+    "touch cobc/cobc.1 bin/cobcrun.1" instead.
   o texinfo 4.12 (with texinfo-tex)
   o texlive (latest, texlive-collection-latex suffices)
     ** NOTE **
     If you don't need an up-to-date info source / manual you can do
-    `touch doc/gnucobol.info doc/gnucobol.pdf` instead.
+    "touch doc/gnucobol.info doc/gnucobol.pdf" instead.
 
 
 For more information about some of the internals and a coding guideline see

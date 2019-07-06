@@ -1,24 +1,30 @@
 <CC386PROJECT>
 	<VERSION ID="5"/>
-	<WORKAREA NAME="..\ocide\GnuCOBOL.cwa"/>
+	<WORKAREA NAME="D:\Programme\Entwicklung\GnuCOBOL\trunk\build_windows\ocide\GnuCOBOL.cwa"/>
 	<TARGET TITLE="libcob">
 		<PROPERTIES>
 			<PROFILE NAME="WIN32" TYPE="DEBUG">
-				<PROP ID="DETAILBUILD">1</PROP>
-				<PROP ID="__RCINCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
-				<PROP ID="__LLIBS">gmp.l pdcurses.l vbisam.l cJSON.l</PROP>
-				<PROP ID="__INCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="OUTPUTEXE">$(PROJECTDIR)\..\$(CURRENTPROFILE)\$(CURRENTRELEASETYPE)\$(OUTPUTNAME)$(OUTPUTEXT)</PROP>
 				<PROP ID="__PROJECTTYPE">2</PROP>
+				<PROP ID="__INCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="__LLIBS">gmp.l pdcurses.l vbisam.l</PROP>
+				<PROP ID="__RCINCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="DETAILBUILD">1</PROP>
 			</PROFILE>
 			<PROFILE NAME="WIN32" TYPE="RELEASE">
-				<PROP ID="__RCINCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
-				<PROP ID="__LLIBS">gmp.l pdcurses.l vbisam.l cJSON.l</PROP>
-				<PROP ID="__INCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
-				<PROP ID="__PROJECTTYPE">2</PROP>
+				<PROP ID="OUTPUTEXE">$(PROJECTDIR)\..\$(CURRENTPROFILE)\$(CURRENTRELEASETYPE)\$(OUTPUTNAME)$(OUTPUTEXT)</PROP>
 				<PROP ID="DETAILBUILD">1</PROP>
+				<PROP ID="__PROJECTTYPE">2</PROP>
+				<PROP ID="__INCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="__LLIBS">gmp.l pdcurses.l vbisam.l</PROP>
+				<PROP ID="__RCINCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
 			</PROFILE>
 		</PROPERTIES>
 		<FILES>
+			<FOLDER TITLE="External">
+				<FILE NAME="..\..\libcob\cJSON.c" TITLE="cJSON.c" CLEAN="0"/>
+				<FILE NAME="..\..\libcob\cJSON.h" TITLE="cJSON.h" CLEAN="0"/>
+			</FOLDER>
 			<FOLDER TITLE="Include Files">
 				<FILE NAME="..\..\libcob\cobgetopt.h" TITLE="cobgetopt.h" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\coblocal.h" TITLE="coblocal.h" CLEAN="0"/>
@@ -27,7 +33,7 @@
 				<FILE NAME="..\..\libcob\system.def" TITLE="system.def" CLEAN="0"/>
 			</FOLDER>
 			<FOLDER TITLE="Resource Files">
-				<FILE NAME="..\..\build_windows\version_libcob.rc" TITLE="version_libcob.rc" CLEAN="0"/>
+				<FILE NAME="..\version_libcob.rc" TITLE="version_libcob.rc" CLEAN="0"/>
 			</FOLDER>
 			<FOLDER TITLE="Source Files">
 				<FILE NAME="..\..\libcob\call.c" TITLE="call.c" CLEAN="0"/>

@@ -14,7 +14,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+## along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 ### GnuCOBOL Test Suite
 
@@ -274,20 +274,23 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        SCREEN           SECTION.
        *> Valid numbers
-       01  a            VALUE "-" LINE 1.
-       01  b            VALUE "-" LINE +1.
-       01  c            VALUE "-" LINE 0.
+       01  v1           VALUE "-" LINE 1.
+       01  v2           VALUE "-" LINE + 1.
+       01  v3           VALUE "-" LINE - 1.
+       01  v4           VALUE "-" LINE 0.
 
        *> invalid numbers
-       01  d            VALUE "-" LINE -1.
-       01  e            VALUE "-" LINE 1.0.
+       01  i1           VALUE "-" LINE +1.
+       01  i2           VALUE "-" LINE -1.
+       01  i3           VALUE "-" LINE 1.0.
        PROCEDURE        DIVISION.
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:12: error: non-negative integer value expected
-prog.cob:13: error: non-negative integer value expected
+[prog.cob:13: error: unsigned integer value expected
+prog.cob:14: error: unsigned integer value expected
+prog.cob:15: error: unsigned integer value expected
 ])
 
 AT_CLEANUP

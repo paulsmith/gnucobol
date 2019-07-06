@@ -1,4 +1,41 @@
 
+2019-06-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* run_prog_manual.sh.in, Makefile.am: changed the manual test runner
+	  to be a script handled by autoconf instead of make
+
+2019-06-18  Simon Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in: explicit disable BDB internal locking by unsetting DB_HOME
+	  to work around issues in different environments and to not pollute the
+	  users's general BDB locking files
+
+2019-06-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (check, checkmanual): now fails if the testsuite reports
+	  any unexpected result (exit with non-zero return)
+
+2019-05-24  Simon Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in: early unset of COB_ variables (before we set them...)
+
+2019-04-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am, atlocal.in: splitted some make targets and added new
+	  localcheck target, which runs the testsuite using the current
+	  environment (whatever GnuCOBOL version is in PATH)
+
+2019-03-23  Simon Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_fundamental.at, testsuite.src/run_misc.at:
+	  adjusted C test sources in the testsuite to include stdio.h
+	  where necessary
+
+2019-03-09  Simon Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/*: adjusted C test sources in the testsuite
+	  with missing/wrong external attributes
+
 2019-02-18  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: cleanup distribution rules

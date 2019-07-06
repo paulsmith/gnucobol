@@ -15,11 +15,11 @@
    GNU Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public License
-   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,9 +56,9 @@
 #include <locale.h>
 #endif
 
-/* Force symbol exports */
+/* Force symbol exports, include decimal definitions */
 #define	COB_LIB_EXPIMP
-
+#include "gmp.h"
 #include "libcob.h"
 #include "coblocal.h"
 
@@ -2085,7 +2085,7 @@ get_iso_week_one (const int day_num, const int day_of_year)
 
 /*
  * Derived from "Calculating the ISO week number for a date" by Julian M.
- * Bucknall (http://www.boyet.com/articles/publishedarticles/calculatingtheisoweeknumb.html).
+ * Bucknall (https://www.boyet.com/articles/publishedarticles/calculatingtheisoweeknumb.html).
  */
 static void
 get_iso_week (const int day_num, int *year, int *week)
@@ -2439,8 +2439,9 @@ split_around_t (const char *str, char *first, char *second)
 	for (i = 0; str[i] != '\0' && str[i] != 'T'; ++i);
 
 	/* Copy everything before 'T' into first (if present) */
-	first_length = i;
-	if (first_length > COB_DATESTR_MAX) {
+	if (i < COB_DATESTR_MAX) {
+		first_length = i;
+	} else {
 		first_length = COB_DATESTR_MAX;
 	}
 	if (first != NULL) {

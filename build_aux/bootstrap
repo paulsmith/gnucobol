@@ -19,12 +19,12 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 me=bootstrap
 
 echo "start to bootstrap GnuCOBOL"
-# get path to GnuCOBOL main directory, possible set with GCMAINPATH
+# get path to GnuCOBOL main directory, possibly set with GCMAINPATH
 if test -z "$GCMAINPATH"; then
   if test "$0" = "./$me"; then
     MAINPATH=..
@@ -35,7 +35,7 @@ else
   MAINPATH=$GCMAINPATH
 fi
 if test ! -f $MAINPATH/build_aux/$me; then
-  echo; echo "ERROR - cannot set main directory - aborting $me" && exit 1
+  echo; echo "ERROR - cannot set main directory [checked $MAINPATH/build_aux/$me] - aborting $me" && exit 1
 fi
 
 echo
@@ -52,7 +52,7 @@ echo; echo "ensure that we have executable scripts..."
 scripts="compile config.guess config.rpath config.sub depcomp install-sh ltmain.sh mdate-sh missing mkinstalldirs ylwrap"
 for file in $scripts ; do
   if test -f $MAINPATH/build_aux/$file; then
-    chmod +x $MAINPATH/build_aux/$file
+    chmod -f u+x $MAINPATH/build_aux/$file
   else
     echo "WARNING, file $MAINPATH/build-aux/$file is missing."
   fi
@@ -61,7 +61,7 @@ done
 scripts="autogen.sh doc/cobcinfo.sh po/update_linguas.sh tests/listings-sed.sh create_win_dist.sh"
 for file in $scripts ; do
   if test -f $MAINPATH/$file; then
-    chmod +x $MAINPATH/$file
+    chmod -f u+x $MAINPATH/$file
   else
     if test ! $file = "create_win_dist.sh"; then
       echo "WARNING, file $MAINPATH/$file is missing."

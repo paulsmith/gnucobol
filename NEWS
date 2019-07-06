@@ -1,6 +1,100 @@
 NEWS - user visible changes				-*- outline -*-
 
- GnuCOBOL 3.0rc-2/final to be released (in 2019)
+ GnuCOBOL 3.1-rc1/final to be released (in June 2019)
+
+* New GnuCOBOL features
+
+** file handling: added support for [RE]WRITE FILE file FROM source
+
+** XML GENERATE statement
+   (note: runtime support needs additional library libxml2)
+
+** JSON GENERATE statement
+   (note: runtime support needs additional library cJSON)
+   
+** CONTINUE AFTER statement (COBOL 202x) implemented, also handle fractions
+   of seconds in C$SLEEP now
+
+** Improved support for different compiler extensions (ACUCOBOL, IBM,
+   Fujitsu, MicroFocus COBOL, Microsoft COBOL, RM/COBOL and more)
+
+** file handling: include support for a callable EXTFH interface also provided
+   by several compilers including Micro Focus
+   This allows users to insert an external file handler while retaining
+   all of the normal COBOL I/O functions with a possible callback to libcob.
+   To have the compiled program call `yourfh()` for file I/O use:
+   `cobc -fcallfh=yourfh`
+   In turn `yourfh()` may call `EXTFH()` to use I/O functions from GnuCOBOL.
+   The external file handler can also be directly invoked from COBOL, too,
+   using `CALL "EXTFH"`.
+   ** Note: Not all flags contained in the FCD3 are handled already **
+   
+** screen i/o: initial mouse support (for details see runtime.cfg),
+   use of CURSOR clause in SPECIAL-NAMES for positioning on ACCEPT
+
+
+* Removed functions
+
+** SCREEN SECTION, REPORT-WRITER module: removed non-standard extension
+   "LINE / COL signed-integer" (inadvertently available since 2.2/3.0rc1);
+   which will now raise an error "unsigned integer expected";
+   if used replace by standard "LINE / COL +/- integer"
+
+
+* Changed cobc options:
+
+  CHECKME
+
+* Changes in the COBOL runtime (libcob)
+
+** Messages from the COBOL runtime are also translated now (if installed).
+   To prevent this disable translations in general with using the configure
+   option --disable-nls (or by deactivating ENABLE_NLS in config.h).
+
+** libcob.h does no longer auto-include gmp.h (behavior since 2.x), if you link
+   against libcob and need cob_decimal include it yourself before - otherwise you
+   do not need it in your include path any more
+
+
+* New build features
+
+** Running the internal tests by make check now fails if the testsuite has any
+   unexpected result.
+
+** The modules and test programs in the NIST COBOL-85 test suite (tests/cobol85)
+   may now be build and/or tested and/or the test results checked separately.
+   You now may also run the tests with a previous installed version of GnuCOBOL
+   (or a version specified by a manual temporary setup).
+   For details see tests/cobol85/README.
+
+** To adjust configure to use libxml2 you may use the new variables XML2_CFLAGS
+   and XML2_LIBS. If unset configure will use pkg-config / xml2-config.
+
+** To adjust configure to use libcjson you may use the new variables CJSON_CFLAGS
+   and CJSON_LIBS. If unset configure will use pkg-config.
+
+** new configure options --with-xml2 / -without-xml2 to explicit force/disable
+   XML runtime support, otherwise it will be included if found as working
+
+** new configure options --with-cjson / -without-cjson to explicit force/disable
+   JSON runtime support, otherwise it will be included if found as working
+   Note: As a special case you may built-in cJSON by putting its source in
+   a sub-directory cJSON. If there is no working cJSON in the system or explicit
+   specified by --with-cjson=local this version will be compiled into libcob.
+
+** Any time after `make` you can call `pre-inst-env` script to use the still-
+   uninstalled binaries. Samples:
+   pre-inst-env cobc -xj prog.cob
+   pre-inst-env cobcrun -M prog start
+   pre-inst-env may also be called without parameters to start a new shell
+   session with the environment adjusted to use the uninstalled version.
+
+
+* Too much bug fixes to list here (please check ChangeLogs for full details).
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ GnuCOBOL 3.0-rc1 released (20180422)
 
 * New GnuCOBOL features
 
@@ -76,6 +170,7 @@ NEWS - user visible changes				-*- outline -*-
    ** Please report if you have a need for this option as it will be **
    ** removed permanently in the next release of GnuCOBOL otherwise. **
 
+
 * Changes in the COBOL runtime (libcob)
 
 ** updated exception handling, GnuCOBOL now only cleans raised exceptions when
@@ -84,34 +179,12 @@ NEWS - user visible changes				-*- outline -*-
 ** The standard-format for program tracing was changed and is now adjustable
    by the runtime configuration option COB_TRACE_FORMAT.
 
-** Messages from the COBOL runtime are also translated now (if installed).
-   To prevent this disable translations in general with using the configure
-   option --disable-nls (or by deactivating ENABLE_NLS in config.h).
-
 * New build features
 
 ** New test suite for manual tests (especially SCREEN I/O),
    run with `make checkmanual`.
    Note: You may want to adjust the test runner tests/run_prog_manual.sh which
    defaults to xterm in GUI environments and screen in terminal environments.
-
-** The modules and test programs in the NIST COBOL-85 test suite (tests/cobol85)
-   may now be build and/or tested and/or the test results checked separately.
-   You now may also run the tests with a previous installed (or with
-   a temporary manual setup prepared) version of GnuCOBOL.
-   For details see tests/cobol85/README.
-
-** To adjust configure to use libxml2 you may use the new variables XML2_CFLAGS
-   and XML2_LIBS. If unset configure will use pkg-config / xml2-config.
-
-** To adjust configure to use libcjson you may use the new variables CJSON_CFLAGS
-   and CJSON_LIBS. If unset configure will use pkg-config.
-
-** new configure options --with-xml2 / -without-xml2 to explicit force/disable
-   XML runtime support, otherwise it will be included if found as working
-
-** new configure options --with-cjson / -without-cjson to explicit force/disable
-   JSON runtime support, otherwise it will be included if found as working
 
 ** new configure option --enable-debug-log to allow *internal* tracing
    of GnuCOBOL (intended for developers of GnuCOBOL only)

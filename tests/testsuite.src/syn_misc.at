@@ -15,7 +15,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+## along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 ### GnuCOBOL Test Suite
 
@@ -1062,12 +1062,20 @@ AT_DATA([prog.cob], [
            DISPLAY "INVALID"
            END-DISPLAY.
        P02.
+           GO TO P03
+           CONTINUE.  *> explicit no unreachable warning
+       P03.
+           GO TO P04
+           CONTINUE AFTER 2 SECONDS.  *> that's one again
+       P04.
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY -Wunreachable prog.cob], [0], [],
 [prog.cob: in paragraph 'P01':
 prog.cob:26: warning: unreachable statement 'DISPLAY'
+prog.cob: in paragraph 'P03':
+prog.cob:33: warning: unreachable statement 'CONTINUE AFTER'
 ])
 
 AT_CLEANUP
@@ -2728,7 +2736,7 @@ AT_DATA([prog3.cob], [
 AT_CHECK([$COMPILE_ONLY -free -fword-length=31 prog.cob], [1], [],
 [prog.cob:11: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
 prog.cob:12: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
-prog.cob:13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:13: error: word length exceeds maximum of 63 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-31':
 prog.cob:19: error: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-32C'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-32C':
@@ -2736,29 +2744,29 @@ prog.cob:20: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LE
 prog.cob:21: error: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
 prog.cob:22: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
-prog.cob:23: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:23: error: word length exceeds maximum of 63 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE':
-prog.cob:24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:24: error: word length exceeds maximum of 63 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
 
 AT_CHECK([$COMPILE_ONLY -free -fword-length=45 prog.cob], [1], [],
 [prog.cob:12: error: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
-prog.cob:13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:13: error: word length exceeds maximum of 63 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-32C':
 prog.cob:21: error: word length exceeds 45 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
 prog.cob:22: error: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
-prog.cob:23: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:23: error: word length exceeds maximum of 63 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE':
-prog.cob:24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:24: error: word length exceeds maximum of 63 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
 
 AT_CHECK([$COMPILE_ONLY -free -fword-length=60 prog.cob], [1], [],
-[prog.cob:13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+[prog.cob:13: error: word length exceeds maximum of 63 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
-prog.cob:23: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:23: error: word length exceeds maximum of 63 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE':
-prog.cob:24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:24: error: word length exceeds maximum of 63 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
 
 AT_CHECK([$COMPILE_ONLY -free -fword-length=45 -frelax-syntax-checks prog2.cob], [0], [],
@@ -2846,7 +2854,7 @@ prog.cob:17: warning: SECTION segment ignored
 prog.cob: in section 'SEC-2':
 prog.cob:20: warning: SECTION segment ignored
 prog.cob: in section 'SEC-3':
-prog.cob:23: error: non-negative integer value expected
+prog.cob:23: error: unsigned integer value expected
 prog.cob:23: warning: SECTION segment ignored
 prog.cob: in section 'SEC-4':
 prog.cob:26: warning: SECTION segment ignored
@@ -2870,7 +2878,7 @@ prog.cob:17: warning: SECTION segment is obsolete in COBOL 85
 prog.cob: in section 'SEC-2':
 prog.cob:20: warning: SECTION segment is obsolete in COBOL 85
 prog.cob: in section 'SEC-3':
-prog.cob:23: error: non-negative integer value expected
+prog.cob:23: error: unsigned integer value expected
 prog.cob:23: warning: SECTION segment is obsolete in COBOL 85
 prog.cob: in section 'SEC-4':
 prog.cob:26: warning: SECTION segment is obsolete in COBOL 85
@@ -3234,6 +3242,8 @@ AT_DATA([prog.cob], [
            DISPLAY N'0123456789ABCDEF'.
            DISPLAY N"0123456789ABCDEF"-
                    N"0123456789ABCDEF".
+           DISPLAY NC"0123456789ABCDEF"-
+                   NC'0123456789ABCDEF'.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
@@ -3241,6 +3251,10 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 prog.cob:6: warning: handling of national literal is unfinished; implementation is likely to be changed
 prog.cob:7: warning: handling of national literal is unfinished; implementation is likely to be changed
 prog.cob:8: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:9: warning: national-character literal used
+prog.cob:9: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:10: warning: national-character literal used
+prog.cob:10: warning: handling of national literal is unfinished; implementation is likely to be changed
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
@@ -3248,6 +3262,8 @@ AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
 prog.cob:6: error: national literal does not conform to COBOL 85
 prog.cob:7: error: national literal does not conform to COBOL 85
 prog.cob:8: error: national literal does not conform to COBOL 85
+prog.cob:9: error: national-character literal does not conform to COBOL 85
+prog.cob:10: error: national-character literal does not conform to COBOL 85
 ])
 
 AT_CLEANUP
@@ -3468,6 +3484,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [1], [],
 [prog.cob:6: error: 'float' is not defined, but is a reserved word in another dialect
@@ -3641,6 +3658,20 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
+[prog.cob: in paragraph 'MAIN':
+prog.cob:11: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:15: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:21: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:22: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:24: error: HANDLE must be either a generic or a WINDOW HANDLE or X(10)
+prog.cob:27: warning: GRAPHICAL CONTROL is not implemented
+prog.cob:28: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:33: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:38: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:44: warning: GRAPHICAL CONTROL is not implemented
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
 prog.cob:11: warning: GRAPHICAL WINDOW is not implemented
 prog.cob:15: warning: GRAPHICAL WINDOW is not implemented
@@ -4087,7 +4118,7 @@ AT_CLEANUP
 
 
 AT_SETUP([NOT ON EXCEPTION with STATIC CALL convention])
-AT_KEYWORDS([misc])
+AT_KEYWORDS([misc CALL-CONVENTION])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4318,6 +4349,9 @@ AT_DATA([prog.cob], [
               WHEN 3
                  CONTINUE
 
+              WHEN 5
+                 CONTINUE
+
            END-EVALUATE
            .
 ])
@@ -4325,7 +4359,8 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:19: error: invalid conditional expression
 prog.cob:16: error: invalid expression
-prog.cob:29: error: wrong number of WHEN parameters
+prog.cob:28: error: wrong number of WHEN parameters
+prog.cob:31: error: wrong number of WHEN parameters
 ])
 
 AT_CLEANUP
@@ -4549,7 +4584,7 @@ AT_CLEANUP
 
 
 AT_SETUP([conflicting entry conventions])
-AT_KEYWORDS([misc ENTRY-CONVENTION])
+AT_KEYWORDS([misc ENTRY-CONVENTION CALL-CONVENTION LINKAGE])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION  DIVISION.
@@ -4561,12 +4596,87 @@ AT_DATA([prog.cob], [
        SPECIAL-NAMES.
            CALL-CONVENTION 0 IS EXTERN.
 
-       PROCEDURE       DIVISION EXTERN.
+       PROCEDURE     DIVISION EXTERN.
            CONTINUE
            .
 ])
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob:11: warning: overriding convention specified in ENTRY-CONVENTION
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog2.
+       OPTIONS.
+           ENTRY-CONVENTION COBOL.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+
+       PROCEDURE     DIVISION WITH C LINKAGE.
+           CONTINUE
+           .
+])
+AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [],
+[prog2.cob:9: warning: overriding convention specified in ENTRY-CONVENTION
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog3.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CALL-CONVENTION 0 IS EXTERN.
+
+       PROCEDURE     DIVISION
+           EXTERN
+           WITH C LINKAGE.
+           CONTINUE
+       ENTRY 'ANOTHERSTATEMENT'.
+           CONTINUE
+       ENTRY EXTERN 'ANOTHERSTATEMENT2'.
+           CONTINUE
+       ENTRY 'ANOTHERSTATEMENT3' WITH C LINKAGE.
+           CONTINUE
+       ENTRY
+           EXTERN
+           'ANOTHERSTATEMENT4'
+           WITH C LINKAGE.
+           CONTINUE
+           .
+])
+AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
+[prog3.cob:11: error: CALL-CONVENTION and WITH LINKAGE are mutually exclusive
+prog3.cob:22: error: CALL-CONVENTION and WITH LINKAGE are mutually exclusive
+])
+AT_CLEANUP
+
+
+AT_SETUP([conflicting call conventions])
+AT_KEYWORDS([misc CALL-CONVENTION LINKAGE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       PROCEDURE     DIVISION.
+           CALL EXTERN 'callee'.
+           CALL 'callee' WITH C LINKAGE.
+           CALL
+              EXTERN
+              'callee'
+              WITH C LINKAGE
+              .
+           GOBACK.
+])
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:10: error: CALL-CONVENTION and WITH LINKAGE are mutually exclusive
+])
+AT_CHECK([$COMPILE_ONLY -std=cobol85 -freserved=EXTERN,C prog.cob], [1], [],
+[prog.cob:5: error: CALL-/ENTRY-CONVENTION does not conform to COBOL 85
+prog.cob:6: error: WITH ... LINKAGE does not conform to COBOL 85
+prog.cob:8: error: CALL-/ENTRY-CONVENTION does not conform to COBOL 85
+prog.cob:10: error: WITH ... LINKAGE does not conform to COBOL 85
+prog.cob:10: error: CALL-CONVENTION and WITH LINKAGE are mutually exclusive
 ])
 AT_CLEANUP
 
@@ -6235,7 +6345,7 @@ AT_DATA([prog.cob], [
                SUPPRESS bool-item WHEN LOW-VALUES,
                    zoned-decimal WHEN HIGH-VALUE
            *> (For generic WHEN phrases, invalid items above are ignored.)
-           .
+           GOBACK.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
@@ -6373,3 +6483,165 @@ prog.cob:30: error: 'MY-ELEMENT-1' requires one subscript
 
 AT_CLEANUP
 
+
+
+
+AT_SETUP([BASED clause, ALLOCATE / FREE statements])
+AT_KEYWORDS([BASED])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  str.
+           03  str-1  PIC XX BASED.
+       01  str-2 BASED.
+           03  str-2a PIC X SYNC.
+           03  str-2b PIC 9.
+       01  one        PIC XX BASED.
+       77  seven      PIC 9 BASED.
+       77  var        PIC 9.
+       77  ptr        USAGE POINTER.
+       SCREEN-STORAGE SECTION.
+       01  scrn      BASED.
+           03  scrn-field pic x.
+
+       PROCEDURE DIVISION.
+           ALLOCATE one
+           ALLOCATE seven INITIALIZED
+           ALLOCATE seven CHARACTERS.
+           ALLOCATE seven CHARACTERS RETURNING ptr.
+           ALLOCATE 1 + 2 * 3 CHARACTERS RETURNING ptr.
+           ALLOCATE 1 + one * 3 CHARACTERS RETURNING ptr.
+           ALLOCATE one   CHARACTERS RETURNING ptr.
+           ALLOCATE seven CHARACTERS INITIALIZED RETURNING ptr.
+           ALLOCATE var
+           FREE var
+           FREE ADDRESS OF var
+           FREE one
+           FREE ADDRESS OF seven
+           MOVE ADDRESS OF seven TO ptr
+           FREE ptr
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:8: error: BASED only allowed at 01/77 level
+prog.cob:16: error: PROCEDURE DIVISION header missing
+prog.cob:16: error: syntax error, unexpected Identifier
+prog.cob:17: error: unknown statement '01'
+prog.cob:18: error: unknown statement '03'
+prog.cob:20: error: syntax error, unexpected PROCEDURE
+prog.cob:23: error: ALLOCATE CHARACTERS requires RETURNING clause
+prog.cob:26: error: 'one' is not a numeric value
+prog.cob:27: error: amount must be specified as a numeric expression
+prog.cob:29: error: target of ALLOCATE is not a BASED item
+prog.cob:30: error: target 1 of FREE is not a BASED data item
+prog.cob:31: error: target 1 of FREE is not a BASED data item
+])
+AT_CLEANUP
+
+
+AT_SETUP([CONTINUE statement])
+AT_KEYWORDS([BASED])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  one        PIC X.
+       77  seven      PIC 9 BASED.
+       77  var        PIC 9.
+       77  ptr        USAGE POINTER.
+       PROCEDURE DIVISION.
+           CONTINUE
+           PERFORM VARYING var FROM 1 BY 1 UNTIL var = 4
+              CONTINUE
+           END-PERFORM
+           CONTINUE AFTER 42 SECONDS      *> COBOL 202x
+           CONTINUE AFTER 4 + 2 SECONDS
+           CONTINUE AFTER var + 2 SECONDS
+           CONTINUE AFTER '1' SECONDS
+           CONTINUE AFTER ptr SECONDS
+           CONTINUE AFTER one SECONDS
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:19: error: amount must be specified as a numeric expression
+prog.cob:20: error: amount must be specified as a numeric expression
+prog.cob:21: error: amount must be specified as a numeric expression
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob:16: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+prog.cob:17: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+prog.cob:18: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+prog.cob:19: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+prog.cob:20: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+prog.cob:21: error: AFTER phrase in CONTINUE statement does not conform to COBOL 2014
+])
+AT_CLEANUP
+
+
+AT_SETUP([conflict markers])
+AT_KEYWORDS([])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+      *> Verify that we report conflict markers correctly
+<<<<<<< HEAD
+       01  one-1      PIC X.
+======= there may be something here
+       01  one-2      PIC X.
+>>>>>>> some note
+      *> Verify that we don't have an issue with unmatched conflict markers
+       77  var        PIC 9.
+<<<<<<< HEAD
+       01  var2       PIC X.
+=======
+<<<<<<< HEAD
+      *> Verify that we only report conflict markers at the start of lines.
+ <<<<<<< HEAD
+       01  one        PIC X.
+ =======
+       01  two        PIC 9.
+ >>>>>>> some note
+       PROCEDURE DIVISION.
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:8: error: version control conflict marker in file
+prog.cob:10: error: version control conflict marker in file
+prog.cob:12: error: version control conflict marker in file
+prog.cob:15: error: version control conflict marker in file
+prog.cob:17: error: version control conflict marker in file
+prog.cob:18: error: version control conflict marker in file
+prog.cob:20: error: invalid indicator '<' at column 7
+prog.cob:22: error: invalid indicator '=' at column 7
+prog.cob:24: warning: ignoring invalid directive: '>> some'
+])
+
+AT_CHECK([$COMPILE_ONLY -free prog.cob], [1], [],
+[prog.cob:8: error: version control conflict marker in file
+prog.cob:10: error: version control conflict marker in file
+prog.cob:12: error: version control conflict marker in file
+prog.cob:15: error: version control conflict marker in file
+prog.cob:17: error: version control conflict marker in file
+prog.cob:18: error: version control conflict marker in file
+prog.cob:24: warning: ignoring invalid directive
+prog.cob:20: error: PROCEDURE DIVISION header missing
+prog.cob:20: error: syntax error, unexpected <
+prog.cob:22: error: syntax error, unexpected =
+prog.cob:25: error: syntax error, unexpected PROCEDURE
+])
+AT_CLEANUP

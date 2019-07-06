@@ -15,7 +15,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+## along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 ### GnuCOBOL Test Suite
 
@@ -1232,6 +1232,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_DATA([module.c], [
+#include <stdio.h>
 #include <libcob.h>
 
 COB_EXT_EXPORT int
@@ -1244,7 +1245,7 @@ some (void)
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE module.c], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:6: entry point 'module' not found
+[libcob: prog.cob:6: error: entry point 'module' not found
 ])
 
 AT_CLEANUP
@@ -1299,7 +1300,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:14: module 'prog3' not found
+[libcob: prog.cob:14: error: module 'prog3' not found
 ])
 
 AT_CLEANUP
@@ -1352,7 +1353,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:25: module 'prog3' not found
+[libcob: prog.cob:25: error: module 'prog3' not found
 ])
 
 AT_CLEANUP
@@ -1755,10 +1756,10 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog.cob:8: attempt to CANCEL active program
+[libcob: prog.cob:8: error: attempt to CANCEL active program
 ])
 AT_CHECK([COB_PHYSICAL_CANCEL=1 ./prog], [1], [],
-[libcob: prog.cob:8: attempt to CANCEL active program
+[libcob: prog.cob:8: error: attempt to CANCEL active program
 ])
 
 AT_CLEANUP
@@ -1795,10 +1796,10 @@ AT_DATA([prog2.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE prog2.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: prog2.cob:7: attempt to CANCEL active program
+[libcob: prog2.cob:7: error: attempt to CANCEL active program
 ])
 AT_CHECK([COB_PHYSICAL_CANCEL=1 ./prog], [1], [],
-[libcob: prog2.cob:7: attempt to CANCEL active program
+[libcob: prog2.cob:7: error: attempt to CANCEL active program
 ])
 
 AT_CLEANUP

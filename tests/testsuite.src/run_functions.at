@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 ##
 ## This file is part of GnuCOBOL.
@@ -14,7 +14,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+## along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 ### GnuCOBOL Test Suite
 
@@ -4251,8 +4251,10 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 AT_CLEANUP
 
 
-AT_SETUP([UDF with recursion])
+AT_SETUP([UDF with recursion (1)])
 AT_KEYWORDS([functions LOCAL-STORAGE])
+
+AT_SKIP_IF(true)	# see bug #222 and r2291 - postponed
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4315,8 +4317,9 @@ Return value '5'], [])
 
 AT_CLEANUP
 
-AT_SETUP([FUNCTION Recursion])
-AT_KEYWORDS([FUNCTIONS])
+
+AT_SETUP([UDF with recursion (2)])
+AT_KEYWORDS([functions LOCAL-STORAGE])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4335,7 +4338,7 @@ AT_DATA([prog.cob], [
             DISPLAY "Begin recursive function test".
             DISPLAY "Return value '" FUNCTION foo (num) "'".
             DISPLAY "End of test".
-           END PROGRAM prog.
+       END PROGRAM prog.
 
        IDENTIFICATION DIVISION.
        FUNCTION-ID. foo.
