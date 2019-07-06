@@ -1,4 +1,10 @@
 
+2019-07-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* create_mingw_bindist.sh: initial commit of script to generate binary
+	  distribution from MinGW environments
+	* create_win_dist.sh: moved from top_srcdir
+
 2019-05-05  Simon Sobisch <simonsobisch@gnu.org>
 
 	* bootstrap: only set executable bit for current user,

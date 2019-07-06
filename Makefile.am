@@ -29,7 +29,8 @@ ACLOCAL_AMFLAGS = -I m4 --install
 BUILT_SOURCES = defaults.h
 DISTCLEANFILES = $(BUILT_SOURCES)
 # CLEANFILES = $(bin_SCRIPTS)
-dist_noinst_SCRIPTS = autogen.sh build_aux/bootstrap po/update_linguas.sh
+dist_noinst_SCRIPTS = autogen.sh build_aux/bootstrap po/update_linguas.sh \
+	build_aux/create_win_dist.sh build_aux/create_mingw_bindist.sh
 
 # wrapper for the build environment
 noinst_SCRIPTS = pre-inst-env
@@ -78,8 +79,8 @@ dist-hook:
 
 # Create dist_win manually (dist-zip would have the same content as dist-gzip)
 distwindir = $(distdir)_win
-distwin: distdir $(top_srcdir)/build_windows $(top_srcdir)/create_win_dist.sh
-	EXTSRCDIR=$(srcdir) EXTDISTDIR=$(distdir) EXTWINDISTDIR=$(distwindir) $(top_srcdir)/create_win_dist.sh
+distwin: distdir $(top_srcdir)/build_windows $(top_srcdir)/build_aux/create_win_dist.sh
+	EXTSRCDIR=$(srcdir) EXTDISTDIR=$(distdir) EXTWINDISTDIR=$(distwindir) $(top_srcdir)/build_aux/create_win_dist.sh
 
 distwin-zip: distwin
 	rm -f "$(distwindir).zip"
