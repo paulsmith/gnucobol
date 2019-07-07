@@ -76,8 +76,7 @@ AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=2 prog.cob], [0], [],
 [cobc: warning: 2 lines per listing page specified, using 20
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff expected.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL expected.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -118,8 +117,7 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog1.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog1.lst prog.lst], [0], [], [])
 
 AT_DATA([prog2.cob], [
   IDENTIFICATION   DIVISION.
@@ -152,8 +150,7 @@ LINE    .....................SOURCE.............................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog2.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog2.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -215,8 +212,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff expected.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL expected.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -277,8 +273,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog3.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog3.lst prog.lst], [0], [], [])
 
 AT_CHECK([$COBC $FLAGS -E -o prog.i prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog.i], [0], [], [])
@@ -318,8 +313,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog4.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog4.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -384,8 +378,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog4.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog4.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -454,8 +447,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog5.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog5.lst prog.lst], [0], [], [])
 
 AT_CAPTURE_FILE([prog1.lst])
 
@@ -600,8 +592,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog1.lst prog1.lis once], [0], [], [])
-AT_CHECK([diff prog6.lst prog1.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog6.lst prog1.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -670,8 +661,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff progl.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL progl.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -741,8 +731,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff progr.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL progr.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -807,8 +796,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog6.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog6.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -1022,8 +1010,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog3.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog3.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -1092,8 +1079,7 @@ prog.cob:8: error: 'FIRST-MATCH' is not defined
 2 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog12.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog12.lst prog.lst], [0], [], [])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1148,8 +1134,7 @@ prog.cob:8: error: 'FIRST-MATCH' is not defined
 2 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog13.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog13.lst prog.lst], [0], [], [])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1202,8 +1187,7 @@ prog.cob:6: warning: numeric value is expected
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog14.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog14.lst prog.lst], [0], [], [])
 
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst crud.cob], [1], [],
@@ -1220,8 +1204,7 @@ AT_DATA([prog15.lst],
 1 error in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog15.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog15.lst prog.lst], [0], [], [])
 
 AT_DATA([prog.cpy], [
        78  I   VALUE 20.
@@ -1296,8 +1279,7 @@ prog.cob:11: warning: numeric value is expected
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog17.lst prog.lst], [0], [], [])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1353,8 +1335,7 @@ prog.cob:6: warning: numeric value is expected
 1 error in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog16.lst prog.lst], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -fmax-errors=0 prog.cob], [97], [],
 [prog.cob:7: error: CRUD.CPY: No such file or directory
@@ -1397,8 +1378,7 @@ cobc: too many errors
 Too many errors in compilation group: 0 maximum errors
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog17.lst prog.lst], [0], [], [])
 
 
 AT_CLEANUP
@@ -1466,8 +1446,7 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog11.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog11.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -1533,11 +1512,9 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 # Check once with $COMPILE and once with $COMPILE_ONLY.
 # This tests whether codegen affects the listing.
 AT_CHECK([$COMPILE -t prog.lst -tsymbols prog.cob], [0], [], [])
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog20.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog20.lst prog.lst], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -t prog2.lst -tsymbols prog.cob], [0], [], [])
-AT_CHECK([$UNIFY_LISTING prog2.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog20.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog20.lst prog2.lst], [0], [], [])
 
 AT_CHECK([rm -f prog.lst prog2.lst], [0], [], [])
 
@@ -1602,11 +1579,9 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 # Check once with $COMPILE and once with $COMPILE_ONLY.
 # This tests whether codegen affects the listing.
 AT_CHECK([$COMPILE -t prog.lst -tsymbols progb.cob], [0], [], [])
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog20b.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog20b.lst prog.lst], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -t prog2.lst -tsymbols progb.cob], [0], [], [])
-AT_CHECK([$UNIFY_LISTING prog2.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog20b.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog20b.lst prog2.lst], [0], [], [])
 
 AT_CHECK([rm -f prog.lst prog2.lst], [0], [], [])
 
@@ -1680,13 +1655,11 @@ progc.cob:13: error: syntax error, unexpected ., expecting DIVISION
 AT_CHECK([$COMPILE -t prog.lst -tsymbols progc.cob], [1], [],
 [progc.cob:13: error: syntax error, unexpected ., expecting DIVISION
 ])
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog20c.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog20c.lst prog.lst], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -t prog2.lst -tsymbols progc.cob], [1], [],
 [progc.cob:13: error: syntax error, unexpected ., expecting DIVISION
 ])
-AT_CHECK([$UNIFY_LISTING prog2.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog20c.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog20c.lst prog2.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -1863,15 +1836,13 @@ AT_CHECK([$COMPILE -x -Wunreachable -t prog.lst -Xref -tsymbols prog-1.cob prog-
 [prog-1.cob:14: warning: unreachable statement 'DISPLAY'
 prog-2.cob:16: warning: unreachable statement 'ACCEPT'
 ])
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff expected.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL expected.lst prog.lst], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -Wunreachable -t prog.lst -Xref -tsymbols prog-1.cob prog-2.cob], [0], [],
 [prog-1.cob:14: warning: unreachable statement 'DISPLAY'
 prog-2.cob:16: warning: unreachable statement 'ACCEPT'
 ])
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff expected.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL expected.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -1916,8 +1887,7 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog9.lst prog.lst], [0], [], [])
 
 AT_DATA([prog2.cob], [
   IDENTIFICATION   DIVISION.
@@ -1958,8 +1928,7 @@ LINE    .....................................................SOURCE.............
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog10.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -2030,8 +1999,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog15.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog15.lst prog.lst], [0], [], [])
 
 AT_DATA([prog2.cob], [
        IDENTIFICATION   DIVISION.
@@ -2078,8 +2046,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog16.lst prog.lst], [0], [], [])
 
 AT_DATA([prog3.cob], [
        IDENTIFICATION   DIVISION.
@@ -2124,8 +2091,7 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog15-1.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog15-1.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -2183,8 +2149,6 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog.cob], [0], [], [])
-
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 
 AT_CHECK([test "$COB_HAS_64_BIT_POINTER" = "yes"], [0], [], [],
 
@@ -2293,7 +2257,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-[AT_CHECK([diff prog17-32.lst prog.lis], [0], [], [])]
+[AT_CHECK([gcdiff -IGnuCOBOL prog17-32.lst prog.lst], [0], [], [])]
 
 ,
 
@@ -2402,7 +2366,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-[AT_CHECK([diff prog17-64.lst prog.lis], [0], [], [])]
+[AT_CHECK([gcdiff -IGnuCOBOL prog17-64.lst prog.lst], [0], [], [])]
 
 )
 
@@ -2531,8 +2495,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog18.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -2644,8 +2607,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog19.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -2704,8 +2666,7 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog16.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -3060,8 +3021,7 @@ prog.cob:11: error: missing file description for FILE PRT-VERSION
 1 error in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog18.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -3564,8 +3524,7 @@ prog.cob:81: warning: uncommon parentheses
 57 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog19.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -3608,8 +3567,7 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog20.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog20.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -3709,8 +3667,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog17.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -3778,8 +3735,7 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff expect.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL -I"here goes the code" expect.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -3824,8 +3780,7 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog7.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog7.lst prog.lst], [0], [], [])
 
 AT_DATA([prog2.cob], [
   IDENTIFICATION   DIVISION.
@@ -3863,8 +3818,7 @@ LINE    .....................SOURCE.............................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog8.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog8.lst prog.lst], [0], [], [])
 
 AT_DATA([prog3.cob], [
        IDENTIFICATION   DIVISION.
@@ -3931,8 +3885,7 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog9.lst prog.lst], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=20 prog3.cob], [0], [], [])
 
@@ -3976,8 +3929,7 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog10.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -4912,8 +4864,7 @@ EDITOR.cob:254: warning: ALTER is obsolete in GnuCOBOL
 1 error in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog18.lst prog.lst], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -Xref -T prog.lst -tlines=0 -tsymbols EDITOR.cob], [1], [],
 [EDITOR.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
@@ -5499,8 +5450,7 @@ EDITOR.cob:254: warning: ALTER is obsolete in GnuCOBOL
 1 error in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog19.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -5807,8 +5757,7 @@ P 199-EXIT                     105      87
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog1.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog1.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
 
@@ -6373,8 +6322,7 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog1.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog1.lst prog.lst], [0], [], [])
 
 AT_DATA([display.inc], [
            DISPLAY 111111111111111111111111111111111111111
@@ -6729,7 +6677,6 @@ LINE    PG/LN  A...B............................................................
 0 errors in compilation group
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog2.lst prog.lis], [0], [], [])
+AT_CHECK([gcdiff -IGnuCOBOL prog2.lst prog.lst], [0], [], [])
 
 AT_CLEANUP
