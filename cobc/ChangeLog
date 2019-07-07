@@ -1,4 +1,8 @@
 
+2019-07-07  Ron Norman <rjn@inglenet.com>
+
+	* cobc.c : Have --info display BDB version 
+
 2019-06-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l (ppinput): check for conflict markers (similar to GCC)
