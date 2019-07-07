@@ -1335,6 +1335,8 @@ cob_chk_file_env (cob_file *f, const char *src)
 			if((p = getenv (file_open_env)) != NULL)
 				break;
 		}
+		if (p == NULL)
+			strcpy (file_open_env,file_open_name);
 	}
 	if (unlikely (q)) {
 		cob_free (q);
