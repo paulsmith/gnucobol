@@ -15,6 +15,11 @@
 	* screenio.c: finished approach to add mouse support via COB_MOUSE_FLAGS
 	* screenio.c, common.c, coblocal.h: added COB_MOUSE_INTERVAL
 
+2019-06-29  Simon Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c: extracted (get_accept_timeout) and removed the artificial
+	  minimal limit
+
 2019-06-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* mlio.c, move.c, numeric.c, reportio.c, termio.c: fixed possible
