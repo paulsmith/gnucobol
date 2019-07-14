@@ -457,8 +457,8 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	}
 
 	for (l = current_program->entry_list; l; l = CB_CHAIN (l)) {
-		if (strcmp ((const char *)name,
-			    (const char *)(CB_LABEL(CB_PURPOSE(l))->name)) == 0) {
+		struct cb_label *label = CB_LABEL (CB_PURPOSE (l));
+		if (strcmp (name, label->name) == 0) {
 			cb_error_x (CB_TREE (current_statement),
 				    _("ENTRY '%s' duplicated"), name);
 		}
@@ -3790,6 +3790,9 @@ special_names_sentence:
 special_name_list:
   special_name
 | special_name_list special_name
+| /* FIXME: the error recovery is broken here, error token
+            should be moved to "special_name" instead */
+  special_name_list error
 ;
 
 special_name:

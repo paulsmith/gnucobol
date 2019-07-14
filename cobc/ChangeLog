@@ -1,4 +1,9 @@
 
+2019-07-14  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (special_name_list): better error recovery (at least as long
+	  as one valid SPECIAL-NAMES entry was found)
+
 2019-06-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l (ppinput): check for conflict markers (similar to GCC)
