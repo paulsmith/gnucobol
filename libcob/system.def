@@ -24,6 +24,8 @@
 COB_SYSTEM_GEN ("SYSTEM",		1, 1, cob_sys_system)
 
 COB_SYSTEM_GEN ("CBL_AND",		3, 3, cob_sys_and)
+COB_SYSTEM_GEN ("CBL_ALARM_SOUND", 0, 0, cob_sys_sound_bell)
+COB_SYSTEM_GEN ("CBL_BELL_SOUND", 0, 0, cob_sys_sound_bell)
 COB_SYSTEM_GEN ("CBL_CHANGE_DIR",	1, 1, cob_sys_change_dir)
 COB_SYSTEM_GEN ("CBL_CHECK_FILE_EXIST",	2, 2, cob_sys_check_file_exist)
 COB_SYSTEM_GEN ("CBL_CLOSE_FILE",	1, 1, cob_sys_close_file)
