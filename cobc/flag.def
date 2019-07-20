@@ -87,7 +87,7 @@ CB_FLAG_NQ (1, "intrinsics", 10,
 /* Flags with suppressed help */
 
 CB_FLAG_ON (cb_flag_recursive_check, 1, "recursive-check",
-	_("  -fno-recursive_check  disable check of recursive program call;\n"
+	_("  -fno-recursive-check  disable check of recursive program call;\n"
 	  "                        effectively compiling as RECURSIVE program"))
 
 CB_FLAG (cb_flag_winmain, 0, "winmain",
