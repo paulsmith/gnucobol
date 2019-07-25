@@ -6647,6 +6647,22 @@ cb_emit_alter (cb_tree source, cb_tree target)
 
 /* CALL statement */
 
+static const char *
+get_constant_call_name (cb_tree prog)
+{
+	/* plain literal or constant (level 78 item, 01 CONSTANT, SYMBOLIC CONSTANT) */
+	if (CB_LITERAL_P (prog) && CB_TREE_CATEGORY (prog) != CB_CATEGORY_NUMERIC) {
+		return (const char *)CB_LITERAL (prog)->data;
+	/* reference (ideally on a prototype) */
+	} else if (CB_REFERENCE_P (prog)) {
+		cb_tree x = cb_ref (prog);
+		if (CB_PROTOTYPE_P (x)) {
+			return CB_PROTOTYPE (x)->ext_name;
+		}
+	}
+	return NULL;
+}
+
 void
 cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	      cb_tree on_exception, cb_tree not_on_exception,
@@ -6657,8 +6673,8 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	cb_tree				x;
 	struct cb_field			*f;
 	const struct system_table	*psyst;
-	const char			*p;
 	const char			*entry;
+	const char			*constant_call_name = get_constant_call_name (prog);
 	char				c;
 	cob_s64_t			val;
 	cob_s64_t			valmin;
@@ -6668,10 +6684,6 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	int				error_ind;
 	int				call_conv;
 	unsigned int		numargs;
-	const int			prog_is_literal_or_prototype
-		= CB_LITERAL_P (prog) || (CB_REFERENCE_P (prog)
-					  && CB_PROTOTYPE_P (cb_ref (prog)));
-
 
 	if (CB_INTRINSIC_P (prog)) {
 		if (CB_INTRINSIC (prog)->intr_tab->category != CB_CATEGORY_ALPHANUMERIC) {
@@ -6710,10 +6722,9 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 		cb_warning (warningopt, _("STDCALL used on 64-bit Windows platform"));
 	}
 #endif
-	if ((call_conv & CB_CONV_STATIC_LINK)
-	    && !prog_is_literal_or_prototype) {
+	if ((call_conv & CB_CONV_STATIC_LINK) && !constant_call_name) {
 		cb_error_x (CB_TREE (current_statement),
-			    _("STATIC CALL convention requires a literal program name"));
+			_("STATIC CALL convention requires a literal program name"));
 		error_ind = 1;
 	}
 
@@ -6860,13 +6871,8 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	}
 
 	is_sys_call = 0;
-	if (prog_is_literal_or_prototype) {
-		if (CB_LITERAL_P (prog)) {
-			p = (const char *)CB_LITERAL(prog)->data;
-		} else { /* prototype */
-			p = CB_PROTOTYPE (cb_ref (prog))->ext_name;
-		}
-
+	if (constant_call_name) {
+		const char			*p = constant_call_name;
 		entry = p;
 		for (; *p; ++p) {
 			if (*p == '/' || *p == '\\') {
@@ -7945,6 +7951,28 @@ cb_emit_goto (cb_tree target, cb_tree depending)
 				    _("GO TO with multiple procedure-names"));
 	} else {
 		/* GO TO procedure-name */
+		cb_emit (cb_build_goto (CB_VALUE (target), NULL));
+	}
+}
+
+void
+cb_emit_goto_entry (cb_tree target, cb_tree depending)
+{
+	if (target == cb_error_node) {
+		return;
+	}
+	if (depending) {
+		/* GO TO ENTRY entry-name ... DEPENDING ON identifier */
+		if (cb_check_numeric_value (depending) == cb_error_node) {
+			return;
+		}
+		cb_check_data_incompat (depending);
+		cb_emit (cb_build_goto (target, depending));
+	} else if (CB_CHAIN (target)) {
+			cb_error_x (CB_TREE (current_statement),
+				    _("GO TO ENTRY with multiple entry-names"));
+	} else {
+		/* GO TO ENTRY entry-name */
 		cb_emit (cb_build_goto (CB_VALUE (target), NULL));
 	}
 }

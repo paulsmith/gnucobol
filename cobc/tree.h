@@ -828,7 +828,8 @@ struct cb_field {
 
 	unsigned int flag_real_binary	: 1;	/* BINARY-CHAR/SHORT/LONG/DOUBLE */
 	unsigned int flag_is_pointer	: 1;	/* Is POINTER */
-	unsigned int flag_item_78	: 1;	/* Is 78 level */
+	unsigned int flag_item_78 	: 1;	/* Is a constant by 78 level,
+										   01 CONSTANT or SYMBOLIC CONSTANT */
 	unsigned int flag_any_length	: 1;	/* Is ANY LENGTH */
 	unsigned int flag_item_based	: 1;	/* Is BASED */
 	unsigned int flag_is_external_form : 1;		/* Is EXTERNAL-FORM */
@@ -1501,6 +1502,7 @@ struct cb_program {
 	struct nested_list	*nested_prog_list;	/* Callable contained */
 	struct nested_list	*common_prog_list;	/* COMMON contained */
 	cb_tree			entry_list;		/* Entry point list */
+	cb_tree			entry_list_goto;	/* Special Entry point list */
 	cb_tree			file_list;		/* File list */
 	cb_tree			cd_list;		/* CD list */
 	cb_tree			exec_list;		/* Executable statements */
@@ -2093,6 +2095,7 @@ extern void		cb_emit_divide (cb_tree, cb_tree,
 extern void		cb_emit_evaluate (cb_tree, cb_tree);
 
 extern void		cb_emit_goto (cb_tree, cb_tree);
+extern void		cb_emit_goto_entry (cb_tree, cb_tree);
 extern void		cb_emit_exit (const unsigned int);
 
 extern void		cb_emit_if (cb_tree, cb_tree, cb_tree);

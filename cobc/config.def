@@ -321,3 +321,6 @@ CB_CONFIG_SUPPORT (cb_xml_generate_extra_phrases, "xml-generate-extra-phrases",
 
 CB_CONFIG_SUPPORT (cb_continue_after, "continue-after",
 	_("AFTER phrase in CONTINUE statement"))
+
+CB_CONFIG_SUPPORT (cb_goto_entry, "goto-entry",
+	_("ENTRY FOR GOTO and GOTO ENTRY statements"))

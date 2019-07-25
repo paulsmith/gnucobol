@@ -475,6 +475,38 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 				CB_BUILD_PAIR (label, CB_BUILD_PAIR(entry_conv, using_list)));
 }
 
+static void
+emit_entry_goto (const char *name)
+{
+	cb_tree		l;
+	cb_tree		label;
+	char		buff[COB_MINI_BUFF];
+
+	snprintf (buff, (size_t)COB_MINI_MAX, "E$%s", name);
+	label = cb_build_label (cb_build_reference (buff), NULL);
+	CB_LABEL (label)->name = name;
+	CB_LABEL (label)->orig_name = current_program->orig_program_id;
+	CB_LABEL (label)->flag_begin = 1;
+	CB_LABEL (label)->flag_entry = 1;
+	label->source_line = backup_source_line;
+	emit_statement (label);
+
+	for (l = current_program->entry_list_goto; l; l = CB_CHAIN (l)) {
+		struct cb_label *real_label = CB_LABEL (CB_VALUE (l));
+		if (strcmp (name, real_label->name) == 0) {
+			cb_error_x (CB_TREE (current_statement),
+				    _("ENTRY FOR GO TO '%s' duplicated"), name);
+		}
+	}
+
+	if (current_program->entry_list_goto) {
+		current_program->entry_list_goto =
+			cb_list_add (current_program->entry_list_goto, label);
+	} else {
+		current_program->entry_list_goto = CB_LIST_INIT (label);
+	}
+}
+
 static size_t
 increment_depth (void)
 {
@@ -11878,6 +11910,13 @@ entry_statement:
 	backup_current_pos ();
   }
   entry_body
+| ENTRY FOR GO TO
+  {
+	check_unreached = 0;
+	begin_statement ("ENTRY FOR GO TO", 0);
+	backup_current_pos ();
+  }
+  entry_goto_body
 ;
 
 entry_body:
@@ -11900,6 +11939,15 @@ entry_body:
 		if (!cobc_check_valid_name ((char *)(CB_LITERAL ($2)->data), ENTRY_NAME)) {
 			emit_entry ((char *)(CB_LITERAL ($2)->data), 1, $4, call_conv);
 		}
+	}
+  }
+;
+
+entry_goto_body:
+  LITERAL
+  {
+	if (cb_verify (cb_goto_entry, "ENTRY FOR GO TO")) {
+		emit_entry_goto ((char *)(CB_LITERAL ($1)->data));
 	}
   }
 ;
@@ -12406,6 +12454,13 @@ go_body:
   _to procedure_name_list goto_depending
   {
 	cb_emit_goto ($2, $3);
+	start_debug = save_debug;
+  }
+| _to ENTRY entry_name_list goto_depending
+  {
+	if (cb_verify (cb_goto_entry, "ENTRY FOR GO TO")) {
+		cb_emit_goto_entry ($3, $4);
+	}
 	start_debug = save_debug;
   }
 ;
@@ -16301,9 +16356,25 @@ mnemonic_name:
   MNEMONIC_NAME			{ $$ = $1; }
 ;
 
+/* Entry name */
+
+entry_name_list:
+  entry_name		{ $$ = CB_LIST_INIT ($1); }
+| entry_name_list
+  entry_name		{ $$ = cb_list_add ($1, $2); }
+;
+
+entry_name:
+  LITERAL
+  {
+	$$ = cb_build_reference ((char *)(CB_LITERAL ($1)->data));
+  }
+;
+
 /* Procedure name */
 
 procedure_name_list:
+  %prec SHIFT_PREFER
   /* empty */			{ $$ = NULL; }
 | procedure_name_list
   procedure_name		{ $$ = cb_list_add ($1, $2); }

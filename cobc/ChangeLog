@@ -4,6 +4,14 @@
 	* parser.y (special_name_list): better error recovery (at least as long
 	  as one valid SPECIAL-NAMES entry was found)
 
+2019-07-13  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (emit_entry_goto, entry_name_list, entry_name),
+	  typeck.c (cb_emit_goto_entry), config.def, tree.h,
+	  codegen.c (output_goto, output_goto_entry): added extension
+	  GO TO ENTRY / ENTRY FOR GO TO, intended mainly for generated code;
+	  guarded by compiler configuration "goto-entry", defaults to warning
+
 2019-06-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l (ppinput): check for conflict markers (similar to GCC)

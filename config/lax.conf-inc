@@ -116,7 +116,8 @@ record-delim-with-fixed-recs:		ok
 missing-statement:			+warning
 zero-length-literals:			ok
 xml-generate-extra-phrases:		ok
-continue-after:				ok
+continue-after:				warning
+goto-entry:				warning
 
 
 # use complete word list
