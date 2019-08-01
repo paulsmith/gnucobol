@@ -53,12 +53,12 @@ size_t			cb_needs_01 = 0;
 static struct cb_field	*last_real_field = NULL;
 static int		occur_align_size = 0;
 static const int	pic_digits[] = { 3, 5, 8, 10, 13, 15, 17, 19 };
-#define CB_MAX_OPS	16
+#define CB_MAX_OPS	32
 static int			op_pos = 1, op_val_pos;
-static char			op_type	[CB_MAX_OPS];
-static char			op_prec	[CB_MAX_OPS];
-static cob_s64_t	op_val	[CB_MAX_OPS];
-static int			op_scale[CB_MAX_OPS];
+static char			op_type	[CB_MAX_OPS+1];
+static char			op_prec	[CB_MAX_OPS+1];
+static cob_s64_t	op_val	[CB_MAX_OPS+1];
+static int			op_scale[CB_MAX_OPS+1];
 
 /* Is list of values really an expression */
 static int
@@ -212,6 +212,10 @@ cb_push_op ( char op, int prec )
 	   &&  prec <= op_prec [op_pos]) {
 		cb_eval_op ();
 	}
+	if(op_pos >= CB_MAX_OPS) {
+		cb_error (_("expression stack overflow at %d entries for operation '%c'"),op_pos,op);
+		return;
+	}
 	op_pos++;
 	op_type [op_pos] = op;
 	op_prec [op_pos] = (char) prec;
@@ -248,6 +252,10 @@ cb_evaluate_expr (cb_tree ch, int normal_prec)
 					&& (xval % 10) == 0) {	/* Remove decimal zeros */
 					xscale--;
 					xval = xval / 10;
+				}
+				if(op_val_pos >= CB_MAX_OPS) {
+					cb_error (_("expression stack overflow at %d entries"),op_val_pos);
+					return;
 				}
 				op_val_pos++;
 				op_val [op_val_pos] = xval;

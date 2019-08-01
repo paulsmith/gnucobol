@@ -54,9 +54,6 @@
 /* included to check for VB_RTD definition */
 #include <vbisam.h>
 #endif
-#if defined	(WITH_DB)
-#include <db.h>
-#endif
 
 #ifdef	HAVE_LOCALE_H
 #include <locale.h>
@@ -2306,11 +2303,7 @@ cobc_print_info (void)
 #if defined	(WITH_INDEX_EXTFH)
 	cobc_var_print (_("ISAM file handler"),		"EXTFH", 0);
 #elif defined	(WITH_DB)
-#if defined(DB_VERSION_STRING)
-	cobc_var_print (_("ISAM file handler"),		DB_VERSION_STRING, 0);
-#else
 	cobc_var_print (_("ISAM file handler"),		"BDB", 0);
-#endif
 #elif defined	(WITH_LMDB)
 	cobc_var_print (_("ISAM file handler"),		"LMDB", 0);
 #elif defined	(WITH_CISAM)
