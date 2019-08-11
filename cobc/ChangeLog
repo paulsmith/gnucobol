@@ -1,4 +1,10 @@
 
+2019-08-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l, config.def: added support for HP COBOL octal literals
+	  unfinished as its type should be context-sensitive (so far chosen
+	  by scanner.l), configured by dialect configuration hp-octal-literals
+
 2019-07-14  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y (special_name_list): better error recovery (at least as long

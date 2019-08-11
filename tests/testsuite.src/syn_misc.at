@@ -3372,8 +3372,44 @@ prog.cob:9: error: hexadecimal-boolean literal does not conform to COBOL 85
 AT_CLEANUP
 
 
+AT_SETUP([HP COBOL octal literals])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           *> Valid forms
+           DISPLAY %17 %37777777777 %456
+
+           *> invalid forms
+           DISPLAY %11111111111111111111111
+           DISPLAY %89
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -Wno-unfinished -fhp-octal-literals=ok prog.cob], [1], [],
+[prog.cob:9: error: invalid % literal: '11111111111111111111111'
+prog.cob:9: error: literal length 23 exceeds 22 characters
+prog.cob:10: error: invalid % literal: '89'
+prog.cob:10: error: literal contains invalid character '8'
+prog.cob:10: error: literal contains invalid character '9'
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob:6: error: HP COBOL octal literal does not conform to COBOL 2014
+prog.cob:6: error: HP COBOL octal literal does not conform to COBOL 2014
+prog.cob:6: error: HP COBOL octal literal does not conform to COBOL 2014
+prog.cob:9: error: HP COBOL octal literal does not conform to COBOL 2014
+prog.cob:10: error: HP COBOL octal literal does not conform to COBOL 2014
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([ACUCOBOL literals])
-AT_KEYWORDS([misc acu extensions])
+AT_KEYWORDS([misc acu extensions binary octal hexadecimal])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

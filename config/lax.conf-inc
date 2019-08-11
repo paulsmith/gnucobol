@@ -93,6 +93,7 @@ national-literals:			ok
 hexadecimal-national-literals:		ok
 national-character-literals:		+warning
 acu-literals:				ok
+hp-octal-literals:			ok
 word-continuation:			ok
 not-exception-before-exception:		+warning
 accept-display-extensions:		ok

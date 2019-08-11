@@ -737,7 +737,7 @@ cb_check_numeric_value (cb_tree x)
 				return cb_build_field_reference (sc, NULL);
 			}
 		}
-		/* Fall-through as we only allow this for RW: SUM*/
+		/* Fall-through as we only allow this for RW: SUM */
 	default:
 		cb_error_x (x, _("'%s' is not a numeric value"), cb_name (x));
 	}
