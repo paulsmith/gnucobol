@@ -1,4 +1,9 @@
 
+2019-08-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l (scan_floating_numeric): fixed stack_overflow_buffer
+	  reported by AddressSanitizer
+
 2019-08-11  Simon Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l, config.def: added support for HP COBOL octal literals

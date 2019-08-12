@@ -1825,9 +1825,10 @@ significand_is_zero (const char *int_part, const char *dec_part)
 #error COB_FLOAT_DIGITS_MAX adjustment needed, common.h must match scanner.l
 #endif
 #define COB_FLOAT_DIGITS_CHCK_MAX    38 /* incl. sign and comma */
-#define COB_FLOAT_DIGITS_STR_MAX     39
+#define COB_FLOAT_DIGITS_STR_WIDTH   39
+#define COB_FLOAT_DIGITS_STR_MAX     40
 
-#define COB_FLOAT_DIGITS_WIDTH	"%" CB_XSTRINGIFY(COB_FLOAT_DIGITS_STR_MAX)
+#define COB_FLOAT_DIGITS_WIDTH	"%" CB_XSTRINGIFY(COB_FLOAT_DIGITS_STR_WIDTH)
 
 static int
 scan_floating_numeric (const char *text)
