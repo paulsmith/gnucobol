@@ -11617,7 +11617,7 @@ cb_build_write_advancing_mnemonic (cb_tree pos, cb_tree mnemonic)
 	}
 	token = CB_SYSTEM_NAME (rtree)->token;
 	switch (token) {
-	case CB_FEATURE_FORMFEED:	/* including S01-S05 and CSP*/
+	case CB_FEATURE_FORMFEED:	/* including S01-S05, CSP and TOP */
 		opt = (pos == CB_BEFORE) ? COB_WRITE_BEFORE : COB_WRITE_AFTER;
 		return cb_int_hex (opt | COB_WRITE_PAGE);
 	case CB_FEATURE_C01:

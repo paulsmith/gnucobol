@@ -457,8 +457,8 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	}
 
 	for (l = current_program->entry_list; l; l = CB_CHAIN (l)) {
-		struct cb_label *label = CB_LABEL (CB_PURPOSE (l));
-		if (strcmp (name, label->name) == 0) {
+		struct cb_label *check = CB_LABEL (CB_PURPOSE (l));
+		if (strcmp (name, check->name) == 0) {
 			cb_error_x (CB_TREE (current_statement),
 				    _("ENTRY '%s' duplicated"), name);
 		}
@@ -3841,6 +3841,7 @@ special_name:
 | crt_status_clause
 | screen_control
 | event_status
+| top_clause
 ;
 
 
@@ -4549,6 +4550,34 @@ event_status:
 	} else {
 		check_repeated ("EVENT STATUS", SYN_CLAUSE_6, &check_duplicate);
 		CB_PENDING ("EVENT STATUS");
+	}
+  }
+;
+
+/* TOP clause */
+
+top_clause:
+  TOP
+  {
+	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
+			       COBC_HD_CONFIGURATION_SECTION,
+			       COBC_HD_SPECIAL_NAMES, 0);
+	check_duplicate = 0;
+	if (current_program->nested_level) {
+		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
+		save_tree = NULL;
+	} else {
+		/* lookup system name
+		   note: result in NULL + raised error if not found */
+		save_tree = get_system_name ("TOP");
+	}
+  }
+  _is undefined_word
+  {
+	if (save_tree && CB_VALID_TREE ($4)) {
+		cb_define ($4, save_tree);
+		CB_CHAIN_PAIR (current_program->mnemonic_spec_list,
+				$4, save_tree);
 	}
   }
 ;

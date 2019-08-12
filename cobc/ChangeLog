@@ -3,6 +3,9 @@
 
 	* scanner.l (scan_floating_numeric): fixed stack_overflow_buffer
 	  reported by AddressSanitizer
+	* reserved.c: TOP as mnemonic CB_FEATURE_FORMFEED
+	* parser.y: added top_clause as we won't be able to define the mnemonic
+	  as it duplicates a reserved word (FIXME: general adjustment needed)
 
 2019-08-11  Simon Sobisch <simonsobisch@gnu.org>
 
