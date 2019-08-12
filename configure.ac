@@ -212,15 +212,15 @@ AC_DEFINE_UNQUOTED([MAX_CALL_FIELD_PARAMS], [$with_max_call_params])
 configured_make=""
 if test -z "$MAKE"; then
   AC_CHECK_PROGS([configured_make], [make gmake gnumake])
-  if test  -z "$configured_make"; then
+  if test -z "$configured_make"; then
 	AC_MSG_ERROR([make not found])
   else
    MAKE=$configured_make
 	AC_SUBST(MAKE)
   fi
 else
-  AC_CHECK_PROG([configured_make], ["$MAKE"])
-  if test  -z "$configured_make"; then
+  AC_CHECK_PROG([configured_make], [$MAKE], [$MAKE])
+  if test -z "$configured_make"; then
 	AC_MSG_ERROR([make, configured as "$MAKE", was not found])
   fi
 fi
