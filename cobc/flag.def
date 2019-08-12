@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -174,12 +174,6 @@ CB_FLAG (cb_flag_relaxed_syntax, 1, "relax-syntax",
 CB_FLAG (cb_flag_optional_file, 1, "optional-file",
 	_("  -foptional-file       treat all files as OPTIONAL\n"
 	  "                        * unless NOT OPTIONAL specified"))
-
-#if 0 /* deactivated + untranslated for now, inspect later */
-CB_FLAG (cb_mf_ibm_comp, 1, "ibmcomp",
-	  "  -fibmcomp             Handle COMP fields like Micro Focus IBMCOMP\n"
-	  "                        * binary-size: 1--8 & synchronized-clause: ignore")
-#endif
 
 CB_FLAG (cb_flag_static_call, 1, "static-call",
 	_("  -fstatic-call         output static function calls for the CALL statement"))

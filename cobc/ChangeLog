@@ -4,6 +4,8 @@
 	* scanner.l, config.def: added support for HP COBOL octal literals
 	  unfinished as its type should be context-sensitive (so far chosen
 	  by scanner.l), configured by dialect configuration hp-octal-literals
+	* flag.def, cobc.c, help.c: moved -f[no-]ibmcomp out of flags.def and
+	  activated the "non-flag" as "normal option"
 
 2019-07-14  Simon Sobisch <simonsobisch@gnu.org>
 

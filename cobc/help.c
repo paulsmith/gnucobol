@@ -174,6 +174,9 @@ cobc_print_usage_flags (void)
 #undef	CB_FLAG_ON
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
+	cobc_print_active (
+	_("  -fibmcomp             sets -fbinary-size=2-4-8 -fsynchronized-clause=ok\n"
+	  "  -fno-ibmcomp          sets -fbinary-size=1--8  -fsynchronized-clause=ignore"), 0);
 	putchar ('\n');
 }
 

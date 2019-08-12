@@ -304,6 +304,7 @@ struct cb_exception cb_exception_table[] = {
 #undef	CB_FLAG_ON
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
+int cb_mf_ibm_comp = -1;
 
 /* Flag to emit Old style: cob_set_location, cob_trace_section */
 int	cb_old_trace = 0;
@@ -539,8 +540,8 @@ static const struct option long_options[] = {
 	{"Wall",		CB_NO_ARG, NULL, 'W'},
 	{"Werror",		CB_OP_ARG, NULL, 'Y'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
-	{"tlines", 		CB_RQ_ARG, NULL, '*'},
-	{"tsymbols", 		CB_NO_ARG, &cb_listing_symbols, 1},		/* kept for backwards-compatibility */
+	{"tlines",		CB_RQ_ARG, NULL, '*'},
+	{"tsymbols",		CB_NO_ARG, &cb_listing_symbols, 1},		/* kept for backwards-compatibility */
 
 #define	CB_FLAG(var,print_help,name,doc)			\
 	{"f" name,		CB_NO_ARG, &var, 1},	\
@@ -557,6 +558,8 @@ static const struct option long_options[] = {
 #undef	CB_FLAG_ON
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
+	{"fibmcomp",		CB_NO_ARG, &cb_mf_ibm_comp, 1},
+	{"fno-ibmcomp",		CB_NO_ARG, &cb_mf_ibm_comp, 0},
 
 #define	CB_CONFIG_ANY(type,var,name,doc)	\
 	{"f" name,		CB_RQ_ARG, NULL, '%'},
@@ -3440,15 +3443,15 @@ process_command_line (const int argc, char **argv)
 		set_compile_level_from_file_extension (output_name);
 	}
 
-#if 0 /* deactivated for now, check later */
-	if(cb_mf_ibm_comp == 0) {		/* NO-IBMCOMP */
+	/* note: this is a "legacy" option, not a flag -
+	   better use the two separate dialect flags */
+	if (cb_mf_ibm_comp == 0) {		/* NO-IBMCOMP */
 		cb_binary_size = CB_BINARY_SIZE_1__8;
 		cb_synchronized_clause = CB_IGNORE;
-	} else if(cb_mf_ibm_comp == 1) {	/* IBMCOMP */
+	} else if (cb_mf_ibm_comp == 1) {	/* IBMCOMP */
 		cb_binary_size = CB_BINARY_SIZE_2_4_8;
 		cb_synchronized_clause = CB_OK;
 	}
-#endif
 
 	return cob_optind;
 }
