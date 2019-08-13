@@ -2185,7 +2185,7 @@ relative_read_next (cob_file *f, const int read_opts)
 		lseek (f->fd, (off_t)0, SEEK_CUR);
 	}
 
-	relsize = f->record_max + sizeof (f->record->size);
+	relsize = ((off_t) f->record_max) + sizeof (f->record->size);
 	if (fstat (f->fd, &st) != 0 || st.st_size == 0) {
 		return COB_STATUS_10_END_OF_FILE;
 	}
