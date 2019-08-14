@@ -56,6 +56,8 @@ reserved:	ANY
 reserved:	ARE
 reserved:	AREA
 reserved:	AREAS
+reserved:	ARGUMENT-NUMBER
+reserved:	ARGUMENT-VALUE
 reserved:	AS
 reserved:	ASCENDING
 reserved:	ASSIGN
