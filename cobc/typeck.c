@@ -1733,7 +1733,8 @@ cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 
 	case CB_TAG_REFERENCE:
 		name_ptr = orig_ptr = CB_NAME (name);
-		if (cb_assign_clause == CB_ASSIGN_MF) {
+		switch (cb_assign_clause) {
+		case CB_ASSIGN_MF:
 			if (cfile->flag_ext_assign) {
 				p = strrchr (name_ptr, '-');
 				if (p) {
@@ -1744,7 +1745,7 @@ cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 			current_program->reference_list =
 			    cb_list_add (current_program->reference_list, name);
 			return name;
-		} else if (cb_assign_clause == CB_ASSIGN_IBM) {
+		case CB_ASSIGN_IBM:
 			p = name_ptr;
 			/* Check organization */
 			if (strncmp (name_ptr, "S-", (size_t)2) == 0 ||
@@ -1761,13 +1762,16 @@ cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 			    strncmp (name_ptr, "AS-", (size_t)3) == 0) {
 org:
 				/* Skip it for now,
-				   CHECKME: this likely should have consequences... */
+				   CHECKME: the organization prefixes
+				   should likely have consequences... */
 				name_ptr = strchr (name_ptr, '-') + 1;
 			}
 			goto build_lit;
+		case CB_ASSIGN_COBOL2002:
+			/* CHECKME - To be looked at */
+			break;
 		}
-		/* Fall through for CB_ASSIGN_COBOL2002 */
-		/* CHECKME - To be looked at */
+		/* Fall through */
 	default:
 		return cb_error_node;
 	}
