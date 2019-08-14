@@ -1,4 +1,8 @@
 
+2019-08-11 Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: added option hp-octal-literals
+
 2019-06-08 Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: removed options json-generate and xml-generate (support is

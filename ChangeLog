@@ -1,4 +1,8 @@
 
+2019-08-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: check for make
+
 2019-06-30  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: changed the manual test runner to be a script handled

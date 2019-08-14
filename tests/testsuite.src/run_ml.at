@@ -1,5 +1,5 @@
 ## Copyright (C) 2018-2019 Free Software Foundation, Inc.
-## Written by Edward Hart
+## Written by Edward Hart, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
 ##
@@ -39,6 +39,11 @@ AT_DATA([prog.cob], [
                05  d        PIC X(3) VALUE SPACES.
 
        01  0SpecialTAGName  PIC X(3) VALUE "abc".
+
+       01  employee.
+           05 id            PIC 9(1)  value 1.
+           05 name          PIC X(10) value "Someone".
+           05 dept          PIC X(10) value "Marketing".
 
        PROCEDURE            DIVISION.
            XML GENERATE out
@@ -102,9 +107,19 @@ AT_DATA([prog.cob], [
                DISPLAY 'Test 9 failed: ' FUNCTION TRIM (out)
            END-IF
            .
+
+           *> Another test with mixed attributes and values
+           XML GENERATE out FROM EMPLOYEE TYPE OF ID IS ATTRIBUTE
+           IF out <> '<employee id="1">'-
+                     '<name>Someone</name>'-
+                     '<dept>Marketing</dept>'-
+                     '</employee>'
+               DISPLAY 'Test 10 failed: ' FUNCTION TRIM (out)
+           END-IF
+           .
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fnot-reserved=ID prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 

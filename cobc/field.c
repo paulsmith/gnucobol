@@ -255,7 +255,7 @@ cb_evaluate_expr (cb_tree ch, int normal_prec)
 				}
 				if(op_val_pos >= CB_MAX_OPS) {
 					cb_error (_("expression stack overflow at %d entries"),op_val_pos);
-					return;
+					return cb_error_node;
 				}
 				op_val_pos++;
 				op_val [op_val_pos] = xval;
@@ -1771,24 +1771,18 @@ validate_elementary_item (struct cb_field *f)
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-SHORT", 4, 1);
 			f->flag_real_binary = 1;
-			if(cb_mf_ibm_comp == 1) 
-				f->flag_synchronized = 0;
 			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_SIGNED_INT:
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-LONG", 9, 1);
 			f->flag_real_binary = 1;
-			if(cb_mf_ibm_comp == 1) 
-				f->flag_synchronized = 0;
 			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_SIGNED_LONG:
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-DOUBLE", 18, 1);
 			f->flag_real_binary = 1;
-			if(cb_mf_ibm_comp == 1) 
-				f->flag_synchronized = 0;
 			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_UNSIGNED_CHAR:
@@ -1801,24 +1795,18 @@ validate_elementary_item (struct cb_field *f)
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-SHORT", 4, 0);
 			f->flag_real_binary = 1;
-			if(cb_mf_ibm_comp == 1) 
-				f->flag_synchronized = 0;
 			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_UNSIGNED_INT:
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-LONG", 9, 0);
 			f->flag_real_binary = 1;
-			if(cb_mf_ibm_comp == 1) 
-				f->flag_synchronized = 0;
 			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_UNSIGNED_LONG:
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-DOUBLE", 18, 0);
 			f->flag_real_binary = 1;
-			if(cb_mf_ibm_comp == 1) 
-				f->flag_synchronized = 0;
 			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_BINARY:
@@ -2034,16 +2022,14 @@ setup_parameters (struct cb_field *f)
 static void
 compute_binary_size (struct cb_field *f, const int size)
 {
-
-	if (cb_binary_size == CB_BINARY_SIZE_1_2_4_8) {
+	switch (cb_binary_size) {
+	case CB_BINARY_SIZE_1_2_4_8:
 		f->size = ((size <= 2) ? 1 :
 			   (size <= 4) ? 2 :
 			   (size <= 9) ? 4 : (size <= 18) ? 8 : 16);
 		return;
-	}
-	if (cb_binary_size == CB_BINARY_SIZE_2_4_8) {
-		if (f->flag_real_binary 
-		 && cb_mf_ibm_comp != 1 
+	case CB_BINARY_SIZE_2_4_8:
+		if (f->flag_real_binary
 		 && size <= 2) {
 			f->size = 1;
 		} else {
@@ -2051,12 +2037,80 @@ compute_binary_size (struct cb_field *f, const int size)
 				   (size <= 9) ? 4 : (size <= 18) ? 8 : 16);
 		}
 		return;
-	}
-	if (cb_binary_size != CB_BINARY_SIZE_1__8) {
-		f->size = size;
-		return;
-	}
-	if (f->pic->have_sign) {
+	case CB_BINARY_SIZE_1__8:
+		if (f->pic->have_sign) {
+			switch (size) {
+			case 0:
+			case 1:
+			case 2:
+				f->size = 1;
+				return;
+			case 3:
+			case 4:
+				f->size = 2;
+				return;
+			case 5:
+			case 6:
+				f->size = 3;
+				return;
+			case 7:
+			case 8:
+			case 9:
+				f->size = 4;
+				return;
+			case 10:
+			case 11:
+				f->size = 5;
+				return;
+			case 12:
+			case 13:
+			case 14:
+				f->size = 6;
+				return;
+			case 15:
+			case 16:
+				f->size = 7;
+				return;
+			case 17:
+			case 18:
+				f->size = 8;
+				return;
+			case 19:
+			case 20:
+			case 21:
+				f->size = 9;
+				return;
+			case 22:
+			case 23:
+				f->size = 10;
+				return;
+			case 24:
+			case 25:
+			case 26:
+				f->size = 11;
+				return;
+			case 27:
+			case 28:
+				f->size = 12;
+				return;
+			case 29:
+			case 30:
+			case 31:
+				f->size = 13;
+				return;
+			case 32:
+			case 33:
+				f->size = 14;
+				return;
+			case 34:
+			case 35:
+				f->size = 15;
+				return;
+			default:
+				f->size = 16;
+				return;
+			}
+		}
 		switch (size) {
 		case 0:
 		case 1:
@@ -2069,18 +2123,18 @@ compute_binary_size (struct cb_field *f, const int size)
 			return;
 		case 5:
 		case 6:
+		case 7:
 			f->size = 3;
 			return;
-		case 7:
 		case 8:
 		case 9:
 			f->size = 4;
 			return;
 		case 10:
 		case 11:
+		case 12:
 			f->size = 5;
 			return;
-		case 12:
 		case 13:
 		case 14:
 			f->size = 6;
@@ -2091,18 +2145,18 @@ compute_binary_size (struct cb_field *f, const int size)
 			return;
 		case 17:
 		case 18:
+		case 19:
 			f->size = 8;
 			return;
-		case 19:
 		case 20:
 		case 21:
 			f->size = 9;
 			return;
 		case 22:
 		case 23:
+		case 24:
 			f->size = 10;
 			return;
-		case 24:
 		case 25:
 		case 26:
 			f->size = 11;
@@ -2122,84 +2176,19 @@ compute_binary_size (struct cb_field *f, const int size)
 			return;
 		case 34:
 		case 35:
+		case 36:
 			f->size = 15;
 			return;
 		default:
 			f->size = 16;
 			return;
 		}
-	}
-	switch (size) {
-	case 0:
-	case 1:
-	case 2:
-		f->size = 1;
 		return;
-	case 3:
-	case 4:
-		f->size = 2;
-		return;
-	case 5:
-	case 6:
-	case 7:
-		f->size = 3;
-		return;
-	case 8:
-	case 9:
-		f->size = 4;
-		return;
-	case 10:
-	case 11:
-	case 12:
-		f->size = 5;
-		return;
-	case 13:
-	case 14:
-		f->size = 6;
-		return;
-	case 15:
-	case 16:
-		f->size = 7;
-		return;
-	case 17:
-	case 18:
-	case 19:
-		f->size = 8;
-		return;
-	case 20:
-	case 21:
-		f->size = 9;
-		return;
-	case 22:
-	case 23:
-	case 24:
-		f->size = 10;
-		return;
-	case 25:
-	case 26:
-		f->size = 11;
-		return;
-	case 27:
-	case 28:
-		f->size = 12;
-		return;
-	case 29:
-	case 30:
-	case 31:
-		f->size = 13;
-		return;
-	case 32:
-	case 33:
-		f->size = 14;
-		return;
-	case 34:
-	case 35:
-	case 36:
-		f->size = 15;
-		return;
+#if 0	/* how should this happen ... */
 	default:
-		f->size = 16;
+		f->size = size;
 		return;
+#endif
 	}
 }
 
@@ -2363,8 +2352,7 @@ unbounded_again:
 				}
 
 				/* Word alignment */
-				if (c->flag_synchronized
-				 && cb_verify_x (CB_TREE (c), cb_synchronized_clause, "SYNC")) {
+				if (c->flag_synchronized) {
 					align_size = 1;
 					switch (c->usage) {
 					case CB_USAGE_BINARY:
@@ -2376,12 +2364,15 @@ unbounded_again:
 							align_size = c->size;
 						} else if (c->size == 8 
 							|| c->size == 16) {
-							if(cb_mf_ibm_comp == 1) {
+#if 1	/* CHECKME: seems wrong, was cb_mf_ibm_comp before... */
+							if (cb_binary_size == CB_BINARY_SIZE_2_4_8) {
 								if (c->usage == CB_USAGE_DOUBLE)
 									align_size = 8;	/* COMP-2 */
 								else
 									align_size = 4;
-							} else if (sizeof (void *) == 4) {
+							} else
+#endif
+							if (sizeof (void *) == 4) {
 								align_size = 4; 	/* 32 bit mode */
 							} else {
 								align_size = 8;		/* 64 bit mode */
@@ -2392,12 +2383,12 @@ unbounded_again:
 					case CB_USAGE_SIGNED_SHORT:
 						align_size = sizeof(short);
 						break;
-		    			case CB_USAGE_UNSIGNED_INT:
-		    			case CB_USAGE_SIGNED_INT:
+					case CB_USAGE_UNSIGNED_INT:
+					case CB_USAGE_SIGNED_INT:
 						align_size = sizeof(int);
 						break;
-		    			case CB_USAGE_UNSIGNED_LONG:
-		    			case CB_USAGE_SIGNED_LONG:
+					case CB_USAGE_UNSIGNED_LONG:
+					case CB_USAGE_SIGNED_LONG:
 						align_size = sizeof(long);
 						break;
 					case CB_USAGE_LONG_DOUBLE:

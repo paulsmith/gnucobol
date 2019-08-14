@@ -418,10 +418,10 @@ test.conf: missing definitions:
 	no definition of 'word-length'
 	no definition of 'literal-length'
 	no definition of 'numeric-literal-length'
-	no definition of 'assign-clause'
+	no definition of 'standard-define'
 	no definition of 'binary-size'
 	no definition of 'binary-byteorder'
-	no definition of 'standard-define'
+	no definition of 'assign-clause'
 	no definition of 'screen-section-rules'
 	no definition of 'filename-mapping'
 	no definition of 'pretty-display'
@@ -480,6 +480,7 @@ test.conf: missing definitions:
 	no definition of 'national-literals'
 	no definition of 'hexadecimal-national-literals'
 	no definition of 'national-character-literals'
+	no definition of 'hp-octal-literals'
 	no definition of 'acu-literals'
 	no definition of 'word-continuation'
 	no definition of 'not-exception-before-exception'
@@ -505,6 +506,7 @@ test.conf: missing definitions:
 	no definition of 'zero-length-literals'
 	no definition of 'xml-generate-extra-phrases'
 	no definition of 'continue-after'
+	no definition of 'goto-entry'
 	no definition of 'depending-on-not-fixed'
 ])
 

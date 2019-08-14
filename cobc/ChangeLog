@@ -1,7 +1,51 @@
 
+2019-08-14  Simon Sobisch <simonsobisch@gnu.org>
+
+	* field.c (cb_evaluate_expr): return error_node on expression overflow
+	* field.c (validate_elementary_item): don't re-set f->flag_synchronized
+	  depending on cb_mf_ibm_comp as the flag is not set because of the ignored
+	  synchronized clause
+	* cobc.h, config.def: moved defines all CB_CONFIG_ANY entries to to new
+	  enums: cb_binary_size_options, cb_binary_byteorder_options,
+	  cb_assign_clause_options; used these instead of unsigned int
+	* field.c (compute_binary_size): switch over cb_binary_size
+	* typeck.c (cb_build_assignment_name): switch over cb_assign_clause
+	* field.c (compute_binary_size): removed superfluous check of cb_mf_ibm_comp
+	  after checking a binary size which is never active with that switch
+	* field.c (compute_size): check cb_binary_size instead of cb_mf_ibm_comp
+
+2019-08-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l (scan_floating_numeric): fixed stack_overflow_buffer
+	  reported by AddressSanitizer
+	* reserved.c: TOP as mnemonic CB_FEATURE_FORMFEED
+	* parser.y: added top_clause as we won't be able to define the mnemonic
+	  as it duplicates a reserved word (FIXME: general adjustment needed)
+
+2019-08-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l, config.def: added support for HP COBOL octal literals
+	  unfinished as its type should be context-sensitive (so far chosen
+	  by scanner.l), configured by dialect configuration hp-octal-literals
+	* flag.def, cobc.c, help.c: moved -f[no-]ibmcomp out of flags.def and
+	  activated the "non-flag" as "normal option"
+
 2019-08-01  Ron Norman <rjn@inglenet.com>
 
 	* field.c: Add bounds check on expression stack and report error
+
+2019-07-14  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (special_name_list): better error recovery (at least as long
+	  as one valid SPECIAL-NAMES entry was found)
+
+2019-07-13  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (emit_entry_goto, entry_name_list, entry_name),
+	  typeck.c (cb_emit_goto_entry), config.def, tree.h,
+	  codegen.c (output_goto, output_goto_entry): added extension
+	  GO TO ENTRY / ENTRY FOR GO TO, intended mainly for generated code;
+	  guarded by compiler configuration "goto-entry", defaults to warning
 
 2019-06-29  Simon Sobisch <simonsobisch@gnu.org>
 

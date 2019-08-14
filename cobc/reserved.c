@@ -78,6 +78,7 @@ static struct system_name_struct	system_name_table[] = {
 	/*{"AFP-5A ",			CB_FEATURE_NAME, CB_FEATURE_AFP_5A , CB_FEATURE_ACTIVE},*/
 	{"CSP",			CB_FEATURE_NAME, CB_FEATURE_FORMFEED, CB_FEATURE_ACTIVE},
 	{"FORMFEED",		CB_FEATURE_NAME, CB_FEATURE_FORMFEED, CB_FEATURE_ACTIVE},
+	{"TOP",		CB_FEATURE_NAME, CB_FEATURE_FORMFEED, CB_FEATURE_ACTIVE},
 	{"CALL-CONVENTION",	CB_FEATURE_NAME, CB_FEATURE_CONVENTION, CB_FEATURE_ACTIVE},
 	{"SWITCH-0",		CB_SWITCH_NAME,  CB_SWITCH_0, CB_FEATURE_ACTIVE},
 	{"SWITCH-1",		CB_SWITCH_NAME,  CB_SWITCH_1, CB_FEATURE_ACTIVE},
@@ -4882,7 +4883,7 @@ change_system_name (const char *name, const char *fname, const int line, enum cb
 	system_name = lookup_system_name (name, 1);
 	if (!system_name) {
 		if (mode == CB_FEATURE_ACTIVE) {
-			configuration_error (fname, line, 1, _("system name %s is unknown"), name);
+			configuration_error (fname, line, 1, _("unknown system-name '%s'"), name);
 		}
 		return;
 	}

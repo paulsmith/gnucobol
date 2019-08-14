@@ -404,6 +404,12 @@ O#[0-9]+ {
 	RETURN_TOK (scan_o (yytext + 2, "O#"));
 }
 
+%[0-9]+ {
+	/* HP-COBOL octal numeric literal */
+	cobc_force_literal = 0;
+	RETURN_TOK (scan_o (yytext + 1, "%"));
+}
+
 X#[0-9A-Za-z]+ |
 H#[0-9A-Za-z]+ {
 	/* ACUCOBOL hexadecimal numeric literal */
@@ -1663,8 +1669,14 @@ scan_o (const char *text, const char *type)
 
 	literal_error = 0;
 
-	if (!cb_verify (cb_acu_literals, _("ACUCOBOL numeric literal"))) {
-		goto error; /* early exit possible as complete literal is consumed */
+	if (type[0] == '%') {
+		if (!cb_verify (cb_hp_octal_literals, _("HP COBOL octal literal"))) {
+			goto error; /* early exit possible as complete literal is consumed */
+		}
+	} else {
+		if (!cb_verify (cb_acu_literals, _("ACUCOBOL numeric literal"))) {
+			goto error; /* early exit possible as complete literal is consumed */
+		}
 	}
 
 	currlen = strlen (text);
@@ -1698,6 +1710,19 @@ scan_o (const char *text, const char *type)
 
 	if (literal_error) {
 		goto error;
+	}
+
+	if (type[0] == '%') {
+		/* actually the rules specify that the literal type is context-sensitive
+		   and for alphanumeric right-filled with NULL, therefore we'd need
+		   a special type of literal here */
+		CB_UNFINISHED ("HP COBOL octal literals");
+#if 0	/* activate to have all %literals to be alphanumeric */
+		char xbuff[19];
+		sprintf ((char *)&xbuff, "'%X'", (unsigned int)val);
+		cobc_force_literal = 0;
+		RETURN_TOK (scan_x ((const char *)&xbuff + 1, "X"));
+#endif
 	}
 
 	sprintf ((char *)plex_buff, CB_FMT_LLU, val);
@@ -1800,9 +1825,10 @@ significand_is_zero (const char *int_part, const char *dec_part)
 #error COB_FLOAT_DIGITS_MAX adjustment needed, common.h must match scanner.l
 #endif
 #define COB_FLOAT_DIGITS_CHCK_MAX    38 /* incl. sign and comma */
-#define COB_FLOAT_DIGITS_STR_MAX     39
+#define COB_FLOAT_DIGITS_STR_WIDTH   39
+#define COB_FLOAT_DIGITS_STR_MAX     40
 
-#define COB_FLOAT_DIGITS_WIDTH	"%" CB_XSTRINGIFY(COB_FLOAT_DIGITS_STR_MAX)
+#define COB_FLOAT_DIGITS_WIDTH	"%" CB_XSTRINGIFY(COB_FLOAT_DIGITS_STR_WIDTH)
 
 static int
 scan_floating_numeric (const char *text)

@@ -6946,12 +6946,11 @@ output_file_error (struct cb_file *pfile)
 static void
 output_goto_1 (cb_tree x)
 {
-	struct cb_label		*lb;
-	struct cb_para_label	*p;
+	struct cb_label		*lb = CB_LABEL (x);
 
-	lb = CB_LABEL (cb_ref (x));
 	if (current_prog->flag_segments && last_segment != lb->segment) {
 		/* Zap independent labels */
+		struct cb_para_label	*p;
 		if (lb->flag_section) {
 			p = lb->para_label;
 		} else if (lb->section) {
@@ -6969,8 +6968,8 @@ output_goto_1 (cb_tree x)
 	}
 
 	/* Check for debugging on procedure */
-	if (current_prog->flag_gen_debug && lb->flag_real_label &&
-	    (current_prog->all_procedure || lb->flag_debugging_mode)) {
+	if (current_prog->flag_gen_debug && lb->flag_real_label
+	  && (current_prog->all_procedure || lb->flag_debugging_mode)) {
 		output_stmt (cb_build_debug (cb_debug_name,
 					     (const char *)lb->name, NULL));
 		output_move (cb_space, cb_debug_contents);
@@ -6978,6 +6977,24 @@ output_goto_1 (cb_tree x)
 
 	output_line ("goto %s%d;", CB_PREFIX_LABEL, lb->id);
 }
+
+/* extension in test, may be removed again */
+static void
+output_goto_entry (cb_tree target)
+{
+	cb_tree l;
+	struct cb_reference	*r = CB_REFERENCE (target);
+	const char *name = r->word->name;
+	for (l = current_program->entry_list_goto; l; l = CB_CHAIN (l)) {
+		struct cb_label *label = CB_LABEL (CB_VALUE (l));
+		if (strcmp (name, label->name) == 0) {
+			output_line ("goto %s%d;", CB_PREFIX_LABEL, label->id);
+			return;
+		}
+	}
+	cb_error_x (target, _("No ENTRY FOR GO TO '%s'"), name);
+}
+
 
 static void
 output_goto (struct cb_goto *p)
@@ -7006,10 +7023,16 @@ output_goto (struct cb_goto *p)
 		output (")\n");
 		output_indent ("{");
 		for (l = p->target; l; l = CB_CHAIN (l)) {
+			cb_tree target = CB_VALUE (l);
+			cb_tree ref = cb_try_ref (target);
 			output_indent_level -= 2;
 			output_line ("case %d:", i++);
 			output_indent_level += 2;
-			output_goto_1 (CB_VALUE (l));
+			if (ref != cb_error_node) {
+				output_goto_1 (ref);
+			} else {
+				output_goto_entry (target);
+			}
 		}
 		output_indent ("}");
 	} else if (p->target == NULL
@@ -7027,7 +7050,13 @@ output_goto (struct cb_goto *p)
 			output_line ("  goto exit_program;");
 		}
 	} else {
-		output_goto_1 (p->target);
+		cb_tree target = p->target;
+		cb_tree ref = cb_try_ref (target);
+		if (ref != cb_error_node) {
+			output_goto_1 (ref);
+		} else {
+			output_goto_entry (target);
+		}
 	}
 }
 

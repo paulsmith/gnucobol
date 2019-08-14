@@ -41,11 +41,13 @@
 
 
 /* String (label) flags */
+
 CB_CONFIG_STRING (cb_config_name, "name", NULL) /* Configuration Name, any value */
 
 CB_CONFIG_STRING (cb_reserved_words, "reserved-words", _("use of complete/fixed reserved words")) /* Reserved word list, filename */
 
 /* Integer flags */
+
 CB_CONFIG_INT (cb_tab_width, "tab-width", 1, 12, CB_XRANGE(1,12),
 	_("set number of spaces that are assumed for tabs"))
 
@@ -66,21 +68,23 @@ CB_CONFIG_INT (cb_numlit_length, "numeric-literal-length", 1, COB_MAX_DIGITS, CB
 
 
 /* Flags with required parameter and special values */
-CB_CONFIG_ANY (unsigned int, cb_assign_clause, "assign-clause",
-	_("set way of interpreting ASSIGN"))
-
-CB_CONFIG_ANY (unsigned int, cb_binary_size, "binary-size",
-	_("binary byte size - defines the allocated bytes according to PIC, may be one of: 2-4-8, 1-2-4-8, 1--8"))
-
-CB_CONFIG_ANY (unsigned int, cb_binary_byteorder, "binary-byteorder",
-	_("binary byte order, may be one of: native, big-endian"))
 
 CB_CONFIG_ANY (enum cb_std_def, cb_std_define, "standard-define", NULL) /* Used Standard (set via -std) */
+
+CB_CONFIG_ANY (enum cb_binary_size_options, cb_binary_size, "binary-size",
+	_("binary byte size - defines the allocated bytes according to PIC, may be one of: 2-4-8, 1-2-4-8, 1--8"))
+
+CB_CONFIG_ANY (enum cb_binary_byteorder_options, cb_binary_byteorder, "binary-byteorder",
+	_("binary byte order, may be one of: native, big-endian"))
+
+CB_CONFIG_ANY (enum cb_assign_clause_options, cb_assign_clause, "assign-clause",
+	_("set way of interpreting ASSIGN"))
 
 CB_CONFIG_ANY (enum cb_screen_clauses_rules, cb_screen_section_clauses, "screen-section-rules",
 	_("which compiler's rules to apply to SCREEN SECTION item clauses"))
 
 /* Normal boolean flags */
+
 CB_CONFIG_BOOLEAN (cb_filename_mapping, "filename-mapping",
 	_("resolve file names at run time using environment variables."))
 
@@ -154,6 +158,7 @@ CB_CONFIG_BOOLEAN (cb_move_nonnumlit_to_numeric_is_zero, "move-non-numeric-lit-t
 	_("imply zero in move of non-numeric literal to numeric items"))
 
 /* Support flags */
+
 CB_CONFIG_SUPPORT (cb_comment_paragraphs, "comment-paragraphs",
 	_("comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE-WRITTEN, ...)"))
 
@@ -253,6 +258,9 @@ CB_CONFIG_SUPPORT (cb_national_hex_literals, "hexadecimal-national-literals",
 CB_CONFIG_SUPPORT (cb_nationalc_literals, "national-character-literals",
 	_("non-standard national literals (NC'UTF-16 string')"))
 
+CB_CONFIG_SUPPORT (cb_hp_octal_literals, "hp-octal-literals",
+	_("HP COBOL octal literals (%377)"))
+
 CB_CONFIG_SUPPORT (cb_acu_literals, "acu-literals",
 	_("ACUCOBOL-GT literals (#B #O #H #X)"))
 
@@ -327,6 +335,9 @@ CB_CONFIG_SUPPORT (cb_xml_generate_extra_phrases, "xml-generate-extra-phrases",
 
 CB_CONFIG_SUPPORT (cb_continue_after, "continue-after",
 	_("AFTER phrase in CONTINUE statement"))
+
+CB_CONFIG_SUPPORT (cb_goto_entry, "goto-entry",
+	_("ENTRY FOR GOTO and GOTO ENTRY statements"))
 
 CB_CONFIG_SUPPORT (cb_depending_on_not_fixed, "depending-on-not-fixed", _("depending-on-not-fixed"))
 

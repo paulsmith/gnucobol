@@ -120,17 +120,6 @@ AH_TEMPLATE([HAVE_MP_GET_MEMORY_FUNCTIONS], [Do we have mp_get_memory_functions 
 AH_TEMPLATE([HAVE_FINITE_IEEEFP_H],
 	[Declaration of finite function in ieeefp.h instead of math.h])
 
-save_libs="$LIBS"
-
-enable_cflags_setting=no
-AC_MSG_CHECKING([whether CFLAGS can be modified])
-# Enable setting if the user has not specified the optimisation in CFLAGS.
-echo "$CFLAGS" | grep "\-O.*\( \|$\)" 1>/dev/null 2>/dev/null
-if test $? != 0; then
-	enable_cflags_setting=yes
-fi
-AC_MSG_RESULT([$enable_cflags_setting])
-
 # Configure options part I (not needing any compilation)
 
 AC_ARG_ENABLE([debug],
@@ -219,6 +208,34 @@ AC_DEFINE_UNQUOTED([MAX_CALL_FIELD_PARAMS], [$with_max_call_params])
 
 
 # Basic capability tests
+
+configured_make=""
+if test -z "$MAKE"; then
+  AC_CHECK_PROGS([configured_make], [make gmake gnumake])
+  if test -z "$configured_make"; then
+	AC_MSG_ERROR([make not found])
+  else
+   MAKE=$configured_make
+	AC_SUBST(MAKE)
+  fi
+else
+  AC_CHECK_PROG([configured_make], [$MAKE], [$MAKE])
+  if test -z "$configured_make"; then
+	AC_MSG_ERROR([make, configured as "$MAKE", was not found])
+  fi
+fi
+
+
+save_libs="$LIBS"
+
+enable_cflags_setting=no
+AC_MSG_CHECKING([whether CFLAGS can be modified])
+# Enable setting if the user has not specified the optimisation in CFLAGS.
+echo "$CFLAGS" | grep "\-O.*\( \|$\)" 1>/dev/null 2>/dev/null
+if test $? != 0; then
+	enable_cflags_setting=yes
+fi
+AC_MSG_RESULT([$enable_cflags_setting])
 
 # Default CFLAGS (removed -g set in AC_INIT for compatibility)
 : ${CFLAGS="-O2"}

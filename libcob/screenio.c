@@ -1362,7 +1362,7 @@ mouse_to_exception_code (mmask_t mask) {
 #endif
 
 static void
-cob_screen_get_all (const int initial_curs, const int get_timeout)
+cob_screen_get_all (const int initial_curs, const int accept_timeout)
 {
 	size_t			curr_index = (size_t)initial_curs;
 	struct cob_inp_struct	*sptr;
@@ -1427,7 +1427,7 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 
 		refresh ();
 		errno = 0;
-		timeout (get_timeout);
+		timeout (accept_timeout);
 		keyp = getch ();
 
 		/* FIXME: modularize (cob_screen_get_all, field_accept) and
@@ -2115,6 +2115,18 @@ screen_display (cob_screen *s, const int line, const int column)
 	refresh ();
 }
 
+static int
+get_accept_timeout (cob_field *ftimeout)
+{
+	if (ftimeout) {
+		/* FIXME: the scale should come primarily from the module,
+		   TODO:  add scale field to module_ptr */
+		return cob_get_int (ftimeout) * COB_TIMEOUT_SCALE;
+	} else {
+		return -1;
+	}
+}
+
 static void
 screen_accept (cob_screen *s, const int line, const int column,
 	       cob_field *ftimeout)
@@ -2129,7 +2141,7 @@ screen_accept (cob_screen *s, const int line, const int column,
 	size_t			firsty;
 	int			starty;
 	int			initial_curs;
-	int			get_timeout;
+	int			accept_timeout;
 
 	init_cob_screen_if_needed ();
 	if (!cob_base_inp) {
@@ -2160,14 +2172,7 @@ screen_accept (cob_screen *s, const int line, const int column,
 		return;
 	}
 
-	if (ftimeout) {
-		get_timeout = cob_get_int (ftimeout) * COB_TIMEOUT_SCALE;
-		if (get_timeout >= 0 && get_timeout < 500) {
-			get_timeout = 500;
-		}
-	} else {
-		get_timeout = -1;
-	}
+	accept_timeout = get_accept_timeout (ftimeout);
 
 	/* Sort input fields on line, column */
 	qsort (cob_base_inp, totl_index,
@@ -2209,7 +2214,7 @@ screen_accept (cob_screen *s, const int line, const int column,
 	if (initial_curs < 0) {
 		initial_curs = 0;
 	}
-	cob_screen_get_all (initial_curs, get_timeout);
+	cob_screen_get_all (initial_curs, accept_timeout);
 	pass_cursor_to_program ();
 	handle_status (global_return);
 }
@@ -2449,15 +2454,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	}
 	count = 0;
 
-	if (ftimeout) {
-		int get_timeout = cob_get_int (ftimeout) * COB_TIMEOUT_SCALE;
-		if (get_timeout >= 0 && get_timeout < 500) {
-			get_timeout = 500;
-		}
-		timeout (get_timeout);
-	} else {
-		timeout (-1);
-	}
+	timeout (get_accept_timeout (ftimeout));
 
 	/* Get characters from keyboard, processing each one. */
 	for (; ;) {

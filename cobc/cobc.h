@@ -78,20 +78,6 @@ enum cb_format {
 #define CB_XSTRINGIFY(s)		CB_STRINGIFY(s)
 #define CB_XRANGE(min,max)		CB_XSTRINGIFY(min) ".." CB_XSTRINGIFY(max)
 
-/* ASSIGN clause interpretation */
-#define CB_ASSIGN_MF			0	/* Micro Focus compatibility */
-#define CB_ASSIGN_IBM			1U	/* IBM compatibility */
-#define CB_ASSIGN_COBOL2002		2U	/* COBOL 2002 standard */
-
-/* COMP/BINARY byte order */
-#define CB_BYTEORDER_BIG_ENDIAN		0
-#define CB_BYTEORDER_NATIVE		1U
-
-/* Binary field sizes */
-#define CB_BINARY_SIZE_1_2_4_8		0	/* 1,2,4,8 bytes */
-#define CB_BINARY_SIZE_1__8		1U	/* 1,2,3,4,5,6,7,8 bytes */
-#define CB_BINARY_SIZE_2_4_8		2U	/* 2,4,8 bytes */
-
 /* Flex directive actions */
 #define PLEX_ACT_IF			0
 #define PLEX_ACT_ELSE			1U
@@ -180,6 +166,26 @@ enum cb_std_def {
 	CB_STD_2014,
 	/* the following must be the last and is invalid */
 	CB_STD_MAX
+};
+
+/* Binary field sizes */
+enum cb_binary_size_options {
+	CB_BINARY_SIZE_1_2_4_8 = 0,	/* 1,2,4,8 bytes */
+	CB_BINARY_SIZE_1__8,		/* 1,2,3,4,5,6,7,8 bytes */
+	CB_BINARY_SIZE_2_4_8	/* 2,4,8 bytes */
+};
+
+/* COMP/BINARY byte order */
+enum cb_binary_byteorder_options {
+	CB_BYTEORDER_BIG_ENDIAN = 0,
+	CB_BYTEORDER_NATIVE
+};
+
+/* ASSIGN clause interpretation */
+enum cb_assign_clause_options {
+	CB_ASSIGN_MF = 0,	/* Micro Focus compatibility */
+	CB_ASSIGN_IBM,			/* IBM compatibility */
+	CB_ASSIGN_COBOL2002		/* COBOL 2002 standard */
 };
 
 /* Clauses an elementary screen item is required to have */

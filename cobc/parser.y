@@ -457,8 +457,8 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	}
 
 	for (l = current_program->entry_list; l; l = CB_CHAIN (l)) {
-		if (strcmp ((const char *)name,
-			    (const char *)(CB_LABEL(CB_PURPOSE(l))->name)) == 0) {
+		struct cb_label *check = CB_LABEL (CB_PURPOSE (l));
+		if (strcmp (name, check->name) == 0) {
 			cb_error_x (CB_TREE (current_statement),
 				    _("ENTRY '%s' duplicated"), name);
 		}
@@ -473,6 +473,38 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	current_program->entry_list =
 		cb_list_append (current_program->entry_list,
 				CB_BUILD_PAIR (label, CB_BUILD_PAIR(entry_conv, using_list)));
+}
+
+static void
+emit_entry_goto (const char *name)
+{
+	cb_tree		l;
+	cb_tree		label;
+	char		buff[COB_MINI_BUFF];
+
+	snprintf (buff, (size_t)COB_MINI_MAX, "E$%s", name);
+	label = cb_build_label (cb_build_reference (buff), NULL);
+	CB_LABEL (label)->name = name;
+	CB_LABEL (label)->orig_name = current_program->orig_program_id;
+	CB_LABEL (label)->flag_begin = 1;
+	CB_LABEL (label)->flag_entry = 1;
+	label->source_line = backup_source_line;
+	emit_statement (label);
+
+	for (l = current_program->entry_list_goto; l; l = CB_CHAIN (l)) {
+		struct cb_label *real_label = CB_LABEL (CB_VALUE (l));
+		if (strcmp (name, real_label->name) == 0) {
+			cb_error_x (CB_TREE (current_statement),
+				    _("ENTRY FOR GO TO '%s' duplicated"), name);
+		}
+	}
+
+	if (current_program->entry_list_goto) {
+		current_program->entry_list_goto =
+			cb_list_add (current_program->entry_list_goto, label);
+	} else {
+		current_program->entry_list_goto = CB_LIST_INIT (label);
+	}
 }
 
 static size_t
@@ -3790,6 +3822,9 @@ special_names_sentence:
 special_name_list:
   special_name
 | special_name_list special_name
+| /* FIXME: the error recovery is broken here, error token
+            should be moved to "special_name" instead */
+  special_name_list error
 ;
 
 special_name:
@@ -3806,6 +3841,7 @@ special_name:
 | crt_status_clause
 | screen_control
 | event_status
+| top_clause
 ;
 
 
@@ -4514,6 +4550,34 @@ event_status:
 	} else {
 		check_repeated ("EVENT STATUS", SYN_CLAUSE_6, &check_duplicate);
 		CB_PENDING ("EVENT STATUS");
+	}
+  }
+;
+
+/* TOP clause */
+
+top_clause:
+  TOP
+  {
+	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
+			       COBC_HD_CONFIGURATION_SECTION,
+			       COBC_HD_SPECIAL_NAMES, 0);
+	check_duplicate = 0;
+	if (current_program->nested_level) {
+		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
+		save_tree = NULL;
+	} else {
+		/* lookup system name
+		   note: result in NULL + raised error if not found */
+		save_tree = get_system_name ("TOP");
+	}
+  }
+  _is undefined_word
+  {
+	if (save_tree && CB_VALID_TREE ($4)) {
+		cb_define ($4, save_tree);
+		CB_CHAIN_PAIR (current_program->mnemonic_spec_list,
+				$4, save_tree);
 	}
   }
 ;
@@ -7082,7 +7146,9 @@ synchronized_clause:
   SYNCHRONIZED _left_or_right
   {
 	check_repeated ("SYNCHRONIZED", SYN_CLAUSE_9, &check_pic_duplicate);
-	current_field->flag_synchronized = 1;
+	if (cb_verify (cb_synchronized_clause, "SYNC")) {
+		current_field->flag_synchronized = 1;
+	}
   }
 ;
 
@@ -11889,6 +11955,13 @@ entry_statement:
 	backup_current_pos ();
   }
   entry_body
+| ENTRY FOR GO TO
+  {
+	check_unreached = 0;
+	begin_statement ("ENTRY FOR GO TO", 0);
+	backup_current_pos ();
+  }
+  entry_goto_body
 ;
 
 entry_body:
@@ -11911,6 +11984,15 @@ entry_body:
 		if (!cobc_check_valid_name ((char *)(CB_LITERAL ($2)->data), ENTRY_NAME)) {
 			emit_entry ((char *)(CB_LITERAL ($2)->data), 1, $4, call_conv);
 		}
+	}
+  }
+;
+
+entry_goto_body:
+  LITERAL
+  {
+	if (cb_verify (cb_goto_entry, "ENTRY FOR GO TO")) {
+		emit_entry_goto ((char *)(CB_LITERAL ($1)->data));
 	}
   }
 ;
@@ -12417,6 +12499,13 @@ go_body:
   _to procedure_name_list goto_depending
   {
 	cb_emit_goto ($2, $3);
+	start_debug = save_debug;
+  }
+| _to ENTRY entry_name_list goto_depending
+  {
+	if (cb_verify (cb_goto_entry, "ENTRY FOR GO TO")) {
+		cb_emit_goto_entry ($3, $4);
+	}
 	start_debug = save_debug;
   }
 ;
@@ -16339,9 +16428,25 @@ mnemonic_name:
   MNEMONIC_NAME			{ $$ = $1; }
 ;
 
+/* Entry name */
+
+entry_name_list:
+  entry_name		{ $$ = CB_LIST_INIT ($1); }
+| entry_name_list
+  entry_name		{ $$ = cb_list_add ($1, $2); }
+;
+
+entry_name:
+  LITERAL
+  {
+	$$ = cb_build_reference ((char *)(CB_LITERAL ($1)->data));
+  }
+;
+
 /* Procedure name */
 
 procedure_name_list:
+  %prec SHIFT_PREFER
   /* empty */			{ $$ = NULL; }
 | procedure_name_list
   procedure_name		{ $$ = cb_list_add ($1, $2); }

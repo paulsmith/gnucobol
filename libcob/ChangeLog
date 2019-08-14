@@ -1,4 +1,9 @@
 
+2019-07-14  Simon Sobisch <simonsobisch@gnu.org>
+
+	* system.def: added CBL_ALARM_SOUND and CBL_BELL_SOUND, both as alias
+	  to cob_sys_sound_bell
+
 2019-07-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.h: removed inclusion of stdio.h
@@ -26,6 +31,11 @@
 	  fix bug #579 - use CURSOR clause in SPECIAL-NAMES also for positioning
 	* screenio.c: finished approach to add mouse support via COB_MOUSE_FLAGS
 	* screenio.c, common.c, coblocal.h: added COB_MOUSE_INTERVAL
+
+2019-06-29  Simon Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c: extracted (get_accept_timeout) and removed the artificial
+	  minimal limit FR #196
 
 2019-06-24  Ron Norman <rjn@inglenet.com>
 

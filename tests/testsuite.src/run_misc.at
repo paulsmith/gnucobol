@@ -13617,6 +13617,96 @@ E: OK OTHER option taken
 AT_CLEANUP
 
 
+AT_SETUP([ENTRY FOR GO TO / GO TO ENTRY])
+AT_KEYWORDS([runmisc condition expression])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 JUMP-ENTRY    PIC 9  VALUE 6.
+          88 EXT-MODUS  VALUES 3, 4.
+       LINKAGE SECTION.
+       PROCEDURE DIVISION.
+           GO TO ENTRY 'STMT05'.
+       MAIN.
+           GO TO ENTRY 'STMT01'
+                       'STMT02'
+                       'STMT03'
+                       'STMT04'
+                       'STMT05'
+           DEPENDING ON JUMP-ENTRY
+           DISPLAY 'NOT JUMPED'
+           GOBACK.
+       ENTRY FOR GO TO 'STMT01'
+           DISPLAY 'STMT01'
+       ENTRY FOR GO TO 'STMT02'
+           PERFORM 3 TIMES
+       ENTRY FOR GO TO 'STMT03'
+              DISPLAY 'STMT03'
+       ENTRY FOR GO TO 'STMT04'  DISPLAY 'STMT04'
+              IF EXT-MODUS EXIT PERFORM END-IF
+           END-PERFORM
+       ENTRY FOR GO TO 'STMT05'
+           DISPLAY 'STMT05'
+           SUBTRACT 1 FROM JUMP-ENTRY
+           GO TO MAIN.
+
+])
+
+# TODO: move to syntax checks, together with all expected error messages
+AT_CHECK([$COMPILE -std=mf-strict prog.cob], [1], [],
+[prog.cob:10: error: ENTRY FOR GO TO does not conform to Micro Focus COBOL
+prog.cob: in paragraph 'MAIN':
+prog.cob:18: error: ENTRY FOR GO TO does not conform to Micro Focus COBOL
+prog.cob:20: error: ENTRY FOR GO TO does not conform to Micro Focus COBOL
+prog.cob:22: error: ENTRY FOR GO TO does not conform to Micro Focus COBOL
+prog.cob:24: error: ENTRY FOR GO TO does not conform to Micro Focus COBOL
+prog.cob:26: error: ENTRY FOR GO TO does not conform to Micro Focus COBOL
+prog.cob:29: error: ENTRY FOR GO TO does not conform to Micro Focus COBOL
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob:10: warning: ENTRY FOR GO TO used
+prog.cob: in paragraph 'MAIN':
+prog.cob:18: warning: ENTRY FOR GO TO used
+prog.cob:20: warning: ENTRY FOR GO TO used
+prog.cob:22: warning: ENTRY FOR GO TO used
+prog.cob:24: warning: ENTRY FOR GO TO used
+prog.cob:26: warning: ENTRY FOR GO TO used
+prog.cob:29: warning: ENTRY FOR GO TO used
+])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[STMT05
+STMT05
+STMT04
+STMT05
+STMT03
+STMT04
+STMT05
+STMT03
+STMT04
+STMT03
+STMT04
+STMT03
+STMT04
+STMT05
+STMT01
+STMT03
+STMT04
+STMT03
+STMT04
+STMT03
+STMT04
+STMT05
+NOT JUMPED
+], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([PERFORM VARYING Float])
 AT_KEYWORDS([Perform])
 
@@ -17213,6 +17303,7 @@ counter is +1024
 ], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([Test HEX String])
 AT_KEYWORDS([Numeric])

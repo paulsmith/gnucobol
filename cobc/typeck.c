@@ -767,7 +767,7 @@ cb_check_numeric_value (cb_tree x)
 				return cb_build_field_reference (sc, NULL);
 			}
 		}
-		/* Fall-through as we only allow this for RW: SUM*/
+		/* Fall-through as we only allow this for RW: SUM */
 	default:
 		cb_error_x (x, _("'%s' is not a numeric value"), cb_name (x));
 	}
@@ -1763,7 +1763,8 @@ cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 
 	case CB_TAG_REFERENCE:
 		name_ptr = orig_ptr = CB_NAME (name);
-		if (cb_assign_clause == CB_ASSIGN_MF) {
+		switch (cb_assign_clause) {
+		case CB_ASSIGN_MF:
 			if (cfile->flag_ext_assign) {
 				p = strrchr (name_ptr, '-');
 				if (p) {
@@ -1774,7 +1775,7 @@ cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 			current_program->reference_list =
 			    cb_list_add (current_program->reference_list, name);
 			return name;
-		} else if (cb_assign_clause == CB_ASSIGN_IBM) {
+		case CB_ASSIGN_IBM:
 			p = name_ptr;
 			/* Check organization */
 			if (strncmp (name_ptr, "S-", (size_t)2) == 0 ||
@@ -1791,13 +1792,16 @@ cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 			    strncmp (name_ptr, "AS-", (size_t)3) == 0) {
 org:
 				/* Skip it for now,
-				   CHECKME: this likely should have consequences... */
+				   CHECKME: the organization prefixes
+				   should likely have consequences... */
 				name_ptr = strchr (name_ptr, '-') + 1;
 			}
 			goto build_lit;
+		case CB_ASSIGN_COBOL2002:
+			/* CHECKME - To be looked at */
+			break;
 		}
-		/* Fall through for CB_ASSIGN_COBOL2002 */
-		/* CHECKME - To be looked at */
+		/* Fall through */
 	default:
 		return cb_error_node;
 	}
@@ -6740,6 +6744,22 @@ cb_emit_alter (cb_tree source, cb_tree target)
 
 /* CALL statement */
 
+static const char *
+get_constant_call_name (cb_tree prog)
+{
+	/* plain literal or constant (level 78 item, 01 CONSTANT, SYMBOLIC CONSTANT) */
+	if (CB_LITERAL_P (prog) && CB_TREE_CATEGORY (prog) != CB_CATEGORY_NUMERIC) {
+		return (const char *)CB_LITERAL (prog)->data;
+	/* reference (ideally on a prototype) */
+	} else if (CB_REFERENCE_P (prog)) {
+		cb_tree x = cb_ref (prog);
+		if (CB_PROTOTYPE_P (x)) {
+			return CB_PROTOTYPE (x)->ext_name;
+		}
+	}
+	return NULL;
+}
+
 void
 cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	      cb_tree on_exception, cb_tree not_on_exception,
@@ -6750,8 +6770,8 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	cb_tree				x;
 	struct cb_field			*f;
 	const struct system_table	*psyst;
-	const char			*p;
 	const char			*entry;
+	const char			*constant_call_name = get_constant_call_name (prog);
 	char				c;
 	cob_s64_t			val;
 	cob_s64_t			valmin;
@@ -6761,10 +6781,6 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	int				error_ind;
 	int				call_conv;
 	unsigned int		numargs;
-	const int			prog_is_literal_or_prototype
-		= CB_LITERAL_P (prog) || (CB_REFERENCE_P (prog)
-					  && CB_PROTOTYPE_P (cb_ref (prog)));
-
 
 	if (CB_INTRINSIC_P (prog)) {
 		if (CB_INTRINSIC (prog)->intr_tab->category != CB_CATEGORY_ALPHANUMERIC) {
@@ -6803,10 +6819,9 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 		cb_warning (warningopt, _("STDCALL used on 64-bit Windows platform"));
 	}
 #endif
-	if ((call_conv & CB_CONV_STATIC_LINK)
-	    && !prog_is_literal_or_prototype) {
+	if ((call_conv & CB_CONV_STATIC_LINK) && !constant_call_name) {
 		cb_error_x (CB_TREE (current_statement),
-			    _("STATIC CALL convention requires a literal program name"));
+			_("STATIC CALL convention requires a literal program name"));
 		error_ind = 1;
 	}
 
@@ -6956,13 +6971,8 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	}
 
 	is_sys_call = 0;
-	if (prog_is_literal_or_prototype) {
-		if (CB_LITERAL_P (prog)) {
-			p = (const char *)CB_LITERAL(prog)->data;
-		} else { /* prototype */
-			p = CB_PROTOTYPE (cb_ref (prog))->ext_name;
-		}
-
+	if (constant_call_name) {
+		const char			*p = constant_call_name;
 		entry = p;
 		for (; *p; ++p) {
 			if (*p == '/' || *p == '\\') {
@@ -8045,6 +8055,28 @@ cb_emit_goto (cb_tree target, cb_tree depending)
 				    _("GO TO with multiple procedure-names"));
 	} else {
 		/* GO TO procedure-name */
+		cb_emit (cb_build_goto (CB_VALUE (target), NULL));
+	}
+}
+
+void
+cb_emit_goto_entry (cb_tree target, cb_tree depending)
+{
+	if (target == cb_error_node) {
+		return;
+	}
+	if (depending) {
+		/* GO TO ENTRY entry-name ... DEPENDING ON identifier */
+		if (cb_check_numeric_value (depending) == cb_error_node) {
+			return;
+		}
+		cb_check_data_incompat (depending);
+		cb_emit (cb_build_goto (target, depending));
+	} else if (CB_CHAIN (target)) {
+			cb_error_x (CB_TREE (current_statement),
+				    _("GO TO ENTRY with multiple entry-names"));
+	} else {
+		/* GO TO ENTRY entry-name */
 		cb_emit (cb_build_goto (CB_VALUE (target), NULL));
 	}
 }
@@ -11763,7 +11795,7 @@ cb_build_write_advancing_mnemonic (cb_tree pos, cb_tree mnemonic)
 	}
 	token = CB_SYSTEM_NAME (rtree)->token;
 	switch (token) {
-	case CB_FEATURE_FORMFEED:	/* including S01-S05 and CSP*/
+	case CB_FEATURE_FORMFEED:	/* including S01-S05, CSP and TOP */
 		opt = (pos == CB_BEFORE) ? COB_WRITE_BEFORE : COB_WRITE_AFTER;
 		return cb_int_hex (opt | COB_WRITE_PAGE);
 	case CB_FEATURE_C01:

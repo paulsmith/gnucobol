@@ -72,17 +72,15 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 AT_CLEANUP
 
 
-## Numeric Boolean literal
-
-AT_SETUP([Numeric Boolean literal])
-AT_KEYWORDS([extensions literals])
+AT_SETUP([Numeric Boolean literals])
+AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01 X-1           PIC 9(2) VALUE B"010101".
+       01 X-1           PIC 9(2)  VALUE B"010101".
        01 X-2           PIC 9(20) VALUE B"111111111111111111111111111111
       -                                  "111111111111111111111111111111
       -                                  "1111".
@@ -103,10 +101,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 AT_CLEANUP
 
 
-# ACUCOBOL literal
-
-AT_SETUP([ACUCOBOL literal])
-AT_KEYWORDS([extensions literals])
+AT_SETUP([ACUCOBOL literals])
+AT_KEYWORDS([extensions acu binary octal hexadecimal])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -114,8 +110,8 @@ AT_DATA([prog.cob], [
        PROCEDURE        DIVISION.
            DISPLAY B#101 UPON STDOUT
            DISPLAY O#17777777777 UPON STDOUT
-           DISPLAY X#ffffffff UPON STDOUT
-           DISPLAY H#ffffffff UPON STDOUT
+           DISPLAY X#ffFFFFff UPON STDOUT
+           DISPLAY H#ffFFFFff UPON STDOUT
 
            STOP RUN.
 ])
@@ -126,6 +122,94 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 2147483647
 4294967295
 4294967295
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([HP COBOL octal literals])
+AT_KEYWORDS([extensions])
+
+# FIXME: the type of octal literals must be context-sensitive, see below
+# currently hard-wired as numeric (may be switched in scanner.l to alphanumeric)
+
+AT_XFAIL_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+      *>   Octal literal is "AB" in ASCII.
+       01  ITEM-ALPHA     PIC XX        VALUE %40502.
+      *>   Octal literal is 39.
+       01  ITEM-NUMERIC   PIC 99 BINARY VALUE %47.
+      *>   Octal literal is ASCII 12.
+       01  ITEM-NUM       PIC 99        VALUE %30462.
+       PROCEDURE        DIVISION.
+      *>   Octal literal is "XY".
+           DISPLAY %54131.
+           IF ITEM-ALPHA NOT = "AB"
+              DISPLAY "VALUE %40502 is not ""AB"" (ASCII) but "
+                      ITEM-ALPHA
+           END-IF
+           IF ITEM-NUMERIC NOT = 39
+              DISPLAY "VALUE %47 BINARY is not 39 but " ITEM-NUMERIC
+           END-IF
+           IF ITEM-NUM NOT = 12
+              DISPLAY "VALUE %30462 is not 12 (ASCII) but " ITEM-NUM
+           END-IF
+      *>   Adds octal 23 (decimal 19, as it is an arithmetic expression).
+           ADD %23 TO ITEM-NUM.
+           IF ITEM-NUM NOT = 31
+              DISPLAY "12 + %23 (19) is not 31 but " ITEM-NUM
+           END-IF
+      *>   Sets the data to octal 30462 (ASCII 12).
+           MOVE %30462 TO ITEM-NUM
+           IF ITEM-NUM NOT = 12
+              DISPLAY "%30462 is not 12 (ASCII) but " ITEM-NUM
+           END-IF
+      *>   Sets the data to x'4100' (octal 101 -> ASCII A + right-pad NULL)
+           MOVE %101 TO ITEM-ALPHA
+           IF ITEM-ALPHA NOT = x"4100"
+              DISPLAY "%101 is not x""4100"" = Anull (ASCII) but "
+                      ITEM-ALPHA
+           END-IF
+           
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -fhp-octal-literals=ok prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[XY
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Hexadecimal numeric literals]) # FIXME: needs a dialect configuration
+AT_KEYWORDS([extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-1           PIC 9(8) VALUE H"012345".
+       01 X-2           PIC 9(8) VALUE H"FFFFFF".
+       PROCEDURE        DIVISION.
+           DISPLAY X-1
+           END-DISPLAY.
+           DISPLAY X-2
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[00074565
+16777215
 ])
 
 AT_CLEANUP
@@ -196,34 +280,6 @@ COBOL: X is +166589200 and Y is 0000000024
 
 AT_CLEANUP
 
-
-## H literal
-
-AT_SETUP([Hexadecimal numeric literal]) # Shouldn't this be in run_fundamentals?
-AT_KEYWORDS([extensions literals])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-       01 X-1           PIC 9(8) VALUE H"012345".
-       01 X-2           PIC 9(8) VALUE H"FFFFFF".
-       PROCEDURE        DIVISION.
-           DISPLAY X-1
-           END-DISPLAY.
-           DISPLAY X-2
-           END-DISPLAY.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[00074565
-16777215
-])
-
-AT_CLEANUP
 
 ## Expression
 
@@ -1027,7 +1083,7 @@ AT_DATA([prog.cob], [
        CONFIGURATION SECTION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT FLATFILE 
+           SELECT FLATFILE
            ASSIGN "SEQODO"
            ORGANIZATION LINE SEQUENTIAL
            FILE STATUS IS CUST-STAT .
@@ -1036,7 +1092,7 @@ AT_DATA([prog.cob], [
        FILE SECTION.
        FD  FLATFILE
            BLOCK CONTAINS 5 RECORDS.
-      
+
        01  TSTREC.
          05  SEQ           PIC 99.
          05  DEP-X         PIC 99.
@@ -1044,22 +1100,22 @@ AT_DATA([prog.cob], [
          05  HELLO         PIC X(5) VALUE 'World'.
          05  TSTGRP.
            10  TSTGRP1.
-             15  TSTX OCCURS 1 TO 3 TIMES 
+             15  TSTX OCCURS 1 TO 3 TIMES
                       DEPENDING ON DEP-X.
                20  TSTG-1  PIC Z9.
              15  TSTTAIL1  PIC XXXX.
            10  TSTY-ALL.
-             15  TSTY OCCURS 1 TO 3 TIMES 
+             15  TSTY OCCURS 1 TO 3 TIMES
                       DEPENDING ON DEP-X.
                20  TSTY-1  PIC 99.
                20  TSTY-2  PIC XXX.
-               20  TSTY-3  PIC X 
+               20  TSTY-3  PIC X
                              OCCURS 1 TO 12 TIMES
                              DEPENDING ON DEP-Y.
                20  TSTY-4  PIC XX.
                20  TSTY-5    OCCURS 1 TO 3 TIMES
                              DEPENDING ON DEP-X.
-                  25  TSTY-6 OCCURS 1 TO 3 TIMES 
+                  25  TSTY-6 OCCURS 1 TO 3 TIMES
                              DEPENDING ON DEP-X.
                      30  TSTY-7  PIC X.
            10  TSTTAIL2    PIC XX.
@@ -1238,7 +1294,7 @@ AT_KEYWORDS([OCCURS ODO])
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-      
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  L1-1-2-S    PIC 99.
@@ -1247,7 +1303,7 @@ AT_DATA([prog.cob], [
        01  L1-3-S      PIC 99.
        01  L1-3-2-S    PIC 99.
        01  BUFFER      PIC X(370).
-      
+
        PROCEDURE DIVISION.
            MOVE ALL '0123456789' TO BUFFER.
            MOVE 3 TO L1-1-2-S.
@@ -1276,13 +1332,13 @@ AT_DATA([prog.cob], [
                                L1-3-2-S.
            STOP RUN.
            END PROGRAM prog.
-      
+
        IDENTIFICATION DIVISION.
        PROGRAM-ID. IBM-ODO-TEST.
-      
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-      
+
        LINKAGE SECTION.
        01  L1-1-2-S    PIC 99.
        01  L1-1-2-1-S  PIC 99.
@@ -1303,7 +1359,7 @@ AT_DATA([prog.cob], [
                30  L1-3-1-2 PIC X.
                30  L1-3-1-3 PIC X(5).
              25 L1-3-2 OCCURS 0 TO 1 TIMES DEPENDING ON L1-3-2-S PIC X.
-      
+
        PROCEDURE DIVISION USING BASE
                                 L1-1-2-S
                                 L1-1-2-1-S
@@ -1311,7 +1367,7 @@ AT_DATA([prog.cob], [
                                 L1-3-S
                                 L1-3-2-S.
            DISPLAY "Length is " LENGTH OF BASE
-                   " with " L1-1-2-S 
+                   " with " L1-1-2-S
                    ", " L1-1-2-1-S
                    ", " L1-2-S
                    ", " L1-3-S
@@ -1514,6 +1570,7 @@ Slided ODO : '2126123456End'
 ], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([DEPENDING ON with ODOSLIDE])
 AT_KEYWORDS([Subroutine])
@@ -4701,12 +4758,12 @@ AT_DATA([prog.cob], [
               WHEN '"1"'   ALSO SPACES
               WHEN "a v"   ALSO SPACES
               WHEN '"a v"' ALSO SPACES
-                 DISPLAY "  called with -" 
+                 DISPLAY "  called with -"
                          function trim (chaining-param) "-"
               WHEN "a"    ALSO "v"
-                 DISPLAY "  called with -" 
+                 DISPLAY "  called with -"
                          FUNCTION TRIM (chaining-param) "-"
-                         " and with -" 
+                         " and with -"
                          FUNCTION TRIM (chaining-param-2) "-"
               WHEN "start" ALSO SPACES
                  MOVE 'prog 1'         TO chaining-param
@@ -4729,7 +4786,7 @@ AT_DATA([prog.cob], [
                  PERFORM callme
                  DISPLAY "tests finished"
               WHEN OTHER
-                 DISPLAY "called with unexpected -" 
+                 DISPLAY "called with unexpected -"
                          FUNCTION TRIM (chaining-param) "-"
            END-EVALUATE
            STOP RUN.
@@ -4828,7 +4885,7 @@ AT_DATA([prog.cob], [
            EXIT PROGRAM
            .
        END PROGRAM DemoErrProc.
-   
+
        IDENTIFICATION DIVISION.
        PROGRAM-ID. ErrProc.
        PROCEDURE DIVISION.
@@ -5126,7 +5183,7 @@ AT_KEYWORDS([extensions])
 AT_DATA([prog.cob], [
        IDENTIFICATION  DIVISION.
        PROGRAM-ID.     prog.
-       
+
        DATA            DIVISION.
        WORKING-STORAGE SECTION.
        01  comp1       COMP-1.
@@ -5162,7 +5219,7 @@ AT_DATA([prog.cob], [
        >>END-IF
        IDENTIFICATION  DIVISION.
        PROGRAM-ID.     prog.
-       
+
        DATA            DIVISION.
        WORKING-STORAGE SECTION.
        01  comp1       COMP-1.
