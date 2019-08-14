@@ -7146,7 +7146,9 @@ synchronized_clause:
   SYNCHRONIZED _left_or_right
   {
 	check_repeated ("SYNCHRONIZED", SYN_CLAUSE_9, &check_pic_duplicate);
-	current_field->flag_synchronized = 1;
+	if (cb_verify (cb_synchronized_clause, "SYNC")) {
+		current_field->flag_synchronized = 1;
+	}
   }
 ;
 

@@ -1,4 +1,9 @@
 
+2019-08-14  Simon Sobisch <simonsobisch@gnu.org>
+
+	* field.c, parser.y: verification of cb_synchronized_clause moved, only
+	  set f->flag_synchronized if actually active
+
 2019-08-12  Simon Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l (scan_floating_numeric): fixed stack_overflow_buffer
