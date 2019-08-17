@@ -2647,21 +2647,6 @@ output_source_cache (void)
 	output_storage ("};\n");
 }
 
-static char *
-user_func_upper (const char *func)
-{
-	unsigned char	*s;
-	char		*rets;
-
-	rets = cb_encode_program_id (func);
-	for (s = (unsigned char *)rets; *s; s++) {
-		if (islower ((int)*s)) {
-			*s = (cob_u8_t)toupper ((int)*s);
-		}
-	}
-	return rets;
-}
-
 /* Literal */
 
 int
@@ -3736,7 +3721,8 @@ output_param (cb_tree x, int id)
 				COBC_ABORT ();
 			}
 			/* LCOV_EXCL_STOP */
-			func = user_func_upper (CB_PROTOTYPE (l)->ext_name);
+			/* always convert function names to upper case */
+			func = cb_encode_program_id (CB_PROTOTYPE (l)->ext_name, 0, COB_FOLD_UPPER);
 			lookup_func_call (func);
 			output ("func_%s.funcfld (&cob_dyn_%u", func, gen_dynamic);
 			gen_dynamic++;
@@ -6161,7 +6147,7 @@ output_call (struct cb_call *p)
 			output ("%s", (char *)psyst->syst_call);
 		} else {
 			s = get_program_id_str (p->name);
-			name_str = cb_encode_program_id (s);
+			name_str = cb_encode_program_id (s, 1, cb_fold_call);
 
 			/* Check contained programs */
 			nlp = find_nested_prog_with_id (name_str);
@@ -6185,7 +6171,7 @@ output_call (struct cb_call *p)
 		/* Dynamic link */
 		if (name_is_literal_or_prototype) {
 			s = get_program_id_str (p->name);
-			name_str = cb_encode_program_id (s);
+			name_str = cb_encode_program_id (s, 1, cb_fold_call);
 			lookup_call (name_str);
 			callname = s;
 
@@ -6446,7 +6432,7 @@ output_cancel (struct cb_cancel *p)
 
 	if (is_literal_or_prototype_ref (p->target)) {
 		s = get_program_id_str (p->target);
-		name_str = cb_encode_program_id (s);
+		name_str = cb_encode_program_id (s, 0, cb_fold_call);
 		nlp = find_nested_prog_with_id (name_str);
 		output_prefix ();
 		if (nlp) {

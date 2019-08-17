@@ -1,4 +1,13 @@
 
+2019-08-15  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobcinfo.sh (_create_file): cut down creation-time of tex-includes
+	  by 98% by using read to split into separate parts
+	* cobcinfo.sh: optionally use sed binary specified by $SED
+	* Makefile.am: pass $SED to cobcinfo.sh
+	* cobcinfo.sh: added TAIL_START/TAIL_LAST to allow overriding tail
+	  invocation for non-posix systems
+
 2019-06-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: adjusted dependencies for latest changes

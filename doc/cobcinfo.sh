@@ -22,6 +22,11 @@
 # use GREP from configure, passed when called from Makefile
 GREP_ORIG="$GREP";
 if test "x$GREP" = "x"; then GREP=grep; fi
+if test "x$SED" = "x"; then SED=sed; fi
+
+# default to POSIX, Solaris for example uses "tail +"
+if test "x$TAIL_START" = "x"; then TAIL_START="tail -n +"; fi
+#if test "x$TAIL_LAST" = "x"; then TAIL_LAST="tail -n "; fi
 
 if test "$1" != "fixtimestamps"; then
 
@@ -75,24 +80,23 @@ _create_file () {
   case "$1" in
 	"cbhelp.tex")
 		rm -rf $1
-		$COBC -q --help | grep -E "ptions.*:" | cut -d: -f1 | \
+		$COBC -q --help | $GREP -E "ptions.*:" | cut -d: -f1 | \
 		while read section; do
 			header_found=""
 			$COBC -q --help                | \
 				$GREP    -A2000 "$section" | \
 				$GREP -E -B2000 "^$" -m 1  | \
-				sed -e 's/^\t/D\t/g'            \
+				$SED -e 's/^\t/D~/g'            \
+				    -e 's/\t/~/g'              \
 				    -e 's/* NOT \(.\+\)/; @emph{not \1}/g' \
 				    -e 's/* ALWAYS \(.\+\)/; @emph{always \1}/g' \
 				    -e 's/* /; /g' \
-				    -e 's/^    \+/D\t/g'         \
+				    -e 's/^    \+/D~/g'         \
 				    -e 's/^ \+//g'                \
-				    -e 's/  \+/\t/g'               \
+				    -e 's/  \+/~/g'               \
 				    -e 's/<\([^>]\+\)>/@var{\1}/g'| \
-			while read line; do
-				if test -z "$line"; then continue; fi
-				name=`echo "$line" | cut -f1`
-				desc=`echo "$line" | cut -f2`
+			while IFS='~' read -r name desc; do
+				if test -z "$name"; then continue; fi
 				if test -z "$header_found"; then
 					header_found=1
 					echo "@section $section"   >>$1
@@ -102,8 +106,10 @@ _create_file () {
 						echo "@item @code{$name}"  >>$1
 					fi
 					echo "$desc"      | \
-					sed -e 's/ \(-W[a-z]*\)/ @option{\1}/g'       \
-					    -e 's/ \([A-Z][A-Z -]*[A-Z]\)/ @code{\1}/g'   >>$1
+					$SED -e 's/ \(-[Wfv][a-z-]*\)/ @option{\1}/g'       \
+					     -e 's/\([ (]\)\([A-Z][A-Z -]*[A-Z]\)/\1@code{\2}/g' \
+					     -e 's/^\([A-Z][A-Z -]*[A-Z]\)/@code{\1}/g' \
+					     -e 's/@code{\(IBM\|ANSI\|ISO\|NIST\)}/\1/g'   >>$1
 				fi
 			done
 			echo "@end table"          >>$1
@@ -115,14 +121,12 @@ _create_file () {
 		$COBCRUN -q --help                | \
 			$GREP -E -A2000 -E "ptions.*:" | \
 			$GREP -E -B2000 "^$" -m 1       | \
-			sed -e 's/^    \+/D\t/g'         \
+			$SED -e 's/^    \+/D~/g'         \
 			    -e 's/^ \+//g'                \
-			    -e 's/  \+/\t/g'               \
+			    -e 's/  \+/~/g'               \
 			    -e 's/<\([^>]\+\)>/@var{\1}/g'| \
-		while read line; do
-			if test -z "$line"; then continue; fi
-			name=`echo "$line" | cut -f1`
-			desc=`echo "$line" | cut -f2`
+		while IFS='~' read -r name desc; do
+			if test -z "$name"; then continue; fi
 			if test -z "$header_found"; then
 				header_found=1
 				echo "@table @code"        >>$1
@@ -131,7 +135,7 @@ _create_file () {
 					echo "@item @code{$name}"  >>$1
 				fi
 				echo "$desc"          | \
-				sed -e 's/ -M/ @option{-M}/g' \
+				$SED -e 's/ -M/ @option{-M}/g' \
 				    -e 's/\(COB[A-Z_]\+\)/@env{\1}/g' >>$1
 			fi
 		done
@@ -143,14 +147,12 @@ _create_file () {
 		echo "@headitem Reserved word @tab Implemented @tab Aliases" >>$1
 		$COBC -q --list-reserved | \
 			$GREP -E -B9999 "^$" -m 2 | \
-			sed -e 's/  \+/\t/g' \
-			    -e 's/(Context sensitive/ (C\/S/g' \
-			    -e 's/(aliased with \([^)]*\))/\t@code{\1}/g' | \
-		while read line; do
-			if test -z "$line"; then continue; fi
-			name=`echo "$line"   | cut -f1`
-			impl=`echo "$line" | cut -f2 | sed -e 's/ /\t/g'`
-			aliases=`echo "$line" | cut -f3`
+			$SED -e 's/  \+/;/g' \
+			    -e 's/ (Context sensitive/\t(C\/S/g' \
+			    -e 's/(aliased with \([^)]*\))/;@code{\1}/g' \
+			    -e 's/ ;/;/g' | \
+		while IFS=';' read -r name impl aliases; do
+			if test -z "$name"; then continue; fi
 			if test -z "$header_found"; then
 				header_found=1
 			else
@@ -183,12 +185,9 @@ _create_file () {
 		echo "@headitem Register @tab Implemented @tab Definition" >>$1
 		$COBC -q --list-reserved     | \
 			$GREP -A100 "registers"  | \
-			sed -e 's/  \+/\t/g'     | \
-		while read line; do
-			if test -z "$line"; then continue; fi
-			name=`echo "$line"   | cut -f1`
-			impl=`echo "$line" | cut -f2`
-			definition=`echo "$line" | cut -f3`
+			$SED -e 's/  \+/~/g'     | \
+		while IFS='~' read -r name impl definition; do
+			if test -z "$name"; then continue; fi
 			if test -z "$header_found"; then
 				header_found=1
 			else
@@ -200,12 +199,9 @@ _create_file () {
 	"cbintr.tex")
 		echo "@multitable @columnfractions .40 .20 .40"  >$1
 		$COBC -q --list-intrinsics | \
-			sed -e 's/  \+/\t/g'   | \
-		while read line; do
-			if test -z "$line"; then continue; fi
-			name=`echo "$line"   | cut -f1`
-			impl=`echo "$line"   | cut -f2`
-			params=`echo "$line" | cut -f3`
+			$SED -e 's/  \+/\t/g'   | \
+		while IFS='~' read -r name impl params; do
+			if test -z "$name"; then continue; fi
 			if test -z "$header_found"; then
 				header_found=1
 				echo "@headitem $name @tab $impl @tab $params"  >>$1
@@ -218,11 +214,9 @@ _create_file () {
 	"cbsyst.tex")
 		echo "@multitable @columnfractions .40 .20"  >$1
 		$COBC -q --list-system     | \
-			sed -e 's/  \+/\t/g'   | \
-		while read line; do
-			if test -z "$line"; then continue; fi
-			name=`echo "$line"   | cut -f1`
-			params=`echo "$line" | cut -f2`
+			$SED -e 's/  \+/~/g'   | \
+		while IFS='~' read -r name params; do
+			if test -z "$name"; then continue; fi
 			if test -z "$header_found"; then
 				header_found=1
 				echo "@headitem $name @tab $params"  >>$1
@@ -250,36 +244,39 @@ _create_file () {
 		done
 		;;
 	"cbconf.tex")
+		lines=2
 		$GREP -A9999 "https://www.gnu.org/licenses/" \
 		  "$confdir/default.conf" \
-		| sed -e 's/\r//g'  \
-		| tail -n +2                   >$1
+		| $SED -e 's/\r//g'  \
+		       -e 's/# \?TO-\?DO.*//g'  \
+		| $TAIL_START$lines >$1
 		;;
 	"cbrunt.tex")
 		# First section, as it is formatted different
 		$GREP -A400 -m1 "##" "$confdir/runtime.cfg" | \
 			$GREP -B400 -m2 "##" | \
 			cut -b2- | \
-			sed -e 's/\r//g'  \
-			    -e 's/^#$//g'  \
-			    -e 's/^#\( .*\)/@section\1\n/g' \
-			    -e 's/^ //g' \
-			    -e 's/{/@{/g' \
-			    -e 's/}/@}/g' \
-			    -e 's/\(Example:\)  \(.*\)$/\n\1 @code{\2}/g' \
-			    -e 's/  \([^ ][^(]*\)  \([,.]\)/ @code{\1}\2/g' \
-			    -e 's/  \([^ ][^(]*\)  / @code{\1} /g' \
-			    -e 's/  \([^ ][^(]*\)$/ @code{\1}/g' \
-			    -e 's/^$/@\*/g'          > $1
+			$SED -e 's/\r//g'  \
+			     -e 's/^#$//g'  \
+			     -e 's/^#\( .*\)/@section\1\n/g' \
+			     -e 's/^ //g' \
+			     -e 's/{/@{/g' \
+			     -e 's/}/@}/g' \
+			     -e 's/\(Example:\)  \(.*\)$/\n\1 @code{\2}/g' \
+			     -e 's/  \([^ ][^(]*\)  \([,.]\)/ @code{\1}\2/g' \
+			     -e 's/  \([^ ][^(]*\)  / @code{\1} /g' \
+			     -e 's/  \([^ ][^(]*\)$/ @code{\1}/g' \
+			     -e 's/^$/@\*/g'          > $1
 		lines=`cat $1 | wc -l`
 		lines=`expr 20 + $lines`
 		# All other sections
 		echo "@verbatim"               >>$1
-		tail -n +$lines "$confdir/runtime.cfg" | \
+		$TAIL_START$lines "$confdir/runtime.cfg" | \
 			cut -b2- | \
-			sed -e 's/\r//g' \
-			    -e 's/^#\( .*\)/@end verbatim\n@section\1\n@verbatim/g' \
-			    -e 's/^ //g'           >>$1
+			$SED -e 's/\r//g' \
+			     -e 's/# \?TO-\?DO.*$//g'  \
+			     -e 's/^#\( .*\)/@end verbatim\n@section\1\n@verbatim/g' \
+			     -e 's/^ //g'           >>$1
 		echo "@end verbatim"           >>$1
 		;;
   esac

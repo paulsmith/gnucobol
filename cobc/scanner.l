@@ -1209,7 +1209,7 @@ read_literal (const char mark, const char *type)
 		if (unlikely (c == 0)) break;	/* fixes unexpected error case */
 #endif
 		if (!literal_error) {
-			if (unlikely (i == plex_size)) {
+			if (unlikely (i + 1 == plex_size)) {
 				plex_size *= 2;
 				if (unlikely (plex_size > (cb_lit_length + 1))) {
 					plex_size = (size_t)cb_lit_length + 1;

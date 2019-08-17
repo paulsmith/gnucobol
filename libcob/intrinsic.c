@@ -124,7 +124,7 @@ static const int leap_month_days[] =
 #define COB_TIMESTR_LEN		26 /* including max decimal places */
 #define	COB_TIMESTR_MAX		(COB_TIMESTR_LEN - 1)
 
-#define COB_DATETIMESTR_LEN		36
+#define COB_DATETIMESTR_LEN		37
 #define	COB_DATETIMESTR_MAX		(COB_DATETIMESTR_LEN - 1)
 
 /* Locale name to Locale ID table */
@@ -3475,7 +3475,7 @@ cob_valid_datetime_format (const char *format, const char decimal_point)
 	split_around_t (format, date_format_str, time_format_str);
 
 	if (!cob_valid_date_format (date_format_str)
-	    || !cob_valid_time_format (time_format_str, decimal_point)) {
+	 || !cob_valid_time_format (time_format_str, decimal_point)) {
 		return 0;
 	}
 

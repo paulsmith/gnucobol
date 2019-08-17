@@ -21,7 +21,7 @@
 
 COBC = cobc$(EXEEXT)
 COBCRUN = cobcrun$(EXEEXT)
-PASSED_OPTIONS = GREP=$(GREP) COBC=$(COBC) COBCRUN=$(COBCRUN)
+PASSED_OPTIONS = GREP=$(GREP) SED=$(SED) COBC=$(COBC) COBCRUN=$(COBCRUN)
 COBCINFOSH = $(PASSED_OPTIONS) $(abs_top_builddir)/pre-inst-env \
 	$(top_srcdir)/doc/cobcinfo.sh
 

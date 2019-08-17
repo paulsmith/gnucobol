@@ -1,4 +1,15 @@
 
+2019-08-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* call.c (cob_resolve_internal): refactored to keep call_entry_buff
+	  and call_entry_buff2 as a local variables instead of dynamic
+	  storage check + allocating + deallocating
+	* common.h, call.c (cob_encode_program_id): extracted from
+	  cob_resolve_internal and added explicit check for the buffer
+	  size fixing bug #584; externalized for use by cobc
+	* common.h: new define COB_MAX_LITERAL_LEN, with currently 256k,
+	  used in cobc instead of previous LONG_MAX
+
 2019-07-14  Simon Sobisch <simonsobisch@gnu.org>
 
 	* system.def: added CBL_ALARM_SOUND and CBL_BELL_SOUND, both as alias

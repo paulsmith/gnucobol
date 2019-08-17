@@ -1,4 +1,21 @@
 
+2019-08-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_encode_program_id), parser.y, codegen.c, cobc.c: changed
+	  method signature to remove unnecessary check for path separators and
+	  do case folding as requested - callers use explicit COB_FOLD_UPPER for
+	  functions now instead of additional folding after the call, also lead
+	  to removing (user_func_upper) from codegen.c
+	* typeck.c (cb_encode_program_id): check for path separators now backwards
+	* typeck.c: removed duplicated code for program-id encoding
+	  using libcob's new cob_encode_program_id with explicit check
+	  for buffer size fixing bug #584
+	* scanner.l (read_literal): fixed bug #583 buffer overflow
+	* cobc.c: PROGRAM-ID verification with explicit check for empty PROGRAM-ID
+	  and cut of PROGRAM-IDs that are too long in the error message
+	* config.def (cb_lit_length): changed internal maximum length of a literal
+	  from LONG_MAX to COB_MAX_LITERAL_LEN, a new define with currently 256k
+
 2019-08-14  Simon Sobisch <simonsobisch@gnu.org>
 
 	* field.c (cb_evaluate_expr): return error_node on expression overflow

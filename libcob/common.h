@@ -665,7 +665,7 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #define	COB_STACK_SIZE		255
 
 /* Maximum size of file records */
-/* TODO: add compiler configuration for limiting this */
+/* TODO: add compiler configuration for limiting this - per file type */
 #define	MAX_FD_RECORD		64 * 1024 * 1024
 
 /* Maximum size of file records (IDX) */
@@ -702,6 +702,9 @@ only usable with COB_USE_VC2013_OR_GREATER */
 /* Maximum length of COBOL words */
 #define	COB_MAX_WORDLEN		63
 
+/* Maximum length of literals */
+#define	COB_MAX_LITERAL_LEN		256 * 1024
+
 /* Maximum length of COBOL program names */
 #define	COB_MAX_NAMELEN		31
 
@@ -718,6 +721,7 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #define	COB_RET_TYPE_VOID	2
 
 /* Fold case types */
+#define	COB_FOLD_NONE		0
 #define	COB_FOLD_UPPER		1
 #define	COB_FOLD_LOWER		2
 
@@ -2082,6 +2086,8 @@ COB_EXPIMP void		cob_field_content (cob_field *f, cob_field *t, cob_field_attr *
 COB_EXPIMP unsigned int	cob_get_name_hash (const char *name);
 
 COB_EXPIMP void		cob_set_cancel		(cob_module *);
+COB_EXPIMP int		cob_encode_program_id (const unsigned char * const, unsigned char * const,
+						 const int, const int);
 COB_EXPIMP void		*cob_resolve		(const char *);
 COB_EXPIMP void		*cob_resolve_cobol	(const char *, const int,
 						 const int);

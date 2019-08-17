@@ -124,8 +124,6 @@ static int			expr_stack_size;	/* Stack max size */
 static struct expr_node		*expr_stack;		/* Expression node stack */
 static int			report_id = 1;
 
-static const unsigned char	hexval[] = "0123456789ABCDEF";
-
 #ifdef	HAVE_DESIGNATED_INITS
 static const unsigned char	expr_prio[256] = {
 	['x'] = 0,
@@ -147,77 +145,8 @@ static const unsigned char	expr_prio[256] = {
 	['('] = 9,
 	[0] = 10
 };
-
-static const unsigned char	valid_char[256] = {
-	['0'] = 1,
-	['1'] = 1,
-	['2'] = 1,
-	['3'] = 1,
-	['4'] = 1,
-	['5'] = 1,
-	['6'] = 1,
-	['7'] = 1,
-	['8'] = 1,
-	['9'] = 1,
-	['A'] = 1,
-	['B'] = 1,
-	['C'] = 1,
-	['D'] = 1,
-	['E'] = 1,
-	['F'] = 1,
-	['G'] = 1,
-	['H'] = 1,
-	['I'] = 1,
-	['J'] = 1,
-	['K'] = 1,
-	['L'] = 1,
-	['M'] = 1,
-	['N'] = 1,
-	['O'] = 1,
-	['P'] = 1,
-	['Q'] = 1,
-	['R'] = 1,
-	['S'] = 1,
-	['T'] = 1,
-	['U'] = 1,
-	['V'] = 1,
-	['W'] = 1,
-	['X'] = 1,
-	['Y'] = 1,
-	['Z'] = 1,
-	['_'] = 1,
-	['a'] = 1,
-	['b'] = 1,
-	['c'] = 1,
-	['d'] = 1,
-	['e'] = 1,
-	['f'] = 1,
-	['g'] = 1,
-	['h'] = 1,
-	['i'] = 1,
-	['j'] = 1,
-	['k'] = 1,
-	['l'] = 1,
-	['m'] = 1,
-	['n'] = 1,
-	['o'] = 1,
-	['p'] = 1,
-	['q'] = 1,
-	['r'] = 1,
-	['s'] = 1,
-	['t'] = 1,
-	['u'] = 1,
-	['v'] = 1,
-	['w'] = 1,
-	['x'] = 1,
-	['y'] = 1,
-	['z'] = 1
-};
 #else
 static unsigned char		expr_prio[256];
-static unsigned char		valid_char[256];
-static const unsigned char	pvalid_char[] =
-	"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
 #endif
 
 #ifdef	COB_EBCDIC_MACHINE
@@ -1574,61 +1503,31 @@ cb_trim_program_id (cb_tree id_literal)
 	CB_LITERAL (id_literal)->size = len;
 }
 
+/** encode given name
+  \param name to encode
+  \param strip_path specifying if name may include directory which
+         should be stripped in the encoded version
+  \return pointer to encoded name
+ */
 char *
-cb_encode_program_id (const char *name)
+cb_encode_program_id (const char *name, const int strip_path, const int fold_case)
 {
-	unsigned char		*p;
-	const unsigned char	*s;
-	const unsigned char	*t;
+	const unsigned char	*s = (const unsigned char *)name;
 	unsigned char		buff[COB_MINI_BUFF];
 
 	/* position after last path separator (included for CALL) */
-	s = NULL;
-	for (t = (const unsigned char *)name; *t; t++) {
-		if (*t == (unsigned char)'/' || *t == (unsigned char)'\\') {
-			s = t + 1;
-		}
-	}
-	if (!s) {
-		s = (const unsigned char *)name;
-	}
-	p = buff;
-	/* Encode the initial digit */
-	if (*s <= (unsigned char)'9' && *s >= (unsigned char)'0') {
-		*p++ = (unsigned char)'_';
-	}
-	/* Encode invalid letters */
-	for (; *s; s++) {
-		if (likely(valid_char[*s])) {
-			*p++ = *s;
-		} else {
-			*p++ = (unsigned char)'_';
-			if (*s == (unsigned char)'-') {
-				*p++ = (unsigned char)'_';
-			} else {
-				*p++ = hexval[*s / 16U];
-				*p++ = hexval[*s % 16U];
+	if (strip_path) {
+		const unsigned char	*t;
+		for (t = s + strlen (name); t > s; t--) {
+			if (*t == (unsigned char)'/' || *t == (unsigned char)'\\') {
+				s = t + 1;
+				break;
 			}
 		}
 	}
-	*p = 0;
 
-	/* Check case folding */
-	if (unlikely(cb_fold_call)) {
-		if (cb_fold_call == COB_FOLD_UPPER) {
-			for (p = buff; *p; p++) {
-				if (islower (*p)) {
-					*p = (cob_u8_t)toupper (*p);
-				}
-			}
-		} else if (cb_fold_call == COB_FOLD_LOWER) {
-			for (p = buff; *p; p++) {
-				if (isupper (*p)) {
-					*p = (cob_u8_t)tolower (*p);
-				}
-			}
-		}
-	}
+	/* Encode program name, including case folding */
+	cob_encode_program_id ((unsigned char *)name, buff, COB_MINI_MAX, fold_case);
 
 	return cobc_check_string ((char *)buff);
 }
@@ -1636,24 +1535,16 @@ cb_encode_program_id (const char *name)
 char *
 cb_build_program_id (const char *name, const cob_u32_t is_func)
 {
-	char		*s;
-	unsigned char	*p;
+	/* always convert function names to upper case */
+	const int	folding = is_func ? COB_FOLD_UPPER : cb_fold_call;
+
+	/* checking for valid name, the error raised there is enough to stop
+	   the generation, therefore we ignore the result */
+	(void)cobc_check_valid_name (name, PROGRAM_ID_NAME);
 
 	/* Set and encode the PROGRAM-ID */
 	current_program->orig_program_id = (char *) name;
-	s = cb_encode_program_id (cobc_parse_strdup (name));
-
-	(void)cobc_check_valid_name (current_program->orig_program_id, PROGRAM_ID_NAME);
-
-	/* Convert function names to upper case */
-	if (is_func) {
-		for (p = (unsigned char *)s; *p; ++p) {
-			if (islower ((int)*p)) {
-				*p = (cob_u8_t)toupper ((int)*p);
-			}
-		}
-	}
-	return s;
+	return cb_encode_program_id (name, 0, folding);
 }
 
 cb_tree
@@ -9236,7 +9127,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 					i++;
 				}
 				if ((int)i > size) {
-					size = i;
+					size = (signed int)i;
 					goto size_overflow;
 				}
 				/* for VALUE: additional check without trim */
