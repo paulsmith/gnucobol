@@ -684,6 +684,9 @@ only usable with COB_USE_VC2013_OR_GREATER */
 /* Maximum length of COBOL words */
 #define	COB_MAX_WORDLEN		63
 
+/* Maximum length of literals */
+#define	COB_MAX_LITERAL_LEN		256 * 1024
+
 /* Maximum length of COBOL program names */
 #define	COB_MAX_NAMELEN		31
 

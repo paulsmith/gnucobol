@@ -1483,6 +1483,7 @@ cobc_bcompare (const void *p1, const void *p2)
 
 enum name_error_reason {
 	INVALID_LENGTH = 1,
+	EMPTY_NAME,
 	SPACE_UNDERSCORE_FIRST_CHAR,
 	GNUCOBOL_PREFIX,
 	C_KEYWORD,
@@ -1496,8 +1497,12 @@ cobc_error_name (const char *name, const enum cobc_name_type type,
 	const char	*s;
 
 	switch (reason) {
-	case INVALID_LENGTH:	/* <1 || > COB_MAX_NAMELEN ("normal mode ") || > COB_MAX_WORDLEN */
-		s = _(" - length is less than 1 or exceeds maximum");
+	case INVALID_LENGTH:	/* > COB_MAX_NAMELEN ("normal mode ") || > COB_MAX_WORDLEN */
+		s = _(" - length exceeds maximum");
+		strcpy ((char *)(name + 32), "...");
+		break;
+	case EMPTY_NAME:
+		s = _(" - name cannot be empty");
 		break;
 	case SPACE_UNDERSCORE_FIRST_CHAR:
 		s = _(" - name cannot begin with space or underscore");
@@ -1527,12 +1532,11 @@ cobc_error_name (const char *name, const enum cobc_name_type type,
 	case PROGRAM_ID_NAME:
 		cb_error (_("invalid PROGRAM-ID '%s'%s"), name, s);
 		break;
-	/* LCOV_EXCL_START */
 	default:
-		/* internal rare error, no need for translation */
+		/* internal rare error (should be raised for 'a-[150 times]-b'),
+		   no need for translation */
 		cobc_err_msg ("unknown name error '%s'%s", name, s);
 		break;
-	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -1553,7 +1557,7 @@ cobc_check_valid_name (const char *name, const enum cobc_name_type prechk)
 
 	/* Check name is of valid length. */
 	if (len < 1) {
-		cobc_error_name (name, prechk, INVALID_LENGTH);
+		cobc_error_name (name, prechk, EMPTY_NAME);
 		return 1;
 	}
 	if (cb_flag_main || !cb_relaxed_syntax_checks) {
@@ -1567,6 +1571,9 @@ cobc_check_valid_name (const char *name, const enum cobc_name_type prechk)
 			return 1;
 		}
 	}
+
+	/* missing check (here): encoded length > internal buffer,
+	   see cob_encode_program_id */
 
 	if (*name == '_' || *name == ' ') {
 		cobc_error_name (name, prechk, SPACE_UNDERSCORE_FIRST_CHAR);

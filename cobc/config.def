@@ -60,7 +60,7 @@ CB_CONFIG_INT (cb_pic_length, "pic-length", 1, COB_MINI_MAX, _("<number>"),
 CB_CONFIG_INT (cb_word_length, "word-length", 1, COB_MAX_WORDLEN, CB_XRANGE(1,COB_MAX_WORDLEN),
 	_("maximum word-length for COBOL (= programmer defined) words"))
 
-CB_CONFIG_INT (cb_lit_length, "literal-length", 1, LONG_MAX, _("<number>"),
+CB_CONFIG_INT (cb_lit_length, "literal-length", 1, COB_MAX_LITERAL_LEN, _("<number>"),
 	_("maximum literal size in general"))
 
 CB_CONFIG_INT (cb_numlit_length, "numeric-literal-length", 1, COB_MAX_DIGITS, CB_XRANGE(1,COB_MAX_DIGITS),
