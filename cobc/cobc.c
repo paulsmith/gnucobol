@@ -3566,7 +3566,7 @@ process_filename (const char *filename)
 	if (strcasecmp (extension, "lib")
 	 && strcasecmp (extension, "a")
 	 && strcasecmp (extension, COB_OBJECT_EXT)) {
-		if (cobc_check_valid_name (fbasename, 0)) {
+		if (cobc_check_valid_name (fbasename, FILE_BASE_NAME)) {
 			return NULL;
 		}
 	}
@@ -3585,7 +3585,7 @@ process_filename (const char *filename)
 		ffn->next = fn;
 	}
 
-	fn->demangle_source = cb_encode_program_id (fbasename);
+	fn->demangle_source = cb_encode_program_id (fbasename, 0, cb_fold_call);
 
 	/* Check input file type */
 	if (strcasecmp (extension, "i") == 0) {

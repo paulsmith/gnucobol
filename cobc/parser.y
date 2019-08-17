@@ -381,7 +381,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	snprintf (buff, (size_t)COB_MINI_MAX, "E$%s", name);
 	label = cb_build_label (cb_build_reference (buff), NULL);
 	if (encode) {
-		CB_LABEL (label)->name = cb_encode_program_id (name);
+		CB_LABEL (label)->name = cb_encode_program_id (name, 0, cb_fold_call);
 		CB_LABEL (label)->orig_name = name;
 	} else {
 		CB_LABEL (label)->name = name;

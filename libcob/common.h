@@ -700,6 +700,7 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #define	COB_RET_TYPE_VOID	2
 
 /* Fold case types */
+#define	COB_FOLD_NONE		0
 #define	COB_FOLD_UPPER		1
 #define	COB_FOLD_LOWER		2
 
@@ -1952,6 +1953,8 @@ DECLNORET COB_EXPIMP void	cob_call_error		(void) COB_A_NORETURN;
 COB_EXPIMP void		cob_field_constant (cob_field *f, cob_field *t, cob_field_attr *a, void *d);
 
 COB_EXPIMP void		cob_set_cancel		(cob_module *);
+COB_EXPIMP int		cob_encode_program_id (const unsigned char * const, unsigned char * const,
+						 const int, const int);
 COB_EXPIMP void		*cob_resolve		(const char *);
 COB_EXPIMP void		*cob_resolve_cobol	(const char *, const int,
 						 const int);
