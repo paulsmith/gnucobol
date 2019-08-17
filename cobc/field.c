@@ -255,7 +255,7 @@ cb_evaluate_expr (cb_tree ch, int normal_prec)
 				}
 				if (op_val_pos >= CB_MAX_OPS) {
 					cb_error (_("expression stack overflow at %d entries"), op_val_pos);
-					return;
+					return cb_error_node;
 				}
 				op_val_pos++;
 				op_val [op_val_pos] = xval;
@@ -327,11 +327,12 @@ cb_evaluate_expr (cb_tree ch, int normal_prec)
 		}
 		cb_eval_op ();
 	}
-	if (op_pos >= 0
-	 && op_type [op_pos] == '(') {
-		cb_error (_("missing right parenthesis"));
-	} else if (op_pos >= 0) {
-		cb_error (_("'%c' operator misplaced"),op_type [op_pos]);
+	if (op_pos >= 0) {
+		if (op_type[op_pos] == '(') {
+			cb_error (_("missing right parenthesis"));
+		} else {
+			cb_error (_("'%c' operator misplaced"), op_type [op_pos]);
+		}
 	}
 	xval	= op_val [0];
 	xscale	= op_scale [0];
@@ -343,7 +344,7 @@ cb_evaluate_expr (cb_tree ch, int normal_prec)
 		xscale++;
 		xval = xval * 10;
 	}
-	sprintf(result, CB_FMT_LLD, xval);
+	sprintf (result, CB_FMT_LLD, xval);
 	return cb_build_numeric_literal (0, result, xscale);
 }
 
