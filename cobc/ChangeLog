@@ -42,6 +42,10 @@
 	* flag.def, cobc.c, help.c: moved -f[no-]ibmcomp out of flags.def and
 	  activated the "non-flag" as "normal option"
 
+2019-08-01  Ron Norman <rjn@inglenet.com>
+
+	* field.c: bug #582 add bounds check on expression stack and report error
+
 2019-07-14  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y (special_name_list): better error recovery (at least as long
