@@ -2609,19 +2609,12 @@ join_environment (void)
 	bdb_env->lock_id (bdb_env, &bdb_lock_id);
 }
 
-static int
-lock_record (cob_file *f, const char *key, const unsigned int keylen)
+static void
+set_dbt (struct indexed_file *p, DBT *dbt, const char *key, const unsigned int keylen)
 {
-	struct indexed_file	*p;
-	size_t			len;
-	int			ret;
-	DBT			dbt;
-
-	p = f->file;
-	len = keylen + p->filenamelen + 1;
+	size_t	len = keylen + p->filenamelen + 1;
 	if (len > rlo_size) {
-		cob_free (record_lock_object);
-		record_lock_object = cob_malloc (len);
+		record_lock_object = cob_realloc (record_lock_object, rlo_size, len);
 		rlo_size = len;
 	}
 	memcpy ((char *)record_lock_object, p->filename,
@@ -2629,8 +2622,19 @@ lock_record (cob_file *f, const char *key, const unsigned int keylen)
 	memcpy ((char *)record_lock_object + p->filenamelen + 1, key,
 		(size_t)keylen);
 	memset (&dbt, 0, sizeof (dbt));
-	dbt.size = (cob_dbtsize_t) len;
-	dbt.data = record_lock_object;
+	dbt->size = (cob_dbtsize_t) len;
+	dbt->data = record_lock_object;
+}
+
+
+static int
+lock_record (cob_file *f, const char *key, const unsigned int keylen)
+{
+	struct indexed_file	*p = f->file;
+	DBT			dbt;
+	int			ret;
+
+	set_dbt (p, &dbt, key, keylen);
 	ret = bdb_env->lock_get (bdb_env, p->bdb_lock_id, DB_LOCK_NOWAIT,
 				&dbt, DB_LOCK_WRITE, &p->bdb_record_lock);
 	if (!ret) {
@@ -2642,26 +2646,12 @@ lock_record (cob_file *f, const char *key, const unsigned int keylen)
 static int
 test_record_lock (cob_file *f, const char *key, const unsigned int keylen)
 {
-	struct indexed_file	*p;
-	size_t			len;
-	int			ret;
+	struct indexed_file	*p = f->file;
 	DBT			dbt;
 	DB_LOCK			test_lock;
+	int			ret;
 
-	p = f->file;
-	len = keylen + p->filenamelen + 1;
-	if (len > rlo_size) {
-		cob_free (record_lock_object);
-		record_lock_object = cob_malloc (len);
-		rlo_size = len;
-	}
-	memcpy ((char *)record_lock_object, p->filename,
-		(size_t)(p->filenamelen + 1));
-	memcpy ((char *)record_lock_object + p->filenamelen + 1, key,
-		(size_t)keylen);
-	memset (&dbt, 0, sizeof (dbt));
-	dbt.size = (cob_dbtsize_t) len;
-	dbt.data = record_lock_object;
+	set_dbt (p, &dbt, key, keylen);
 	ret = bdb_env->lock_get (bdb_env, p->bdb_lock_id, DB_LOCK_NOWAIT,
 				&dbt, DB_LOCK_WRITE, &test_lock);
 	if (!ret) {
@@ -2673,27 +2663,23 @@ test_record_lock (cob_file *f, const char *key, const unsigned int keylen)
 static int
 unlock_record (cob_file *f)
 {
-	struct indexed_file	*p;
-	int			ret;
+	struct indexed_file	*p = f->file;
 
-	p = f->file;
 	if (p->record_locked == 0) {
 		return 0;
 	}
-	ret = bdb_env->lock_put (bdb_env, &p->bdb_record_lock);
 	p->record_locked = 0;
-	return ret;
+	return bdb_env->lock_put (bdb_env, &p->bdb_record_lock);
 }
 
 /* Get the next number in a set of duplicates */
 static unsigned int
 get_dupno (cob_file *f, const cob_u32_t i)
 {
-	struct indexed_file	*p;
+	struct indexed_file	*p = f->file;
 	int			ret;
 	unsigned int		dupno;
 
-	p = f->file;
 	dupno = 0;
 	bdb_setkey(f, i);
 	memcpy (p->temp_key, p->key.data, (size_t)p->maxkeylen);
@@ -2714,16 +2700,13 @@ get_dupno (cob_file *f, const cob_u32_t i)
 static int
 check_alt_keys (cob_file *f, const int rewrite)
 {
-	struct indexed_file	*p;
+	struct indexed_file	*p = f->file;
 	size_t			i;
-	int			ret;
 
-	p = f->file;
 	for (i = 1; i < f->nkeys; ++i) {
 		if (!f->keys[i].tf_duplicates) {
 			bdb_setkey (f, i);
-			ret = DB_GET (p->db[i], 0);
-			if (ret == 0) {
+			if (DB_GET (p->db[i], 0) == 0) {
 				if (rewrite) {
 					if (bdb_cmpkey (f, p->data.data, f->record->data, 0, 0)) {
 						return 1;
@@ -2740,13 +2723,12 @@ check_alt_keys (cob_file *f, const int rewrite)
 static int
 indexed_write_internal (cob_file *f, const int rewrite, const int opt)
 {
-	struct indexed_file	*p;
+	struct indexed_file	*p = f->file;
 	cob_u32_t		i, len;
 	unsigned int		dupno;
 	cob_u32_t		flags;
 	int			close_cursor, ret;
 
-	p = f->file;
 	if (bdb_env) {
 		flags = DB_WRITECURSOR;
 	} else {
@@ -2853,14 +2835,13 @@ static int
 indexed_start_internal (cob_file *f, const int cond, cob_field *key,
 			const int read_opts, const int test_lock)
 {
-	struct indexed_file	*p;
+	struct indexed_file	*p = f->file;
 	int			ret, len, fullkeylen, partlen;
 	unsigned int		dupno;
 	int			key_index;
 
 	dupno = 0;
 	ret = 0;
-	p = f->file;
 	/* Look up for the key */
 	key_index = bdb_findkey (f, key, &fullkeylen, &partlen);
 	if (key_index < 0) {
@@ -2998,14 +2979,12 @@ indexed_start_internal (cob_file *f, const int cond, cob_field *key,
 static int
 indexed_delete_internal (cob_file *f, const int rewrite)
 {
-	struct indexed_file	*p;
+	struct indexed_file	*p = f->file;
 	int			i,len;
 	DBT			prim_key;
-	int			ret;
 	cob_u32_t		flags;
 	int			close_cursor;
 
-	p = f->file;
 	if (bdb_env) {
 		flags = DB_WRITECURSOR;
 	} else {
@@ -3025,8 +3004,8 @@ indexed_delete_internal (cob_file *f, const int rewrite)
 	if (f->access_mode != COB_ACCESS_SEQUENTIAL) {
 		bdb_setkey(f, 0);
 	}
-	ret = DB_SEQ (p->cursor[0], DB_SET);
-	if (ret != 0 && f->access_mode != COB_ACCESS_SEQUENTIAL) {
+	if (DB_SEQ (p->cursor[0], DB_SET) != 0
+	 && f->access_mode != COB_ACCESS_SEQUENTIAL) {
 		if (close_cursor) {
 			p->cursor[0]->c_close (p->cursor[0]);
 			p->cursor[0] = NULL;
@@ -3035,8 +3014,7 @@ indexed_delete_internal (cob_file *f, const int rewrite)
 		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
 	if (bdb_env != NULL) {
-		ret = test_record_lock (f, p->key.data, p->key.size);
-		if (ret) {
+		if (test_record_lock (f, p->key.data, p->key.size)) {
 			if (close_cursor) {
 				p->cursor[0]->c_close (p->cursor[0]);
 				p->cursor[0] = NULL;
@@ -7080,9 +7058,9 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 #ifdef	WITH_DB
 	bdb_env = NULL;
 	bdb_data_dir = NULL;
-	record_lock_object = cob_malloc ((size_t)1024);
+	rlo_size = COB_SMALL_BUFF;
+	record_lock_object = cob_malloc (rlo_size);
 	bdb_buff = cob_malloc ((size_t)COB_SMALL_BUFF);
-	rlo_size = 1024;
 #endif
 
 #ifdef VB_RTD

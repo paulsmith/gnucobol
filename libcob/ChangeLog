@@ -3,6 +3,8 @@
 
 	* common.h: allow to force aligned pointer access by external
 	  define of COB_NON_ALIGNED
+	* fileio.c [WITH_DB]: minor refactoring - limit scope of some variables,
+	  extracted (set_dbt) from (lock_record, test_record_lock)
 
 2019-08-17  Simon Sobisch <simonsobisch@gnu.org>
 
