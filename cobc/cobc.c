@@ -59,6 +59,8 @@
 #include <locale.h>
 #endif
 
+#include <limits.h>
+
 #include "tarstamp.h"
 
 #include "cobc.h"
@@ -1623,7 +1625,7 @@ cobc_deciph_optarg (const char *p, const int allow_quote)
 	const unsigned char	*s;
 	size_t			len;
 	size_t			i;
-	int			n;
+	size_t			n;
 
 	len = strlen (p);
 	if (!len) {
@@ -1651,8 +1653,9 @@ cobc_deciph_optarg (const char *p, const int allow_quote)
 		}
 		n *= 10;
 		n += (s[i] & 0x0F);
+		if (n > INT_MAX) return INT_MAX;
 	}
-	return n;
+	return (int)n;
 }
 
 /* exit to OS before processing a COBOL/C source file */

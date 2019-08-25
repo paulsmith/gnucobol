@@ -15,6 +15,8 @@
 	  and cut of PROGRAM-IDs that are too long in the error message
 	* config.def (cb_lit_length): changed internal maximum length of a literal
 	  from LONG_MAX to COB_MAX_LITERAL_LEN, a new define with currently 256k
+	* cobc.c (cobc_deciph_optarg): explicit check for integer overflow and
+	  return INT_MAX in this case
 
 2019-08-14  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -49,7 +51,7 @@
 
 2019-08-01  Ron Norman <rjn@inglenet.com>
 
-	* field.c: Add bounds check on expression stack and report error
+	* field.c: bug #582 add bounds check on expression stack and report error
 
 2019-07-14  Simon Sobisch <simonsobisch@gnu.org>
 

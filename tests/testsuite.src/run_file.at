@@ -4302,7 +4302,7 @@ AT_DATA([prog.cob], [
 
        DATA                DIVISION.
        WORKING-STORAGE     SECTION.
-       01  fh              PIC 9 COMP-5.
+       01  fh              PIC X(4) COMP-5.
        01  rb              PIC X(8) COMP-X.
        01  cb-bfr          PIC X(4) COMP-X VALUE 16.
        01  w-dirname-1     PIC X(4) VALUE "tmp1".

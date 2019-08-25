@@ -565,7 +565,14 @@ only usable with COB_USE_VC2013_OR_GREATER */
 
 #endif
 
-#if !defined(__i386__) && !defined(__x86_64__) && !defined(__powerpc__) && !defined(__powerpc64__) && !defined(__ppc__) && !defined(__amd64__)
+/* TODO: recheck these options (got in by OC 2.0, should be moved to config.h [only used in cobc, so far]) */
+#if defined (COB_NON_ALIGNED)	/* allow explicit check of generated code and to skip this part in checks of undefined behavior) */
+	/* Some DEC Alphas can only load shorts at 4-byte aligned addresses */
+	#ifdef	__alpha
+		#define COB_SHORT_BORK
+	#endif
+	#define __unaligned
+#elif !defined(__i386__) && !defined(__x86_64__) && !defined(__powerpc__) && !defined(__powerpc64__) && !defined(__ppc__) && !defined(__amd64__)
 	#define	COB_NON_ALIGNED
 	/* Some DEC Alphas can only load shorts at 4-byte aligned addresses */
 	#ifdef	__alpha
@@ -580,8 +587,6 @@ only usable with COB_USE_VC2013_OR_GREATER */
 	#define COB_ALLOW_UNALIGNED
 	#define __unaligned
 #endif
-
-
 
 #if	defined(_MSC_VER) || defined(__ORANGEC__) || defined(__WATCOMC__) || \
     defined(__BORLANDC__) || defined(__MINGW32__) || defined (__DJGPP__)
