@@ -1,4 +1,9 @@
 
+2019-08-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.h: allow to force aligned pointer access by external
+	  define of COB_NON_ALIGNED
+
 2019-08-17  Simon Sobisch <simonsobisch@gnu.org>
 
 	* call.c (cob_resolve_internal): refactored to keep call_entry_buff
