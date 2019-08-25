@@ -9760,7 +9760,6 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 	record_lock_object = cob_malloc ((size_t)1024);
 	bdb_buff = cob_malloc ((size_t)COB_SMALL_BUFF);
 	rlo_size = 1024;
-	bdb_buff = cob_malloc ((size_t)COB_SMALL_BUFF+1);
 #endif
 
 	if(chk_file_path) {
