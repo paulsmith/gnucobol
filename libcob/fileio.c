@@ -112,6 +112,7 @@
 #include "libcob.h"
 #include "coblocal.h"
 
+static void free_extfh_fcd ();	/* Free all tables used for EXTFH interface */
 #ifdef	WITH_DB
 
 #include <db.h>
@@ -9702,6 +9703,8 @@ cob_exit_fileio (void)
 		runtime_buffer = NULL;
 	}
 
+	free_extfh_fcd ();
+
 	for (l = file_cache; l;) {
 		p = l;
 		l = l->next;
@@ -10227,6 +10230,21 @@ find_file (FCD3 *fcd)
 	ff->free_fcd = 0;
 	fcd_file_list = ff;
 	return f;
+}
+
+static void
+free_extfh_fcd ()
+{
+	struct fcd_file	*ff,*nff;
+
+	for(ff = fcd_file_list; ff; ff = nff) {
+		nff = ff->next;
+		if(ff->free_fcd)
+			cob_free((void*)ff->fcd);
+		else
+			cob_free((void*)ff->f);
+		cob_free((void*)ff);
+	}
 }
 
 static void

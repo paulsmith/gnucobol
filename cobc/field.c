@@ -2031,7 +2031,8 @@ compute_binary_size (struct cb_field *f, const int size)
 		return;
 	case CB_BINARY_SIZE_2_4_8:
 		if (f->flag_real_binary
-		 && size <= 2) {
+		 && size <= 2
+		 && cb_mf_ibm_comp != 1) {
 			f->size = 1;
 		} else {
 			f->size = ((size <= 4) ? 2 :
@@ -2303,7 +2304,9 @@ compute_size (struct cb_field *f)
 		}
 
 		/* Groups */
-		if (f->flag_synchronized && warningopt) {
+		if (f->flag_synchronized 
+		 && !f->flag_ignore_sync
+		 && warningopt) {
 			cb_warning_x (COBC_WARN_FILLER, CB_TREE (f), _("ignoring SYNCHRONIZED for group item '%s'"),
 				    cb_name (CB_TREE (f)));
 		}
@@ -2353,7 +2356,8 @@ unbounded_again:
 				}
 
 				/* Word alignment */
-				if (c->flag_synchronized) {
+				if (c->flag_synchronized
+				 && !c->flag_ignore_sync) {
 					align_size = 1;
 					switch (c->usage) {
 					case CB_USAGE_BINARY:
@@ -2365,15 +2369,12 @@ unbounded_again:
 							align_size = c->size;
 						} else if (c->size == 8 
 							|| c->size == 16) {
-#if 1	/* CHECKME: seems wrong, was cb_mf_ibm_comp before... */
 							if (cb_binary_size == CB_BINARY_SIZE_2_4_8) {
 								if (c->usage == CB_USAGE_DOUBLE)
 									align_size = 8;	/* COMP-2 */
 								else
 									align_size = 4;
-							} else
-#endif
-							if (sizeof (void *) == 4) {
+							} else if (sizeof (void *) == 4) {
 								align_size = 4; 	/* 32 bit mode */
 							} else {
 								align_size = 8;		/* 64 bit mode */

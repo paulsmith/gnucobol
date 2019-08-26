@@ -6822,26 +6822,32 @@ usage:
 | BINARY_SHORT _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_SHORT);
+	current_field->flag_ignore_sync = 1;
   }
 | BINARY_SHORT UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_SHORT);
+	current_field->flag_ignore_sync = 1;
   }
 | BINARY_LONG _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_INT);
+	current_field->flag_ignore_sync = 1;
   }
 | BINARY_LONG UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_INT);
+	current_field->flag_ignore_sync = 1;
   }
 | BINARY_DOUBLE _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_LONG);
+	current_field->flag_ignore_sync = 1;
   }
 | BINARY_DOUBLE UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_LONG);
+	current_field->flag_ignore_sync = 1;
   }
 | BINARY_C_LONG _signed
   {

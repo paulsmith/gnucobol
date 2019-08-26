@@ -1,4 +1,14 @@
 
+2019-08-26  Ron Norman <rjn@inglenet.com>
+
+	* cobc.h: Add extern cb_mf_ibm_comp
+	* tree.h: Add flag_ignore_sync
+	* parser.y: set flag_ignore_sync for BINARY-SHORT/LONG/DOUBLE
+	* field.c: test flag_ignore_sync for BINARY-SHORT/LONG/DOUBLE
+	          which are never SYNCed
+	* flag.def : fix help info
+	* help.c : display -fibmcomp info
+
 2019-08-17  Simon Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_encode_program_id), parser.y, codegen.c, cobc.c: changed

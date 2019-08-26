@@ -116,7 +116,7 @@ CB_FLAG_ON (cb_flag_remove_unreachable, 1, "remove-unreachable",
 	  "                        * turned off by -g"))
 
 CB_FLAG_ON (cb_flag_inline_intrinsic, 1, "inline-intrinsic",
-	_("when possible resolve intrinsic FUNCTIONs at compile time"))
+	_("  -finline-intrinsic\twhen possible resolve intrinsic FUNCTIONs at compile time"))
 
 CB_FLAG (cb_flag_trace, 1, "trace",
 	_("  -ftrace               generate trace code\n"

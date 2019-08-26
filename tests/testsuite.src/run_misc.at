@@ -15040,7 +15040,7 @@ AT_DATA([prog.cob], [
         05 FILLER PIC X(10) VALUE "BIN-SHORT".
         05 FILLER PIC X(40) VALUE "x12xx12".
         05 FILLER PIC X(40) VALUE "x12xx12".
-        05 FILLER PIC X(40) VALUE "x12xxx12".
+        05 FILLER PIC X(40) VALUE "x12xx12".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE " ".
@@ -15048,7 +15048,7 @@ AT_DATA([prog.cob], [
         05 FILLER PIC X(10) VALUE "BIN-DBL".
         05 FILLER PIC X(40) VALUE "x12345678x12345678".
         05 FILLER PIC X(40) VALUE "x12345678x12345678".
-        05 FILLER PIC X(40) VALUE "x12345678xxxxxxx12345678".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
@@ -15056,10 +15056,10 @@ AT_DATA([prog.cob], [
         05 FILLER PIC X(10) VALUE "COMP-5".
         05 FILLER PIC X(40) VALUE "x12345678x12345678".
         05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
-        05 FILLER PIC X(40) VALUE "x1234xxx1234".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE " ".
-        05 FILLER PIC X(40) VALUE "x1234xxx1234".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
 
         05 FILLER PIC X(10) VALUE "CMP-1".
         05 FILLER PIC X(40) VALUE "x1234x1234".
@@ -15484,7 +15484,6 @@ AT_CHECK([./prog], [0], [23 tests & 00 failed
 ], [])
 
 AT_CLEANUP
-
 AT_SETUP([NO Subscript])
 AT_KEYWORDS([LENGTH])
 
@@ -15627,8 +15626,7 @@ ODO-TABLE(1) is 0000000012 and 012
 
 AT_CLEANUP
 
-
-AT_SETUP([MF SYNC])
+AT_SETUP([IBM SYNC])
 AT_KEYWORDS([Numeric])
 
 AT_DATA([prog.cob], [
@@ -15646,7 +15644,7 @@ AT_DATA([prog.cob], [
        77  TESTIDX                PIC 99 VALUE 1.
        77  BIT-MODE               PIC 99 VALUE 32.
        77  TESTNUM                PIC 99 VALUE 0.
-       77  TESTMAX                PIC 99 VALUE 23.
+       77  TESTMAX                PIC 99 VALUE 24.
        77  TESTCASE               PIC 99 VALUE 0.
        77  TESTFAIL               PIC 99 VALUE 0.
        77  TESTEND                PIC X(15) VALUE " ".
@@ -15657,7 +15655,7 @@ AT_DATA([prog.cob], [
        01  TEST-MODES.
            05  FILLER PIC X(10) VALUE "MF".
            05  FILLER PIC X(10) VALUE "IBMCOMP".
-           05  FILLER PIC X(10) VALUE "C2002".
+           05  FILLER PIC X(10) VALUE "DEFAULT".
 
        01  FILLER REDEFINES TEST-MODES.
            05  FILLER             OCCURS 3 TIMES.
@@ -15812,7 +15810,7 @@ AT_DATA([prog.cob], [
         05 FILLER PIC X(10) VALUE "BIN-SHORT".
         05 FILLER PIC X(40) VALUE "x12xx12".
         05 FILLER PIC X(40) VALUE "x12xx12".
-        05 FILLER PIC X(40) VALUE "x12xxx12".
+        05 FILLER PIC X(40) VALUE "x12xx12".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE " ".
@@ -15820,10 +15818,18 @@ AT_DATA([prog.cob], [
         05 FILLER PIC X(10) VALUE "BIN-DBL".
         05 FILLER PIC X(40) VALUE "x12345678x12345678".
         05 FILLER PIC X(40) VALUE "x12345678x12345678".
-        05 FILLER PIC X(40) VALUE "x12345678xxxxxxx12345678".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
+
+        05 FILLER PIC X(10) VALUE "BIN-LNG".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "x1234xxx1234".
 
         05 FILLER PIC X(10) VALUE "COMP-5".
         05 FILLER PIC X(40) VALUE "x12345678x12345678".
@@ -15850,7 +15856,7 @@ AT_DATA([prog.cob], [
         05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
 
        01  FILLER REDEFINES TEST-CASES.
-           05  FILLER             OCCURS 23 TIMES.
+           05  FILLER             OCCURS 24 TIMES.
               10  TEST-NAME       PIC X(10).
               10  TEST-RESULTS.
                 15  MF-64RESULT     PIC X(40).
@@ -16039,7 +16045,15 @@ AT_DATA([prog.cob], [
            10  FILLER             PICTURE X(1). 
            10  COMD-FLD1          BINARY-DOUBLE.
            10  FILLER             PICTURE X(1). 
-           10  COMD-FLD2          BINARY-DOUBLE UNSIGNED SYNC.
+           10  COMD-FLD2          BINARY-DOUBLE SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-BLNG.
+           10  FILLER             PICTURE X(1). 
+           10  COMBL-FLD1         BINARY-LONG.
+           10  FILLER             PICTURE X(1). 
+           10  COMBL-FLD2         BINARY-LONG SYNC.
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
@@ -16069,7 +16083,7 @@ AT_DATA([prog.cob], [
        PROCEDURE DIVISION.
 
            MOVE LENGTH OF TESTPTR TO VLEN.
-           IF VLEN EQUALS 8
+           IF VLEN EQUAL 8
                MOVE 64     TO BIT-MODE
            ELSE
                MOVE 32     TO BIT-MODE.
@@ -16196,6 +16210,11 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO COMD-FLD2 (1:).
            PERFORM CHECK-IT.
 
+           MOVE "BIN-LNG" TO TESTNAME.
+           MOVE "12345678" TO COMBL-FLD1 (1:).
+           MOVE "12345678" TO COMBL-FLD2 (1:).
+           PERFORM CHECK-IT.
+
            MOVE "COMP-5" TO TESTNAME.
            MOVE "12345678" TO CMP5-FLD1 (1:).
            MOVE "12345678" TO CMP5-FLD2 (1:).
@@ -16211,7 +16230,8 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO CMP2-FLD2 (1:).
            PERFORM CHECK-IT.
            
-           DISPLAY TESTCASE " tests & " TESTFAIL " failed".
+           DISPLAY TEST-MODE (TESTMODE) 
+                   TESTCASE " tests with " TESTFAIL " failed".
            STOP RUN RETURNING 0.
 
        CHECK-IT SECTION.
@@ -16221,6 +16241,7 @@ AT_DATA([prog.cob], [
            PERFORM VARYING TESTNUM FROM 1 BY 1
                      UNTIL TEST-NAME (TESTNUM) = TESTNAME
                         OR TESTNUM > TESTMAX
+              CONTINUE
            END-PERFORM.
            IF TESTNUM > TESTMAX
                DISPLAY TESTNAME " :NOT FOUND"
@@ -16230,7 +16251,7 @@ AT_DATA([prog.cob], [
                GO TO CHECK-EXIT
            END-IF.
            MOVE TEST-RESULT (TESTNUM, TESTMODE) TO TESTRESULT.
-		   COMPUTE TESTIDX = TESTMODE + 3.
+           COMPUTE TESTIDX = TESTMODE + 3.
            IF BIT-MODE = 32
            AND TEST-RESULT (TESTNUM, TESTIDX) NOT = SPACES
                MOVE TEST-RESULT (TESTNUM, TESTIDX) TO TESTRESULT.
@@ -16251,15 +16272,15 @@ AT_DATA([prog.cob], [
            
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+AT_CHECK([cobc -x -std=ibm -w prog.cob ], [0], [], [])
 
-AT_CHECK([./prog], [0], [23 tests & 00 failed
+AT_CHECK([./prog], [0], [IBMCOMP   24 tests with 00 failed
 ], [])
 
 AT_CLEANUP
 
 
-AT_SETUP([MF IBMCOMP])
+AT_SETUP([MF IBMCOMP SYNC])
 AT_KEYWORDS([Numeric])
 
 AT_DATA([prog.cob], [
@@ -16277,7 +16298,7 @@ AT_DATA([prog.cob], [
        77  TESTIDX                PIC 99 VALUE 1.
        77  BIT-MODE               PIC 99 VALUE 32.
        77  TESTNUM                PIC 99 VALUE 0.
-       77  TESTMAX                PIC 99 VALUE 23.
+       77  TESTMAX                PIC 99 VALUE 24.
        77  TESTCASE               PIC 99 VALUE 0.
        77  TESTFAIL               PIC 99 VALUE 0.
        77  TESTEND                PIC X(15) VALUE " ".
@@ -16288,7 +16309,7 @@ AT_DATA([prog.cob], [
        01  TEST-MODES.
            05  FILLER PIC X(10) VALUE "MF".
            05  FILLER PIC X(10) VALUE "IBMCOMP".
-           05  FILLER PIC X(10) VALUE "C2002".
+           05  FILLER PIC X(10) VALUE "DEFAULT".
 
        01  FILLER REDEFINES TEST-MODES.
            05  FILLER             OCCURS 3 TIMES.
@@ -16442,19 +16463,27 @@ AT_DATA([prog.cob], [
 
         05 FILLER PIC X(10) VALUE "BIN-SHORT".
         05 FILLER PIC X(40) VALUE "x12xx12".
-        05 FILLER PIC X(40) VALUE "x12xxx12".
-        05 FILLER PIC X(40) VALUE "x12xxx12".
+        05 FILLER PIC X(40) VALUE "x12xx12".
+        05 FILLER PIC X(40) VALUE "x12xx12".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE " ".
 
         05 FILLER PIC X(10) VALUE "BIN-DBL".
         05 FILLER PIC X(40) VALUE "x12345678x12345678".
-        05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
-        05 FILLER PIC X(40) VALUE "x12345678xxxxxxx12345678".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE " ".
         05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
+
+        05 FILLER PIC X(10) VALUE "BIN-LNG".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "x1234xxx1234".
 
         05 FILLER PIC X(10) VALUE "COMP-5".
         05 FILLER PIC X(40) VALUE "x12345678x12345678".
@@ -16481,7 +16510,7 @@ AT_DATA([prog.cob], [
         05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
 
        01  FILLER REDEFINES TEST-CASES.
-           05  FILLER             OCCURS 23 TIMES.
+           05  FILLER             OCCURS 24 TIMES.
               10  TEST-NAME       PIC X(10).
               10  TEST-RESULTS.
                 15  MF-64RESULT     PIC X(40).
@@ -16670,7 +16699,15 @@ AT_DATA([prog.cob], [
            10  FILLER             PICTURE X(1). 
            10  COMD-FLD1          BINARY-DOUBLE.
            10  FILLER             PICTURE X(1). 
-           10  COMD-FLD2          BINARY-DOUBLE UNSIGNED SYNC.
+           10  COMD-FLD2          BINARY-DOUBLE SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-BLNG.
+           10  FILLER             PICTURE X(1). 
+           10  COMBL-FLD1         BINARY-LONG.
+           10  FILLER             PICTURE X(1). 
+           10  COMBL-FLD2         BINARY-LONG SYNC.
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
@@ -16700,7 +16737,7 @@ AT_DATA([prog.cob], [
        PROCEDURE DIVISION.
 
            MOVE LENGTH OF TESTPTR TO VLEN.
-           IF VLEN EQUALS 8
+           IF VLEN EQUAL 8
                MOVE 64     TO BIT-MODE
            ELSE
                MOVE 32     TO BIT-MODE.
@@ -16827,6 +16864,11 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO COMD-FLD2 (1:).
            PERFORM CHECK-IT.
 
+           MOVE "BIN-LNG" TO TESTNAME.
+           MOVE "12345678" TO COMBL-FLD1 (1:).
+           MOVE "12345678" TO COMBL-FLD2 (1:).
+           PERFORM CHECK-IT.
+
            MOVE "COMP-5" TO TESTNAME.
            MOVE "12345678" TO CMP5-FLD1 (1:).
            MOVE "12345678" TO CMP5-FLD2 (1:).
@@ -16842,7 +16884,8 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO CMP2-FLD2 (1:).
            PERFORM CHECK-IT.
            
-           DISPLAY TESTCASE " tests & " TESTFAIL " failed".
+           DISPLAY TEST-MODE (TESTMODE) 
+                   TESTCASE " tests with " TESTFAIL " failed".
            STOP RUN RETURNING 0.
 
        CHECK-IT SECTION.
@@ -16852,6 +16895,7 @@ AT_DATA([prog.cob], [
            PERFORM VARYING TESTNUM FROM 1 BY 1
                      UNTIL TEST-NAME (TESTNUM) = TESTNAME
                         OR TESTNUM > TESTMAX
+              CONTINUE
            END-PERFORM.
            IF TESTNUM > TESTMAX
                DISPLAY TESTNAME " :NOT FOUND"
@@ -16861,7 +16905,7 @@ AT_DATA([prog.cob], [
                GO TO CHECK-EXIT
            END-IF.
            MOVE TEST-RESULT (TESTNUM, TESTMODE) TO TESTRESULT.
-		   COMPUTE TESTIDX = TESTMODE + 3.
+           COMPUTE TESTIDX = TESTMODE + 3.
            IF BIT-MODE = 32
            AND TEST-RESULT (TESTNUM, TESTIDX) NOT = SPACES
                MOVE TEST-RESULT (TESTNUM, TESTIDX) TO TESTRESULT.
@@ -16884,7 +16928,1315 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([cobc -x -std=mf -w -fibmcomp prog.cob ], [0], [], [])
 
-AT_CHECK([./prog], [0], [23 tests & 00 failed
+AT_CHECK([./prog], [0], [IBMCOMP   24 tests with 00 failed
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([MF SYNC])
+AT_KEYWORDS([Numeric])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       FILE SECTION.
+      
+       WORKING-STORAGE SECTION.
+      
+       77  VLEN                   PIC 99 VALUE 1.
+       77  TESTMODE               PIC 99 VALUE 1.
+       77  TESTIDX                PIC 99 VALUE 1.
+       77  BIT-MODE               PIC 99 VALUE 32.
+       77  TESTNUM                PIC 99 VALUE 0.
+       77  TESTMAX                PIC 99 VALUE 24.
+       77  TESTCASE               PIC 99 VALUE 0.
+       77  TESTFAIL               PIC 99 VALUE 0.
+       77  TESTEND                PIC X(15) VALUE " ".
+       77  TESTNAME               PIC X(10) VALUE " ".
+       77  TESTRESULT             PIC X(40) VALUE " ".
+       77  TESTPTR                USAGE POINTER.
+
+       01  TEST-MODES.
+           05  FILLER PIC X(10) VALUE "MF".
+           05  FILLER PIC X(10) VALUE "IBMCOMP".
+           05  FILLER PIC X(10) VALUE "DEFAULT".
+
+       01  FILLER REDEFINES TEST-MODES.
+           05  FILLER             OCCURS 3 TIMES.
+              10  TEST-MODE       PIC X(10).
+
+       01  TEST-CASES.
+        05 FILLER PIC X(10) VALUE "COMP-FLD1".
+        05 FILLER PIC X(40) VALUE "xxxxx1".
+        05 FILLER PIC X(40) VALUE "xxxxx11".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLD2".
+        05 FILLER PIC X(40) VALUE "xxxxx22".
+        05 FILLER PIC X(40) VALUE "xxxxxx22".
+        05 FILLER PIC X(40) VALUE "xxxxxx22".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLDO".
+        05 FILLER PIC X(40) VALUE "xxxxxxx11xxx22xxx33".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLDS".
+        05 FILLER PIC X(40) VALUE "xxxxxxx11xxx22xxx33".
+        05 FILLER PIC X(40) VALUE "xxxxxxxx11xxxx22xxxx33".
+        05 FILLER PIC X(40) VALUE "xxxxxxxx11xxxx22xxxx33".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLD3".
+        05 FILLER PIC X(40) VALUE "xxxxx123".
+        05 FILLER PIC X(40) VALUE "xxxxxxxx1234".
+        05 FILLER PIC X(40) VALUE "xxxxxxxx1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLDL".
+        05 FILLER PIC X(40) VALUE "xxxxx1".
+        05 FILLER PIC X(40) VALUE "xxxxxx12".
+        05 FILLER PIC X(40) VALUE "xxxxx1".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLDR".
+        05 FILLER PIC X(40) VALUE "xxxxx1".
+        05 FILLER PIC X(40) VALUE "xxxxxx12".
+        05 FILLER PIC X(40) VALUE "xxxxx1".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COM1-FLD".
+        05 FILLER PIC X(40) VALUE "xxxxx12xxx123xxx12345678".
+        05 FILLER PIC X(40) VALUE "xxxxxx12xxxx1234xxxx12345678".
+        05 FILLER PIC X(40) VALUE "xxxxxx12xxxx1234xxxxxxxx12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "xxxxxx12xxxx1234xxxx12345678".
+
+        05 FILLER PIC X(10) VALUE "COM2-FLD".
+        05 FILLER PIC X(40) VALUE "xxxxx12345xxx1234567xxx12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COM3-FLD".
+        05 FILLER PIC X(40) VALUE "xxxxx123xxx1234xxx1234567".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COM4-FLD".
+        05 FILLER PIC X(40) VALUE "x123456x1234x123456x123".
+        05 FILLER PIC X(40) VALUE "xxxx12345678xxxx1234x12345678x1234".
+        05 FILLER PIC X(40) 
+           VALUE "xxxxxxxx12345678xxxx1234x12345678x1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "xxxx12345678xxxx1234x12345678x1234".
+
+        05 FILLER PIC X(10) VALUE "NOSYNC".
+        05 FILLER PIC X(40) VALUE "x123456x123".
+        05 FILLER PIC X(40) VALUE "x12345678x1234".
+        05 FILLER PIC X(40) VALUE "x12345678x1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "SYNC".
+        05 FILLER PIC X(40) VALUE "x123456x1234".
+        05 FILLER PIC X(40) VALUE "xxxx12345678xxxx1234".
+        05 FILLER PIC X(40) VALUE "xxxxxxxx12345678xxxx1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "xxxx12345678xxxx1234".
+
+        05 FILLER PIC X(10) VALUE "COMP-3".
+        05 FILLER PIC X(40) VALUE "x1234567x1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-1".
+        05 FILLER PIC X(40) VALUE "12341234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-2".
+        05 FILLER PIC X(40) VALUE "1234567812345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "SIGN L/T".
+        05 FILLER PIC X(40) VALUE "x-01x02-x-03x04-".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-X".
+        05 FILLER PIC X(40) VALUE "x123x1234567x1234x12345678".
+        05 FILLER PIC X(40) VALUE "x123x1234567xxxx1234xxxx12345678".
+        05 FILLER PIC X(40) VALUE "x123x1234567xxxx1234xxxx12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "BIN-SHORT".
+        05 FILLER PIC X(40) VALUE "x12xx12".
+        05 FILLER PIC X(40) VALUE "x12xx12".
+        05 FILLER PIC X(40) VALUE "x12xx12".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "BIN-DBL".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
+
+        05 FILLER PIC X(10) VALUE "BIN-LNG".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "x1234xxx1234".
+
+        05 FILLER PIC X(10) VALUE "COMP-5".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
+        05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
+        05 FILLER PIC X(40) VALUE "x12345678xxxxxxx12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
+
+        05 FILLER PIC X(10) VALUE "CMP-1".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE "x1234xxx1234".
+        05 FILLER PIC X(40) VALUE "x1234xxx1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "CMP-2".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
+        05 FILLER PIC X(40) VALUE "x12345678xxxxxxx12345678".
+        05 FILLER PIC X(40) VALUE "x12345678xxxxxxx12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
+
+       01  FILLER REDEFINES TEST-CASES.
+           05  FILLER             OCCURS 24 TIMES.
+              10  TEST-NAME       PIC X(10).
+              10  TEST-RESULTS.
+                15  MF-64RESULT     PIC X(40).
+                15  IBM-64RESULT    PIC X(40).
+                15  C2002-64RESULT  PIC X(40).
+                15  MF-32RESULT     PIC X(40).
+                15  IBM-32RESULT    PIC X(40).
+                15  C2002-32RESULT  PIC X(40).
+              10  FILLER REDEFINES TEST-RESULTS.
+                15  TEST-RESULT   PIC X(40) OCCURS 6 TIMES.
+
+       01  TESTRECORD             PIC X(40).
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTREC1.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD1          PICTURE S9(2) COMP-4. 
+           10  FILLER             PICTURE X(5).
+      
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTREC2.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD2          PICTURE S9(4) COMP-4 SYNC . 
+      
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTREC3.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD3          PICTURE S9(6) COMP-4 SYNC. 
+           10  FILLER             PICTURE X(5).
+      
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTRECL.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLDL          PICTURE S9(2) COMP-4 SYNC LEFT. 
+           10  FILLER             PICTURE X(5).
+      
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTRECR.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLDR          PICTURE S9(2) COMP-4 SYNC RIGHT. 
+           10  FILLER             PICTURE X(5).
+      
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTRECS.
+           10  FILLER             PICTURE X(5). 
+           10  FILLER OCCURS 3 TIMES.
+               15  FILLER         PICTURE X(2).
+               15  COMP-FLDS      PICTURE S9(4) COMP-4 SYNC . 
+               15  FILLER         PICTURE X(1).
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTRECO.
+           10  FILLER             PICTURE X(5). 
+           10  FILLER OCCURS 3 TIMES.
+               15  FILLER         PICTURE X(2).
+               15  COMP-FLDO      PICTURE S9(4) COMP-4 . 
+               15  FILLER         PICTURE X(1).
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP SYNC COMP-4.
+         05  GRP1.
+           10  FILLER             PICTURE X(5). 
+           10  COM1-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM1-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(3). 
+           10  COM1-FLD3          PICTURE S9(18). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP2 SIGN LEADING SEPARATE.
+         05  GRP2-1.
+           10  FILLER             PICTURE X(5). 
+           10  COM2-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM2-FLD2          PICTURE S9(6) SIGN TRAILING SEPARATE. 
+           10  FILLER             PICTURE X(3). 
+           10  COM2-FLD3          PICTURE S9(7). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP3 COMP-3.
+         05  GRP3-1.
+           10  FILLER             PICTURE X(5). 
+      * Following is not allowed by Micro Focus
+      *    10  COM3-FLD1          PICTURE S9(4) COMP-4. 
+           10  COM3-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM3-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(3). 
+         05  GRP3-2.
+           10  COM3-FLD3          PICTURE S9(13). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP4 COMP-4.
+         05  GRP4-1 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD2          PICTURE S9(7). 
+           10  FILLER             PICTURE X(1). 
+         05  GRP4-2.
+           10  COM4-FLD3          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD4          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP5 COMP-4.
+           10  FILLER             PICTURE X(1). 
+           10  COM5-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM5-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP5S COMP-4 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD1         PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD2         PICTURE S9(7). 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP6 COMP-3.
+           10  FILLER             PICTURE X(1). 
+           10  COM6-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM6-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP7 COMP-1.
+           10  COM7-FLD1          .
+           10  COM7-FLD2          .
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP8 COMP-2.
+           10  COM8-FLD1          .
+           10  COM8-FLD2          .
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP9.
+         05  GRP9-1 SIGN LEADING SEPARATE.
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD1          PICTURE S9(2). 
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD2          PICTURE S9(2) SIGN TRAILING SEPARATE. 
+           10  FILLER             PICTURE X(1). 
+         05  GRP9-2 SIGN TRAILING SEPARATE.
+           10  COM9-FLD3          PICTURE S9(2) SIGN LEADING SEPARATE. 
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD4          PICTURE S9(2). 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRPX.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-FLD1          PICTURE X(3) COMP-X SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-FLD2          PICTURE X(7) COMP-X.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-FLT           COMP-1 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-DBL           COMP-2 SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-BSHORT.
+           10  FILLER             PICTURE X(1). 
+           10  COMS-FLD1          BINARY-SHORT.
+           10  FILLER             PICTURE X(2). 
+           10  COMS-FLD2          BINARY-SHORT SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-BLONG.
+           10  FILLER             PICTURE X(1). 
+           10  COML-FLD1          BINARY-LONG.
+           10  FILLER             PICTURE X(1). 
+           10  COML-FLD2          BINARY-LONG SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-BDBL.
+           10  FILLER             PICTURE X(1). 
+           10  COMD-FLD1          BINARY-DOUBLE.
+           10  FILLER             PICTURE X(1). 
+           10  COMD-FLD2          BINARY-DOUBLE SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-BLNG.
+           10  FILLER             PICTURE X(1). 
+           10  COMBL-FLD1         BINARY-LONG.
+           10  FILLER             PICTURE X(1). 
+           10  COMBL-FLD2         BINARY-LONG SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-CMP5.
+           10  FILLER             PICTURE X(1). 
+           10  CMP5-FLD1          PIC 9(18) COMP-5.
+           10  FILLER             PICTURE X(1). 
+           10  CMP5-FLD2          PIC 9(18) COMP-5 SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-CMP1.
+           10  FILLER             PICTURE X(1). 
+           10  CMP1-FLD1          COMP-1.
+           10  FILLER             PICTURE X(1). 
+           10  CMP1-FLD2          COMP-1 SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-CMP2.
+           10  FILLER             PICTURE X(1). 
+           10  CMP2-FLD1          COMP-2.
+           10  FILLER             PICTURE X(1). 
+           10  CMP2-FLD2          COMP-2 SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       PROCEDURE DIVISION.
+
+           MOVE LENGTH OF TESTPTR TO VLEN.
+           IF VLEN EQUAL 8
+               MOVE 64     TO BIT-MODE
+           ELSE
+               MOVE 32     TO BIT-MODE.
+           MOVE ALL "x"    TO TESTRECORD.
+           MOVE 1 TO TESTMODE.
+           MOVE ALL "x"    TO TSTREC2.
+           MOVE "22"       TO COMP-FLD2 (1:).
+           IF TSTREC2 = 'xxxxxx22'
+               MOVE 3 TO TESTMODE.
+           MOVE "12345678" TO COML-FLD2 (1:).
+           IF COML-FLD2 = 875770417
+             MOVE "Little-Endian" TO TESTEND
+           ELSE
+             MOVE "Big-Endian" TO TESTEND
+           END-IF.
+           MOVE LENGTH OF COMP-FLD1 TO VLEN.
+           IF VLEN = 2
+               MOVE 2 TO TESTMODE.
+           MOVE ALL "x"    TO TESTRECORD.
+
+           MOVE "COMP-FLD1" TO TESTNAME.
+           MOVE "11"        TO COMP-FLD1 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLD2" TO TESTNAME.
+           MOVE "22"       TO COMP-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLDO" TO TESTNAME.
+           MOVE "11"       TO COMP-FLDO (1) (1:2)
+           MOVE "22"       TO COMP-FLDO (2) (1:2)
+           MOVE "33"       TO COMP-FLDO (3) (1:2)
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLDS" TO TESTNAME.
+           MOVE "11"       TO COMP-FLDS (1) (1:2)
+           MOVE "22"       TO COMP-FLDS (2) (1:2)
+           MOVE "33"       TO COMP-FLDS (3) (1:2)
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLD3" TO TESTNAME.
+           MOVE "1234678"  TO COMP-FLD3 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLDL" TO TESTNAME.
+           MOVE "12345678" TO COMP-FLDL (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLDR" TO TESTNAME.
+           MOVE "12345678" TO COMP-FLDR (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COM1-FLD" TO TESTNAME.
+           MOVE "12345678" TO COM1-FLD1 (1:).
+           MOVE "12345678" TO COM1-FLD2 (1:).
+           MOVE "12345678" TO COM1-FLD3 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COM2-FLD" TO TESTNAME.
+           MOVE "12345678" TO COM2-FLD1 (1:).
+           MOVE "12345678" TO COM2-FLD2 (1:).
+           MOVE "12345678" TO COM2-FLD3 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COM3-FLD" TO TESTNAME.
+           MOVE "12345678" TO COM3-FLD1 (1:).
+           MOVE "12345678" TO COM3-FLD2 (1:).
+           MOVE "12345678" TO COM3-FLD3 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COM4-FLD" TO TESTNAME.
+           MOVE "12345678" TO COM4-FLD1 (1:).
+           MOVE "12345678" TO COM4-FLD2 (1:).
+           MOVE "12345678" TO COM4-FLD3 (1:).
+           MOVE "12345678" TO COM4-FLD4 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "NOSYNC" TO TESTNAME.
+           MOVE "12345678" TO COM5-FLD1 (1:).
+           MOVE "12345678" TO COM5-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "SYNC" TO TESTNAME.
+           MOVE "12345678" TO COM5S-FLD1 (1:).
+           MOVE "12345678" TO COM5S-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-3" TO TESTNAME.
+           MOVE "12345678" TO COM6-FLD1 (1:).
+           MOVE "12345678" TO COM6-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-1" TO TESTNAME.
+           MOVE "12345678" TO COM7-FLD1 (1:).
+           MOVE "12345678" TO COM7-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-2" TO TESTNAME.
+           MOVE "12345678" TO COM8-FLD1 (1:).
+           MOVE "12345678" TO COM8-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "SIGN L/T" TO TESTNAME.
+           MOVE -1 TO COM9-FLD1 .
+           MOVE -2 TO COM9-FLD2 .
+           MOVE -3 TO COM9-FLD3 .
+           MOVE -4 TO COM9-FLD4 .
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-X" TO TESTNAME.
+           MOVE "12345678" TO COMX-FLD1 (1:).
+           MOVE "12345678" TO COMX-FLD2 (1:).
+           MOVE "12345678" TO COMX-FLT (1:).
+           MOVE "12345678" TO COMX-DBL (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "BIN-SHORT" TO TESTNAME.
+           MOVE "12345678" TO COMS-FLD1 (1:).
+           MOVE "12345678" TO COMS-FLD2 (1:).
+           PERFORM CHECK-IT.
+           
+           MOVE "BIN-DBL" TO TESTNAME.
+           MOVE "12345678" TO COMD-FLD1 (1:).
+           MOVE "12345678" TO COMD-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "BIN-LNG" TO TESTNAME.
+           MOVE "12345678" TO COMBL-FLD1 (1:).
+           MOVE "12345678" TO COMBL-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-5" TO TESTNAME.
+           MOVE "12345678" TO CMP5-FLD1 (1:).
+           MOVE "12345678" TO CMP5-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "CMP-1" TO TESTNAME.
+           MOVE "12345678" TO CMP1-FLD1 (1:).
+           MOVE "12345678" TO CMP1-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "CMP-2" TO TESTNAME.
+           MOVE "12345678" TO CMP2-FLD1 (1:).
+           MOVE "12345678" TO CMP2-FLD2 (1:).
+           PERFORM CHECK-IT.
+           
+           DISPLAY TEST-MODE (TESTMODE) 
+                   TESTCASE " tests with " TESTFAIL " failed".
+           STOP RUN RETURNING 0.
+
+       CHECK-IT SECTION.
+       CHECK-01.
+           INSPECT TESTRECORD REPLACING TRAILING 'x' BY ' '.
+           ADD 1 TO TESTCASE.
+           PERFORM VARYING TESTNUM FROM 1 BY 1
+                     UNTIL TEST-NAME (TESTNUM) = TESTNAME
+                        OR TESTNUM > TESTMAX
+              CONTINUE
+           END-PERFORM.
+           IF TESTNUM > TESTMAX
+               DISPLAY TESTNAME " :NOT FOUND"
+               DISPLAY "           :   GOT: " TESTRECORD ":"
+               ADD 1 TO TESTFAIL
+               MOVE ALL "x"    TO TESTRECORD
+               GO TO CHECK-EXIT
+           END-IF.
+           MOVE TEST-RESULT (TESTNUM, TESTMODE) TO TESTRESULT.
+           COMPUTE TESTIDX = TESTMODE + 3.
+           IF BIT-MODE = 32
+           AND TEST-RESULT (TESTNUM, TESTIDX) NOT = SPACES
+               MOVE TEST-RESULT (TESTNUM, TESTIDX) TO TESTRESULT.
+           IF TESTRESULT = SPACES
+               MOVE TEST-RESULT (TESTNUM, 1) TO TESTRESULT.
+           IF TESTRESULT NOT = TESTRECORD
+               DISPLAY TESTNAME
+                       " :FAILED:  Mode " BIT-MODE 
+                       " " TEST-MODE (TESTMODE)
+                       ", Case " TESTCASE ", " TESTEND
+               DISPLAY "           :   GOT: " TESTRECORD ":"
+               DISPLAY "           :EXPECT: " TESTRESULT ":"
+               ADD 1 TO TESTFAIL
+           END-IF.
+           MOVE ALL "x"    TO TESTRECORD.
+       CHECK-EXIT.
+           EXIT.
+           
+])
+
+AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [MF        24 tests with 00 failed
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([default SYNC])
+AT_KEYWORDS([Numeric])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       FILE SECTION.
+      
+       WORKING-STORAGE SECTION.
+      
+       77  VLEN                   PIC 99 VALUE 1.
+       77  TESTMODE               PIC 99 VALUE 1.
+       77  TESTIDX                PIC 99 VALUE 1.
+       77  BIT-MODE               PIC 99 VALUE 32.
+       77  TESTNUM                PIC 99 VALUE 0.
+       77  TESTMAX                PIC 99 VALUE 24.
+       77  TESTCASE               PIC 99 VALUE 0.
+       77  TESTFAIL               PIC 99 VALUE 0.
+       77  TESTEND                PIC X(15) VALUE " ".
+       77  TESTNAME               PIC X(10) VALUE " ".
+       77  TESTRESULT             PIC X(40) VALUE " ".
+       77  TESTPTR                USAGE POINTER.
+
+       01  TEST-MODES.
+           05  FILLER PIC X(10) VALUE "MF".
+           05  FILLER PIC X(10) VALUE "IBMCOMP".
+           05  FILLER PIC X(10) VALUE "DEFAULT".
+
+       01  FILLER REDEFINES TEST-MODES.
+           05  FILLER             OCCURS 3 TIMES.
+              10  TEST-MODE       PIC X(10).
+
+       01  TEST-CASES.
+        05 FILLER PIC X(10) VALUE "COMP-FLD1".
+        05 FILLER PIC X(40) VALUE "xxxxx1".
+        05 FILLER PIC X(40) VALUE "xxxxx11".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLD2".
+        05 FILLER PIC X(40) VALUE "xxxxx22".
+        05 FILLER PIC X(40) VALUE "xxxxxx22".
+        05 FILLER PIC X(40) VALUE "xxxxxx22".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLDO".
+        05 FILLER PIC X(40) VALUE "xxxxxxx11xxx22xxx33".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLDS".
+        05 FILLER PIC X(40) VALUE "xxxxxxx11xxx22xxx33".
+        05 FILLER PIC X(40) VALUE "xxxxxxxx11xxxx22xxxx33".
+        05 FILLER PIC X(40) VALUE "xxxxxxxx11xxxx22xxxx33".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLD3".
+        05 FILLER PIC X(40) VALUE "xxxxx123".
+        05 FILLER PIC X(40) VALUE "xxxxxxxx1234".
+        05 FILLER PIC X(40) VALUE "xxxxxxxx1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLDL".
+        05 FILLER PIC X(40) VALUE "xxxxx1".
+        05 FILLER PIC X(40) VALUE "xxxxxx12".
+        05 FILLER PIC X(40) VALUE "xxxxx1".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-FLDR".
+        05 FILLER PIC X(40) VALUE "xxxxx1".
+        05 FILLER PIC X(40) VALUE "xxxxxx12".
+        05 FILLER PIC X(40) VALUE "xxxxx1".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COM1-FLD".
+        05 FILLER PIC X(40) VALUE "xxxxx12xxx123xxx12345678".
+        05 FILLER PIC X(40) VALUE "xxxxxx12xxxx1234xxxx12345678".
+        05 FILLER PIC X(40) VALUE "xxxxxx12xxxx1234xxxxxxxx12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "xxxxxx12xxxx1234xxxx12345678".
+
+        05 FILLER PIC X(10) VALUE "COM2-FLD".
+        05 FILLER PIC X(40) VALUE "xxxxx12345xxx1234567xxx12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COM3-FLD".
+        05 FILLER PIC X(40) VALUE "xxxxx123xxx1234xxx1234567".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COM4-FLD".
+        05 FILLER PIC X(40) VALUE "x123456x1234x123456x123".
+        05 FILLER PIC X(40) VALUE "xxxx12345678xxxx1234x12345678x1234".
+        05 FILLER PIC X(40) 
+           VALUE "xxxxxxxx12345678xxxx1234x12345678x1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "xxxx12345678xxxx1234x12345678x1234".
+
+        05 FILLER PIC X(10) VALUE "NOSYNC".
+        05 FILLER PIC X(40) VALUE "x123456x123".
+        05 FILLER PIC X(40) VALUE "x12345678x1234".
+        05 FILLER PIC X(40) VALUE "x12345678x1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "SYNC".
+        05 FILLER PIC X(40) VALUE "x123456x1234".
+        05 FILLER PIC X(40) VALUE "xxxx12345678xxxx1234".
+        05 FILLER PIC X(40) VALUE "xxxxxxxx12345678xxxx1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "xxxx12345678xxxx1234".
+
+        05 FILLER PIC X(10) VALUE "COMP-3".
+        05 FILLER PIC X(40) VALUE "x1234567x1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-1".
+        05 FILLER PIC X(40) VALUE "12341234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-2".
+        05 FILLER PIC X(40) VALUE "1234567812345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "SIGN L/T".
+        05 FILLER PIC X(40) VALUE "x-01x02-x-03x04-".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "COMP-X".
+        05 FILLER PIC X(40) VALUE "x123x1234567x1234x12345678".
+        05 FILLER PIC X(40) VALUE "x123x1234567xxxx1234xxxx12345678".
+        05 FILLER PIC X(40) VALUE "x123x1234567xxxx1234xxxx12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "BIN-SHORT".
+        05 FILLER PIC X(40) VALUE "x12xx12".
+        05 FILLER PIC X(40) VALUE "x12xx12".
+        05 FILLER PIC X(40) VALUE "x12xx12".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "BIN-DBL".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
+
+        05 FILLER PIC X(10) VALUE "BIN-LNG".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "x1234xxx1234".
+
+        05 FILLER PIC X(10) VALUE "COMP-5".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
+        05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
+        05 FILLER PIC X(40) VALUE "x12345678xxxxxxx12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
+
+        05 FILLER PIC X(10) VALUE "CMP-1".
+        05 FILLER PIC X(40) VALUE "x1234x1234".
+        05 FILLER PIC X(40) VALUE "x1234xxx1234".
+        05 FILLER PIC X(40) VALUE "x1234xxx1234".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+
+        05 FILLER PIC X(10) VALUE "CMP-2".
+        05 FILLER PIC X(40) VALUE "x12345678x12345678".
+        05 FILLER PIC X(40) VALUE "x12345678xxxxxxx12345678".
+        05 FILLER PIC X(40) VALUE "x12345678xxxxxxx12345678".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE " ".
+        05 FILLER PIC X(40) VALUE "x12345678xxx12345678".
+
+       01  FILLER REDEFINES TEST-CASES.
+           05  FILLER             OCCURS 24 TIMES.
+              10  TEST-NAME       PIC X(10).
+              10  TEST-RESULTS.
+                15  MF-64RESULT     PIC X(40).
+                15  IBM-64RESULT    PIC X(40).
+                15  C2002-64RESULT  PIC X(40).
+                15  MF-32RESULT     PIC X(40).
+                15  IBM-32RESULT    PIC X(40).
+                15  C2002-32RESULT  PIC X(40).
+              10  FILLER REDEFINES TEST-RESULTS.
+                15  TEST-RESULT   PIC X(40) OCCURS 6 TIMES.
+
+       01  TESTRECORD             PIC X(40).
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTREC1.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD1          PICTURE S9(2) COMP-4. 
+           10  FILLER             PICTURE X(5).
+      
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTREC2.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD2          PICTURE S9(4) COMP-4 SYNC . 
+      
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTREC3.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLD3          PICTURE S9(6) COMP-4 SYNC. 
+           10  FILLER             PICTURE X(5).
+      
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTRECL.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLDL          PICTURE S9(2) COMP-4 SYNC LEFT. 
+           10  FILLER             PICTURE X(5).
+      
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTRECR.
+           10  FILLER             PICTURE X(5). 
+           10  COMP-FLDR          PICTURE S9(2) COMP-4 SYNC RIGHT. 
+           10  FILLER             PICTURE X(5).
+      
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTRECS.
+           10  FILLER             PICTURE X(5). 
+           10  FILLER OCCURS 3 TIMES.
+               15  FILLER         PICTURE X(2).
+               15  COMP-FLDS      PICTURE S9(4) COMP-4 SYNC . 
+               15  FILLER         PICTURE X(1).
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTRECO.
+           10  FILLER             PICTURE X(5). 
+           10  FILLER OCCURS 3 TIMES.
+               15  FILLER         PICTURE X(2).
+               15  COMP-FLDO      PICTURE S9(4) COMP-4 . 
+               15  FILLER         PICTURE X(1).
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP SYNC COMP-4.
+         05  GRP1.
+           10  FILLER             PICTURE X(5). 
+           10  COM1-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM1-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(3). 
+           10  COM1-FLD3          PICTURE S9(18). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP2 SIGN LEADING SEPARATE.
+         05  GRP2-1.
+           10  FILLER             PICTURE X(5). 
+           10  COM2-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM2-FLD2          PICTURE S9(6) SIGN TRAILING SEPARATE. 
+           10  FILLER             PICTURE X(3). 
+           10  COM2-FLD3          PICTURE S9(7). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP3 COMP-3.
+         05  GRP3-1.
+           10  FILLER             PICTURE X(5). 
+      * Following is not allowed by Micro Focus
+      *    10  COM3-FLD1          PICTURE S9(4) COMP-4. 
+           10  COM3-FLD1          PICTURE S9(4). 
+           10  FILLER             PICTURE X(3). 
+           10  COM3-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(3). 
+         05  GRP3-2.
+           10  COM3-FLD3          PICTURE S9(13). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP4 COMP-4.
+         05  GRP4-1 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD2          PICTURE S9(7). 
+           10  FILLER             PICTURE X(1). 
+         05  GRP4-2.
+           10  COM4-FLD3          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM4-FLD4          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP5 COMP-4.
+           10  FILLER             PICTURE X(1). 
+           10  COM5-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM5-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP5S COMP-4 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD1         PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD2         PICTURE S9(7). 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP6 COMP-3.
+           10  FILLER             PICTURE X(1). 
+           10  COM6-FLD1          PICTURE S9(13). 
+           10  FILLER             PICTURE X(1). 
+           10  COM6-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP7 COMP-1.
+           10  COM7-FLD1          .
+           10  COM7-FLD2          .
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP8 COMP-2.
+           10  COM8-FLD1          .
+           10  COM8-FLD2          .
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP9.
+         05  GRP9-1 SIGN LEADING SEPARATE.
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD1          PICTURE S9(2). 
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD2          PICTURE S9(2) SIGN TRAILING SEPARATE. 
+           10  FILLER             PICTURE X(1). 
+         05  GRP9-2 SIGN TRAILING SEPARATE.
+           10  COM9-FLD3          PICTURE S9(2) SIGN LEADING SEPARATE. 
+           10  FILLER             PICTURE X(1). 
+           10  COM9-FLD4          PICTURE S9(2). 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRPX.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-FLD1          PICTURE X(3) COMP-X SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-FLD2          PICTURE X(7) COMP-X.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-FLT           COMP-1 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COMX-DBL           COMP-2 SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-BSHORT.
+           10  FILLER             PICTURE X(1). 
+           10  COMS-FLD1          BINARY-SHORT.
+           10  FILLER             PICTURE X(2). 
+           10  COMS-FLD2          BINARY-SHORT SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-BLONG.
+           10  FILLER             PICTURE X(1). 
+           10  COML-FLD1          BINARY-LONG.
+           10  FILLER             PICTURE X(1). 
+           10  COML-FLD2          BINARY-LONG SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-BDBL.
+           10  FILLER             PICTURE X(1). 
+           10  COMD-FLD1          BINARY-DOUBLE.
+           10  FILLER             PICTURE X(1). 
+           10  COMD-FLD2          BINARY-DOUBLE SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-BLNG.
+           10  FILLER             PICTURE X(1). 
+           10  COMBL-FLD1         BINARY-LONG.
+           10  FILLER             PICTURE X(1). 
+           10  COMBL-FLD2         BINARY-LONG SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-CMP5.
+           10  FILLER             PICTURE X(1). 
+           10  CMP5-FLD1          PIC 9(18) COMP-5.
+           10  FILLER             PICTURE X(1). 
+           10  CMP5-FLD2          PIC 9(18) COMP-5 SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-CMP1.
+           10  FILLER             PICTURE X(1). 
+           10  CMP1-FLD1          COMP-1.
+           10  FILLER             PICTURE X(1). 
+           10  CMP1-FLD2          COMP-1 SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TST-CMP2.
+           10  FILLER             PICTURE X(1). 
+           10  CMP2-FLD1          COMP-2.
+           10  FILLER             PICTURE X(1). 
+           10  CMP2-FLD2          COMP-2 SYNC.
+           10  FILLER             PICTURE X(1). 
+
+       PROCEDURE DIVISION.
+
+           MOVE LENGTH OF TESTPTR TO VLEN.
+           IF VLEN EQUAL 8
+               MOVE 64     TO BIT-MODE
+           ELSE
+               MOVE 32     TO BIT-MODE.
+           MOVE ALL "x"    TO TESTRECORD.
+           MOVE 1 TO TESTMODE.
+           MOVE ALL "x"    TO TSTREC2.
+           MOVE "22"       TO COMP-FLD2 (1:).
+           IF TSTREC2 = 'xxxxxx22'
+               MOVE 3 TO TESTMODE.
+           MOVE "12345678" TO COML-FLD2 (1:).
+           IF COML-FLD2 = 875770417
+             MOVE "Little-Endian" TO TESTEND
+           ELSE
+             MOVE "Big-Endian" TO TESTEND
+           END-IF.
+           MOVE LENGTH OF COMP-FLD1 TO VLEN.
+           IF VLEN = 2
+               MOVE 2 TO TESTMODE.
+           MOVE ALL "x"    TO TESTRECORD.
+
+           MOVE "COMP-FLD1" TO TESTNAME.
+           MOVE "11"        TO COMP-FLD1 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLD2" TO TESTNAME.
+           MOVE "22"       TO COMP-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLDO" TO TESTNAME.
+           MOVE "11"       TO COMP-FLDO (1) (1:2)
+           MOVE "22"       TO COMP-FLDO (2) (1:2)
+           MOVE "33"       TO COMP-FLDO (3) (1:2)
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLDS" TO TESTNAME.
+           MOVE "11"       TO COMP-FLDS (1) (1:2)
+           MOVE "22"       TO COMP-FLDS (2) (1:2)
+           MOVE "33"       TO COMP-FLDS (3) (1:2)
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLD3" TO TESTNAME.
+           MOVE "1234678"  TO COMP-FLD3 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLDL" TO TESTNAME.
+           MOVE "12345678" TO COMP-FLDL (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-FLDR" TO TESTNAME.
+           MOVE "12345678" TO COMP-FLDR (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COM1-FLD" TO TESTNAME.
+           MOVE "12345678" TO COM1-FLD1 (1:).
+           MOVE "12345678" TO COM1-FLD2 (1:).
+           MOVE "12345678" TO COM1-FLD3 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COM2-FLD" TO TESTNAME.
+           MOVE "12345678" TO COM2-FLD1 (1:).
+           MOVE "12345678" TO COM2-FLD2 (1:).
+           MOVE "12345678" TO COM2-FLD3 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COM3-FLD" TO TESTNAME.
+           MOVE "12345678" TO COM3-FLD1 (1:).
+           MOVE "12345678" TO COM3-FLD2 (1:).
+           MOVE "12345678" TO COM3-FLD3 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COM4-FLD" TO TESTNAME.
+           MOVE "12345678" TO COM4-FLD1 (1:).
+           MOVE "12345678" TO COM4-FLD2 (1:).
+           MOVE "12345678" TO COM4-FLD3 (1:).
+           MOVE "12345678" TO COM4-FLD4 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "NOSYNC" TO TESTNAME.
+           MOVE "12345678" TO COM5-FLD1 (1:).
+           MOVE "12345678" TO COM5-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "SYNC" TO TESTNAME.
+           MOVE "12345678" TO COM5S-FLD1 (1:).
+           MOVE "12345678" TO COM5S-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-3" TO TESTNAME.
+           MOVE "12345678" TO COM6-FLD1 (1:).
+           MOVE "12345678" TO COM6-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-1" TO TESTNAME.
+           MOVE "12345678" TO COM7-FLD1 (1:).
+           MOVE "12345678" TO COM7-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-2" TO TESTNAME.
+           MOVE "12345678" TO COM8-FLD1 (1:).
+           MOVE "12345678" TO COM8-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "SIGN L/T" TO TESTNAME.
+           MOVE -1 TO COM9-FLD1 .
+           MOVE -2 TO COM9-FLD2 .
+           MOVE -3 TO COM9-FLD3 .
+           MOVE -4 TO COM9-FLD4 .
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-X" TO TESTNAME.
+           MOVE "12345678" TO COMX-FLD1 (1:).
+           MOVE "12345678" TO COMX-FLD2 (1:).
+           MOVE "12345678" TO COMX-FLT (1:).
+           MOVE "12345678" TO COMX-DBL (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "BIN-SHORT" TO TESTNAME.
+           MOVE "12345678" TO COMS-FLD1 (1:).
+           MOVE "12345678" TO COMS-FLD2 (1:).
+           PERFORM CHECK-IT.
+           
+           MOVE "BIN-DBL" TO TESTNAME.
+           MOVE "12345678" TO COMD-FLD1 (1:).
+           MOVE "12345678" TO COMD-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "BIN-LNG" TO TESTNAME.
+           MOVE "12345678" TO COMBL-FLD1 (1:).
+           MOVE "12345678" TO COMBL-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "COMP-5" TO TESTNAME.
+           MOVE "12345678" TO CMP5-FLD1 (1:).
+           MOVE "12345678" TO CMP5-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "CMP-1" TO TESTNAME.
+           MOVE "12345678" TO CMP1-FLD1 (1:).
+           MOVE "12345678" TO CMP1-FLD2 (1:).
+           PERFORM CHECK-IT.
+
+           MOVE "CMP-2" TO TESTNAME.
+           MOVE "12345678" TO CMP2-FLD1 (1:).
+           MOVE "12345678" TO CMP2-FLD2 (1:).
+           PERFORM CHECK-IT.
+           
+           DISPLAY TEST-MODE (TESTMODE) 
+                   TESTCASE " tests with " TESTFAIL " failed".
+           STOP RUN RETURNING 0.
+
+       CHECK-IT SECTION.
+       CHECK-01.
+           INSPECT TESTRECORD REPLACING TRAILING 'x' BY ' '.
+           ADD 1 TO TESTCASE.
+           PERFORM VARYING TESTNUM FROM 1 BY 1
+                     UNTIL TEST-NAME (TESTNUM) = TESTNAME
+                        OR TESTNUM > TESTMAX
+              CONTINUE
+           END-PERFORM.
+           IF TESTNUM > TESTMAX
+               DISPLAY TESTNAME " :NOT FOUND"
+               DISPLAY "           :   GOT: " TESTRECORD ":"
+               ADD 1 TO TESTFAIL
+               MOVE ALL "x"    TO TESTRECORD
+               GO TO CHECK-EXIT
+           END-IF.
+           MOVE TEST-RESULT (TESTNUM, TESTMODE) TO TESTRESULT.
+           COMPUTE TESTIDX = TESTMODE + 3.
+           IF BIT-MODE = 32
+           AND TEST-RESULT (TESTNUM, TESTIDX) NOT = SPACES
+               MOVE TEST-RESULT (TESTNUM, TESTIDX) TO TESTRESULT.
+           IF TESTRESULT = SPACES
+               MOVE TEST-RESULT (TESTNUM, 1) TO TESTRESULT.
+           IF TESTRESULT NOT = TESTRECORD
+               DISPLAY TESTNAME
+                       " :FAILED:  Mode " BIT-MODE 
+                       " " TEST-MODE (TESTMODE)
+                       ", Case " TESTCASE ", " TESTEND
+               DISPLAY "           :   GOT: " TESTRECORD ":"
+               DISPLAY "           :EXPECT: " TESTRESULT ":"
+               ADD 1 TO TESTFAIL
+           END-IF.
+           MOVE ALL "x"    TO TESTRECORD.
+       CHECK-EXIT.
+           EXIT.
+           
+])
+
+AT_CHECK([cobc -x -std=default -w prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [DEFAULT   24 tests with 00 failed
 ], [])
 
 AT_CLEANUP

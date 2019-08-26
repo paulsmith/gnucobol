@@ -1,4 +1,8 @@
 
+2019-08-26  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Clean up 'fcd' tables dynamically allocated via free_extfh_fcd
+
 2019-08-25  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.h: allow to force aligned pointer access by external
