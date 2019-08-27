@@ -116,7 +116,7 @@ CB_CONFIG_BOOLEAN (cb_sticky_linkage, "sticky-linkage",
 	_("LINKAGE-SECTION items remain allocated between invocations"))
 
 CB_CONFIG_BOOLEAN (cb_move_ibm, "move-ibm",	/* counterpart for MF's BYTE-MODE-MOVE */
-	_("MOVE operates as on IBM (left to right, byte by byte)"))
+	_("MOVE operates as on IBM (left to right, byte by byte), otherwise no propagating move"))
 
 CB_CONFIG_BOOLEAN (cb_perform_osvs, "perform-osvs",
 	_("exit point of any currently executing perform is recognized if reached"))

@@ -189,15 +189,6 @@ CB_FLAG_ON (cb_flag_c_decl_for_static_call, 1, "gen-c-decl-static-call",
 CB_FLAG (cb_mf_files, 1, "mf-files",
 	 _("  -fmf-files           Sequential & Relative files will match Micro Focus format"))
 
-CB_FLAG (cb_flag_arithmetic_osvs, 1, "arithmetic-osvs",
-	 _("  -farithmetic-osvs    Round down number of decimals in intermediate results\n"
-	   "                        to number of decimals in final result field\n"
-	   "                       default: no rounding, More accurate "))
-
-CB_FLAG (cb_flag_move_ibm, 1, "move-ibm",
-	 _("  -fmove-ibm           MOVE operates as on IBM (left to right, byte by byte)\n"
-	   "                       default: no propagating move"))
-
 CB_FLAG_ON (cb_listing_with_header, 1, "theaders",
 	_("  -fno-theaders         suppress all headers and output of compilation\n"
 	  "                        options from listing while keeping page breaks"))

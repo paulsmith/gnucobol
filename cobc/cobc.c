@@ -2577,8 +2577,6 @@ process_command_line (const int argc, char **argv)
 	int			error_all_warnings = 0;
 
 	cb_mf_ibm_comp = -1;
-	cb_flag_arithmetic_osvs = -1;
-	cb_flag_move_ibm = -1;
 
 #if defined (_WIN32) || defined (__DJGPP__)
 	/* Translate command line arguments from DOS/WIN to UNIX style */
@@ -3472,17 +3470,6 @@ process_command_line (const int argc, char **argv)
 	} else if (cb_mf_ibm_comp == 1) {	/* IBMCOMP */
 		cb_binary_size = CB_BINARY_SIZE_2_4_8;
 		cb_synchronized_clause = CB_OK;
-	}
-
-	if (cb_flag_arithmetic_osvs == 1) {	/* -farithmetic-osvs overrides stdxxx.conf */
-		cb_arithmetic_osvs = 1;
-	} else if(cb_flag_arithmetic_osvs == 0) {
-		cb_arithmetic_osvs = 0;
-	}
-	if (cb_flag_move_ibm == 1) {		/* -fmove-ibm overrides stdxxx.conf */
-		cb_move_ibm = 1;
-	} else if(cb_flag_move_ibm == 0) {
-		cb_move_ibm = 0;
 	}
 
 	return cob_optind;
