@@ -9948,6 +9948,10 @@ output_error_handler (struct cb_program *prog)
 	}
 	output_line ("if (!(cob_glob_ptr->cob_error_file->flag_select_features & COB_SELECT_FILE_STATUS)) {");
 	output_line ("\tcob_fatal_error (COB_FERROR_FILE);");
+	if (cb_standard_error_handler) {		/* Emit 'goto' to avoid unreferenced label C warning */
+		output_line ("    goto %s%d;", CB_PREFIX_LABEL,
+				     CB_LABEL (cb_standard_error_handler)->id);
+	}
 	output_line ("}");
 	if (seen) {
 		output_line ("break;");
