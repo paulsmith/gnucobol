@@ -59,6 +59,8 @@
 #include <fcntl.h>
 #endif
 
+static void free_extfh_fcd (void);	/* Free all tables used for EXTFH interface */
+
 #ifdef	_WIN32
 
 #define WIN32_LEAN_AND_MEAN
@@ -112,7 +114,6 @@
 #include "libcob.h"
 #include "coblocal.h"
 
-static void free_extfh_fcd ();	/* Free all tables used for EXTFH interface */
 #ifdef	WITH_DB
 
 #include <db.h>
@@ -976,21 +977,21 @@ cob_write_dict (cob_file *f, char *filename)
 			fprintf(fo,",fixed");
 	}
 	fprintf(fo," ");
-	fprintf(fo,"recsz=%ld ",f->record_max);
+	fprintf(fo,"recsz=%ld ",(long)(f->record_max));
 	if(f->record_min != f->record_max)
-		fprintf(fo,"minsz=%ld ",f->record_min);
+		fprintf(fo,"minsz=%ld ",(long)(f->record_min));
 
 	if (f->organization == COB_ORG_INDEXED) {
 		/* Write Key information from cob_file */
-		fprintf(fo,"nkeys=%ld ",f->nkeys);
+		fprintf(fo,"nkeys=%ld ",(long)(f->nkeys));
 		for(idx=0; idx < f->nkeys; idx++) {
 			fprintf(fo,"key%d=(",idx+1);
 			if(f->keys[idx].count_components <= 1) {
-				fprintf(fo,"%d:%ld",f->keys[idx].offset,f->keys[idx].field->size);
+				fprintf(fo,"%d:%ld",f->keys[idx].offset,(long)(f->keys[idx].field->size));
 			} else {
 				for(k=0; k < f->keys[idx].count_components; k++) {
-					fprintf(fo,"%ld:%ld",f->keys[idx].component[k]->data - f->record->data,
-										f->keys[idx].component[k]->size);
+					fprintf(fo,"%ld:%ld",(long)(f->keys[idx].component[k]->data - f->record->data),
+										(long)(f->keys[idx].component[k]->size));
 					if(k+1 < f->keys[idx].count_components)
 						fprintf(fo,",");
 				}
@@ -1223,6 +1224,8 @@ cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
 					} else if (*p == 'x') {
 						subchr = (unsigned char) strtol (&p[2], NULL, 16);
 						p += 5;
+					} else {
+						subchr = 0;
 					}
 					if (keyn > f->nkeys)		/* Skip this */
 						continue;
@@ -4884,12 +4887,14 @@ bdb_err_event (DB_ENV *env, u_int32_t event, void *info)
 		msg = "FailChk_Panic";
 		/* fall-thru */
 #endif
+#ifdef DB_EVENT_PANIC
 	case DB_EVENT_PANIC:
 		if (msg != NULL) msg = "Panic";
 		/* unset BDB environment as we cannot do anything with it any more */
 		bdb_env = NULL;
 		bdb_err_tear_down = 1;
 		break;
+#endif
 #ifdef DB_EVENT_EVENT_MUTEX_DIED
 	case DB_EVENT_MUTEX_DIED:
 		msg = "Mutex Died"; break;
@@ -4953,7 +4958,9 @@ join_environment (void)
 #endif
 	bdb_env->lock_id (bdb_env, &bdb_lock_id);
 	bdb_env->set_lk_detect (bdb_env, DB_LOCK_DEFAULT);
+#if (DB_VERSION_MAJOR > 4)
 	bdb_env->set_event_notify(bdb_env, (void*)bdb_err_event);
+#endif
 }
 
 /* Impose lock on 'file' using BDB locking */

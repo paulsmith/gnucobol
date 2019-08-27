@@ -1,7 +1,8 @@
 
-2019-08-26  Ron Norman <rjn@inglenet.com>
+2019-08-27  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Clean up 'fcd' tables dynamically allocated via free_extfh_fcd
+	            fix some compile warnings
 
 2019-08-25  Simon Sobisch <simonsobisch@gnu.org>
 
