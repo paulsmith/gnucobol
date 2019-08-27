@@ -1090,6 +1090,7 @@ validate_pic (struct cb_field *f)
 
 	/* Check for Group attributes to be carried to elementary field */
 	if (!f->flag_validated
+	 && cb_nonnumeric_with_numeric_group_usage == CB_OK
 	 && !f->children) {
 		if (f->usage == CB_USAGE_DISPLAY
 		 && f->pic
@@ -1123,15 +1124,15 @@ validate_pic (struct cb_field *f)
 			struct cb_field *p;
 			for (p = f->parent; p; p = p->parent) {
 				if (p->flag_synchronized) {
-					f->flag_synchronized = 1;
+						f->flag_synchronized = 1;
 					break;
 				}
 			}
 		}
 		if (f->pic
-		&&  f->pic->category == CB_CATEGORY_NUMERIC
-		&&  f->flag_sign_separate == 0
-		&&  f->flag_sign_leading == 0) {
+		 && f->pic->category == CB_CATEGORY_NUMERIC
+		 && f->flag_sign_separate == 0
+		 && f->flag_sign_leading == 0) {
 			struct cb_field *p;
 			for (p = f->parent; p; p = p->parent) {
 				if (p->flag_sign_separate

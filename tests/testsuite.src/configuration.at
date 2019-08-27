@@ -508,6 +508,8 @@ test.conf: missing definitions:
 	no definition of 'continue-after'
 	no definition of 'goto-entry'
 	no definition of 'depending-on-not-fixed'
+	no definition of 'binary-sync-clause'
+	no definition of 'nonnumeric-with-numeric-group-usage'
 ])
 
 AT_CLEANUP

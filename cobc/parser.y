@@ -6782,10 +6782,12 @@ usage:
 | SIGNED_SHORT
   {
 	check_and_set_usage (CB_USAGE_SIGNED_SHORT);
+	current_field->flag_synchronized = 1;
   }
 | SIGNED_INT
   {
 	check_and_set_usage (CB_USAGE_SIGNED_INT);
+	current_field->flag_synchronized = 1;
   }
 | SIGNED_LONG
   {
@@ -6794,14 +6796,17 @@ usage:
 #else
 	check_and_set_usage (CB_USAGE_SIGNED_LONG);
 #endif
+	current_field->flag_synchronized = 1;
   }
 | UNSIGNED_SHORT
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_SHORT);
+	current_field->flag_synchronized = 1;
   }
 | UNSIGNED_INT
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_INT);
+	current_field->flag_synchronized = 1;
   }
 | UNSIGNED_LONG
   {
@@ -6810,6 +6815,7 @@ usage:
 #else
 	check_and_set_usage (CB_USAGE_UNSIGNED_LONG);
 #endif
+	current_field->flag_synchronized = 1;
   }
 | BINARY_CHAR _signed
   {
@@ -6822,32 +6828,38 @@ usage:
 | BINARY_SHORT _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_SHORT);
-	current_field->flag_ignore_sync = 1;
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_SHORT UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_SHORT);
-	current_field->flag_ignore_sync = 1;
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_LONG _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_INT);
-	current_field->flag_ignore_sync = 1;
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_LONG UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_INT);
-	current_field->flag_ignore_sync = 1;
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_DOUBLE _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_LONG);
-	current_field->flag_ignore_sync = 1;
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_DOUBLE UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_LONG);
-	current_field->flag_ignore_sync = 1;
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_C_LONG _signed
   {

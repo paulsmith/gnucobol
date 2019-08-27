@@ -3954,6 +3954,7 @@ main (int argc, char **argv)
    /* call COBOL program (initialization missing)
       note: COBOL program terminates the program by STOP RUN */
    (void)callee (p1, p2);
+   return 0;
 }
 ]])
 
@@ -15918,14 +15919,14 @@ AT_DATA([prog.cob], [
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP SYNC COMP-4.
+        02  TSTGRP.
          05  GRP1.
            10  FILLER             PICTURE X(5). 
-           10  COM1-FLD1          PICTURE S9(4). 
+           10  COM1-FLD1          PICTURE S9(4) SYNC COMP-4. 
            10  FILLER             PICTURE X(3). 
-           10  COM1-FLD2          PICTURE S9(6). 
+           10  COM1-FLD2          PICTURE S9(6) SYNC COMP-4. 
            10  FILLER             PICTURE X(3). 
-           10  COM1-FLD3          PICTURE S9(18). 
+           10  COM1-FLD3          PICTURE S9(18) SYNC COMP-4. 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP2 SIGN LEADING SEPARATE.
@@ -15938,55 +15939,53 @@ AT_DATA([prog.cob], [
            10  COM2-FLD3          PICTURE S9(7). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP3 COMP-3.
+        02  TSTGRP3.
          05  GRP3-1.
            10  FILLER             PICTURE X(5). 
-      * Following is not allowed by Micro Focus
-      *    10  COM3-FLD1          PICTURE S9(4) COMP-4. 
-           10  COM3-FLD1          PICTURE S9(4). 
+           10  COM3-FLD1          PICTURE S9(4) COMP-3. 
            10  FILLER             PICTURE X(3). 
-           10  COM3-FLD2          PICTURE S9(6). 
+           10  COM3-FLD2          PICTURE S9(6) COMP-3. 
            10  FILLER             PICTURE X(3). 
          05  GRP3-2.
-           10  COM3-FLD3          PICTURE S9(13). 
+           10  COM3-FLD3          PICTURE S9(13) COMP-3. 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP4 COMP-4.
-         05  GRP4-1 SYNC.
+        02  TSTGRP4.
+         05  GRP4-1.
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD1          PICTURE S9(13). 
+           10  COM4-FLD1          PICTURE S9(13) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD2          PICTURE S9(7). 
+           10  COM4-FLD2          PICTURE S9(7) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
          05  GRP4-2.
-           10  COM4-FLD3          PICTURE S9(13). 
+           10  COM4-FLD3          PICTURE S9(13) COMP-4. 
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD4          PICTURE S9(6). 
-           10  FILLER             PICTURE X(1). 
-
-       01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP5 COMP-4.
-           10  FILLER             PICTURE X(1). 
-           10  COM5-FLD1          PICTURE S9(13). 
-           10  FILLER             PICTURE X(1). 
-           10  COM5-FLD2          PICTURE S9(6). 
+           10  COM4-FLD4          PICTURE S9(6) COMP-4. 
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP5S COMP-4 SYNC.
+        02  TSTGRP5.
            10  FILLER             PICTURE X(1). 
-           10  COM5S-FLD1         PICTURE S9(13). 
+           10  COM5-FLD1          PICTURE S9(13) COMP-4. 
            10  FILLER             PICTURE X(1). 
-           10  COM5S-FLD2         PICTURE S9(7). 
+           10  COM5-FLD2          PICTURE S9(6) COMP-4. 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP5S.
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD1         PICTURE S9(13) COMP-4 SYNC. 
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD2         PICTURE S9(7) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP6 COMP-3.
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
            10  COM6-FLD1          PICTURE S9(13). 
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
            10  COM6-FLD2          PICTURE S9(6). 
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP7 COMP-1.
@@ -16230,7 +16229,7 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO CMP2-FLD2 (1:).
            PERFORM CHECK-IT.
            
-           DISPLAY TEST-MODE (TESTMODE) 
+           DISPLAY BIT-MODE ":" TEST-MODE (TESTMODE) 
                    TESTCASE " tests with " TESTFAIL " failed".
            STOP RUN RETURNING 0.
 
@@ -16274,7 +16273,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([cobc -x -std=ibm -w prog.cob ], [0], [], [])
 
-AT_CHECK([./prog], [0], [IBMCOMP   24 tests with 00 failed
+AT_CHECK([./prog], [0], [64:IBMCOMP   24 tests with 00 failed
 ], [])
 
 AT_CLEANUP
@@ -16572,14 +16571,14 @@ AT_DATA([prog.cob], [
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP SYNC COMP-4.
+        02  TSTGRP.
          05  GRP1.
            10  FILLER             PICTURE X(5). 
-           10  COM1-FLD1          PICTURE S9(4). 
+           10  COM1-FLD1          PICTURE S9(4) SYNC COMP-4. 
            10  FILLER             PICTURE X(3). 
-           10  COM1-FLD2          PICTURE S9(6). 
+           10  COM1-FLD2          PICTURE S9(6) SYNC COMP-4. 
            10  FILLER             PICTURE X(3). 
-           10  COM1-FLD3          PICTURE S9(18). 
+           10  COM1-FLD3          PICTURE S9(18) SYNC COMP-4. 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP2 SIGN LEADING SEPARATE.
@@ -16592,55 +16591,53 @@ AT_DATA([prog.cob], [
            10  COM2-FLD3          PICTURE S9(7). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP3 COMP-3.
+        02  TSTGRP3.
          05  GRP3-1.
            10  FILLER             PICTURE X(5). 
-      * Following is not allowed by Micro Focus
-      *    10  COM3-FLD1          PICTURE S9(4) COMP-4. 
-           10  COM3-FLD1          PICTURE S9(4). 
+           10  COM3-FLD1          PICTURE S9(4) COMP-3. 
            10  FILLER             PICTURE X(3). 
-           10  COM3-FLD2          PICTURE S9(6). 
+           10  COM3-FLD2          PICTURE S9(6) COMP-3. 
            10  FILLER             PICTURE X(3). 
          05  GRP3-2.
-           10  COM3-FLD3          PICTURE S9(13). 
+           10  COM3-FLD3          PICTURE S9(13) COMP-3. 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP4 COMP-4.
-         05  GRP4-1 SYNC.
+        02  TSTGRP4.
+         05  GRP4-1.
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD1          PICTURE S9(13). 
+           10  COM4-FLD1          PICTURE S9(13) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD2          PICTURE S9(7). 
+           10  COM4-FLD2          PICTURE S9(7) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
          05  GRP4-2.
-           10  COM4-FLD3          PICTURE S9(13). 
+           10  COM4-FLD3          PICTURE S9(13) COMP-4. 
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD4          PICTURE S9(6). 
-           10  FILLER             PICTURE X(1). 
-
-       01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP5 COMP-4.
-           10  FILLER             PICTURE X(1). 
-           10  COM5-FLD1          PICTURE S9(13). 
-           10  FILLER             PICTURE X(1). 
-           10  COM5-FLD2          PICTURE S9(6). 
+           10  COM4-FLD4          PICTURE S9(6) COMP-4. 
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP5S COMP-4 SYNC.
+        02  TSTGRP5.
            10  FILLER             PICTURE X(1). 
-           10  COM5S-FLD1         PICTURE S9(13). 
+           10  COM5-FLD1          PICTURE S9(13) COMP-4. 
            10  FILLER             PICTURE X(1). 
-           10  COM5S-FLD2         PICTURE S9(7). 
+           10  COM5-FLD2          PICTURE S9(6) COMP-4. 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP5S.
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD1         PICTURE S9(13) COMP-4 SYNC. 
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD2         PICTURE S9(7) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP6 COMP-3.
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
            10  COM6-FLD1          PICTURE S9(13). 
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
            10  COM6-FLD2          PICTURE S9(6). 
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP7 COMP-1.
@@ -16884,7 +16881,7 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO CMP2-FLD2 (1:).
            PERFORM CHECK-IT.
            
-           DISPLAY TEST-MODE (TESTMODE) 
+           DISPLAY BIT-MODE ":" TEST-MODE (TESTMODE) 
                    TESTCASE " tests with " TESTFAIL " failed".
            STOP RUN RETURNING 0.
 
@@ -16928,7 +16925,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([cobc -x -std=mf -w -fibmcomp prog.cob ], [0], [], [])
 
-AT_CHECK([./prog], [0], [IBMCOMP   24 tests with 00 failed
+AT_CHECK([./prog], [0], [64:IBMCOMP   24 tests with 00 failed
 ], [])
 
 AT_CLEANUP
@@ -17226,14 +17223,14 @@ AT_DATA([prog.cob], [
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP SYNC COMP-4.
+        02  TSTGRP.
          05  GRP1.
            10  FILLER             PICTURE X(5). 
-           10  COM1-FLD1          PICTURE S9(4). 
+           10  COM1-FLD1          PICTURE S9(4) SYNC COMP-4. 
            10  FILLER             PICTURE X(3). 
-           10  COM1-FLD2          PICTURE S9(6). 
+           10  COM1-FLD2          PICTURE S9(6) SYNC COMP-4. 
            10  FILLER             PICTURE X(3). 
-           10  COM1-FLD3          PICTURE S9(18). 
+           10  COM1-FLD3          PICTURE S9(18) SYNC COMP-4. 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP2 SIGN LEADING SEPARATE.
@@ -17246,55 +17243,53 @@ AT_DATA([prog.cob], [
            10  COM2-FLD3          PICTURE S9(7). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP3 COMP-3.
+        02  TSTGRP3.
          05  GRP3-1.
            10  FILLER             PICTURE X(5). 
-      * Following is not allowed by Micro Focus
-      *    10  COM3-FLD1          PICTURE S9(4) COMP-4. 
-           10  COM3-FLD1          PICTURE S9(4). 
+           10  COM3-FLD1          PICTURE S9(4) COMP-3. 
            10  FILLER             PICTURE X(3). 
-           10  COM3-FLD2          PICTURE S9(6). 
+           10  COM3-FLD2          PICTURE S9(6) COMP-3. 
            10  FILLER             PICTURE X(3). 
          05  GRP3-2.
-           10  COM3-FLD3          PICTURE S9(13). 
+           10  COM3-FLD3          PICTURE S9(13) COMP-3. 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP4 COMP-4.
-         05  GRP4-1 SYNC.
+        02  TSTGRP4.
+         05  GRP4-1.
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD1          PICTURE S9(13). 
+           10  COM4-FLD1          PICTURE S9(13) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD2          PICTURE S9(7). 
+           10  COM4-FLD2          PICTURE S9(7) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
          05  GRP4-2.
-           10  COM4-FLD3          PICTURE S9(13). 
+           10  COM4-FLD3          PICTURE S9(13) COMP-4. 
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD4          PICTURE S9(6). 
-           10  FILLER             PICTURE X(1). 
-
-       01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP5 COMP-4.
-           10  FILLER             PICTURE X(1). 
-           10  COM5-FLD1          PICTURE S9(13). 
-           10  FILLER             PICTURE X(1). 
-           10  COM5-FLD2          PICTURE S9(6). 
+           10  COM4-FLD4          PICTURE S9(6) COMP-4. 
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP5S COMP-4 SYNC.
+        02  TSTGRP5.
            10  FILLER             PICTURE X(1). 
-           10  COM5S-FLD1         PICTURE S9(13). 
+           10  COM5-FLD1          PICTURE S9(13) COMP-4. 
            10  FILLER             PICTURE X(1). 
-           10  COM5S-FLD2         PICTURE S9(7). 
+           10  COM5-FLD2          PICTURE S9(6) COMP-4. 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP5S.
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD1         PICTURE S9(13) COMP-4 SYNC. 
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD2         PICTURE S9(7) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP6 COMP-3.
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
            10  COM6-FLD1          PICTURE S9(13). 
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
            10  COM6-FLD2          PICTURE S9(6). 
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP7 COMP-1.
@@ -17538,7 +17533,7 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO CMP2-FLD2 (1:).
            PERFORM CHECK-IT.
            
-           DISPLAY TEST-MODE (TESTMODE) 
+           DISPLAY BIT-MODE ":" TEST-MODE (TESTMODE) 
                    TESTCASE " tests with " TESTFAIL " failed".
            STOP RUN RETURNING 0.
 
@@ -17582,7 +17577,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
 
-AT_CHECK([./prog], [0], [MF        24 tests with 00 failed
+AT_CHECK([./prog], [0], [64:MF        24 tests with 00 failed
 ], [])
 
 AT_CLEANUP
@@ -17880,14 +17875,14 @@ AT_DATA([prog.cob], [
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP SYNC COMP-4.
+        02  TSTGRP.
          05  GRP1.
            10  FILLER             PICTURE X(5). 
-           10  COM1-FLD1          PICTURE S9(4). 
+           10  COM1-FLD1          PICTURE S9(4) SYNC COMP-4. 
            10  FILLER             PICTURE X(3). 
-           10  COM1-FLD2          PICTURE S9(6). 
+           10  COM1-FLD2          PICTURE S9(6) SYNC COMP-4. 
            10  FILLER             PICTURE X(3). 
-           10  COM1-FLD3          PICTURE S9(18). 
+           10  COM1-FLD3          PICTURE S9(18) SYNC COMP-4. 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP2 SIGN LEADING SEPARATE.
@@ -17900,55 +17895,53 @@ AT_DATA([prog.cob], [
            10  COM2-FLD3          PICTURE S9(7). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP3 COMP-3.
+        02  TSTGRP3.
          05  GRP3-1.
            10  FILLER             PICTURE X(5). 
-      * Following is not allowed by Micro Focus
-      *    10  COM3-FLD1          PICTURE S9(4) COMP-4. 
-           10  COM3-FLD1          PICTURE S9(4). 
+           10  COM3-FLD1          PICTURE S9(4) COMP-3. 
            10  FILLER             PICTURE X(3). 
-           10  COM3-FLD2          PICTURE S9(6). 
+           10  COM3-FLD2          PICTURE S9(6) COMP-3. 
            10  FILLER             PICTURE X(3). 
          05  GRP3-2.
-           10  COM3-FLD3          PICTURE S9(13). 
+           10  COM3-FLD3          PICTURE S9(13) COMP-3. 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP4 COMP-4.
-         05  GRP4-1 SYNC.
+        02  TSTGRP4.
+         05  GRP4-1.
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD1          PICTURE S9(13). 
+           10  COM4-FLD1          PICTURE S9(13) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD2          PICTURE S9(7). 
+           10  COM4-FLD2          PICTURE S9(7) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
          05  GRP4-2.
-           10  COM4-FLD3          PICTURE S9(13). 
+           10  COM4-FLD3          PICTURE S9(13) COMP-4. 
            10  FILLER             PICTURE X(1). 
-           10  COM4-FLD4          PICTURE S9(6). 
-           10  FILLER             PICTURE X(1). 
-
-       01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP5 COMP-4.
-           10  FILLER             PICTURE X(1). 
-           10  COM5-FLD1          PICTURE S9(13). 
-           10  FILLER             PICTURE X(1). 
-           10  COM5-FLD2          PICTURE S9(6). 
+           10  COM4-FLD4          PICTURE S9(6) COMP-4. 
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
-        02  TSTGRP5S COMP-4 SYNC.
+        02  TSTGRP5.
            10  FILLER             PICTURE X(1). 
-           10  COM5S-FLD1         PICTURE S9(13). 
+           10  COM5-FLD1          PICTURE S9(13) COMP-4. 
            10  FILLER             PICTURE X(1). 
-           10  COM5S-FLD2         PICTURE S9(7). 
+           10  COM5-FLD2          PICTURE S9(6) COMP-4. 
+           10  FILLER             PICTURE X(1). 
+
+       01  FILLER REDEFINES TESTRECORD.
+        02  TSTGRP5S.
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD1         PICTURE S9(13) COMP-4 SYNC. 
+           10  FILLER             PICTURE X(1). 
+           10  COM5S-FLD2         PICTURE S9(7) COMP-4 SYNC. 
            10  FILLER             PICTURE X(1). 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP6 COMP-3.
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
            10  COM6-FLD1          PICTURE S9(13). 
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
            10  COM6-FLD2          PICTURE S9(6). 
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE 9(1). 
 
        01  FILLER REDEFINES TESTRECORD.
         02  TSTGRP7 COMP-1.
@@ -18192,7 +18185,7 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO CMP2-FLD2 (1:).
            PERFORM CHECK-IT.
            
-           DISPLAY TEST-MODE (TESTMODE) 
+           DISPLAY BIT-MODE ":" TEST-MODE (TESTMODE) 
                    TESTCASE " tests with " TESTFAIL " failed".
            STOP RUN RETURNING 0.
 
@@ -18236,7 +18229,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([cobc -x -std=default -w prog.cob ], [0], [], [])
 
-AT_CHECK([./prog], [0], [DEFAULT   24 tests with 00 failed
+AT_CHECK([./prog], [0], [64:DEFAULT   24 tests with 00 failed
 ], [])
 
 AT_CLEANUP

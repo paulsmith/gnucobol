@@ -341,3 +341,9 @@ CB_CONFIG_SUPPORT (cb_goto_entry, "goto-entry",
 
 CB_CONFIG_SUPPORT (cb_depending_on_not_fixed, "depending-on-not-fixed", _("depending-on-not-fixed"))
 
+CB_CONFIG_SUPPORT (cb_binary_sync_clause, "binary-sync-clause",
+	_("BINARY-SHORT/LONG/DOUBLE SYNCHRONIZED clause"))
+
+CB_CONFIG_SUPPORT (cb_nonnumeric_with_numeric_group_usage, "nonnumeric-with-numeric-group-usage",
+	_("Non-Numeric item with Numeric Group USAGE clause"))
+
