@@ -11722,12 +11722,6 @@ cb_build_write_advancing_page (cb_tree pos)
 void
 cobc_init_typeck (void)
 {
-	const unsigned char	*p;
-
-	memset (valid_char, 0, sizeof(valid_char));
-	for (p = pvalid_char; *p; ++p) {
-		valid_char[*p] = 1;
-	}
 	memset(expr_prio, 0, sizeof(expr_prio));
 	expr_prio['x' & 0xFF] = 0;
 	expr_prio['^' & 0xFF] = 1;
