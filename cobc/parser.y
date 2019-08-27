@@ -6247,7 +6247,7 @@ con_source:
 		$$ = cb_int ((int)sizeof(float));
 	}
   }
-| FLOAT_SHORT
+| FLOAT_SHORT	/* alias from FLOAT (ACU) in reserved.c */
   {
 	$$ = cb_int ((int)sizeof(float));
   }
@@ -6888,7 +6888,7 @@ usage:
 
 double_usage:
   COMP_2
-| FLOAT_LONG
+| FLOAT_LONG	/* alias from DOUBLE (ACU) in reserved.c */
 ;
 
 _font_name:
