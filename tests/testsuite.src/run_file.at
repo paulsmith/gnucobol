@@ -573,7 +573,6 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-
 AT_SETUP([File SORT, SEQUENTIAL])
 AT_KEYWORDS([runfile using giving])
 
@@ -708,7 +707,7 @@ AT_CLEANUP
 
 #### added for reportwriter r1566
 AT_SETUP([INDEXED File KEYCHECK])
-AT_KEYWORDS([FileIo])
+AT_KEYWORDS([runfile])
 
 # skip if not configured with ISAM
 AT_SKIP_IF([test "$COB_HAS_ISAM" != "yes"])
@@ -1341,9 +1340,9 @@ AT_DATA([prog.cob], [
            CLOSE TSPFILE.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [Loading sample data file.
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [Loading sample data file.
 Sample data file load complete.
 LIST SAMPLE FILE
 Key: ALP00000 is ALPHA ELECTRICAL CO. LTD. Disk=8417    .
@@ -3147,7 +3146,7 @@ AT_DATA([prog.cob], [
            Exit.
 ])
 
-AT_CHECK([$COMPILE prog.cob ], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [delete file
@@ -8113,7 +8112,8 @@ AT_CAPTURE_FILE(./TEST-OUT)
 # note: currently with the same behaviour as MF
 #       (ignoring minimal record length for line-sequential)
 #       this may change in the future...
-AT_DATA([reference], [  1
+AT_DATA([reference],
+[  1
   2
   3
   4
@@ -8314,7 +8314,7 @@ AT_DATA([prog.cob], [
              DISPLAY "Read2 " C2-CUST-NUM " #:" REC-NUM
                      " Trms:" C2-NO-TERMINALS
            END-IF.
-      
+      *
        LOAD-RECORD.
            MOVE SPACES                       TO TSPFL-RECORD.
            MOVE SPACES                       TO TSP2-RECORD.
@@ -8324,12 +8324,12 @@ AT_DATA([prog.cob], [
            MOVE 20070319                     TO CM-PK-DATE.
            IF SUB = 1 OR 4 OR 6
                MOVE -20070319                 TO CM-PK-DATE.
-      
+      *
            IF ODD-RECORD
                MOVE "8417"                   TO C2-DISK 
-               MOVE CM-CUST-NUM              TO C2-CUST-NUM
+      *        MOVE CM-CUST-NUM              TO C2-CUST-NUM
                MOVE '2'                      TO C2-TYPE
-               MOVE CM-COMPANY               TO C2-COMPANY
+      *        MOVE CM-COMPANY               TO C2-COMPANY
                MOVE CM-PK-DATE               TO C2-PK-DATE
                MOVE CM-NO-TERMINALS          TO C2-NO-TERMINALS
                MOVE DATA-ADDRESS (SUB)       TO C2-ADDRESS
@@ -8340,9 +8340,10 @@ AT_DATA([prog.cob], [
                WRITE TSPFL-RECORD.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [Loading sample program data file.
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Loading sample program data file.
 Sample program data file load complete.
 Initial Re-Read Open Sts:00
 Read2 ALP00000 #:0001 Trms:0010
@@ -8704,9 +8705,10 @@ AT_DATA([prog.cob], [
            WRITE TSPFL-RECORD.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [Loading sample program data file.
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Loading sample program data file.
 Sample program data file load complete.
 Open Sts:00
 Next  ALP00000 #0001 Trms:0010
@@ -8982,7 +8984,7 @@ AT_DATA([prog.cob], [
              DISPLAY "Read2 " C2-CUST-NUM
                      " Trms:" C2-NO-TERMINALS
            END-IF.
-
+      *
        LOAD-RECORD.
            MOVE SPACES                       TO TSPFL-RECORD.
            MOVE SPACES                       TO TSP2-RECORD.
@@ -8992,14 +8994,14 @@ AT_DATA([prog.cob], [
            MOVE 20070319                     TO CM-PK-DATE.
            IF SUB = 1 OR 4 OR 6
                MOVE -20070319                 TO CM-PK-DATE.
-      
+      *
            IF  ODD-RECORD
                MOVE "8417"                   TO CM-DISK 
            ELSE
                MOVE "8470"                   TO CM-DISK.
            IF ODD-RECORD
-               MOVE CM-CUST-NUM              TO C2-CUST-NUM
-               MOVE CM-COMPANY               TO C2-COMPANY
+      *        MOVE CM-CUST-NUM              TO C2-CUST-NUM
+      *        MOVE CM-COMPANY               TO C2-COMPANY
                MOVE CM-DISK                  TO C2-DISK   
                MOVE CM-PK-DATE               TO C2-PK-DATE
                MOVE CM-NO-TERMINALS          TO C2-NO-TERMINALS
@@ -9010,9 +9012,10 @@ AT_DATA([prog.cob], [
                WRITE TSPFL-RECORD.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [Loading sample program data file.
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Loading sample program data file.
 Sample program data file load complete.
 Open Sts:00
 Read2 ALP00000 Trms:0010
@@ -9223,9 +9226,10 @@ AT_DATA([prog.cob], [
            WRITE TSPFL-RECORD.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [Loading sample data file.
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Loading sample data file.
 Sample data file load complete.
 Open Sts:00
 Read ALP00000 Sts:00
@@ -9256,8 +9260,9 @@ Read Status: 10
 
 AT_CLEANUP
 
+
 AT_SETUP([RELATIVE File Locking])
-AT_KEYWORDS([FileIo])
+AT_KEYWORDS([runfile])
 
 # has timing issues - just skip until resolved later
 AT_SKIP_IF(true)
@@ -9701,14 +9706,16 @@ AT_DATA([prog.cob], [
            WRITE TSPFL-RECORD.
 ])
 
-AT_CHECK([cobc -x -std=mf -w -fmf-files prog.cob], [0], [], [])
+# CHECKME: do we need -std/-fmf-files here?
+AT_CHECK([$COMPILE -std=mf -fmf-files prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./control.txt)
 
-AT_DATA([reference], [Control .  . Loading sample program data file
+AT_DATA([reference],
+[Control .  . Loading sample program data file
 Control :01: continue test
 Control :02: waiting step 1 completion
 Control :03: waiting step 2 completion
@@ -9721,7 +9728,8 @@ AT_CHECK([diff reference control.txt], [0], [], [])
 
 AT_CAPTURE_FILE(./parent.txt)
 
-AT_DATA([reference], [ PARENT :01: READ Open                  Sts:00
+AT_DATA([reference],
+[ PARENT :01: READ Open                  Sts:00
  PARENT :02: Next    ALP00000 Trms:0010 #0001
  PARENT :03: Next    BET00000 Trms:0010 #0002
  PARENT :04: NO SHARE Open              Sts:00
@@ -9756,7 +9764,8 @@ AT_CHECK([diff reference parent.txt], [0], [], [])
 
 AT_CAPTURE_FILE(./child.txt)
 
-AT_DATA([reference], [  CHILD :01: READ Open                  Sts:00
+AT_DATA([reference],
+[  CHILD :01: READ Open                  Sts:00
   CHILD :02: Next    ALP00000 Trms:0010 #0001
   CHILD :03: Next    BET00000 Trms:0010 #0002
   CHILD :04: NO SHARE Open              Sts:61
@@ -9794,7 +9803,7 @@ AT_CHECK([diff reference child.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([WRITE+REWRITE FILE name ])
+AT_SETUP([WRITE and REWRITE FILE name ])
 AT_KEYWORDS([runfile])
 
 AT_DATA([prog.cob], [
@@ -9935,9 +9944,10 @@ AT_DATA([prog.cob], [
            WRITE FILE FLATFILE FROM TSPFL-RECORD.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [Loading sample program data file.
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Loading sample program data file.
 Sample program data file load complete.
 Read    BET00000 Sts:00 Trms:0013
 REWROTE BET00000 Sts:00 Trms:0014
@@ -9945,8 +9955,9 @@ REWROTE BET00000 Sts:00 Trms:0014
 
 AT_CLEANUP
 
+
 AT_SETUP([INDEXED File Locking])
-AT_KEYWORDS([FileIo])
+AT_KEYWORDS([runfile])
 
 # has timing issues - just skip until resolved later
 AT_SKIP_IF(true)
@@ -10499,14 +10510,16 @@ AT_DATA([prog.cob], [
            MOVE SPACES TO REPORT-RECORD.
 ])
 
-AT_CHECK([cobc -x -std=mf -w -fmf-files prog.cob], [0], [], [])
+# CHECKME: do we need -std/-fmf-files here?
+AT_CHECK([$COMPILE -std=mf -fmf-files prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./control.txt)
 
-AT_DATA([reference], [Control  :01: Loading test data file.
+AT_DATA([reference],
+[Control  :01: Loading test data file.
 Control  :02: continue test
 Control  :03: waiting step 1 completion
 Control  :04: waiting step 2 completion
@@ -10519,7 +10532,8 @@ AT_CHECK([diff reference control.txt], [0], [], [])
 
 AT_CAPTURE_FILE(./parent.txt)
 
-AT_DATA([reference], [ PARENT  :01: READ Open                  Sts:00
+AT_DATA([reference],
+[ PARENT  :01: READ Open                  Sts:00
  PARENT  :02: Next    ALP00000 Trms:0010
  PARENT  :03: Next    BET00000 Trms:0010
  PARENT  :04: OPEN NO SHARE              Sts:00
@@ -10559,7 +10573,8 @@ AT_CHECK([diff reference parent.txt], [0], [], [])
 
 AT_CAPTURE_FILE(./child.txt)
 
-AT_DATA([reference], [  CHILD  :01: READ Open                  Sts:00
+AT_DATA([reference],
+[  CHILD  :01: READ Open                  Sts:00
   CHILD  :02: Next    ALP00000 Trms:0010
   CHILD  :03: Next    BET00000 Trms:0010
   CHILD  :04: OPEN NO SHARE              Sts:61
@@ -10604,8 +10619,9 @@ AT_CHECK([diff reference child.txt], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([RELATIVE File Locking])
-AT_KEYWORDS([FileIo])
+AT_KEYWORDS([runfile])
 
 # has timing issues - just skip until resolved later
 AT_SKIP_IF(true)
@@ -11060,14 +11076,14 @@ AT_DATA([prog.cob], [
            WRITE TSPFL-RECORD.
 ])
 
-AT_CHECK([cobc -x -std=mf -w -fmf-files prog.cob], [0], [], [])
-
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./control.txt)
 
-AT_DATA([reference], [Control .  . Loading sample program data file
+AT_DATA([reference],
+[Control .  . Loading sample program data file
 Control :01: continue test
 Control :02: waiting step 1 completion
 Control :03: waiting step 2 completion
@@ -11080,7 +11096,8 @@ AT_CHECK([diff reference control.txt], [0], [], [])
 
 AT_CAPTURE_FILE(./parent.txt)
 
-AT_DATA([reference], [ PARENT :01: READ Open                  Sts:00
+AT_DATA([reference],
+[ PARENT :01: READ Open                  Sts:00
  PARENT :02: Next    ALP00000 Trms:0010 #0001
  PARENT :03: Next    BET00000 Trms:0010 #0002
  PARENT :04: NO SHARE Open              Sts:00
@@ -11115,7 +11132,8 @@ AT_CHECK([diff reference parent.txt], [0], [], [])
 
 AT_CAPTURE_FILE(./child.txt)
 
-AT_DATA([reference], [  CHILD :01: READ Open                  Sts:00
+AT_DATA([reference],
+[  CHILD :01: READ Open                  Sts:00
   CHILD :02: Next    ALP00000 Trms:0010 #0001
   CHILD :03: Next    BET00000 Trms:0010 #0002
   CHILD :04: NO SHARE Open              Sts:61
@@ -11154,9 +11172,10 @@ AT_CLEANUP
 
 
 AT_SETUP([Read on optional missing file])
-AT_KEYWORDS([FILEIO])
+AT_KEYWORDS([runfile])
 
-AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
+AT_DATA([prog.cob],
+[       IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
@@ -11203,9 +11222,10 @@ AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
            STOP RUN.
 ])
 
-AT_CHECK([cobc -x -std=mf -debug -Wall prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [1st Read on missing optional file = 10 OK
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[1st Read on missing optional file = 10 OK
 2nd Read on missing optional file = 46 OK
 ], [])
 
@@ -11213,7 +11233,7 @@ AT_CLEANUP
 
 
 AT_SETUP([SELECT with ASSIGN in LINKAGE])
-AT_KEYWORDS([FILE-CONTROL])
+AT_KEYWORDS([runfile FILE-CONTROL])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -11329,9 +11349,10 @@ AT_DATA([prog.cob], [
        END PROGRAM TSTOPN.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [Opened error: 31.
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Opened error: 31.
 Opened file: foyasg.txt.
 Output file: fooasg.txt - 00 #0001.
 Output file: foxasg.txt - 00 #0001.
@@ -11342,8 +11363,11 @@ Extend file: foxasg.txt - 00 #0002.
 
 AT_CLEANUP
 
+
 AT_SETUP([INDEXED File Variable len record])
 AT_KEYWORDS([runfile])
+
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 
 AT_DATA([prog.cob], [
        Identification division.
@@ -11409,7 +11433,6 @@ AT_DATA([prog.cob], [
        Procedure division.
 
       * Prepare.
-      *    Move "/tmp/tbw" to path-tbw.
            Move "tbw" to path-tbw.
 
       * First test.
@@ -11559,9 +11582,10 @@ AT_DATA([prog.cob], [
            Exit.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+# CHECKME: do we need -std=mf here?
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [delete file
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [delete file
 delete file
 open
 open
@@ -11606,10 +11630,12 @@ Test completed
 
 AT_CLEANUP
 
+
 AT_SETUP([GC LINE SEQUENTIAL Long-Record])
 AT_KEYWORDS([runfile])
 
-AT_DATA([inp_data],[Record 1................................X.......
+AT_DATA([inp_data],
+[Record 1................................X.......
 Record 2.....................X
 Record 3................................X...
 ])
@@ -11672,7 +11698,8 @@ AT_DATA([prog.cob], [
                    " LENGTH IS " INPUT-LEN
            IF INPUT-STATUS = "00"
                DISPLAY "       :" INPUT-REC ":" 
-           CLOSE INFILE.
+           END-IF
+           CLOSE INFILE
 
            OPEN OUTPUT OUTFILE
            MOVE 9 TO INPUT-LEN
@@ -11692,7 +11719,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
 AT_CHECK([export DD_INFILE=./inp_data
 export OUTFILE=TEST-FILE
@@ -11705,13 +11732,13 @@ export OUTFILE=TEST-FILE
  Read 4: STATUS IS 10 LENGTH IS 000
 Write 1: STATUS IS 00 LENGTH IS 009
 Write 2: STATUS IS 00 LENGTH IS 064
-], [libcob: warning: implicit CLOSE of INFILE ('INFILE')
-])
+], [])
 
 
 AT_CAPTURE_FILE(./TEST-FILE)
 
-AT_DATA([reference], [Record 1.
+AT_DATA([reference],
+[Record 1.
 Record 2................................
 ])
 
@@ -11723,7 +11750,8 @@ AT_CLEANUP
 AT_SETUP([MF LINE SEQUENTIAL Long-Record])
 AT_KEYWORDS([runfile])
 
-AT_DATA([inp_data],[Record 1................................X.......
+AT_DATA([inp_data],
+[Record 1................................X.......
 Record 2.....................X
 Record 3................................X...
 ])
@@ -11786,7 +11814,8 @@ AT_DATA([prog.cob], [
                    " LENGTH IS " INPUT-LEN
            IF INPUT-STATUS = "00"
                DISPLAY "       :" INPUT-REC ":" 
-           CLOSE INFILE.
+           END-IF
+           CLOSE INFILE
 
            OPEN OUTPUT OUTFILE
            MOVE 9 TO INPUT-LEN
@@ -11806,11 +11835,15 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([cobc -x -std=mf -w -fmf-files prog.cob ], [0], [], [])
+# FIXME: must work with -std=mf alone --> -fmf-files split and included as configuration options!
+# AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -std=mf -fmf-files prog.cob], [0], [], [])
+
 
 AT_CHECK([export DD_INFILE=./inp_data
 export OUTFILE=TEST-FILE
-./prog], [0], [ Read 1: STATUS IS 00 LENGTH IS 040
+./prog], [0],
+[ Read 1: STATUS IS 00 LENGTH IS 040
        :Record 1................................:
  Read 2: STATUS IS 00 LENGTH IS 008
        :X.......                                :
@@ -11825,7 +11858,8 @@ Write 2: STATUS IS 00 LENGTH IS 064
 
 AT_CAPTURE_FILE(./TEST-FILE)
 
-AT_DATA([reference], [Record 1.
+AT_DATA([reference],
+[Record 1.
 Record 2................................
 ])
 
