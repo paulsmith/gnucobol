@@ -962,7 +962,7 @@ cob_write_dict (cob_file *f, char *filename)
 			fprintf(fo,",MF");
 		else if(f->file_format == COB_FILE_IS_GC)
 			fprintf(fo,",GC");
-		else if(f->file_format >= 0 && f->file_format <= 7)
+		else if(f->file_format <= 7)
 			fprintf(fo,",%s",file_format[f->file_format]);
 	} else if(f->organization == COB_ORG_LINE_SEQUENTIAL) {
 		if(f->flag_line_adv)
@@ -4872,6 +4872,7 @@ bdb_errcall_set (DB_ENV *dbe, const char *prefix, const char *err)
 
 static int bdb_err_tear_down = 0;
 
+#if (DB_VERSION_MAJOR > 4)
 static void
 bdb_err_event (DB_ENV *env, u_int32_t event, void *info)
 {
@@ -4908,6 +4909,7 @@ bdb_err_event (DB_ENV *env, u_int32_t event, void *info)
 	cob_runtime_error (_("BDB (%s), error: %d %s"), "fatal error", event, msg);
 	cob_stop_run (1);
 }
+#endif
 
 static void
 join_environment (void)
