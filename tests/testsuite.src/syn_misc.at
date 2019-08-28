@@ -6681,3 +6681,46 @@ prog.cob:22: error: syntax error, unexpected =
 prog.cob:25: error: syntax error, unexpected PROCEDURE
 ])
 AT_CLEANUP
+
+AT_SETUP([Group Usage Error])
+AT_KEYWORDS([Numeric])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TESTRECORD.
+        02  TSTGRP3 COMP-3.
+         05  GRP3-1.
+           10  FILLER             PICTURE X(1). 
+           10  COM3-FLD1          PICTURE S9(4) COMP-4. 
+           10  FILLER             PICTURE X(1). 
+           10  COM3-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+           10  COM3-FLD3          PICTURE S9(6) DISPLAY. 
+           10  FILLER             PICTURE X(1). 
+         05  GRP3-2.
+           10  FILLER             USAGE COMP-1.
+
+       PROCEDURE DIVISION.
+
+           MOVE ALL 'x' TO TESTRECORD.
+           MOVE "12345678" TO COM3-FLD1 (1:).
+           MOVE "12345678" TO COM3-FLD2 (1:).
+           DISPLAY TESTRECORD.
+           STOP RUN.
+
+           
+])
+
+AT_CHECK([cobc -x -std=mf -w prog.cob ], [1], [],
+[prog.cob:12: error: TSTGRP3 USAGE COMP-3 incompatible with COM3-FLD1 USAGE COMP
+prog.cob:16: error: TSTGRP3 USAGE COMP-3 incompatible with COM3-FLD3 USAGE DISPLAY
+prog.cob:19: error: TSTGRP3 USAGE COMP-3 incompatible with FILLER USAGE COMP-1
+])
+
+AT_CLEANUP
+

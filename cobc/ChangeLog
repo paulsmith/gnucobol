@@ -1,4 +1,10 @@
 
+2019-08-28  Ron Norman <rjn@inglenet.com>
+
+	* tree.h: Add flag_usage_defined
+	* parser.y: set flag_synchronized for [UN]SIGNED-SHORT/INT/LONG 
+	* field.c: validate that group USAGE is compatible with any field usage
+
 2019-08-27  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (process_command_line), flag.def: removed duplicated flag handling

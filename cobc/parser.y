@@ -1696,6 +1696,7 @@ check_and_set_usage (const enum cb_usage usage)
 {
 	check_repeated ("USAGE", SYN_CLAUSE_5, &check_pic_duplicate);
 	current_field->usage = usage;
+	current_field->flag_usage_defined = 1;
 }
 
 static void
@@ -6676,6 +6677,9 @@ usage:
 	current_field->flag_comp_1 = 1;
 	if (cb_binary_comp_1) {
 		check_and_set_usage (CB_USAGE_SIGNED_SHORT);
+#if 0 /* ?? */
+		current_field->flag_synchronized = 1;
+#endif
 	} else {
 		check_and_set_usage (CB_USAGE_FLOAT);
 	}

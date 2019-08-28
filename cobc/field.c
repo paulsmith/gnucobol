@@ -663,6 +663,15 @@ is_numeric_usage (const enum cb_usage usage)
 	}
 }
 
+static COB_INLINE COB_A_INLINE int
+is_numeric_field (struct cb_field *f)
+{
+	if (f->pic
+	 && f->pic->category == CB_CATEGORY_NUMERIC)
+		return 1;
+	return is_numeric_usage (f->usage);
+}
+
 /* create an implicit picture for items that miss it but need one,
    return 1 if not possible */
 static unsigned int
@@ -1091,11 +1100,24 @@ validate_pic (struct cb_field *f)
 	/* Check for Group attributes to be carried to elementary field */
 	if (!f->flag_validated
 	 && cb_nonnumeric_with_numeric_group_usage == CB_OK
+	 && f->parent
 	 && !f->children) {
-		if (f->usage == CB_USAGE_DISPLAY
-		 && f->pic
-		 && f->pic->category == CB_CATEGORY_NUMERIC) {
-			struct cb_field *p;
+		struct cb_field *p;
+		/* DBG if (f->usage != CB_USAGE_DISPLAY */
+		if (f->flag_usage_defined
+		 && is_numeric_field (f)) {
+			for (p = f->parent; p; p = p->parent) {
+				if (p->usage != CB_USAGE_DISPLAY
+				 && f->usage != p->usage) {
+					cb_error_x (x, _("%s USAGE %s incompatible with %s USAGE %s"),
+								p->flag_filler?"FILLER":p->name, cb_get_usage_string (p->usage),
+								f->flag_filler?"FILLER":f->name, cb_get_usage_string (f->usage));
+					break;
+				}
+			}
+		}
+		if (!f->flag_usage_defined
+		 && is_numeric_field (f)) {
 			for (p = f->parent; p; p = p->parent) {
 				if (p->usage != CB_USAGE_DISPLAY) {
 					f->usage = p->usage;
@@ -1104,6 +1126,7 @@ validate_pic (struct cb_field *f)
 			}
 		}
 		if ( !f->flag_synchronized
+		 && !f->flag_ignore_sync
 		 && ( f->usage == CB_USAGE_BINARY
 		    || f->usage == CB_USAGE_FLOAT
 		    || f->usage == CB_USAGE_DOUBLE
@@ -1121,7 +1144,6 @@ validate_pic (struct cb_field *f)
 		    || f->usage == CB_USAGE_FP_BIN64
 		    || f->usage == CB_USAGE_FP_BIN128
 		    || f->usage == CB_USAGE_LONG_DOUBLE)) {
-			struct cb_field *p;
 			for (p = f->parent; p; p = p->parent) {
 				if (p->flag_synchronized) {
 						f->flag_synchronized = 1;
@@ -1133,7 +1155,6 @@ validate_pic (struct cb_field *f)
 		 && f->pic->category == CB_CATEGORY_NUMERIC
 		 && f->flag_sign_separate == 0
 		 && f->flag_sign_leading == 0) {
-			struct cb_field *p;
 			for (p = f->parent; p; p = p->parent) {
 				if (p->flag_sign_separate
 				 || p->flag_sign_leading) {

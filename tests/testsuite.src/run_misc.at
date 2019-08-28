@@ -18234,6 +18234,89 @@ AT_CHECK([./prog], [0], [64:DEFAULT   24 tests with 00 failed
 
 AT_CLEANUP
 
+AT_SETUP([Group Usage 1])
+AT_KEYWORDS([Numeric])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TESTRECORD.
+        02  TSTGRP3 COMP-4.
+         05  GRP3-1.
+           10  FILLER             PICTURE X(1). 
+           10  COM3-FLD1          PICTURE S9(3). 
+           10  FILLER             PICTURE X(3). 
+           10  COM3-FLD2          PICTURE S9(6). 
+         05  GRP3-2 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COM3-FLD3          PICTURE S9(5). 
+           10  FILLER             PICTURE X. 
+
+       PROCEDURE DIVISION.
+
+           MOVE ALL 'x' TO TESTRECORD.
+           MOVE "12345678" TO COM3-FLD1 (1:).
+           MOVE "12345678" TO COM3-FLD2 (1:).
+           MOVE "12345678" TO COM3-FLD3 (1:).
+           DISPLAY TESTRECORD.
+           STOP RUN.
+
+           
+])
+
+AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [x12xxx123x123x
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Group Usage 2])
+AT_KEYWORDS([Numeric])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TESTRECORD.
+        02  TSTGRP3 COMP-4.
+         05  GRP3-1.
+           10  FILLER             PICTURE X(1). 
+           10  COM3-FLD1          PICTURE S9(3). 
+           10  FILLER             PICTURE X(3). 
+           10  COM3-FLD2          PICTURE S9(6). 
+         05  GRP3-2 SYNC.
+           10  FILLER             PICTURE X(1). 
+           10  COM3-FLD3          PICTURE S9(5). 
+           10  FILLER             PICTURE X. 
+
+       PROCEDURE DIVISION.
+
+           MOVE ALL 'x' TO TESTRECORD.
+           MOVE "12345678" TO COM3-FLD1 (1:).
+           MOVE "12345678" TO COM3-FLD2 (1:).
+           MOVE "12345678" TO COM3-FLD3 (1:).
+           DISPLAY TESTRECORD.
+           STOP RUN.
+
+           
+])
+
+AT_CHECK([cobc -x -std=mf -w -fibmcomp prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [x12xxx1234xx1234x
+], [])
+
+AT_CLEANUP
+
 AT_SETUP([MF COMP-5 noibmcomp])
 AT_KEYWORDS([NOIBMCOMP])
 
