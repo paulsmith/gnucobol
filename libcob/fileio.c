@@ -9911,7 +9911,7 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 	if (fcd->fnamePtr != NULL) {
 		cob_free ((void*)fcd->fnamePtr);
 	}
-	fcd->fnamePtr = strdup(assignto);
+	fcd->fnamePtr = cob_strdup(assignto);
 	fcd->openMode |= OPEN_NOT_OPEN;
 	STCOMPX2(fnlen, fcd->fnameLen);
 	STCOMPX2(0, fcd->refKey);
@@ -10248,10 +10248,13 @@ free_extfh_fcd ()
 
 	for(ff = fcd_file_list; ff; ff = nff) {
 		nff = ff->next;
-		if(ff->free_fcd)
+		if (ff->free_fcd) {
+			if (ff->fcd->fnamePtr != NULL)
+				cob_free ((void*)(ff->fcd->fnamePtr));
 			cob_free((void*)ff->fcd);
-		else
+		} else {
 			cob_free((void*)ff->f);
+		}
 		cob_free((void*)ff);
 	}
 }
@@ -10378,10 +10381,13 @@ cob_extfh_close (
 				pff->next = ff->next;
 			else
 				fcd_file_list = ff->next;
-			if(ff->free_fcd)
+			if (ff->free_fcd) {
+				if (ff->fcd->fnamePtr != NULL)
+					cob_free ((void*)(ff->fcd->fnamePtr));
 				cob_free((void*)ff->fcd);
-			else
+			} else {
 				cob_free((void*)ff->f);
+			}
 			cob_free((void*)ff);
 			break;
 		}

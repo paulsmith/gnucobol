@@ -1,4 +1,8 @@
 
+2019-08-28  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Free up 'fcd' fnamePtr allocated 
+
 2019-08-27  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Clean up 'fcd' tables dynamically allocated via free_extfh_fcd

@@ -1103,7 +1103,6 @@ validate_pic (struct cb_field *f)
 	 && f->parent
 	 && !f->children) {
 		struct cb_field *p;
-		/* DBG if (f->usage != CB_USAGE_DISPLAY */
 		if (f->flag_usage_defined
 		 && is_numeric_field (f)) {
 			for (p = f->parent; p; p = p->parent) {

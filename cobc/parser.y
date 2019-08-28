@@ -6677,9 +6677,7 @@ usage:
 	current_field->flag_comp_1 = 1;
 	if (cb_binary_comp_1) {
 		check_and_set_usage (CB_USAGE_SIGNED_SHORT);
-#if 0 /* ?? */
 		current_field->flag_synchronized = 1;
-#endif
 	} else {
 		check_and_set_usage (CB_USAGE_FLOAT);
 	}
@@ -6872,6 +6870,7 @@ usage:
 #else
 	check_and_set_usage (CB_USAGE_SIGNED_LONG);
 #endif
+	current_field->flag_synchronized = 1;
   }
 | BINARY_C_LONG UNSIGNED
   {
@@ -6880,6 +6879,7 @@ usage:
 #else
 	check_and_set_usage (CB_USAGE_UNSIGNED_LONG);
 #endif
+	current_field->flag_synchronized = 1;
   }
 | FLOAT_BINARY_32
   {
@@ -9324,14 +9324,6 @@ procedure_param:
 		f = CB_FIELD (cb_ref (x));
 		f->flag_is_pdiv_opt = 1;
 	}
-
-/* RJN. This should not be an error
-	if (call_mode == CB_CALL_BY_VALUE
-	 && CB_REFERENCE_P ($4)
-	 && CB_FIELD (cb_ref ($4))->flag_any_length) {
-		cb_error_x ($4, _("ANY LENGTH items may only be BY REFERENCE formal parameters"));
-	}
-*/
 
 	$$ = CB_BUILD_PAIR (cb_int (call_mode), x);
 	CB_SIZES ($$) = size_mode;

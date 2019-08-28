@@ -16229,7 +16229,7 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO CMP2-FLD2 (1:).
            PERFORM CHECK-IT.
            
-           DISPLAY BIT-MODE ":" TEST-MODE (TESTMODE) 
+           DISPLAY TEST-MODE (TESTMODE) 
                    TESTCASE " tests with " TESTFAIL " failed".
            STOP RUN RETURNING 0.
 
@@ -16273,7 +16273,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([cobc -x -std=ibm -w prog.cob ], [0], [], [])
 
-AT_CHECK([./prog], [0], [64:IBMCOMP   24 tests with 00 failed
+AT_CHECK([./prog], [0], [IBMCOMP   24 tests with 00 failed
 ], [])
 
 AT_CLEANUP
@@ -16881,7 +16881,7 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO CMP2-FLD2 (1:).
            PERFORM CHECK-IT.
            
-           DISPLAY BIT-MODE ":" TEST-MODE (TESTMODE) 
+           DISPLAY TEST-MODE (TESTMODE) 
                    TESTCASE " tests with " TESTFAIL " failed".
            STOP RUN RETURNING 0.
 
@@ -16925,7 +16925,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([cobc -x -std=mf -w -fibmcomp prog.cob ], [0], [], [])
 
-AT_CHECK([./prog], [0], [64:IBMCOMP   24 tests with 00 failed
+AT_CHECK([./prog], [0], [IBMCOMP   24 tests with 00 failed
 ], [])
 
 AT_CLEANUP
@@ -17533,7 +17533,7 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO CMP2-FLD2 (1:).
            PERFORM CHECK-IT.
            
-           DISPLAY BIT-MODE ":" TEST-MODE (TESTMODE) 
+           DISPLAY TEST-MODE (TESTMODE) 
                    TESTCASE " tests with " TESTFAIL " failed".
            STOP RUN RETURNING 0.
 
@@ -17577,7 +17577,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
 
-AT_CHECK([./prog], [0], [64:MF        24 tests with 00 failed
+AT_CHECK([./prog], [0], [MF        24 tests with 00 failed
 ], [])
 
 AT_CLEANUP
@@ -18185,7 +18185,7 @@ AT_DATA([prog.cob], [
            MOVE "12345678" TO CMP2-FLD2 (1:).
            PERFORM CHECK-IT.
            
-           DISPLAY BIT-MODE ":" TEST-MODE (TESTMODE) 
+           DISPLAY TEST-MODE (TESTMODE) 
                    TESTCASE " tests with " TESTFAIL " failed".
            STOP RUN RETURNING 0.
 
@@ -18229,7 +18229,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([cobc -x -std=default -w prog.cob ], [0], [], [])
 
-AT_CHECK([./prog], [0], [64:DEFAULT   24 tests with 00 failed
+AT_CHECK([./prog], [0], [DEFAULT   24 tests with 00 failed
 ], [])
 
 AT_CLEANUP
