@@ -24,7 +24,7 @@
 AC_PREREQ([2.64])
 
 AC_INIT([GnuCOBOL],
-	[3.1-dev],
+	[3.2-early-dev],
 	[bug-gnucobol@gnu.org],
 	[gnucobol],
 	[https://www.gnu.org/software/gnucobol/])
@@ -356,7 +356,7 @@ unset cob_keyw
 # Checks for library functions.
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([memmove memset setlocale fcntl strerror strcasecmp \
-	strchr strrchr strdup strstr strtol gettimeofday localeconv \
+	strchr strrchr strdup strstr atol strtol atoll strtoll gettimeofday localeconv \
 	getexecname canonicalize_file_name popen raise readlink realpath \
 	setenv strcoll])
 

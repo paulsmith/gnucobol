@@ -1,10 +1,17 @@
 
+2019-08-28  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Free up 'fcd' fnamePtr allocated 
+
+2019-08-27  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Clean up 'fcd' tables dynamically allocated via free_extfh_fcd
+	            fix some compile warnings
+
 2019-08-25  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.h: allow to force aligned pointer access by external
 	  define of COB_NON_ALIGNED
-	* fileio.c [WITH_DB]: minor refactoring - limit scope of some variables,
-	  extracted (set_dbt) from (lock_record, test_record_lock)
 
 2019-08-17  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -22,10 +29,22 @@
 	* system.def: added CBL_ALARM_SOUND and CBL_BELL_SOUND, both as alias
 	  to cob_sys_sound_bell
 
+2019-07-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.h: removed inclusion of stdio.h
+	* common.h, coblocal.h: moved definition of cob_print_field to local
+	* fileio.c (cob_write_dict): fixed compiler warnings
+
 2019-07-02  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_sys_oc_nanosleep): fixed by splitting get_sleep_nanoseconds
 	  into an additional function get_sleep_nanoseconds_from_seconds
+
+2019-07-01  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Use DB_ENV->remove to clean up the BDB environment in
+	cob_exit_fileio. This make test cases using INDEXED files repeatable with
+	DB_HOME defined and/or defaulting to "./"
 
 2019-06-30  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -43,10 +62,40 @@
 	* screenio.c: extracted (get_accept_timeout) and removed the artificial
 	  minimal limit FR #196
 
+2019-06-24  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Fixed to check file_features for COB_FILE_SYNC flag and then
+	cob_sync the file
+
 2019-06-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* mlio.c, move.c, numeric.c, reportio.c, termio.c: fixed possible
 	  arithmetic overflow (especially because of cast errors on x64)
+
+2019-06-21  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Add cob_write_dict and cob_read_dict for data file description
+
+2019-06-14  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c (bdb_err_event): added DB_EVENT_WRITE_FAILED, call cob_stoprun
+	  for full tear-down, to no create loops in case of fatal errors unset
+	  bdb_env and use new guard bdb_err_tear_down;
+	  adjusted to remove compiler warnings
+
+2019-06-13  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Use bdb_env->set_event_notify to catch fatal BDB errors
+	  and exit the program 
+
+2019-06-11  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: COB_FILE_PATH may be a colon separated list of directories
+	    With BDB the COB_FILE_PATH is now passed to BDB using set_data_dir
+
+2019-06-10  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Merged BDB record lock retry logic from reportwriter
 
 2019-06-10  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -64,6 +113,20 @@
 	  translation ("via" translated as very long string)
 	* common.h: new define MAX_FILE_KEYS (currently at 255) with main purpose
 	  to limit allocation of external provided key definition
+
+2019-06-07  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: If DB_HOME is not defined, then default to "."
+	  If DB_HOME is 'no' or 'false' then disable record/file locking
+
+2019-06-06  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Fix more merge issues for BDB
+
+2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c (cob_file_close, cob_file_unlock) [!HAVE_FCNTL]: fixed
+	  missing check for fcntl availability
 
 2019-05-31  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -130,6 +193,7 @@
 
 	* screenio.c: define ALT_DEL, ALT_LEFT, ALT_RIGHT
 	  using \033 for Escape instead of \E to avoid C compiler problems
+	* fileio.c: Fix RELATIVE file I/O bug for use on big-endian system
 
 2019-04-12  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -168,9 +232,13 @@
 
 2019-03-12  Simon Sobisch <simonsobisch@gnu.org>
 
-	* common.c (print_info): changed msgid for "file handler" and
-	  already output if RTD-version of VB-ISAM is used (even if this
-	  wouldn't work currently), partially after Ron Norman
+	* common.c (print_info): changed msgid for "file handler" and output
+	  if RTD-version of VB-ISAM is used, partially after Ron Norman
+
+2015-03-03  Ron Norman
+
+	* fileio.c, common.c, common.h updated to resolve little endian
+	  versus big endian issues
 
 2019-02-26  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -193,7 +261,7 @@
 
 	* screenio.c (cob_screen_init): fix background=foreground from terminal
 	* screenio.c (cob_screen_init, cob_screen_attr): explicit define and use
-	  color_pair 1 as "black on black" 
+	  color_pair 1 as "black on black"
 	* screenio.c (cob_screen_attr): fix long standing bug in use of
 	  color_set (takes color_pair_number, not a COLOR_PAIR)
 	* screenio.c (cob_screen_attr): extracted (cob_to_curses_color,
@@ -342,9 +410,14 @@
 
 	* coblocal.h, numeric.c (cob_decimal_init2): fixed compiler warning
 
-2018-06-21  Brian Tiffin <btiffin@gnu.org>
+2018-07-31  Ron Norman <rjn@inglenet.com>
+	* termio.c: Improved pretty display for LENGTH/FUNCTION values
+	            Added cob_field_int_display
+	* common.h: added cob_field_int_display
+	* intrinsic.c: Improved for pretty_display
 
-	* common.h, intrinsic.c: CONTENTS-OF renamed to CONTENT-OF
+2018-07-29  Ron Norman <rjn@inglenet.com>
+	* fileio.c: Added code to set COB_STATUS_53_MAX_LOCKS
 
 2018-07-29  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -361,6 +434,27 @@
 
 	* common.c (cob_check_ref_mod): display maximum size on overflow
 
+2018-07-12  Ron Norman <rjn@inglenet.com>
+	* call.c: Added cob_get_name_line to return source line of CALL
+	          Added cob_field_value to copy field & set COB_FLAG_VALUE
+	          Added cob_field_content to copy field & set COB_FLAG_CONTENT
+
+2018-07-05  Ron Norman <rjn@inglenet.com>
+	* coblocal.h,common.c: Added runtime.cfg options for COB_LS_SPLIT
+	* fileio.c: Added checks for runtime.cfg options for split or truncate
+	   LINE SEQUENTIAL records which are longer than expected
+
+2018-07-04  Ron Norman <rjn@inglenet.com>
+	* common.h: Added COB_MF_LS_SPLIT flag
+	* fileio.c:
+	  Added check for IO_fdname having 'ls_split' for 
+	  Micro Focus compatible LINE SEQUENTIAL files.
+	  When a record is longer than the program was compiled for
+	  Micro Focus will return the extra data as an extra record.
+	  This is the result for when IO_fdname has ls_split.
+	  For 'GC' format LINE SEQUENTIAL or for 'nols_split' a long
+	  record will get truncated and skip to the next LF.
+
 2018-07-04  Edward Hart <edward.dan.hart@gmail.com>
 
 	* move.c (cob_move_display_to_edited): fixed bug #220 again; this time
@@ -376,10 +470,10 @@
 
 2018-06-18  Ron Norman <rjn@inglenet.com>
 
-	* fileio.c: Updates to the EXTFH logic 
+	* fileio.c: Updates to the EXTFH logic
 	   You can now actually compile using MF Visual COBOL and include the
 	   GnuCOBOL libcob as follows:
-	     cob -L/usr/local/lib -lcob -C "CALLFH=EXTFH" 
+	     cob -L/usr/local/lib -lcob -C "CALLFH=EXTFH"
 
 2018-06-10  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -566,6 +660,11 @@
 
 	* termio.c: standardize display of -NaN and NaN for float/double
 
+2018-01-03 Ron Norman <rjn@inglenet.com>
+	* common.c,common.h: Add cob_function_return routine to
+	  copy a FUNCTION's RETURNING cob_field to 'cob_module' 
+	  save area and return address of that
+
 2018-01-03  Simon Sobisch <simonsobisch@gnu.org>
 
 	* numeric.c [WIN32]: fix missing definition of isnan / isinf
@@ -706,6 +805,10 @@
 	  calls (calls to put were completely unchecked before) and raise correct
 	  fileio status (especially 34 for disk/quota full) instead of status 30
 
+2017-10-31  Ron Norman <rjn@inglenet.com>
+
+	* common.h: Add cob_global_exception and COB_RESET_EXCEPTION
+
 2017-10-24  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c: changed message format back to old version, see bug #455
@@ -742,6 +845,13 @@
 
 	* screenio.c (cob_screen_get_all): changed backspace to emit beep if
 	  entered at start of field, not to act like back-tab (bug #426).
+
+2017-09-26  Ron Norman <rjn@inglenet.com>
+
+	* common.c,common.h: Add code for COB_FERROR_DIV_ZERO
+	  restore code to invoke 'dump' on program abort
+	* numeric.c: If divide by Zero and no ON SIZE ERROR
+	  then abort with COB_FERROR_DIV_ZERO
 
 2017-09-21  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -921,6 +1031,13 @@
 	* screenio.c (screen_display): FR #191 set flag pending_accept
 	  for DISPLAY screen, too
 
+2017-05-02 Ron Norman <rjn@inglenet.com>
+	* common.c,coblocal.h: added 'cob_keycheck' to indicate if INDEXED file
+	  keys must match exactly. Default is TRUE
+	* fileio.c: 
+	  Add code to handle 'keycheck' in IO_filename env var.
+	  Added code to indexed_open for C|D|VB-ISAM files to handle keycheck
+
 2017-05-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_sig_handler, cob_set_signal): added code for SIGBUS
@@ -930,6 +1047,13 @@
 
 	* common.c (set_value, get_value): using correcting format modifier
 	  for cob_s64_t (CB_FMT_LLD)
+
+2017-04-27 Ron Norman <rjn@inglenet.com>
+	* move.c: added 'cob_alloc_move' used to copy data for BY VALUE params
+	* common.c,common.h: added 'cob_get_hase_name' used to create has value
+	  added 'cob_alloc_attr' to create working 'cob_field_attr'
+	* call.c: set 'cobglobptr->cob_call_from_c' &
+	  'cobglobptr->cob_call_name_hash' as required
 
 2017-04-27  Sergey Kashyrin <ska@kiska.net>
 
@@ -948,10 +1072,24 @@
 	* fileio.c: for the callable EXTFH interface, set f->file_version
 	  to COB_FILE_VERSION
 
+2017-04-18 Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: relative_read_size returns an 'int' and not 'size_t'
+	* screenio.c: add (int) casts
+	* move.c: use 'int' instead of 'size_t' as it needs to be signed
+
 2017-04-18  Ron Norman <rjn@inglenet.com>
 
 	* numeric.c, common.c, coblocal.h: define ISFINITE depending on
 	  HAVE_ISFINITE to either use 'isfinite' or 'finite' or '_finite'
+
+2017-04-12 Ron Norman <rjn@inglenet.com>
+
+	* fileio.c,common.c:
+	 Routines which implement functions defined via 'system.def'
+	 have been enhanced to use the C API functions to access
+	 parameter fields passed on the CALL statement in the COBOL
+	 application code.
 
 2017-04-10  Ron Norman <rjn@inglenet.com>
 
@@ -969,6 +1107,16 @@
 	* intrinsic.c (in_last_n_chars): fixed underflow when field->size was
 	  less than n, ultimately causing an invalid read.
 	* fileio.c (indexed_open): fixed minor memory leak.
+
+2017-04-07  Ron Norman <rjn@inglenet.com>
+	* common.c,coblocal.h,runtime.cfg:
+	  Added COB_MF_LS_NULLS,COB_MF_LS_VALIDATE,COB_SHARE_MODE
+	  & COB_RETRY_MODE to runtime.cfg
+	* fileio.c:
+	  Added check for IX,SQ,RL,LS,LA_OPTIONS env var for file
+	  I/O options when IO_fdname is not defined.
+	  Added check for mf_ls_nulls and mf_ls_validate options
+	  for Micro Focus compatible LINE SEQUENTIAL files
 
 2017-03-31  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -992,10 +1140,36 @@
 
 	* common.c: fix minor memory leaks in configuration code
 
+2017-02-12  Ron Norman <rjn@inglenet.com>
+	* common.c,common.h:
+	  Added check to open trace file on READY TRACE
+	* common.h:
+	  Added flags to FCD3 for TRACE & STATS
+	* fileio.c:
+	  Added code to invoke trace and/or stats for EXTFH usage
+	  If -ftraceall not used, then open trace_file when defined
+	  and the file had 'trace_io' set true
+
 2017-02-07  Simon Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c: [!COB_GEN_SCREENIO] fixed zero_line_col_allowed
 	  missing / superfluous in function declarations
+
+2017-02-07  Ron Norman <rjn@inglenet.com>
+	* common.c,common.h,coblocal.h:
+	  Added COB_STATS_RECORD & COB_STATS_FILE to runtime.cfg
+	* fileio.c:
+	  Added stats code to save_status.
+	  Added check for IO_fdname and check for 'stats' option
+
+2017-02-07  Ron Norman <rjn@inglenet.com>
+	* common.c,common.h,coblocal.h:
+	  Added COB_TRACE_IO to runtime.cfg
+	* termio.c:
+	  Added cob_print_field to be used by fileio Trace code
+	* fileio.c:
+	  Added trace code to save_status.
+	  Added check for IO_fdname and check for 'trace' option
 
 2017-02-06  Ron Norman <rjn@inglenet.com>
 
@@ -1080,6 +1254,17 @@
 	  missing file, removed some redundant code
 	* fileio.c [WITH_DB]: moved call to join_environment to indexed_open
 
+2016-12-30  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c,common.h
+	  Complete work on BDB use of SHARING & RETRY
+	  Problems solved by closing BDB cursor as soon/often as possible
+	  as the BDB cursor seems to create some internal locks
+	  Retry interval reduced to 100ms
+
+	* INDEXED file test case added and uses a file to synchronize tests
+	* RELATIVE file test case added and uses a file to synchronize tests
+
 2016-12-27  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.h: added COB_MAX_UNBOUNDED_SIZE
@@ -1105,6 +1290,22 @@
 	* common.c, common.h, coblocal.h, screenio.c: FR #191 added runtime
 	  configuration COB_EXIT_WAIT and COB_EXIT_MSG for waiting if
 	  extended ACCEPT after last extended DISPLAY (if any) is missing
+
+2016-12-24  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c,common.c,common.h,coblocal.h
+	  Extensive updates for fileio.c to handle OPEN SHARING
+	  and RETRY clauses on all I/O statements.
+	  Relative files use sigaction/alarm/fcntl to wait for
+	  record locks.
+	  C/D/VB-ISAM files use the ISAM handle functions combined with
+	  a wait/retry loop. each loop happens at 125ms interval.
+	  BDB code updated to use none deprecated functions, use some
+	  subroutines instead of inline code and changes for SHARING/RETRY
+
+	* At present there are no test cases but these will come in a while
+	  I need to come up with a better way to synchronize separate
+	  processes so I can reliably recreate the test cases
 
 2016-12-23  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -1141,6 +1342,21 @@
 	  third parameter which should be set if the result is assigned to one of
 	  the original strings
 
+2016-12-02  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c,common.h
+	  Changes to use error status 51 for record locked and
+	  52 for DeadLock instead of 61 for both. 62 is used for
+	  file sharing errors on OPEN of the file
+
+2016-11-30  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c,common.c,common.h
+	  Compiler updated for handling the SHARING, RETRY, ADVANCING LOCK
+	  and IGNORE LOCK phrases, Mainly for RELATIVE files now.
+	  This is a 'work in progress' and more updates will follow to include
+	  support for INDEXED and SEQUENTIAL files
+
 2016-11-19  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_sys_fork, cob_sys_waitpid): don't abort if necessary
@@ -1154,6 +1370,12 @@
 	  (fork a new COBOL process) and cob_sys_waitpid for CBL_GC_WAITPID
 	  (wait for completion of another process)
 	* system.def: Add CBL_GC_xxx as alias for CBL_OC_xxx
+
+2016-11-15 Ron Norman <rjn@inglenet.com>
+
+	* fileio.c ((cob_sys_open_file, cob_sys_create_file)):
+	  removed #ifdef WORDS_BIGENDIAN, as literal parameters are
+	  now passed as PIC S9(9) BINARY
 
 2016-11-13  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -1257,6 +1479,14 @@
 
 	* common.c, common.h: minor fixes for compatibility to VC2005
 
+2016-06-20 Ron Norman <rjn@inglenet.com>
+
+	* common.h: added some COB_CHAR_xxx to define some characters
+	* fileio.c: for LINE SEQUENTIAL files with COB_LS_VALIDATE = true
+	    changed bad data error from 30 to 34
+	    Also allow some characters thru such as BS, FF, TAB, ESC, SI
+	    No data validation is done for LINE ADVANCING output files
+
 2016-06-20  Ron Norman <rjn@inglenet.com>
 
 	* coblocal.h, common.c: FR #138 identify config variables which accept
@@ -1332,6 +1562,10 @@
 
 	* common.c (cob_set_location, cob_trace_section, cob_exit_common): fix for
 	  bug #216 - store a duplicate of cob_last_sfile for tracing, free on exit
+
+2016-04-16 Ron Norman <rjn@inglenet.com>
+
+	* common.c report error for undefined environment variables
 
 2016-03-15  Ron Norman <rjn@inglenet.com>
 
@@ -1630,12 +1864,27 @@
 	  by moving physical_cancel (defined in call.c and referenced via
 	  runtimeptr) to cobglobptr->cob_physical_cancel for check in COBOL modules
 
+2015-04-30  Ron Norman
+
+	* common.h, change cob_file record_off to type cob_s64_t (from off_t)
+	  so that the size does not change depending on C comppiler
+	  This is most likely the cause of the previous issue.
+
 2015-04-29  Ron Norman <rjn@inglenet.com>
 
 	* reportio.c: change to allocate larger size data area for temp
 	  fields used for CONTROL breaks. This is a cludge to avoid
 	  something that is clobbering free memory on SUN system.
 	  It did work fine on x86 Linux so watch out for this later.
+
+2015-04-27  Ron Norman
+
+	* common.c fileio.c common.h
+	  updated to support Micro Focus format files.
+	  fileio.c also check for environment variable
+	  IO_filename that can speficy options for just the one file
+	  New runtime option (mf_files) to set all files to default
+	  to Micro Focus format
 
 2015-04-14  Ron Norman <rjn@inglenet.com>
 
@@ -1695,11 +1944,13 @@
 	* call.c, common.c, intrinsic.c, numeric.c: fix segfault on early exit
 	  during runtime initialisation
 
-2015-03-03  Ron Norman
+2015-03-03  Ron Norman <rjn@inglenet.com>
 
 	* common.c (cob_sys_getopt_long_long): fix ENDIAN problem with CBL_GC_GETOPT
 	* fileio.c (cob_sys_create_file, cob_sys_open_file):
 	  fix ENDIAN problem with CBL_CREATE_FILE, CBL_OPEN_FILE
+	* fileio.c, common.c, common.h updated to resolve little endian
+	  versus big endian issues
 
 2015-03-01  Ron Norman <rjn@inglenet.com>
 

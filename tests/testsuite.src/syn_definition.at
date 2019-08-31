@@ -834,6 +834,37 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([SYNCHRONIZED clause])
+AT_KEYWORDS([definition sync])
+
+# GC simply ignored RIGHT which seems to be wrong according to ISO (but right for MF).
+# The check / correction is TODO as the current warning shows up in the COBOL85 tests.
+#AT_XFAIL_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77  CS-FULL            PICTURE 9(4) COMPUTATIONAL SYNCHRONIZED.
+       77  CS                 PIC 9(4) COMP SYNC.
+       77  CSL                PIC 9(4) COMP SYNC LEFT.
+       77  CSR                PIC 9(4) COMP SYNC RIGHT.
+       PROCEDURE        DIVISION.
+           MOVE 1 TO CS-FULL, CS, CSL, CSR.
+           STOP RUN.
+])
+
+# currently is:
+#AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+#[prog.cob: 9: Warning: 'SYNCHRONIZED RIGHT' not implemented
+#])
+#should be
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
 ###
 ### File name
 ###

@@ -1,4 +1,9 @@
 
+2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: gcdiff - removed extra link and compiler flags fixing
+	  build on systems that don't link via -lcob
+
 2019-04-07  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am (COBCRUN): use pre-inst-env ensuring to use the built version
@@ -79,6 +84,23 @@
 	* Makefile.am: added CODE_COVERAGE parts as provided by AX_CODE_COVERAGE
 	* cobcrun.c: don't print runtime env when program name > max length,
 	  surrounded exception ABORTs that cannot be tested by LCOV_EXCP markers
+
+2017-02-05  Ron Norman <rjn@inglenet.com>
+
+	* gcdiff.c: Updates to handle time compares and look for run options
+	  in gcdiff.conf in current directory, started unified diff
+
+2017-02-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* gcdiff.c: added option to read files from stdin (GCD_DASH)
+	* gcdiff.c: added NLS and locale, changed fprintf calls to puts/printf,
+	  added version output and used output for usage similar to cobcrun
+	* gcdiff.c [_WIN32]: compatibility changes
+
+2017-02-03  Ron Norman <rjn@inglenet.com>
+
+	* gcdiff.c : New module for doing a 'diff' for test cases
+	* Makefile.am : Updated for gcdiff.c
 
 2017-01-10  Simon Sobisch <simonsobisch@gnu.org>
 

@@ -1696,6 +1696,7 @@ check_and_set_usage (const enum cb_usage usage)
 {
 	check_repeated ("USAGE", SYN_CLAUSE_5, &check_pic_duplicate);
 	current_field->usage = usage;
+	current_field->flag_usage_defined = 1;
 }
 
 static void
@@ -5104,7 +5105,7 @@ _lock_with:
   }
 | with_rollback
   {
-	current_file->lock_mode |= COB_LOCK_MULTIPLE;
+	current_file->lock_mode |= (COB_LOCK_ROLLBACK|COB_LOCK_MULTIPLE);
   }
 ;
 
@@ -5359,9 +5360,9 @@ sharing_clause:
 ;
 
 sharing_option:
-  ALL _other			{ $$ = NULL; }
-| NO _other			{ $$ = cb_int (COB_LOCK_OPEN_EXCLUSIVE); }
-| READ ONLY			{ $$ = NULL; }
+  ALL _other			{ $$ = cb_int (COB_SHARE_ALL_OTHER); }
+| NO _other			{ $$ = cb_int (COB_SHARE_NO_OTHER); }
+| READ ONLY			{ $$ = cb_int (COB_SHARE_READ_ONLY); }
 ;
 
 /* I-O-CONTROL paragraph */
@@ -6676,6 +6677,7 @@ usage:
 	current_field->flag_comp_1 = 1;
 	if (cb_binary_comp_1) {
 		check_and_set_usage (CB_USAGE_SIGNED_SHORT);
+		current_field->flag_synchronized = 1;
 	} else {
 		check_and_set_usage (CB_USAGE_FLOAT);
 	}
@@ -6782,10 +6784,12 @@ usage:
 | SIGNED_SHORT
   {
 	check_and_set_usage (CB_USAGE_SIGNED_SHORT);
+	current_field->flag_synchronized = 1;
   }
 | SIGNED_INT
   {
 	check_and_set_usage (CB_USAGE_SIGNED_INT);
+	current_field->flag_synchronized = 1;
   }
 | SIGNED_LONG
   {
@@ -6794,14 +6798,17 @@ usage:
 #else
 	check_and_set_usage (CB_USAGE_SIGNED_LONG);
 #endif
+	current_field->flag_synchronized = 1;
   }
 | UNSIGNED_SHORT
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_SHORT);
+	current_field->flag_synchronized = 1;
   }
 | UNSIGNED_INT
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_INT);
+	current_field->flag_synchronized = 1;
   }
 | UNSIGNED_LONG
   {
@@ -6810,6 +6817,7 @@ usage:
 #else
 	check_and_set_usage (CB_USAGE_UNSIGNED_LONG);
 #endif
+	current_field->flag_synchronized = 1;
   }
 | BINARY_CHAR _signed
   {
@@ -6822,26 +6830,38 @@ usage:
 | BINARY_SHORT _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_SHORT);
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_SHORT UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_SHORT);
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_LONG _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_INT);
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_LONG UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_INT);
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_DOUBLE _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_LONG);
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_DOUBLE UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_LONG);
+	if (cb_binary_sync_clause == CB_IGNORE)
+		current_field->flag_ignore_sync = 1;
   }
 | BINARY_C_LONG _signed
   {
@@ -6850,6 +6870,7 @@ usage:
 #else
 	check_and_set_usage (CB_USAGE_SIGNED_LONG);
 #endif
+	current_field->flag_synchronized = 1;
   }
 | BINARY_C_LONG UNSIGNED
   {
@@ -6858,6 +6879,7 @@ usage:
 #else
 	check_and_set_usage (CB_USAGE_UNSIGNED_LONG);
 #endif
+	current_field->flag_synchronized = 1;
   }
 | FLOAT_BINARY_32
   {
@@ -7157,7 +7179,9 @@ _left_or_right:
 | LEFT
 | RIGHT
   {
-	CB_PENDING ("SYNCHRONIZED RIGHT");
+	/* Stay quiet on this
+	PENDING ("SYNCHRONIZED RIGHT");
+	*/
   }
 ;
 
@@ -9301,12 +9325,6 @@ procedure_param:
 		f->flag_is_pdiv_opt = 1;
 	}
 
-	if (call_mode == CB_CALL_BY_VALUE
-	 && CB_REFERENCE_P ($4)
-	 && CB_FIELD (cb_ref ($4))->flag_any_length) {
-		cb_error_x ($4, _("ANY LENGTH items may only be BY REFERENCE formal parameters"));
-	}
-
 	$$ = CB_BUILD_PAIR (cb_int (call_mode), x);
 	CB_SIZES ($$) = size_mode;
   }
@@ -9323,7 +9341,6 @@ _procedure_type:
 	if (current_program->flag_chained) {
 		cb_error (_("%s not allowed in CHAINED programs"), "BY VALUE");
 	} else {
-		CB_UNFINISHED (_("parameters passed BY VALUE"));
 		call_mode = CB_CALL_BY_VALUE;
 	}
   }
@@ -10815,6 +10832,17 @@ call_param:
 	int	save_mode;	/* internal single parameter only mode */
 
 	save_mode = call_mode;
+	if (CB_LITERAL_P($3)) {
+		/* literals become BY CONTENT */
+		if (CB_NUMERIC_LITERAL_P ($3)) {
+			/* If not BY VALUE numeric-literals become BY CONTENT */
+			if (call_mode != CB_CALL_BY_VALUE) {
+				call_mode = CB_CALL_BY_CONTENT;
+			}
+		} else {
+			call_mode = CB_CALL_BY_CONTENT;
+		}
+	}
 	if (call_mode != CB_CALL_BY_REFERENCE) {
 		if (CB_FILE_P ($3) || (CB_REFERENCE_P ($3) &&
 		    CB_FILE_P (CB_REFERENCE ($3)->value))) {
@@ -13140,6 +13168,8 @@ open_file_entry:
   {
 	cb_tree l;
 	cb_tree x;
+	cb_tree retry;
+	int	retry_times, retry_seconds, retry_forever;
 
 	if (($1 && $3) || ($1 && $6) || ($3 && $6)) {
 		cb_error_x (CB_TREE (current_statement),
@@ -13152,10 +13182,18 @@ open_file_entry:
 	} else {
 		x = $1;
 	}
+	retry = current_statement->retry;
+	retry_times = current_statement->flag_retry_times;
+	retry_seconds = current_statement->flag_retry_seconds;
+	retry_forever = current_statement->flag_retry_forever;
 
 	for (l = $5; l; l = CB_CHAIN (l)) {
 		if (CB_VALID_TREE (CB_VALUE (l))) {
 			begin_implicit_statement ();
+			current_statement->retry = retry;
+			current_statement->flag_retry_times = retry_times;
+			current_statement->flag_retry_seconds = retry_seconds;
+			current_statement->flag_retry_forever = retry_forever;
 			cb_emit_open (CB_VALUE (l), $2, x);
 		}
 	}
@@ -13569,7 +13607,13 @@ _lock_phrases:
 
 ignoring_lock:
   IGNORING LOCK
+  {
+	current_statement->flag_ignore_lock = 1;
+  }
 | _with IGNORE LOCK
+  {
+	current_statement->flag_ignore_lock = 1;
+  }
 ;
 
 advancing_lock_or_retry:
@@ -13596,8 +13640,20 @@ retry_phrase:
 retry_options:
   /* HACK: added _for to fix shift/reduce conflict. */
   RETRY _for exp TIMES
+  {
+	current_statement->retry = $3;
+	current_statement->flag_retry_times = 1;
+  }
 | RETRY _for exp SECONDS
+  {
+	current_statement->retry = $3;
+	current_statement->flag_retry_seconds = 1;
+  }
 | RETRY FOREVER
+  {
+	current_statement->retry = NULL;
+	current_statement->flag_retry_forever = 1;
+  }
 ;
 
 _extended_with_lock:
@@ -13612,11 +13668,10 @@ extended_with_lock:
   }
 | _with KEPT LOCK
   {
-   $$ = cb_int5;
+	$$ = cb_int5;
   }
 | _with WAIT
   {
-	/* TO-DO: Merge with RETRY phrase */
 	$$ = cb_int4;
   }
 ;

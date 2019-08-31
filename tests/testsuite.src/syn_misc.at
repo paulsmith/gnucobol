@@ -2453,8 +2453,8 @@ prog.cob:9: error: literal length exceeds 160 characters
 ])
 
 AT_CHECK([$COMPILE_ONLY -free prog2.cob], [1], [],
-[prog2.cob:9: error: invalid literal: '                                   ...'
-prog2.cob:9: error: literal length 8299 exceeds 8191 characters
+[prog2.cob:43: error: invalid literal: '                                   ...'
+prog2.cob:43: error: literal length 8299 exceeds 8191 characters
 ])
 
 # extra test with listing as this is an edge case there
@@ -2466,8 +2466,8 @@ prog.cob:9: error: literal length exceeds 8191 characters
 
 AT_CAPTURE_FILE([prog2.lst])
 AT_CHECK([$COMPILE_ONLY -free -t prog2.lst prog2.cob], [1], [],
-[prog2.cob:9: error: invalid literal: '                                   ...'
-prog2.cob:9: error: literal length 8299 exceeds 8191 characters
+[prog2.cob:43: error: invalid literal: '                                   ...'
+prog2.cob:43: error: literal length 8299 exceeds 8191 characters
 ])
 
 AT_CLEANUP
@@ -4038,6 +4038,7 @@ AT_CLEANUP
 
 AT_SETUP([ANY LENGTH item as BY VALUE formal parameter])
 AT_KEYWORDS([misc BY VALUE])
+AT_SKIP_IF(true)
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4053,8 +4054,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:9: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
-prog.cob:9: error: ANY LENGTH items may only be BY REFERENCE formal parameters
+[prog.cob:9: error: ANY LENGTH items may only be BY REFERENCE formal parameters
 ])
 AT_CLEANUP
 
@@ -4194,7 +4194,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:5: error: STATIC CALL and ON EXCEPTION are mutually exclusive
 ])
 AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
-AT_CHECK([$COMPILE_ONLY -static prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -fstatic-call prog2.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [],
 [prog3.cob:6: warning: STATIC CALL convention ignored because of ON EXCEPTION
 ])
@@ -4962,25 +4962,22 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: in section 'test-DEBUG':
+[prog.cob: in section 'TEST-DEBUG2':
+prog.cob:24: error: duplicate DEBUGGING target: 'i'
+prog.cob: in section 'test-DEBUG':
 prog.cob:22: warning: 'MAIN' is not in DECLARATIVES
-prog.cob:22: error: 'TEST-DEBUG2' may only be referenced with PERFORM
 prog.cob:19: error: DEBUGGING target invalid: 'test-DEBUG'
 prog.cob: in section 'TEST-DEBUG2':
 prog.cob:25: error: DEBUGGING target invalid: 'test-DEBUG'
-prog.cob: in section 'MAIN':
-prog.cob:31: warning: 'test-DEBUG' is in DECLARATIVES
 ])
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
-[prog.cob: in section 'test-DEBUG':
-prog.cob:20: warning: USE FOR DEBUGGING is obsolete in COBOL 85
+[prog.cob: in section 'TEST-DEBUG2':
+prog.cob:24: error: duplicate DEBUGGING target: 'i'
+prog.cob: in section 'test-DEBUG':
 prog.cob:22: error: 'MAIN' is not in DECLARATIVES
-prog.cob:22: error: 'TEST-DEBUG2' may only be referenced with PERFORM
 prog.cob:19: error: DEBUGGING target invalid: 'test-DEBUG'
 prog.cob: in section 'TEST-DEBUG2':
 prog.cob:25: error: DEBUGGING target invalid: 'test-DEBUG'
-prog.cob: in section 'MAIN':
-prog.cob:31: error: 'test-DEBUG' is in DECLARATIVES
 ])
 AT_CLEANUP
 
@@ -6444,6 +6441,86 @@ prog.cob:152: error: SUPPRESS WHEN LOW-VALUE item must be USAGE DISPLAY or NATIO
 ])
 AT_CLEANUP
 
+AT_SETUP([IBM Data Division])
+AT_KEYWORDS([78 LENGTH])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01 DATA-SIZE  PIC 999.
+       01 MY-DATA.
+          03 MY-TABLE OCCURS 20 TIMES.
+             05 MY-ELEMENT-1  PIC X(10).
+             05 MY-ELEMENT-2  PIC 99.
+       78 MY-LEN VALUE LENGTH OF MY-DATA.
+
+       01 TBLX       PIC 99 VALUE 5.
+       01 ODO-DATA.
+          03 ODO-TABLE OCCURS 1 TO 15 TIMES DEPENDING ON TBLX.
+             05 ODO-ELEMENT-1 PIC X(10).
+             05 ODO-ELEMENT-2 PIC 99.
+       78 ODO-LEN VALUE LENGTH OF ODO-DATA.
+
+       PROCEDURE DIVISION.
+           DISPLAY "MY-LEN       is " MY-LEN.
+           DISPLAY "ODO-LEN      is " ODO-LEN.
+           MOVE LENGTH OF MY-DATA TO DATA-SIZE.
+           DISPLAY "MY-DATA      is " FUNCTION LENGTH (MY-DATA)
+                   " and " DATA-SIZE.
+           MOVE LENGTH OF MY-ELEMENT-1 TO DATA-SIZE.
+           DISPLAY "MY-ELEMENT-1 is " FUNCTION LENGTH (MY-ELEMENT-1)
+                   " and " DATA-SIZE.
+           MOVE LENGTH OF MY-TABLE TO DATA-SIZE.
+           DISPLAY "MY-TABLE     is " LENGTH OF MY-TABLE
+                   " and " DATA-SIZE.
+           MOVE LENGTH OF MY-TABLE(1) TO DATA-SIZE.
+           DISPLAY "MY-TABLE(1)  is " FUNCTION LENGTH (MY-TABLE(1))
+                   " and " DATA-SIZE.
+
+           MOVE LENGTH OF ODO-DATA TO DATA-SIZE.
+           DISPLAY "ODO-DATA a   is " FUNCTION LENGTH (ODO-DATA)
+                   " and " DATA-SIZE.
+           MOVE FUNCTION LENGTH (ODO-DATA) TO DATA-SIZE.
+           DISPLAY "ODO-DATA b   is " LENGTH OF ODO-DATA
+                   " and " DATA-SIZE.
+           MOVE LENGTH OF ODO-TABLE TO DATA-SIZE.
+           DISPLAY "ODO-TABLE    is " LENGTH OF ODO-TABLE
+                   " and " DATA-SIZE.
+           MOVE LENGTH OF ODO-TABLE(1) TO DATA-SIZE.
+           DISPLAY "ODO-TABLE(1) is " FUNCTION LENGTH (ODO-TABLE(1))
+                   " and " DATA-SIZE.
+           STOP RUN.
+])
+
+AT_CHECK([cobc -x -std=ibm prog.cob ], [1], [],
+[prog.cob:21: error: variable length item not allowed here
+prog.cob:21: error: constant item 'ODO-LEN' requires a VALUE clause
+prog.cob:30: warning: subscript missing for 'MY-ELEMENT-1' - defaulting to 1
+])
+
+AT_CHECK([cobc -x -std=ibm-strict -w prog.cob ], [1], [],
+[prog.cob:14: error: LENGTH OF 'MY-DATA' not allowed outside of Procedure Division
+prog.cob:14: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:21: error: LENGTH OF 'ODO-DATA' not allowed outside of Procedure Division
+prog.cob:21: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:30: error: 'MY-ELEMENT-1' requires one subscript
+])
+
+AT_CHECK([cobc -x prog.cob ], [1], [],
+[prog.cob:21: error: variable length item not allowed here
+prog.cob:21: error: constant item 'ODO-LEN' requires a VALUE clause
+prog.cob:30: error: 'MY-ELEMENT-1' requires one subscript
+])
+
+AT_CLEANUP
+
+
+
 
 AT_SETUP([BASED clause, ALLOCATE / FREE statements])
 AT_KEYWORDS([BASED])
@@ -6603,5 +6680,47 @@ prog.cob:20: error: syntax error, unexpected <
 prog.cob:22: error: syntax error, unexpected =
 prog.cob:25: error: syntax error, unexpected PROCEDURE
 ])
+AT_CLEANUP
+
+AT_SETUP([Group Usage Error])
+AT_KEYWORDS([Numeric])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TESTRECORD.
+        02  TSTGRP3 COMP-3.
+         05  GRP3-1.
+           10  FILLER             PICTURE X(1). 
+           10  COM3-FLD1          PICTURE S9(4) COMP-4. 
+           10  FILLER             PICTURE X(1). 
+           10  COM3-FLD2          PICTURE S9(6). 
+           10  FILLER             PICTURE X(1). 
+           10  COM3-FLD3          PICTURE S9(6) DISPLAY. 
+           10  FILLER             PICTURE X(1). 
+         05  GRP3-2.
+           10  FILLER             USAGE COMP-1.
+
+       PROCEDURE DIVISION.
+
+           MOVE ALL 'x' TO TESTRECORD.
+           MOVE "12345678" TO COM3-FLD1 (1:).
+           MOVE "12345678" TO COM3-FLD2 (1:).
+           DISPLAY TESTRECORD.
+           STOP RUN.
+
+           
+])
+
+AT_CHECK([cobc -x -std=mf -w prog.cob ], [1], [],
+[prog.cob:12: error: TSTGRP3 USAGE COMP-3 incompatible with COM3-FLD1 USAGE COMP
+prog.cob:16: error: TSTGRP3 USAGE COMP-3 incompatible with COM3-FLD3 USAGE DISPLAY
+prog.cob:19: error: TSTGRP3 USAGE COMP-3 incompatible with FILLER USAGE COMP-1
+])
+
 AT_CLEANUP
 

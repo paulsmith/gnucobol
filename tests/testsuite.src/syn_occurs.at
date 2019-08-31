@@ -450,3 +450,35 @@ grep "prog.cob:11: error: numeric literal '9223372036854775808' exceeds limit"],
 
 AT_CLEANUP
 
+
+AT_SETUP([ODO not Fixed Loc])
+AT_KEYWORDS([ODO])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+      ******************************************************************
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+      ******************************************************************
+       WORKING-STORAGE SECTION.
+       01 DAT.
+           02 ODO-1 PIC 9.
+           02 ODO-1-DATA OCCURS 1 TO 6 TIMES DEPENDING ON ODO-1
+                PIC 9.
+           02 ODO-2 PIC 9.
+           02 ODO-2-DATA OCCURS 1 TO 6 TIMES DEPENDING ON ODO-2
+                PIC 9.
+           02 ODO-3 PIC XXX.     
+          
+      ******************************************************************
+       PROCEDURE DIVISION.
+           STOP RUN.
+
+])
+
+AT_CHECK([$COMPILE_ONLY -std=mf prog.cob ], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=mf -fodoslide prog.cob ], [0], [], [])
+
+AT_CLEANUP
+

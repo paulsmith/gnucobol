@@ -116,7 +116,7 @@ CB_CONFIG_BOOLEAN (cb_sticky_linkage, "sticky-linkage",
 	_("LINKAGE-SECTION items remain allocated between invocations"))
 
 CB_CONFIG_BOOLEAN (cb_move_ibm, "move-ibm",	/* counterpart for MF's BYTE-MODE-MOVE */
-	_("MOVE operates as on IBM (left to right, byte by byte)"))
+	_("MOVE operates as on IBM (left to right, byte by byte), otherwise no propagating move"))
 
 CB_CONFIG_BOOLEAN (cb_perform_osvs, "perform-osvs",
 	_("exit point of any currently executing perform is recognized if reached"))
@@ -215,6 +215,12 @@ CB_CONFIG_SUPPORT (cb_entry_statement, "entry-statement",
 
 CB_CONFIG_SUPPORT (cb_move_noninteger_to_alphanumeric, "move-noninteger-to-alphanumeric",
 	_("move noninteger to alphanumeric"))
+
+CB_CONFIG_BOOLEAN (cb_occurs_max_length_without_subscript, "occurs-max-length-without-subscript",
+	_("occurs max length without subscript"))
+
+CB_CONFIG_BOOLEAN (cb_length_in_data_division, "length-in-data-division",
+      _("length in data division")) 
 
 CB_CONFIG_SUPPORT (cb_move_fig_constant_to_numeric, "move-figurative-constant-to-numeric",
 	_("move figurative constants to numeric"))
@@ -332,3 +338,12 @@ CB_CONFIG_SUPPORT (cb_continue_after, "continue-after",
 
 CB_CONFIG_SUPPORT (cb_goto_entry, "goto-entry",
 	_("ENTRY FOR GOTO and GOTO ENTRY statements"))
+
+CB_CONFIG_SUPPORT (cb_depending_on_not_fixed, "depending-on-not-fixed", _("depending-on-not-fixed"))
+
+CB_CONFIG_SUPPORT (cb_binary_sync_clause, "binary-sync-clause",
+	_("BINARY-SHORT/LONG/DOUBLE SYNCHRONIZED clause"))
+
+CB_CONFIG_SUPPORT (cb_nonnumeric_with_numeric_group_usage, "nonnumeric-with-numeric-group-usage",
+	_("Non-Numeric item with Numeric Group USAGE clause"))
+

@@ -243,27 +243,24 @@ static void
 copy_file_line (cb_tree e, cb_tree y, cb_tree x)
 {
 	if (y == cb_zero || x == cb_zero) {
-		e->source_line = prev_expr_line = cb_exp_line;
-		e->source_file = cb_source_file;
+		prev_expr_line = cb_exp_line;
+		SET_SOURCE(e, cb_source_file, cb_exp_line);
 	} else if (y && x && y->source_line > x->source_line) {
-		e->source_file = y->source_file;
-		e->source_line = y->source_line;
+		SET_SOURCE(e, y->source_file, y->source_line);
 		e->source_column = y->source_column;
 #if 0 /* TODO remove if not needed */
 		save_expr_file = (char *)y->source_file;
 		save_expr_line = y->source_line;
 #endif
 	} else if (!x && y && y->source_line) {
-		e->source_file = y->source_file;
-		e->source_line = y->source_line;
+		SET_SOURCE(e, y->source_file, y->source_line);
 		e->source_column = y->source_column;
 #if 0 /* TODO remove if not needed */
 		save_expr_file = (char *)e->source_file;
 		save_expr_line = e->source_line;
 #endif
 	} else if (x && x->source_line) {
-		e->source_file = x->source_file;
-		e->source_line = x->source_line;
+		SET_SOURCE(e, x->source_file, x->source_line);
 		e->source_column = x->source_column;
 #if 0 /* TODO remove if not needed */
 		save_expr_file = (char *)e->source_file;
@@ -276,8 +273,7 @@ copy_file_line (cb_tree e, cb_tree y, cb_tree x)
 		e->source_line = save_expr_line;
 #endif
 	} else {
-		e->source_line = cb_exp_line;
-		e->source_file = cb_source_file;
+		SET_SOURCE(e, cb_source_file, cb_exp_line);
 	}
 }
 
@@ -852,6 +848,20 @@ get_data_and_size_from_lit (cb_tree x, unsigned char **data, size_t *size)
 	return 0;
 }
 
+#if 0
+static void
+dump_literal( const char func[], int line, const void *tree ) {
+	if( 1 && tree && CB_LITERAL_P(tree) ) {
+		const struct cb_literal *lit = CB_LITERAL(tree);
+		printf( "%s:%d: %p: %.*s, size=%d\n", func, line, 
+			lit, lit->size, lit->data, lit->size );
+	}
+}
+# define dump_literal(t) dump_literal(__func__, __LINE__, (t))
+#else 
+# define dump_literal(t)
+#endif
+
 static struct cb_literal *
 concat_literals (const cb_tree left, const cb_tree right)
 {
@@ -875,6 +885,7 @@ concat_literals (const cb_tree left, const cb_tree right)
 	memcpy (p->data, ldata, lsize);
 	memcpy (p->data + lsize, rdata, rsize);
 
+	dump_literal(p);
 	return p;
 }
 
@@ -1230,6 +1241,9 @@ cb_tree_category (cb_tree x)
 				x->category = CB_CATEGORY_BOOLEAN;
 				break;
 			default:
+				if (f->usage == CB_USAGE_COMP_X)
+					x->category = CB_CATEGORY_NUMERIC;
+				else
 				if (f->pic) {
 					x->category = f->pic->category;
 				/* FIXME: Hack for CGI to not abort */
@@ -1292,6 +1306,9 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 	switch (CB_TREE_CATEGORY (x)) {
 	case CB_CATEGORY_ALPHABETIC:
 	case CB_CATEGORY_ALPHANUMERIC:
+		if(f->usage == CB_USAGE_COMP_X) {
+			return COB_TYPE_NUMERIC_BINARY;
+		}
 		return COB_TYPE_ALPHANUMERIC;
 	case CB_CATEGORY_ALPHANUMERIC_EDITED:
 		return COB_TYPE_ALPHANUMERIC_EDITED;
@@ -1636,6 +1653,11 @@ cb_get_int (const cb_tree x)
 
 	val = 0;
 	for (; i < l->size; i++) {
+		if( !isdigit(l->data[i]) ) {
+			fprintf(stdout, "'%.*s' at pos %d of %d is not an ASCII digit\n",
+				l->size, l->data, i+1, l->size);
+			continue;
+		}
 		val = val * 10 + l->data[i] - '0';
 	}
 	if (val && l->sign < 0) {
@@ -1795,8 +1817,7 @@ cb_build_list (cb_tree purpose, cb_tree value, cb_tree chain)
 
 	/* Set location to that of initial element. */
 	if (value) {
-		CB_TREE(p)->source_file = value->source_file;
-		CB_TREE(p)->source_line = value->source_line;
+		SET_SOURCE(CB_TREE(p), value->source_file, value->source_line);
 		CB_TREE(p)->source_column = value->source_column;
 	}
 
@@ -1891,8 +1912,7 @@ cb_define (cb_tree name, cb_tree val)
 	w = CB_REFERENCE (name)->word;
 	w->items = cb_list_add (w->items, val);
 	w->count++;
-	val->source_file = name->source_file;
-	val->source_line = name->source_line;
+	SET_SOURCE(val, name->source_file, name->source_line);
 	CB_REFERENCE (name)->value = val;
 	return w->name;
 }
@@ -1914,6 +1934,35 @@ add_contained_prog (struct nested_list *parent_list, struct cb_program *child_pr
 	nlp->next = parent_list;
 	nlp->nested_prog = child_prog;
 	return nlp;
+}
+
+void
+cb_tree_source_set (const char func[], int line, cb_tree tree,
+		    const char source_file[], int source_line )
+{
+	tree->source_file = source_file;
+	tree->source_line = source_line;
+
+	if(getenv("COBC_TRACE")) {
+		printf( "%s:%d: set tag %d for %s:%d ",
+			func, line, tree->tag,
+			tree->source_file, tree->source_line );
+		if( CB_LITERAL_P(tree) ) {
+			const struct cb_literal *p = CB_LITERAL(tree);
+			if( p->data ) {
+				printf( "(%p: %.*s, size=%d)",
+					p, p->size, p->data, p->size );
+			}
+		}
+		if( CB_FIELD_P(tree) ) {
+			const struct cb_field *p = CB_FIELD(tree);
+			if( p->name ) {
+				printf( "('%s' a/k/a '%s')",
+					p->name, p->ename );
+			}
+		}
+		printf("\n");
+	}
 }
 
 struct cb_program *
@@ -2190,8 +2239,7 @@ cb_build_comment (const char *str)
 	p = make_tree (CB_TAG_DIRECT, CB_CATEGORY_ALPHANUMERIC,
 		       sizeof (struct cb_direct));
 	p->line = str;
-	CB_TREE (p)->source_file = cb_source_file;
-	CB_TREE (p)->source_line = cb_source_line;
+	SET_SOURCE_CB( CB_TREE (p) );
 	return CB_TREE (p);
 }
 
@@ -2225,8 +2273,7 @@ cb_build_debug (const cb_tree target, const char *str, const cb_tree fld)
 		p->fld = fld;
 		p->size = (size_t)CB_FIELD_PTR (fld)->size;
 	}
-	CB_TREE (p)->source_file = cb_source_file;
-	CB_TREE (p)->source_line = cb_source_line;
+	SET_SOURCE_CB( CB_TREE (p) );
 	return CB_TREE (p);
 }
 
@@ -2240,8 +2287,7 @@ cb_build_debug_call (struct cb_label *target)
 	p = make_tree (CB_TAG_DEBUG_CALL, CB_CATEGORY_ALPHANUMERIC,
 		       sizeof (struct cb_debug_call));
 	p->target = target;
-	CB_TREE (p)->source_file = cb_source_file;
-	CB_TREE (p)->source_line = cb_source_line;
+	SET_SOURCE_CB( CB_TREE (p) );
 	return CB_TREE (p);
 }
 
@@ -2380,8 +2426,7 @@ cb_build_numsize_literal (const void *data, const size_t size, const int sign)
 
 	l = CB_TREE (p);
 
-	l->source_file = cb_source_file;
-	l->source_line = cb_source_line;
+	SET_SOURCE_CB( l );
 
 	return l;
 }
@@ -2393,8 +2438,7 @@ cb_build_alphanumeric_literal (const void *data, const size_t size)
 
 	l = CB_TREE (build_literal (CB_CATEGORY_ALPHANUMERIC, data, size));
 
-	l->source_file = cb_source_file;
-	l->source_line = cb_source_line;
+        SET_SOURCE_CB( l );
 
 	return l;
 }
@@ -2406,8 +2450,7 @@ cb_build_national_literal (const void *data, const size_t size)
 
 	l = CB_TREE (build_literal (CB_CATEGORY_NATIONAL, data, size));
 
-	l->source_file = cb_source_file;
-	l->source_line = cb_source_line;
+        SET_SOURCE_CB( l );
 
 	return l;
 }
@@ -2451,8 +2494,7 @@ cb_concat_literals (const cb_tree x1, const cb_tree x2)
 
 	l = CB_TREE (p);
 
-	l->source_file = x1->source_file;
-	l->source_line = x1->source_line;
+        SET_SOURCE_CB( l );
 
 	return l;
 }
@@ -3609,6 +3651,10 @@ cb_field_size (const cb_tree x)
 	case CB_TAG_LITERAL:
 		return CB_LITERAL (x)->size;
 	case CB_TAG_FIELD:
+		f = CB_FIELD (x);
+		if(f->usage == CB_USAGE_COMP_X
+		&& f->compx_size > 0)
+			return f->compx_size;
 		return CB_FIELD (x)->size;
 	case CB_TAG_REFERENCE:
 		r = CB_REFERENCE (x);
@@ -3626,8 +3672,9 @@ cb_field_size (const cb_tree x)
 			} else {
 				return -1;
 			}
-		} else if (f->flag_any_length) {
-			return -1;
+		} else if(f->usage == CB_USAGE_COMP_X
+			&& f->compx_size > 0) {
+				return f->compx_size;
 		} else {
 			return f->size;
 		}
@@ -4435,8 +4482,7 @@ cb_build_reference (const char *name)
 	x = CB_TREE (r);
 
 	/* position of tree */
-	x->source_file = cb_source_file;
-	x->source_line = cb_source_line;
+        SET_SOURCE_CB( x );
 
 	return x;
 }
@@ -5359,6 +5405,9 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			 && yl->scale == 0
 			 && xl->sign == 0
 			 && yl->sign == 0
+			    /*&& xl->size < 9
+			      && yl->size < 9  
+			      from reportwriter, caused missing warning in test 213 */
 			 && xl->all == 0
 			 && yl->all == 0) {
 				copy_file_line (e, y, x);
@@ -5721,8 +5770,7 @@ cb_build_label (cb_tree name, struct cb_label *section)
 		p->section_id = p->id;
 	}
 	x = CB_TREE (p);
-	x->source_file = cb_source_file;
-	x->source_line = cb_source_line;
+        SET_SOURCE_CB( x );
 	return x;
 }
 
@@ -6095,12 +6143,19 @@ cb_tree
 cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 		    const int isuser)
 {
+	int				xscale, rscale, k;
 	struct cb_intrinsic_table	*cbp;
-	cb_tree					x;
+	struct cb_literal 		*lp;
+	cb_tree				l;
+	cb_tree				x;
 	struct cb_field			*fld;
 	enum cb_category		catg;
+	cob_s64_t			xval,rslt;
+	int				numargs, num_integer, num_string, use_rslt, use_drslt;
+	double				drslt, dval;
+	char				result[64];
 
-	int numargs = (int)cb_list_length (args);
+	numargs = (int)cb_list_length (args);
 
 	if (unlikely (isuser)) {
 		if (refmod && CB_LITERAL_P(CB_PAIR_X(refmod)) &&
@@ -6169,12 +6224,186 @@ cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 		}
 	}
 
+
 	/* FIXME: Some FUNCTIONS need a test for / adjustment depending on their arguments' category:
 	   * CONCATENATE/SUBSTITUTE/...
 	     all should be of the same category alphanumeric/alphabetic vs. national
 	   * MAX/REVERSE/TRIM/...
 	     depending on the arguments' category the type of the function must be adjusted
 	*/
+
+	/*
+	 * Check if intrinsic can be computed at compile time
+	 *  (Partly implemented as much more can be added for other functions)
+	 *  RJN Sep 2017
+	 */
+	if (cb_flag_inline_intrinsic) {
+		if (cbp->intr_enum == CB_INTR_E) {
+			return cb_build_numeric_literal (0, "271828182845904523536028747135266249", 35);
+		}
+		if (cbp->intr_enum == CB_INTR_PI) {
+			return cb_build_numeric_literal (0, "314159265358979323846264338327950288", 35);
+		}
+
+		num_integer = num_string = 0;
+		for (l = args; l; l = CB_CHAIN(l)) {
+			if (CB_LITERAL_P (CB_VALUE(l))) {
+				lp = CB_LITERAL(CB_VALUE(l));
+				if (CB_NUMERIC_LITERAL_P (CB_VALUE(l))) {
+					if (((int)lp->size - lp->scale) >= 0	/* Simple Numerics */
+					 && lp->scale < 5
+					 && lp->size  < 12)
+						num_integer++;	
+				} else {
+					num_string++;
+				}
+			}
+		}
+
+		if (num_integer == numargs
+		 && numargs > 0
+		 && !refmod) {
+			xval = rslt = use_rslt = use_drslt = rscale = 0;
+			drslt = dval = 0;
+			for (l = args; l; l = CB_CHAIN(l)) {
+				lp = CB_LITERAL(CB_VALUE(l));
+				xval = atoll((const char*)lp->data);
+				if(lp->sign == -1) xval = -xval;
+				xscale = lp->scale;
+				while (xscale < rscale) {
+					xval = xval * 10;
+					xscale++;
+				}
+				while (xscale > rscale) {
+					rslt = rslt * 10;
+					rscale++;
+				}
+				switch (cbp->intr_enum) {
+				case CB_INTR_MAX:
+					if (l == args)
+						rslt = xval;
+					else if (xval > rslt)
+						rslt = xval;
+					use_rslt = 1;
+					break;
+				case CB_INTR_MIN:
+					if (l == args)
+						rslt = xval;
+					else if (xval < rslt)
+						rslt = xval;
+					use_rslt = 1;
+					break;
+				case CB_INTR_SUM:
+					rslt += xval;
+					use_rslt = 1;
+					break;
+				case CB_INTR_REM:
+					if (l == args) {
+						rslt = xval;
+					} else {
+						rslt = rslt % xval;
+					}
+					use_rslt = 1;
+					break;
+				case CB_INTR_INTEGER:
+					rslt = xval;
+					if (rslt < 0) {
+						while (rscale > 0) {
+							rslt = rslt / 10;
+							rscale--;
+						}
+						if (lp->scale > 0)
+							rslt -= 1;
+					} else {
+						while (rscale > 0) {
+							rslt = rslt / 10;
+							rscale--;
+						}
+					}
+					use_rslt = 1;
+					break;
+				case CB_INTR_INTEGER_PART:
+					rslt = xval;
+					while (rscale > 0) {
+						rslt = rslt / 10;
+						rscale--;
+					}
+					use_rslt = 1;
+					break;
+#if 0
+		/* SIN results differs after 15 decimal places from runtime value */
+				case CB_INTR_SIN:
+					dval = xval;
+					while (xscale > 0) {
+						dval = dval / 10.0;
+						xscale--;
+					}
+					drslt = sin (dval);
+					use_drslt = 1;
+					break;
+		/* SQRT results differs after 15 decimal places from runtime value */
+				case CB_INTR_SQRT:
+					dval = xval;
+					while (xscale > 0) {
+						dval = dval / 10.0;
+						xscale--;
+					}
+					drslt = sqrt (dval);
+					use_drslt = 1;
+					break;
+#endif
+				default:
+					break;
+				}
+			}
+			if (use_rslt) {
+				while (rscale > 0
+				    && rslt != 0
+				    && (rslt % 10) == 0) {	/* Adjust out trailing ZEROs */
+					rslt = rslt / 10;
+					rscale--;
+				}
+				sprintf(result, CB_FMT_LLD, rslt);
+				return cb_build_numeric_literal (0, result, rscale);
+			}
+			if (use_drslt) {
+				for (k=35; k > 2; k--) {
+					if (sprintf(result, "%.*f", k, drslt) < 40)
+						break;
+				}
+				for (k=strlen(result); k > 0 && result[k-1] == '0'; k--)
+					result[k-1] = 0;
+				if (result[k-1] == '.')
+					result[k-1] = 0;
+				return cb_build_numeric_literal (0, result, 0);
+			}
+		} else 
+		if (num_string == numargs
+		 && numargs > 0
+		 && !refmod) {
+			for (l = args; l; l = CB_CHAIN(l)) {
+				lp = CB_LITERAL(CB_VALUE(l));
+				switch (cbp->intr_enum) {
+				case CB_INTR_UPPER_CASE:
+					for (k=0; k < lp->size; k++) {
+						if (islower(lp->data[k]))
+							lp->data[k] = toupper(lp->data[k]);
+					}
+					return cb_build_alphanumeric_literal (lp->data, lp->size);
+					break;
+				case CB_INTR_LOWER_CASE:
+					for (k=0; k < lp->size; k++) {
+						if (isupper(lp->data[k]))
+							lp->data[k] = tolower(lp->data[k]);
+					}
+					return cb_build_alphanumeric_literal (lp->data, lp->size);
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	}
 
 	switch (cbp->intr_enum) {
 	case CB_INTR_LENGTH:

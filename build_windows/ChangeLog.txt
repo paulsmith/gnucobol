@@ -153,6 +153,10 @@
 	* makedist.bat: only pause when started by double click
 	* makebisonflex.bat: new batch for (re-)generating bison/flex files
 
+2017-02-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* added vs projects for gcdiff an added them to GnuCOBOL.sln
+
 2016-12-28  Simon Sobisch <simonsobisch@gnu.org>
 
 	* defaults.h.in: added "/incremental:no" to COB_LDFLAGS

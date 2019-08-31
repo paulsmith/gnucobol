@@ -20,16 +20,18 @@
 # along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
 bin_SCRIPTS = cob-config
-bin_PROGRAMS = cobcrun
+bin_PROGRAMS = cobcrun gcdiff
 cobcrun_SOURCES = cobcrun.c
 dist_man_MANS = cobcrun.1 cob-config.1
 COBCRUN = "$(top_builddir)/pre-inst-env" cobcrun$(EXEEXT)
+gcdiff_SOURCES = gcdiff.c
 
 AM_LDFLAGS = $(COB_EXPORT_DYN)
 AM_CPPFLAGS = -I$(top_srcdir)
 AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)
 cobcrun_LDADD = $(top_builddir)/lib/libsupport.a $(top_builddir)/libcob/libcob.la \
 	$(CODE_COVERAGE_LIBS)
+gcdiff_LDADD = $(top_builddir)/lib/libsupport.a $(top_builddir)/libcob/libcob.la
 
 # Add rules for code-coverage testing, as provided AX_CODE_COVERAGE
 @CODE_COVERAGE_RULES@
@@ -38,6 +40,6 @@ CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 
 MAINTAINERCLEANFILES = cobcrun.1
 
-cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac |  cobcrun$(EXEEXT)
+cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac
 	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) "$(COBCRUN) -q"
 

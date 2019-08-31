@@ -50,6 +50,11 @@
 #include <fcntl.h>
 #endif
 
+#if defined(WITH_VBISAM)
+/* included to check for VB_RTD definition */
+#include <vbisam.h>
+#endif
+
 #ifdef	HAVE_LOCALE_H
 #include <locale.h>
 #endif
@@ -2312,16 +2317,18 @@ cobc_print_info (void)
 	cobc_var_print (_("ISAM file handler"),		"EXTFH", 0);
 #elif defined	(WITH_DB)
 	cobc_var_print (_("ISAM file handler"),		"BDB", 0);
+#elif defined	(WITH_LMDB)
+	cobc_var_print (_("ISAM file handler"),		"LMDB", 0);
 #elif defined	(WITH_CISAM)
 	cobc_var_print (_("ISAM file handler"),		"C-ISAM", 0);
 #elif defined	(WITH_DISAM)
 	cobc_var_print (_("ISAM file handler"),		"D-ISAM", 0);
 #elif defined	(WITH_VBISAM)
-#if defined	(VB_RTD)
+# if defined	(VB_RTD)
 	cobc_var_print (_("ISAM file handler"),		"VBISAM (RTD)", 0);
-#else
+# else
 	cobc_var_print (_("ISAM file handler"),		"VBISAM", 0);
-#endif
+# endif
 #else
 	cobc_var_print (_("ISAM file handler"),		_("disabled"), 0);
 #endif
@@ -2568,6 +2575,8 @@ process_command_line (const int argc, char **argv)
 
 	int			conf_ret = 0;
 	int			error_all_warnings = 0;
+
+	cb_mf_ibm_comp = -1;
 
 #if defined (_WIN32) || defined (__DJGPP__)
 	/* Translate command line arguments from DOS/WIN to UNIX style */

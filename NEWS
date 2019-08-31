@@ -1,5 +1,14 @@
 NEWS - user visible changes				-*- outline -*-
 
+ GnuCOBOL development (currently as 3.2-early-dev)
+ 
+ *** anything may change during development of this version
+     in this change including incompatible changes ***
+
+* internal change: fileio splitted
+* many internal changes, possibly changing some defaults
+
+
  GnuCOBOL 3.1-rc1/final to be released (in June 2019)
 
 * New GnuCOBOL features

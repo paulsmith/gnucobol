@@ -964,6 +964,7 @@ cob_resolve_cobol (const char *name, const int fold_case, const int errind)
 	char	*entry;
 	char	*dirent;
 
+	cobglobptr->cob_exception_code = 0;
 	entry = cob_chk_call_path (name, &dirent);
 	p = cob_resolve_internal (entry, dirent, fold_case);
 	if (dirent) {
@@ -975,6 +976,7 @@ cob_resolve_cobol (const char *name, const int fold_case, const int errind)
 		}
 		cob_set_exception (COB_EC_PROGRAM_NOT_FOUND);
 	}
+	cobglobptr->cob_call_name_hash = cob_get_name_hash (name);
 	return p;
 }
 
@@ -1025,6 +1027,7 @@ cob_call_field (const cob_field *f, const struct cob_call_struct *cs,
 	}
 
 	entry = cob_chk_call_path (buff, &dirent);
+	cobglobptr->cob_call_name_hash = cob_get_name_hash (entry);
 
 	/* Check if system routine */
 	for (psyst = system_tab; psyst->syst_name; ++psyst) {
@@ -1162,6 +1165,8 @@ cob_call (const char *name, const int argc, void **argv)
 	pargv = cob_malloc (MAX_CALL_FIELD_PARAMS * sizeof(void *));
 	/* Set number of parameters */
 	cobglobptr->cob_call_params = argc;
+	cobglobptr->cob_call_from_c = 1;
+	cobglobptr->cob_call_name_hash = 0;
 	for (i = 0; i < argc; ++i) {
 		pargv[i] = argv[i];
 	}
@@ -1554,7 +1559,21 @@ cob_get_param_field (int n, const char *caller_name)
 }
 
 int
-cob_get_num_params (void)
+cob_get_name_line ( char *prog, int *line )
+{
+	int	k;
+	if (line != NULL)
+		*line = COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt);
+	if (prog != NULL) {
+		strcpy(prog, COB_MODULE_PTR->module_name);
+		for (k=strlen(prog); k > 0 && prog[k-1] == ' '; k--)
+			prog[k-1] = 0;
+	}
+	return COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt);
+}
+
+int
+cob_get_num_params ( void )
 {
 	if (cobglobptr) {
 		return cobglobptr->cob_call_params;
@@ -1566,14 +1585,26 @@ cob_get_num_params (void)
 	return -1;
 }
 
+void
+cob_set_num_params ( int n )
+{
+	if (cobglobptr) {
+		cobglobptr->cob_call_params = n;
+		return;
+	}
+	/* note: same message in call.c */
+	cob_runtime_warning_external ("cob_set_num_params", 1,
+		_("cob_init() has not been called"));
+	return;
+}
+
 int
 cob_get_param_type (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_type");
 
-	if (f == NULL) {
+	if (f == NULL)
 		return -1;
-	}
 	if (f->attr->type == COB_TYPE_NUMERIC_BINARY) {
 		if (COB_FIELD_REAL_BINARY (f)) {
 			return COB_TYPE_NUMERIC_COMP5;
@@ -1592,9 +1623,8 @@ cob_get_param_size (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_size");
 
-	if (f == NULL) {
+	if (f == NULL)
 		return -1;
-	}
 	return (int)f->size;
 }
 
@@ -1602,9 +1632,8 @@ int
 cob_get_param_sign (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_sign");
-	if (f == NULL) {
+	if (f == NULL)
 		return -1;
-	}
 	if (COB_FIELD_HAVE_SIGN(f)) {
 		return 1;
 	}
@@ -1615,9 +1644,8 @@ int
 cob_get_param_scale (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_scale");
-	if (f == NULL) {
+	if (f == NULL) 
 		return -1;
-	}
 	return (int)f->attr->scale;
 }
 
@@ -1625,9 +1653,8 @@ int
 cob_get_param_digits (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_digits");
-	if (f == NULL) {
+	if (f == NULL) 
 		return -1;
-	}
 	return (int)f->attr->digits;
 }
 
@@ -1635,12 +1662,14 @@ int
 cob_get_param_constant (int n)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_param_constant");
-	if (f == NULL) {
+	if (f == NULL) 
 		return -1;
-	}
-	if (COB_FIELD_CONSTANT (f)) {
+	if (COB_FIELD_CONTENT(f)) 
+		return 3;
+	if (COB_FIELD_VALUE(f)) 
+		return 2;
+	if (COB_FIELD_CONSTANT(f)) 
 		return 1;
-	}
 	return 0;
 }
 
@@ -1963,5 +1992,29 @@ cob_field_constant (cob_field *f, cob_field *t, cob_field_attr *a, void *d)
 	t->data = d;
 	t->attr = a;
 	a->flags |= COB_FLAG_CONSTANT;
-	memcpy((void*)t->data, (void*)f->data, f->size);
+	memmove((void*)t->data, (void*)f->data, f->size);
+}
+
+/* Create copy of field and mark as a VALUE */
+void
+cob_field_value (cob_field *f, cob_field *t, cob_field_attr *a, void *d)
+{
+	memcpy((void*)t, (void*)f, sizeof(cob_field));
+	memcpy((void*)a, (void*)f->attr, sizeof(cob_field_attr));
+	t->data = d;
+	t->attr = a;
+	a->flags |= COB_FLAG_VALUE;
+	memmove((void*)t->data, (void*)f->data, f->size);
+}
+
+/* Create copy of field and mark as a CONTENT */
+void
+cob_field_content (cob_field *f, cob_field *t, cob_field_attr *a, void *d)
+{
+	memcpy((void*)t, (void*)f, sizeof(cob_field));
+	memcpy((void*)a, (void*)f->attr, sizeof(cob_field_attr));
+	t->data = d;
+	t->attr = a;
+	a->flags |= COB_FLAG_CONTENT;
+	memmove((void*)t->data, (void*)f->data, f->size);
 }

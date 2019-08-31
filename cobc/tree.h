@@ -22,6 +22,22 @@
 #ifndef CB_TREE_H
 #define CB_TREE_H
 
+#ifndef HAVE_ATOLL
+#ifdef  HAVE_STRTOLL
+#ifndef atoll
+#define atoll(x) strtoll(x, NULL, 10)
+#endif
+#endif
+#endif
+
+#ifndef HAVE_ATOL
+#ifdef  HAVE_STRTOL
+#ifndef atol
+#define atol(x) strtol(x, NULL, 10)
+#endif
+#endif
+#endif
+
 #define CB_BEFORE		cb_int0
 #define CB_AFTER		cb_int1
 
@@ -47,6 +63,9 @@
 #define CB_PREFIX_REPORT_CONTROL "rc_"	/* Report CONTROL (cob_report_control) */
 #define CB_PREFIX_REPORT_REF	"rr_"	/* Report CONTROL reference (cob_report_control_ref) */
 #define CB_PREFIX_REPORT_SUM_CTR "rsc_"	/* Report SUM COUNTER */
+
+#define CB_PROGRAM_TYPE		0
+#define CB_FUNCTION_TYPE	1
 
 #define CB_CALL_BY_REFERENCE	1
 #define CB_CALL_BY_CONTENT	2
@@ -524,6 +543,22 @@ struct cb_next_elem {
 	struct cb_next_elem	*next;
 };
 
+/* FIXME: HAVE_FUNC should be checked via configure and the others be a fallback */
+#if defined(NO_HAVE_FUNC)
+  #define CURRENT_FUNCTION "unknown"
+#elif defined(_MSC_VER)
+  #define CURRENT_FUNCTION __FUNCTION__
+#else
+  #define CURRENT_FUNCTION __func__
+#endif
+
+void
+cb_tree_source_set( const char func[], int line, cb_tree tree, 
+		    const char source_file[], int source_line );
+#define SET_SOURCE(t, s, l) cb_tree_source_set(CURRENT_FUNCTION, __LINE__, (t), (s), (l))
+#define SET_SOURCE_CB(t) cb_tree_source_set(CURRENT_FUNCTION, __LINE__,	(t), \
+					    cb_source_file, cb_source_line)
+
 /* xref entries */
 struct cb_xref_elem {
 	struct cb_xref_elem	*next;
@@ -785,6 +820,7 @@ struct cb_field {
 	int			size;		/* Field size */
 	int			level;		/* Level number */
 	int			memory_size;	/* Memory size */
+	int			compx_size;	/* Original COMP-X byte size */
 	int			offset;		/* Byte offset from 01 level */
 	int			occurs_min;	/* OCCURS <min> */
 	int			occurs_max;	/* OCCURS [... TO] <max> */
@@ -839,7 +875,7 @@ struct cb_field {
 	unsigned int flag_invalid	: 1;	/* Is broken */
 	unsigned int flag_field		: 1;	/* Has been internally cached */
 	unsigned int flag_chained	: 1;	/* CHAINING item */
-	unsigned int flag_anylen_done	: 1;	/* ANY LENGTH is set up */
+	unsigned int flag_data_set	: 1;	/* The data address was set in entry code */
 	unsigned int flag_is_verified	: 1;	/* Has been verified */
 	unsigned int flag_is_c_long	: 1;	/* Is BINARY-C-LONG */
 	unsigned int flag_is_pdiv_parm	: 1;	/* Is PROC DIV USING */
@@ -863,6 +899,9 @@ struct cb_field {
 	unsigned int flag_internal_constant	: 1;	/* Is an internally generated CONSTANT */
 	unsigned int flag_comp_1	: 1;	/* Is USAGE COMP-1 */
 	unsigned int flag_volatile	: 1;	/* VOLATILE */
+	unsigned int flag_validated	: 1;	/* 'usage' was validated */
+	unsigned int flag_ignore_sync	: 1;	/* Ignore SYNCHRONIZED */
+	unsigned int flag_usage_defined	: 1;	/* 'usage' was specifically coded */
 };
 
 #define CB_FIELD(x)		(CB_TREE_CAST (CB_TAG_FIELD, struct cb_field, x))
@@ -992,6 +1031,7 @@ struct cb_file {
 	int			organization;		/* ORGANIZATION - FIXME: use enum */
 	int			access_mode;		/* ACCESS MODE - FIXME: use enum */
 	cob_flags_t		lock_mode;		/* LOCK MODE */
+	int			fd_share_mode;		/* SHARING mode */
 	int			special;		/* Special file */
 	int			same_clause;		/* SAME clause */
 	unsigned int		flag_finalized	: 1;	/* Is finalized */
@@ -1334,6 +1374,7 @@ struct cb_statement {
 	cb_tree			null_check;		/* NULL check */
 	cb_tree			debug_check;		/* Field DEBUG */
 	cb_tree			debug_nodups;		/* Field DEBUG dups */
+	cb_tree			retry;			/* RETRY expression */
 	struct cb_attr_struct	*attr_ptr;		/* Attributes */
 	enum cb_handler_type	handler_type;		/* Handler type */
 	unsigned int		flag_no_based	: 1;	/* Check BASED */
@@ -1341,6 +1382,11 @@ struct cb_statement {
 	unsigned int		flag_merge	: 1;	/* Is MERGE */
 	unsigned int		flag_callback	: 1;	/* DEBUG Callback */
 	unsigned int		flag_implicit	: 1;	/* Is an implicit statement */
+	unsigned int		flag_retry_times: 1;	/* RETRY exp TIMES */
+	unsigned int		flag_retry_seconds: 1;	/* RETRY exp SECONDS */
+	unsigned int		flag_retry_forever: 1;	/* RETRY FOREVER */
+	unsigned int		flag_advancing_lock: 1;	/* ADVANCING ON LOCK */
+	unsigned int		flag_ignore_lock: 1;	/* IGNORE LOCK */
 };
 
 #define CB_STATEMENT(x)		(CB_TREE_CAST (CB_TAG_STATEMENT, struct cb_statement, x))
@@ -1983,6 +2029,7 @@ extern cb_tree		cb_check_numeric_value (cb_tree);
 extern size_t		cb_check_index_or_handle_p (cb_tree x);
 extern void		cb_set_dmax (int scale);
 
+extern int	cb_is_field_unbounded (struct cb_field *);
 extern void		cb_set_intr_when_compiled (void);
 extern void		cb_build_registers (void);
 extern void		cb_add_external_defined_registers (void);
@@ -2214,6 +2261,8 @@ extern cb_tree		cobc_tree_cast_check (const cb_tree, const char *,
 
 /* codegen.c */
 extern void		codegen (struct cb_program *, const int);
+extern struct cb_field *chk_field_variable_size (struct cb_field *f);
+extern unsigned int	chk_field_variable_address (struct cb_field *fld);
 
 /* scanner.l */
 extern void		cb_unput_dot (void);

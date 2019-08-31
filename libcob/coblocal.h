@@ -35,6 +35,23 @@
 #else
 #define ISFINITE finite
 #endif
+
+#ifndef HAVE_ATOLL
+#ifdef  HAVE_STRTOLL
+#ifndef atoll
+#define atoll(x) strtoll(x, NULL, 10)
+#endif
+#endif
+#endif
+
+#ifndef HAVE_ATOL
+#ifdef  HAVE_STRTOL
+#ifndef atol
+#define atol(x) strtol(x, NULL, 10)
+#endif
+#endif
+#endif
+
 #if	defined(_MSC_VER) || defined(__BORLANDC__) || defined(__WATCOMC__)
 
 #include <float.h>
@@ -238,10 +255,27 @@ typedef struct __cob_settings {
 	/* fileio.c */
 	unsigned int	cob_unix_lf;		/* Use POSIX LF */
 	unsigned int	cob_do_sync;
-	unsigned int	cob_ls_uses_cr;
-	unsigned int	cob_ls_nulls;
-	unsigned int	cob_ls_fixed;
-	unsigned int	cob_varseq_type;
+	unsigned int	cob_ls_uses_cr;		/* Line Sequential uses CR LF */
+	unsigned int	cob_ls_fixed;		/* Line Sequential is fixed length */
+	unsigned int	cob_ls_nulls;		/* NUL insert to Line Sequential */
+	unsigned int	cob_ls_split;		/* Split 'too long' record into parts (Default is truncate) */
+	unsigned int	cob_ls_validate;	/* Validate data in Line Sequential */
+	unsigned int	cob_mf_ls_nulls;	/* MF file: NUL insert to Line Sequential */
+	unsigned int	cob_mf_ls_split;	/* MF file: Split 'too long' record into parts */
+	unsigned int	cob_mf_ls_validate;	/* MF file: Validate data in Line Sequential */
+	unsigned int	cob_varseq_type;	/* Variable Sequential Default file format */
+	unsigned int	cob_varrel_type;	/* Variable Relative default file format */
+	unsigned int	cob_fixrel_type;	/* Fixed Relative default file format */
+	unsigned int	cob_mf_files;		/* If TRUE, use Micro Focus file formats */
+	unsigned int	cob_gc_files;		/* If TRUE, revert back to old GNU Cobol file formats */
+	unsigned int	cob_retry_times;	/* Default: RETRY n TIMES value */
+	unsigned int	cob_retry_seconds;	/* Default: RETRY n SECONDS value */
+	unsigned int	cob_trace_io;		/* If TRACE READY, also dump File/Record/Status */
+	unsigned int	cob_stats_record;	/* If record I/O statics */
+	unsigned int	cob_share_mode;		/* Default file share mode */
+	unsigned int	cob_retry_mode;		/* Default file retry mode */
+	unsigned int	cob_keycheck;		/* Default KEYCHECK mode */
+	char		*cob_stats_filename;	/* Place to write I/O stats */
 	char 		*cob_file_path;
 	char		*bdb_home;
 	size_t		cob_sort_memory;
@@ -355,6 +389,10 @@ COB_HIDDEN void		cob_init_move		(cob_global *, cob_settings *);
 COB_HIDDEN void		cob_init_screenio	(cob_global *, cob_settings *);
 COB_HIDDEN void		cob_init_mlio		(cob_global * const);
 
+COB_HIDDEN void		cob_print_field		(FILE *, cob_field *, int, int);
+
+COB_HIDDEN void		cob_fork_fileio		(cob_global *, cob_settings *);
+
 COB_HIDDEN void		cob_exit_screen		(void);
 COB_HIDDEN void		cob_exit_numeric	(void);
 COB_HIDDEN void		cob_exit_fileio		(void);
@@ -419,7 +457,6 @@ COB_HIDDEN int	cob_debug_dump		(void *mem, int len);
          as these parts should be surrounded by #ifdef COB_DEBUG_LOG */
 #endif
 COB_HIDDEN FILE			*cob_get_dump_file	(void);
-
 
 #if 0 /* currently not used */
 COB_HIDDEN char		*cob_int_to_string		(int, char*);

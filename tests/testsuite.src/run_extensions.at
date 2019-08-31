@@ -30,9 +30,12 @@ AT_DATA([dump.c], [
 #include <libcob.h>
 
 COB_EXT_EXPORT int
-dump (unsigned char *data, int *p)
+dump (unsigned char *data, char *p)
 {
   int i;
+  if ( *p == 0 ) p++;
+  if ( *p == 0 ) p++;	/* Skip for BIG Endian system */
+  if ( *p == 0 ) p++;
   if ( *p == 1 ) {
      for (i = 0; i < 4; i++)
        printf ("%02x", data[[i]]);
@@ -208,6 +211,72 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [00074565
 16777215
 ])
+
+AT_CLEANUP
+
+
+AT_SETUP([CALL USING numeric literal])
+AT_KEYWORDS([CALL])
+
+AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  MYRTN  PIC X(9) VALUE "SUB  ".
+       01  BINFLD PIC S9(9) BINARY VALUE 1280.
+       
+       PROCEDURE DIVISION.
+           CALL "SUB"  USING LENGTH OF MYRTN BY VALUE 10.
+           CALL "SUB"  USING BINFLD BY VALUE 11.
+           CALL "SUB"  USING BY CONTENT BINFLD BY VALUE 12.
+           CALL "SUB"  USING BINFLD BY VALUE 13.
+           CALL "SUB"  USING 1280 BY VALUE 14.
+           CALL "SUB"  USING -1280 BY VALUE 15.
+           CALL "SUB"  USING BY CONTENT 1280 BY VALUE 16.
+           CALL "SUB"  USING BY CONTENT -1280 BY VALUE 17.
+           CALL "SUB"  USING BY REFERENCE 1280 BY VALUE 18.
+           CALL "SUB"  USING BY REFERENCE -1280 BY VALUE 19.
+           CALL "SUB"  USING BY CONTENT BINFLD BY VALUE 20.
+           CALL "SUB"  USING BY REFERENCE BINFLD BY VALUE 21.
+           CALL "SUB"  USING 1665431892 BY VALUE 22.
+           CALL "SUB"  USING 1665.892 BY VALUE 23.
+           CALL "SUB"  USING 1665.89200 BY VALUE 24. 
+           STOP RUN.
+           END PROGRAM prog.
+       
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. "SUB".
+       
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  x  PIC S9(9) BINARY.
+       01  y  PIC 9(9)  COMP-5.
+       
+       PROCEDURE DIVISION USING x, VALUE y.
+           DISPLAY "COBOL: X is " x " and Y is " y.
+           ADD 1 TO x.
+           END PROGRAM "SUB".
+])
+
+AT_CHECK([cobc -x -std=mf -debug -Wall prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0], [COBOL: X is +000000009 and Y is 0000000010
+COBOL: X is +000001280 and Y is 0000000011
+COBOL: X is +000001281 and Y is 0000000012
+COBOL: X is +000001281 and Y is 0000000013
+COBOL: X is +000001280 and Y is 0000000014
+COBOL: X is -000001280 and Y is 0000000015
+COBOL: X is +000001280 and Y is 0000000016
+COBOL: X is -000001280 and Y is 0000000017
+COBOL: X is +000001280 and Y is 0000000018
+COBOL: X is -000001280 and Y is 0000000019
+COBOL: X is +000001282 and Y is 0000000020
+COBOL: X is +000001282 and Y is 0000000021
+COBOL: X is +665431892 and Y is 0000000022
+COBOL: X is +001665892 and Y is 0000000023
+COBOL: X is +166589200 and Y is 0000000024
+], [])
 
 AT_CLEANUP
 
@@ -950,11 +1019,10 @@ AT_DATA([ALLOC.cob], [
              ALLOCATE SIZE-NEEDED CHARACTERS INITIALIZED RETURNING VPTR2
              SET ADDRESS OF BUFFER TO VPTR2
              MOVE VARGRP TO BUFFER(1:SIZE-NEEDED)
-             inspect BUFFER(1:SIZE-NEEDED) replacing all x'00' by space
-             DISPLAY 'BUFFER     = "'
-                   BUFFER(170:66) '"'
-             DISPLAY 'BUFFER     = "'
-                   BUFFER(226:66) '"'
+             inspect BUFFER(3:SIZE-NEEDED - 3) 
+                     replacing all x'00' by space
+             DISPLAY 'BUFFER     = "' BUFFER(170:66) '"'
+             DISPLAY '             "' BUFFER(226:66) '"'
              move size-needed to old-size
 
       *********************************************************************
@@ -981,8 +1049,6 @@ AT_DATA([ALLOC.cob], [
              SET ADDRESS OF VARGRP TO VPTR3
              MOVE NUM-ELEMENTS TO OBJ
              MOVE BUFFER(1:old-size) TO VARGRP
-             call 'CBL_OC_DUMP' using VARGRP   *> remove me once all is fine
-             (1:size-needed) *> FIXME (from rw-branch), shouldn't be needed
       *************************************************************
       * Free the original table and temp copy
       *************************************************************
@@ -993,15 +1059,12 @@ AT_DATA([ALLOC.cob], [
 
 AT_CHECK([$COMPILE -std=ibm-strict -w ALLOC.cob], [0], [], [])
 
-# compiler limits ODO-item wrong, merge of rw-branch needed
-AT_XFAIL_IF(true)
-
 AT_CHECK([$COBCRUN_DIRECT ./ALLOC], [0],
 [First allocation, using 00322 bytes.
 VARTAB(12) = "9999        0000"
 VARTAB(17) = "0000HI MOM  0000"
-BUFFER     = "        9999        0000                                "
-             "                                0000HI MOM  0000        "
+BUFFER     = "         9999        0000                                         "
+             "                                 0000HI MOM  0000                 "
 Re-allocation, using 00482 bytes.
 VARTAB(12) = "9999        0000"
 VARTAB(17) = "0000HI MOM  0000"
@@ -1321,10 +1384,279 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COBC -x -std=ibm -fodoslide prog.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[Length is +0000000222 with 03, 04, 00, 06, 01
+[Length is 0000000222 with 03, 04, 00, 06, 01
 "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567.901234567890123456789012345+++901234567890123456789--2345678901234567890123456789012345678901234567890123456789012345678901"
-Length is +0000000134 with 02, 03, 01, 04, 00
+Length is 0000000134 with 02, 03, 01, 04, 00
 "012345678901234567890123456789012345678901234567890123456789012345678901234567.901+++567--01234567890123456789012345678901234567890123"
+], [])
+
+AT_CLEANUP
+
+AT_SETUP([DEPENDING ON with ODOSLIDE])
+AT_KEYWORDS([MOVE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+      ******************************************************************
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+      ******************************************************************
+       WORKING-STORAGE SECTION.
+      *
+       01 WITHOUT-ODO.
+          02 DATA1   PIC X(1).
+          02 DEP1    PIC 9(1) VALUE 0.
+          02 DEP2    PIC 9(1) VALUE 0.
+          02 GROUP1  OCCURS 2 TIMES.
+             03 DATA11   PIC X(1).
+          02 GROUP2  OCCURS 3 TIMES.
+             03 DATA21   PIC X(1).
+          02 DATA3   PIC X(2).
+
+      *
+       01 WITH-ODO.
+          02 ODO-DATA1   PIC X(1).
+          02 ODO-DEP1    PIC 9(1) VALUE 0.
+          02 ODO-DEP2    PIC 9(1) VALUE 0.
+          02 ODO-GROUP1  OCCURS 0 TO 2 TIMES DEPENDING ON ODO-DEP1.
+             03 ODO-DATA11   PIC X(1).
+          02 ODO-GROUP2  OCCURS 0 TO 3 TIMES DEPENDING ON ODO-DEP2.
+             03 ODO-DATA21   PIC X(1).
+          02 ODO-DATA3   PIC X(2).
+
+       77 IX  PIC 9.
+       01 DAT.
+           02 ODO-1 PIC 9.
+           02 ODO-1-DATA OCCURS 1 TO 6 TIMES DEPENDING ON ODO-1
+                PIC 9.
+           02 ODO-2 PIC 9.
+           02 ODO-2-DATA OCCURS 1 TO 6 TIMES DEPENDING ON ODO-2
+                PIC 9.
+           02 ODO-3 PIC XXX.     
+          
+      ******************************************************************
+       PROCEDURE DIVISION.
+      ******************************************************************
+      *
+       TEST1.
+           MOVE "A01  B  CD" TO WITHOUT-ODO
+           DISPLAY "********"
+           DISPLAY "TEST WITHOUT ODO: '" WITHOUT-ODO "'"
+           DISPLAY "DATA1=" DATA1
+           DISPLAY "DEP1="  DEP1.
+           DISPLAY "DEP2="  DEP2
+           DISPLAY "DATA21(1)="  DATA21 (1)
+           DISPLAY "DATA3="  DATA3
+           .
+
+       TEST2.
+           MOVE "A01BCD" TO WITH-ODO 
+           DISPLAY "TEST WITH ODO: '" WITH-ODO 
+                   "' Len:" LENGTH OF WITH-ODO
+           DISPLAY "ODO-DATA1=" ODO-DATA1 "."
+           DISPLAY "ODO-DEP1="  ODO-DEP1 "."
+           DISPLAY "ODO-DEP2="  ODO-DEP2 "."
+           DISPLAY "ODO-DATA21(1)="  ODO-DATA21 (1) "."
+           DISPLAY "ODO-DATA3="  ODO-DATA3 "."
+
+           MOVE "12BCDEF" TO WITH-ODO (2:)
+           DISPLAY "TEST WITH ODO: '" WITH-ODO 
+                   "' Len:" LENGTH OF WITH-ODO
+           DISPLAY "ODO-DATA1=" ODO-DATA1 "."
+           DISPLAY "ODO-DEP1="  ODO-DEP1 "."
+           DISPLAY "ODO-DEP2="  ODO-DEP2 "."
+           DISPLAY "ODO-DATA11(1)="  ODO-DATA11 (1) "."
+           DISPLAY "ODO-DATA21(1)="  ODO-DATA21 (1) "."
+           DISPLAY "ODO-DATA21(2)="  ODO-DATA21 (2) "."
+           DISPLAY "ODO-DATA3="  ODO-DATA3 "."
+
+           MOVE "A23BCDEFGH" TO WITH-ODO (1:)
+           DISPLAY "TEST WITH ODO: '" WITH-ODO 
+                   "' Len:" LENGTH OF WITH-ODO.
+           DISPLAY "ODO-DATA1=" ODO-DATA1 "."
+           DISPLAY "ODO-DEP1="  ODO-DEP1 "."
+           DISPLAY "ODO-DEP2="  ODO-DEP2 "."
+           DISPLAY "ODO-DATA11(1)="  ODO-DATA11 (1) "."
+           DISPLAY "ODO-DATA11(2)="  ODO-DATA11 (2) "."
+           DISPLAY "ODO-DATA21(1)="  ODO-DATA21 (1) "."
+           DISPLAY "ODO-DATA21(2)="  ODO-DATA21 (2) "."
+           DISPLAY "ODO-DATA21(3)="  ODO-DATA21 (3) "."
+           DISPLAY "ODO-DATA3="  ODO-DATA3 "."
+           .
+
+       TEST3.
+           MOVE "A01" TO WITH-ODO (1:3)
+           MOVE "BCD" TO WITH-ODO (4:3)
+           DISPLAY "********"
+           DISPLAY "TEST WITH ODO, SEPERATED: '" WITH-ODO "'"
+           DISPLAY "ODO-DATA1=" ODO-DATA1 "."
+           DISPLAY "ODO-DEP1="  ODO-DEP1 "."
+           DISPLAY "ODO-DEP2="  ODO-DEP2 "."
+           DISPLAY "ODO-DATA21(1)="  ODO-DATA21 (1) "."
+           DISPLAY "ODO-DATA3="  ODO-DATA3 "."
+           .
+  
+
+           DISPLAY "********"
+           MOVE 2 TO ODO-1
+           MOVE 3 TO ODO-2
+           MOVE "End" TO ODO-3
+           PERFORM SHOW-ODO
+           MOVE 2 TO ODO-1
+           MOVE 6 TO ODO-2
+           MOVE "End" TO ODO-3
+           PERFORM SHOW-ODO
+           STOP RUN
+           .
+
+       SHOW-ODO.
+           PERFORM VARYING IX FROM 1 BY 1
+                     UNTIL IX > ODO-1
+               MOVE IX TO ODO-1-DATA (IX)
+           END-PERFORM
+           PERFORM VARYING IX FROM 1 BY 1
+                     UNTIL IX > ODO-2
+               MOVE IX TO ODO-2-DATA (IX)
+           END-PERFORM
+           DISPLAY "Slided ODO : '" DAT "'"
+           .
+])
+
+AT_CHECK([$COMPILE -std=default -fodoslide prog.cob ], [0], [], [prog.cob:36: warning: ODO-2 does not have a fixed location
+])
+
+AT_CHECK([./prog], [0], [********
+TEST WITHOUT ODO: 'A01  B  CD'
+DATA1=A
+DEP1=0
+DEP2=1
+DATA21(1)=B
+DATA3=CD
+TEST WITH ODO: 'A01BCD' Len:6
+ODO-DATA1=A.
+ODO-DEP1=0.
+ODO-DEP2=1.
+ODO-DATA21(1)=B.
+ODO-DATA3=CD.
+TEST WITH ODO: 'A12BCDEF' Len:8
+ODO-DATA1=A.
+ODO-DEP1=1.
+ODO-DEP2=2.
+ODO-DATA11(1)=B.
+ODO-DATA21(1)=C.
+ODO-DATA21(2)=D.
+ODO-DATA3=EF.
+TEST WITH ODO: 'A23BCDEFGH' Len:10
+ODO-DATA1=A.
+ODO-DEP1=2.
+ODO-DEP2=3.
+ODO-DATA11(1)=B.
+ODO-DATA11(2)=C.
+ODO-DATA21(1)=D.
+ODO-DATA21(2)=E.
+ODO-DATA21(3)=F.
+ODO-DATA3=GH.
+********
+TEST WITH ODO, SEPERATED: 'A01BCD'
+ODO-DATA1=A.
+ODO-DEP1=0.
+ODO-DEP2=1.
+ODO-DATA21(1)=B.
+ODO-DATA3=CD.
+********
+Slided ODO : '2123123End'
+Slided ODO : '2126123456End'
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([DEPENDING ON with ODOSLIDE])
+AT_KEYWORDS([Subroutine])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01    WS-LINE.
+        03 WS-LINE-LEN PIC 9(5).
+        03 WS-LINE-TEXT.
+           04 WS-BYTE PIC X(1) OCCURS 1 TO 132 DEPENDING WS-LINE-LEN.
+        03 WS-LINE-LEN2 PIC 9(5).
+        03 WS-LINE-TEXT2.
+           04 WS-BYTE2 PIC X(1) OCCURS 1 TO 132 DEPENDING WS-LINE-LEN2.
+
+       PROCEDURE DIVISION.
+       A-MAIN SECTION.
+
+             MOVE 5 TO WS-LINE-LEN
+             MOVE 'Hello' TO WS-LINE-TEXT ( 1 : )
+             MOVE 5 TO WS-LINE-LEN2
+             MOVE 'BYE!!' TO WS-LINE-TEXT2 ( 1 : )
+             DISPLAY '1. Pre CALL DATA :' WS-LINE ': '
+                     'LEN ' LENGTH OF WS-LINE
+             MOVE '00003BYE00003Now..' TO WS-LINE
+             DISPLAY '2. Pre CALL DATA :' WS-LINE ': '
+                     'LEN ' LENGTH OF WS-LINE
+
+             CALL 'BUGSUB' USING WS-LINE
+
+             DISPLAY '3. Post CALL DATA :' WS-LINE-TEXT ': '
+                     'LEN ' LENGTH OF WS-LINE-TEXT
+
+             STOP RUN.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BUGSUB.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01    WS-CON PIC X(8) VALUE '005Hello'.
+       01    WS-CON2 PIC X(15) VALUE '00009Hello Dog'.
+       LINKAGE SECTION.
+        01  GENERIC-AREA.
+           03 GENERIC-AREA-LEN PIC 9(5).
+           03 GENERIC-AREA-TEXT.
+              04 GEN-BYTE PIC X(1) OCCURS 1 TO 32000
+                    DEPENDING GENERIC-AREA-LEN.
+           03 GENERIC-AREA-LEN2 PIC 9(5).
+           03 GENERIC-AREA-TEXT2.
+              04 GEN-BYTE2 PIC X(1) OCCURS 1 TO 32000
+                    DEPENDING GENERIC-AREA-LEN2.
+
+       PROCEDURE DIVISION USING GENERIC-AREA.
+       A-MAIN SECTION.
+
+          DISPLAY 'In subroutine, Clear'
+          MOVE SPACES    TO GENERIC-AREA-TEXT
+          DISPLAY 'In subroutine, Fill hdr'
+          MOVE WS-CON2   TO GENERIC-AREA 
+          DISPLAY '4. Test Move DATA :' GENERIC-AREA ': '
+                     'LEN ' LENGTH OF GENERIC-AREA
+          DISPLAY 'In subroutine, Fill partial'
+          MOVE WS-CON    TO GENERIC-AREA (3:)
+          DISPLAY '5. Test Move DATA :' GENERIC-AREA ': '
+                     'LEN ' LENGTH OF GENERIC-AREA
+          MOVE 'Bye Bye' TO GENERIC-AREA-TEXT
+          MOVE 7 TO GENERIC-AREA-LEN
+          MOVE 'Bye Bye' TO GENERIC-AREA-TEXT
+          GOBACK.
+
+           END PROGRAM BUGSUB.
+       END PROGRAM prog.
+])
+
+AT_CHECK([cobc -x -std=ibm -w -fodoslide prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], [1. Pre CALL DATA :00005Hello00005BYE!!: LEN 0000000020
+2. Pre CALL DATA :00003BYE00003Now: LEN 0000000016
+In subroutine, Clear
+In subroutine, Fill hdr
+4. Test Move DATA :00009Hello Dog     : LEN 0000000019
+In subroutine, Fill partial
+5. Test Move DATA :00005Hello     : LEN 0000000015
+3. Post CALL DATA :Bye Bye: LEN 0000000007
 ], [])
 
 AT_CLEANUP
@@ -1588,37 +1920,37 @@ AT_KEYWORDS([extensions])
 # Will fail if memory is freed which was
 # allocated by mpir/gmp.
 AT_DATA([prog_a.cob], [
-		IDENTIFICATION DIVISION.
-		PROGRAM-ID. prog_a.
-		DATA DIVISION.
-		WORKING-STORAGE SECTION.
-		77  WS-STRINGA   PIC X(10).
-		PROCEDURE DIVISION.
-		    MOVE  "hi there"   TO WS-STRINGA
-		    CALL  "prog_b"  USING WS-STRINGA
-		    DISPLAY "back in prog_a"
-		    GOBACK.
+        IDENTIFICATION DIVISION.
+    	PROGRAM-ID. prog_a.
+    	DATA DIVISION.
+    	WORKING-STORAGE SECTION.
+    	77  WS-STRINGA   PIC X(10).
+    	PROCEDURE DIVISION.
+    	    MOVE  "hi there"   TO WS-STRINGA
+    	    CALL  "prog_b"  USING WS-STRINGA
+    	    DISPLAY "back in prog_a"
+    	    GOBACK.
 ])
 
 AT_DATA([prog_b.cob], [
-		IDENTIFICATION DIVISION.
-		PROGRAM-ID. prog_b.
-		DATA DIVISION.
-		WORKING-STORAGE SECTION.
-		77  WS-STRINGB   PIC X(10).
-		77  WS-CALLSB    PIC 9(03).
-		LOCAL-STORAGE SECTION.
-		77  LS-STRING  PIC X(10).
-		LINKAGE SECTION.
-		77  LK-STRING  PIC X(10).
+    	IDENTIFICATION DIVISION.
+    	PROGRAM-ID. prog_b.
+    	DATA DIVISION.
+    	WORKING-STORAGE SECTION.
+    	77  WS-STRINGB   PIC X(10).
+    	77  WS-CALLSB    PIC 9(03).
+    	LOCAL-STORAGE SECTION.
+    	77  LS-STRING  PIC X(10).
+    	LINKAGE SECTION.
+    	77  LK-STRING  PIC X(10).
 
-		PROCEDURE DIVISION  USING  LK-STRING.
-		    DISPLAY "entered prog_b"
-		    ADD   1  TO  WS-CALLSB
-		    MOVE  LK-STRING TO WS-STRINGB
-		    MOVE  LK-STRING TO LS-STRING
-		    DISPLAY "exiting prog_b"
-		    GOBACK.
+    	PROCEDURE DIVISION  USING  LK-STRING.
+    	    DISPLAY "entered prog_b"
+    	    ADD   1  TO  WS-CALLSB
+    	    MOVE  LK-STRING TO WS-STRINGB
+    	    MOVE  LK-STRING TO LS-STRING
+    	    DISPLAY "exiting prog_b"
+    	    GOBACK.
 ])
 
 AT_CHECK([$COMPILE prog_a.cob], [0], [], [])
@@ -1661,7 +1993,6 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
 [prog.cob:8: warning: BY CONTENT assumed for alphanumeric item 'X'
-prog.cob:19: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
@@ -1749,10 +2080,6 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], ignore)
-#AT_CHECK([$COMPILE prog.cob], [0], [],
-# hack for now: ignore
-#[prog.cob:58: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
-#])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [4: +0000000001
 1: +002
@@ -2302,9 +2629,7 @@ AT_DATA([caller.cob], [
 ])
 
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
-AT_CHECK([$COMPILE_MODULE callee.cob], [0], [],
-[callee.cob:10: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
-])
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 
 AT_CLEANUP
@@ -2973,7 +3298,7 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  SWITCH       PIC 99 VALUE 12.
-	   78  Z            VALUE 11.
+       78  Z            VALUE 11.
        PROCEDURE        DIVISION.
            ADD SWITCH 1 GIVING SWITCH
            END-ADD.

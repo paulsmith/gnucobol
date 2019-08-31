@@ -52,7 +52,7 @@ size_t			cb_needs_01 = 0;
 
 static struct cb_field	*last_real_field = NULL;
 static int		occur_align_size = 0;
-static const int	pic_digits[] = { 2, 4, 7, 9, 12, 14, 16, 18 };
+static const int	pic_digits[] = { 3, 5, 8, 10, 13, 15, 17, 19 };
 #define CB_MAX_OPS	32
 static int			op_pos = 1, op_val_pos;
 static char			op_type	[CB_MAX_OPS+1];
@@ -558,7 +558,7 @@ same_level:
 
 	/* Inherit parents properties */
 	if (f->parent) {
-		f->usage = f->parent->usage;
+		f->usage = CB_USAGE_DISPLAY;	/* Default to DISPLAY data */
 		f->indexes = f->parent->indexes;
 		f->flag_sign_leading = f->parent->flag_sign_leading;
 		f->flag_sign_separate = f->parent->flag_sign_separate;
@@ -663,6 +663,15 @@ is_numeric_usage (const enum cb_usage usage)
 	}
 }
 
+static COB_INLINE COB_A_INLINE int
+is_numeric_field (struct cb_field *f)
+{
+	if (f->pic
+	 && f->pic->category == CB_CATEGORY_NUMERIC)
+		return 1;
+	return is_numeric_usage (f->usage);
+}
+
 /* create an implicit picture for items that miss it but need one,
    return 1 if not possible */
 static unsigned int
@@ -672,6 +681,7 @@ create_implicit_picture (struct cb_field *f)
 	cb_tree			first_value;
 	char			*pp;
 	struct cb_literal	*lp;
+	struct cb_field		*p;
 	int			size_implied = 1;
 	int			is_numeric = 0;
 	int			ret;
@@ -790,6 +800,17 @@ create_implicit_picture (struct cb_field *f)
 			f->usage = CB_USAGE_DISPLAY;
 		}
 		return 0;
+	}
+
+	if (f->usage == CB_USAGE_DISPLAY) {
+		for (p = f->parent; p; p = p->parent) {
+			if (p->usage == CB_USAGE_FLOAT
+			 || p->usage == CB_USAGE_DOUBLE
+			 || p->usage == CB_USAGE_INDEX) {
+				f->usage = p->usage;	/* Propogate group USAGE to elementary field */
+				return 0;
+			}
+		}
 	}
 
 	ret = 0;
@@ -1075,6 +1096,75 @@ validate_pic (struct cb_field *f)
 	if (f->flag_comp_1 && cb_binary_comp_1) {
 		return 0;
 	}
+
+	/* Check for Group attributes to be carried to elementary field */
+	if (!f->flag_validated
+	 && cb_nonnumeric_with_numeric_group_usage == CB_OK
+	 && f->parent
+	 && !f->children) {
+		struct cb_field *p;
+		if (f->flag_usage_defined
+		 && is_numeric_field (f)) {
+			for (p = f->parent; p; p = p->parent) {
+				if (p->usage != CB_USAGE_DISPLAY
+				 && f->usage != p->usage) {
+					cb_error_x (x, _("%s USAGE %s incompatible with %s USAGE %s"),
+								p->flag_filler?"FILLER":p->name, cb_get_usage_string (p->usage),
+								f->flag_filler?"FILLER":f->name, cb_get_usage_string (f->usage));
+					break;
+				}
+			}
+		}
+		if (!f->flag_usage_defined
+		 && is_numeric_field (f)) {
+			for (p = f->parent; p; p = p->parent) {
+				if (p->usage != CB_USAGE_DISPLAY) {
+					f->usage = p->usage;
+					break;
+				}
+			}
+		}
+		if ( !f->flag_synchronized
+		 && !f->flag_ignore_sync
+		 && ( f->usage == CB_USAGE_BINARY
+		    || f->usage == CB_USAGE_FLOAT
+		    || f->usage == CB_USAGE_DOUBLE
+		    || f->usage == CB_USAGE_UNSIGNED_SHORT
+		    || f->usage == CB_USAGE_SIGNED_SHORT
+		    || f->usage == CB_USAGE_UNSIGNED_INT
+		    || f->usage == CB_USAGE_SIGNED_INT
+		    || f->usage == CB_USAGE_UNSIGNED_LONG
+		    || f->usage == CB_USAGE_SIGNED_LONG
+		    || f->usage == CB_USAGE_COMP_5
+		    || f->usage == CB_USAGE_COMP_6
+		    || f->usage == CB_USAGE_FP_DEC64
+		    || f->usage == CB_USAGE_FP_DEC128
+		    || f->usage == CB_USAGE_FP_BIN32
+		    || f->usage == CB_USAGE_FP_BIN64
+		    || f->usage == CB_USAGE_FP_BIN128
+		    || f->usage == CB_USAGE_LONG_DOUBLE)) {
+			for (p = f->parent; p; p = p->parent) {
+				if (p->flag_synchronized) {
+						f->flag_synchronized = 1;
+					break;
+				}
+			}
+		}
+		if (f->pic
+		 && f->pic->category == CB_CATEGORY_NUMERIC
+		 && f->flag_sign_separate == 0
+		 && f->flag_sign_leading == 0) {
+			for (p = f->parent; p; p = p->parent) {
+				if (p->flag_sign_separate
+				 || p->flag_sign_leading) {
+					f->flag_sign_separate = p->flag_sign_separate;
+					f->flag_sign_leading  = p->flag_sign_leading;
+					break;
+				}
+			}
+		}
+	}
+	f->flag_validated = 1;
 
 	/* if picture is not needed it is an error to specify it
 	   note: we may have set the picture internal */
@@ -1561,13 +1651,24 @@ validate_elem_screen (struct cb_field *f)
 	warn_full_on_numeric_items_is_useless (f);
 }
 
+static void
+validate_field_clauses (cb_tree x, struct cb_field *f)
+{
+	if (f->flag_blank_zero) {
+		cb_error_x (x, _("BLANK ZERO not compatible with USAGE"));
+	}
+	if (f->flag_sign_leading || f->flag_sign_separate) {
+		cb_error_x (x, _("SIGN clause not compatible with USAGE"));
+	}
+}
+
 /* Perform validation of a non-66-or-88-level elementary item. */
 static unsigned int
 validate_elementary_item (struct cb_field *f)
 {
 	unsigned int	ret;
-	cob_pic_symbol	*pstr;
-	int		n;
+	cob_pic_symbol	*pstr = NULL;
+	int		n = 0;
 
 	ret = validate_usage (f);
 	if (f->flag_sign_clause) {
@@ -1649,8 +1750,9 @@ validate_elementary_item (struct cb_field *f)
 
 	/* TO-DO: Also move, this is not validation */
 	if (f->flag_blank_zero
-	    && f->pic
-	    && f->pic->category == CB_CATEGORY_NUMERIC) {
+	 && f->pic
+	 && f->pic->category == CB_CATEGORY_NUMERIC) {
+		cb_tree x;
 		/* Reconstruct the picture string */
 		if (f->pic->scale > 0) {
 			/* Size for genned string */
@@ -1659,12 +1761,81 @@ validate_elementary_item (struct cb_field *f)
 			} else {
 				n = 3;
 			}
+
 			f->pic->str = cobc_parse_malloc ((size_t)n * sizeof (cob_pic_symbol));
 			pstr = f->pic->str;
 			if (f->pic->have_sign) {
 				pstr->symbol = '+';
 				pstr->times_repeated = 1;
 				++pstr;
+			}
+		} 
+		x = CB_TREE (f);
+
+		switch (f->usage) {
+		default:
+			break;
+		case CB_USAGE_DISPLAY:
+			if (current_program->flag_trailing_separate &&
+			    f->pic &&
+			    f->pic->category == CB_CATEGORY_NUMERIC &&
+			    !f->flag_sign_leading) {
+				f->flag_sign_separate = 1;
+			}
+			break;
+		case CB_USAGE_SIGNED_CHAR:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-CHAR", 2, 1);
+			f->flag_real_binary = 1;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_SIGNED_SHORT:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-SHORT", 4, 1);
+			f->flag_real_binary = 1;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_SIGNED_INT:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-LONG", 9, 1);
+			f->flag_real_binary = 1;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_SIGNED_LONG:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-DOUBLE", 18, 1);
+			f->flag_real_binary = 1;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_UNSIGNED_CHAR:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-CHAR", 2, 0);
+			f->flag_real_binary = 1;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_UNSIGNED_SHORT:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-SHORT", 4, 0);
+			f->flag_real_binary = 1;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_UNSIGNED_INT:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-LONG", 9, 0);
+			f->flag_real_binary = 1;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_UNSIGNED_LONG:
+			f->usage = CB_USAGE_COMP_5;
+			f->pic = cb_build_binary_picture ("BINARY-DOUBLE", 18, 0);
+			f->flag_real_binary = 1;
+			validate_field_clauses (x, f);
+			break;
+		case CB_USAGE_BINARY:
+		case CB_USAGE_PACKED:
+		case CB_USAGE_BIT:
+			if (f->pic->category != CB_CATEGORY_NUMERIC) {
+				cb_error_x (x, _("'%s' PICTURE clause not compatible with USAGE"), cb_name (x));
 			}
 			pstr->symbol = '9';
 			pstr->times_repeated = (int)f->pic->digits - f->pic->scale;
@@ -1678,22 +1849,7 @@ validate_elementary_item (struct cb_field *f)
 			++pstr;
 
 			f->pic->size++;
-		} else {
-			/* Size for genned string */
-			if (f->pic->have_sign) {
-				n = 2;
-			} else {
-				n = 1;
-			}
-			f->pic->str = cobc_parse_malloc ((size_t)n * sizeof(cob_pic_symbol));
-			pstr = f->pic->str;
-			if (f->pic->have_sign) {
-				pstr->symbol = '+';
-				pstr->times_repeated = 1;
-				++pstr;
-			}
-			pstr->symbol = '9';
-			pstr->times_repeated = f->pic->digits;
+			break;
 		}
 		f->pic->lenstr = n;
 		f->pic->category = CB_CATEGORY_NUMERIC_EDITED;
@@ -1847,17 +2003,26 @@ setup_parameters (struct cb_field *f)
 		break;
 
 	case CB_USAGE_COMP_5:
+	case CB_USAGE_COMP_N:
+		if(f->pic 
+		&& f->pic->orig
+		&& f->pic->orig[0] == 'X') {
+			f->usage = CB_USAGE_COMP_X;
+		}
 		f->flag_real_binary = 1;
 		/* Fall-through */
 	case CB_USAGE_COMP_X:
-	case CB_USAGE_COMP_N:
-		if (f->pic->category == CB_CATEGORY_ALPHANUMERIC) {
+		if (f->pic->category == CB_CATEGORY_ALPHANUMERIC
+		 && f->usage == CB_USAGE_COMP_X) {
+			f->compx_size = f->size = f->pic->size;
 			if (f->pic->size > 8) {
 				f->pic = CB_PICTURE (cb_build_picture ("9(36)"));
 			} else {
 				char		pic[8];
 				sprintf (pic, "9(%d)", pic_digits[f->pic->size - 1]);
 				f->pic = CB_PICTURE (cb_build_picture (pic));
+				if(f->compx_size > 0)
+					f->pic->size = f->compx_size;
 			}
 		}
 #ifndef WORDS_BIGENDIAN
@@ -1886,7 +2051,9 @@ compute_binary_size (struct cb_field *f, const int size)
 			   (size <= 9) ? 4 : (size <= 18) ? 8 : 16);
 		return;
 	case CB_BINARY_SIZE_2_4_8:
-		if (f->flag_real_binary && size <= 2) {
+		if (f->flag_real_binary
+		 && size <= 2
+		 && cb_mf_ibm_comp != 1) {
 			f->size = 1;
 		} else {
 			f->size = ((size <= 4) ? 2 :
@@ -2132,6 +2299,24 @@ compute_size (struct cb_field *f)
 		}
 		return f->size;
 	}
+	if (f->storage == CB_STORAGE_REPORT
+	 && (f->report_flag & COB_REPORT_LINE)
+	 && !(f->report_flag & COB_REPORT_LINE_PLUS)
+	 && f->parent
+	 && f->parent->children != f) {
+		for(c = f->parent->children; c && c != f; c = c->sister) {
+			if ((c->report_flag & COB_REPORT_LINE)
+			 && !(c->report_flag & COB_REPORT_LINE_PLUS)
+			 && c->report_line == f->report_line) {
+				if (warningopt) {
+					cb_warning_x (COBC_WARN_FILLER,
+						      CB_TREE(f), _("Duplicate LINE %d ignored"),f->report_line);
+				}
+				f->report_line = 0;
+				f->report_flag &= ~COB_REPORT_LINE;
+			}
+		}
+	}
 
 	if (f->children) {
 		if (f->storage == CB_STORAGE_REPORT
@@ -2140,7 +2325,9 @@ compute_size (struct cb_field *f)
 		}
 
 		/* Groups */
-		if (f->flag_synchronized && warningopt) {
+		if (f->flag_synchronized 
+		 && !f->flag_ignore_sync
+		 && warningopt) {
 			cb_warning_x (COBC_WARN_FILLER, CB_TREE (f), _("ignoring SYNCHRONIZED for group item '%s'"),
 				    cb_name (CB_TREE (f)));
 		}
@@ -2190,25 +2377,53 @@ unbounded_again:
 				}
 
 				/* Word alignment */
-				if (c->flag_synchronized) {
+				if (c->flag_synchronized
+				 && !c->flag_ignore_sync) {
 					align_size = 1;
 					switch (c->usage) {
 					case CB_USAGE_BINARY:
 					case CB_USAGE_COMP_5:
-					case CB_USAGE_COMP_X:
-					case CB_USAGE_COMP_N:
 					case CB_USAGE_FLOAT:
 					case CB_USAGE_DOUBLE:
+						if (c->size == 2
+						 || c->size == 4) {
+							align_size = c->size;
+						} else if (c->size == 8 
+							|| c->size == 16) {
+							if (cb_binary_size == CB_BINARY_SIZE_2_4_8) {
+								if (c->usage == CB_USAGE_DOUBLE)
+									align_size = 8;	/* COMP-2 */
+								else
+									align_size = 4;
+							} else if (sizeof (void *) == 4) {
+								align_size = 4; 	/* 32 bit mode */
+							} else {
+								align_size = 8;		/* 64 bit mode */
+							}
+						}
+						break;
+					case CB_USAGE_UNSIGNED_SHORT:
+					case CB_USAGE_SIGNED_SHORT:
+						align_size = sizeof(short);
+						break;
+					case CB_USAGE_UNSIGNED_INT:
+					case CB_USAGE_SIGNED_INT:
+						align_size = sizeof(int);
+						break;
+					case CB_USAGE_UNSIGNED_LONG:
+					case CB_USAGE_SIGNED_LONG:
+						align_size = sizeof(long);
+						break;
 					case CB_USAGE_LONG_DOUBLE:
 					case CB_USAGE_FP_BIN32:
 					case CB_USAGE_FP_BIN64:
 					case CB_USAGE_FP_BIN128:
 					case CB_USAGE_FP_DEC64:
 					case CB_USAGE_FP_DEC128:
-						if (c->size == 2 ||
-						    c->size == 4 ||
-						    c->size == 8 ||
-						    c->size == 16) {
+						if (c->size == 2 
+						 || c->size == 4
+						 || c->size == 8
+						 || c->size == 16) {
 							align_size = c->size;
 						}
 						break;
@@ -2229,10 +2444,13 @@ unbounded_again:
 					case CB_USAGE_PROGRAM_POINTER:
 						align_size = sizeof (void *);
 						break;
+					case CB_USAGE_COMP_X:
+					case CB_USAGE_COMP_N:
+						break;
 					default:
 						break;
 					}
-					if (c->offset % align_size != 0) {
+					if ((c->offset % align_size) != 0) {
 						pad = align_size - (c->offset % align_size);
 						c->offset += pad;
 						size_check += pad;
@@ -2294,6 +2512,10 @@ unbounded_again:
 
 		switch (f->usage) {
 		case CB_USAGE_COMP_X:
+			if(f->compx_size > 0) {
+				size = f->compx_size;
+				break;
+			}
 		case CB_USAGE_COMP_N:
 			if (f->pic->category == CB_CATEGORY_ALPHANUMERIC) {
 				break;
@@ -2551,10 +2773,14 @@ cb_validate_78_item (struct cb_field *f, const cob_u32_t no78add)
 
 	x = CB_TREE (f);
 	noadd = no78add;
-	if (CB_INVALID_TREE (f->values)) {
+	if (CB_INVALID_TREE (f->values) 
+	 || CB_INVALID_TREE(CB_VALUE(f->values))) {
 		level_require_error (x, "VALUE");
 		noadd = 1;
-	} else if (CB_INVALID_TREE (CB_VALUE (f->values))) {
+	}
+
+	if (f->pic || f->flag_occurs) {
+		level_except_error (x, "VALUE");
 		noadd = 1;
 	}
 

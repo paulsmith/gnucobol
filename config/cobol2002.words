@@ -207,6 +207,13 @@ reserved:	FILE-CONTROL
 reserved:	FILLER
 reserved:	FINAL
 reserved:	FIRST
+reserved:	FLOAT-BINARY*
+reserved:	FLOAT-BINARY-128
+reserved:	FLOAT-BINARY-32
+reserved:	FLOAT-BINARY-64
+reserved:	FLOAT-DECIMAL*
+reserved:	FLOAT-DECIMAL-16
+reserved:	FLOAT-DECIMAL-34
 reserved:	FLOAT-EXTENDED
 reserved:	FLOAT-LONG
 reserved:	FLOAT-SHORT

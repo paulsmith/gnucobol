@@ -154,7 +154,8 @@ pretty_display_numeric (cob_field *f, FILE *fp)
 
 	cob_move (f, &temp);
 	for (i = 0; i < size; ++i) {
-		putc (q[i], fp);
+		if(q[i] != 0)
+			putc (q[i], fp);
 	}
 }
 
@@ -643,6 +644,27 @@ cob_dump_field (const int level, const char *name,
 	va_end (ap);
 }
 
+void
+cob_print_field (FILE *fp, cob_field *f, int indent, int width)
+{
+	if (f->data == NULL) {
+		fprintf(fp," <NULL> address");
+	} else if (!is_field_display(f)
+		&& (f->attr->type == COB_TYPE_NUMERIC_EDITED
+		 || f->attr->type == COB_TYPE_NUMERIC_DISPLAY)) {
+		display_alnum_dump (f, fp, indent, width);
+	} else if (f->attr->type == COB_TYPE_ALPHANUMERIC
+		|| f->attr->type == COB_TYPE_ALPHANUMERIC_EDITED
+		|| f->attr->type == COB_TYPE_GROUP
+		|| f->size > 39) {
+		display_alnum_dump (f, fp, indent, width);
+	} else {
+		fprintf(fp," ");
+		display_common (f, fp);
+	}
+	fprintf(fp,"\n");
+}
+
 /* ACCEPT */
 
 void
@@ -707,6 +729,17 @@ cob_accept (cob_field *f)
 		}
 	}
 	cob_move (&temp, f);
+}
+
+/*
+ * Move numeric value into working field with tailing NULs
+ * Then 'pretty_display_numeric' will skip outputing the NULs
+ */
+void
+cob_field_int_display (cob_field *i, cob_field *f)
+{
+	memset(f->data,0,f->size);
+	sprintf((char *)(f->data),"%d",*(int *)i->data);
 }
 
 void

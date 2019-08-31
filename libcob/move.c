@@ -704,7 +704,7 @@ cob_move_display_to_edited (cob_field *f1, cob_field *f2)
 	  TO-DO: This is computed in cb_build_picture; add computed results to
 	  cb_field and use those.
 	*/
-	for (p = COB_FIELD_PIC (f2); p->symbol; ++p) {
+	for (p = COB_FIELD_PIC (f2); p && p->symbol; ++p) {
 		c = p->symbol;
 		repeat = p->times_repeated;
 		if (c == '9' || c == 'Z' || c == '*') {
@@ -730,7 +730,19 @@ cob_move_display_to_edited (cob_field *f1, cob_field *f2)
 	}
 
 	src = max - COB_FIELD_SCALE(f1) - count;
-	for (p = COB_FIELD_PIC (f2); p->symbol; ++p) {
+	if(COB_FIELD_PIC (f2) == NULL) {
+		/* There is no PIC present so assume all PIC 9s */
+		n = f2->size;
+		src = max - n;
+		for (; n > 0; n--, ++dst) {
+			*dst = (min <= src && src < max) ? *src++ : (src++, '0');
+			if (*dst != '0') {
+				is_zero = suppress_zero = 0;
+			}
+			suppress_zero = 0;
+		}
+	}
+	for (p = COB_FIELD_PIC (f2); p && p->symbol; ++p) {
 		c = p->symbol;
 		n = p->times_repeated;
 		for (; n > 0; n--, ++dst) {
@@ -1474,6 +1486,110 @@ cob_move (cob_field *src, cob_field *dst)
 			return;
 		}
 	}
+}
+
+/* 
+ * Allocate storage as required and move data to dst field 
+ * The storage for these LINKAGE fields is allocated from a 
+ * single buffer pointed to by 'cob_module->param_buf'
+ * cob_module_free will release the memory 
+ */
+void
+cob_alloc_move (cob_field *src, cob_field *dst, const int nsize)
+{
+	unsigned int	size;
+	int		i, j, k, use, pos, npos;
+	unsigned char	*buf;
+	cob_module	*mod = COB_MODULE_PTR;
+	cob_field	*f;
+
+	if (src == NULL) {	/* OMMITTED parameter */
+		dst->data = NULL;
+		return;
+	}
+
+	if (nsize > 0
+	&& (int)dst->size != nsize) {
+		dst->data = NULL;
+		dst->size = (size_t) nsize;
+	}
+
+	if (dst->data == NULL) {
+		size = (dst->size + 7) / 8;
+		size = size * 8;
+		if (mod->param_buf == NULL) {
+			mod->param_buf_used = 0;
+			mod->param_buf_size = size + 8;
+			mod->param_buf = cob_cache_malloc (mod->param_buf_size);
+		}
+		if (mod->param_field == NULL) {
+			mod->param_num = 0;
+			mod->param_max = 2;
+			mod->param_field = cob_cache_malloc (mod->param_max * sizeof(void*));
+		}
+		buf = NULL;
+		use = mod->param_buf_used;
+		for (i=j=0; i < mod->param_num; i++) {
+			if (mod->param_field[i]->data == NULL) {
+				if (i > 0 && j == 0) {
+					for (k=i; k < mod->param_num 
+						&& mod->param_field[k]->data == NULL; k++);
+					if (k == mod->param_num) { /* All remaining fields have NULL */
+						j = 0;
+						break;
+					}
+				}
+				j++;
+			}
+		}
+		if (i > 0 && j == i) {		/* No LINKAGE fields stored */
+			mod->param_buf_used = 0;
+			j = 0;
+		}
+
+		if (mod->param_buf_used + size > mod->param_buf_size) {	/* Grow the buffer */
+			buf = mod->param_buf;
+			mod->param_buf_size += (size + 8);
+			mod->param_buf = cob_cache_malloc (mod->param_buf_size);
+		} else if (i > 0 && j > 0) {	/* Some unassigned fields so shuffle them up */
+			buf = mod->param_buf;
+			mod->param_buf = cob_cache_malloc (mod->param_buf_size);
+		}
+
+		if (buf != NULL) {
+			for (i=npos=0; i < mod->param_num; i++) {	/* Adjust 'data' for new buffer */
+				f = mod->param_field [i];
+				if (f->data != NULL) {
+					pos = f->data - buf;
+					if (pos >= 0
+					 && pos < use) {		/* Within previous buffer? */
+					 	memcpy (&mod->param_buf[npos], f->data, f->size);
+						f->data = &mod->param_buf[npos];
+						npos += ((f->size + 7) / 8) * 8;
+					}
+				}
+			}
+			cob_cache_free (buf);
+		}
+		for (i=0; i < mod->param_num; i++) {
+			if (mod->param_field[i] == dst) 
+				break;
+		}
+		if (i >= mod->param_num) {	/* Not in table, so add it */
+			if (mod->param_num >= mod->param_max) {
+				mod->param_max += 2;
+				mod->param_field = cob_cache_realloc (mod->param_field, 
+									mod->param_max * sizeof(void*));
+			}
+			i = mod->param_num++;
+			mod->param_field[i] = dst;
+		}
+
+		dst->data = &mod->param_buf[mod->param_buf_used];
+		mod->param_buf_used += size;
+	}
+
+	cob_move (src, dst);
 }
 
 /* Convenience functions */

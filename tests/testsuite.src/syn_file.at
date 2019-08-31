@@ -1922,7 +1922,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:15: error: non-standard 'NO DUPLICATES'
+[prog.cob:7: error: missing file description for FILE TEST-FILE
+prog.cob:11: error: 'TESTKEY1' is not defined
+prog.cob:12: error: 'TESTKEY2' is not defined
+prog.cob:14: error: 'TESTKEY3' is not defined
 ])
 AT_CHECK([$COMPILE_ONLY -frelax-syntax prog.cob], [0], [], [])
 AT_CLEANUP
@@ -1951,7 +1954,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:12: error: 'RECORD' is mandatory here
+[prog.cob:7: error: missing file description for FILE TEST-FILE
+prog.cob:11: error: 'TESTKEY1' is not defined
+prog.cob:12: error: 'TESTKEY2' is not defined
 ])
 AT_CHECK([$COMPILE_ONLY -frelax-syntax prog.cob], [0], [], [])
 AT_CLEANUP
