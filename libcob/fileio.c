@@ -166,10 +166,14 @@ static	vb_rtd_t *vbisam_rtd = NULL;
 #endif
 #endif
 
+#endif
+
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
 #include "libcob.h"
 #include "coblocal.h"
+
+#ifdef	WITH_ANY_ISAM
 
 /* Isam File handler packet */
 
