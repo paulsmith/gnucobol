@@ -109,11 +109,6 @@ static void free_extfh_fcd (void);	/* Free all tables used for EXTFH interface *
 
 #endif	/* _WIN32 */
 
-/* Force symbol exports */
-#define	COB_LIB_EXPIMP
-#include "libcob.h"
-#include "coblocal.h"
-
 #ifdef	WITH_DB
 
 #include <db.h>
@@ -170,6 +165,11 @@ static	vb_rtd_t *vbisam_rtd = NULL;
 #define ISRECLEN isreclen
 #endif
 #endif
+
+/* Force symbol exports */
+#define	COB_LIB_EXPIMP
+#include "libcob.h"
+#include "coblocal.h"
 
 /* Isam File handler packet */
 
