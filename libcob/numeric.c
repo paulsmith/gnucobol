@@ -42,9 +42,13 @@
 #ifndef isnan
 #define isnan(x)	_isnan(x)
 #endif
-#ifndef isinf
-#define isinf(x)	((_fpclass(x) == _FPCLASS_PINF) || \
-					 (_fpclass(x) == _FPCLASS_NINF))
+#endif
+
+#if !defined(isinf)
+#if defined(WIN32)
+#define isinf(x) ((_fpclass(x) == _FPCLASS_PINF) || (_fpclass(x) == _FPCLASS_NINF))
+#else
+#define isinf(x) (!ISFINITE(x))
 #endif
 #endif
 

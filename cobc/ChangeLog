@@ -1,4 +1,9 @@
 
+2019-09-03  Ron Norman <rjn@inglenet.com>
+
+	* tree.h: Add checks for C compiler presence of __FUNCTION__
+	* typeck.c: Fix some #if to include missing conditions
+
 2019-08-28  Ron Norman <rjn@inglenet.com>
 
 	* tree.h: Add flag_usage_defined

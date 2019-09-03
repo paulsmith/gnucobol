@@ -254,6 +254,7 @@ static const unsigned char	valid_char[256] = {
 	['z'] = 1
 };
 #else
+static int					init_valid_char = 1;
 static unsigned char		valid_char[256];
 static const unsigned char	pvalid_char[] =
 	"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
@@ -606,6 +607,16 @@ cob_encode_program_id (const unsigned char *const name,
 	const unsigned char *s = name;
 	int pos = 0;
 
+#ifndef	HAVE_DESIGNATED_INITS
+	if (init_valid_char) {
+		const unsigned char	*pv;
+		init_valid_char = 0;
+		memset (valid_char, 0, sizeof(valid_char));
+		for (pv = pvalid_char; *pv; ++pv) {
+			valid_char[*pv] = 1;
+		}
+	}
+#endif
 	/* Encode the initial digit */
 	if (unlikely (*name <= (unsigned char)'9' && *name >= (unsigned char)'0')) {
 		name_buff[pos++] = (unsigned char)'_';
@@ -1441,6 +1452,7 @@ cob_init_call (cob_global *lptr, cob_settings* sptr, const int check_mainhandle)
 	cob_jmp_primed = 0;
 
 #ifndef	HAVE_DESIGNATED_INITS
+	init_valid_char = 0;
 	memset (valid_char, 0, sizeof(valid_char));
 	for (pv = pvalid_char; *pv; ++pv) {
 		valid_char[*pv] = 1;
