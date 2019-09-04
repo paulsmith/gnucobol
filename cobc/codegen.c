@@ -5628,7 +5628,6 @@ output_bin_field (const cb_tree x, const cob_u32_t id)
 	   therefore generate this part of the assignment separately */
 	output_line ("cob_field\tcontent_fb_%u = { %u, NULL, &%s%d };",
 		     id, size, CB_PREFIX_ATTR, i);
-	output_line ("content_fb_%u.data = content_%u.data;", id, id);
 }
 
 static COB_INLINE COB_A_INLINE int
@@ -5867,11 +5866,7 @@ output_call (struct cb_call *p)
 					output_line ("cob_field      content_%s%u;", CB_PREFIX_FIELD, n);
 				}
 				output_line ("cob_field_attr content_%s%u;", CB_PREFIX_ATTR, n);
-#if   defined(__SUNPRO_C)
 				output_bin_field (x, n);
-#else
-				output_bin_field (x, n);
-#endif
 			} else {
 				if (!need_brace) {
 					need_brace = 1;
@@ -5902,6 +5897,9 @@ output_call (struct cb_call *p)
 		switch (CB_PURPOSE_INT (l)) {
 		case CB_CALL_BY_REFERENCE:
 			if (CB_NUMERIC_LITERAL_P (x)) {
+				/* Set 'data' after all variable declarations */
+				output_line ("content_fb_%u.data = content_%u.data;", n, n);
+
 				output_prefix ();
 				if (cb_fit_to_int (x)) {
 					pval = (unsigned int)cb_get_int (x);
@@ -5938,6 +5936,9 @@ output_call (struct cb_call *p)
 				output (";\n");
 			} else if (CB_TREE_TAG (x) != CB_TAG_INTRINSIC) {
 				if (CB_NUMERIC_LITERAL_P (x)) {
+					/* Set 'data' after all variable declarations */
+					output_line ("content_fb_%u.data = content_%u.data;", n, n);
+
 					output_prefix ();
 					if (cb_fit_to_int (x)) {
 						pval = (unsigned int)cb_get_int (x);

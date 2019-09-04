@@ -1,4 +1,11 @@
 
+2019-09-04  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: Set temp-field.data after all declarations to
+	            avoid problems with some C compilers (SUN is one)
+	* typeck.c: Fix for use of cob_pointer_manip
+	* codeoptim.c: Adjust cob_pointer_manip to match usage
+
 2019-09-03  Ron Norman <rjn@inglenet.com>
 
 	* tree.h: Add checks for C compiler presence of __FUNCTION__
