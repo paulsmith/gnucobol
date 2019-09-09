@@ -1,4 +1,8 @@
 
+2019-09-09  Ron Norman <rjn@inglenet.com>
+
+	* common.h: Add defines for COB_ALIGN_8 to set 8 byte boundary alignment
+
 2019-09-03  Ron Norman <rjn@inglenet.com>
 
 	* call.c: Initialize valid_char when needed

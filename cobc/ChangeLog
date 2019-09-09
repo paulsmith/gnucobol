@@ -1,4 +1,9 @@
 
+2019-09-09  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: Emit attributes and/or pragma to align 01/77 fields on
+	            8 byte boundary
+
 2019-09-04  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c: Set temp-field.data after all declarations to

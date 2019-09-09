@@ -1915,14 +1915,33 @@ output_local_base_cache (void)
 			output_local ("static int	%s%d;",
 				      CB_PREFIX_BASE, blp->f->id);
 		} else if( !(blp->f->report_flag & COB_REPORT_REF_EMITTED)) {
+#if defined(COB_ALIGN_PRAGMA_8)
+			output_local ("#pragma align 8 (%s%d)\n", CB_PREFIX_BASE, blp->f->id);
+#endif
+#ifdef  HAVE_ATTRIBUTE_ALIGNED
 			output_local ("static cob_u8_t	%s%d[%d]%s;",
 				      CB_PREFIX_BASE, blp->f->id,
 				      blp->f->memory_size, COB_ALIGN);
+#else
+#if !defined(COB_ALLOW_UNALIGNED) && defined(COB_ALIGN_UNKNOWN)
+			cb_warning (warningopt, _("System requires data alignment which is unknown"));
+#endif
+#if !defined(COB_ALLOW_UNALIGNED) && defined(COB_ALIGN_8)
+			output_local ("static cob_u8_t COB_ALIGN_8 %s%d[%d];",
+				      CB_PREFIX_BASE, blp->f->id, blp->f->memory_size);
+#elif defined(COB_ALIGN_8)
+			output_local ("static cob_u8_t COB_ALIGN_8 %s%d[%d];",
+				      CB_PREFIX_BASE, blp->f->id, blp->f->memory_size);
+#else
+			output_local ("static cob_u8_t	%s%d[%d];",
+				      CB_PREFIX_BASE, blp->f->id,blp->f->memory_size);
+#endif
+#endif
 		}
 		output_local ("\t/* %s */\n", blp->f->name);
 	}
 
-	output_local ("\n/* End of data storage */\n\n");
+	output_local ("\n/* End of local data storage */\n\n");
 }
 
 static void
@@ -1949,9 +1968,25 @@ output_nonlocal_base_cache (void)
 			output_storage ("static int	  %s%d;",
 					CB_PREFIX_BASE, blp->f->id);
 		} else {
-			output_storage ("static cob_u8_t  %s%d[%d]%s;",
-					CB_PREFIX_BASE, blp->f->id,
-					blp->f->memory_size, COB_ALIGN);
+#ifdef  HAVE_ATTRIBUTE_ALIGNED
+			output_storage ("static cob_u8_t	%s%d[%d]%s;",
+				      CB_PREFIX_BASE, blp->f->id,
+				      blp->f->memory_size, COB_ALIGN);
+#else
+#if !defined(COB_ALLOW_UNALIGNED) && defined(COB_ALIGN_UNKNOWN)
+			cb_warning (warningopt, _("System requires data alignment which is unknown"));
+#endif
+#if defined(COB_ALIGN_PRAGMA_8)
+			output_storage ("#pragma align 8 (%s%d)\n", CB_PREFIX_BASE, blp->f->id);
+#endif
+#if !defined(COB_ALLOW_UNALIGNED) && defined(COB_ALIGN_8)
+			output_storage ("static cob_u8_t COB_ALIGN_8 %s%d[%d];",
+				      CB_PREFIX_BASE, blp->f->id, blp->f->memory_size);
+#else
+			output_storage ("static cob_u8_t	%s%d[%d];",
+				      CB_PREFIX_BASE, blp->f->id, blp->f->memory_size);
+#endif
+#endif
 		}
 		output_storage ("\t/* %s */\n", blp->f->name);
 	}

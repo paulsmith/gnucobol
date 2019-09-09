@@ -588,6 +588,37 @@ only usable with COB_USE_VC2013_OR_GREATER */
 	#define __unaligned
 #endif
 
+/* COB_ALIGN_UNKNOWN: We've not figured out a way to force alignment */
+/* COB_ALIGN_PRAGMA_8: Insert ahead of each variable declaration */
+/* COB_ALIGN_8: Insert as part of variable declaration to align on 8 byte boundary */
+#if defined(__MACH__)
+#define COB_ALIGN_8 __attribute__((aligned (8)))
+#elif defined(__GNUC__) || defined(__linux__) || defined (__PPC__)
+#define COB_ALIGN_8 __attribute__((aligned (8)))
+#elif defined(__hpux)
+#define COB_ALIGN_8 
+#define COB_ALIGN_UNKNOWN
+#elif defined(_HPUX_SOURCE) || defined(__LP64__)
+#define COB_ALIGN_8
+#define COB_ALIGN_UNKNOWN
+#elif defined(__SUNPRO_C)
+/* Insert #pragma align 8 (varname) */
+#define COB_ALIGN_PRAGMA_8
+#elif defined(__MACH__)
+#define COB_ALIGN_8 __attribute__((aligned (8)))
+#elif defined(_WIN32)
+#define COB_ALIGN_8
+#define COB_ALIGN_UNKNOWN
+#elif defined(_WIN64)
+#define COB_ALIGN_8
+#define COB_ALIGN_UNKNOWN
+#elif defined(__arm__)
+#define COB_ALIGN_8 __align(8)
+#else
+#define COB_ALIGN_8
+#define COB_ALIGN_UNKNOWN
+#endif
+
 #if	defined(_MSC_VER) || defined(__ORANGEC__) || defined(__WATCOMC__) || \
     defined(__BORLANDC__) || defined(__MINGW32__) || defined (__DJGPP__)
 #define PATHSEP_CHAR (char) ';'
