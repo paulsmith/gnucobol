@@ -2074,12 +2074,8 @@ AT_DATA([prog2.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COBC -x prog.cob])
-AT_CHECK([$COBCRUN_DIRECT ./prog X], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
-[libcob: error: inconsistant file name (status = 31) for file test-file ('field with NULL address')
-])
 AT_CHECK([$COMPILE prog.cob])
+AT_CHECK([$COBCRUN_DIRECT ./prog X], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
 [libcob: prog.cob:23: error: inconsistant file name (status = 31) for file test-file ('field with NULL address') on OPEN
 ])
