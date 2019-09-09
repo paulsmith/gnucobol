@@ -33,7 +33,7 @@
 				<FILE NAME="..\version_cobcrun.rc" TITLE="version_cobcrun.rc" CLEAN="0"/>
 			</FOLDER>
 			<FOLDER TITLE="Source Files">
-				<FILE NAME="..\..\in\cobcrun.c" TITLE="cobcrun.c" CLEAN="0"/>
+				<FILE NAME="..\..\bin\cobcrun.c" TITLE="cobcrun.c" CLEAN="0"/>
 			</FOLDER>
 			<FILE NAME="..\..\in\ChangeLog" TITLE="ChangeLog" CLEAN="0"/>
 		</FILES>

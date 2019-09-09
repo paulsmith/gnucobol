@@ -1,6 +1,6 @@
 
 /* config.h, tested with x86/x64 VS2005-2019
-   and OrangeC 6.0.41.1 (which ignores the lib comments) */
+   and OrangeC 6.0.43.1 (which ignores the lib comments) */
 
 #define NOISAM       0
 #define BDB          1
@@ -196,6 +196,14 @@
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 /* #undef ENABLE_NLS */
+
+/* Define to 1 if you have the `atol' function. */
+#define HAVE_ATOL 1
+
+/* Define to 1 if you have the `atoll' function. */
+/* MSC < 2013 (_MS_VER < 1800) does *NOT* have `atoll', but `_atoi64'
+   which is used as fallback via common.h */
+#define HAVE_ATOLL 1
 
 /* Has __attribute__((aligned)) */
 /* #undef HAVE_ATTRIBUTE_ALIGNED */
@@ -464,7 +472,7 @@
 #endif
 
 /* Define to 1 if you have the `setenv' function. */
-/* MSC does *NOT* has `setenv' (!)
+/* MSC does *NOT* have `setenv' (!)
    But as the handling of the fallback `putenv' is different in POSIX and _MSC
    (POSIX stores no duplicate of `putenv', where _MSC does), we pretend to
    have support for `setenv' and define it in common.c using _putenv_s,
@@ -599,7 +607,7 @@
 #define PACKAGE_NAME "GnuCOBOL"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "GnuCOBOL 3.1-dev"
+#define PACKAGE_STRING "GnuCOBOL 3.2-early-dev"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "gnucobol"
@@ -608,7 +616,7 @@
 #define PACKAGE_URL "https://www.gnu.org/software/gnucobol/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.1-dev"
+#define PACKAGE_VERSION "3.2-early-dev"
 
 /* Define a patch level (numeric, max. 8 digits) */
 #define PATCH_LEVEL COB_NUM_TAR_DATE
@@ -645,7 +653,7 @@
 
 
 /* Version number of package */
-#define VERSION "3.1-dev"
+#define VERSION "3.2-early-dev"
 
 /* Use CISAM as ISAM handler */
 #if CONFIGURED_ISAM == CISAM

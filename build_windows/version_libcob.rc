@@ -19,8 +19,8 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 #endif
 
 VS_VERSION_INFO    VERSIONINFO
-  FILEVERSION      3,1,PATCH_LEVEL,0
-  PRODUCTVERSION   3,1,PATCH_LEVEL,0
+  FILEVERSION      3,2,PATCH_LEVEL,0
+  PRODUCTVERSION   3,2,PATCH_LEVEL,0
 
   FILEOS           VOS_NT_WINDOWS32
 
@@ -38,20 +38,20 @@ VS_VERSION_INFO    VERSIONINFO
       // VALUE "Comments",         "Free for general use, including commercial (distribution bound to GPL).\0"
       // VALUE "CompanyName",      "No Company\0"
       VALUE "FileDescription",  PACKAGE_NAME " Runtime supporting most COBOL dialects with lots of extensions"
-      VALUE "FileVersion",      "3.1.3170"
+      VALUE "FileVersion",      "3.2.3273"
       VALUE "InternalName",     "libcob"
       VALUE "LegalCopyright",   "Copyright (C) 2001-2019 Free Software Foundation, Inc."
       VALUE "LegalTrademarks",  "Runtime: GNU Lesser General Public License v3 - see COPYING.LESSER,\x0ADocumentation: GNU Free Documentation License."
       VALUE "OriginalFilename", "libcob.dll"
       VALUE "ProductName",      PACKAGE_NAME " runtime library"
-      VALUE "ProductVersion",   PACKAGE_VERSION "." STRINGIZE(COB_NUM_TAR_DATE) " - r3170"
+      VALUE "ProductVersion",   PACKAGE_VERSION "." STRINGIZE(COB_NUM_TAR_DATE) " - r3273"
       // Should be set if VS_FF_PRIVATEBUILD is set:
       VALUE "PrivateBuild",     "Built from SVN (trunk)"
       // Should be set if VS_FF_SPECIALBUILD is set (including description what it was build for):
       VALUE "SpecialBuild",     ""
 
       /* Non-Standard entries */
-      VALUE "Build",            "June 2019"
+      VALUE "Build",            "Sept 2019"
       VALUE "Developer",        "Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart and many others (see AUTHORS and THANKS)"
       VALUE "Support",          "https://www.gnu.org/software/gnucobol/"
       VALUE "Users",            "Unlimited."
