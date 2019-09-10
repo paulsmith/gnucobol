@@ -3865,7 +3865,7 @@ lineseq_rewrite (cob_file *f, const int opt)
 static int
 relative_read_size (cob_file *f, off_t off, int *isdeleted)
 {
-	int	relsize = 0;
+	size_t	relsize = 0;
 	unsigned char rechdr[8];
 
 	*isdeleted = 0;
