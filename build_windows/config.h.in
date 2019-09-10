@@ -548,7 +548,7 @@
 #if !defined(_MSC_VER) || _MSC_VER >= 1800 /* = COB_USE_VC2013_OR_GREATER */
 #define HAVE_STRTOLL 1
 #else
-/* #undef HAVE_STRTOLL
+/* #undef HAVE_STRTOLL */
 #endif
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
