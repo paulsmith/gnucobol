@@ -7471,10 +7471,9 @@ print_info (void)
 	const int wide = 0;
 #endif
 #endif
-#if defined (mpir_version) || defined (__PDCURSES__) || defined (NCURSES_VERSION)
-	char	versbuff2[115] = { '\0' };
-#endif
+	char	versbuff2[115];
 
+	memset(versbuff2,0,sizeof(versbuff2));
 	print_version ();
 	putchar ('\n');
 	puts (_("build information"));
