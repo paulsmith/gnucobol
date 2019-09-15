@@ -1044,7 +1044,7 @@ struct cb_file {
 	int			optional;		/* OPTIONAL */
 	int			organization;		/* ORGANIZATION - FIXME: use enum */
 	int			access_mode;		/* ACCESS MODE - FIXME: use enum */
-	cob_flags_t		lock_mode;		/* LOCK MODE */
+	int			lock_mode;		/* LOCK MODE */
 	int			fd_share_mode;		/* SHARING mode */
 	int			special;		/* Special file */
 	int			same_clause;		/* SAME clause */

@@ -1,6 +1,11 @@
 
 2019-09-15  Ron Norman <rjn@inglenet.com>
 
+	* tree.h: Revert 'lock_mode' back to an 'int'
+	* codegen.c,debug.c: Changes for 'lock_mode' being an 'int'
+
+2019-09-15  Ron Norman <rjn@inglenet.com>
+
 	* cobc.h: Add COB_MEM_SIZE as size of cob_mem_struct rounded up to
 	          multiple of sizeof(long long)
 	* cobc.c: Use COB_MEM_SIZE as size of cob_mem_struct

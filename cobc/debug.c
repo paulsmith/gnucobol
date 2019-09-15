@@ -914,7 +914,7 @@ print_file(  const struct cb_file *tr, FILE *output ) {
 		"optional = %d\n"
 		"organization = %d\n"
 		"access_mode = %d\n"
-		"lock_mode = %lld\n"
+		"lock_mode = %d\n"
 		"fd_share_mode = %d\n"
 		"special = %d\n"
 		"same_clause = %d\n",

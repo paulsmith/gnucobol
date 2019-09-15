@@ -8529,7 +8529,7 @@ output_file_initialization (struct cb_file *f)
 		     f->organization);
 	output_line ("%s%s->access_mode = %d;", CB_PREFIX_FILE, f->cname,
 		     f->access_mode);
-	output_line ("%s%s->lock_mode = " CB_FMT_LLD ";", CB_PREFIX_FILE, f->cname,
+	output_line ("%s%s->lock_mode = %d;", CB_PREFIX_FILE, f->cname,
 		     f->lock_mode);
 	output_line ("%s%s->open_mode = 0;", CB_PREFIX_FILE, f->cname);
 	output_line ("%s%s->flag_optional = %d;", CB_PREFIX_FILE, f->cname,
