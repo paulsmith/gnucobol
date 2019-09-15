@@ -595,12 +595,12 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #define COB_ALIGN_8 __attribute__((aligned (8)))
 #elif defined(__GNUC__) || defined(__linux__) || defined (__PPC__)
 #define COB_ALIGN_8 __attribute__((aligned (8)))
-#elif defined(__hpux)
+#elif defined(__hpux) || defined(_HPUX_SOURCE) || defined(__LP64__)
 #define COB_ALIGN_8 
 #define COB_ALIGN_UNKNOWN
-#elif defined(_HPUX_SOURCE) || defined(__LP64__)
-#define COB_ALIGN_8
-#define COB_ALIGN_UNKNOWN
+#ifdef COB_ALLOW_UNALIGNED 
+#undef COB_ALLOW_UNALIGNED 
+#endif
 #elif defined(__SUNPRO_C)
 /* Insert #pragma align 8 (varname) */
 #define COB_ALIGN_PRAGMA_8
