@@ -532,7 +532,7 @@ AT_CHECK([$COBCRUN -M ./mainer called "first argument" "second" "third"], [0],
 ], [])
 
 # additional test with environment configuration settings removed:
-AT_CHECK([unset COB_PRE_LOAD COB_LIBRARY_PATH && $COBCRUN -M ./mainer called "first argument" "second" "third"], [0],
+AT_CHECK([unset COB_PRE_LOAD COB_LIBRARY_PATH; $COBCRUN -M ./mainer called "first argument" "second" "third"], [0],
 [first argument second third:second
 ], [])
 

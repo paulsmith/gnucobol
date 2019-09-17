@@ -745,7 +745,7 @@ AT_CLEANUP
 AT_SETUP([runtime configuration: strings and environment])
 AT_KEYWORDS([configuration environment variable])
 
-AT_CHECK([unset greet name && \
+AT_CHECK([unset greet name; \
 TESTME="this is a test" COB_EXIT_MSG='${greet:Bye} ${name:-user}, ${TESTME}' $COBCRUN --runtime-conf | \
 grep "COB_EXIT_MSG" | grep "Bye user, this is a test"], [0], ignore, [])
 AT_CHECK([$COBCRUN --runtime-conf | \

@@ -4655,7 +4655,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_MODULE fexists_signed.c], [0], , [])
 AT_CHECK([$COMPILE prog.cob], [0], , [])
-AT_CHECK([unset COB_FILE_PATH && ./prog], [0])
+AT_CHECK([unset COB_FILE_PATH; ./prog], [0])
 
 AT_CLEANUP
 
