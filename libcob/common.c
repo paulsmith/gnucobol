@@ -186,6 +186,13 @@
 #elif	defined(__TINYC__)
 #define GC_C_VERSION_PRF	"(Tiny C) "
 #define GC_C_VERSION	CB_XSTRINGIFY(__TINYC__)
+#elif  defined(__hpux) || defined(_HPUX_SOURCE)
+#if  defined(__ia64)
+#define GC_C_VERSION_PRF       "(HPUX IA64) "
+#else
+#define GC_C_VERSION_PRF       "(HPUX PA-RISC) "
+#endif
+#define GC_C_VERSION   " C"  
 #else
 #define GC_C_VERSION_PRF	""
 #define GC_C_VERSION	_("unknown")
