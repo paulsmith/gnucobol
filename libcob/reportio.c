@@ -156,12 +156,10 @@ free_control_fields (cob_report *r)
 		if(rc->val) {
 			cob_field_free(rc->val);
 			rc->val = NULL;
-			printf("DBG free val cleaned\n");
 		}
 		if(rc->sf) {
 			cob_field_free(rc->sf);
 			rc->sf = NULL;
-			printf("DBG free sf cleaned\n");
 		}
 		rc->has_heading = FALSE;
 		rc->has_footing = FALSE;
@@ -177,7 +175,6 @@ free_control_fields (cob_report *r)
 	for(k=0; k < MAX_ACTIVE_REPORTS; k++) {
 		if (active_reports[k] == r) {
 			active_reports[k] = NULL;
-			printf("DBG Table cleaned\n");
 		}
 	}
 }
@@ -1280,7 +1277,6 @@ cob_exit_reportio()
 	for(k=0; k < MAX_ACTIVE_REPORTS; k++) {
 		if(active_reports[k] != NULL) {
 			free_control_fields (active_reports[k]);
-			printf("DBG Clean up in exit\n");
 		}
 	}
 }
@@ -1358,7 +1354,6 @@ cob_report_initiate(cob_report *r)
 				break;
 			if (active_reports[k] == NULL) {
 				active_reports[k] = r;
-			printf("DBG Table for exit\n");
 				break;
 			}
 		}
