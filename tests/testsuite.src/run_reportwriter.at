@@ -1641,8 +1641,8 @@ AT_DATA([prog.cob], [
                03  COLUMN 27   PIC X(41) VALUE
                    'C U S T O M E R  C H A R G E  R E P O R T'.
                03  COLUMN 90   PIC X(04) VALUE 'PAGE'.
-               03  COLUMN 95   PIC ZZZZ9 SOURCE PAGE-COUNTER.
-           02  LINE PLUS 2.
+               03  COLUMN +1   PIC ZZZZ9 SOURCE PAGE-COUNTER.
+           02  LINE +2.
                03  COLUMN 01   PIC X(09) VALUE 'CUST. NO.'.
                03  COLUMN 15   PIC X(10) VALUE 'CUST. NAME'.
                03  COLUMN 51   PIC X(09) VALUE 'ITEM COST'.

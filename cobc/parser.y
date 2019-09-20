@@ -7947,6 +7947,9 @@ line_clause_option:
 | _plus integer_or_zero
   {
 	current_field->report_line = cb_get_int ($2);
+	if ((CB_LITERAL_P($2) && CB_LITERAL ($2)->sign > 0)) {
+		current_field->report_flag |= COB_REPORT_LINE_PLUS;
+	}
 	if ($1) {
 		current_field->report_flag |= COB_REPORT_LINE_PLUS;
 		if (current_field->report_line == 0) {
@@ -8030,6 +8033,14 @@ column_integer:
   {
 	int colnum;
 	colnum = cb_get_int ($1);
+	if (CB_LITERAL_P($1) && CB_LITERAL ($1)->sign > 0) {
+		if(current_field->parent
+		&& current_field->parent->children == current_field) {
+			cb_warning (COBC_WARN_FILLER,_("PLUS is ignored on first field of line"));
+		} else {
+			current_field->report_flag |= COB_REPORT_COLUMN_PLUS;
+		}
+	}
 	if (colnum < 0) {
 		/* already handled by integer check */
 	} else if (colnum == 0) {
