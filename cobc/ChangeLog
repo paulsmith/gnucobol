@@ -1,4 +1,9 @@
 
+2019-09-20  Ron Norman <rjn@inglenet.com>
+
+	* parser.y: Fixed 'integer' to allow signed values in report
+	           for example  COLUMN +2 vs COLUMN 2
+
 2019-09-15  Ron Norman <rjn@inglenet.com>
 
 	* typeck.c: Emit ADD/SUBTRACT shortcut for COMP-5 only 
