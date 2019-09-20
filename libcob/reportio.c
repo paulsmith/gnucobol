@@ -63,6 +63,8 @@ static const cob_field_attr	const_alpha_attr =
 				{COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL};
 static const cob_field_attr	const_num_attr =
 				{COB_TYPE_NUMERIC, 0, 0, 0, NULL};
+#define MAX_ACTIVE_REPORTS 10
+static cob_report *active_reports[MAX_ACTIVE_REPORTS];
 /*
  * Move "String" to 'dst' field
  */
@@ -138,6 +140,46 @@ cob_field_free (cob_field *f)
 		cob_free((void*)f->data);
 	cob_free((void*)f);
 	return ;
+}
+
+/*
+ * Free control temp areas
+ */
+static void
+free_control_fields (cob_report *r)
+{
+	cob_report_control	*rc;
+	cob_report_control_ref	*rr;
+	int		k;
+
+	for(rc = r->controls; rc; rc = rc->next) {
+		if(rc->val) {
+			cob_field_free(rc->val);
+			rc->val = NULL;
+			printf("DBG free val cleaned\n");
+		}
+		if(rc->sf) {
+			cob_field_free(rc->sf);
+			rc->sf = NULL;
+			printf("DBG free sf cleaned\n");
+		}
+		rc->has_heading = FALSE;
+		rc->has_footing = FALSE;
+		for(rr = rc->control_ref; rr; rr = rr->next) {
+			if (rr->ref_line->flags & COB_REPORT_CONTROL_HEADING
+			 || rr->ref_line->flags & COB_REPORT_CONTROL_HEADING_FINAL)
+				rc->has_heading = TRUE;
+			if (rr->ref_line->flags & COB_REPORT_CONTROL_FOOTING
+			 || rr->ref_line->flags & COB_REPORT_CONTROL_FOOTING_FINAL)
+				rc->has_footing = TRUE;
+		}
+	}
+	for(k=0; k < MAX_ACTIVE_REPORTS; k++) {
+		if (active_reports[k] == r) {
+			active_reports[k] = NULL;
+			printf("DBG Table cleaned\n");
+		}
+	}
 }
 
 /*
@@ -1221,8 +1263,11 @@ zero_all_counters(cob_report *r, int	flag, cob_report_line *l)
 void
 cob_init_reportio(cob_global *gptr, cob_settings *sptr)
 {
+	int		k;
 	cobglobptr = gptr;
 	cobsetptr  = sptr;
+	for(k=0; k < MAX_ACTIVE_REPORTS; k++)
+		active_reports[k] = NULL;
 }
 
 /*
@@ -1231,6 +1276,13 @@ cob_init_reportio(cob_global *gptr, cob_settings *sptr)
 void
 cob_exit_reportio()
 {
+	int		k;
+	for(k=0; k < MAX_ACTIVE_REPORTS; k++) {
+		if(active_reports[k] != NULL) {
+			free_control_fields (active_reports[k]);
+			printf("DBG Clean up in exit\n");
+		}
+	}
 }
 
 /*
@@ -1242,6 +1294,7 @@ cob_report_initiate(cob_report *r)
 	cob_report_control	*rc;
 	cob_report_control_ref	*rr;
 	cob_report_sum_ctr	*sc;
+	int		k;
 
 	reportInitialize();
 	if(r->initiate_done) {
@@ -1300,6 +1353,15 @@ cob_report_initiate(cob_report *r)
 		}
 		rc->val = cob_field_dup(rc->f,0);
 		rc->sf  = cob_field_dup(rc->f,0);
+		for(k=0; k < MAX_ACTIVE_REPORTS; k++) {
+			if (active_reports[k] == r)
+				break;
+			if (active_reports[k] == NULL) {
+				active_reports[k] = r;
+			printf("DBG Table for exit\n");
+				break;
+			}
+		}
 		rc->has_heading = FALSE;
 		rc->has_footing = FALSE;
 		for(rr = rc->control_ref; rr; rr = rr->next) {
@@ -1454,31 +1516,7 @@ PrintReportFooting:
 		r->in_report_footing = FALSE;
 	}
 
-	/*
-	 * Free control temp areas
-	 */
-	for(rc = r->controls; rc; rc = rc->next) {
-		if(rc->val) {
-			cob_field_free(rc->val);
-			rc->val = NULL;
-		}
-		if(rc->sf) {
-			cob_field_free(rc->sf);
-			rc->sf = NULL;
-		}
-		rc->has_heading = FALSE;
-		rc->has_footing = FALSE;
-		for(rr = rc->control_ref; rr; rr = rr->next) {
-			if(rr->ref_line->flags & COB_REPORT_CONTROL_HEADING)
-				rc->has_heading = TRUE;
-			if(rr->ref_line->flags & COB_REPORT_CONTROL_HEADING_FINAL)
-				rc->has_heading = TRUE;
-			if(rr->ref_line->flags & COB_REPORT_CONTROL_FOOTING)
-				rc->has_footing = TRUE;
-			if(rr->ref_line->flags & COB_REPORT_CONTROL_FOOTING_FINAL)
-				rc->has_footing = TRUE;
-		}
-	}
+	free_control_fields (r);
 	r->initiate_done = FALSE;
 	return 0;
 }

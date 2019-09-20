@@ -1,4 +1,7 @@
 
+2019-09-20  Ron Norman <rjn@inglenet.com>
+	* reportio.c: Table up report for cleanup in cob_exit_reportio
+
 2019-09-15  Ron Norman <rjn@inglenet.com>
 
 	* common.h: For HPUX set COB_ALLOW_UNALIGNED as undefined
