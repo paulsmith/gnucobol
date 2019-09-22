@@ -9821,6 +9821,7 @@ output_field_display (struct cb_field *f, int offset, int idx)
 			if (field_subscript[i] < 0) {
 				output (", i_%d, ",-field_subscript[i]);
 				if (cb_flag_odoslide
+				 && p
 				 && p->depending) {
 					output_size (cb_build_field_reference (p, NULL));
 				} else {
@@ -9829,7 +9830,8 @@ output_field_display (struct cb_field *f, int offset, int idx)
 			} else {
 				output (", %d, 0",field_subscript[i]);
 			}
-			p = p->parent;
+			if (p)
+				p = p->parent;
 		}
 	}
 	output (");\n");

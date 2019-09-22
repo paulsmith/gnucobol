@@ -1,6 +1,10 @@
 
 2019-09-22  Ron Norman <rjn@inglenet.com>
 
+	* codegen.c: Fix logic error in output_field_display
+
+2019-09-22  Ron Norman <rjn@inglenet.com>
+
 	* parser.y: Fixed 'integer' to allow signed values in report
 	           for example  COLUMN +2 vs COLUMN 2
 		   when -std=xxxx has report-column-plus: yes
