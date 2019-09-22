@@ -63,10 +63,10 @@ CB_FLAG_RQ (cb_default_byte, 1, "defaultbyte", -1, 6,
 	  "                        * decimal 0..255 or any quoted character\n"
 	  "                        * default: initialize to picture"))
 
-CB_FLAG_RQ (cb_max_errors, 1, "max-errors", 100, 7,
+CB_FLAG_RQ (cb_max_errors, 1, "max-errors", 128, 7,
 	_("  -fmax-errors=<number>\tmaximum number of errors to report before\n"
 	  "                        compilation is aborted\n"
-	  "                        * default: 100"))
+	  "                        * default: 128"))
 
 CB_FLAG_RQ (cb_def_dump, 1, "dump", -1, 8,
 	_("  -fdump=<scope>        dump data fields on abort, <scope> may be\n"

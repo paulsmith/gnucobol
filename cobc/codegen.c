@@ -8826,8 +8826,9 @@ output_report_data (struct cb_field *p)
 		|| (p->report_flag & COB_REPORT_PAGE_FOOTING)) {
 			prev_col_pos = report_col_pos = 1;
 		} else {
-			if((p->report_flag & COB_REPORT_COLUMN_PLUS)) {
-				p->report_column = report_col_pos + p->report_column;
+			if((p->report_flag & COB_REPORT_COLUMN_PLUS)
+			 && p->report_column > 0) {
+				p->report_column = report_col_pos + p->report_column - 1;
 				/*p->report_flag &= ~COB_REPORT_COLUMN_PLUS;*/
 			} else if(p->report_column <= 0) {	/* No COLUMN was given */
 				p->report_column = report_col_pos;

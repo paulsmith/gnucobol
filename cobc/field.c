@@ -2648,13 +2648,6 @@ unbounded_again:
 		}
 	}
 
-	if (f->storage == CB_STORAGE_REPORT) {
-		if (f->occurs_max > 1
-		 && (f->report_flag & COB_REPORT_COLUMN_PLUS)
-		 && f->step_count == 0) {
-			f->step_count = f->report_column + f->size;
-		}
-	}
 	return f->size;
 }
 

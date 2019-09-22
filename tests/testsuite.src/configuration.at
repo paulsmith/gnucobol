@@ -444,6 +444,7 @@ test.conf: missing definitions:
 	no definition of 'console-is-crt'
 	no definition of 'no-echo-means-secure'
 	no definition of 'line-col-zero-default'
+	no definition of 'report-column-plus'
 	no definition of 'display-special-fig-consts'
 	no definition of 'binary-comp-1'
 	no definition of 'move-non-numeric-lit-to-numeric-is-zero'

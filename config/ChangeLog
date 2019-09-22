@@ -1,4 +1,8 @@
 
+2019-09-22  Ron Norman <rjn@inglenet.com>
+
+	* general: added option report-column-plus
+
 2019-08-11 Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: added option hp-octal-literals

@@ -154,6 +154,7 @@ AT_DATA([prog.cob], [
        01 rp-detail TYPE DETAIL.
           02 LINE PLUS 1.
              03 COLUMN 03   PIC X(06) VALUE 'SAMPLE'.
+             03 COLUMN +9   PIC X(06) VALUE 'REPORT'.
 
        PROCEDURE DIVISION.
            OPEN OUTPUT out-file.
@@ -164,10 +165,11 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [1], [],
 [prog.cob:18: error: invalid COLUMN integer; must be > 0
 prog.cob:24: error: unsigned integer value expected
 prog.cob:25: error: unsigned integer value expected
+prog.cob:30: error: unsigned integer value expected
 ])
 
 AT_CLEANUP

@@ -148,6 +148,9 @@ CB_CONFIG_BOOLEAN (cb_no_echo_means_secure, "no-echo-means-secure",
 CB_CONFIG_BOOLEAN (cb_line_col_zero_default, "line-col-zero-default",
 	_("assume the first item in a field DISPLAY goes at LINE 0 COL 0, not LINE 1 COL 1"))
 
+CB_CONFIG_BOOLEAN (cb_report_column_plus, "report-column-plus",
+	_("in a REPORT COLUMN may have PLUS num, + num, or +num"))
+
 CB_CONFIG_BOOLEAN (cb_display_special_fig_consts, "display-special-fig-consts",
 	_("special behaviour of DISPLAY SPACE/ALL X'01'/ALL X'02'/ALL X'07'"))
 

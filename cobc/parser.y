@@ -17188,7 +17188,8 @@ integer:
 	 || !CB_LITERAL_P($1)
 	 || CB_LITERAL ($1)->scale
 	 || CB_LITERAL ($1)->sign < 0 
-	 || (current_report == NULL && CB_LITERAL ($1)->sign)) {
+	 || (CB_LITERAL ($1)->sign && current_report && !cb_report_column_plus)
+	 || (CB_LITERAL ($1)->sign && current_report == NULL)) {
 		cb_error (_("unsigned integer value expected"));
 		$$ = cb_build_numeric_literal(-1, "1", 0);
 	} else {
