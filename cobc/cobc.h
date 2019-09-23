@@ -42,6 +42,60 @@
 #define N_(s)		s
 #endif
 
+/* TODO: recheck these options (got into libcob/common.h by OC 2.0, moved to cobc.h in 3.1, should be moved to config.h) */
+#if defined (COB_NON_ALIGNED)	/* allow explicit check of generated code and to skip this part in checks of undefined behavior) */
+	/* Some DEC Alphas can only load shorts at 4-byte aligned addresses */
+	#ifdef	__alpha
+		#define COB_SHORT_BORK
+	#endif
+	#define __unaligned
+#elif !defined(__i386__) && !defined(__x86_64__) && !defined(__powerpc__) && !defined(__powerpc64__) && !defined(__ppc__) && !defined(__amd64__)
+	#define	COB_NON_ALIGNED
+	/* Some DEC Alphas can only load shorts at 4-byte aligned addresses */
+	#ifdef	__alpha
+		#define COB_SHORT_BORK
+	#endif
+	#if defined(_MSC_VER)
+		#define COB_ALLOW_UNALIGNED
+	#else
+		#define __unaligned
+	#endif
+#else
+	#define COB_ALLOW_UNALIGNED
+	#define __unaligned
+#endif
+
+/* COB_ALIGN_UNKNOWN: We've not figured out a way to force alignment */
+/* COB_ALIGN_PRAGMA_8: Insert ahead of each variable declaration */
+/* COB_ALIGN_8: Insert as part of variable declaration to align on 8 byte boundary */
+#if defined(__MACH__)
+#define COB_ALIGN_8 __attribute__((aligned (8)))
+#elif defined(__GNUC__) || defined(__linux__) || defined (__PPC__)
+#define COB_ALIGN_8 __attribute__((aligned (8)))
+#elif defined(__hpux) || defined(_HPUX_SOURCE) || defined(__LP64__)
+#define COB_ALIGN_8 
+#define COB_ALIGN_UNKNOWN
+#ifdef COB_ALLOW_UNALIGNED 
+#undef COB_ALLOW_UNALIGNED 
+#endif
+#elif defined(__SUNPRO_C)
+/* Insert #pragma align 8 (varname) */
+#define COB_ALIGN_PRAGMA_8
+#elif defined(__MACH__)
+#define COB_ALIGN_8 __attribute__((aligned (8)))
+#elif defined(_WIN32)
+#define COB_ALIGN_8
+#define COB_ALIGN_UNKNOWN
+#elif defined(_WIN64)
+#define COB_ALIGN_8
+#define COB_ALIGN_UNKNOWN
+#elif defined(__arm__)
+#define COB_ALIGN_8 __align(8)
+#else
+#define COB_ALIGN_8
+#define COB_ALIGN_UNKNOWN
+#endif
+
 /* Defines for access() */
 #ifndef	F_OK
 #define	F_OK		0

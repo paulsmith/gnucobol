@@ -1,4 +1,9 @@
 
+2019-09-23  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.h: moved alignment defines from libcob/common.h here
+	* tree.h: removed duplicate redefinition of atol/atoll
+
 2019-09-22  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c: Fix logic error in output_field_display
@@ -13,16 +18,11 @@
 
 2019-09-15  Ron Norman <rjn@inglenet.com>
 
+	* cobc.h: For HPUX set COB_ALLOW_UNALIGNED as undefined
 	* typeck.c: Emit ADD/SUBTRACT shortcut for COMP-5 only 
 	            if COB_ALLOW_UNALIGNED defined
-
-2019-09-15  Ron Norman <rjn@inglenet.com>
-
 	* tree.h: Revert 'lock_mode' back to an 'int'
-	* codegen.c,debug.c: Changes for 'lock_mode' being an 'int'
-
-2019-09-15  Ron Norman <rjn@inglenet.com>
-
+	* codegen.c, debug.c: Changes for 'lock_mode' being an 'int'
 	* cobc.h: Add COB_MEM_SIZE as size of cob_mem_struct rounded up to
 	          multiple of sizeof(long long)
 	* cobc.c: Use COB_MEM_SIZE as size of cob_mem_struct
@@ -30,6 +30,7 @@
 
 2019-09-09  Ron Norman <rjn@inglenet.com>
 
+	* cobc.h: Add defines for COB_ALIGN_8 to set 8 byte boundary alignment
 	* codegen.c: Emit attributes and/or pragma to align 01/77 fields on
 	            8 byte boundary
 
@@ -66,6 +67,11 @@
 	          which are never SYNCed
 	* flag.def : fix help info
 	* help.c : display -fibmcomp info
+
+2019-08-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.h: allow to force aligned pointer access by external
+	  define of COB_NON_ALIGNED
 
 2019-08-17  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -4377,6 +4383,7 @@
 	* codegen.c: added check of recursive CALL for INITIAL programs
 
 2015-03-03  Ron Norman
+
 	* codeoptim.c & typeck.c: fixes for systems which require aligned
 	  data but the C compile does not support __unaligned directive
 	  codegen.c: fix for C compilers (old SUN for one) that do not
