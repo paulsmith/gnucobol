@@ -1628,6 +1628,10 @@ output_standard_includes (struct cb_program *prog)
 	output ("#define  COB_KEYWORD_INLINE %s\n",
 		CB_XSTRINGIFY(COB_KEYWORD_INLINE));
 #endif
+#ifdef	COB_ALIGN_8
+	output ("#define  COB_ALIGN_8 %s\n",
+		CB_XSTRINGIFY(COB_ALIGN_8));
+#endif
 	if (cb_flag_winmain) {
 		output ("#include <windows.h>\n");
 	}
