@@ -61,39 +61,10 @@
 		#define COB_NO_UNALIGNED_ATTRIBUTE
 	#endif
 #else
-	#define COB_ALLOW_UNALIGNED
+	#if !defined(__hpux) && !defined(_HPUX_SOURCE) && !defined(__LP64__)
+		#define COB_ALLOW_UNALIGNED
+	#endif
 	#define COB_NO_UNALIGNED_ATTRIBUTE
-#endif
-
-/* COB_ALIGN_UNKNOWN: We've not figured out a way to force alignment */
-/* COB_ALIGN_PRAGMA_8: Insert ahead of each variable declaration */
-/* COB_ALIGN_8: Insert as part of variable declaration to align on 8 byte boundary */
-#if defined(__MACH__)
-#define COB_ALIGN_8 __attribute__((aligned (8)))
-#elif defined(__GNUC__) || defined(__linux__) || defined (__PPC__)
-#define COB_ALIGN_8 __attribute__((aligned (8)))
-#elif defined(__hpux) || defined(_HPUX_SOURCE) || defined(__LP64__)
-#define COB_ALIGN_8 
-#define COB_ALIGN_UNKNOWN
-#ifdef COB_ALLOW_UNALIGNED 
-#undef COB_ALLOW_UNALIGNED 
-#endif
-#elif defined(__SUNPRO_C)
-/* Insert #pragma align 8 (varname) */
-#define COB_ALIGN_PRAGMA_8
-#elif defined(__MACH__)
-#define COB_ALIGN_8 __attribute__((aligned (8)))
-#elif defined(_WIN32)
-#define COB_ALIGN_8
-#define COB_ALIGN_UNKNOWN
-#elif defined(_WIN64)
-#define COB_ALIGN_8
-#define COB_ALIGN_UNKNOWN
-#elif defined(__arm__)
-#define COB_ALIGN_8 __align(8)
-#else
-#define COB_ALIGN_8
-#define COB_ALIGN_UNKNOWN
 #endif
 
 /* Defines for access() */

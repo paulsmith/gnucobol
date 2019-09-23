@@ -1,9 +1,10 @@
 
 2019-09-23  Simon Sobisch <simonsobisch@gnu.org>
 
-	* cobc.h: moved alignment defines from libcob/common.h here
+	* codegen.c: moved alignment defines from libcob/common.h here
+	* cobc.h: moved alignment exception for hpux from libcob/common.h here
 	* codeoptim.c, cobc.h: generate the actual requested code w/o the attribute
-	  instead of overriding underline attribute in the header
+	  __unaligned instead of overriding the attribute in the header
 	* tree.h: removed duplicate redefinition of atol/atoll
 
 2019-09-22  Ron Norman <rjn@inglenet.com>

@@ -38,8 +38,29 @@
 
 #ifdef	HAVE_ATTRIBUTE_ALIGNED
 #define COB_ALIGN " __attribute__((aligned))"
+#define ALIGN_KNOWN
 #else
-#define COB_ALIGN ""
+/*#if defined(_MSC_VER) || defined(__ORANGEC__)*/
+#if defined(_WIN32)
+#define COB_ALIGN_DECL_8 "__declspec(align(8)) "
+#define ALIGN_KNOWN
+#else
+#define COB_ALIGN_DECL_8 ""
+#endif
+#if defined(__arm__)
+#define COB_ALIGN_ATTR_8 " __align(8)"
+#define ALIGN_KNOWN
+#else
+#define COB_ALIGN_ATTR_8 ""
+#endif
+#if defined(__SUNPRO_C)
+/* Insert #pragma align 8 (varname) */
+#define COB_ALIGN_PRAGMA_8
+#define ALIGN_KNOWN
+#endif
+#endif
+#if !defined(ALIGN_KNOWN) && !defined(COB_ALLOW_UNALIGNED)
+#error System requires data alignment which is unknown
 #endif
 
 #define COB_MAX_SUBSCRIPTS	16
@@ -1628,10 +1649,6 @@ output_standard_includes (struct cb_program *prog)
 	output ("#define  COB_KEYWORD_INLINE %s\n",
 		CB_XSTRINGIFY(COB_KEYWORD_INLINE));
 #endif
-#ifdef	COB_ALIGN_8
-	output ("#define  COB_ALIGN_8 %s\n",
-		CB_XSTRINGIFY(COB_ALIGN_8));
-#endif
 	if (cb_flag_winmain) {
 		output ("#include <windows.h>\n");
 	}
@@ -1919,27 +1936,14 @@ output_local_base_cache (void)
 			output_local ("static int	%s%d;",
 				      CB_PREFIX_BASE, blp->f->id);
 		} else if( !(blp->f->report_flag & COB_REPORT_REF_EMITTED)) {
-#if defined(COB_ALIGN_PRAGMA_8)
-			output_local ("#pragma align 8 (%s%d)\n", CB_PREFIX_BASE, blp->f->id);
-#endif
 #ifdef  HAVE_ATTRIBUTE_ALIGNED
 			output_local ("static cob_u8_t	%s%d[%d]%s;",
 				      CB_PREFIX_BASE, blp->f->id,
 				      blp->f->memory_size, COB_ALIGN);
 #else
-#if !defined(COB_ALLOW_UNALIGNED) && defined(COB_ALIGN_UNKNOWN)
-			cb_warning (warningopt, _("System requires data alignment which is unknown"));
-#endif
-#if !defined(COB_ALLOW_UNALIGNED) && defined(COB_ALIGN_8)
-			output_local ("static cob_u8_t COB_ALIGN_8 %s%d[%d];",
-				      CB_PREFIX_BASE, blp->f->id, blp->f->memory_size);
-#elif defined(COB_ALIGN_8)
-			output_local ("static cob_u8_t COB_ALIGN_8 %s%d[%d];",
-				      CB_PREFIX_BASE, blp->f->id, blp->f->memory_size);
-#else
-			output_local ("static cob_u8_t	%s%d[%d];",
-				      CB_PREFIX_BASE, blp->f->id,blp->f->memory_size);
-#endif
+			output_local ("static %scob_u8_t%s	%s%d[%d];",
+				      COB_ALIGN_DECL_8, COB_ALIGN_ATTR_8, CB_PREFIX_BASE,
+					  blp->f->id, blp->f->memory_size);
 #endif
 		}
 		output_local ("\t/* %s */\n", blp->f->name);
@@ -1977,19 +1981,12 @@ output_nonlocal_base_cache (void)
 				      CB_PREFIX_BASE, blp->f->id,
 				      blp->f->memory_size, COB_ALIGN);
 #else
-#if !defined(COB_ALLOW_UNALIGNED) && defined(COB_ALIGN_UNKNOWN)
-			cb_warning (warningopt, _("System requires data alignment which is unknown"));
-#endif
 #if defined(COB_ALIGN_PRAGMA_8)
 			output_storage ("#pragma align 8 (%s%d)\n", CB_PREFIX_BASE, blp->f->id);
 #endif
-#if !defined(COB_ALLOW_UNALIGNED) && defined(COB_ALIGN_8)
-			output_storage ("static cob_u8_t COB_ALIGN_8 %s%d[%d];",
-				      CB_PREFIX_BASE, blp->f->id, blp->f->memory_size);
-#else
-			output_storage ("static cob_u8_t	%s%d[%d];",
-				      CB_PREFIX_BASE, blp->f->id, blp->f->memory_size);
-#endif
+			output_storage ("static %scob_u8_t%s	%s%d[%d];",
+				      COB_ALIGN_DECL_8, COB_ALIGN_ATTR_8, CB_PREFIX_BASE,
+					  blp->f->id, blp->f->memory_size);
 #endif
 		}
 		output_storage ("\t/* %s */\n", blp->f->name);
