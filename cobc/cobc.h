@@ -48,7 +48,7 @@
 	#ifdef	__alpha
 		#define COB_SHORT_BORK
 	#endif
-	#define __unaligned
+	#define COB_NO_UNALIGNED_ATTRIBUTE
 #elif !defined(__i386__) && !defined(__x86_64__) && !defined(__powerpc__) && !defined(__powerpc64__) && !defined(__ppc__) && !defined(__amd64__)
 	#define	COB_NON_ALIGNED
 	/* Some DEC Alphas can only load shorts at 4-byte aligned addresses */
@@ -58,11 +58,11 @@
 	#if defined(_MSC_VER)
 		#define COB_ALLOW_UNALIGNED
 	#else
-		#define __unaligned
+		#define COB_NO_UNALIGNED_ATTRIBUTE
 	#endif
 #else
 	#define COB_ALLOW_UNALIGNED
-	#define __unaligned
+	#define COB_NO_UNALIGNED_ATTRIBUTE
 #endif
 
 /* COB_ALIGN_UNKNOWN: We've not figured out a way to force alignment */
