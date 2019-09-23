@@ -6881,6 +6881,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Trace feature with EXTFH])
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 AT_KEYWORDS([Trace])
 
 AT_DATA([prog.cob], [
@@ -8301,6 +8302,7 @@ AT_CHECK([gcdiff references traces.txt], [0], [], [])
 AT_CLEANUP
 
 AT_SETUP([Test trace feature])
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 AT_KEYWORDS([Trace])
 
 AT_DATA([prog.cob], [
@@ -10099,6 +10101,7 @@ AT_CHECK([gcdiff reference TEST-OUT], [0], [], [])
 AT_CLEANUP
 
 AT_SETUP([Trace feature with subroutine])
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 AT_KEYWORDS([Trace])
 
 AT_DATA([callsub.cob], [
