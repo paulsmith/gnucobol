@@ -116,16 +116,16 @@ cob_gen_optim (const enum cb_optim val)
 
 	case COB_POINTER_MANIP:
 		output_storage ("static void COB_NOINLINE");
-		output_storage ("cob_pointer_manip (cob_field *f1, cob_field *f2, const unsigned int addsub)");
+		output_storage ("cob_pointer_manip (void *f1, cob_field *f2, const unsigned int addsub)");
 		output_storage ("{");
 		output_storage ("	unsigned char   *tmptr;");
-		output_storage ("	memcpy (&tmptr, f1->data, sizeof(void *));");
+		output_storage ("	memcpy (&tmptr, f1, sizeof(unsigned char *));");
 		output_storage ("	if (addsub) {");
 		output_storage ("		tmptr -= cob_get_int (f2);");
 		output_storage ("	} else {");
 		output_storage ("		tmptr += cob_get_int (f2);");
 		output_storage ("	}");
-		output_storage ("	memcpy (f1->data, &tmptr, sizeof(void *));");
+		output_storage ("	memcpy (f1, &tmptr, sizeof(unsigned char *));");
 		output_storage ("}");
 		return;
 
@@ -255,7 +255,12 @@ cob_gen_optim (const enum cb_optim val)
 		output_storage ("	if (unlikely(n < 0)) {");
 		output_storage ("		return 1;");
 		output_storage ("	}");
+
+#ifdef	COB_ALLOW_UNALIGNED
 		output_storage ("	val = *(unsigned short " UNALIGNED_ATTRIBUTE "*)p;");
+#else
+		output_storage ("	optim_memcpy ((void*)&val,p,sizeof(unsigned short));");
+#endif
 		output_storage ("	return (val < n) ? -1 : (val > n);");
 		output_storage ("}");
 		return;
@@ -266,7 +271,11 @@ cob_gen_optim (const enum cb_optim val)
 		output_storage ("{");
 		output_storage ("	short	val;");
 
+#ifdef	COB_ALLOW_UNALIGNED
 		output_storage ("	val = *(short " UNALIGNED_ATTRIBUTE "*)p;");
+#else
+		output_storage ("	optim_memcpy ((void*)&val,p,sizeof(short));");
+#endif
 		output_storage ("	return (val < n) ? -1 : (val > n);");
 		output_storage ("}");
 		return;
@@ -280,7 +289,12 @@ cob_gen_optim (const enum cb_optim val)
 		output_storage ("	if (unlikely(n < 0)) {");
 		output_storage ("		return 1;");
 		output_storage ("	}");
+
+#ifdef	COB_ALLOW_UNALIGNED
 		output_storage ("	val = *(unsigned int " UNALIGNED_ATTRIBUTE "*)p;");
+#else
+		output_storage ("	optim_memcpy ((void*)&val,p,sizeof(unsigned int));");
+#endif
 		output_storage ("	return (val < n) ? -1 : (val > n);");
 		output_storage ("}");
 		return;
@@ -291,7 +305,11 @@ cob_gen_optim (const enum cb_optim val)
 		output_storage ("{");
 		output_storage ("	int	val;");
 
+#ifdef	COB_ALLOW_UNALIGNED
 		output_storage ("	val = *(int " UNALIGNED_ATTRIBUTE "*)p;");
+#else
+		output_storage ("	optim_memcpy ((void*)&val,p,sizeof(int));");
+#endif
 		output_storage ("	return (val < n) ? -1 : (val > n);");
 		output_storage ("}");
 		return;
@@ -302,7 +320,11 @@ cob_gen_optim (const enum cb_optim val)
 		output_storage ("{");
 		output_storage ("	cob_u64_t	val;");
 
+#ifdef	COB_ALLOW_UNALIGNED
 		output_storage ("	val = *(cob_u64_t " UNALIGNED_ATTRIBUTE "*)p;");
+#else
+		output_storage ("	optim_memcpy ((void*)&val,p,sizeof(cob_u64_t));");
+#endif
 		output_storage ("	return (val < n) ? -1 : (val > n);");
 		output_storage ("}");
 		return;
@@ -313,7 +335,11 @@ cob_gen_optim (const enum cb_optim val)
 		output_storage ("{");
 		output_storage ("	cob_s64_t	val;");
 
+#ifdef	COB_ALLOW_UNALIGNED
 		output_storage ("	val = *(cob_s64_t " UNALIGNED_ATTRIBUTE "*)p;");
+#else
+		output_storage ("	optim_memcpy((void*)&val,p,sizeof(cob_s64_t));");
+#endif
 		output_storage ("	return (val < n) ? -1 : (val > n);");
 		output_storage ("}");
 		return;
