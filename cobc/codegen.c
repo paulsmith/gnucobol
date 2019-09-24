@@ -1941,6 +1941,9 @@ output_local_base_cache (void)
 				      CB_PREFIX_BASE, blp->f->id,
 				      blp->f->memory_size, COB_ALIGN);
 #else
+#if defined(COB_ALIGN_PRAGMA_8)
+			output_local ("#pragma align 8 (%s%d)\n", CB_PREFIX_BASE, blp->f->id);
+#endif
 			output_local ("static %scob_u8_t%s	%s%d[%d];",
 				      COB_ALIGN_DECL_8, COB_ALIGN_ATTR_8, CB_PREFIX_BASE,
 					  blp->f->id, blp->f->memory_size);
