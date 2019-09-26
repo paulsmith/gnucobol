@@ -168,6 +168,7 @@ static	vb_rtd_t *vbisam_rtd = NULL;
 
 #endif
 
+#include "sysdefines.h"
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
 #include "libcob.h"

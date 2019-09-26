@@ -22,8 +22,6 @@
 #ifndef COB_COMMON_H
 #define COB_COMMON_H
 
-#include "../libcob/sysdefines.h"
-
 /* Only define cob_decimal if we have the necessary mpz_t from gmp.h/mpir.h
    (or can self-define it from mp.h) */
 #ifndef __GMP_H__

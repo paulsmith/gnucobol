@@ -121,6 +121,8 @@
 #endif
 /* end of library headers */
 
+#include "sysdefines.h"
+
 #include "lib/gettext.h"
 
 /* Force symbol exports */
