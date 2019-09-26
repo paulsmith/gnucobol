@@ -2007,6 +2007,13 @@ cb_build_identifier (cb_tree x, const int subchk)
 	} else {
 		pseudosize = f->size;
 	}
+	if (cb_reference_bounds_check == CB_WARNING
+	 || cb_reference_bounds_check == CB_OK) {
+		p = cb_field_founder (f); 
+		if (p != f) {
+			pseudosize = p->size - f->offset;	/* Remaining size of group item */
+		}
+	}
 	if (r->offset) {
 		/* Compile-time check */
 		if (CB_LITERAL_P (r->offset)
@@ -2014,34 +2021,58 @@ cb_build_identifier (cb_tree x, const int subchk)
 			offset = cb_get_int (r->offset);
 			if (f->flag_any_length) {
 				if (offset < 1) {
-					cb_error_x (x, _("offset of '%s' out of bounds: %d"), name, offset);
+					cb_error_x (x, _("offset must be greater than zero"));
 				} else if (r->length && CB_LITERAL_P (r->length)) {
 					length = cb_get_int (r->length);
 					/* FIXME: needs to be supported for zero length literals */
 					if (length < 1) {
-						cb_error_x (x, _("length of '%s' out of bounds: %d"),
-							    name, length);
+						cb_error_x (x, _("length must be greater than zero"));
 					}
 				}
 			} else {
-				if (offset < 1 || offset > pseudosize) {
-					cb_error_x (x, _("offset of '%s' out of bounds: %d"), name, offset);
-				} else if (r->length && CB_LITERAL_P (r->length)) {
+				if (offset < 1) {
+					cb_error_x (x, _("offset must be greater than zero"));
+				} else if (offset > pseudosize) {
+					if (cb_reference_bounds_check == CB_WARNING) {
+						cb_warning_x (warningopt, x, _("offset of '%s' out of bounds: %d"), name, offset);
+					} else
+					if (cb_reference_bounds_check == CB_ERROR) {
+						cb_error_x (x, _("offset of '%s' out of bounds: %d"), name, offset);
+					}
+				} 
+				if (r->length && CB_LITERAL_P (r->length)) {
 					length = cb_get_int (r->length);
 					/* FIXME: needs to be supported for zero length literals */
-					if (length < 1 || length > pseudosize - offset + 1) {
-						cb_error_x (x, _("length of '%s' out of bounds: %d"),
-							    name, length);
+					if (length < 1) {
+						cb_error_x (x, _("length must be greater than zero"));
+					} else if ((length > pseudosize - offset + 1)
+						&& (offset <= pseudosize && offset >= 1) ) {
+						if (cb_reference_bounds_check == CB_WARNING) {
+							cb_warning_x (warningopt, x, _("length of '%s' out of bounds: %d"),
+								    name, length);
+						} else
+						if (cb_reference_bounds_check == CB_ERROR) {
+							cb_error_x (x, _("length of '%s' out of bounds: %d"),
+								    name, length);
+						}
 					}
 				}
 			}
 		} else if (r->length && CB_LITERAL_P (r->length)
-	 	 		&& !cb_is_field_unbounded (f)) {
+ 	 		&& !cb_is_field_unbounded (f)) {
 			length = cb_get_int (r->length);
 			/* FIXME: needs to be supported for zero length literals */
-			if (length < 1 || length > pseudosize) {
-				cb_error_x (x, _("length of '%s' out of bounds: %d"),
-					    name, length);
+			if (length < 1) {
+				cb_error_x (x, _("length must be greater than zero"));
+			} else if (length > pseudosize) {
+				if (cb_reference_bounds_check == CB_WARNING) {
+					cb_warning_x (warningopt, x, _("length of '%s' out of bounds: %d"),
+						    name, length);
+				} else
+				if (cb_reference_bounds_check == CB_ERROR) {
+					cb_error_x (x, _("length of '%s' out of bounds: %d"),
+						    name, length);
+				}
 			}
 		}
 

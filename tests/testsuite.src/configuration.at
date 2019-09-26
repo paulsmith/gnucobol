@@ -492,6 +492,7 @@ test.conf: missing definitions:
 	no definition of 'constant-01'
 	no definition of 'perform-varying-without-by'
 	no definition of 'reference-out-of-declaratives'
+	no definition of 'reference-bounds-check'
 	no definition of 'program-prototypes'
 	no definition of 'call-convention-mnemonic'
 	no definition of 'call-convention-linkage'

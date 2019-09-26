@@ -5417,28 +5417,28 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:15: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob:17: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:17: error (ignored): offset must be greater than zero
 prog.cob:22: warning: expression '2' EQUALS '3' is always FALSE
 prog.cob:25: warning: expression '1' EQUALS '1' is always TRUE
-prog.cob:29: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:29: error (ignored): offset must be greater than zero
 prog.cob:30: warning: expression '1' EQUALS '1' is always TRUE
 prog.cob:35: warning: expression '1' EQUALS '1' is always TRUE
 prog.cob:36: warning: expression '2' EQUALS '1' is always FALSE
-prog.cob:38: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:38: error (ignored): offset must be greater than zero
 prog.cob:41: warning: expression '1' EQUALS '3' is always FALSE
 prog.cob:41: warning: PERFORM FOREVER since UNTIL is always FALSE
 prog.cob:45: warning: expression '1' EQUALS '1' is always TRUE
 prog.cob:45: warning: PERFORM NEVER since UNTIL is always TRUE
-prog.cob:47: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:47: error (ignored): offset must be greater than zero
 prog.cob:50: warning: expression '1' EQUALS '3' is always FALSE
 prog.cob:50: warning: PERFORM FOREVER since UNTIL is always FALSE
 prog.cob:54: warning: expression '1' EQUALS '1' is always TRUE
 prog.cob:54: warning: PERFORM ONCE since UNTIL is always TRUE
 prog.cob:59: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob:61: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:61: error (ignored): offset must be greater than zero
 prog.cob:62: warning: expression '115' GREATER THAN '16' is always TRUE
 prog.cob:71: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob:73: error: offset of 'var' out of bounds: -99
+prog.cob:73: error: offset must be greater than zero
 prog.cob:74: warning: expression '115' GREATER THAN '16' is always TRUE
 prog.cob:82: warning: expression '15' EQUALS '115' is always FALSE
 prog.cob:85: warning: expression '115' EQUALS '15' is always FALSE
@@ -5540,7 +5540,7 @@ AT_DATA([prog.cob], [
 #       and therefore cannot be raised earlier
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob:11: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob:13: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:13: error (ignored): offset must be greater than zero
 prog.cob:16: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob:17: error (ignored): 'notdefined' is not defined
 prog.cob:20: warning: expression '115' LESS THAN '16' is always FALSE
@@ -5578,7 +5578,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:11: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob:13: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:13: error (ignored): offset must be greater than zero
 prog.cob:14: error: syntax error, unexpected IF
 ])
 
@@ -5664,7 +5664,7 @@ AT_CHECK([$COMPILE_ONLY -C -fno-remove-unreachable prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN-10':
 prog.cob:17: warning: expression '115' GREATER THAN '16' is always TRUE
 prog.cob:17: warning: expression '115' LESS THAN '200' is always TRUE
-prog.cob:20: error: offset of 'VAR' out of bounds: -99
+prog.cob:20: error: offset must be greater than zero
 prog.cob:23: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob:35: warning: expression '3' EQUALS '7' is always FALSE
 prog.cob:60: warning: expression '115' LESS THAN '32' is always FALSE
@@ -5675,7 +5675,7 @@ AT_CHECK([$COMPILE_ONLY -C prog.cob], [0], [],
 [prog.cob: in paragraph 'MAIN-10':
 prog.cob:17: warning: expression '115' GREATER THAN '16' is always TRUE
 prog.cob:17: warning: expression '115' LESS THAN '200' is always TRUE
-prog.cob:20: error (ignored): offset of 'VAR' out of bounds: -99
+prog.cob:20: error (ignored): offset must be greater than zero
 prog.cob:23: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob:35: warning: expression '3' EQUALS '7' is always FALSE
 prog.cob:60: warning: expression '115' LESS THAN '32' is always FALSE

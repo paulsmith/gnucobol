@@ -294,6 +294,9 @@ CB_CONFIG_SUPPORT (cb_perform_varying_without_by, "perform-varying-without-by",
 CB_CONFIG_SUPPORT (cb_reference_out_of_declaratives, "reference-out-of-declaratives",
 	_("references to sections not in DECLARATIVES from within DECLARATIVES"))
 
+CB_CONFIG_SUPPORT (cb_reference_bounds_check, "reference-bounds-check",
+	_("reference modification strict bounds check"))
+
 CB_CONFIG_SUPPORT (cb_program_prototypes, "program-prototypes",
 	_("CALL/CANCEL with program-prototype-name"))
 

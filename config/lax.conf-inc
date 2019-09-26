@@ -82,6 +82,7 @@ move-figurative-quote-to-numeric:	+archaic
 multiple-file-tape-clause:		+obsolete
 next-sentence-phrase:			+archaic
 odo-without-to:				+warning
+reference-bounds-check:			+warning
 padding-character-clause:		+obsolete
 section-segments:			+ignore
 stop-literal-statement:			+obsolete

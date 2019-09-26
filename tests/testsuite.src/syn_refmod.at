@@ -78,13 +78,13 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:9: error: offset of 'X' out of bounds: 0
-prog.cob:11: error: offset of 'X' out of bounds: 0
+AT_CHECK([$COMPILE_ONLY -std=cobol2002 prog.cob], [1], [],
+[prog.cob:9: error: offset must be greater than zero
+prog.cob:11: error: offset must be greater than zero
 prog.cob:13: error: offset of 'X' out of bounds: 5
 prog.cob:15: error: offset of 'X' out of bounds: 5
-prog.cob:17: error: length of 'X' out of bounds: 0
-prog.cob:19: error: length of 'X' out of bounds: 0
+prog.cob:17: error: length must be greater than zero
+prog.cob:19: error: length must be greater than zero
 prog.cob:21: error: length of 'X' out of bounds: 5
 prog.cob:23: error: length of 'X' out of bounds: 5
 ])
@@ -118,9 +118,9 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -Wno-constant-expr prog.cob], [0], [],
-[prog.cob:10: error (ignored): offset of 'X' out of bounds: 0
-prog.cob:12: error (ignored): length of 'X' out of bounds: 0
+AT_CHECK([$COMPILE_ONLY -std=default -freference-bounds-check=error -Wno-constant-expr prog.cob], [0], [],
+[prog.cob:10: error (ignored): offset must be greater than zero
+prog.cob:12: error (ignored): length must be greater than zero
 prog.cob:14: error (ignored): offset of 'X' out of bounds: 5
 prog.cob:16: error (ignored): length of 'X' out of bounds: 5
 prog.cob:19: error (ignored): CONVERTING operands differ in size
@@ -129,3 +129,72 @@ AT_CHECK([$COMPILE_ONLY -Wno-constant-expr  -fno-constant-folding prog.cob],
 [0], [], [])
 
 AT_CLEANUP
+
+AT_SETUP([Reference Bounds check])
+AT_KEYWORDS([REFMOD])
+
+AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TSTLEN PIC 99 VALUE 10.
+       01  TSTBIN PIC 99 COMP VALUE 10.
+       01  TSTBIN10 PIC 9(9) COMP VALUE 825373492.
+       01  TSTX4    PIC X(4).
+       01  TSTREC.
+         05  TSTTAIL2  PIC X.
+         05  TSTTAIL3  PIC X.
+         05  FILLER    PIC X(8).
+         05  TSTEND    PIC X.
+       01  TSTREC2 PIC X(20).
+       01  TSTXX   PIC X(2).
+       PROCEDURE DIVISION.
+           MOVE "  " TO TSTTAIL2 (1:2).
+           MOVE SPACES TO TSTTAIL3 (2:8).
+           MOVE "  " TO TSTTAIL3 (1:15).
+           MOVE ALL "*" TO TSTREC (-1:-1).
+           MOVE "  " TO TSTTAIL2 (1:0).
+           MOVE '$' TO TSTEND.
+           DISPLAY "TSTREC is " TSTREC.
+           MOVE ALL "+" TO TSTTAIL3 (0:TSTLEN).
+           MOVE '$' TO TSTEND.
+           DISPLAY "TSTREC is " TSTREC.
+           MOVE 11 to TSTLEN.
+           MOVE SPACES TO TSTTAIL2 (1:TSTLEN).
+           MOVE '$' TO TSTEND.
+           DISPLAY "TSTREC is " TSTREC.
+           MOVE '12' TO TSTXX.
+           MOVE TSTXX TO TSTLEN.
+           DISPLAY "TSTLEN is " TSTLEN.
+           MOVE ' 3' TO TSTXX.
+           MOVE TSTXX TO TSTLEN.
+           DISPLAY "TSTLEN is " TSTLEN.
+           MOVE '  ' TO TSTXX.
+           MOVE TSTXX TO TSTLEN.
+           DISPLAY "TSTLEN is " TSTLEN.
+           MOVE 75 TO TSTLEN.
+           MOVE TSTLEN TO TSTXX.
+           DISPLAY "TSTXX is " TSTXX " vs " TSTLEN.
+           MOVE ' 3' TO TSTXX.
+           MOVE TSTXX TO TSTBIN.
+           DISPLAY "TSTBIN is " TSTBIN.
+           ADD 1 to TSTBIN.
+           MOVE TSTBIN TO TSTXX.
+           DISPLAY "TSTXX is " TSTXX " vs " TSTBIN.
+           MOVE TSTBIN10 (1:4) TO TSTX4 (1:4).
+           DISPLAY "TSTBIN10 is " TSTBIN10 " vs '" TSTX4 "'".
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol2002 prog.cob ], [1], [],
+[prog.cob:17: error: length of 'TSTTAIL2' out of bounds: 2
+prog.cob:18: error: offset of 'TSTTAIL3' out of bounds: 2
+prog.cob:19: error: length of 'TSTTAIL3' out of bounds: 15
+prog.cob:20: error: offset must be greater than zero
+prog.cob:20: error: length must be greater than zero
+prog.cob:21: error: length must be greater than zero
+prog.cob:24: error: offset must be greater than zero
+])
+
+AT_CLEANUP
+
