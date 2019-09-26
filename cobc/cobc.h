@@ -42,30 +42,7 @@
 #define N_(s)		s
 #endif
 
-/* TODO: recheck these options (got into libcob/common.h by OC 2.0, moved to cobc.h in 3.1, should be moved to config.h) */
-#if defined (COB_NON_ALIGNED)	/* allow explicit check of generated code and to skip this part in checks of undefined behavior) */
-	/* Some DEC Alphas can only load shorts at 4-byte aligned addresses */
-	#ifdef	__alpha
-		#define COB_SHORT_BORK
-	#endif
-	#define COB_NO_UNALIGNED_ATTRIBUTE
-#elif !defined(__i386__) && !defined(__x86_64__) && !defined(__powerpc__) && !defined(__powerpc64__) && !defined(__ppc__) && !defined(__amd64__)
-	#define	COB_NON_ALIGNED
-	/* Some DEC Alphas can only load shorts at 4-byte aligned addresses */
-	#ifdef	__alpha
-		#define COB_SHORT_BORK
-	#endif
-	#if defined(_MSC_VER)
-		#define COB_ALLOW_UNALIGNED
-	#else
-		#define COB_NO_UNALIGNED_ATTRIBUTE
-	#endif
-#else
-	#if !defined(__hpux) && !defined(_HPUX_SOURCE) && !defined(__LP64__)
-		#define COB_ALLOW_UNALIGNED
-	#endif
-	#define COB_NO_UNALIGNED_ATTRIBUTE
-#endif
+#include "../libcob/sysdefines.h"
 
 /* Defines for access() */
 #ifndef	F_OK
@@ -97,11 +74,6 @@ enum cb_format {
 /* COPY extended syntax defines */
 #define CB_REPLACE_LEADING		1U
 #define CB_REPLACE_TRAILING		2U
-
-/* Stringify macros */
-#define CB_STRINGIFY(s)			#s
-#define CB_XSTRINGIFY(s)		CB_STRINGIFY(s)
-#define CB_XRANGE(min,max)		CB_XSTRINGIFY(min) ".." CB_XSTRINGIFY(max)
 
 /* Flex directive actions */
 #define PLEX_ACT_IF			0

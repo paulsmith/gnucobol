@@ -36,30 +36,7 @@
 #include "cobc.h"
 #include "tree.h"
 
-#ifdef	HAVE_ATTRIBUTE_ALIGNED
-#define COB_ALIGN " __attribute__((aligned))"
-#define ALIGN_KNOWN
-#else
-/*#if defined(_MSC_VER) || defined(__ORANGEC__)*/
-#if defined(_WIN32)
-#define COB_ALIGN_DECL_8 "__declspec(align(8)) "
-#define ALIGN_KNOWN
-#else
-#define COB_ALIGN_DECL_8 ""
-#endif
-#if defined(__arm__)
-#define COB_ALIGN_ATTR_8 " __align(8)"
-#define ALIGN_KNOWN
-#else
-#define COB_ALIGN_ATTR_8 ""
-#endif
-#if defined(__SUNPRO_C)
-/* Insert #pragma align 8 (varname) */
-#define COB_ALIGN_PRAGMA_8
-#define ALIGN_KNOWN
-#endif
-#endif
-#if !defined(ALIGN_KNOWN) && !defined(COB_ALLOW_UNALIGNED)
+#if !defined(COB_ALIGN_KNOWN) && !defined(COB_ALLOW_UNALIGNED)
 #error System requires data alignment which is unknown
 #endif
 

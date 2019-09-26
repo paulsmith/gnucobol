@@ -22,6 +22,8 @@
 #ifndef COB_COMMON_H
 #define COB_COMMON_H
 
+#include "../libcob/sysdefines.h"
+
 /* Only define cob_decimal if we have the necessary mpz_t from gmp.h/mpir.h
    (or can self-define it from mp.h) */
 #ifndef __GMP_H__
@@ -565,36 +567,7 @@ only usable with COB_USE_VC2013_OR_GREATER */
 
 #endif
 
-#if	defined(_MSC_VER) || defined(__ORANGEC__) || defined(__WATCOMC__) || \
-    defined(__BORLANDC__) || defined(__MINGW32__) || defined (__DJGPP__)
-#define PATHSEP_CHAR (char) ';'
-#define PATHSEP_STR (char *) ";"
-#else
-#define PATHSEP_CHAR (char) ':'
-#define PATHSEP_STR (char *) ":"
-#endif
-#ifndef	_WIN32 /* note: needs to be \ for MinGW, needed for cobc -j */
-#define SLASH_CHAR	(char) '/'
-#define SLASH_STR	(char *) "/"
-#else
-#define SLASH_CHAR	(char) '\\'
-#define SLASH_STR	(char *) "\\"
-#endif
-
-#ifdef __DJGPP__
-#define HAVE_8DOT3_FILENAMES
-#endif
-
 /* End compiler stuff */
-
-/* EBCDIC determination */
-
-#if	' ' == 0x40
-#define	COB_EBCDIC_MACHINE
-#else
-#undef	COB_EBCDIC_MACHINE
-#endif
-
 
 /* Macro to prevent compiler warning "conditional expression is constant" */
 #if defined (_MSC_VER) && COB_USE_VC2008_OR_GREATER

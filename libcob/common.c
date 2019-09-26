@@ -141,66 +141,6 @@
 #define	CB_IMSG_SIZE	24
 #define	CB_IVAL_SIZE	(80 - CB_IMSG_SIZE - 4)
 
-/* Stringify macros */
-#define CB_STRINGIFY(s)			#s
-#define CB_XSTRINGIFY(s)		CB_STRINGIFY (s)
-
-/* C version info */
-#ifdef	__VERSION__
-#if		! defined (_MSC_VER)
-#if		defined (__MINGW32__)
-#define GC_C_VERSION_PRF	"(MinGW) "
-#elif	defined (__DJGPP__)
-#define GC_C_VERSION_PRF	"(DJGPP) "
-#elif	defined (__ORANGEC__)
-#define GC_C_VERSION_PRF	"(OrangeC) "
-#else
-#define GC_C_VERSION_PRF	""
-#endif
-#elif	defined (__c2__)
-#define GC_C_VERSION_PRF	"(Microsoft C2) "
-#elif	defined (__llvm__)
-#define GC_C_VERSION_PRF	"(LLVM / MSC) "
-#else
-#define GC_C_VERSION_PRF	"(Microsoft) "
-#endif
-#define GC_C_VERSION	CB_XSTRINGIFY (__VERSION__)
-#elif	defined (__xlc__)
-#define GC_C_VERSION_PRF	"(IBM XL C/C++) "
-#define GC_C_VERSION	CB_XSTRINGIFY (__xlc__)
-#elif	defined (__SUNPRO_C)
-#define GC_C_VERSION_PRF	"(Sun C) "
-#define GC_C_VERSION	CB_XSTRINGIFY (__SUNPRO_C)
-#elif	defined (_MSC_VER)
-#define GC_C_VERSION_PRF	"(Microsoft) "
-#define GC_C_VERSION	CB_XSTRINGIFY (_MSC_VER)
-#elif	defined (__BORLANDC__)
-#define GC_C_VERSION_PRF	"(Borland) "
-#define GC_C_VERSION	CB_XSTRINGIFY (__BORLANDC__)
-#elif	defined (__WATCOMC__)
-#define GC_C_VERSION_PRF	"(Watcom) "
-#define GC_C_VERSION	CB_XSTRINGIFY (__WATCOMC__)
-#elif	defined (__INTEL_COMPILER)
-#define GC_C_VERSION_PRF	"(Intel) "
-#define GC_C_VERSION	CB_XSTRINGIFY (__INTEL_COMPILER)
-#elif	defined(__TINYC__)
-#define GC_C_VERSION_PRF	"(Tiny C) "
-#define GC_C_VERSION	CB_XSTRINGIFY(__TINYC__)
-#elif  defined(__HP_cc)
-#define GC_C_VERSION_PRF       "(HP aC++/ANSI C) "
-#define GC_C_VERSION   CB_XSTRINGIFY(__HP_cc) 
-#elif  defined(__hpux) || defined(_HPUX_SOURCE)
-#if  defined(__ia64)
-#define GC_C_VERSION_PRF       "(HPUX IA64) "
-#else
-#define GC_C_VERSION_PRF       "(HPUX PA-RISC) "
-#endif
-#define GC_C_VERSION   " C"  
-#else
-#define GC_C_VERSION_PRF	""
-#define GC_C_VERSION	_("unknown")
-#endif
-
 #if COB_MAX_UNBOUNDED_SIZE > COB_MAX_FIELD_SIZE
 #define COB_MAX_ALLOC_SIZE COB_MAX_UNBOUNDED_SIZE
 #else

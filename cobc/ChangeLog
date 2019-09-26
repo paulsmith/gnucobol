@@ -1,6 +1,11 @@
 
 2019-09-26  Ron Norman <rjn@inglenet.com>
 
+	* libcob/sysdefines.h: New header to keep system dependent #defines
+	* cob.c,cob.hi,codegen.c: Uses sysdefines.h
+
+2019-09-26  Ron Norman <rjn@inglenet.com>
+
 	* typeck.c: Compile time checking of reference modification
 	           is now based on reference-bounds-check config option
 
