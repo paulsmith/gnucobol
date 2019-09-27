@@ -1762,6 +1762,24 @@ is_recursive_call (cb_tree target)
 	return !strcmp (target_name, current_program->orig_program_id);
 }
 
+/* If literal of all SPACES, then process as cb_space */
+static cb_tree
+check_for_space (cb_tree x)
+{
+	int	k;
+	if (CB_LITERAL_P (x)
+	 && CB_LITERAL (x)->data[0] == ' '
+	 && current_report == NULL
+	 && cobc_cs_check == 0
+	 && CB_LITERAL (x)->size < 50) {
+		for (k=0; k < CB_LITERAL (x)->size
+			&& CB_LITERAL (x)->data[k] == ' '; k++);
+		if (k == CB_LITERAL (x)->size)
+			return cb_space;
+	}
+	return x;
+}
+
 static cb_tree
 check_not_88_level (cb_tree x)
 {
@@ -17271,7 +17289,7 @@ class_value:
 			}
 		}
 	}
-	$$ = $1;
+	$$ = check_for_space ($1);
   }
 | SPACE				{ $$ = cb_space; }
 | ZERO				{ $$ = cb_zero; }
@@ -17284,7 +17302,7 @@ class_value:
 literal:
   basic_literal
   {
-	$$ = $1;
+	$$ = check_for_space ($1);
   }
 | ALL basic_value
   {
