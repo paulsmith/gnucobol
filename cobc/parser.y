@@ -144,6 +144,7 @@ unsigned int			cobc_in_procedure = 0;
 unsigned int			cobc_in_repository = 0;
 unsigned int			cobc_force_literal = 0;
 unsigned int			cobc_cs_check = 0;
+unsigned int			cobc_is_move = 0;
 unsigned int			cobc_allow_program_name = 0;
 unsigned int			cobc_in_xml_generate_body = 0;
 unsigned int			cobc_in_json_generate_body = 0;
@@ -1771,6 +1772,7 @@ check_for_space (cb_tree x)
 	 && CB_LITERAL (x)->data[0] == ' '
 	 && current_report == NULL
 	 && cobc_cs_check == 0
+	 && cobc_is_move == 1
 	 && CB_LITERAL (x)->size < 50) {
 		for (k=0; k < CB_LITERAL (x)->size
 			&& CB_LITERAL (x)->data[k] == ' '; k++);
@@ -13126,6 +13128,7 @@ move_statement:
   MOVE
   {
 	begin_statement ("MOVE", 0);
+	cobc_is_move = 1;
   }
   move_body
 ;
@@ -13134,10 +13137,12 @@ move_body:
   x TO target_x_list
   {
 	cb_emit_move ($1, $3);
+	cobc_is_move = 0;
   }
 | CORRESPONDING x TO target_x_list
   {
 	cb_emit_move_corresponding ($2, $4);
+	cobc_is_move = 0;
   }
 ;
 
