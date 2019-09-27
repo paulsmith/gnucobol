@@ -250,3 +250,131 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
 ])
 
 AT_CLEANUP
+
+AT_SETUP([Test Reference Modification])
+AT_KEYWORDS([Numeric])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TSTLEN PIC 99 VALUE 10.
+       01  TSTBIN PIC 99 COMP VALUE 10.
+       01  TSTBIN10 PIC 9(9) COMP VALUE 825373492.
+       01  TSTX4    PIC X(4).
+       01  TSTREC.
+         05  TSTTAIL2  PIC X.
+         05  TSTTAIL3  PIC X.
+         05  FILLER    PIC X(8).
+         05  TSTEND    PIC X.
+       01  TSTREC2 PIC X(20).
+       01  TSTXX   PIC X(2).
+       PROCEDURE DIVISION.
+           MOVE ALL "x" TO TSTREC.
+           DISPLAY "MOVEs to TSTTAIL3 (2:8)".
+           MOVE SPACES  TO TSTTAIL3 (2:8).
+           DISPLAY "SPACES : " TSTREC.
+           MOVE ALL "x" TO TSTREC.
+           MOVE ALL " " TO TSTTAIL3 (2:8).
+           DISPLAY "ALL ' ': " TSTREC.
+           MOVE ALL "x" TO TSTREC.
+           MOVE "  "    TO TSTTAIL3 (2:8).
+           DISPLAY "'  '   : " TSTREC.
+           MOVE ALL "x" TO TSTREC.
+           MOVE "ABC"   TO TSTTAIL3 (2:8).
+           DISPLAY "ABC    : " TSTREC.
+           MOVE ALL "x" TO TSTREC.
+           MOVE X"4142" TO TSTTAIL3 (2:8).
+           DISPLAY "x4142  : " TSTREC.
+           IF TSTTAIL3 (2:8) = X"4142"
+               DISPLAY "IF = 'AB' is good"
+           ELSE
+               DISPLAY "IF = 'AB' is Bad!"
+           END-IF.
+
+           DISPLAY "MOVEs to TSTREC2 (3:15)".
+           MOVE ALL "x" TO TSTREC2.
+           MOVE SPACES  TO TSTREC2 (3:15).
+           DISPLAY "SPACE  : " TSTREC2.
+           MOVE ALL "x" TO TSTREC2.
+           MOVE ALL " " TO TSTREC2 (3:15).
+           DISPLAY "ALL' ' : " TSTREC2.
+           MOVE ALL "x" TO TSTREC2.
+           MOVE "  "    TO TSTREC2 (3:15).
+           DISPLAY "'  '   : " TSTREC2.
+           MOVE ALL "x" TO TSTREC2.
+           MOVE "DEF"   TO TSTREC2 (3:15).
+           DISPLAY "DEF    : " TSTREC2.
+           MOVE ALL "x" TO TSTREC2.
+           MOVE X"4344" TO TSTREC2 (3:15).
+           DISPLAY "x4344  : " TSTREC2.
+
+           MOVE SPACES  TO TSTREC2.
+
+           MOVE "  " TO TSTTAIL2 (1:2).
+           MOVE ALL "*" TO TSTREC (1:TSTLEN).
+           MOVE '$' TO TSTEND.
+           DISPLAY "TSTREC is " TSTREC.
+           MOVE ALL "+" TO TSTTAIL3 (1:TSTLEN).
+           MOVE '$' TO TSTEND.
+           DISPLAY "TSTREC is " TSTREC.
+           MOVE 11 to TSTLEN.
+           MOVE SPACES TO TSTTAIL2 (1:TSTLEN).
+           MOVE '$' TO TSTEND.
+           DISPLAY "TSTREC is " TSTREC.
+           MOVE '12' TO TSTXX.
+           MOVE TSTXX TO TSTLEN.
+           DISPLAY "TSTLEN is " TSTLEN.
+           MOVE ' 3' TO TSTXX.
+           MOVE TSTXX TO TSTLEN.
+           DISPLAY "TSTLEN is " TSTLEN.
+           MOVE '  ' TO TSTXX.
+           MOVE TSTXX TO TSTLEN.
+           DISPLAY "TSTLEN is " TSTLEN.
+           MOVE 75 TO TSTLEN.
+           MOVE TSTLEN TO TSTXX.
+           DISPLAY "TSTXX is " TSTXX " vs " TSTLEN.
+           MOVE ' 3' TO TSTXX.
+           MOVE TSTXX TO TSTBIN.
+           DISPLAY "TSTBIN is " TSTBIN.
+           ADD 1 to TSTBIN.
+           MOVE TSTBIN TO TSTXX.
+           DISPLAY "TSTXX is " TSTXX " vs " TSTBIN.
+           MOVE TSTBIN10 (1:4) TO TSTX4 (1:4).
+           DISPLAY "TSTBIN10 is " TSTBIN10 " vs '" TSTX4 "'".
+           MOVE 10 TO TSTLEN.
+           MOVE ALL "x" TO TSTTAIL3 (1:TSTLEN + 2).
+           STOP RUN.
+])
+
+AT_CHECK([cobc -x -std=mf -debug -Wall prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [1], [MOVEs to TSTTAIL3 (2:8)
+SPACES : xx        x
+ALL ' ': xx        x
+'  '   : xx        x
+ABC    : xxABC     x
+x4142  : xxAB      x
+IF = 'AB' is good
+MOVEs to TSTREC2 (3:15)
+SPACE  : xx               xxx
+ALL' ' : xx               xxx
+'  '   : xx               xxx
+DEF    : xxDEF            xxx
+x4344  : xxCD             xxx
+TSTREC is **********$
+TSTREC is *+++++++++$
+TSTREC is           $
+TSTLEN is 12
+TSTLEN is 03
+TSTLEN is 00
+TSTXX is 75 vs 75
+TSTBIN is 03
+TSTXX is 04 vs 04
+TSTBIN10 is 825373492 vs '1234'
+], [libcob: prog.cob:91: error: length of 'TSTTAIL3' out of bounds: 12, maximum: 10
+])
+
+AT_CLEANUP
+

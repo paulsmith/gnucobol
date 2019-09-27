@@ -1,4 +1,8 @@
 
+2019-09-27  Ron Norman <rjn@inglenet.com>
+
+	* typeck.c: Check for reference modification when using literals
+
 2019-09-26  Ron Norman <rjn@inglenet.com>
 
 	* libcob/sysdefines.h: New header to keep system dependent #defines
