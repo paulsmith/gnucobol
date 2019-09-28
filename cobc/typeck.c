@@ -9747,18 +9747,20 @@ cb_build_move_literal (cb_tree src, cb_tree dst)
 
 	l = CB_LITERAL (src);
 	f = CB_FIELD_PTR (dst);
-	r = CB_REFERENCE (dst);
 	cat = CB_TREE_CATEGORY (dst);
 
 	if (f->flag_any_length) {
 		return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
 	}
 
-	if ((cb_reference_bounds_check == CB_WARNING
-	  || cb_reference_bounds_check == CB_OK) 
-	 && (r->offset != NULL
-	  || r->length != NULL)) {
-		return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
+	if (CB_REFERENCE_P (dst)) {
+		r = CB_REFERENCE (dst);
+		if ((cb_reference_bounds_check == CB_WARNING
+		  || cb_reference_bounds_check == CB_OK) 
+		 && (r->offset != NULL
+		  || r->length != NULL)) {
+			return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
+		}
 	}
 
 	if (l->all) {
