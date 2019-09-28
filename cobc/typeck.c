@@ -10047,7 +10047,7 @@ cb_tree
 cb_build_move (cb_tree src, cb_tree dst)
 {
 	struct cb_reference	*src_ref, *dst_ref, *x;
-	int	move_zero;
+	int	move_zero, k;
 
 	if (CB_INVALID_TREE(src)
 	 || CB_INVALID_TREE(dst)) {
@@ -10065,6 +10065,12 @@ cb_build_move (cb_tree src, cb_tree dst)
 #endif
 	if (move_zero) {
 		src = cb_zero;
+	} else if (CB_LITERAL_P (src)
+			&& CB_LITERAL (src)->data[0] == ' ') {
+		for (k=0; k < CB_LITERAL (src)->size
+				&& CB_LITERAL (src)->data[k] == ' '; k++);
+		if (k == CB_LITERAL (src)->size)
+			src = cb_space;
 	}
 
 	if (current_program->flag_report) {

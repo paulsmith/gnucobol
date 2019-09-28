@@ -1,8 +1,8 @@
 
-2019-09-27  Ron Norman <rjn@inglenet.com>
+2019-09-28  Ron Norman <rjn@inglenet.com>
 
-	* parser.y: If "literal" is all SPACES then process as cb_space
-	            for MOVE statements
+	* typeck.c: If MOVE "literal" is all SPACES then process as 
+	            cb_space so MOVE SPACE & MOVE "   " are identical
 
 2019-09-27  Ron Norman <rjn@inglenet.com>
 

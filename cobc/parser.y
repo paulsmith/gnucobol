@@ -144,7 +144,6 @@ unsigned int			cobc_in_procedure = 0;
 unsigned int			cobc_in_repository = 0;
 unsigned int			cobc_force_literal = 0;
 unsigned int			cobc_cs_check = 0;
-unsigned int			cobc_is_move = 0;
 unsigned int			cobc_allow_program_name = 0;
 unsigned int			cobc_in_xml_generate_body = 0;
 unsigned int			cobc_in_json_generate_body = 0;
@@ -1761,25 +1760,6 @@ is_recursive_call (cb_tree target)
 	}
 
 	return !strcmp (target_name, current_program->orig_program_id);
-}
-
-/* If literal of all SPACES, then process as cb_space */
-static cb_tree
-check_for_space (cb_tree x)
-{
-	int	k;
-	if (CB_LITERAL_P (x)
-	 && CB_LITERAL (x)->data[0] == ' '
-	 && current_report == NULL
-	 && cobc_cs_check == 0
-	 && cobc_is_move == 1
-	 && CB_LITERAL (x)->size < 50) {
-		for (k=0; k < CB_LITERAL (x)->size
-			&& CB_LITERAL (x)->data[k] == ' '; k++);
-		if (k == CB_LITERAL (x)->size)
-			return cb_space;
-	}
-	return x;
 }
 
 static cb_tree
@@ -13128,7 +13108,6 @@ move_statement:
   MOVE
   {
 	begin_statement ("MOVE", 0);
-	cobc_is_move = 1;
   }
   move_body
 ;
@@ -13137,12 +13116,10 @@ move_body:
   x TO target_x_list
   {
 	cb_emit_move ($1, $3);
-	cobc_is_move = 0;
   }
 | CORRESPONDING x TO target_x_list
   {
 	cb_emit_move_corresponding ($2, $4);
-	cobc_is_move = 0;
   }
 ;
 
@@ -17294,7 +17271,7 @@ class_value:
 			}
 		}
 	}
-	$$ = check_for_space ($1);
+	$$ = $1;
   }
 | SPACE				{ $$ = cb_space; }
 | ZERO				{ $$ = cb_zero; }
@@ -17307,7 +17284,7 @@ class_value:
 literal:
   basic_literal
   {
-	$$ = check_for_space ($1);
+	$$ = $1;
   }
 | ALL basic_value
   {
