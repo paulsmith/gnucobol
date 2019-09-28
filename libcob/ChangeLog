@@ -1,4 +1,8 @@
 
+2019-09-28  Ron Norman <rjn@inglenet.com>
+
+	* common.h: COB_FILE_VERSION changed to 4 (matching reportwriter)
+
 2019-09-26  Ron Norman <rjn@inglenet.com>
 
 	* sysdefines.h: New header to keep system dependent #defines

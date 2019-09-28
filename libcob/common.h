@@ -1368,8 +1368,8 @@ typedef struct cob_io_stat_s {
 	unsigned int	fail_io;
 } cob_io_stats;
 
-/* File version (likely can be removed from cob_file in the future) */
-#define	COB_FILE_VERSION	1
+/* File version */
+#define	COB_FILE_VERSION	4
 
 /* File structure */
 
