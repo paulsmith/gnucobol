@@ -714,7 +714,7 @@ register:	RETURN-CODE
 # register:	SORT-MODE-SIZE
 register:	SORT-RETURN
  register:	TALLY
-# register:	TIME-OF-DAY		# only available in OS/VS mode
+# register:	TIME-OF-DAY
 register:	WHEN-COMPILED
 
 
