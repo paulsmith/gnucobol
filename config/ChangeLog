@@ -1,4 +1,9 @@
 
+2019-09-28  Edward Hart <edward.dan.hart@gmail.com>
+
+	* realia.conf, realia-strict.conf, realia.words, Makefile.am: added
+	  dialect for CA Realia II.
+
 2019-09-26  Ron Norman <rjn@inglenet.com>
 
 	* general: added option reference-bounds-check
