@@ -496,7 +496,7 @@ reserved:	PROCEED
 reserved:	PROCES
 reserved:	PROCESSING
 reserved:	PROGRAM
-reserved:	PROGRAMID
+reserved:	PROGRAM-ID
 reserved:	PROMPT
 reserved:	PROTECTED
 reserved:	PURGE
@@ -713,7 +713,7 @@ register:	RETURN-CODE
 # register:	SORT-MESSAGE
 # register:	SORT-MODE-SIZE
 register:	SORT-RETURN
- register:	TALLY
+register:	TALLY
 # register:	TIME-OF-DAY
 register:	WHEN-COMPILED
 
