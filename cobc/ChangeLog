@@ -1,7 +1,14 @@
 
+2019-09-29  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, reserved.c: added detection of OS/VS-era I/O extensions.
+	* parser.y: added ASSIGN VARYING variant of ASSIGN USING.
+	* reserved.c (lookup_reserved_word): allow SELECT and I-O-CONTROL to
+	  have multiple context-sensitive words occur in one sentence.
+
 2019-09-28  Ron Norman <rjn@inglenet.com>
 
-	* typeck.c: If MOVE "literal" is all SPACES then process as 
+	* typeck.c: If MOVE "literal" is all SPACES then process as
 	            cb_space so MOVE SPACE & MOVE "   " are identical
 
 2019-09-27  Ron Norman <rjn@inglenet.com>
@@ -35,13 +42,13 @@
 	* parser.y: Fixed 'integer' to allow signed values in report
 	           for example  COLUMN +2 vs COLUMN 2
 		   when -std=xxxx has report-column-plus: yes
-	* codegen.c,field.c: Corrections to handling of COLUMN 
+	* codegen.c,field.c: Corrections to handling of COLUMN
 	           With OCCURS COLUMN +num is no longer an alternative for STEP
 
 2019-09-15  Ron Norman <rjn@inglenet.com>
 
 	* cobc.h: For HPUX set COB_ALLOW_UNALIGNED as undefined
-	* typeck.c: Emit ADD/SUBTRACT shortcut for COMP-5 only 
+	* typeck.c: Emit ADD/SUBTRACT shortcut for COMP-5 only
 	            if COB_ALLOW_UNALIGNED defined
 	* tree.h: Revert 'lock_mode' back to an 'int'
 	* codegen.c, debug.c: Changes for 'lock_mode' being an 'int'
@@ -71,7 +78,7 @@
 2019-08-28  Ron Norman <rjn@inglenet.com>
 
 	* tree.h: Add flag_usage_defined
-	* parser.y: set flag_synchronized for [UN]SIGNED-SHORT/INT/LONG 
+	* parser.y: set flag_synchronized for [UN]SIGNED-SHORT/INT/LONG
 	            set flag_synchronized for BINARY-C-LONG
 	* field.c: validate that group USAGE is compatible with any field usage
 

@@ -263,6 +263,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "ACTIVE-X",		1, 1, ACTIVEX,		/* ACU extension, very unlikely to be implemented */
 				CB_CS_GRAPHICAL_CONTROL, CB_CS_DISPLAY | CB_CS_SCREEN
   },
+  { "ACTUAL",			0, 1, ACTUAL,			/* OS/VS extension */
+    				0, CB_CS_SELECT
+  },
   { "ADD",			1, 0, ADD,			/* 2002 */
 				0, 0
   },
@@ -777,6 +780,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "COPY-SELECTION",		0, 1, COPY_SELECTION,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
+  { "CORE-INDEX",		0, 1, CORE_INDEX,		/* OS/VS extension */
+				0, CB_CS_I_O_CONTROL
+  },
   { "CORR",			0, 0, CORRESPONDING,		/* 2002 */
 				0, 0
   },
@@ -905,6 +911,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "DISK",			0, 1, DISK,			/* Extension */
 				0, CB_CS_ASSIGN
+  },
+  { "DISP",			0, 1, DISP,			/* OS/VS extension */
+    				0, CB_CS_OPEN
   },
   { "DISPLAY",			1, 0, DISPLAY,			/* 2002 */
 				0, 0
@@ -1135,7 +1144,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
   { "EVERY",			0, 1, EVERY,			/* IBM extension */
-				0, CB_CS_XML_GENERATE
+				0, CB_CS_I_O_CONTROL | CB_CS_XML_GENERATE
   },
   { "EXCEPTION",		0, 0, EXCEPTION,		/* 2002 */
 				0, 0
@@ -1199,6 +1208,12 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "FILE-ID",			0, 0, FILE_ID,			/* Extension */
 				0, 0
+  },
+  { "FILE-LIMIT",		0, 1, FILE_LIMIT,		/* OS/VS extension */
+    				0, CB_CS_SELECT
+  },
+  { "FILE-LIMITS",		0, 1, FILE_LIMITS,		/* OS/VS extension */
+    				0, CB_CS_SELECT
   },
   { "FILE-NAME",		0, 1, FILE_NAME,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -1611,8 +1626,11 @@ static struct cobc_reserved default_reserved_words[] = {
   { "LEADING",			0, 0, LEADING,			/* 2002 */
 				0, 0
   },
-  { "LEADING-SHIFT",			0, 1, LEADING_SHIFT,			/* ACU extension */
+  { "LEADING-SHIFT",			0, 1, LEADING_SHIFT,	/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
+  },
+  { "LEAVE",			0, 1, LEAVE,			/* OS/VS extension */
+    				0, CB_CS_OPEN
   },
   { "LEFT",			0, 0, LEFT,			/* 2002 */
 				0, 0
@@ -1846,6 +1864,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "NO-KEY-LETTER",			0, 1, NO_KEY_LETTER,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
+  },
+  { "NOMINAL",			0, 1, NOMINAL,			/* OS/VS extension */
+    				0, CB_CS_SELECT
   },
   { "NO-SEARCH",			0, 1, NO_SEARCH,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -2191,6 +2212,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "RECORD",			0, 0, RECORD,			/* 2002 */
 				0, 0
   },
+  { "RECORD-CRITERIA",		0, 1, RECORD_CRITERIA,		/* OS/VS extension */
+				0, CB_CS_I_O_CONTROL
+  },
   { "RECORD-DATA",			0, 1, RECORD_DATA,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
@@ -2266,6 +2290,12 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "REQUIRED",			0, 1, REQUIRED,			/* 2002 (C/S) */
 				0, CB_CS_ACCEPT | CB_CS_SCREEN
+  },
+  { "REREAD",			0, 1, REREAD,			/* OS/VS extension */
+    				0, CB_CS_OPEN
+  },
+  { "RERUN",			0, 1, RERUN,			/* IBM extension */
+				0, CB_CS_I_O_CONTROL
   },
   { "RESERVE",			0, 0, RESERVE,			/* 2002 */
 				0, 0
@@ -2727,6 +2757,18 @@ static struct cobc_reserved default_reserved_words[] = {
   { "TOWARD-LESSER",		0, 1, TOWARD_LESSER,		/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
   },
+  { "TRACK",			0, 1, TRACK,			/* OS/VS extension */
+    				0, CB_CS_SELECT
+  },
+  { "TRACKS",			0, 1, TRACKS,			/* OS/VS extension */
+    				0, CB_CS_SELECT
+  },
+  { "TRACK-AREA",		0, 1, TRACK_AREA,		/* OS/VS extension */
+    				0, CB_CS_SELECT
+  },
+  { "TRACK-LIMIT",		0, 1, TRACK_LIMIT,		/* OS/VS extension */
+    				0, CB_CS_SELECT
+  },
   { "TRADITIONAL-FONT",		0, 0, TRADITIONAL_FONT,		/* ACU extension */
 				0, 0					/* Checkme: likely context sensitive */
   },
@@ -2943,6 +2985,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "WRITE",			1, 0, WRITE,			/* 2002 */
 				0, 0
+  },
+  { "WRITE-ONLY",		0, 1, WRITE_ONLY,		/* IBM extension */
+				0, CB_CS_I_O_CONTROL
   },
   { "WRITERS",		0, 1, WRITERS,		/* ACU extension */
 				0, CB_CS_OPEN
@@ -4339,7 +4384,7 @@ get_system_name_translated (cb_tree word)
 {
 	char system_name[COB_MAX_WORDLEN + 1];
 	cb_tree res;
-	
+
 	system_name[COB_MAX_WORDLEN] = 0;
 	strncpy(system_name, CB_NAME (word), COB_MAX_WORDLEN);
 	if (system_name [6] == '_') {
@@ -4507,14 +4552,17 @@ lookup_reserved_word (const char *name)
 			return NULL;
 		}
 		/*
-		  The only context-sensitive phrase outside the procedure division
-		  we expect to manually reset cobc_cs_check is OPTIONS and SCREEN.
+		  The only context-sensitive phrases outside the procedure division
+		  we expect to manually reset cobc_cs_check are OPTIONS, SELECT,
+		  I-O-CONTROL and SCREEN.
 
 		  Note: Everything in the environment and identification division can
-		  (and does) reset cobc-cs_check.
+		  (and does) reset cobc_cs_check.
 		*/
 		if (!cobc_in_procedure
 		 && !(cobc_cs_check & CB_CS_OPTIONS)
+		 && !(cobc_cs_check & CB_CS_SELECT)
+		 && !(cobc_cs_check & CB_CS_I_O_CONTROL)
 		 && !(cobc_cs_check & CB_CS_SCREEN)) {
 			cobc_cs_check = 0;
 		}

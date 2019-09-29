@@ -2103,6 +2103,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token ACCESS
 %token ACTIVEX			"ACTIVE-X"
 %token ACTION
+%token ACTUAL
 %token ADD
 %token ADDRESS
 %token ADJUSTABLE_COLUMNS	"ADJUSTABLE-COLUMNS"
@@ -2258,7 +2259,8 @@ set_record_size (cb_tree min, cb_tree max)
 %token CONVERSION
 %token CONVERTING
 %token COPY
-%token COPY_SELECTION	"COPY-SELECTION"
+%token COPY_SELECTION		"COPY-SELECTION"
+%token CORE_INDEX		"CORE-INDEX"
 %token CORRESPONDING
 %token COUNT
 %token CRT
@@ -2301,6 +2303,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token DISABLE
 %token DISC
 %token DISK
+%token DISP
 %token DISPLAY
 %token DISPLAY_COLUMNS		"DISPLAY-COLUMNS"
 %token DISPLAY_FORMAT		"DISPLAY-FORMAT"
@@ -2395,6 +2398,8 @@ set_record_size (cb_tree min, cb_tree max)
 %token FH__KEYDEF		"FH--KEYDEF"
 %token FILE_CONTROL		"FILE-CONTROL"
 %token FILE_ID			"FILE-ID"
+%token FILE_LIMIT		"FILE-LIMIT"
+%token FILE_LIMITS		"FILE-LIMITS"
 %token FILE_NAME		"FILE-NAME"
 %token FILE_POS			"FILE-POS"
 %token FILL_COLOR		"FILL-COLOR"
@@ -2517,6 +2522,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token LAYOUT_MANAGER		"LAYOUT-MANAGER"
 %token LEADING
 %token LEADING_SHIFT		"LEADING-SHIFT"
+%token LEAVE
 %token LEFT
 %token LEFTLINE
 %token LEFT_TEXT			"LEFT-TEXT"
@@ -2605,6 +2611,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token NO_FOCUS			"NO-FOCUS"
 %token NO_GROUP_TAB		"NO-GROUP-TAB"
 %token NO_KEY_LETTER	"NO-KEY-LETTER"
+%token NOMINAL
 %token NO_SEARCH		"NO-SEARCH"
 %token NO_UPDOWN		"NO-UPDOWN"
 %token NONNUMERIC
@@ -2718,6 +2725,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token READY_TRACE		"READY TRACE"
 %token RECEIVE
 %token RECORD
+%token RECORD_CRITERIA		"RECORD-CRITERIA"
 %token RECORD_DATA		"RECORD-DATA"
 %token RECORD_TO_ADD	"RECORD-TO-ADD"
 %token RECORD_TO_DELETE	"RECORD-TO-DELETE"
@@ -2742,6 +2750,8 @@ set_record_size (cb_tree min, cb_tree max)
 %token REPORTS
 %token REPOSITORY
 %token REQUIRED
+%token REREAD
+%token RERUN
 %token RESERVE
 %token RESET
 %token RESET_TRACE		"RESET TRACE"
@@ -2909,9 +2919,13 @@ set_record_size (cb_tree min, cb_tree max)
 %token TOP
 %token TOWARD_GREATER		"TOWARD-GREATER"
 %token TOWARD_LESSER		"TOWARD-LESSER"
+%token TRACK
+%token TRACKS
+%token TRACK_AREA		"TRACK-AREA"
+%token TRACK_LIMIT		"TRACK-LIMIT"
 %token TRADITIONAL_FONT		"TRADITIONAL-FONT"
 %token TRAILING
-%token TRAILING_SHIFT	"TRAILING-SHIFT"
+%token TRAILING_SHIFT		"TRAILING-SHIFT"
 %token TRANSFORM
 %token TRANSPARENT
 %token TREE_VIEW		"TREE-VIEW"
@@ -2984,6 +2998,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token WORKING_STORAGE		"WORKING-STORAGE"
 %token WRAP
 %token WRITE
+%token WRITE_ONLY		"WRITE-ONLY"
 %token WRITERS
 %token X
 %token XML
@@ -4687,6 +4702,10 @@ select_clause:
 | file_status_clause
 | lock_mode_clause
 | sharing_clause
+| file_limit_clause
+| actual_key_clause
+| track_area_clause
+| track_limit_clause
 /* FXIME: disabled because of shift/reduce conflict
 | encryption_clause
 */
@@ -4709,12 +4728,12 @@ select_clause:
 /* ASSIGN clause */
 
 assign_clause:
-  ASSIGN _to_using _ext_clause _line_adv_file assignment_name
+  ASSIGN _to_using_varying _ext_clause _line_adv_file assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	current_file->assign = cb_build_assignment_name (current_file, $5);
   }
-| ASSIGN _to_using _ext_clause general_device_name _assignment_name
+| ASSIGN _to_using_varying _ext_clause general_device_name _assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	if ($5) {
@@ -4723,7 +4742,7 @@ assign_clause:
 		current_file->flag_fileid = 1;
 	}
   }
-| ASSIGN _to_using _ext_clause line_seq_device_name _assignment_name
+| ASSIGN _to_using_varying _ext_clause line_seq_device_name _assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	current_file->organization = COB_ORG_LINE_SEQUENTIAL;
@@ -4733,7 +4752,7 @@ assign_clause:
 		current_file->flag_fileid = 1;
 	}
   }
-| ASSIGN _to_using _ext_clause DISPLAY _assignment_name
+| ASSIGN _to_using_varying _ext_clause DISPLAY _assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	if ($5) {
@@ -4745,7 +4764,7 @@ assign_clause:
 		current_file->special = COB_SELECT_STDOUT;
 	}
   }
-| ASSIGN _to_using _ext_clause KEYBOARD _assignment_name
+| ASSIGN _to_using_varying _ext_clause KEYBOARD _assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	if ($5) {
@@ -4757,7 +4776,7 @@ assign_clause:
 		current_file->special = COB_SELECT_STDIN;
 	}
   }
-| ASSIGN _to_using _ext_clause printer_name _assignment_name
+| ASSIGN _to_using_varying _ext_clause printer_name _assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	current_file->organization = COB_ORG_LINE_SEQUENTIAL;
@@ -5365,6 +5384,52 @@ sharing_option:
 | READ ONLY			{ $$ = cb_int (COB_SHARE_READ_ONLY); }
 ;
 
+/* FILE-LIMIT clause */
+
+file_limit_clause:
+  file_limit_or_limits _is_are thru_list
+  {
+	(void)cb_verify (CB_OBSOLETE, "FILE-LIMIT");
+	check_repeated ("FILE-LIMIT", SYN_CLAUSE_13, &check_duplicate);
+  }
+;
+
+thru_list:
+  reference_or_literal THRU reference_or_literal
+| thru_list reference_or_literal THRU reference_or_literal
+;
+
+/* ACTUAL KEY clause */
+
+actual_key_clause:
+  actual_or_nominal _key _is reference
+  {
+	(void)cb_verify (CB_OBSOLETE, "ACTUAL/NOMINAL KEY");
+	check_repeated ("ACTUAL/NOMINAL KEY", SYN_CLAUSE_14, &check_duplicate);
+  }
+;
+
+/* TRACK-AREA clause */
+
+track_area_clause:
+  TRACK_AREA _is reference_or_literal _characters
+  {
+	(void)cb_verify (CB_OBSOLETE, "TRACK-AREA");
+	check_repeated ("TRACK-AREA", SYN_CLAUSE_15, &check_duplicate);
+  }
+;
+
+/* TRACK-LIMIT clause */
+
+track_limit_clause:
+  TRACK_LIMIT _is integer track_or_tracks
+  {
+	(void)cb_verify (CB_OBSOLETE, "TRACK-LIMIT");
+	check_repeated ("TRACK-LIMIT", SYN_CLAUSE_16, &check_duplicate);
+  }
+
+;
+
 /* I-O-CONTROL paragraph */
 
 _i_o_control:
@@ -5395,8 +5460,9 @@ i_o_control_list:
 
 i_o_control_clause:
   same_clause
-| apply_commit_clause
+| apply_clause
 | multiple_file_tape_clause
+| rerun_clause
 ;
 
 /* SAME clause */
@@ -5436,15 +5502,19 @@ _same_option:
 | SORT_MERGE			{ $$ = cb_int2; }
 ;
 
-/* APPLY COMMIT clause */
+/* APPLY clause */
 
-apply_commit_clause:
+apply_clause:
   APPLY COMMIT _on reference_list
   {
 	current_program->apply_commit = $4;
 	CB_PENDING("APPLY COMMIT");
   }
+| APPLY write_only_or_core_idx _on file_name_list
+| APPLY RECORD TOK_OVERFLOW _on file_name_list
+| APPLY RECORD_CRITERIA _to reference _on file_name
 ;
+
 
 /* MULTIPLE FILE TAPE clause */
 
@@ -5477,6 +5547,20 @@ _multiple_file_position:
 | POSITION integer
 ;
 
+/* RERUN clause */
+
+rerun_clause:
+  RERUN _on_assignment _every rerun_event _of file_name
+;
+
+_on_assignment:
+  _on assignment_name
+;
+
+rerun_event:
+  integer RECORDS
+| END _of reel_or_unit
+;
 
 /* DATA DIVISION */
 
@@ -5792,7 +5876,7 @@ linage_bottom:
 recording_mode_clause:
   RECORDING _mode _is recording_mode
   {
-	cobc_cs_check = 0;
+	cobc_cs_check ^= CB_CS_RECORDING;
 	check_repeated ("RECORDING", SYN_CLAUSE_9, &check_duplicate);
 	/* ignore */
   }
@@ -6600,7 +6684,7 @@ picture_clause:
 _pic_locale_format:
   /* empty */
   { $$ = NULL; }
-| LOCALE _is_locale_name SIZE _is integer  
+| LOCALE _is_locale_name SIZE _is integer
   {
 	/* $2 -> optional locale-name to be used */
 	$$ = $5;
@@ -6609,7 +6693,7 @@ _pic_locale_format:
 
 _is_locale_name:
   /* empty */
-| _is locale_name  
+| _is locale_name
   {
 	$$ = $2;
   }
@@ -13231,12 +13315,17 @@ _open_sharing:
 
 _open_option:
   /* empty */			{ $$ = NULL; }
-| lock_allowing		{ $$ = $1; }
-| open_option_sequential { $$ = NULL; }
+| lock_allowing			{ $$ = $1; }
+| open_option_sequential	{ $$ = NULL; }
 /* note: RM/COBOL allow lock together with the other options,
          most (all?) other dialects allow only one of them
 		 extra rule to possibly cater for this later */
 | lock_allowing open_option_sequential	{ $$ = $1; }
+| osvs_input_mode
+  {
+	  (void)cb_verify (CB_OBSOLETE, "OPEN LEAVE/REREAD/DISP");
+	  $$ = NULL;
+  }
 ;
 
 lock_allowing:
@@ -13261,7 +13350,7 @@ open_lock_option:
 ;
 
 allowing_option:
-  NO _others			{ $$ = cb_int (COB_LOCK_OPEN_EXCLUSIVE); }
+  NO _others		{ $$ = cb_int (COB_LOCK_OPEN_EXCLUSIVE); }
 | allowing_all		{ $$ = NULL; }
 | READERS		{ $$ = NULL; }	/* docs say: identical to EXCLUSIVE + OPEN INPUT, CHECKME */
 ;
@@ -13296,6 +13385,10 @@ open_option_sequential:
   }
 ;
 
+osvs_input_mode:
+  LEAVE
+| REREAD
+| DISP;
 
 /* PERFORM statement */
 
@@ -17187,7 +17280,7 @@ integer:
 	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC
 	 || !CB_LITERAL_P($1)
 	 || CB_LITERAL ($1)->scale
-	 || CB_LITERAL ($1)->sign < 0 
+	 || CB_LITERAL ($1)->sign < 0
 	 || (CB_LITERAL ($1)->sign && current_report && !cb_report_column_plus)
 	 || (CB_LITERAL ($1)->sign && current_report == NULL)) {
 		cb_error (_("unsigned integer value expected"));
@@ -17828,6 +17921,7 @@ _controls:	| CONTROLS ;
 _control:	| CONTROL ;
 _data:		| DATA ;
 _end_of:	| _to END _of ;
+_every:		| EVERY ;
 _file:		| TOK_FILE ;
 _for:		| FOR ;
 _from:		| FROM ;
@@ -17878,7 +17972,7 @@ _terminal:		| TERMINAL ;
 _then:		| THEN ;
 _times:		| TIMES ;
 _to:		| TO ;
-_to_using:	| TO | USING ;
+_to_using_varying:	| TO | USING | _to VARYING;
 _up:		| UP ;
 _when:		| WHEN ;
 _when_set_to:	| WHEN SET TO ;
@@ -17887,12 +17981,14 @@ _with_for:	| WITH | FOR ;
 
 /* Mandatory selection */
 
+actual_or_nominal:	ACTUAL | NOMINAL;
 column_or_col:		COLUMN | COL ;
 columns_or_cols:	COLUMNS | COLS ;
 column_or_cols:		column_or_col | columns_or_cols ;
 column_or_col_or_position_or_pos:		COLUMN | COL | POSITION | POS ;
 comp_equal:		TOK_EQUAL | EQUAL ;
 exception_or_error:	EXCEPTION | ERROR ;
+file_limit_or_limits:	FILE_LIMIT | FILE_LIMITS ;
 in_of:			IN | OF ;
 label_option:		STANDARD | OMITTED ;
 line_or_lines:		LINE | LINES ;
@@ -17901,6 +17997,8 @@ object_char_or_word_or_modules:	CHARACTERS | WORDS | MODULES;
 records:		RECORD _is_are | RECORDS _is_are ;
 reel_or_unit:		REEL | UNIT ;
 size_or_length:		SIZE | LENGTH ;
+track_or_tracks:	TRACK | TRACKS ;
+write_only_or_core_idx:	WRITE_ONLY | CORE_INDEX ;
 
 /* Mandatory R/W keywords */
 detail_keyword:		DETAIL | DE ;

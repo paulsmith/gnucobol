@@ -488,7 +488,7 @@ reserved:	PRINT-SWITCH
 reserved:	PRINTER
 reserved:	PRINTER-1
 reserved:	PRINTING
-reserved:	PRIOR
+reserved:	PRIOR=PREVIOUS
 reserved:	PROCEDURE
 reserved:	PROCEDURE-POINTER
 reserved:	PROCEDURES

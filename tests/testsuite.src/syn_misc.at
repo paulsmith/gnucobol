@@ -841,7 +841,7 @@ AT_CLEANUP
 
 
 AT_SETUP([INSPECT invalid size])
-AT_KEYWORDS([misc refmod]) 
+AT_KEYWORDS([misc refmod])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -6497,13 +6497,13 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([cobc -x -std=ibm prog.cob ], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [1], [],
 [prog.cob:21: error: variable length item not allowed here
 prog.cob:21: error: constant item 'ODO-LEN' requires a VALUE clause
 prog.cob:30: warning: subscript missing for 'MY-ELEMENT-1' - defaulting to 1
 ])
 
-AT_CHECK([cobc -x -std=ibm-strict -w prog.cob ], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob], [1], [],
 [prog.cob:14: error: LENGTH OF 'MY-DATA' not allowed outside of Procedure Division
 prog.cob:14: error: 78 VALUE does not conform to IBM COBOL
 prog.cob:21: error: LENGTH OF 'ODO-DATA' not allowed outside of Procedure Division
@@ -6511,15 +6511,13 @@ prog.cob:21: error: 78 VALUE does not conform to IBM COBOL
 prog.cob:30: error: 'MY-ELEMENT-1' requires one subscript
 ])
 
-AT_CHECK([cobc -x prog.cob ], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:21: error: variable length item not allowed here
 prog.cob:21: error: constant item 'ODO-LEN' requires a VALUE clause
 prog.cob:30: error: 'MY-ELEMENT-1' requires one subscript
 ])
 
 AT_CLEANUP
-
-
 
 
 AT_SETUP([BASED clause, ALLOCATE / FREE statements])
@@ -6683,7 +6681,7 @@ prog.cob:25: error: syntax error, unexpected PROCEDURE
 AT_CLEANUP
 
 AT_SETUP([Group Usage Error])
-AT_KEYWORDS([Numeric])
+AT_KEYWORDS([numeric])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -6695,13 +6693,13 @@ AT_DATA([prog.cob], [
        01  TESTRECORD.
         02  TSTGRP3 COMP-3.
          05  GRP3-1.
-           10  FILLER             PICTURE X(1). 
-           10  COM3-FLD1          PICTURE S9(4) COMP-4. 
-           10  FILLER             PICTURE X(1). 
-           10  COM3-FLD2          PICTURE S9(6). 
-           10  FILLER             PICTURE X(1). 
-           10  COM3-FLD3          PICTURE S9(6) DISPLAY. 
-           10  FILLER             PICTURE X(1). 
+           10  FILLER             PICTURE X(1).
+           10  COM3-FLD1          PICTURE S9(4) COMP-4.
+           10  FILLER             PICTURE X(1).
+           10  COM3-FLD2          PICTURE S9(6).
+           10  FILLER             PICTURE X(1).
+           10  COM3-FLD3          PICTURE S9(6) DISPLAY.
+           10  FILLER             PICTURE X(1).
          05  GRP3-2.
            10  FILLER             USAGE COMP-1.
 
@@ -6713,10 +6711,10 @@ AT_DATA([prog.cob], [
            DISPLAY TESTRECORD.
            STOP RUN.
 
-           
+
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob ], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=mf prog.cob ], [1], [],
 [prog.cob:12: error: TSTGRP3 USAGE COMP-3 incompatible with COM3-FLD1 USAGE COMP
 prog.cob:16: error: TSTGRP3 USAGE COMP-3 incompatible with COM3-FLD3 USAGE DISPLAY
 prog.cob:19: error: TSTGRP3 USAGE COMP-3 incompatible with FILLER USAGE COMP-1
@@ -6724,3 +6722,54 @@ prog.cob:19: error: TSTGRP3 USAGE COMP-3 incompatible with FILLER USAGE COMP-1
 
 AT_CLEANUP
 
+AT_SETUP([OSVS I/O extensions])
+AT_KEYWORDS([ibm file extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN "f.dat" SEQUENTIAL
+               FILE-LIMITS ARE 1 THRU 10, 100 THRU f-max
+               TRACK-AREA 100 CHARACTERS
+               TRACK-LIMIT 5 TRACKS.
+           SELECT g ASSIGN "g.dat" RELATIVE
+               RELATIVE KEY g-key
+               ACTUAL KEY g-actual-key.
+
+       I-O-CONTROL.
+           APPLY RECORD OVERFLOW f, g
+           APPLY CORE-INDEX f
+           APPLY RECORD-CRITERIA f-rec, f
+           RERUN ON "g2.dat" EVERY END REEL g
+           .
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  f.
+       01  f-rec        PIC X(100).
+
+       FD  g.
+       01  g-rec        PIC 9(10).
+
+       WORKING-STORAGE  SECTION.
+       01  f-max        PIC 9(5) VALUE 1000.
+       01  g-key        PIC 999.
+       01  g-actual-key PIC XXX.
+
+       PROCEDURE        DIVISION.
+           OPEN INPUT f DISP, INPUT g REREAD
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:10: warning: FILE-LIMIT is obsolete in GnuCOBOL
+prog.cob:10: warning: TRACK-AREA is obsolete in GnuCOBOL
+prog.cob:11: warning: TRACK-LIMIT is obsolete in GnuCOBOL
+prog.cob:14: warning: ACTUAL/NOMINAL KEY is obsolete in GnuCOBOL
+prog.cob:36: warning: OPEN LEAVE/REREAD/DISP is obsolete in GnuCOBOL
+prog.cob:36: warning: OPEN LEAVE/REREAD/DISP is obsolete in GnuCOBOL
+])
+AT_CLEANUP
