@@ -5,6 +5,7 @@
 	* parser.y: added ASSIGN VARYING variant of ASSIGN USING.
 	* reserved.c (lookup_reserved_word): allow SELECT and I-O-CONTROL to
 	  have multiple context-sensitive words occur in one sentence.
+	* config.def: clarified -fline-col-zero-default.
 
 2019-09-28  Ron Norman <rjn@inglenet.com>
 
