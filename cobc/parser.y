@@ -2277,6 +2277,8 @@ set_record_size (cb_tree min, cb_tree max)
 %token CURSOR_Y		"CURSOR-Y"
 %token CUSTOM_PRINT_TEMPLATE	"CUSTOM-PRINT-TEMPLATE"
 %token CYCLE
+%token CYL_INDEX		"CYL-INDEX"
+%token CYL_OVERFLOW		"CYL-OVERFLOW"
 %token DASHED
 %token DATA
 %token DATA_COLUMNS		"DATA-COLUMNS"
@@ -2390,6 +2392,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token EXIT
 %token EXPONENTIATION		"exponentiation operator"
 %token EXTEND
+%token EXTENDED_SEARCH		"EXTENDED-SEARCH"
 %token EXTERNAL
 %token EXTERNAL_FORM		"EXTERNAL-FORM"
 %token F
@@ -2552,6 +2555,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token LOCALE_TIME_FROM_FUNC	"FUNCTION LOCALE-TIME-FROM-SECONDS"
 %token LOCAL_STORAGE		"LOCAL-STORAGE"
 %token LOCK
+%token LOCK_HOLDING		"LOCK-HOLDING"
 %token LONG_DATE			"LONG-DATE"
 %token LOWER
 %token LOWERED
@@ -2562,6 +2566,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token MAGNETIC_TAPE		"MAGNETIC-TAPE"
 %token MANUAL
 %token MASS_UPDATE		"MASS-UPDATE"
+%token MASTER_INDEX		"MASTER-INDEX"
 %token MAX_LINES		"MAX-LINES"
 %token MAX_PROGRESS		"MAX-PROGRESS"
 %token MAX_TEXT			"MAX-TEXT"
@@ -2689,6 +2694,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token PRESENT
 %token PREVIOUS
 %token PRINT
+%token PRINT_CONTROL	"PRINT-CONTROL"
 %token PRINT_NO_PROMPT	"PRINT-NO-PROMPT"
 %token PRINT_PREVIEW	"PRINT-PREVIEW"
 %token PRINTER
@@ -2725,8 +2731,8 @@ set_record_size (cb_tree min, cb_tree max)
 %token READY_TRACE		"READY TRACE"
 %token RECEIVE
 %token RECORD
-%token RECORD_CRITERIA		"RECORD-CRITERIA"
 %token RECORD_DATA		"RECORD-DATA"
+%token RECORD_OVERFLOW		"RECORD-OVERFLOW"
 %token RECORD_TO_ADD	"RECORD-TO-ADD"
 %token RECORD_TO_DELETE	"RECORD-TO-DELETE"
 %token RECORDING
@@ -2743,6 +2749,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token REMAINDER
 %token REMOVAL
 %token RENAMES
+%token REORG_CRITERIA		"REORG-CRITERIA"
 %token REPLACE
 %token REPLACING
 %token REPORT
@@ -2999,6 +3006,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token WRAP
 %token WRITE
 %token WRITE_ONLY		"WRITE-ONLY"
+%token WRITE_VERIFY		"WRITE-VERIFY"
 %token WRITERS
 %token X
 %token XML
@@ -4704,6 +4712,7 @@ select_clause:
 | sharing_clause
 | file_limit_clause
 | actual_key_clause
+| nominal_key_clause
 | track_area_clause
 | track_limit_clause
 /* FXIME: disabled because of shift/reduce conflict
@@ -5402,10 +5411,20 @@ thru_list:
 /* ACTUAL KEY clause */
 
 actual_key_clause:
-  actual_or_nominal _key _is reference
+  ACTUAL _key _is reference
   {
-	(void)cb_verify (CB_OBSOLETE, "ACTUAL/NOMINAL KEY");
-	check_repeated ("ACTUAL/NOMINAL KEY", SYN_CLAUSE_14, &check_duplicate);
+	(void)cb_verify (CB_OBSOLETE, "ACTUAL KEY");
+	check_repeated ("ACTUAL KEY", SYN_CLAUSE_14, &check_duplicate);
+  }
+;
+
+/* NOMINAL KEY clause */
+
+nominal_key_clause:
+  NOMINAL _key _is reference
+  {
+	(void)cb_verify (CB_OBSOLETE, "NOMINAL KEY");
+	check_repeated ("NOMINAL KEY", SYN_CLAUSE_15, &check_duplicate);
   }
 ;
 
@@ -5415,7 +5434,7 @@ track_area_clause:
   TRACK_AREA _is reference_or_literal _characters
   {
 	(void)cb_verify (CB_OBSOLETE, "TRACK-AREA");
-	check_repeated ("TRACK-AREA", SYN_CLAUSE_15, &check_duplicate);
+	check_repeated ("TRACK-AREA", SYN_CLAUSE_16, &check_duplicate);
   }
 ;
 
@@ -5425,7 +5444,7 @@ track_limit_clause:
   TRACK_LIMIT _is integer track_or_tracks
   {
 	(void)cb_verify (CB_OBSOLETE, "TRACK-LIMIT");
-	check_repeated ("TRACK-LIMIT", SYN_CLAUSE_16, &check_duplicate);
+	check_repeated ("TRACK-LIMIT", SYN_CLAUSE_17, &check_duplicate);
   }
 
 ;
@@ -5510,11 +5529,31 @@ apply_clause:
 	current_program->apply_commit = $4;
 	CB_PENDING("APPLY COMMIT");
   }
-| APPLY write_only_or_core_idx _on file_name_list
-| APPLY RECORD TOK_OVERFLOW _on file_name_list
-| APPLY RECORD_CRITERIA _to reference _on file_name
+| APPLY LOCK_HOLDING _on file_name_list
+  {
+	CB_PENDING ("APPLY LOCK-HOLDING");
+  }
+| APPLY PRINT_CONTROL _on file_name_list
+  {
+	CB_PENDING ("APPLY PRINT-CONTROL");
+  }
+| APPLY WRITE_ONLY _on file_name_list
+| obsolete_dos_vs_apply_phrase
+  {
+	cb_verify (CB_OBSOLETE, _("DOS/VS APPLY phrase"));
+  }
 ;
 
+obsolete_dos_vs_apply_phrase:
+  APPLY CORE_INDEX _to reference _on file_name_list
+| APPLY CYL_INDEX _to integer _on file_name_list
+| APPLY CYL_OVERFLOW _of integer track_or_tracks _on file_name_list
+| APPLY EXTENDED_SEARCH _on file_name_list
+| APPLY MASTER_INDEX _to integer _on file_name_list
+| APPLY RECORD_OVERFLOW _on file_name_list
+| APPLY REORG_CRITERIA _to reference _on file_name_list
+| APPLY WRITE_VERIFY _on file_name_list
+;
 
 /* MULTIPLE FILE TAPE clause */
 
@@ -17981,7 +18020,6 @@ _with_for:	| WITH | FOR ;
 
 /* Mandatory selection */
 
-actual_or_nominal:	ACTUAL | NOMINAL;
 column_or_col:		COLUMN | COL ;
 columns_or_cols:	COLUMNS | COLS ;
 column_or_cols:		column_or_col | columns_or_cols ;
@@ -17998,7 +18036,6 @@ records:		RECORD _is_are | RECORDS _is_are ;
 reel_or_unit:		REEL | UNIT ;
 size_or_length:		SIZE | LENGTH ;
 track_or_tracks:	TRACK | TRACKS ;
-write_only_or_core_idx:	WRITE_ONLY | CORE_INDEX ;
 
 /* Mandatory R/W keywords */
 detail_keyword:		DETAIL | DE ;

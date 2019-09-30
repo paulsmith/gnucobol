@@ -1,4 +1,9 @@
 
+2019-09-30  Edward Hart <edward.dan.hart@gmail.com>
+
+	* realia.words: Removed words belonging to other dialects - word list
+	  now matches REALIA6.
+
 2019-09-28  Edward Hart <edward.dan.hart@gmail.com>
 
 	* realia.conf, realia-strict.conf, realia.words, Makefile.am: added

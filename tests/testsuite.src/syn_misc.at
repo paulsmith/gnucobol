@@ -6741,9 +6741,14 @@ AT_DATA([prog.cob], [
                ACTUAL KEY g-actual-key.
 
        I-O-CONTROL.
-           APPLY RECORD OVERFLOW f, g
-           APPLY CORE-INDEX f
-           APPLY RECORD-CRITERIA f-rec, f
+           APPLY RECORD-OVERFLOW f, g
+           APPLY CORE-INDEX core-idx ON f
+           APPLY CYL-INDEX TO 5 ON f
+           APPLY CYL-OVERFLOW 10 TRACKS f
+           APPLY EXTENDED-SEARCH g
+           APPLY MASTER-INDEX TO 5 on g
+           APPLY WRITE-VERIFY f, g
+           APPLY REORG-CRITERIA f-rec, f
            RERUN ON "g2.dat" EVERY END REEL g
            .
        DATA             DIVISION.
@@ -6755,6 +6760,7 @@ AT_DATA([prog.cob], [
        01  g-rec        PIC 9(10).
 
        WORKING-STORAGE  SECTION.
+       01  core-idx     PIC 999.
        01  f-max        PIC 9(5) VALUE 1000.
        01  g-key        PIC 999.
        01  g-actual-key PIC XXX.
@@ -6768,8 +6774,16 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob:10: warning: FILE-LIMIT is obsolete in GnuCOBOL
 prog.cob:10: warning: TRACK-AREA is obsolete in GnuCOBOL
 prog.cob:11: warning: TRACK-LIMIT is obsolete in GnuCOBOL
-prog.cob:14: warning: ACTUAL/NOMINAL KEY is obsolete in GnuCOBOL
-prog.cob:36: warning: OPEN LEAVE/REREAD/DISP is obsolete in GnuCOBOL
-prog.cob:36: warning: OPEN LEAVE/REREAD/DISP is obsolete in GnuCOBOL
+prog.cob:14: warning: ACTUAL KEY is obsolete in GnuCOBOL
+prog.cob:18: warning: DOS/VS APPLY phrase is obsolete in GnuCOBOL
+prog.cob:19: warning: DOS/VS APPLY phrase is obsolete in GnuCOBOL
+prog.cob:20: warning: DOS/VS APPLY phrase is obsolete in GnuCOBOL
+prog.cob:21: warning: DOS/VS APPLY phrase is obsolete in GnuCOBOL
+prog.cob:22: warning: DOS/VS APPLY phrase is obsolete in GnuCOBOL
+prog.cob:23: warning: DOS/VS APPLY phrase is obsolete in GnuCOBOL
+prog.cob:24: warning: DOS/VS APPLY phrase is obsolete in GnuCOBOL
+prog.cob:25: warning: DOS/VS APPLY phrase is obsolete in GnuCOBOL
+prog.cob:42: warning: OPEN LEAVE/REREAD/DISP is obsolete in GnuCOBOL
+prog.cob:42: warning: OPEN LEAVE/REREAD/DISP is obsolete in GnuCOBOL
 ])
 AT_CLEANUP

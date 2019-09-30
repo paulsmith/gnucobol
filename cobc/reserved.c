@@ -831,6 +831,12 @@ static struct cobc_reserved default_reserved_words[] = {
   { "CYCLE",			0, 1, CYCLE,			/* 2002 (C/S) */
 				0, CB_CS_EXIT
   },
+  { "CYL-INDEX",		0, 1, CYL_INDEX,		/* OS/VS extension */
+				0, CB_CS_I_O_CONTROL
+  },
+  { "CYL-OVERFLOW",		0, 1, CYL_OVERFLOW,		/* OS/VS extension */
+				0, CB_CS_I_O_CONTROL
+  },
   { "DASHED",		0, 1, DASHED,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
@@ -1171,6 +1177,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "EXTEND",			0, 0, EXTEND,			/* 2002 */
 				0, 0
+  },
+  { "EXTENDED-SEARCH",		0, 1, EXTENDED_SEARCH,		/* OS/VS extension */
+				0, CB_CS_I_O_CONTROL
   },
   { "EXTERN",			0, 1, TOK_EXTERN,		/* 2002 Implementor specific ENTRY-CONVENTION,
 								   Extension: implicit defined CALL-CONVENTION */
@@ -1698,6 +1707,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "LOCK",			0, 0, LOCK,			/* 2002 */
 				0, 0
   },
+  { "LOCK-HOLDING",		0, 1, LOCK_HOLDING,		/* ACU extension */
+				0, CB_CS_I_O_CONTROL
+  },
   { "LONG-DATE",			0, 1, LONG_DATE,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
@@ -1725,6 +1737,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "MASS-UPDATE",		0, 1, MASS_UPDATE,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY | CB_CS_SELECT | CB_CS_OPEN
+  },
+  { "MASTER-INDEX",		0, 1, MASTER_INDEX,		/* OS/VS extension */
+				0, CB_CS_I_O_CONTROL
   },
   { "MAX-LINES",		0, 1, MAX_LINES,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -2212,11 +2227,11 @@ static struct cobc_reserved default_reserved_words[] = {
   { "RECORD",			0, 0, RECORD,			/* 2002 */
 				0, 0
   },
-  { "RECORD-CRITERIA",		0, 1, RECORD_CRITERIA,		/* OS/VS extension */
-				0, CB_CS_I_O_CONTROL
-  },
   { "RECORD-DATA",			0, 1, RECORD_DATA,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
+  },
+  { "RECORD-OVERFLOW",		0, 1, RECORD_OVERFLOW,		/* OS/VS extension */
+				0, CB_CS_I_O_CONTROL
   },
   { "RECORD-TO-ADD",			0, 1, RECORD_TO_ADD,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -2269,6 +2284,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "RENAMES",			0, 0, RENAMES,			/* 2002 */
 				0, 0
+  },
+  { "REORG-CRITERIA",		0, 1, REORG_CRITERIA,		/* OS/VS extension */
+				0, CB_CS_I_O_CONTROL
   },
   { "REPLACE",			0, 0, REPLACE,			/* 2002 */
 				0, 0
@@ -2758,10 +2776,10 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, CB_CS_ROUNDED
   },
   { "TRACK",			0, 1, TRACK,			/* OS/VS extension */
-    				0, CB_CS_SELECT
+    				0, CB_CS_SELECT | CB_CS_I_O_CONTROL
   },
   { "TRACKS",			0, 1, TRACKS,			/* OS/VS extension */
-    				0, CB_CS_SELECT
+    				0, CB_CS_SELECT | CB_CS_I_O_CONTROL
   },
   { "TRACK-AREA",		0, 1, TRACK_AREA,		/* OS/VS extension */
     				0, CB_CS_SELECT
@@ -2987,6 +3005,9 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "WRITE-ONLY",		0, 1, WRITE_ONLY,		/* IBM extension */
+				0, CB_CS_I_O_CONTROL
+  },
+  { "WRITE-VERIFY",		0, 1, WRITE_VERIFY,		/* OS/VS extension */
 				0, CB_CS_I_O_CONTROL
   },
   { "WRITERS",		0, 1, WRITERS,		/* ACU extension */
