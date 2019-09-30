@@ -6714,7 +6714,7 @@ AT_DATA([prog.cob], [
 
 ])
 
-AT_CHECK([$COMPILE_ONLY -std=mf prog.cob ], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=mf -Wno-truncate prog.cob], [1], [],
 [prog.cob:12: error: TSTGRP3 USAGE COMP-3 incompatible with COM3-FLD1 USAGE COMP
 prog.cob:16: error: TSTGRP3 USAGE COMP-3 incompatible with COM3-FLD3 USAGE DISPLAY
 prog.cob:19: error: TSTGRP3 USAGE COMP-3 incompatible with FILLER USAGE COMP-1

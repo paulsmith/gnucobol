@@ -5453,6 +5453,9 @@ track_limit_clause:
 
 _i_o_control:
 | i_o_control_header _i_o_control_entries
+  {
+	cobc_cs_check = 0;
+  }
 ;
 
 i_o_control_header:
