@@ -1,4 +1,8 @@
 
+2019-10-01  Edward Hart <edward.dan.hart@gmail.com>
+
+	* fileio.c: fixed location of definition of off_t (bug #596)
+
 2019-09-28  Ron Norman <rjn@inglenet.com>
 
 	* common.h: COB_FILE_VERSION changed to 4 (matching reportwriter)
@@ -28,7 +32,7 @@
 
 2019-08-28  Ron Norman <rjn@inglenet.com>
 
-	* fileio.c: Free up 'fcd' fnamePtr allocated 
+	* fileio.c: Free up 'fcd' fnamePtr allocated
 
 2019-08-27  Ron Norman <rjn@inglenet.com>
 
@@ -108,7 +112,7 @@
 2019-06-13  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Use bdb_env->set_event_notify to catch fatal BDB errors
-	  and exit the program 
+	  and exit the program
 
 2019-06-11  Ron Norman <rjn@inglenet.com>
 
@@ -469,7 +473,7 @@
 2018-07-04  Ron Norman <rjn@inglenet.com>
 	* common.h: Added COB_MF_LS_SPLIT flag
 	* fileio.c:
-	  Added check for IO_fdname having 'ls_split' for 
+	  Added check for IO_fdname having 'ls_split' for
 	  Micro Focus compatible LINE SEQUENTIAL files.
 	  When a record is longer than the program was compiled for
 	  Micro Focus will return the extra data as an extra record.
@@ -684,7 +688,7 @@
 
 2018-01-03 Ron Norman <rjn@inglenet.com>
 	* common.c,common.h: Add cob_function_return routine to
-	  copy a FUNCTION's RETURNING cob_field to 'cob_module' 
+	  copy a FUNCTION's RETURNING cob_field to 'cob_module'
 	  save area and return address of that
 
 2018-01-03  Simon Sobisch <simonsobisch@gnu.org>
@@ -1056,7 +1060,7 @@
 2017-05-02 Ron Norman <rjn@inglenet.com>
 	* common.c,coblocal.h: added 'cob_keycheck' to indicate if INDEXED file
 	  keys must match exactly. Default is TRUE
-	* fileio.c: 
+	* fileio.c:
 	  Add code to handle 'keycheck' in IO_filename env var.
 	  Added code to indexed_open for C|D|VB-ISAM files to handle keycheck
 
