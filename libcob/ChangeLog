@@ -1,4 +1,9 @@
 
+2019-10-03  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Removed definition of off_t as it needs to be defined
+	           by the system and is most often in <sys/types.h>
+
 2019-10-01  Edward Hart <edward.dan.hart@gmail.com>
 
 	* fileio.c: fixed location of definition of off_t (bug #596)

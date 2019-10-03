@@ -169,10 +169,6 @@ static	vb_rtd_t *vbisam_rtd = NULL;
 #include "libcob.h"
 #include "coblocal.h"
 
-#ifndef off_t
-#define off_t		cob_s64_t
-#endif
-
 #ifdef	WITH_ANY_ISAM
 
 /* Isam File handler packet */
