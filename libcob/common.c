@@ -393,6 +393,7 @@ static struct config_tbl gc_conf[] = {
 	{"COB_SORT_CHUNK","sort_chunk",		"256K",	NULL,GRP_FILE,ENV_SIZE,SETPOS(cob_sort_chunk),(128 * 1024),(16 * 1024 * 1024)},
 	{"COB_SORT_MEMORY","sort_memory",	"128M",	NULL,GRP_FILE,ENV_SIZE,SETPOS(cob_sort_memory),(1024*1024),4294967294 /* max. guaranteed - 1 */},
 	{"COB_SYNC","sync",			"false",syncopts,GRP_FILE,ENV_BOOL,SETPOS(cob_do_sync)},
+    {"COB_KEYCHECK","keycheck",     "on",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_keycheck)},
 #ifdef  WITH_DB
 	{"DB_HOME", "db_home", 			NULL, 	NULL, GRP_FILE, ENV_FILE, SETPOS (bdb_home)},
 #endif
