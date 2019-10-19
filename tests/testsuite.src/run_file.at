@@ -6729,8 +6729,10 @@ AT_DATA([prog.cob], [
           STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0])
+AT_CHECK([export IX_OPTIONS='keycheck=off' 
+$COMPILE prog.cob], [0], , [])
+AT_CHECK([export IX_OPTIONS='keycheck=off'
+$COBCRUN_DIRECT ./prog], [0])
 
 AT_CLEANUP
 
