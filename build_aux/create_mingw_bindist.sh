@@ -158,7 +158,7 @@ cd "../lib_stripped"
 strip -p --strip-debug --strip-unneeded *.a         2>/dev/null
 popd 1>/dev/null
 
-cat >$target_dir/set_env.bat <<'_FEOF'
+cat >$target_dir/set_env.cmd <<'_FEOF'
 @echo off
 
 echo.
@@ -205,7 +205,7 @@ cobc --version
 
 _FEOF
 
-sed -i -e 's/\r*$/\r/' "$target_dir/set_env.bat"
+sed -i -e 's/\r*$/\r/' "$target_dir/set_env.cmd"
 
 
 cat >$target_dir/BUGS.txt <<'_FEOF'
@@ -241,4 +241,4 @@ _FEOF
 sed -i -e 's/\r*$/\r/' "$target_dir/README.txt"
 
 echo && echo FINISHED
-echo && echo make sure to adjust set_env.bat, README.txt and BUGS.txt
+echo && echo make sure to adjust set_env.cmd, README.txt and BUGS.txt

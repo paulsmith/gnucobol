@@ -290,6 +290,8 @@
     <None Include="..\..\cobc\ppparse.def" />
     <None Include="..\..\cobc\warning.def" />
     <None Include="..\..\cobc\ChangeLog" />
+    <None Include="..\..\libcob\exception.def" />
+    <None Include="..\..\libcob\system.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\config.h" />

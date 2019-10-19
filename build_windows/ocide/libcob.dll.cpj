@@ -1,23 +1,23 @@
 <CC386PROJECT>
 	<VERSION ID="5"/>
-	<WORKAREA NAME="D:\Programme\Entwicklung\GnuCOBOL\trunk\build_windows\ocide\GnuCOBOL.cwa"/>
+	<WORKAREA NAME="D:\Programme\Entwicklung\GnuCOBOL\code\trunk\build_windows\ocide\GnuCOBOL.cwa"/>
 	<TARGET TITLE="libcob">
 		<PROPERTIES>
 			<PROFILE NAME="WIN32" TYPE="DEBUG">
-				<PROP ID="OUTPUTEXE">$(PROJECTDIR)\..\$(CURRENTPROFILE)\$(CURRENTRELEASETYPE)\$(OUTPUTNAME)$(OUTPUTEXT)</PROP>
-				<PROP ID="__PROJECTTYPE">2</PROP>
-				<PROP ID="__INCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
-				<PROP ID="__LLIBS">gmp.l pdcurses.l vbisam.l</PROP>
-				<PROP ID="__RCINCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
 				<PROP ID="DETAILBUILD">1</PROP>
+				<PROP ID="__RCINCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="__LLIBS">gmp.l pdcurses.l vbisam.l</PROP>
+				<PROP ID="__INCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="__PROJECTTYPE">2</PROP>
+				<PROP ID="OUTPUTEXE">$(PROJECTDIR)\..\$(CURRENTPROFILE)\$(CURRENTRELEASETYPE)\$(OUTPUTNAME)$(OUTPUTEXT)</PROP>
 			</PROFILE>
 			<PROFILE NAME="WIN32" TYPE="RELEASE">
-				<PROP ID="OUTPUTEXE">$(PROJECTDIR)\..\$(CURRENTPROFILE)\$(CURRENTRELEASETYPE)\$(OUTPUTNAME)$(OUTPUTEXT)</PROP>
-				<PROP ID="DETAILBUILD">1</PROP>
-				<PROP ID="__PROJECTTYPE">2</PROP>
-				<PROP ID="__INCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
-				<PROP ID="__LLIBS">gmp.l pdcurses.l vbisam.l</PROP>
 				<PROP ID="__RCINCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="__LLIBS">gmp.l pdcurses.l vbisam.l</PROP>
+				<PROP ID="__INCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="__PROJECTTYPE">2</PROP>
+				<PROP ID="DETAILBUILD">1</PROP>
+				<PROP ID="OUTPUTEXE">$(PROJECTDIR)\..\$(CURRENTPROFILE)\$(CURRENTRELEASETYPE)\$(OUTPUTNAME)$(OUTPUTEXT)</PROP>
 			</PROFILE>
 		</PROPERTIES>
 		<FILES>
@@ -30,6 +30,7 @@
 				<FILE NAME="..\..\libcob\coblocal.h" TITLE="coblocal.h" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\common.h" TITLE="common.h" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\exception.def" TITLE="exception.def" CLEAN="0"/>
+				<FILE NAME="..\..\libcob\fileio.h" TITLE="fileio.h" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\system.def" TITLE="system.def" CLEAN="0"/>
 			</FOLDER>
 			<FOLDER TITLE="Resource Files">
@@ -39,7 +40,12 @@
 				<FILE NAME="..\..\libcob\call.c" TITLE="call.c" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\cobgetopt.c" TITLE="cobgetopt.c" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\common.c" TITLE="common.c" CLEAN="0"/>
+				<FILE NAME="..\..\libcob\fbdb.c" TITLE="fbdb.c" CLEAN="0"/>
+				<FILE NAME="..\..\libcob\fextfh.c" TITLE="fextfh.c" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\fileio.c" TITLE="fileio.c" CLEAN="0"/>
+				<FILE NAME="..\..\libcob\fisam.c" TITLE="fisam.c" CLEAN="0"/>
+				<FILE NAME="..\..\libcob\flmdb.c" TITLE="flmdb.c" CLEAN="0"/>
+				<FILE NAME="..\..\libcob\focextfh.c" TITLE="focextfh.c" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\intrinsic.c" TITLE="intrinsic.c" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\mlio.c" TITLE="mlio.c" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\move.c" TITLE="move.c" CLEAN="0"/>

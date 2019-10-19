@@ -598,6 +598,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libcob\exception.def"
+				>
+			</File>
+			<File
 				RelativePath="..\..\cobc\flag.def"
 				>
 			</File>
@@ -607,6 +611,10 @@
 			</File>
 			<File
 				RelativePath="..\..\cobc\ppparse.def"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob\system.def"
 				>
 			</File>
 			<File

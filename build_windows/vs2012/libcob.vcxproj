@@ -170,7 +170,12 @@
     <ClCompile Include="..\..\libcob\call.c" />
     <ClCompile Include="..\..\libcob\cobgetopt.c" />
     <ClCompile Include="..\..\libcob\common.c" />
+    <ClCompile Include="..\..\libcob\fbdb.c" />
+    <ClCompile Include="..\..\libcob\fextfh.c" />
     <ClCompile Include="..\..\libcob\fileio.c" />
+    <ClCompile Include="..\..\libcob\fisam.c" />
+    <ClCompile Include="..\..\libcob\flmdb.c" />
+    <ClCompile Include="..\..\libcob\focextfh.c" />
     <ClCompile Include="..\..\libcob\intrinsic.c" />
     <ClCompile Include="..\..\libcob\mlio.c" />
     <ClCompile Include="..\..\libcob\move.c" />
@@ -187,6 +192,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\libcob.h" />
+    <ClInclude Include="..\..\libcob\fileio.h" />
     <ClInclude Include="..\config.h" />
     <ClInclude Include="..\defaults.h" />
     <ClInclude Include="..\..\libcob\cobgetopt.h" />

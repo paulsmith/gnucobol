@@ -4,9 +4,10 @@
 
 #define NOISAM       0
 #define BDB          1
-#define VBISAM       2
-#define CISAM        3
+#define LMDB         2
+#define VBISAM       3
 #define DISAM        4
+#define CISAM        5
 
 #define NOCURSES     0
 #define PDCURSES     1
@@ -97,6 +98,14 @@
 #else
 #pragma comment(lib, "libdb48")
 //#pragma comment(lib, "libdb62")
+#endif
+#elif CONFIGURED_ISAM == LMDB
+#if defined _DEBUG
+#pragma comment(lib, "liblmdbd")
+//#pragma comment(lib, "lmdb")
+#else
+#pragma comment(lib, "liblmdb")
+//#pragma comment(lib, "lmdb")
 #endif
 #endif /* CONFIGURED_ISAM */
 #endif
@@ -662,7 +671,7 @@
 /* Version number of package */
 #define VERSION "3.2-early-dev"
 
-/* Use CISAM as ISAM handler */
+/* Use CISAM as INDEXED handler */
 #if CONFIGURED_ISAM == CISAM
 #define WITH_CISAM 1
 #else
@@ -683,30 +692,33 @@
 #define WITH_CURSES "disabled"
 #endif
 
-/* Use Berkeley DB library as emulation of ISAM handler */
+/* Use Berkeley DB library as INDEXED handler */
 #if CONFIGURED_ISAM == BDB
 #define WITH_DB 1
 #else
 /* #undef WITH_DB */
 #endif
 
-/* Use DISAM as ISAM handler */
+/* Use DISAM as INDEXED handler */
 #if CONFIGURED_ISAM == DISAM
 #define WITH_DISAM 1
 #else
 /* #undef WITH_DISAM */
 #endif
 
-/* Compile with an external ISAM handler */
+/* Compile with obsolete external INDEXED handler */
 /* #undef WITH_INDEX_EXTFH */
 
-/* Compile with an external SEQ/RAN handler */
+/* Use Lightning Memory-Mapped Database as INDEXED handler */
+/* #undef WITH_LMDB */
+
+/* Compile with obsolete external SEQ/RAN handler */
 /* #undef WITH_SEQRA_EXTFH */
 
 /* Define variable sequential file format */
 #define WITH_VARSEQ 0
 
-/* Use VBISAM as ISAM handler */
+/* Use VBISAM as INDEXED handler */
 #if CONFIGURED_ISAM == VBISAM
 #define WITH_VBISAM 1
 #else
@@ -763,6 +775,7 @@
 
 #undef NOISAM
 #undef BDB
+#undef LMDB
 #undef VBISAM
 #undef CISAM
 #undef DISAM

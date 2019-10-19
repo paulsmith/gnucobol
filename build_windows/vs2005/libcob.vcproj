@@ -369,7 +369,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libcob\fbdb.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob\fextfh.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libcob\fileio.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob\fisam.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob\flmdb.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob\focextfh.c"
 				>
 			</File>
 			<File
@@ -432,6 +452,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libcob\exception.def"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob\fileio.h"
 				>
 			</File>
 			<File
