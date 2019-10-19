@@ -844,17 +844,44 @@ enum cob_exception_id {
 
 #define COB_FILE_MODE		0666
 
-/* Organization, FIXME: change to enum */
+/* File: 'file_format' as stored on disk */
+#define COB_FILE_IS_GCVS0	0	/* GnuCOBOL VarSeq 0 */
+#define COB_FILE_IS_GCVS1	1	/* GnuCOBOL VarSeq 1 */
+#define COB_FILE_IS_GCVS2	2	/* GnuCOBOL VarSeq 2 */
+#define COB_FILE_IS_GCVS3	3	/* GnuCOBOL VarSeq 3 */
+#define COB_FILE_IS_B32		4	/* 32-bit BigEndian record prefix */
+#define COB_FILE_IS_B64		5	/* 64-bit BigEndian record prefix */
+#define COB_FILE_IS_L32		6	/* 32-bit LittleEndian record prefix */
+#define COB_FILE_IS_L64		7	/* 64-bit LittleEndian record prefix */
+#define COB_FILE_IS_GC		10	/* GnuCOBOL default format */
+#define COB_FILE_IS_MF		11	/* Micro Focus default format */
+
+
+/* Organization */
 
 #define COB_ORG_SEQUENTIAL	0
 #define COB_ORG_LINE_SEQUENTIAL	1
 #define COB_ORG_RELATIVE	2
 #define COB_ORG_INDEXED		3
 #define COB_ORG_SORT		4
-#define COB_ORG_MAX		5
-#define COB_ORG_MESSAGE	6 /* only for syntax checks */
+#define COB_ORG_MAX			5 
 
-/* Access mode, FIXME: change to enum */
+/* io_routine */
+
+#define COB_IO_SEQUENTIAL	0
+#define COB_IO_LINE_SEQUENTIAL	1
+#define COB_IO_RELATIVE		2
+#define COB_IO_CISAM		3	/* INDEXED via C-ISAM */
+#define COB_IO_DISAM		4	/* INDEXED via D-ISAM */
+#define COB_IO_VBISAM		5	/* INDEXED via VB-ISAM */
+#define COB_IO_BDB			6	/* INDEXED via BDB */
+#define COB_IO_LMDB			7	/* INDEXED via LMDB */
+#define COB_IO_IXEXT 		8	/* INDEXED via Local old style WITH_INDEX_EXTFH */
+#define COB_IO_SQEXT 		9	/* SEQUENTIAL via old style WITH_SEQRA_EXTFH */
+#define COB_IO_RLEXT 		10	/* RELATIVE via old style WITH_SEQRA_EXTFH */
+#define COB_IO_MAX			11 
+
+/* Access mode */
 
 #define COB_ACCESS_SEQUENTIAL	1
 #define COB_ACCESS_DYNAMIC	2
@@ -886,18 +913,6 @@ enum cob_exception_id {
 #define COB_LOCK_ROLLBACK	(1U << 5)
 
 #define COB_FILE_EXCLUSIVE	(COB_LOCK_EXCLUSIVE | COB_LOCK_OPEN_EXCLUSIVE)
-
-/* File: 'file_format' as stored on disk */
-#define COB_FILE_IS_GCVS0	0	/* GNUCobol VarSeq 0 */
-#define COB_FILE_IS_GCVS1	1	/* GNUCobol VarSeq 1 */
-#define COB_FILE_IS_GCVS2	2	/* GNUCobol VarSeq 2 */
-#define COB_FILE_IS_GCVS3	3	/* GNUCobol VarSeq 3 */
-#define COB_FILE_IS_B32		4	/* 32-bit BigEndian record prefix */
-#define COB_FILE_IS_B64		5	/* 64-bit BigEndian record prefix */
-#define COB_FILE_IS_L32		6	/* 32-bit LittleEndian record prefix */
-#define COB_FILE_IS_L64		7	/* 64-bit LittleEndian record prefix */
-#define COB_FILE_IS_GC		10	/* GNUCobol default format */
-#define COB_FILE_IS_MF		11	/* Micro Focus format */
 
 /* File: 'file_features' file processing features */
 #define COB_FILE_SYNC		(1 << 0)/* sync writes to disk */
@@ -1451,6 +1466,10 @@ typedef struct __cob_file {
 #define COB_LAST_OPEN		7
 #define COB_LAST_CLOSE		8
 #define COB_LAST_DELETE_FILE	9
+
+	unsigned char		io_routine;		/* Index to I/O routine function pointers */
+	unsigned char		unused[2];		
+
 	cob_io_stats		stats[6];		/* I/O Counts by 'operation' type */
 
 } cob_file;
@@ -1656,18 +1675,6 @@ typedef struct __cob_global {
 	unsigned int		cob_debugging_mode;	/* activation of USE ON DEBUGGING code */
 
 } cob_global;
-
-/* File I/O function pointer structure */
-struct cob_fileio_funcs {
-	int	(*open)		(cob_file *, char *, const int, const int);
-	int	(*close)	(cob_file *, const int);
-	int	(*start)	(cob_file *, const int, cob_field *);
-	int	(*read)		(cob_file *, cob_field *, const int);
-	int	(*read_next)	(cob_file *, const int);
-	int	(*write)	(cob_file *, const int);
-	int	(*rewrite)	(cob_file *, const int);
-	int	(*fdelete)	(cob_file *);
-};
 
 /* Low level jump structure */
 struct cobjmp_buf {
@@ -2451,7 +2458,11 @@ COB_EXPIMP void	cob_file_external_addr (const char *,
 COB_EXPIMP void	cob_file_malloc (cob_file **, cob_file_key **,
 				 const int nkeys, const int linage);
 COB_EXPIMP void	cob_file_free   (cob_file **, cob_file_key **);
+COB_EXPIMP void cob_commit	(void);
+COB_EXPIMP void cob_rollback	(void);
 
+/******************************************/
+/* Functions in fileio.c  API for codegen */
 COB_EXPIMP void cob_open	(cob_file *, const int, const int, cob_field *);
 COB_EXPIMP void cob_close	(cob_file *, cob_field *, const int, const int);
 COB_EXPIMP void cob_read	(cob_file *, cob_field *, cob_field *, const int);
@@ -2465,12 +2476,10 @@ COB_EXPIMP void cob_write	(cob_file *, cob_field *, const int,
 
 COB_EXPIMP void cob_delete_file	(cob_file *, cob_field *);
 COB_EXPIMP void cob_unlock_file	(cob_file *, cob_field *);
-COB_EXPIMP void cob_commit	(void);
-COB_EXPIMP void cob_rollback	(void);
 
 /*********************************************/
-/* EXTFH functions */
-
+/* EXTFH functions in filemfextfh.c */
+COB_EXPIMP void free_extfh_fcd (void);
 COB_EXPIMP int	EXTFH		(unsigned char *opcode, FCD3 *fcd);
 COB_EXPIMP void	cob_extfh_open		(int (*callfh)(unsigned char *opcode, FCD3 *fcd),
 					cob_file *, const int, const int, cob_field *);

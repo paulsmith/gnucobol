@@ -6,6 +6,11 @@ NEWS - user visible changes				-*- outline -*-
      in this change including incompatible changes ***
 
 * internal change: fileio splitted
+
+* The old OpenCOBOL EXTFH interface built in via --with-seqra-extfh 
+*     and --with-index-extfh is obsolete and will be removed in the
+*     next major release
+
 * many internal changes, possibly changing some defaults
 
 

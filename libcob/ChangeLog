@@ -1,4 +1,11 @@
 
+2019-10-19  Ron Norman <rjn@inglenet.com>
+	* fileio.c has been split into fileio.c fisam.c fbdb.c fextfh.c focextfh.c
+	* fileio.h added with common definitions for all fileio modules
+	* flmdb.c copied from isam-lmdb branch
+	* You can now configure multiple INDEXED file handlers but only one of
+	  C-ISAM, D-ISAM or VB-ISAM
+
 2019-10-03  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Removed definition of off_t as it needs to be defined

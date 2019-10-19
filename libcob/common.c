@@ -77,6 +77,9 @@
 #ifdef	WITH_DB
 #include <db.h>
 #endif
+#ifdef	WITH_LMDB
+#include <lmdb.h>
+#endif
 
 #if defined (HAVE_NCURSESW_NCURSES_H)
 #include <ncursesw/ncurses.h>
@@ -7482,9 +7485,9 @@ print_info (void)
 #endif
 
 #ifdef COB_EBCDIC_MACHINE
-	var_print (_("native EBCDIC"),		_("yes"), "", 0);
+	var_print (_("native character set"),		_("EBCDIC"), "", 0);
 #else
-	var_print (_("native EBCDIC"),		_("no"), "", 0);
+	var_print (_("native character set"),		_("ASCII"), "", 0);
 #endif
 
 #if !defined (__PDCURSES__) && !defined (NCURSES_VERSION)
@@ -7586,35 +7589,51 @@ print_info (void)
 	}
 
 #ifdef	WITH_SEQRA_EXTFH
-	var_print (_("sequential file handler"),	"EXTFH", "", 0);
+	var_print (_("sequential file handler"),	"EXTFH (obsolete)", "", 0);
 #else
 	var_print (_("sequential file handler"),	_("built-in"), "", 0);
 #endif
 
+#if defined(WITH_INDEX_EXTFH) || defined(WITH_CISAM) || defined(WITH_dISAM) \
+	|| defined(WITH_VBISAM) || defined(WITH_DB) || defined(WITH_LMDB)
 #if defined	(WITH_INDEX_EXTFH)
-	var_print (_("ISAM file handler"), 		"EXTFH", "", 0);
-#elif defined	(WITH_DB)
+	var_print (_("indexed file handler"), 		"EXTFH (obsolete)", "", 0);
+#endif
+#if defined	(WITH_DB)
 	major = 0, minor = 0, patch = 0;
 	db_version (&major, &minor, &patch);
 	if (major == DB_VERSION_MAJOR && minor == DB_VERSION_MINOR) {
-		snprintf (versbuff, 55, "%s, version %d.%d%d", "BDB", major, minor, patch);
+		snprintf (versbuff, 55, "%s, version %d.%d.%d", "BDB", major, minor, patch);
 	} else {
-		snprintf (versbuff, 55, "%s, version %d.%d%d (compiled with %d.%d)",
+		snprintf (versbuff, 55, "%s, version %d.%d.%d (compiled with %d.%d)",
 			"BDB", major, minor, patch, DB_VERSION_MAJOR, DB_VERSION_MINOR);
 	}
-	var_print (_("ISAM file handler"), 		versbuff, "", 0);
-#elif defined	(WITH_CISAM)
-	var_print (_("ISAM file handler"), 		"C-ISAM" "", 0);
-#elif defined	(WITH_DISAM)
-	var_print (_("ISAM file handler"), 		"D-ISAM", "", 0);
-#elif defined	(WITH_VBISAM)
-#if defined	(VB_RTD)
-	var_print (_("ISAM file handler"), 		"VBISAM (RTD)", "", 0);
+	var_print (_("indexed file handler"), 		versbuff, "", 0);
+#endif
+#if defined	(WITH_LMDB)
+#if defined(MDB_VERSION_MAJOR) && defined(MDB_VERSION_MINOR) && defined(MDB_VERSION_PATCH)
+	snprintf (versbuff, 55, "%s, compiled %d.%d.%d",
+			"LMDB", MDB_VERSION_MAJOR, MDB_VERSION_MINOR,MDB_VERSION_PATCH);
+	var_print (_("indexed file handler"), 		versbuff, "", 0);
 #else
-	var_print (_("ISAM file handler"), 		"VBISAM", "", 0);
+	var_print (_("indexed file handler"), 		"LMDB", "", 0);
+#endif
+#endif
+#if defined	(WITH_CISAM)
+	var_print (_("indexed file handler"), 		"C-ISAM", "", 0);
+#endif
+#if defined	(WITH_DISAM)
+	var_print (_("indexed file handler"), 		"D-ISAM", "", 0);
+#endif
+#if defined	(WITH_VBISAM)
+#if defined	(VB_RTD)
+	var_print (_("indexed file handler"), 		"VB-ISAM (RTD)", "", 0);
+#else
+	var_print (_("indexed file handler"), 		"VB-ISAM", "", 0);
+#endif
 #endif
 #else
-	var_print (_("ISAM file handler"), 		_("disabled"), "", 0);
+	var_print (_("indexed file handler"), 		_("disabled"), "", 0);
 #endif
 
 	major = 0, minor = 0, patch = 0;

@@ -70,6 +70,13 @@
 
 #include "libcob/cobgetopt.h"
 
+#ifdef	WITH_DB
+#include <db.h>
+#endif
+#ifdef	WITH_LMDB
+#include <lmdb.h>
+#endif
+
 #if defined (COB_EXPERIMENTAL) || 1
 #define COB_INTERNAL_XREF
 enum xref_type {
@@ -2197,9 +2204,9 @@ cobc_print_info (void)
 #endif
 
 #ifdef COB_EBCDIC_MACHINE
-	cobc_var_print (_("native EBCDIC"),	_("yes"), 0);
+	cobc_var_print (_("native character set"),	_("EBCDIC"), 0);
 #else
-	cobc_var_print (_("native EBCDIC"),	_("no"), 0);
+	cobc_var_print (_("native character set"),	_("ASCII"), 0);
 #endif
 
 	cobc_var_print (_("extended screen I/O"),	WITH_CURSES, 0);
@@ -2211,29 +2218,65 @@ cobc_print_info (void)
 	}
 
 #ifdef	WITH_SEQRA_EXTFH
-	cobc_var_print (_("sequential file handler"),	"EXTFH", 0);
+	cobc_var_print (_("sequential file handler"),	"EXTFH (obsolete)", 0);
 #else
 	cobc_var_print (_("sequential file handler"),	_("built-in"), 0);
 #endif
 
 #if defined	(WITH_INDEX_EXTFH)
-	cobc_var_print (_("ISAM file handler"),		"EXTFH", 0);
-#elif defined	(WITH_DB)
-	cobc_var_print (_("ISAM file handler"),		"BDB", 0);
-#elif defined	(WITH_LMDB)
-	cobc_var_print (_("ISAM file handler"),		"LMDB", 0);
-#elif defined	(WITH_CISAM)
-	cobc_var_print (_("ISAM file handler"),		"C-ISAM", 0);
-#elif defined	(WITH_DISAM)
-	cobc_var_print (_("ISAM file handler"),		"D-ISAM", 0);
-#elif defined	(WITH_VBISAM)
-# if defined	(VB_RTD)
-	cobc_var_print (_("ISAM file handler"),		"VBISAM (RTD)", 0);
-# else
-	cobc_var_print (_("ISAM file handler"),		"VBISAM", 0);
-# endif
+	cobc_var_print (_("indexed file handler"),		"EXTFH (obsolete)", 0);
+#ifndef HASISAM
+#define HASISAM 1
+#endif
+#endif
+#if defined	(WITH_DB)
+#if defined(DB_VERSION_MAJOR) && defined(DB_VERSION_MINOR) && defined(DB_VERSION_PATCH)
+	snprintf (versbuff, 55, "%s version %d.%d.%d",
+			"BDB", DB_VERSION_MAJOR, DB_VERSION_MINOR,DB_VERSION_PATCH);
+	cobc_var_print (_("indexed file handler"), 		versbuff, 0);
 #else
-	cobc_var_print (_("ISAM file handler"),		_("disabled"), 0);
+	cobc_var_print (_("indexed file handler"), 		"BDB", 0);
+#endif
+#ifndef HASISAM
+#define HASISAM 1
+#endif
+#endif
+#if defined	(WITH_LMDB)
+#if defined(MDB_VERSION_MAJOR) && defined(MDB_VERSION_MINOR) && defined(MDB_VERSION_PATCH)
+	snprintf (versbuff, 55, "%s version %d.%d.%d",
+			"LMDB", MDB_VERSION_MAJOR, MDB_VERSION_MINOR,MDB_VERSION_PATCH);
+	cobc_var_print (_("indexed file handler"), 		versbuff, 0);
+#else
+	cobc_var_print (_("indexed file handler"), 		"LMDB", 0);
+#endif
+#ifndef HASISAM
+#define HASISAM 1
+#endif
+#endif
+#if defined	(WITH_CISAM)
+	cobc_var_print (_("indexed file handler"),		"C-ISAM", 0);
+#ifndef HASISAM
+#define HASISAM 1
+#endif
+#endif
+#if defined	(WITH_DISAM)
+	cobc_var_print (_("indexed file handler"),		"D-ISAM", 0);
+#ifndef HASISAM
+#define HASISAM 1
+#endif
+#endif
+#if defined	(WITH_VBISAM)
+# if defined	(VB_RTD)
+	cobc_var_print (_("indexed file handler"),		"VBISAM (RTD)", 0);
+# else
+	cobc_var_print (_("indexed file handler"),		"VBISAM", 0);
+# endif
+#ifndef HASISAM
+#define HASISAM 1
+#endif
+#endif
+#ifndef HASISAM
+	cobc_var_print (_("indexed file handler"),		_("disabled"), 0);
 #endif
 
 #if defined(__MPIR_VERSION)
