@@ -133,9 +133,6 @@ static char	**file_paths = NULL;
 static const char	* const prefix[] = { "DD_", "dd_", "" };
 #define NUM_PREFIX	sizeof (prefix) / sizeof (char *)
 
-static int dummy_delete		(cob_file_api *, cob_file *);
-static int dummy_read		(cob_file_api *, cob_file *, cob_field *, const int);
-static int dummy_start		(cob_file_api *, cob_file *, const int, cob_field *);
 static int dummy_stub		() {return 0;};
 static int dummy_91			() {return COB_STATUS_91_NOT_AVAILABLE;};
 

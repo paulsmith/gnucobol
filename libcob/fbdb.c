@@ -29,8 +29,11 @@
 
 #include <db.h>
 
+void cob_bdb_init_fileio (cob_file_api *a);
+
 /* Local variables */
 
+static int ix_bdb_sync		(cob_file_api *,cob_file *f);
 static int ix_bdb_open		(cob_file_api *,cob_file *, char *, const int, const int);
 static int ix_bdb_close		(cob_file_api *,cob_file *, const int);
 static int ix_bdb_start		(cob_file_api *,cob_file *, const int, cob_field *);
@@ -41,15 +44,10 @@ static int ix_bdb_delete	(cob_file_api *,cob_file *);
 static int ix_bdb_file_delete(cob_file_api *, cob_file *, char *);
 static int ix_bdb_rewrite	(cob_file_api *,cob_file *, const int);
 static int ix_bdb_file_unlock (cob_file_api *a, cob_file *f);
-static void cob_bdb_exit_fileio (cob_file_api *a);
-static int cob_bdb_fork (cob_file_api *a);
-void cob_bdb_init_fileio (cob_file_api *a);
+static void ix_bdb_exit_fileio (cob_file_api *a);
+static int ix_bdb_fork (cob_file_api *a);
 
-static int 
-ix_bdb_dummy ()
-{
-	return 0;
-}
+static int ix_bdb_dummy () { return 0; }
 
 static const struct cob_fileio_funcs ext_indexed_funcs = {
 	ix_bdb_open,
@@ -62,12 +60,12 @@ static const struct cob_fileio_funcs ext_indexed_funcs = {
 	ix_bdb_delete,
 	ix_bdb_file_delete,
 	cob_bdb_init_fileio,
-	cob_bdb_exit_fileio,
-	cob_bdb_fork,
-	ix_bdb_dummy,
-	ix_bdb_dummy,
+	ix_bdb_exit_fileio,
+	ix_bdb_fork,
+	ix_bdb_sync,
+	(void*)ix_bdb_dummy,
 	ix_bdb_file_unlock,
-	ix_bdb_dummy
+	(void*)ix_bdb_dummy
 };
 
 static DB_ENV	*bdb_env = NULL;
@@ -352,8 +350,8 @@ bdb_close_index(cob_file *f, int index)
 
 /* Local functions */
 
-static void
-cob_bdb_sync (cob_file *f)
+static int
+ix_bdb_sync (cob_file_api *a, cob_file *f)
 {
 	struct indexed_file	*p;
 	size_t			i;
@@ -367,8 +365,8 @@ cob_bdb_sync (cob_file *f)
 				}
 			}
 		}
-		return;
 	}
+	return 0;
 }
 
 /* INDEXED */
@@ -1166,6 +1164,7 @@ ix_bdb_delete_internal (cob_file *f, const int rewrite, int bdb_opts)
 	return COB_STATUS_00_SUCCESS;
 }
 
+/* Delete file */
 static int
 ix_bdb_file_delete (cob_file_api *a, cob_file *f, char *filename)
 {
@@ -1249,29 +1248,7 @@ bdb_nofile (const char *filename)
 	return 1;
 }
 
-/* Delete file */
-
-static void
-indexed_file_delete (cob_file *f, const char *filename)
-{
-	int	i;
-	char	file_open_buff[2560];
-
-	for (i = 0; i < f->nkeys; ++i) {
-		if (i == 0) {
-			snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s",
-				  filename);
-		} else {
-			snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s.%d",
-				  filename, (int)i);
-		}
-		file_open_buff[COB_FILE_MAX] = 0;
-		unlink (file_open_buff);
-	}
-}
-
 /* OPEN INDEXED file */
-
 static int
 ix_bdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const int sharing)
 {
@@ -2040,7 +2017,7 @@ ix_bdb_file_unlock (cob_file_api *a, cob_file *f)
 
 /* Call this routine when a new process has been forked */
 static int
-cob_bdb_fork (cob_file_api *a)
+ix_bdb_fork (cob_file_api *a)
 {
 	bdb_lock_id = 0;
 	if(bdb_env) {
@@ -2051,7 +2028,7 @@ cob_bdb_fork (cob_file_api *a)
 }
 
 static void
-cob_bdb_exit_fileio (cob_file_api *a)
+ix_bdb_exit_fileio (cob_file_api *a)
 {
 	if(record_lock_object) {
 		cob_free (record_lock_object);

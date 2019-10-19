@@ -23,6 +23,7 @@
 #define cobsetptr file_setptr
 #include "fileio.h"
 
+#if	defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
 #define	COB_WITH_STATUS_02
 
 #if	defined(WITH_CISAM)
@@ -1545,3 +1546,5 @@ cob_isam_init_fileio (cob_file_api *a)
 #endif
 #endif
 }
+
+#endif

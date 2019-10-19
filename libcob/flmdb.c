@@ -113,16 +113,6 @@ lmdb_cursor_close (const char func[], int line, MDB_cursor *cursor) {
 #define mdb_cursor_close(cursor)		\
   lmdb_cursor_close (__FILE__, __LINE__, (cursor));
 
-/* Renew a cursor handle. */
-static int
-lmdb_cursor_renew (const char func[], int line,
-		   MDB_txn *txn, MDB_cursor *cursor) {
-  module_trace( "mdb_cursor_renew(%p, %p)", func, line, txn, cursor) ;
-  return mdb_cursor_renew (txn, cursor);
-}
-#define mdb_cursor_renew(txn, cursor)		\
-  lmdb_cursor_renew (__FILE__, __LINE__, (txn) , (cursor) );
-
 /* Retrieve by cursor. */
 static int
 lmdb_cursor_get (const char func[], int line,
@@ -186,16 +176,6 @@ lmdb_get (const char func[], int line,
 #define mdb_get(txn, dbi, key, data)		\
   lmdb_get(__FILE__, __LINE__,  (txn), (dbi), (key), (data) )
 
-/* Store items into a database. */
-static int
-lmdb_put (const char func[], int line, MDB_txn *txn, MDB_dbi dbi,
-	  MDB_val *key, MDB_val *data, unsigned int flags) {
-      module_trace("mdb_put(%p, %d, %p, %p, %u)", func, line, txn, dbi, key, data, flags);
-      return mdb_put(txn, dbi, key, data, flags);
-}
-#define mdb_put(txn, dbi, key, data, flags)		\
-  lmdb_put(__FILE__, __LINE__, (txn), (dbi), (key), (data), (flags) )
-
 /* Abandon all the operations of the transaction. */
 static void
 lmdb_txn_abort (const char func[], int line, MDB_txn *txn) {
@@ -225,6 +205,27 @@ lmdb_txn_commit (const char func[], int line, MDB_txn *txn) {
 #define mdb_txn_commit(txn)			\
   lmdb_txn_commit(__FILE__, __LINE__, (txn))
 
+#if 0 /* Currently unused */
+/* Renew a cursor handle. */
+static int
+lmdb_cursor_renew (const char func[], int line,
+		   MDB_txn *txn, MDB_cursor *cursor) {
+  module_trace( "mdb_cursor_renew(%p, %p)", func, line, txn, cursor) ;
+  return mdb_cursor_renew (txn, cursor);
+}
+#define mdb_cursor_renew(txn, cursor)		\
+  lmdb_cursor_renew (__FILE__, __LINE__, (txn) , (cursor) );
+
+/* Store items into a database. */
+static int
+lmdb_put (const char func[], int line, MDB_txn *txn, MDB_dbi dbi,
+	  MDB_val *key, MDB_val *data, unsigned int flags) {
+      module_trace("mdb_put(%p, %d, %p, %p, %u)", func, line, txn, dbi, key, data, flags);
+      return mdb_put(txn, dbi, key, data, flags);
+}
+#define mdb_put(txn, dbi, key, data, flags)		\
+  lmdb_put(__FILE__, __LINE__, (txn), (dbi), (key), (data), (flags) )
+
 /* Renew a read-only transaction. */
 static int
 lmdb_txn_renew (const char func[], int line, MDB_txn *txn) {
@@ -242,6 +243,7 @@ lmdb_txn_reset (const char func[], int line, MDB_txn *txn) {
 }
 #define mdb_txn_reset(txn)			\
   lmdb_txn_reset(__FILE__, __LINE__, (txn))
+#endif
 /* end trace macros */
 
 #define	cob_dbtsize_t		size_t
