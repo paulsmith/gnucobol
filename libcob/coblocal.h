@@ -381,7 +381,6 @@ struct config_tbl {
 COB_HIDDEN void		cob_init_numeric	(cob_global *);
 COB_HIDDEN void		cob_init_termio		(cob_global *, cob_settings *);
 COB_HIDDEN void		cob_init_fileio		(cob_global *, cob_settings *);
-COB_HIDDEN char		*cob_get_filename_print	(cob_file *, const int);
 COB_HIDDEN void		cob_init_reportio	(cob_global *, cob_settings *);
 COB_HIDDEN void		cob_init_call		(cob_global *, cob_settings *, const int);
 COB_HIDDEN void		cob_init_intrinsic	(cob_global *);
@@ -392,7 +391,28 @@ COB_HIDDEN void		cob_init_mlio		(cob_global * const);
 
 COB_HIDDEN void		cob_print_field		(FILE *, cob_field *, int, int);
 
+COB_HIDDEN char		*cob_get_filename_print	(cob_file *, const int);
 COB_HIDDEN void		cob_fork_fileio		(cob_global *, cob_settings *);
+
+COB_HIDDEN void		free_extfh_fcd		(void);
+COB_HIDDEN void		cob_extfh_open		(int (*callfh)(unsigned char *opcode, FCD3 *fcd),
+					cob_file *, const int, const int, cob_field *);
+COB_HIDDEN void		cob_extfh_close		(int (*callfh)(unsigned char *opcode, FCD3 *fcd),
+					cob_file *, cob_field *, const int, const int);
+COB_HIDDEN void		cob_extfh_read		(int (*callfh)(unsigned char *opcode, FCD3 *fcd),
+					cob_file *, cob_field *, cob_field *, const int);
+COB_HIDDEN void		cob_extfh_read_next	(int (*callfh)(unsigned char *opcode, FCD3 *fcd),
+					cob_file *, cob_field *, const int);
+COB_HIDDEN void		cob_extfh_rewrite	(int (*callfh)(unsigned char *opcode, FCD3 *fcd),
+					cob_file *, cob_field *, const int, cob_field *);
+COB_HIDDEN void		cob_extfh_delete	(int (*callfh)(unsigned char *opcode, FCD3 *fcd),
+					cob_file *, cob_field *);
+COB_HIDDEN void		cob_extfh_start		(int (*callfh)(unsigned char *opcode, FCD3 *fcd),
+					cob_file *, const int, cob_field *,
+					cob_field *, cob_field *);
+COB_HIDDEN void		cob_extfh_write		(int (*callfh)(unsigned char *opcode, FCD3 *fcd),
+					cob_file *, cob_field *, const int,
+				 	cob_field *, const unsigned int);
 
 COB_HIDDEN void		cob_exit_screen		(void);
 COB_HIDDEN void		cob_exit_numeric	(void);
@@ -488,7 +508,5 @@ cob_max_int (const int x, const int y)
 #ifdef __cplusplus
 }
 #endif
-
-#undef	COB_HIDDEN
 
 #endif	/* COB_LOCAL_H */

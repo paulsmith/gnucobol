@@ -232,21 +232,6 @@ static const char *io_rtn_name[COB_IO_MAX+1] = {
 	""
 };
 
-#ifdef	WITH_DB
-extern void	cob_bdb_init_fileio (cob_file_api *);
-#endif
-#ifdef	WITH_LMDB
-extern void	cob_lmdb_init_fileio (cob_file_api *);
-#endif
-
-#if defined(WITH_CISAM)
-extern void	cob_isam_init_fileio (cob_file_api *);
-#elif defined(WITH_DISAM)
-extern void	cob_isam_init_fileio (cob_file_api *);
-#elif defined(WITH_VBISAM)
-extern void	cob_isam_init_fileio (cob_file_api *);
-#endif
-
 #ifdef	WITH_INDEX_EXTFH
 void cob_index_init_fileio (cob_file_api *);
 #endif
@@ -6010,11 +5995,7 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 			file_setptr->cob_fixrel_type = COB_FILE_IS_GC;
 	}
 
-#if defined(WITH_CISAM)
-	cob_isam_init_fileio (&file_api);
-#elif defined(WITH_DISAM)
-	cob_isam_init_fileio (&file_api);
-#elif defined(WITH_VBISAM)
+#if defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
 	cob_isam_init_fileio (&file_api);
 #endif
 

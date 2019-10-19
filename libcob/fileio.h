@@ -109,6 +109,9 @@
 #endif	/* _WIN32 */
 
 #include "sysdefines.h"
+
+/* Force symbol exports */
+#define	COB_LIB_EXPIMP
 #include "libcob.h"
 #include "coblocal.h"
 
@@ -172,10 +175,21 @@ static const int	status_exception[] = {
 	COB_EC_I_O_IMP			/* 9x */
 };
 
-extern int cob_write_dict (cob_file *f, char *filename);
-extern int cob_read_dict (cob_file *f, char *filename, int updt, int *retsts);
-extern void cob_set_file_format (cob_file *f);
-extern void cob_chk_file_mapping (cob_file *f);
-extern void cob_file_save_status (cob_file *f, cob_field *fnstatus, const int status);
-extern void cob_file_sync (cob_file *f);
+COB_HIDDEN int cob_write_dict (cob_file *f, char *filename);
+COB_HIDDEN int cob_read_dict (cob_file *f, char *filename, int updt, int *retsts);
+COB_HIDDEN void cob_set_file_format (cob_file *f);
+COB_HIDDEN void cob_chk_file_mapping (cob_file *f);
+COB_HIDDEN void cob_file_save_status (cob_file *f, cob_field *fnstatus, const int status);
+COB_HIDDEN void cob_file_sync (cob_file *f);
+
+#ifdef	WITH_DB
+COB_HIDDEN void	cob_bdb_init_fileio (cob_file_api *);
+#endif
+#ifdef	WITH_LMDB
+COB_HIDDEN void	cob_lmdb_init_fileio (cob_file_api *);
+#endif
+
+#if defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
+COB_HIDDEN void	cob_isam_init_fileio (cob_file_api *);
+#endif
 #endif

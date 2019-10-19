@@ -596,8 +596,9 @@ isam_file_delete (cob_file_api *a, cob_file *f, char *filename)
 #if defined(WITH_DISAM)
 	struct stat	st;
 #endif
-	COB_UNUSED (f);
 	char	file_name_buf [COB_FILE_MAX+1];
+
+	COB_UNUSED (f);
 
 	snprintf (file_name_buf, (size_t)COB_FILE_MAX, "%s.idx", filename);
 	file_name_buf[COB_FILE_MAX] = 0;
