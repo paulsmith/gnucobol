@@ -221,9 +221,8 @@ indexed_cmpkey (struct indexfile *fh, unsigned char *data, int idx, int partlen)
 	}
 	for (part = 0; part < fh->key[idx].k_nparts && partlen > 0; part++) {
 		cl = partlen > fh->key[idx].k_part[part].kp_leng ? fh->key[idx].k_part[part].kp_leng : partlen;
-		sts = memcmp(	data  + fh->key[idx].k_part[part].kp_start,
-				fh->savekey + totlen,
-				cl);
+		sts = memcmp( data + fh->key[idx].k_part[part].kp_start,
+					fh->savekey + totlen, cl);
 		if (sts != 0) {
 			return sts;
 		}
@@ -1227,7 +1226,10 @@ isam_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 			} else {
 				switch (fh->startcond) {
 				case COB_LE:
-					domoveback = 0;
+					if(indexed_cmpkey(fh, f->record->data, fh->curkey, 0) > 0)
+						domoveback = 1;
+					else
+						domoveback = 0;
 					while (ISERRNO == 0
 					&& indexed_cmpkey(fh, f->record->data, fh->curkey, 0) == 0) {
 						isread (fh->isfd, (void *)f->record->data, ISNEXT);

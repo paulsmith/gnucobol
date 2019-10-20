@@ -1186,10 +1186,11 @@ lmdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 	f->open_mode = mode;
 	if (mode == COB_OPEN_OUTPUT ) {
 		a->cob_write_dict(f, db_buff);
-		printf("DBG write dict: %s\n",db_buff);
 	}
 
-	if (f->flag_optional && nonexistent) {
+	if (f->flag_optional 
+	 && nonexistent
+	 && mode != COB_OPEN_OUTPUT) {
 		return COB_STATUS_05_SUCCESS_OPTIONAL;
 	}
 

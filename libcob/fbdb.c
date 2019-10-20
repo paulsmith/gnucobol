@@ -1472,7 +1472,9 @@ ix_bdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const
 	}
 
 	f->open_mode = mode;
-	if (f->flag_optional && nonexistent) {
+	if (f->flag_optional 
+	 && nonexistent
+	 && mode != COB_OPEN_OUTPUT) {
 		return COB_STATUS_05_SUCCESS_OPTIONAL;
 	}
 	return 0;

@@ -393,7 +393,6 @@ COB_HIDDEN void		cob_print_field		(FILE *, cob_field *, int, int);
 
 COB_HIDDEN char		*cob_get_filename_print	(cob_file *, const int);
 COB_HIDDEN void		cob_fork_fileio		(cob_global *, cob_settings *);
-
 COB_HIDDEN void		free_extfh_fcd		(void);
 
 COB_HIDDEN void		cob_exit_screen		(void);
