@@ -19,11 +19,19 @@
 */
 
 
-#define cobglobptr file_globptr
-#define cobsetptr file_setptr
 #include "fileio.h"
 
 #if	defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
+#ifdef cobglobptr
+#undef cobglobptr
+#endif
+#ifdef cobsetptr
+#undef cobsetptr
+#endif
+#define cobglobptr	isam_globptr
+#define cobsetptr	isam_setptr
+static	cob_global		*isam_globptr;
+static	cob_settings	*isam_setptr;
 #define	COB_WITH_STATUS_02
 
 #if	defined(WITH_CISAM)
@@ -507,12 +515,12 @@ isopen_retry(cob_file *f, char *filename, int mode)
 	if ((f->retry_mode & COB_RETRY_SECONDS)) {
 		retry = 1;
 		interval = f->retry_seconds>0?f->retry_seconds:
-			(file_setptr->cob_retry_seconds>0?file_setptr->cob_retry_seconds:1);
+			(isam_setptr->cob_retry_seconds>0?isam_setptr->cob_retry_seconds:1);
 	} else
 	if ((f->retry_mode & COB_RETRY_TIMES)) {
 		retry = f->retry_times>0?f->retry_times:
-			(file_setptr->cob_retry_times>0?file_setptr->cob_retry_times:1);
-		interval = file_setptr->cob_retry_seconds>0?file_setptr->cob_retry_seconds:1;
+			(isam_setptr->cob_retry_times>0?isam_setptr->cob_retry_times:1);
+		interval = isam_setptr->cob_retry_seconds>0?isam_setptr->cob_retry_seconds:1;
 	}
 	if(retry > 0) {
 		retry = retry * interval * COB_RETRY_PER_SECOND ;
@@ -555,12 +563,12 @@ isread_retry(cob_file *f, void *data, int mode)
 	if ((f->retry_mode & COB_RETRY_SECONDS)) {
 		retry = 1;
 		interval = f->retry_seconds>0?f->retry_seconds:
-			(file_setptr->cob_retry_seconds>0?file_setptr->cob_retry_seconds:1);
+			(isam_setptr->cob_retry_seconds>0?isam_setptr->cob_retry_seconds:1);
 	} else
 	if ((f->retry_mode & COB_RETRY_TIMES)) {
 		retry = f->retry_times>0?f->retry_times:
-			(file_setptr->cob_retry_times>0?file_setptr->cob_retry_times:1);
-		interval = file_setptr->cob_retry_seconds>0?file_setptr->cob_retry_seconds:1;
+			(isam_setptr->cob_retry_times>0?isam_setptr->cob_retry_times:1);
+		interval = isam_setptr->cob_retry_seconds>0?isam_setptr->cob_retry_seconds:1;
 	}
 	if(retry > 0) {
 		retry = retry * interval * COB_RETRY_PER_SECOND ;
@@ -1553,6 +1561,8 @@ cob_isam_init_fileio (cob_file_api *a)
 	}
 #endif
 #endif
+	isam_globptr = a->glbptr;
+	isam_setptr = a->setptr;
 }
 
 #endif

@@ -18,9 +18,6 @@
    along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#define cobglobptr file_globptr
-#define cobsetptr file_setptr
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
 #include "fileio.h"
@@ -87,162 +84,170 @@ static const char	**db_data_dir = NULL;
 		       __FILE__, __LINE__, ## __VA_ARGS__);		\
 }
 
-#define module_trace(fmt, ...) {				\
-    if( getenv("ISAM_TRACE") ) {				\
-      fprintf(stderr, "%s:%d: " fmt "\n", ## __VA_ARGS__);	\
-    }								\
-  }
-
 /* Create a cursor handle. */
 static int
-lmdb_cursor_open (const char func[], int line,
-		  MDB_txn *txn, MDB_dbi dbi, MDB_cursor **cursor) {
-  module_trace( "mdb_cursor_open(%p, %d, %p)", func, line, 
-		txn, dbi, cursor);
-  return mdb_cursor_open(txn, dbi, cursor);
+lmdb_cursor_open (int line, MDB_txn *txn, MDB_dbi dbi, MDB_cursor **cursor) 
+{
+	int sts;
+	sts = mdb_cursor_open(txn, dbi, cursor);
+	DEBUG_LOG("flmdb", ("%d: mdb_cursor_open(%p, %d, %p) -> %d\n", line, txn, dbi, cursor, sts));
+	return sts;
 }
 #define mdb_cursor_open(txn, dbi, cursor) \
-  lmdb_cursor_open(__FILE__, __LINE__, (txn) , (dbi) , (cursor) )
+  lmdb_cursor_open(__LINE__, (txn) , (dbi) , (cursor) )
 
 /* Close a cursor handle. */
 static void
-lmdb_cursor_close (const char func[], int line, MDB_cursor *cursor) {
-    module_trace( "mdb_cursor_close(%p)", func, line, cursor);
-    return mdb_cursor_close (cursor);
+lmdb_cursor_close (int line, MDB_cursor *cursor) 
+{
+    DEBUG_LOG("flmdb", ("%d: mdb_cursor_close(%p)\n", line, cursor));
+    mdb_cursor_close (cursor);
 }
 #define mdb_cursor_close(cursor)		\
-  lmdb_cursor_close (__FILE__, __LINE__, (cursor));
+  lmdb_cursor_close (__LINE__, (cursor));
 
 /* Retrieve by cursor. */
 static int
-lmdb_cursor_get (const char func[], int line,
-		 MDB_cursor *cursor, MDB_val *key, MDB_val *data,
-		 MDB_cursor_op op) {
-    module_trace( "mdb_cursor_get(%p, %p, %p, %d)", func, line, cursor, key, data, op);
-    return mdb_cursor_get(cursor, key, data, op);
+lmdb_cursor_get (int line, MDB_cursor *cursor, MDB_val *key, MDB_val *data, MDB_cursor_op op) 
+{
+	int	sts;
+    sts = mdb_cursor_get(cursor, key, data, op);
+    DEBUG_LOG("flmdb", ("%d: mdb_cursor_get(%p, %p, %p, %d) -> %d\n", line, cursor, key, data, op, sts));
+	return sts;
 }
 #define mdb_cursor_get(cursor, key, data,  op)	\
-  lmdb_cursor_get(__FILE__, __LINE__, (cursor) , (key) , (data) , (op) )
+  lmdb_cursor_get(__LINE__, (cursor) , (key) , (data) , (op) )
 
 /* Store by cursor. */
 static int
-lmdb_cursor_put (const char func[], int line,
-		 MDB_cursor *cursor, MDB_val *key, MDB_val *data,
-		 unsigned int flags) {
-  module_trace( "mdb_cursor_put(%p, %p, %p, %u)", func, line, cursor, key, data, flags);
-  return mdb_cursor_put(cursor, key, data, flags);
+lmdb_cursor_put (int line, MDB_cursor *cursor, MDB_val *key, MDB_val *data, unsigned int flags)
+{
+	int	sts;
+	sts = mdb_cursor_put(cursor, key, data, flags);
+	DEBUG_LOG("flmdb", ("%d: mdb_cursor_put(%p, %p, %p, %u) -> %d\n", line, cursor, key, data, flags, sts));
+	return sts;
 }
 #define mdb_cursor_put(cursor, key, data, flags)	\
-  lmdb_cursor_put (__FILE__, __LINE__, (cursor), (key), (data), (flags))
+  lmdb_cursor_put (__LINE__, (cursor), (key), (data), (flags))
 
 /* Delete current key/data pair. */
 static int
-lmdb_cursor_del (const char func[], int line,
-		 MDB_cursor *cursor, unsigned int flags) {
-  module_trace( "mdb_cursor_del(%p, %u)", func, line, cursor, flags);
-  return mdb_cursor_del(cursor, flags);
+lmdb_cursor_del (int line, MDB_cursor *cursor, unsigned int flags) 
+{
+	int sts;
+	sts = mdb_cursor_del(cursor, flags);
+	DEBUG_LOG("flmdb", ("%d: mdb_cursor_del(%p, %u) -> %d\n", line, cursor, flags, sts));
+	return sts;
 }
 #define mdb_cursor_del(cursor, flags)		\
-  lmdb_cursor_del(__FILE__, __LINE__, (cursor), (flags))
+  lmdb_cursor_del(__LINE__, (cursor), (flags))
 
 /* Open a database in the environment. */
 static int
-lmdb_dbi_open (const char func[], int line,
-MDB_txn *txn, const char *name, unsigned int flags, MDB_dbi *dbi)
+lmdb_dbi_open (int line, MDB_txn *txn, const char *name, unsigned int flags, MDB_dbi *dbi)
 {
-  module_trace("mdb_dbi_open(%p, %s, %u, %p)", func, line, (txn), (name), (flags), (dbi) );
-  return mdb_dbi_open( (txn), (name), (flags), (dbi) );
+	int sts;
+	sts = mdb_dbi_open( (txn), (name), (flags), (dbi) );
+	DEBUG_LOG("flmdb",("%d: mdb_dbi_open(%p, %s, %u, %p) -> %d\n", line, txn, name, flags, dbi, sts ));
+	return sts;
 }
 #define mdb_dbi_open(txn, name, flags, dbi)		\
-  lmdb_dbi_open(__FILE__, __LINE__,  (txn), (name), (flags), (dbi) )
+  lmdb_dbi_open(__LINE__,  (txn), (name), (flags), (dbi) )
 
 /* Close a database handle. Normally unnecessary. */
 static void
-lmdb_dbi_close (const char func[], int line,
-		MDB_env *env, MDB_dbi dbi) {
-  module_trace("mdb_dbi_close(%p, %d)", func, line, (env), (dbi));
-  return mdb_dbi_close( (env), (dbi) );
+lmdb_dbi_close (int line, MDB_env *env, MDB_dbi dbi) 
+{
+	DEBUG_LOG("flmdb",("%d: mdb_dbi_close(%p, %d)\n", line, (env), (dbi)));
+	mdb_dbi_close( (env), (dbi) );
 }
 #define mdb_dbi_close(env, dbi)			\
-  lmdb_dbi_close(__FILE__, __LINE__,  (env), (dbi) )
+  lmdb_dbi_close(__LINE__,  (env), (dbi) )
 
 /* Get items from a database. */
 static int
-lmdb_get (const char func[], int line,
-	  MDB_txn *txn, MDB_dbi dbi, MDB_val *key, MDB_val *data) {
-  module_trace("mdb_get(%p, %d, %p, %p)", func, line, (txn), (dbi), (key), (data) );
-  return mdb_get( (txn), (dbi), (key), (data) );
+lmdb_get (int line, MDB_txn *txn, MDB_dbi dbi, MDB_val *key, MDB_val *data) 
+{
+	int sts;
+	sts = mdb_get( (txn), (dbi), (key), (data) );
+	DEBUG_LOG("flmdb",("%d: mdb_get(%p, %d, %p, %p) -> %d\n", line, txn, dbi, key, data, sts ));
+	return sts;
 }
 #define mdb_get(txn, dbi, key, data)		\
-  lmdb_get(__FILE__, __LINE__,  (txn), (dbi), (key), (data) )
+  lmdb_get(__LINE__,  (txn), (dbi), (key), (data) )
 
 /* Abandon all the operations of the transaction. */
 static void
-lmdb_txn_abort (const char func[], int line, MDB_txn *txn) {
-  module_trace("mdb_txn_abort(%p)", func, line, txn);
-      return mdb_txn_abort(txn);
+lmdb_txn_abort (int line, MDB_txn *txn) 
+{
+	DEBUG_LOG("flmdb",("%d: mdb_txn_abort(%p)\n", line, txn));
+	mdb_txn_abort(txn);
 }
 #define mdb_txn_abort(txn)			\
-  lmdb_txn_abort(__FILE__, __LINE__, (txn))
+  lmdb_txn_abort(__LINE__, (txn))
 
 /* Create a transaction for use with the environment. */
 static int
-lmdb_txn_begin (const char func[], int line,
-		MDB_env *env, MDB_txn *parent, unsigned int flags,
-		MDB_txn **txn) {
-  module_trace("mdb_txn_begin(%p, %p, %u, %p)", func, line, env, parent, flags, txn);
-  return mdb_txn_begin( env, parent, flags, txn);
+lmdb_txn_begin (int line, MDB_env *env, MDB_txn *parent, unsigned int flags, MDB_txn **txn) 
+{
+	int	sts;
+	sts = mdb_txn_begin( env, parent, flags, txn);
+	DEBUG_LOG("flmdb",("%d: mdb_txn_begin(%p, %p, %u, %p) -> %d\n", line, env, parent, flags, txn, sts));
+	return sts;
 }
 #define mdb_txn_begin(env, parent, flags, txn)		\
-      lmdb_txn_begin(__FILE__, __LINE__,  (env), (parent), (flags), (txn) )
+      lmdb_txn_begin(__LINE__,  (env), (parent), (flags), (txn) )
 
 /* Commit all the operations of a transaction into the database. */
 static int
-lmdb_txn_commit (const char func[], int line, MDB_txn *txn) {
-  module_trace("mdb_txn_commit(%p)", func, line, txn);
-  return mdb_txn_commit(txn);			
+lmdb_txn_commit (int line, MDB_txn *txn) 
+{
+	int sts;
+	sts = mdb_txn_commit(txn);			
+	DEBUG_LOG("flmdb",("%d: mdb_txn_commit(%p) -> %d\n", line, txn, sts));
+	return sts;
 }
 #define mdb_txn_commit(txn)			\
-  lmdb_txn_commit(__FILE__, __LINE__, (txn))
+  lmdb_txn_commit(__LINE__, (txn))
 
 #if 0 /* Currently unused */
 /* Renew a cursor handle. */
 static int
-lmdb_cursor_renew (const char func[], int line,
-		   MDB_txn *txn, MDB_cursor *cursor) {
-  module_trace( "mdb_cursor_renew(%p, %p)", func, line, txn, cursor) ;
-  return mdb_cursor_renew (txn, cursor);
+lmdb_cursor_renew (int line, MDB_txn *txn, MDB_cursor *cursor) 
+{
+	DEBUG_LOG("flmdb",( "%d: mdb_cursor_renew(%p, %p)\n", line, txn, cursor) ;
+	return mdb_cursor_renew (txn, cursor);
 }
 #define mdb_cursor_renew(txn, cursor)		\
-  lmdb_cursor_renew (__FILE__, __LINE__, (txn) , (cursor) );
+  lmdb_cursor_renew (__LINE__, (txn) , (cursor) );
 
 /* Store items into a database. */
 static int
-lmdb_put (const char func[], int line, MDB_txn *txn, MDB_dbi dbi,
-	  MDB_val *key, MDB_val *data, unsigned int flags) {
-      module_trace("mdb_put(%p, %d, %p, %p, %u)", func, line, txn, dbi, key, data, flags);
-      return mdb_put(txn, dbi, key, data, flags);
+lmdb_put (int line, MDB_txn *txn, MDB_dbi dbi, MDB_val *key, MDB_val *data, unsigned int flags) 
+{
+    DEBUG_LOG("flmdb",("%d: mdb_put(%p, %d, %p, %p, %u)\n", line, txn, dbi, key, data, flags));
+    return mdb_put(txn, dbi, key, data, flags);
 }
 #define mdb_put(txn, dbi, key, data, flags)		\
-  lmdb_put(__FILE__, __LINE__, (txn), (dbi), (key), (data), (flags) )
+  lmdb_put(__LINE__, (txn), (dbi), (key), (data), (flags) )
 
 /* Renew a read-only transaction. */
 static int
-lmdb_txn_renew (const char func[], int line, MDB_txn *txn) {
-  module_trace("mdb_txn_renew(%p)", func, line, txn);
-  return mdb_txn_renew(txn);			
+lmdb_txn_renew (int line, MDB_txn *txn) {
+	DEBUG_LOG("flmdb",("%d: mdb_txn_renew(%p)\n", line, txn));
+	return mdb_txn_renew(txn);			
 }
 #define mdb_txn_renew(txn)			\
-  lmdb_txn_renew(__FILE__, __LINE__, (txn))
+  lmdb_txn_renew(__LINE__, (txn))
 
 /* Reset a read-only transaction. */
 static void
-lmdb_txn_reset (const char func[], int line, MDB_txn *txn) {
-  module_trace("mdb_txn_reset(%p)", func, line, txn);
-  mdb_txn_reset(txn);			
+lmdb_txn_reset (int line, MDB_txn *txn) {
+	DEBUG_LOG("flmdb",("%d: mdb_txn_reset(%p)\n", line, txn);
+	mdb_txn_reset(txn);			
 }
 #define mdb_txn_reset(txn)			\
-  lmdb_txn_reset(__FILE__, __LINE__, (txn))
+  lmdb_txn_reset( __LINE__, (txn))
 #endif
 /* end trace macros */
 

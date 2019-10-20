@@ -19,8 +19,6 @@
 */
 
 
-#define cobglobptr file_globptr
-#define cobsetptr file_setptr
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
 #include "fileio.h"

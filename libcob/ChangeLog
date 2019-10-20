@@ -1,4 +1,9 @@
 
+2019-10-20  Ron Norman <rjn@inglenet.com>
+	* common.c fix problem with DEBUG_LOG operation
+	* flmdb.c changed to use DEBUG_LOG
+	* fisam.c change name of global/set pointers
+
 2019-10-19  Ron Norman <rjn@inglenet.com>
 	* fisam.c correction for START LESS EQUAL followed by READ PREVIOUS
 	* fbdb.c,flmdb.c correction to not return 05 status when OPEN OUTPUT

@@ -225,7 +225,10 @@ static int			cob_debug_log_time = 0;
 static FILE			*cob_debug_file = NULL;
 static int			cob_debug_level = 9;
 static char			*cob_debug_mod = NULL;
-static char			cob_debug_modules[12][4] = {"", "", "", "", "", "", "", "", "", "", "", ""};
+#define DEBUG_MOD_LEN 6
+#define DEBUG_MOD_MAX 12
+static char			cob_debug_modules[DEBUG_MOD_MAX][DEBUG_MOD_LEN+1] = 
+					{" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "};
 static char			*cob_debug_file_name = NULL;
 #endif
 
@@ -8423,7 +8426,7 @@ cob_debug_open (void)
 			switch (log_opt) {
 
 			case 'M':	/* module to debug */
-				for (j = 0; j < 4; i++) {
+				for (j = 0; j < DEBUG_MOD_LEN; i++) {
 					if (debug_env[i] == ','
 					 || debug_env[i] == ';'
 					 || debug_env[i] == 0) {
@@ -8433,12 +8436,12 @@ cob_debug_open (void)
 				}
 				module_name[j] = 0;
 				/* note: special module ALL is checked later */
-				for (j = 0; j < 12 && cob_debug_modules[j][0] > ' '; j++) {
+				for (j = 0; j < DEBUG_MOD_MAX && cob_debug_modules[j][0] > ' '; j++) {
 					if (strcasecmp (cob_debug_modules[j], module_name) == 0) {
 						break;
 					}
 				}
-				if (j < 12 && cob_debug_modules[j][0] == ' ') {
+				if (j < DEBUG_MOD_MAX && cob_debug_modules[j][0] <= ' ') {
 					strcpy (cob_debug_modules[j], module_name);
 				}
 				if (debug_env[i] == 0) i--;
@@ -8495,8 +8498,8 @@ cob_debug_open (void)
 	cob_debug_file_name = cob_strdup (logfile);
 
 	/* ensure trace file is open if we use this as debug log and exit */
-	if (cobsetptr->cob_trace_filename &&
-		strcmp (cobsetptr->cob_trace_filename, cob_debug_file_name) == 0) {
+	if (cobsetptr->cob_trace_filename 
+	 && strcmp (cobsetptr->cob_trace_filename, cob_debug_file_name) == 0) {
 		cob_check_trace_file ();
 		cob_debug_file = cobsetptr->cob_trace_file;
 		return;
@@ -8523,7 +8526,7 @@ cob_debug_logit (int level, char *module)
 	if (level > cob_debug_level) {
 		return 1;
 	}
-	for (i=0; i < 12 && cob_debug_modules[i][0] > ' '; i++) {
+	for (i=0; i < DEBUG_MOD_MAX && cob_debug_modules[i][0] > ' '; i++) {
 		if (strcasecmp ("ALL", cob_debug_modules[i]) == 0) {
 			cob_debug_mod = (char*)module;
 			return 0;						/* Logging is allowed */
