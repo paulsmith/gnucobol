@@ -2223,11 +2223,11 @@ cobc_print_info (void)
 	cobc_var_print (_("sequential file handler"),	_("built-in"), 0);
 #endif
 
+
+#if defined(WITH_INDEX_EXTFH) || defined(WITH_CISAM) || defined(WITH_dISAM) \
+	|| defined(WITH_VBISAM) || defined(WITH_DB) || defined(WITH_LMDB)
 #if defined	(WITH_INDEX_EXTFH)
 	cobc_var_print (_("indexed file handler"),		"EXTFH (obsolete)", 0);
-#ifndef HASISAM
-#define HASISAM 1
-#endif
 #endif
 #if defined	(WITH_DB)
 #if defined(DB_VERSION_MAJOR) && defined(DB_VERSION_MINOR) && defined(DB_VERSION_PATCH)
@@ -2236,9 +2236,6 @@ cobc_print_info (void)
 	cobc_var_print (_("indexed file handler"), 		versbuff, 0);
 #else
 	cobc_var_print (_("indexed file handler"), 		"BDB", 0);
-#endif
-#ifndef HASISAM
-#define HASISAM 1
 #endif
 #endif
 #if defined	(WITH_LMDB)
@@ -2249,21 +2246,12 @@ cobc_print_info (void)
 #else
 	cobc_var_print (_("indexed file handler"), 		"LMDB", 0);
 #endif
-#ifndef HASISAM
-#define HASISAM 1
-#endif
 #endif
 #if defined	(WITH_CISAM)
 	cobc_var_print (_("indexed file handler"),		"C-ISAM", 0);
-#ifndef HASISAM
-#define HASISAM 1
-#endif
 #endif
 #if defined	(WITH_DISAM)
 	cobc_var_print (_("indexed file handler"),		"D-ISAM", 0);
-#ifndef HASISAM
-#define HASISAM 1
-#endif
 #endif
 #if defined	(WITH_VBISAM)
 # if defined	(VB_RTD)
@@ -2271,11 +2259,8 @@ cobc_print_info (void)
 # else
 	cobc_var_print (_("indexed file handler"),		"VBISAM", 0);
 # endif
-#ifndef HASISAM
-#define HASISAM 1
 #endif
-#endif
-#ifndef HASISAM
+#else
 	cobc_var_print (_("indexed file handler"),		_("disabled"), 0);
 #endif
 

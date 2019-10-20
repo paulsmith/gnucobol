@@ -2478,8 +2478,27 @@ COB_EXPIMP void cob_delete_file	(cob_file *, cob_field *);
 COB_EXPIMP void cob_unlock_file	(cob_file *, cob_field *);
 
 /*********************************************/
-/* EXTFH functions in filemfextfh.c */
+/* EXTFH functions in fextfh.c */
 COB_EXPIMP int	EXTFH		(unsigned char *, FCD3 *);
+
+COB_EXPIMP void	cob_extfh_open (int (*callfh)(unsigned char *, FCD3 *),
+				 cob_file *, const int, const int, cob_field *);
+COB_EXPIMP void	cob_extfh_close (int (*callfh)(unsigned char *, FCD3 *),
+				 cob_file *, cob_field *, const int, const int);
+COB_EXPIMP void	cob_extfh_read (int (*callfh)(unsigned char *, FCD3 *),
+				 cob_file *, cob_field *, cob_field *, const int);
+COB_EXPIMP void	cob_extfh_read_next (int (*callfh)(unsigned char *, FCD3 *),
+				 cob_file *, cob_field *, const int);
+COB_EXPIMP void	cob_extfh_rewrite (int (*callfh)(unsigned char *, FCD3 *),
+				 cob_file *, cob_field *, const int, cob_field *);
+COB_EXPIMP void	cob_extfh_delete (int (*callfh)(unsigned char *, FCD3 *),
+				 cob_file *, cob_field *);
+COB_EXPIMP void	cob_extfh_start (int (*callfh)(unsigned char *, FCD3 *),
+				 cob_file *, const int, cob_field *,
+				 cob_field *, cob_field *);
+COB_EXPIMP void	cob_extfh_write (int (*callfh)(unsigned char *, FCD3 *),
+				 cob_file *, cob_field *, const int,
+				 cob_field *, const unsigned int);
 
 /* File system routines */
 COB_EXPIMP int cob_sys_open_file	(unsigned char *, unsigned char *,

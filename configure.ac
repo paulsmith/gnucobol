@@ -1723,11 +1723,19 @@ elif test "$with_vbisam" = "yes"; then
 	COB_HAS_ISAM=vbisam
 elif test "$with_db" = "yes"; then
 	COB_HAS_ISAM=db
+elif test "$with_lmdb" = "yes"; then
+	COB_HAS_ISAM=lmdb
 elif test "$with_index_extfh" = "yes"; then
 	COB_HAS_ISAM=index_extfh
 else
 	COB_HAS_ISAM=no
 fi
+COB_HAS_CISAM=$with_cisam
+COB_HAS_DISAM=$with_disam
+COB_HAS_VBISAM=$with_vbisam
+COB_HAS_BDB=$with_db
+COB_HAS_LMDB=$with_lmdb
+COB_HAS_OCEXTFH=$with_index_extfh
 
 if test "$USE_NCURSES" = "not_found" -o "$USE_NCURSES" = "no"; then
 	COB_HAS_CURSES=no
@@ -1796,6 +1804,12 @@ AC_SUBST([COB_FIX_LIB])
 AC_SUBST([COB_FIX_LIBTOOL])
 AC_SUBST([COB_KEYWORD_INLINE])
 AC_SUBST([COB_HAS_ISAM])
+AC_SUBST([COB_HAS_CISAM])
+AC_SUBST([COB_HAS_DISAM])
+AC_SUBST([COB_HAS_VBISAM])
+AC_SUBST([COB_HAS_BDB])
+AC_SUBST([COB_HAS_LMDB])
+AC_SUBST([COB_HAS_OCEXTFH])
 AC_SUBST([COB_HAS_CURSES])
 AC_SUBST([COB_HAS_XML2])
 AC_SUBST([COB_HAS_CJSON])
@@ -1875,6 +1889,9 @@ if test "$with_db" = "yes"; then
 fi
 if test "$with_lmdb" = "yes"; then
   AC_MSG_NOTICE([ Use LMDB for ISAM I/O:                       yes])
+fi
+if test "$COB_HAS_ISAM" = no; then
+  AC_MSG_NOTICE([ ISAM I/O (no handler configured):            NO])
 fi
 AC_MSG_NOTICE([ Use libxml2 for XML I/O                      ${COB_HAS_XML2}])
 AC_MSG_NOTICE([ Use cJSON for JSON I/O                       $with_cjson])  
