@@ -333,8 +333,8 @@ cob_write_dict (cob_file *f, char *filename)
 
 	if (f->organization == COB_ORG_INDEXED) {
 		/* Write Key information from cob_file */
-		fprintf(fo,"nkeys=%ld ",(long)(f->nkeys));
-		for(idx=0; idx < f->nkeys; idx++) {
+		fprintf(fo,"nkeys=%d ",(int)(f->nkeys));
+		for(idx=0; idx < (int)f->nkeys; idx++) {
 			fprintf(fo,"key%d=(",idx+1);
 			if(f->keys[idx].count_components <= 1) {
 				fprintf(fo,"%d:%ld",f->keys[idx].offset,(long)(f->keys[idx].field->size));
@@ -427,7 +427,7 @@ cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
 	sts = ret = 0;
 	if(retsts)
 		*retsts = 0;
-	nkeys = f->nkeys;
+	nkeys = (int)f->nkeys;
 	while (fgets (ddbuf, sizeof(ddbuf)-1, fi) != NULL) {
 		if (ddbuf[0] == '#')/* Skip Comment lines */
 			continue;
@@ -490,21 +490,21 @@ cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
 				} else if (strcmp(wrd,"nkeys") == 0) {
 					p = cob_dd_prms (p, p1, NULL);
 					nkeys = atoi (p1);
-					if (f->nkeys != nkeys
+					if ((int)f->nkeys != nkeys
 					 && !updt
 					 && f->flag_keycheck) {
 						ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
 						sts = 1;
 						break;
 					}
-					if (nkeys < f->nkeys
+					if (nkeys < (int)f->nkeys
 					 && !updt) {
 						sts = 1;
 						break;
 					}
 				} else if (memcmp(wrd,"key",3) == 0) {
 					keyn = atoi (&wrd[3]);
-					if (keyn > f->nkeys
+					if (keyn > (int)f->nkeys
 					 && !f->flag_keycheck
 					 && !updt) {			/* Skip this key def */
 						do {
@@ -512,7 +512,7 @@ cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
 						} while (*p == ',');
 						continue;
 					}
-					if(keyn > f->nkeys) {
+					if(keyn > (int)f->nkeys) {
 						sts = 1;
 						break;
 					}
@@ -571,7 +571,7 @@ cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
 					}
 					idx = keyn - 1;
 					p = cob_dd_prms (p, p1, NULL);
-					if (keyn > f->nkeys)		/* Skip this */
+					if (keyn > (int)f->nkeys)		/* Skip this */
 						continue;
 
 					if (p1[0] == 'Y'
@@ -600,7 +600,7 @@ cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
 					} else {
 						subchr = 0;
 					}
-					if (keyn > f->nkeys)		/* Skip this */
+					if (keyn > (int)f->nkeys)		/* Skip this */
 						continue;
 					if (f->flag_keycheck
 					 && !f->keys[idx].tf_suppress) {
@@ -667,7 +667,7 @@ cob_chk_file_env (cob_file *f, const char *src)
 			if ((file_open_io_env = getenv (file_open_env)) == NULL) {
 				for (i = 0; file_open_env[i] != 0; ++i) {	/* Try all Upper Case */
 					if(islower((unsigned char)file_open_env[i]))
-						file_open_env[i] = toupper((unsigned char)file_open_env[i]);
+						file_open_env[i] = (unsigned char)toupper((int)file_open_env[i]);
 				}
 				file_open_io_env = getenv (file_open_env);
 			}
@@ -2396,6 +2396,7 @@ cob_file_open (cob_file_api *a, cob_file *f, char *filename, const int mode, con
 	const char		*fmode;
 	cob_linage		*lingptr;
 	unsigned int		nonexistent;
+	COB_UNUSED (a);
 
 	f->share_mode = sharing;
 	if (f->organization != COB_ORG_LINE_SEQUENTIAL) {
@@ -2533,6 +2534,8 @@ static int
 cob_file_close (cob_file_api *a, cob_file *f, const int opt)
 {
 	int	ret;
+	COB_UNUSED (a);
+
 	switch (opt) {
 	case COB_CLOSE_LOCK:
 		/* meaning (not file-sharing related):
@@ -2606,6 +2609,7 @@ sequential_read (cob_file_api *a, cob_file *f, const int read_opts)
 		unsigned int	sint;
 	} recsize;
 
+	COB_UNUSED (a);
 	COB_UNUSED (read_opts);
 
 	if (unlikely (f->flag_operation != 0)) {
@@ -2693,6 +2697,7 @@ sequential_write (cob_file_api *a, cob_file *f, const int opt)
 	} recsize;
 	int	padlen;
 
+	COB_UNUSED (a);
 	if (unlikely (f->flag_operation == 0)) {
 		f->flag_operation = 1;
 	}
@@ -2776,6 +2781,7 @@ sequential_rewrite (cob_file_api *a, cob_file *f, const int opt)
 		unsigned int	sint;
 	} recsize;
 	int	bytesread, rcsz, padlen;
+	COB_UNUSED (a);
 	COB_UNUSED (opt);
 
 	f->flag_operation = 1;
@@ -2847,7 +2853,6 @@ sequential_rewrite (cob_file_api *a, cob_file *f, const int opt)
 }
 
 /* LINE SEQUENTIAL */
-
 static int
 lineseq_read (cob_file_api *a, cob_file *f, const int read_opts)
 {
@@ -2855,6 +2860,7 @@ lineseq_read (cob_file_api *a, cob_file *f, const int read_opts)
 	size_t		i = 0;
 	int		n, k;
 
+	COB_UNUSED (a);
 	COB_UNUSED (read_opts);
 
 	dataptr = f->record->data;
@@ -2924,6 +2930,7 @@ lineseq_write (cob_file_api *a, cob_file *f, const int opt)
 	cob_linage		*lingptr;
 	size_t			size;
 	int			ret;
+	COB_UNUSED (a);
 
 	/* Determine the size to be written */
 	if (unlikely (f->file_features & COB_FILE_LS_FIXED)) {
@@ -3048,6 +3055,7 @@ lineseq_rewrite (cob_file_api *a, cob_file *f, const int opt)
 	size_t			size, psize, slotlen;
 	int			ret;
 	off_t			curroff;
+	COB_UNUSED (a);
 
 	curroff = ftell ((FILE *)f->file);	/* Current file position */
 	/* Determine the size to be written */
@@ -3204,7 +3212,7 @@ relative_read_size (cob_file *f, off_t off, int *isdeleted)
 		return (int)relsize;
 	} else
 	if (f->file_format == COB_FILE_IS_MF) {
-		if (lseek (f->fd, off + f->record_slot - 1, SEEK_SET) == (off_t)-1 ) {
+		if (lseek (f->fd, (off_t)(off + (off_t)f->record_slot - 1), SEEK_SET) == (off_t)-1 ) {
 			return -1;
 		}
 		rechdr[0] = 0;
@@ -3220,7 +3228,6 @@ relative_read_size (cob_file *f, off_t off, int *isdeleted)
 	return 0;
 }
 
-
 /* RELATIVE  START */
 static int
 relative_start (cob_file_api *a, cob_file *f, const int cond, cob_field *k)
@@ -3231,6 +3238,7 @@ relative_start (cob_file_api *a, cob_file *f, const int cond, cob_field *k)
 	int		ksindex;
 	int		kcond, isdeleted;
 	struct stat	st;
+	COB_UNUSED (a);
 
 	if (fstat (f->fd, &st) != 0 || st.st_size == 0) {
 		return COB_STATUS_23_KEY_NOT_EXISTS;
@@ -3374,7 +3382,7 @@ relative_read_off (cob_file *f, off_t off)
 	}
 	if (f->file_format == COB_FILE_IS_MF) {
 		if(f->record_min != f->record_max) {
-			lseek (f->fd, off + f->record_slot - 1, SEEK_SET);
+			lseek (f->fd, (off_t)(off + (off_t)f->record_slot - 1), SEEK_SET);
 		}
 		read (f->fd, recmark, 1);	/* Active Record marker */
 		if (recmark[0] == 0x00) {	/* Flagged Deleted */
@@ -3392,6 +3400,7 @@ relative_read (cob_file_api *a, cob_file *f, cob_field *k, const int read_opts)
 	off_t	off;
 	int	relnum,errsts;
 	struct stat	st;
+	COB_UNUSED (a);
 
 	if (unlikely (f->flag_operation != 0)) {
 		f->flag_operation = 0;
@@ -3438,6 +3447,7 @@ relative_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	struct stat	st;
 	int		sts;
 	int		errsts;
+	COB_UNUSED (a);
 
 	if (unlikely (f->flag_operation != 0)) {
 		f->flag_operation = 0;
@@ -3517,7 +3527,7 @@ relative_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 		sts = relative_read_off (f, curroff);
 
 		if (sts == COB_STATUS_00_SUCCESS) {
-			lseek (f->fd, (off_t)curroff + f->record_slot, SEEK_SET);
+			lseek (f->fd, (off_t)(curroff + (off_t)f->record_slot), SEEK_SET);
 			return COB_STATUS_00_SUCCESS;
 		}
 		if (sts == COB_STATUS_30_PERMANENT_ERROR
@@ -3609,6 +3619,7 @@ relative_write (cob_file_api *a, cob_file *f, const int opt)
 	int	kindex,rcsz;
 	struct stat	st;
 	COB_UNUSED (opt);
+	COB_UNUSED (a);
 
 	rcsz = (int)f->record->size;
 	if (unlikely(f->flag_operation == 0)) {
@@ -3686,6 +3697,7 @@ relative_rewrite (cob_file_api *a, cob_file *f, const int opt)
 	size_t	relsize;
 	int	relnum,isdeleted=0,errsts;
 
+	COB_UNUSED (a);
 	f->flag_operation = 1;
 	f->last_key = f->keys[0].field;
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
@@ -3741,7 +3753,7 @@ relative_rewrite (cob_file_api *a, cob_file *f, const int opt)
 		if(f->record_min == f->record_max) {	/* Fixed size */
 			write (f->fd, "\n", 1);
 		} else {
-			lseek (f->fd, (off_t)off + f->record_slot, SEEK_SET);
+			lseek (f->fd, (off_t)(off + (off_t)f->record_slot), SEEK_SET);
 		}
 	}
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
@@ -3769,6 +3781,7 @@ relative_delete (cob_file_api *a, cob_file *f)
 	unsigned char rechdr[8];
 	int	relnum,isdeleted,errsts;
 
+	COB_UNUSED (a);
 	f->flag_operation = 1;
 	relnum = cob_get_int (f->keys[0].field) - 1;
 	if (relnum < 0) {
@@ -3835,7 +3848,7 @@ relative_delete (cob_file_api *a, cob_file *f)
 			return -1;
 		}
 		if (f->file_format == COB_FILE_IS_MF) {
-			if (lseek (f->fd, off + f->record_slot - 1, SEEK_SET) == (off_t)-1 ) {
+			if (lseek (f->fd, (off_t)(off + (off_t)f->record_slot - 1), SEEK_SET) == (off_t)-1 ) {
 				return COB_STATUS_30_PERMANENT_ERROR;
 			}
 			rechdr[0] = 0;
@@ -3843,7 +3856,7 @@ relative_delete (cob_file_api *a, cob_file *f)
 		}
 	} else
 	if (f->file_format == COB_FILE_IS_MF) {
-		if (lseek (f->fd, off + f->record_max, SEEK_SET) == (off_t)-1 ) {
+		if (lseek (f->fd, (off_t)(off + (off_t)f->record_max), SEEK_SET) == (off_t)-1 ) {
 			return COB_STATUS_30_PERMANENT_ERROR;
 		}
 		rechdr[0] = 0;
@@ -5155,7 +5168,7 @@ static int
 cob_file_sort_compare (struct cobitem *k1, struct cobitem *k2, void *pointer)
 {
 	cob_file	*f;
-	size_t		i;
+	int		i;
 	size_t		u1;
 	size_t		u2;
 	int		cmp;
@@ -5163,7 +5176,7 @@ cob_file_sort_compare (struct cobitem *k1, struct cobitem *k2, void *pointer)
 	cob_field	f2;
 
 	f = pointer;
-	for (i = 0; i < f->nkeys; ++i) {
+	for (i = 0; i < (int)f->nkeys; ++i) {
 		f1 = f2 = *(f->keys[i].field);
 		f1.data = k1->item + f->keys[i].offset;
 		f2.data = k2->item + f->keys[i].offset;

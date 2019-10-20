@@ -341,6 +341,7 @@ isam_sync (cob_file_api *a, cob_file *f)
 {
 	struct indexfile	*fh;
 
+	COB_UNUSED (a);
 	if (f->organization == COB_ORG_INDEXED) {
 		fh = f->file;
 		if (fh) {
@@ -586,7 +587,6 @@ isread_retry(cob_file *f, void *data, int mode)
 	return sts;
 }
 
-
 /* Delete file */
 
 static int
@@ -597,6 +597,7 @@ isam_file_delete (cob_file_api *a, cob_file *f, char *filename)
 #endif
 	char	file_name_buf [COB_FILE_MAX+1];
 
+	COB_UNUSED (a);
 	COB_UNUSED (f);
 
 	snprintf (file_name_buf, (size_t)COB_FILE_MAX, "%s.idx", filename);
@@ -1082,6 +1083,7 @@ isam_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	int			lmode, skip_read;
 	int			domoveback;
 
+	COB_UNUSED (a);
 	fh = f->file;
 	ret = COB_STATUS_00_SUCCESS;
 	lmode = 0;
@@ -1336,7 +1338,6 @@ isam_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	return COB_CHECK_DUP (ret);
 }
 
-
 /* WRITE to the INDEXED file  */
 
 static int
@@ -1345,6 +1346,7 @@ isam_write (cob_file_api *a, cob_file *f, const int opt)
 	struct indexfile	*fh;
 	int			ret = 0;
 
+	COB_UNUSED (a);
 	fh = f->file;
 	if (f->flag_nonexistent) {
 		return COB_STATUS_48_OUTPUT_DENIED;
@@ -1389,6 +1391,7 @@ isam_delete (cob_file_api *a, cob_file *f)
 	struct indexfile	*fh;
 	int			ret;
 
+	COB_UNUSED (a);
 	fh = f->file;
 	ret = COB_STATUS_00_SUCCESS;
 	if (f->flag_nonexistent) {
@@ -1429,6 +1432,7 @@ isam_rewrite (cob_file_api *a, cob_file *f, const int opt)
 	int			k;
 	int			ret;
 
+	COB_UNUSED (a);
 	fh = f->file;
 	ret = COB_STATUS_00_SUCCESS;
 	if (f->flag_nonexistent) {
@@ -1528,6 +1532,7 @@ isam_rewrite (cob_file_api *a, cob_file *f, const int opt)
 static void
 cob_isam_exit_fileio (cob_file_api *a)
 {
+	COB_UNUSED (a);
 #ifndef	WITH_DISAM
 	(void)iscleanup ();
 #endif

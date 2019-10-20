@@ -11467,7 +11467,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			output_prefix ();
 			output ("(void)%s_%d_ (-1", next_prog->program_id,
 				next_prog->toplev_count);
-			for (i = 0; i < next_prog->num_proc_params; ++i) {
+			for (i = 0; i < (int)(next_prog->num_proc_params); ++i) {
 				output (", NULL");
 			}
 			output (");\n");

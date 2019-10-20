@@ -4886,6 +4886,8 @@ cob_sys_xor (const void *p1, void *p2, const int length)
 	cob_u8_ptr		data_2;
 	size_t			n;
 
+	COB_UNUSED (p1);
+	COB_UNUSED (p2);
 	COB_CHK_PARMS (CBL_XOR, 3);
 	data_1 = cob_get_param_data (1);
 	data_2 = cob_get_param_data (2);
@@ -7817,9 +7819,9 @@ print_runtime_conf ()
 				}
 				vl = (unsigned int)strlen (value);
 				plen = 71 - hdlen;
-				if (vl < min_conf_length) {
+				if (vl < (unsigned int)min_conf_length) {
 					plen2 = min_conf_length - vl;
-				} else if (vl == min_conf_length) {
+				} else if (vl == (unsigned int)min_conf_length) {
 					plen2 = 1;
 				} else {
 					plen2 = 0;

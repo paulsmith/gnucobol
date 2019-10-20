@@ -2012,7 +2012,8 @@ setup_parameters (struct cb_field *f)
 		f->flag_real_binary = 1;
 		/* Fall-through */
 	case CB_USAGE_COMP_X:
-		if (f->pic->category == CB_CATEGORY_ALPHANUMERIC
+		if (f->pic
+		 && f->pic->category == CB_CATEGORY_ALPHANUMERIC
 		 && f->usage == CB_USAGE_COMP_X) {
 			f->compx_size = f->size = f->pic->size;
 			if (f->pic->size > 8) {

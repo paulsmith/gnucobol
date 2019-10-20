@@ -6385,14 +6385,14 @@ cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 				lp = CB_LITERAL(CB_VALUE(l));
 				switch (cbp->intr_enum) {
 				case CB_INTR_UPPER_CASE:
-					for (k=0; k < lp->size; k++) {
+					for (k=0; k < (int)(lp->size); k++) {
 						if (islower(lp->data[k]))
 							lp->data[k] = toupper(lp->data[k]);
 					}
 					return cb_build_alphanumeric_literal (lp->data, lp->size);
 					break;
 				case CB_INTR_LOWER_CASE:
-					for (k=0; k < lp->size; k++) {
+					for (k=0; k < (int)(lp->size); k++) {
 						if (isupper(lp->data[k]))
 							lp->data[k] = tolower(lp->data[k]);
 					}

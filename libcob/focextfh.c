@@ -317,7 +317,7 @@ seqra_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const 
 	ret = extfh_seqra_locate (f, filename);
 	switch (ret) {
 	case COB_NOT_CONFIGURED:
-		cob_chk_file_mapping (f);
+		a->chk_file_mapping (f);
 		if (access (filename, F_OK) && errno == ENOENT) {
 			if (mode != COB_OPEN_OUTPUT && f->flag_optional == 0) {
 				return COB_STATUS_35_NOT_EXISTS;
@@ -350,6 +350,7 @@ seqra_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const 
 static int
 seqra_close (cob_file_api *a, cob_file *f, const int opt)
 {
+	COB_UNUSED (a);
 	return extfh_cob_file_close (f, opt);
 }
 
@@ -359,6 +360,7 @@ static int
 sequential_read (cob_file_api *a, cob_file *f, const int read_opts)
 {
 	int	extfh_ret;
+
 	extfh_ret = extfh_sequential_read (f, read_opts);
 	if (extfh_ret != COB_NOT_CONFIGURED) {
 		return extfh_ret;
@@ -375,6 +377,7 @@ static int
 sequential_write (cob_file_api *a, cob_file *f, const int opt)
 {
 	int	extfh_ret;
+
 	extfh_ret = extfh_sequential_write (f, opt);
 	if (extfh_ret != COB_NOT_CONFIGURED) {
 		return extfh_ret;
@@ -391,6 +394,7 @@ static int
 sequential_rewrite (cob_file_api *a, cob_file *f, const int opt)
 {
 	int	extfh_ret;
+
 	extfh_ret = extfh_sequential_rewrite (f, opt);
 	if (extfh_ret != COB_NOT_CONFIGURED) {
 		return extfh_ret;

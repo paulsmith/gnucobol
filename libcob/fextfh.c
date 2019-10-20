@@ -88,7 +88,7 @@ static void
 copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 {
 	char	assignto[512];
-	int	fnlen,kdblen,idx,keypos,keycomp,k,nkeys;
+	unsigned int	fnlen,kdblen,idx,keypos,keycomp,k,nkeys;
 	KDB	*kdb;
 	EXTKEY	*key;
 
@@ -346,13 +346,13 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 	if (f->select_name == NULL) {
 		char	fdname[49];
 		f->select_name = (char*)f->assign->data;
-		for (k=0; k < f->assign->size; k++) {
+		for (k=0; k < (int)(f->assign->size); k++) {
 			if (f->assign->data[k] == '/') {
 				f->select_name = (char*)&f->assign->data[k+1];
 			}
 		}
 		for (k=0; f->select_name[k] > ' ' && k < 48; k++) {
-			fdname[k] = toupper(f->select_name[k]);
+			fdname[k] = (char)toupper((int)f->select_name[k]);
 		}
 		fdname[k] = 0;
 		f->select_name = cob_strdup (fdname);
@@ -369,7 +369,7 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 				f->nkeys = MAX_FILE_KEYS;
 			}
 			f->keys = cob_malloc (sizeof(cob_file_key) * f->nkeys);
-			for (k=0; k < f->nkeys; k++) {
+			for (k=0; k < (int)f->nkeys; k++) {
 				parts = LDCOMPX2(fcd->kdbPtr->key[k].count);
 				off   = LDCOMPX2(fcd->kdbPtr->key[k].offset);
 				key   = (EXTKEY*) ((char*)(fcd->kdbPtr) + off);
@@ -478,7 +478,7 @@ save_fcd_status (FCD3 *fcd, int sts)
 static int
 cob_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 {
-	int 	k,part;
+	unsigned int 	k,part;
 	*fullkeylen = *partlen = 0;
 
 	for (k = 0; k < f->nkeys; ++k) {
@@ -487,7 +487,7 @@ cob_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 		&&  f->keys[k].field->data == kf->data) {
 			*fullkeylen = f->keys[k].field->size;
 			*partlen = kf->size;
-			return k;
+			return (int)k;
 		}
 	}
 	for (k = 0; k < f->nkeys; ++k) {
@@ -502,7 +502,7 @@ cob_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 					*partlen = kf->size;
 				else
 					*partlen = *fullkeylen;
-				return k;
+				return (int)k;
 			}
 		}
 	}
@@ -529,8 +529,8 @@ cob_extfh_open (
 
 	f->last_operation = COB_LAST_OPEN;
 	fcd = find_fcd(f);
-	f->share_mode = sharing;
-	f->last_open_mode = mode;
+	f->share_mode = (unsigned char)sharing;
+	f->last_open_mode = (unsigned char)mode;
 	if(mode == COB_OPEN_OUTPUT)
 		STCOMPX2(OP_OPEN_OUTPUT, opcode);
 	else if(mode == COB_OPEN_I_O)
@@ -908,7 +908,7 @@ org_handling:
 	switch (fcd->fileOrg) {
 	case ORG_INDEXED:
 		k = LDCOMPX2(fcd->refKey);
-		if (k >= 0 && k <= f->nkeys) {
+		if (k >= 0 && k <= (int)f->nkeys) {
 			if (f->keys[k].count_components <= 1) {
 				key->size = f->keys[k].field->size;
 				key->attr = f->keys[k].field->attr;

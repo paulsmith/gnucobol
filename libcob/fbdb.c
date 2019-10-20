@@ -154,7 +154,7 @@ bdb_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 			return k;
 		}
 	}
-	for (k = 0; k < f->nkeys; ++k) {
+	for (k = 0; k < (int)(f->nkeys); ++k) {
 		if (f->keys[k].count_components > 1) {
 			if ( (f->keys[k].field
 			   && f->keys[k].field->data == kf->data
@@ -181,7 +181,7 @@ bdb_keylen (cob_file *f, int idx)
 {
 	int totlen, part;
 
-	if (idx < 0 || idx > f->nkeys) {
+	if (idx < 0 || idx > (int)(f->nkeys)) {
 		return -1;
 	}
 	if (f->keys[idx].count_components > 0) {
@@ -262,7 +262,7 @@ bdb_cmpkey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx,
 		}
 		return 0;
 	}
-	cl = partlen > f->keys[idx].field->size ? f->keys[idx].field->size : partlen;
+	cl = partlen > (int)(f->keys[idx].field->size) ? (int)(f->keys[idx].field->size) : partlen;
 	return memcmp (keyarea,
 			record  + (f->keys[idx].field->data - f->record->data),
 			cl);
@@ -595,7 +595,7 @@ bdb_lock_record (cob_file *f, const char *key, const unsigned int keylen)
 			p->bdb_locks = cob_malloc(p->bdb_lock_max * sizeof(DB_LOCK));
 			p->bdb_lock_num = 0;
 		}
-		if (p->bdb_lock_num >= p->bdb_lock_max) {
+		if (p->bdb_lock_num+1 >= p->bdb_lock_max) {
 			p->bdb_lock_max += COB_MAX_BDB_LOCKS;
 			p->bdb_locks = realloc(p->bdb_locks, p->bdb_lock_max * sizeof(DB_LOCK));
 		}
@@ -1121,7 +1121,7 @@ ix_bdb_delete_internal (cob_file *f, const int rewrite, int bdb_opts)
 	prim_key.data = p->temp_key;
 
 	/* Delete the secondary keys */
-	for (i = 1; i < f->nkeys; ++i) {
+	for (i = 1; i < (int)(f->nkeys); ++i) {
 		len = bdb_savekey(f, p->suppkey, p->data.data, i);
 		memset(p->savekey, 0, p->maxkeylen);
 		len = bdb_savekey(f, p->savekey, p->saverec, i);
@@ -1261,7 +1261,7 @@ ix_bdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const
 	cob_u32_t		flags = 0;
 	int			ret = 0;
 	int			nonexistent;
-	char		runtime_buffer[2560];
+	char		runtime_buffer[COB_FILE_MAX+1];
 
 	if (bdb_join) {			/* Join BDB, on first OPEN of INDEXED file */
 		join_environment (a);
@@ -1471,7 +1471,7 @@ ix_bdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const
 		p->data.data = NULL;
 	}
 
-	f->open_mode = mode;
+	f->open_mode = (unsigned char)mode;
 	if (f->flag_optional 
 	 && nonexistent
 	 && mode != COB_OPEN_OUTPUT) {
@@ -1488,6 +1488,7 @@ ix_bdb_close (cob_file_api *a, cob_file *f, const int opt)
 	struct indexed_file	*p;
 	int			i;
 
+	COB_UNUSED (a);
 	COB_UNUSED (opt);
 
 	p = f->file;
@@ -1541,6 +1542,7 @@ ix_bdb_close (cob_file_api *a, cob_file *f, const int opt)
 static int
 ix_bdb_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 {
+	COB_UNUSED (a);
 
 	return ix_bdb_start_internal (f, cond, key, 0, 0);
 }
@@ -1555,6 +1557,7 @@ ix_bdb_read (cob_file_api *a, cob_file *f, cob_field *key, const int read_opts)
 	int			bdb_opts;
 	int			test_lock;
 
+	COB_UNUSED (a);
 	p = f->file;
 	test_lock = 0;
 	bdb_opts = read_opts;
@@ -1622,6 +1625,7 @@ ix_bdb_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	int			bdb_opts;
 	unsigned int		dupno;
 
+	COB_UNUSED (a);
 	p = f->file;
 	nextprev = DB_NEXT;
 	dupno = 0;
@@ -1893,6 +1897,7 @@ ix_bdb_write (cob_file_api *a, cob_file *f, const int opt)
 	struct indexed_file	*p;
 	int			ret;
 
+	COB_UNUSED (a);
 	if (f->flag_nonexistent) {
 		return COB_STATUS_48_OUTPUT_DENIED;
 	}
@@ -1924,6 +1929,7 @@ ix_bdb_delete (cob_file_api *a, cob_file *f)
 {
 	int			ret;
 
+	COB_UNUSED (a);
 	if (f->flag_nonexistent) {
 		return COB_STATUS_49_I_O_DENIED;
 	}
@@ -1939,6 +1945,7 @@ ix_bdb_rewrite (cob_file_api *a, cob_file *f, const int opt)
 {
 	int			ret;
 
+	COB_UNUSED (a);
 	if (f->flag_nonexistent) {
 		return COB_STATUS_49_I_O_DENIED;
 	}
@@ -1993,6 +2000,7 @@ ix_bdb_rewrite (cob_file_api *a, cob_file *f, const int opt)
 static int
 ix_bdb_file_unlock (cob_file_api *a, cob_file *f)
 {
+	COB_UNUSED (a);
 	if (COB_FILE_SPECIAL(f)) {
 		return 0;
 	}
@@ -2021,6 +2029,7 @@ ix_bdb_file_unlock (cob_file_api *a, cob_file *f)
 static int
 ix_bdb_fork (cob_file_api *a)
 {
+	COB_UNUSED (a);
 	bdb_lock_id = 0;
 	if(bdb_env) {
 		bdb_env->lock_id (bdb_env, &bdb_lock_id);
@@ -2032,6 +2041,7 @@ ix_bdb_fork (cob_file_api *a)
 static void
 ix_bdb_exit_fileio (cob_file_api *a)
 {
+	COB_UNUSED (a);
 	if(record_lock_object) {
 		cob_free (record_lock_object);
 		record_lock_object = NULL;
