@@ -18,8 +18,37 @@
    along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#if defined(IS_ISAM_LIB)
+#ifdef WITH_CISAM
+#undef WITH_CISAM
+#endif
+#ifdef WITH_DISAM
+#undef WITH_DISAM
+#endif
+#ifdef WITH_VBISAM
+#undef WITH_VBISAM
+#endif
+
+#ifdef FOR_CISAM
+#define WITH_CISAM
+#ifdef VB_RTD
+#undef VB_RTD
+#endif
+#endif
+#ifdef FOR_DISAM
+#define WITH_DISAM
+#ifdef VB_RTD
+#undef VB_RTD
+#endif
+#endif
+#ifdef FOR_VBISAM
+#define WITH_VBISAM
+#endif
+#endif
 
 #include "fileio.h"
+
+#if !defined(WITH_MULTI_ISAM) || defined(IS_ISAM_LIB)
 
 #if	defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
 #ifdef cobglobptr
@@ -33,6 +62,9 @@
 static	cob_global		*isam_globptr;
 static	cob_settings	*isam_setptr;
 #define	COB_WITH_STATUS_02
+#if defined(WITH_VBISAM) && defined(WITH_DISAM)
+#undef WITH_DISAM
+#endif
 
 #if	defined(WITH_CISAM)
 #include <isam.h>
@@ -641,6 +673,13 @@ isam_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 	struct keydesc		kd;
 	struct dictinfo		di;		/* Defined in (c|d|vb)isam.h */
 
+#if defined(WITH_CISAM)
+	f->io_routine = COB_IO_CISAM;
+#elif defined(WITH_DISAM)
+	f->io_routine = COB_IO_DISAM;
+#elif defined(WITH_VBISAM)
+	f->io_routine = COB_IO_VBISAM;
+#endif
 	if (mode == COB_OPEN_INPUT) {
 		checkvalue = R_OK;
 	} else {
@@ -1549,6 +1588,9 @@ cob_isam_exit_fileio (cob_file_api *a)
 void
 cob_isam_init_fileio (cob_file_api *a)
 {
+#if defined(WITH_VBISAM) && defined(WITH_DISAM)
+#undef WITH_DISAM
+#endif
 #if defined(WITH_DISAM)
 	a->io_funcs[COB_IO_DISAM] = (void*) &ext_indexed_funcs;
 #elif defined(WITH_CISAM)
@@ -1566,3 +1608,4 @@ cob_isam_init_fileio (cob_file_api *a)
 }
 
 #endif
+#endif /* WITH_MULTI_ISAM */

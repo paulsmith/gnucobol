@@ -19,15 +19,38 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
-lib_LTLIBRARIES = libcob.la
+if COB_MAKE_CISAM_LIB
+lib_ci = libcobci.la
+libcobci_la_LIBADD = $(LIBCOB_CISAM)
+else
+lib_ci =
+endif
+
+if COB_MAKE_DISAM_LIB
+lib_di = libcobdi.la
+libcobdi_la_LIBADD = $(LIBCOB_DISAM)
+else
+lib_di =
+endif
+
+if COB_MAKE_VBISAM_LIB
+lib_vb = libcobvb.la
+libcobvb_la_LIBADD = $(LIBCOB_VBISAM)
+else
+lib_vb =
+endif
+
+lib_LTLIBRARIES = libcob.la $(lib_ci) $(lib_di) $(lib_vb)
 libcob_la_SOURCES = common.c move.c numeric.c strings.c \
 	fileio.c fextfh.c fisam.c fbdb.c focextfh.c flmdb.c \
 	call.c intrinsic.c termio.c screenio.c reportio.c cobgetopt.c \
 	mlio.c
+
 if LOCAL_CJSON
 nodist_libcob_la_SOURCES = cJSON.c
 DISTCLEANFILES = cJSON.c cJSON.h
 endif
+
 #ToDo Man Page
 #dist_man_MANS = libcob.3
 #COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)

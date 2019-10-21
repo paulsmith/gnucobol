@@ -31,6 +31,7 @@
 #include <stddef.h>
 #include <stdarg.h>
 #include <string.h>
+#include <errno.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -72,6 +73,7 @@ lt_dlsym (HMODULE hmod, const char *p)
 	return modun.voidptr;
 }
 
+#define lt_dlopenlcl(x)	lt_dlopen(x)
 #define lt_dlclose(x)	FreeLibrary(x)
 #define	lt_dlinit()
 #define	lt_dlexit()
@@ -92,6 +94,7 @@ lt_dlerror (void)
 #include <dlfcn.h>
 
 #define lt_dlopen(x)	dlopen(x, RTLD_LAZY | RTLD_GLOBAL)
+#define lt_dlopenlcl(x)	dlopen(x, RTLD_LAZY | RTLD_LOCAL)
 #define lt_dlsym(x,y)	dlsym(x, y)
 #define lt_dlclose(x)	dlclose(x)
 #define lt_dlerror()	dlerror()
@@ -102,6 +105,7 @@ lt_dlerror (void)
 #else
 
 #include <ltdl.h>
+#define lt_dlopenlcl(x)	lt_dlopen(x)
 
 #endif
 
@@ -1002,6 +1006,22 @@ cob_resolve_func (const char *name)
 	if (unlikely(!p)) {
 		cob_runtime_error (_("user-defined FUNCTION '%s' not found"), name);
 		cob_stop_run (1);
+	}
+	return p;
+}
+
+/*
+ * Load library and return address of entry point
+ */
+void *
+cob_load_lib (const char *library, const char *entry)
+{
+	void	*p;
+
+	errno = 0;
+	p = lt_dlopenlcl (library);
+	if (p) {
+		p = lt_dlsym (p, entry);
 	}
 	return p;
 }

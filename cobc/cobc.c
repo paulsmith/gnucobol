@@ -2224,7 +2224,7 @@ cobc_print_info (void)
 #endif
 
 
-#if defined(WITH_INDEX_EXTFH) || defined(WITH_CISAM) || defined(WITH_dISAM) \
+#if defined(WITH_INDEX_EXTFH) || defined(WITH_CISAM) || defined(WITH_DISAM) \
 	|| defined(WITH_VBISAM) || defined(WITH_DB) || defined(WITH_LMDB)
 #if defined	(WITH_INDEX_EXTFH)
 	cobc_var_print (_("indexed file handler"),		"EXTFH (obsolete)", 0);
@@ -2259,6 +2259,9 @@ cobc_print_info (void)
 # else
 	cobc_var_print (_("indexed file handler"),		"VBISAM", 0);
 # endif
+#endif
+#if defined(WITH_IXDFLT)
+	cobc_var_print (_("default indexed handler"),    WITH_IXDFLT, 0);
 #endif
 #else
 	cobc_var_print (_("indexed file handler"),		_("disabled"), 0);

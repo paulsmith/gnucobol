@@ -38,6 +38,9 @@
 #define	COB_LIB_EXPIMP
 
 #include "fileio.h"
+#if defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
+#include <dlfcn.h>
+#endif
 
 struct file_list {
 	struct file_list	*next;
@@ -255,6 +258,11 @@ get_io_ptr (cob_file *f)
 
 static const char *file_format[8] = {"0","1","2","3","B32","B64","L32","L64"};
 static const char *dict_ext = "dd";
+
+#if defined(WITH_INDEXED)
+static const char ix_routine = WITH_INDEXED;
+static char ix_type[3] = "XX";
+#else
 #if defined(WITH_CISAM)
 static const char ix_routine = COB_IO_CISAM;
 static const char ix_type[3] = "CI";
@@ -277,6 +285,7 @@ static const char ix_type[3] = "IS";
 static const char ix_routine = COB_IO_IXEXT;
 static const char ix_type[3] = "IS";
 #endif
+#endif
 
 /*
  * Write data file description to a text file
@@ -296,7 +305,7 @@ cob_write_dict (cob_file *f, char *filename)
 	if(f->organization == COB_ORG_INDEXED) {
 		fprintf(fo,"type=IX,%.2s",io_rtn_name[f->io_routine]);
 	} else if(f->organization == COB_ORG_RELATIVE) {
-		fprintf(fo,"type=RL");
+		fprintf(fo,"type=%.2s",io_rtn_name[COB_IO_RELATIVE]);
 		if(f->file_format == COB_FILE_IS_MF)
 			fprintf(fo,",MF");
 		else if(f->file_format == COB_FILE_IS_GC)
@@ -304,7 +313,7 @@ cob_write_dict (cob_file *f, char *filename)
 		else
 			fprintf(fo,",%.2s",io_rtn_name[f->io_routine]);
 	} else if(f->organization == COB_ORG_SEQUENTIAL) {
-		fprintf(fo,"type=SQ");
+		fprintf(fo,"type=%.2s",io_rtn_name[COB_IO_SEQUENTIAL]);
 		if(f->file_format == COB_FILE_IS_MF)
 			fprintf(fo,",MF");
 		else if(f->file_format == COB_FILE_IS_GC)
@@ -457,10 +466,13 @@ cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
 								break;
 							}
 						}
-						if (k >= COB_IO_MAX
-						 && strcmp(p2,ix_type) != 0) {
-							sts = 1;
-							break;
+						if (k >= COB_IO_MAX) {
+							if (strcmp(p2,ix_type) != 0) {
+								f->io_routine = ix_routine;
+							} else {
+								sts = 1;
+								break;
+							}
 						}
 					}
 				} else if (strcmp(wrd,"recsz") == 0) {
@@ -5939,6 +5951,9 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 	char	*p;
 	int	i,k;
 
+#if defined(WITH_INDEXED)
+	memcpy((void*)ix_type,(void*)io_rtn_name[WITH_INDEXED],2);
+#endif
 	runtime_buffer = cob_fast_malloc ((size_t)(4 * COB_FILE_BUFF) + 4);
 	file_open_env = runtime_buffer + COB_FILE_BUFF;
 	file_open_name = runtime_buffer + (2 * COB_FILE_BUFF);
@@ -6009,7 +6024,38 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 	}
 
 #if defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
+#if defined(WITH_MULTI_ISAM)
+	{
+		void (*ioinit)(cob_file_api *);
+#if defined(WITH_CISAM)
+		ioinit = cob_load_lib ("libcobci.so", "cob_isam_init_fileio");
+		if(ioinit == NULL) {
+			cob_runtime_error (_("C-ISAM library %s is not present"),"libcobci.so");
+			exit(-1);
+		}
+		ioinit(&file_api);
+#endif
+#if defined(WITH_DISAM)
+		ioinit = cob_load_lib ("libcobdi.so", "cob_isam_init_fileio");
+		if(ioinit == NULL) {
+			cob_runtime_error (_("D-ISAM library %s is not present"),"libcobdi.so");
+			exit(-1);
+		}
+		ioinit(&file_api);
+#endif
+#if defined(WITH_VBISAM)
+		ioinit = cob_load_lib ("libcobvb.so", "cob_isam_init_fileio");
+		if(ioinit == NULL) {
+			cob_runtime_error (_("VB-ISAM library %s is not present"),"libcobvb.so");
+			exit(-1);
+		}
+		ioinit(&file_api);
+#endif
+	}
+#else
+	/* Single type of ISAM is used */
 	cob_isam_init_fileio (&file_api);
+#endif
 #endif
 
 #ifdef	WITH_DB

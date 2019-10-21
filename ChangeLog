@@ -1,4 +1,12 @@
 
+2019-10-21  Ron Norman <rjn@inglenet.com> 
+
+	* configure.ac: Updated for multiple INDEXED file handlers
+	               --with-indexed=db/lmdb/cisam/disam/vbisam defines default
+				   handler
+				   If multiple of C/D/VB-ISAM are used then they are built
+				   as a shared library and loaded at run time
+
 2019-08-12  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: check for make

@@ -80,6 +80,9 @@
 #ifdef	WITH_LMDB
 #include <lmdb.h>
 #endif
+#ifdef	WITH_VBISAM
+#include <vbisam.h>
+#endif
 
 #if defined (HAVE_NCURSESW_NCURSES_H)
 #include <ncursesw/ncurses.h>
@@ -7599,7 +7602,7 @@ print_info (void)
 	var_print (_("sequential file handler"),	_("built-in"), "", 0);
 #endif
 
-#if defined(WITH_INDEX_EXTFH) || defined(WITH_CISAM) || defined(WITH_dISAM) \
+#if defined(WITH_INDEX_EXTFH) || defined(WITH_CISAM) || defined(WITH_DISAM) \
 	|| defined(WITH_VBISAM) || defined(WITH_DB) || defined(WITH_LMDB)
 #if defined	(WITH_INDEX_EXTFH)
 	var_print (_("indexed file handler"), 		"EXTFH (obsolete)", "", 0);
@@ -7636,6 +7639,9 @@ print_info (void)
 #else
 	var_print (_("indexed file handler"), 		"VB-ISAM", "", 0);
 #endif
+#endif
+#if defined(WITH_IXDFLT)
+	var_print (_("default indexed handler"), 	WITH_IXDFLT, "", 0);
 #endif
 #else
 	var_print (_("indexed file handler"), 		_("disabled"), "", 0);

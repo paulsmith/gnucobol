@@ -25,7 +25,10 @@
 #define cobglobptr file_globptr
 #define cobsetptr file_setptr
 
+#ifndef _CONFIG_H
 #include <config.h>
+#define _CONFIG_H
+#endif
 
 #define _LFS64_LARGEFILE		1
 #define _LFS64_STDIO			1
@@ -190,6 +193,6 @@ COB_HIDDEN void	cob_lmdb_init_fileio (cob_file_api *);
 #endif
 
 #if defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
-COB_HIDDEN void	cob_isam_init_fileio (cob_file_api *);
+void	cob_isam_init_fileio (cob_file_api *);
 #endif
 #endif

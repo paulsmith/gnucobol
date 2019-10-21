@@ -1,4 +1,14 @@
 
+2019-10-21  Ron Norman <rjn@inglenet.com>
+	* fileio.c Update for multiple xISAM handlers
+	* call.c: added cob_load_lib to load xISAM handler
+	* common.c,common.h: Updated for multiple xISAM handlers
+	* fisam.c Updated for multiple xISAM handlers
+	* Makefile.am Updated for multiple xISAM
+	* libcobci.c - builds fisam.c for C-ISAM
+	* libcobdi.c - builds fisam.c for D-ISAM
+	* libcobvb.c - builds fisam.c for VB-ISAM
+
 2019-10-20  Ron Norman <rjn@inglenet.com>
 	* common.c fix problem with DEBUG_LOG operation
 	* flmdb.c changed to use DEBUG_LOG
