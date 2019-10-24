@@ -22,6 +22,10 @@
 #define	COB_LIB_EXPIMP
 #include "fileio.h"
 
+#ifdef HAVE_SYS_SYSMACROS_H
+#include <sys/sysmacros.h>
+#endif
+
 #if WITH_LMDB
 
 /* Local variables */
@@ -40,11 +44,7 @@ static int cob_lmdb_fork (cob_file_api *a);
 static int ix_lmdb_file_unlock(cob_file_api *, cob_file *);
 void cob_lmdb_init_fileio (cob_file_api *a);
 
-static int 
-ix_lmdb_dummy ()
-{
-	return 0;
-}
+static int ix_lmdb_dummy () { return 0; }
 
 static const struct cob_fileio_funcs lmdb_funcs = {
 	lmdb_open,
@@ -260,7 +260,7 @@ struct indexed_file {
 	MDB_cursor	**cursor;
 	MDB_val		key;
 	MDB_val		data;
-        int             fd;
+	int			fd;
 	char		*filename;	/* Needed for record locks */
 	unsigned char	*last_key;	/* The last key written */
 	unsigned char	*temp_key;	/* Used for temporary storage */
@@ -405,21 +405,22 @@ db_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 static bool
 local_file( dev_t device, char **pname /*output*/ ) 
 {
+	int n, maj, min, nblock;
+	char *s;
+	static char line[128];
+	static char devname[128];
+	static const char filename[] = "/proc/partitions";
+	FILE *file;
+
 #ifdef _WIN32
 	/* TODO: Come back for Win32? */
 	return true;
 #endif
-	static const char filename[] = "/proc/partitions";
-	FILE *file;
 
 	if( (file = fopen(filename, "r")) == NULL ) {
 		WARN("could not open %s", filename);
 	}
 
-	int n, maj, min, nblock;
-	char *s;
-	static char line[128];
-	static char devname[128];
 
 	while( (s = fgets(line, sizeof(line), file)) != NULL ) {
 		if( (n = sscanf(line, "%d%d%d%s", &maj, &min, &nblock, devname)) == EOF ) {
@@ -965,15 +966,16 @@ lmdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 
 	if (getenv("MDB_NO_SHARED_FS_CHK") == NULL) {
 		struct stat sb;
-		char dir[ 1 + strlen(filename) ];
+		char *devname;
+		char dir[ COB_FILE_MAX ];
+		int	is_local;
 
 		sprintf(dir, "%s", filename);
 		if ((stat(dirname(dir), &sb) == -1) || (!S_ISDIR(sb.st_mode))) {
 			return COB_STATUS_30_PERMANENT_ERROR;
 		}
 
-		char *devname;
-		bool is_local = local_file(sb.st_dev, &devname);
+		is_local = local_file(sb.st_dev, &devname);
 		if (!is_local) {
 			fprintf(stderr,"Shared filesystem detected!\n");
 			return COB_STATUS_30_PERMANENT_ERROR;

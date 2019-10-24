@@ -1,4 +1,7 @@
 
+2019-10-24  Ron Norman <rjn@inglenet.com>
+	* flmdb.c updated to be more portable
+
 2019-10-21  Ron Norman <rjn@inglenet.com>
 	* fileio.c Update for multiple xISAM handlers
 	* call.c: added cob_load_lib to load xISAM handler

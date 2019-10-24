@@ -324,7 +324,7 @@ AC_LIB_RPATH
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdint.h sys/types.h signal.h fcntl.h malloc.h locale.h \
-	stddef.h wchar.h dlfcn.h sys/time.h sys/wait.h])
+	stddef.h wchar.h dlfcn.h sys/time.h sys/wait.h sys/sysmacros.h])
 
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -1037,7 +1037,7 @@ fi
 
 AC_ARG_WITH([seqra-extfh],
   [AS_HELP_STRING([--with-seqra-extfh],
-    [(GnuCOBOL) Use obsolete external SEQ/RAN file handler])],
+    [(GnuCOBOL) Use external SEQ/RAN handler (obsolete)])],
   [ if test "$with_seqra_extfh" = "yes"; then
 	AC_DEFINE([WITH_SEQRA_EXTFH], [1])
     fi ],
@@ -1047,18 +1047,40 @@ AC_ARG_WITH([indexed],
   [AS_HELP_STRING([--with-indexed],
     [Define default INDEXED file handler])],
   [ if test "$with_indexed" = "disam"; then
-	  AC_DEFINE([WITH_INDEXED], [COB_IO_DISAM])
-	  AC_DEFINE([WITH_IXDFLT], ["D-ISAM"])
+  	  if test "$with_disam" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_DISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["D-ISAM"])
+	  else
+	    AC_MSG_ERROR([--with-indexed=disam requries --with-disam])
+	  fi
     elif test "$with_indexed" = "cisam"; then
-	  AC_DEFINE([WITH_INDEXED], [COB_IO_CISAM])
-	  AC_DEFINE([WITH_IXDFLT], ["C-ISAM"])
+  	  if test "$with_cisam" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_CISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["C-ISAM"])
+	  else
+	    AC_MSG_ERROR([--with-indexed=cisam requries --with-cisam])
+	  fi
     elif test "$with_indexed" = "vbisam"; then
-	  AC_DEFINE([WITH_INDEXED], [COB_IO_VBISAM])
-	  AC_DEFINE([WITH_IXDFLT], ["VB-ISAM"])
+  	  if test "$with_vbisam" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_VBISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["VB-ISAM"])
+	  else
+	    AC_MSG_ERROR([--with-indexed=vbisam requries --with-vbisam])
+	  fi
     elif test "$with_indexed" = "db"; then
-	  AC_DEFINE([WITH_INDEXED], [COB_IO_BDB])
+  	  if test "$with_db" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_BDB])
+	    AC_DEFINE([WITH_IXDFLT], ["BDB"])
+	  else
+	    AC_MSG_ERROR([--with-indexed=db requries --with-db])
+	  fi
     elif test "$with_indexed" = "lmdb"; then
-	  AC_DEFINE([WITH_INDEXED], [COB_IO_LMDB])
+  	  if test "$with_lmdb" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_LMDB])
+	    AC_DEFINE([WITH_IXDFLT], ["LMDB"])
+	  else
+	    AC_MSG_ERROR([--with-indexed=lmdb requries --with-lmdb])
+	  fi
 	else
 	  AC_MSG_ERROR([--with-indexed value is unknown])
     fi
@@ -1148,7 +1170,7 @@ fi
 
 AC_ARG_WITH([index-extfh],
 [AS_HELP_STRING([--with-index-extfh],
-  [(GnuCOBOL) Use external ISAM file handler])],
+  [(GnuCOBOL) Use external ISAM handler (obsolete)])],
 [ if test "$with_index_extfh" = "yes"; then
   AC_DEFINE([WITH_INDEX_EXTFH], [1])
   fi ],
