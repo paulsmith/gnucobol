@@ -2260,7 +2260,7 @@ cobc_print_info (void)
 	cobc_var_print (_("indexed file handler"),		"VBISAM", 0);
 # endif
 #endif
-#if defined(WITH_IXDFLT)
+#if defined(WITH_IXDFLT) && defined(WITH_MULTI_ISAM)
 	cobc_var_print (_("default indexed handler"),    WITH_IXDFLT, 0);
 #endif
 #else

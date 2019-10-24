@@ -1046,44 +1046,47 @@ AC_ARG_WITH([seqra-extfh],
 AC_ARG_WITH([indexed],
   [AS_HELP_STRING([--with-indexed],
     [Define default INDEXED file handler])],
-  [ if test "$with_indexed" = "disam"; then
-  	  if test "$with_disam" = "yes"; then
+  [ case "$with_indexed" in
+    disam)
+		with_disam=yes
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_DISAM])
-	    AC_DEFINE([WITH_IXDFLT], ["D-ISAM"])
-	  else
-	    AC_MSG_ERROR([--with-indexed=disam requries --with-disam])
-	  fi
-    elif test "$with_indexed" = "cisam"; then
+	    AC_DEFINE([WITH_IXDFLT], ["D-ISAM"]);;
+    cisam)
+		with_cisam=yes
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_CISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["C-ISAM"]);;
+    vbisam)
+		with_vbisam=yes
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_VBISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["VB-ISAM"]);;
+    db)
+		with_db=yes
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_BDB])
+	    AC_DEFINE([WITH_IXDFLT], ["BDB"]);;
+    lmdb)
+		with_lmdb=yes
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_LMDB])
+	    AC_DEFINE([WITH_IXDFLT], ["LMDB"]);;
+	*)
   	  if test "$with_cisam" = "yes"; then
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_CISAM])
 	    AC_DEFINE([WITH_IXDFLT], ["C-ISAM"])
-	  else
-	    AC_MSG_ERROR([--with-indexed=cisam requries --with-cisam])
-	  fi
-    elif test "$with_indexed" = "vbisam"; then
-  	  if test "$with_vbisam" = "yes"; then
+  	  elif test "$with_disam" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_DISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["D-ISAM"])
+  	  elif test "$with_vbisam" = "yes"; then
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_VBISAM])
 	    AC_DEFINE([WITH_IXDFLT], ["VB-ISAM"])
-	  else
-	    AC_MSG_ERROR([--with-indexed=vbisam requries --with-vbisam])
-	  fi
-    elif test "$with_indexed" = "db"; then
-  	  if test "$with_db" = "yes"; then
+  	  elif test "$with_db" = "yes"; then
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_BDB])
 	    AC_DEFINE([WITH_IXDFLT], ["BDB"])
-	  else
-	    AC_MSG_ERROR([--with-indexed=db requries --with-db])
-	  fi
-    elif test "$with_indexed" = "lmdb"; then
-  	  if test "$with_lmdb" = "yes"; then
+  	  elif test "$with_lmdb" = "yes"; then
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_LMDB])
 	    AC_DEFINE([WITH_IXDFLT], ["LMDB"])
 	  else
-	    AC_MSG_ERROR([--with-indexed=lmdb requries --with-lmdb])
-	  fi
-	else
-	  AC_MSG_ERROR([--with-indexed value is unknown])
-    fi
+		AC_MSG_ERROR([--with-indexed=<HANDLER>, must be one of cisam|disam|vbisam|db|lmdb])
+	  fi ;;
+    esac
   ], [])
 
 LIBCOB_ISAM=""

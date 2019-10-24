@@ -7629,7 +7629,7 @@ print_info (void)
 	var_print (_("indexed file handler"), 		"VB-ISAM", "", 0);
 #endif
 #endif
-#if defined(WITH_IXDFLT)
+#if defined(WITH_IXDFLT) && defined(WITH_MULTI_ISAM)
 	var_print (_("default indexed handler"), 	WITH_IXDFLT, "", 0);
 #endif
 #else
