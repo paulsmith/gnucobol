@@ -1087,7 +1087,24 @@ AC_ARG_WITH([indexed],
 		AC_MSG_ERROR([--with-indexed=<HANDLER>, must be one of cisam|disam|vbisam|db|lmdb])
 	  fi ;;
     esac
-  ], [])
+  ], [
+  	  if test "$with_cisam" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_CISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["C-ISAM"])
+  	  elif test "$with_disam" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_DISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["D-ISAM"])
+  	  elif test "$with_vbisam" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_VBISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["VB-ISAM"])
+  	  elif test "$with_db" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_BDB])
+	    AC_DEFINE([WITH_IXDFLT], ["BDB"])
+  	  elif test "$with_lmdb" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_LMDB])
+	    AC_DEFINE([WITH_IXDFLT], ["LMDB"])
+	  fi
+  ])
 
 LIBCOB_ISAM=""
 LIBCOB_CISAM=""
