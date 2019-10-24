@@ -70,7 +70,6 @@ static const char	**db_data_dir = NULL;
 
 #define INTTYPES_H_MISSING
 #include <lmdb.h>
-#include <stdbool.h>
 #ifndef _WIN32	/* correct would be a check for HAVE_SYS_FILE_H */
 #include <libgen.h>
 #include <sys/file.h>
@@ -402,7 +401,8 @@ db_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 	return -1;
 }
 
-static bool
+/* check for local file, returns 1 if "yes" (unimplemented for WIN32) */
+static int
 local_file( dev_t device, char **pname /*output*/ ) 
 {
 	int n, maj, min, nblock;
@@ -414,11 +414,18 @@ local_file( dev_t device, char **pname /*output*/ )
 
 #ifdef _WIN32
 	/* TODO: Come back for Win32? */
-	return true;
+	return 1;
 #endif
+
+	/* TODO: this variable should be moved to common.c as binary config */
+	if (getenv ("MDB_NO_LOCAL_FS_CHK") != NULL) {
+		return 1;
+	}
 
 	if( (file = fopen(filename, "r")) == NULL ) {
 		WARN("could not open %s", filename);
+		/* TODO: Come back here,  /proc/partitions may not be accesible */
+		return 1;
 	}
 
 
@@ -429,12 +436,12 @@ local_file( dev_t device, char **pname /*output*/ )
 		if( n == 4 ) {
 			if( maj == major(device) && min == minor(device) ) {
 				*pname = devname;
-				return true;
+				return 1;
 			}
 		} 
 	}
 
-	return false;
+	return 0;
 }
 
 /* Return total length of the key */
@@ -945,8 +952,11 @@ lmdb_file_delete (cob_file_api *a, cob_file *f, char *filename)
 /* OPEN INDEXED file */
 
 static void 
-indexed_file_free(struct indexed_file* p)
-{ return;}
+indexed_file_free (struct indexed_file* p)
+{
+	/* no cleanup yet */
+	return;
+}
 
 static int
 lmdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const int sharing)
@@ -964,6 +974,7 @@ lmdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 
 	a->chk_file_mapping (f);
 
+	/* TODO: this variable should be moved to common.c as binary config */
 	if (getenv("MDB_NO_SHARED_FS_CHK") == NULL) {
 		struct stat sb;
 		char *devname;
@@ -977,7 +988,7 @@ lmdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 
 		is_local = local_file(sb.st_dev, &devname);
 		if (!is_local) {
-			fprintf(stderr,"Shared filesystem detected!\n");
+			cob_runtime_warning("file %s - shared filesystem detected!", filename);
 			return COB_STATUS_30_PERMANENT_ERROR;
 		}
 	}

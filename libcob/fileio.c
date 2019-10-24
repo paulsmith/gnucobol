@@ -1452,7 +1452,7 @@ lock_record(
 	}
 	return 0;				/* Record is not locked! */
 #else
-	if(retry > 0) {
+	if (retry > 0) {
 		retry = retry * 4;
 		interval = (interval * 1000) / 4;	
 		while(retry-- > 0) {
@@ -1468,7 +1468,7 @@ lock_record(
 				return 1;	/* Got the lock so all is good */
 			}
 			*errsts = errno;
-			cob_sys_sleep_msec(interval);
+			cob_sleep_msec(interval);
 		}
 	} else {
 		while(1) {
@@ -1484,7 +1484,7 @@ lock_record(
 				return 1;	/* Got the lock so all is good */
 			}
 			*errsts = errno;
-			cob_sys_sleep_msec(250);
+			cob_sleep_msec(250);
 		}
 	}
 	return 0;				/* Record is not locked! */

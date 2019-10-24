@@ -1802,7 +1802,6 @@ COB_EXPIMP int	cob_sys_return_args	(void *);
 COB_EXPIMP int	cob_sys_parameter_size	(void *);
 COB_EXPIMP int	cob_sys_fork	(void);
 COB_EXPIMP int	cob_sys_waitpid	(const void *);
-COB_EXPIMP void	cob_sys_sleep_msec(unsigned int);
 
 /*
  * cob_sys_getopt_long_long

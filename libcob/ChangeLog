@@ -1,8 +1,20 @@
 
+2019-10-24  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (internal_nanosleep): added a new parameter specifying
+	  "round to minimal" to be able to use it for locking_timout
+	* common.c, common.h, coblocal.h: replaced non-system function
+	  cob_sys_sleep_msec with new internal cob_sleep_msec
+	* fileio.c, fisam.c, fbdb.c: adjusted cob_sys_sleep_msec->cob_sleep_msec
+	* flmdb.c (local_file): fixed SIGSEGV if proc/partitions is not
+	  accessible and allow the check to be skipped via MDB_NO_LOCAL_FS_CHK
+
 2019-10-24  Ron Norman <rjn@inglenet.com>
+
 	* flmdb.c updated to be more portable
 
 2019-10-21  Ron Norman <rjn@inglenet.com>
+
 	* fileio.c Update for multiple xISAM handlers
 	* call.c: added cob_load_lib to load xISAM handler
 	* common.c,common.h: Updated for multiple xISAM handlers
@@ -13,16 +25,19 @@
 	* libcobvb.c - builds fisam.c for VB-ISAM
 
 2019-10-20  Ron Norman <rjn@inglenet.com>
+
 	* common.c fix problem with DEBUG_LOG operation
 	* flmdb.c changed to use DEBUG_LOG
 	* fisam.c change name of global/set pointers
 
 2019-10-19  Ron Norman <rjn@inglenet.com>
+
 	* fisam.c correction for START LESS EQUAL followed by READ PREVIOUS
 	* fbdb.c,flmdb.c correction to not return 05 status when OPEN OUTPUT
 	   for an optional file
 
 2019-10-19  Ron Norman <rjn@inglenet.com>
+
 	* fileio.c has been split into fileio.c fisam.c fbdb.c fextfh.c focextfh.c
 	* fileio.h added with common definitions for all fileio modules
 	* flmdb.c copied from isam-lmdb branch
@@ -32,7 +47,7 @@
 2019-10-03  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Removed definition of off_t as it needs to be defined
-	           by the system and is most often in <sys/types.h>
+	  by the system and is most often in <sys/types.h>
 
 2019-10-01  Edward Hart <edward.dan.hart@gmail.com>
 

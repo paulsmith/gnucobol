@@ -424,7 +424,7 @@ static struct config_tbl gc_conf[] = {
 static int		translate_boolean_to_int	(const char* ptr);
 static cob_s64_t	get_sleep_nanoseconds	(cob_field *nano_seconds);
 static cob_s64_t	get_sleep_nanoseconds_from_seconds	(cob_field *decimal_seconds);
-static void		internal_nanosleep	(cob_s64_t nsecs);
+static void		internal_nanosleep	(cob_s64_t nsecs, int round_to_minmal);
 
 static int		set_config_val	(char *value, int pos);
 static char		*get_config_val	(char *value, int pos, char *orgvalue);
@@ -4228,7 +4228,7 @@ cob_continue_after (cob_field *decimal_seconds)
 		   specifies EC-CONTINUE-LESS-THAN-ZERO (NF) here... */
 		return;
 	}
-	internal_nanosleep (nanoseconds);
+	internal_nanosleep (nanoseconds, 0);
 }
 
 void
@@ -4324,32 +4324,6 @@ cob_free_alloc (unsigned char **ptr1, unsigned char *ptr2)
 		cob_set_exception (COB_EC_STORAGE_NOT_ALLOC);
 		return;
 	}
-}
-
-/*
- * Sleep for given number of milliseconds, rounded up if needed
- */
-void
-cob_sys_sleep_msec (unsigned int msecs)
-{
-#if	defined(HAVE_NANO_SLEEP)
-	struct timespec	tsec;
-#endif
-
-	if (msecs > 0) {
-#ifdef	_WIN32
-		Sleep (msecs);
-#elif	defined(__370__) || defined(__OS400__)
-		sleep ((msecs+1000-1)/1000);
-#elif	defined(HAVE_NANO_SLEEP)
-		tsec.tv_sec = msecs / 1000;
-		tsec.tv_nsec = (msecs % 1000) * 1000000;
-		nanosleep (&tsec, NULL);
-#else
-		sleep ((msecs+1000-1)/1000);
-#endif
-	}
-	return;
 }
 
 char *
@@ -5165,8 +5139,9 @@ cob_sys_tolower (void *p1, const int length)
 	return 0;
 }
 
-/* maximúm sleep time in seconds, currently 7 days */
+/* maximum sleep time in seconds, currently 7 days */
 #define MAX_SLEEP_TIME 3600*24*7
+#define NANOSECONDS_PER_MILISECOND 1000000
 
 static cob_s64_t
 get_sleep_nanoseconds (cob_field *nano_seconds) {
@@ -5206,35 +5181,49 @@ get_sleep_nanoseconds_from_seconds (cob_field *decimal_seconds) {
 }
 
 static void
-internal_nanosleep (cob_s64_t nsecs)
+internal_nanosleep (const cob_s64_t nsecs, int round_to_minmal)
 {
-#ifdef	HAVE_NANO_SLEEP
-	struct timespec	tsec;
-
-	tsec.tv_sec = nsecs / 1000000000;
-	tsec.tv_nsec = nsecs % 1000000000;
-	nanosleep (&tsec, NULL);
-
-#else
-
-	unsigned int	msecs;
-#if	defined (__370__) || defined (__OS400__)
-	msecs = (unsigned int)(nsecs / 1000000000);
-	if (msecs > 0) {
-		sleep (msecs);
-	}
+	if (nsecs > 0) {
+#if defined	(HAVE_NANO_SLEEP)
+		struct timespec	tsec;
+		tsec.tv_sec = nsecs / 1000000000;
+		tsec.tv_nsec = nsecs % 1000000000;
+		nanosleep (&tsec, NULL);
+#elif defined (HAVE_USLEEP)
+		/* possibly adding usleep() here, currently configure.ac does not check for it as:
+		   * check needed in configure.ac
+		   * little bit ugly because of EINVAL check
+		   * obsolete in POSIX.1-2001, POSIX.1-2008 removed its specification
+		  --> only do if we find a system that does not support nanosleep() but usleep()
+		      in any case the existing code here can be triggered by specifying passing
+			  -DHAVE_USLEEP via CPPFLAGS */
+		unsigned int	micsecs = (unsigned int)(nsecs / 1000);
+		/* prevent EINVAL */
+		if (micsecs < 1000000) {
+			if (micsecs == 0 && round_to_minmal) micsecs = 1;
+			usleep (micsecs);
+		} else {
+			unsigned int	seconds = (unsigned int)(nsecs * 1000 / NANOSECONDS_PER_MILISECOND);
+			sleep (seconds);
+		}
 #elif	defined (_WIN32)
-	msecs = (unsigned int)(nsecs / 1000000);
-	if (msecs > 0) {
+		unsigned int	msecs = (unsigned int)(nsecs / NANOSECONDS_PER_MILISECOND);
+		if (msecs == 0 && round_to_minmal) msecs = 1;
 		Sleep (msecs);
-	}
 #else
-	msecs = (unsigned int)(nsecs / 1000000000);
-	if (msecs > 0) {
-		sleep (msecs);
+		unsigned int	seconds = (unsigned int)(nsecs * 1000 / NANOSECONDS_PER_MILISECOND);
+		if (seconds == 0 && round_to_minmal) seconds = 1;
+		sleep (seconds);
+#endif
 	}
-#endif
-#endif
+}
+
+/* sleep for given number of milliseconds, rounded up if needed */
+void
+cob_sleep_msec (const unsigned int msecs)
+{
+	if (msecs == 0) return;
+	internal_nanosleep (((cob_s64_t)msecs) * NANOSECONDS_PER_MILISECOND, 1);
 }
 
 /* CBL_GC_NANOSLEEP / CBL_OC_NANOSLEEP, origin: OpenCOBOL */
@@ -5248,7 +5237,7 @@ cob_sys_oc_nanosleep (const void *data)
 		cob_s64_t nsecs
 			= get_sleep_nanoseconds (COB_MODULE_PTR->cob_procedure_params[0]);
 		if (nsecs > 0) {
-			internal_nanosleep (nsecs);
+			internal_nanosleep (nsecs, 0);
 		}
 		return 0;
 	}
@@ -5269,7 +5258,7 @@ cob_sys_sleep (const void *data)
 			/* ACUCOBOL specifies a runtime error here... */
 			return -1;
 		}
-		internal_nanosleep (nanoseconds);
+		internal_nanosleep (nanoseconds, 0);
 		return 0;
 	}
 	return 0;	/* CHECKME */

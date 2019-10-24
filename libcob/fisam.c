@@ -564,7 +564,7 @@ isopen_retry(cob_file *f, char *filename, int mode)
 			break;
 		if(retry > 0) {
 			retry--;
-			cob_sys_sleep_msec(interval);
+			cob_sleep_msec(interval);
 		}
 		isfd = isopen ((void *)filename, mode);
 	}
@@ -621,7 +621,7 @@ isread_retry(cob_file *f, void *data, int mode)
 			break;
 		if(retry > 0) {
 			retry--;
-			cob_sys_sleep_msec(interval);
+			cob_sleep_msec(interval);
 		}
 	} while(sts != 0 && retry != 0);
 	return sts;

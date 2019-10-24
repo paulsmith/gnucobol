@@ -512,7 +512,7 @@ bdb_lock_file (cob_file *f, char *filename, int lock_mode)
 		}
 		if (retry > 0) {
 			retry--;
-			cob_sys_sleep_msec(interval);
+			cob_sleep_msec(interval);
 		}
 	} while (ret != 0 && retry != 0);
 
@@ -583,7 +583,7 @@ bdb_lock_record (cob_file *f, const char *key, const unsigned int keylen)
 		}
 		if (retry > 0) {
 			retry--;
-			cob_sys_sleep_msec(interval);
+			cob_sleep_msec(interval);
 		}
 	} while (ret != 0 && retry != 0);
 
@@ -678,7 +678,7 @@ bdb_test_record_lock (cob_file *f, const char *key, const unsigned int keylen)
 		}
 		if (retry > 0) {
 			retry--;
-			cob_sys_sleep_msec(interval);
+			cob_sleep_msec(interval);
 		}
 	} while (ret != 0 && retry != 0);
 
