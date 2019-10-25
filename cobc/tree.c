@@ -435,8 +435,9 @@ make_constant_label (const char *name)
 	return CB_TREE (p);
 }
 
+/* Recursively find/generate a name for the object x. */
 static size_t
-cb_name_1 (char *s, cb_tree x)
+cb_name_1 (char *s, cb_tree x, const int size)
 {
 	char			*orig;
 	struct cb_funcall	*cbip;
@@ -446,36 +447,36 @@ cb_name_1 (char *s, cb_tree x)
 	struct cb_intrinsic	*cbit;
 	cb_tree			l;
 	int			i;
-
+	
 	orig = s;
 	if (!x) {
-		strcpy (s, "(void pointer)");
+		strncpy (s, "(void pointer)", size);
 		return strlen (orig);
 	}
 	switch (CB_TREE_TAG (x)) {
 	case CB_TAG_CONST:
 		if (x == cb_any) {
-			strcpy (s, "ANY");
+			strncpy (s, "ANY", size);
 		} else if (x == cb_true) {
-			strcpy (s, "TRUE");
+			strncpy (s, "TRUE", size);
 		} else if (x == cb_false) {
-			strcpy (s, "FALSE");
+			strncpy (s, "FALSE", size);
 		} else if (x == cb_null) {
-			strcpy (s, "NULL");
+			strncpy (s, "NULL", size);
 		} else if (x == cb_zero) {
-			strcpy (s, "ZERO");
+			strncpy (s, "ZERO", size);
 		} else if (x == cb_space) {
-			strcpy (s, "SPACE");
+			strncpy (s, "SPACE", size);
 		} else if (x == cb_low || x == cb_norm_low) {
-			strcpy (s, "LOW-VALUE");
+			strncpy (s, "LOW-VALUE", size);
 		} else if (x == cb_high || x == cb_norm_high) {
-			strcpy (s, "HIGH-VALUE");
+			strncpy (s, "HIGH-VALUE", size);
 		} else if (x == cb_quote) {
-			strcpy (s, "QUOTE");
+			strncpy (s, "QUOTE", size);
 		} else if (x == cb_error_node) {
-			strcpy (s, _("internal error node"));
+			strncpy (s, _("internal error node"), size);
 		} else {
-			strcpy (s, _("unknown constant"));
+			strncpy (s, _("unknown constant"), size);
 		}
 		break;
 
@@ -483,114 +484,114 @@ cb_name_1 (char *s, cb_tree x)
 		/* TODO: for warning/error messages (do we use this for other parts?):
 		   use cb_word_length as max-length for the output */
 		if (CB_TREE_CLASS (x) == CB_CLASS_NUMERIC) {
-			strcpy (s, (char *)CB_LITERAL (x)->data);
+			strncpy (s, (char *)CB_LITERAL (x)->data, size);
 		} else {
-			sprintf (s, "\"%s\"", (char *)CB_LITERAL (x)->data);
+			snprintf (s, size, "\"%s\"", (char *)CB_LITERAL (x)->data);
 		}
 		break;
 
 	case CB_TAG_FIELD:
 		f = CB_FIELD (x);
 		if (f->flag_filler) {
-			strcpy (s, "FILLER");
+			strncpy (s, "FILLER", size);
 		} else {
-			strcpy (s, f->name);
+			strncpy (s, f->name, size);
 		}
 		break;
 
 	case CB_TAG_REFERENCE:
 		p = CB_REFERENCE (x);
 		if (p->flag_filler_ref) {
-			s += sprintf (s, "FILLER");
+			s += snprintf (s, size, "FILLER");
 		} else {
-			s += sprintf (s, "%s", p->word->name);
+			s += snprintf (s, size, "%s", p->word->name);
 		}
 		if (p->subs && CB_VALUE(p->subs) != cb_int1) {
-			s += sprintf (s, " (");
+			s += snprintf (s, size - (s - orig), " (");
 			p->subs = cb_list_reverse (p->subs);
 			for (l = p->subs; l; l = CB_CHAIN (l)) {
-				s += cb_name_1 (s, CB_VALUE (l));
-				s += sprintf (s, CB_CHAIN (l) ? ", " : ")");
+				s += cb_name_1 (s, CB_VALUE (l), size - (s - orig));
+				s += snprintf (s, size - (s - orig), CB_CHAIN (l) ? ", " : ")");
 			}
 			p->subs = cb_list_reverse (p->subs);
 		}
 		if (p->offset) {
-			s += sprintf (s, " (");
-			s += cb_name_1 (s, p->offset);
-			s += sprintf (s, ":");
+			s += snprintf (s, size - (s - orig), " (");
+			s += cb_name_1 (s, p->offset, size - (s - orig));
+			s += snprintf (s, size - (s - orig), ":");
 			if (p->length) {
-				s += cb_name_1 (s, p->length);
+				s += cb_name_1 (s, p->length, size - (s - orig));
 			}
-			strcpy (s, ")");
+			strncpy (s, ")", size - (s - orig));
 		}
 		if (p->chain) {
-			s += sprintf (s, " in ");
-			s += cb_name_1 (s, p->chain);
+			s += snprintf (s, size - (s - orig), " in ");
+			s += cb_name_1 (s, p->chain, size - (s - orig));
 		}
 		break;
 
 	case CB_TAG_LABEL:
-		sprintf (s, "%s", (char *)(CB_LABEL (x)->name));
+		snprintf (s, size, "%s", (char *)(CB_LABEL (x)->name));
 		break;
 
 	case CB_TAG_ALPHABET_NAME:
-		sprintf (s, "%s", CB_ALPHABET_NAME (x)->name);
+		snprintf (s, size, "%s", CB_ALPHABET_NAME (x)->name);
 		break;
 
 	case CB_TAG_CLASS_NAME:
-		sprintf (s, "%s", CB_CLASS_NAME (x)->name);
+		snprintf (s, size, "%s", CB_CLASS_NAME (x)->name);
 		break;
 
 	case CB_TAG_LOCALE_NAME:
-		sprintf (s, "%s", CB_LOCALE_NAME (x)->name);
+		snprintf (s, size, "%s", CB_LOCALE_NAME (x)->name);
 		break;
 
 	case CB_TAG_BINARY_OP:
 		cbop = CB_BINARY_OP (x);
 		if (cbop->op == '@') {
-			s += sprintf (s, "(");
-			s += cb_name_1 (s, cbop->x);
-			s += sprintf (s, ")");
+			s += snprintf (s, size, "(");
+			s += cb_name_1 (s, cbop->x, size - (s - orig));
+			s += snprintf (s, size - (s - orig), ")");
 		} else if (cbop->op == '!') {
-			s += sprintf (s, "!");
-			s += cb_name_1 (s, cbop->x);
+			s += snprintf (s, size, "!");
+			s += cb_name_1 (s, cbop->x, size - (s - orig));
 		} else {
-			s += sprintf (s, "(");
-			s += cb_name_1 (s, cbop->x);
-			s += sprintf (s, " %c ", cbop->op);
-			s += cb_name_1 (s, cbop->y);
-			strcpy (s, ")");
+			s += snprintf (s, size, "(");
+			s += cb_name_1 (s, cbop->x, size - (s - orig));
+			s += snprintf (s, size - (s - orig), " %c ", cbop->op);
+			s += cb_name_1 (s, cbop->y, size - (s - orig));
+			strncpy (s, ")", size - (s - orig));
 		}
 		break;
 
 	case CB_TAG_FUNCALL:
 		cbip = CB_FUNCALL (x);
-		s += sprintf (s, "%s", cbip->name);
+		s += snprintf (s, size, "%s", cbip->name);
 		for (i = 0; i < cbip->argc; i++) {
-			s += sprintf (s, (i == 0) ? "(" : ", ");
-			s += cb_name_1 (s, cbip->argv[i]);
+			s += snprintf (s, size - (s - orig), (i == 0) ? "(" : ", ");
+			s += cb_name_1 (s, cbip->argv[i], size - (s - orig));
 		}
-		s += sprintf (s, ")");
+		s += snprintf (s, size - (s - orig), ")");
 		break;
 
 	case CB_TAG_INTRINSIC:
 		cbit = CB_INTRINSIC (x);
 		if (!cbit->isuser) {
-			sprintf (s, "FUNCTION %s", cbit->intr_tab->name);
+			snprintf (s, size, "FUNCTION %s", cbit->intr_tab->name);
 		} else if (cbit->name && CB_REFERENCE_P(cbit->name)
 				&& CB_REFERENCE(cbit->name)->word) {
-			sprintf (s, "USER FUNCTION %s", CB_REFERENCE(cbit->name)->word->name);
+			snprintf (s, size, "USER FUNCTION %s", CB_REFERENCE(cbit->name)->word->name);
 		} else {
-			sprintf (s, "USER FUNCTION");
+			snprintf (s, size, "USER FUNCTION");
 		}
 		break;
 
 	case CB_TAG_FILE:
-		sprintf (s, "FILE %s", CB_FILE (x)->name);
+		snprintf (s, size, "FILE %s", CB_FILE (x)->name);
 		break;
 
 	case CB_TAG_REPORT:
-		sprintf (s, "REPORT %s", CB_REPORT_PTR (x)->name);
+		snprintf (s, size, "REPORT %s", CB_REPORT_PTR (x)->name);
 		break;
 
 	case CB_TAG_REPORT_LINE:
@@ -600,11 +601,11 @@ cb_name_1 (char *s, cb_tree x)
 		p = CB_REFERENCE (x);
 #endif
 		f = CB_FIELD (p->value);
-		sprintf (s, "REPORT LINE %s", f->name);
+		snprintf (s, size, "REPORT LINE %s", f->name);
 		break;
 
 	case CB_TAG_CD:
-		sprintf (s, "%s", CB_CD(x)->name);
+		snprintf (s, size, "%s", CB_CD (x)->name);
 		break;
 
 	/* LCOV_EXCL_START */
@@ -1161,8 +1162,7 @@ cb_name (cb_tree x)
 	char	tmp[COB_NORMAL_BUFF] = { 0 };
 	size_t	tlen;
 
-	tlen = cb_name_1 (tmp, x);
-
+	tlen = cb_name_1 (tmp, x, COB_NORMAL_MAX);
 	s = cobc_parse_malloc (tlen + 1);
 	strncpy (s, tmp, tlen);
 

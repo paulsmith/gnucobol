@@ -1,4 +1,8 @@
 
+2019-10-25  Edward Hart <edward.dan.hart@gmail.com>
+
+	* tree.c (cb_name_1): prevent buffer overflows (bug #586).
+
 2019-09-30  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, reserved.c: added more (D)OS/VS and ACUCOBOL APPLY phrases.

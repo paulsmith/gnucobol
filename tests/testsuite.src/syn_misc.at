@@ -6787,3 +6787,91 @@ prog.cob:42: warning: OPEN LEAVE/REREAD/DISP is obsolete in GnuCOBOL
 prog.cob:42: warning: OPEN LEAVE/REREAD/DISP is obsolete in GnuCOBOL
 ])
 AT_CLEANUP
+
+
+AT_SETUP([very long literal in error message])
+AT_KEYWORDS([misc literals])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      tutorial.
+       PROCEDURE DIVISION.
+           move low-values to
+          'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-count'-
+           'vove length of ex-keydef to key2length'-
+           'move 1 to key-countaaaaaaaaaaaaaaaaaaa'-
+           'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:5: error: invalid MOVE target: "vove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countvove length of ex-keydef to key2lengthmove 1 to key-countaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+prog.cob:76: error: syntax error, unexpected end of file
+])
+AT_CLEANUP
