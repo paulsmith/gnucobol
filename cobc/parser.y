@@ -1105,9 +1105,11 @@ end_scope_of_program_name (struct cb_program *program, const unsigned char type)
 	if (!program->flag_common) {
 		l = (struct cb_list *) defined_prog_list;
 		while (l) {
-			if (strcmp (program->orig_program_id,
-				    CB_PROGRAM (l->value)->orig_program_id)
-			    == 0) {
+			/* The nested_level check is for the pathological case
+			   where two nested programs have the same name */
+			if (0 == strcmp (program->orig_program_id,
+					 CB_PROGRAM (l->value)->orig_program_id)
+			    && program->nested_level == CB_PROGRAM (l->value)->nested_level) {
 				remove_program_name (l, prev);
 				if (prev && prev->chain != NULL) {
 					l = CB_LIST (prev->chain);

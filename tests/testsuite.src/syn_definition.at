@@ -468,7 +468,7 @@ AT_DATA([prog.cob], [
        PROCEDURE        DIVISION.
            CONTINUE
            .
-       *> This should cause an error.
+       *> This should cause an error (clashes with COMMON subprog foo)
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      foo.
        END PROGRAM      foo.
@@ -492,6 +492,14 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      foo.
        END PROGRAM      foo.
        END PROGRAM      prog.
+
+       *> This should cause an error
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      samename.
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      samename.
+       END PROGRAM      samename.
+       END PROGRAM      samename.
 ])
 
 AT_CHECK([$COMPILE_ONLY --ffold-call=upper prog.cob], [1], [],
@@ -501,11 +509,17 @@ prog.cob:23: error: redefinition of program name 'foo'
 prog.cob:31: error: redefinition of program name 'prog'
 prog.cob:42: error: redefinition of 'foo'
 prog.cob:35: error: 'foo' previously defined here
+prog.cob:42: error: redefinition of program name 'foo'
+prog.cob:49: error: PROCEDURE DIVISION header missing
+prog.cob:50: error: redefinition of program name 'samename'
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:23: error: redefinition of program ID 'foo'
 prog.cob:31: error: redefinition of program ID 'prog'
+prog.cob:42: error: redefinition of program ID 'foo'
+prog.cob:49: error: PROCEDURE DIVISION header missing
+prog.cob:50: error: redefinition of program ID 'samename'
 ])
 
 AT_CLEANUP
