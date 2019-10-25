@@ -15254,7 +15254,7 @@ program_start_end:
 use_reporting:
   use_global BEFORE REPORTING identifier
   {
-	char wrk[80];
+	char *wrk;
 	cb_tree x;
 	struct cb_field		*f;
 	struct cb_report	*r;
@@ -15270,7 +15270,8 @@ use_reporting:
 			r->has_declarative = 1;
 		}
 	}
-	sprintf(wrk,"USE BEFORE REPORTING %s is l_%d",cb_name($4),current_section->id);
+	wrk = cobc_main_malloc (COB_MINI_BUFF);
+	snprintf (wrk, COB_MINI_MAX, "USE BEFORE REPORTING %s is l_%d", cb_name ($4), current_section->id);
 	current_section->flag_real_label = 1;
 	current_section->flag_declaratives = 1;
 	current_section->flag_begin = 1;
@@ -15278,7 +15279,7 @@ use_reporting:
 	current_section->flag_declarative_exit = 1;
 	current_section->flag_real_label = 1;
 	current_section->flag_skip_label = 0;
-	emit_statement (cb_build_comment (strdup(wrk)));
+	emit_statement (cb_build_comment (wrk));
   }
 ;
 

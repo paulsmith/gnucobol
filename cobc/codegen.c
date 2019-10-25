@@ -9126,8 +9126,8 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 			} else {
 				ref_size = lit->size;
 			}
-			val = (char *)cobc_malloc (ref_size * 2 + 2);
 			if (lit->all) {
+				val = (char *)cobc_malloc (ref_size * 2 + 2);
 				if (lit->data[0] == '"'
 				 || lit->data[0] == '\\') {	/* Fix string for C code */
 					for (i = j = 0; j < (unsigned int)f->size; j++) {

@@ -4,6 +4,7 @@
 	* tree.c (cb_name_1): prevent buffer overflows (bug #586).
 	* parser.y (end_scope_of_program_name): free correct program when a
 	  nested program has the same name as a containing program (bug #587).
+	* codegen.c, parser.y: fixed minor memory leaks.
 
 2019-09-30  Edward Hart <edward.dan.hart@gmail.com>
 
