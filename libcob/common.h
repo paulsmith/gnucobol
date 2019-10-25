@@ -1874,6 +1874,8 @@ struct cob_time
 
 COB_EXPIMP struct cob_time cob_get_current_date_and_time	(void);
 
+COB_EXPIMP void cob_sleep_msec (const unsigned int);
+
 /* Registration of external handlers */
 COB_EXPIMP void	cob_reg_sighnd	(void (*sighnd) (int));
 

@@ -7,8 +7,8 @@
 
 	* common.c (internal_nanosleep): added a new parameter specifying
 	  "round to minimal" to be able to use it for locking_timout
-	* common.c, common.h, coblocal.h: replaced non-system function
-	  cob_sys_sleep_msec with new internal cob_sleep_msec
+	* common.c, common.h: replaced non-system function cob_sys_sleep_msec
+	  with new internal cob_sleep_msec
 	* fileio.c, fisam.c, fbdb.c: adjusted cob_sys_sleep_msec->cob_sleep_msec
 	* flmdb.c (local_file): fixed SIGSEGV if proc/partitions is not
 	  accessible and allow the check to be skipped via MDB_NO_LOCAL_FS_CHK
