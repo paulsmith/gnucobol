@@ -130,6 +130,7 @@ static char		*runtime_buffer = NULL;
 
 static int		chk_file_path = 1;
 
+static const cob_field_attr	const_alpha_attr = {COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL};
 static cob_file_api file_api = {NULL, NULL};
 
 static char	**file_paths = NULL;
@@ -288,88 +289,83 @@ static const char ix_type[3] = "IS";
 #endif
 
 /*
- * Write data file description to a text file
+ * Write data file description to a string 
  */
-int
-cob_write_dict (cob_file *f, char *filename)
+static void
+write_file_def (cob_file *f, char *out)
 {
-	char	outdd[513];
-	FILE	*fo;
-	int		k, idx;
+	int	idx,j;
+	int	k = 0;
 
-	sprintf(outdd,"%s.%s",filename,dict_ext);
-	fo = fopen(outdd,"w");
-	if(fo == NULL) {
-		return 1;
-	}
+	out[k] = 0;
 	if(f->organization == COB_ORG_INDEXED) {
-		fprintf(fo,"type=IX,%.2s",io_rtn_name[f->io_routine]);
+		k += sprintf(&out[k],"type=(IX,%.2s)",io_rtn_name[f->io_routine]);
 	} else if(f->organization == COB_ORG_RELATIVE) {
-		fprintf(fo,"type=%.2s",io_rtn_name[COB_IO_RELATIVE]);
+		k += sprintf(&out[k],"type=(%.2s",io_rtn_name[COB_IO_RELATIVE]);
 		if(f->file_format == COB_FILE_IS_MF)
-			fprintf(fo,",MF");
+			k += sprintf(&out[k],",MF)");
 		else if(f->file_format == COB_FILE_IS_GC)
-			fprintf(fo,",GC");
+			k += sprintf(&out[k],",GC)");
 		else
-			fprintf(fo,",%.2s",io_rtn_name[f->io_routine]);
+			k += sprintf(&out[k],",%.2s)",io_rtn_name[f->io_routine]);
 	} else if(f->organization == COB_ORG_SEQUENTIAL) {
-		fprintf(fo,"type=%.2s",io_rtn_name[COB_IO_SEQUENTIAL]);
+		k += sprintf(&out[k],"type=(%.2s",io_rtn_name[COB_IO_SEQUENTIAL]);
 		if(f->file_format == COB_FILE_IS_MF)
-			fprintf(fo,",MF");
+			k += sprintf(&out[k],",MF)");
 		else if(f->file_format == COB_FILE_IS_GC)
-			fprintf(fo,",GC");
+			k += sprintf(&out[k],",GC)");
 		else if(f->file_format <= 7)
-			fprintf(fo,",%s",file_format[f->file_format]);
+			k += sprintf(&out[k],",%s)",file_format[f->file_format]);
 		else
-			fprintf(fo,",%.2s",io_rtn_name[f->io_routine]);
+			k += sprintf(&out[k],",%.2s)",io_rtn_name[f->io_routine]);
 	} else if(f->organization == COB_ORG_LINE_SEQUENTIAL) {
 		if(f->flag_line_adv)
-			fprintf(fo,"type=LA");
+			k += sprintf(&out[k],"type=(LA");
 		else
-			fprintf(fo,"type=LS");
-		fprintf(fo,",%.2s",io_rtn_name[f->io_routine]);
+			k += sprintf(&out[k],"type=(LS");
+		k += sprintf(&out[k],",%.2s",io_rtn_name[f->io_routine]);
 		if((f->file_features & COB_FILE_LS_CRLF))
-			fprintf(fo,",crlf");
+			k += sprintf(&out[k],",crlf");
 		if((f->file_features & COB_FILE_LS_NULLS))
-			fprintf(fo,",nulls");
+			k += sprintf(&out[k],",nulls");
 		if((f->file_features & COB_FILE_LS_FIXED))
-			fprintf(fo,",fixed");
+			k += sprintf(&out[k],",fixed");
+		k += sprintf(&out[k],")");
 	}
-	fprintf(fo," ");
-	fprintf(fo,"recsz=%ld ",(long)(f->record_max));
+
+	k += sprintf(&out[k]," ");
+	k += sprintf(&out[k],"recsz=%ld ",(long)(f->record_max));
 	if(f->record_min != f->record_max)
-		fprintf(fo,"minsz=%ld ",(long)(f->record_min));
+		k += sprintf(&out[k],"minsz=%ld ",(long)(f->record_min));
 
 	if (f->organization == COB_ORG_INDEXED) {
 		/* Write Key information from cob_file */
-		fprintf(fo,"nkeys=%d ",(int)(f->nkeys));
+		k += sprintf(&out[k],"nkeys=%d ",(int)(f->nkeys));
 		for(idx=0; idx < (int)f->nkeys; idx++) {
-			fprintf(fo,"key%d=(",idx+1);
+			k += sprintf(&out[k],"key%d=(",idx+1);
 			if(f->keys[idx].count_components <= 1) {
-				fprintf(fo,"%d:%ld",f->keys[idx].offset,(long)(f->keys[idx].field->size));
+				k += sprintf(&out[k],"%d:%ld",f->keys[idx].offset,(long)(f->keys[idx].field->size));
 			} else {
-				for(k=0; k < f->keys[idx].count_components; k++) {
-					fprintf(fo,"%ld:%ld",(long)(f->keys[idx].component[k]->data - f->record->data),
-										(long)(f->keys[idx].component[k]->size));
-					if(k+1 < f->keys[idx].count_components)
-						fprintf(fo,",");
+				for(j=0; j < f->keys[idx].count_components; j++) {
+					k += sprintf(&out[k],"%ld:%ld",(long)(f->keys[idx].component[j]->data - f->record->data),
+										(long)(f->keys[idx].component[j]->size));
+					if(j+1 < f->keys[idx].count_components)
+						k += sprintf(&out[k],",");
 				}
 			}
-			fprintf(fo,") ");
+			k += sprintf(&out[k],") ");
 			if(f->keys[idx].tf_duplicates) {
-				fprintf(fo,"dup%d=Y ",idx+1);
+				k += sprintf(&out[k],"dup%d=Y ",idx+1);
 			}
 			if(f->keys[idx].tf_suppress) {
-				if(isprint(f->keys[idx].char_suppress))
-					fprintf(fo,"sup%d='%c' ",idx+1,f->keys[idx].char_suppress);
+				if(isprint(f->keys[idx].char_suppress)
+				&& f->keys[idx].char_suppress != '\'')
+					k += sprintf(&out[k],"sup%d='%c' ",idx+1,f->keys[idx].char_suppress);
 				else
-					fprintf(fo,"sup%d=x'%02X' ",idx+1,f->keys[idx].char_suppress);
+					k += sprintf(&out[k],"sup%d=x'%02X' ",idx+1,f->keys[idx].char_suppress);
 			}
 		}
 	}
-	fprintf(fo,"\r\n");
-	fclose(fo);
-	return 0;
 }
 
 static char *
@@ -416,16 +412,273 @@ cob_dd_prms ( char *p, char *p1, char *p2 )
 }
 
 /*
+ * Parse key definition and update 'cob_file'
+ */
+static char *
+cob_key_def (cob_file *f, int keyn, char *p, int *ret, int keycheck)
+{
+	int		idx,part,loc,len;
+	char	p1[32], p2[32];
+	idx = keyn - 1;
+	part = 0;
+	do {
+		p = cob_dd_prms (p, p1, p2);
+		loc = atoi (p1);
+		len = atoi (p2);
+		if(part >= COB_MAX_KEYCOMP) {
+			*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+			break;
+		}
+		if(part >= f->keys[idx].count_components) {
+			if (keycheck) {
+				*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+				break;
+			}
+			f->keys[idx].count_components = part;
+			f->keys[idx].component[part]->attr = &const_alpha_attr;
+			f->keys[idx].component[part]->size = len;
+			f->keys[idx].component[part]->data = f->record->data + loc;
+		}
+
+		if(f->keys[idx].count_components <= 1) {
+			if (f->keys[idx].offset != loc
+			 || f->keys[idx].field->size != len) {
+				if (keycheck) {
+					*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+					break;
+				}
+				f->keys[idx].offset = loc;
+				f->keys[idx].field->size = len;
+			}
+		} else {
+			if (f->keys[idx].component[part]->size != len
+			 || (f->keys[idx].component[part]->data - f->record->data) != loc) {
+				if (keycheck) {
+					*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+					break;
+				}
+				f->keys[idx].component[part]->size = len;
+				f->keys[idx].component[part]->data = f->record->data + loc;
+			}
+		}
+		part++;
+	} while (*p == ',');
+	return p;
+}
+
+int
+cob_write_dict (cob_file *f, char *filename)
+{
+	char	outdd[COB_FILE_MAX], outbuf[4096];
+	FILE	*fo;
+
+	sprintf(outdd,"%s.%s",filename,dict_ext);
+	fo = fopen(outdd,"w");
+	if(fo == NULL) {
+		return 1;
+	}
+	write_file_def (f, outbuf);
+	fprintf(fo,"%s\r\n",outbuf);
+	fclose(fo);
+	return 0;
+}
+
+/*
+ * Read description of data file from text file and check it
+ */
+static char *			/* Advanced pointer 'p' */
+read_file_def (cob_file *f, char *p, int updt, int *retsts, int *xsts)
+{
+	char	wrd[32], p1[32], p2[32], *prv;
+	unsigned char subchr;
+	int		idx, sts, ret, k;
+	int		nkeys, keyn, len;
+
+	nkeys = (int)f->nkeys;
+	sts = ret = 0;
+	while (*p != 0 && *p != '\r' && *p != '\n') {
+		if(*p == ' ') {
+			p++;
+			continue;
+		}
+		prv = p;
+		p = cob_dd_wrd (p, wrd);
+		if (strcmp(wrd,"type") == 0) {
+			p = cob_dd_prms (p, p1, NULL);
+			p = cob_dd_prms (p, p2, NULL);
+			if (f->organization == COB_ORG_INDEXED) {
+				if(strcmp(p1,"IX") != 0) {
+					sts = 1;
+					break;
+				}
+				for (k=0; k < COB_IO_MAX; k++) {
+					if (memcmp(p2,io_rtn_name[k],2) == 0) {
+						f->io_routine = k;
+						if (fileio_funcs[f->io_routine] == NULL) {
+							cob_runtime_error (_("ERROR %s I/O routine %s is not present"),
+												f->select_name,io_rtn_name[f->io_routine]);
+						}
+						break;
+					}
+				}
+				if (k >= COB_IO_MAX) {
+					if (strcmp(p2,ix_type) != 0) {
+						f->io_routine = ix_routine;
+					} else {
+						sts = 1;
+						break;
+					}
+				}
+			}
+		} else if (strcmp(wrd,"recsz") == 0) {
+			p = cob_dd_prms (p, p1, NULL);
+			len = atoi (p1);
+			if (len != f->record_max) {
+				if (updt) {
+					if(len > f->record_max) {
+						ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+						sts = 1;
+						break;
+					} 
+					if(f->record_min == f->record_max)
+						f->record_min = f->record_max = len;
+					else
+						f->record_max = len;
+				} else {
+					ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+					sts = 1;
+					break;
+				}
+			}
+		} else if (strcmp(wrd,"minsz") == 0) {
+			p = cob_dd_prms (p, p1, NULL);
+			len = atoi (p1);
+			if (len != f->record_min) {
+				if (updt) {
+					if(len > f->record_max) {
+						ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+						sts = 1;
+						break;
+					} 
+					f->record_min = len;
+				} else {
+					ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+					sts = 1;
+					break;
+				}
+			}
+		} else if (strcmp(wrd,"nkeys") == 0) {
+			p = cob_dd_prms (p, p1, NULL);
+			nkeys = atoi (p1);
+			if ((int)f->nkeys != nkeys
+			 && !updt
+			 && f->flag_keycheck) {
+				ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+				sts = 1;
+				break;
+			}
+			if (updt
+			&& (int)f->nkeys != nkeys) {
+				if(nkeys > (int)f->nkeys) {
+					f->keys = cob_cache_realloc (f->keys, sizeof (cob_file_key) * nkeys);
+				}
+				f->nkeys = nkeys;
+			} else
+			if (nkeys < (int)f->nkeys
+			 && !updt) {
+				sts = 1;
+				break;
+			}
+		} else if (memcmp(wrd,"key",3) == 0) {
+			keyn = atoi (&wrd[3]);
+			if (keyn > (int)f->nkeys
+			 && !f->flag_keycheck
+			 && !updt) {			/* Skip this key def */
+				do {
+					p = cob_dd_prms (p, p1, p2);
+				} while (*p == ',');
+				continue;
+			}
+			if(keyn > (int)f->nkeys) {
+				sts = 1;
+				break;
+			}
+			if(keyn > nkeys) {
+				sts = 1;
+				break;
+			}
+			idx = keyn - 1;
+			p = cob_key_def (f, keyn, p, &ret, f->flag_keycheck);
+			if(ret != 0) break;
+			
+		} else if (memcmp(wrd,"dup",3) == 0) {
+			keyn = atoi (&wrd[3]);
+			if(keyn > nkeys) {
+				sts = 1;
+				break;
+			}
+			idx = keyn - 1;
+			p = cob_dd_prms (p, p1, NULL);
+			if (keyn > (int)f->nkeys)		/* Skip this */
+				continue;
+
+			if (p1[0] == 'Y'
+			 && f->flag_keycheck
+			 && !f->keys[idx].tf_duplicates) {
+				sts = 1;
+				break;
+			}
+			if (p1[0] == 'Y')
+				f->keys[idx].tf_duplicates = 1;
+			else
+				f->keys[idx].tf_duplicates = 0;
+		} else if (memcmp(wrd,"sup",3) == 0) {
+			keyn = atoi (&wrd[3]);
+			if(keyn > nkeys) {
+				sts = 1;
+				break;
+			}
+			idx = keyn - 1;
+			if (*p == '\'') {
+				subchr = p[1];
+				p += 3;
+			} else if (*p == 'x') {
+				subchr = (unsigned char) strtol (&p[2], NULL, 16);
+				p += 5;
+			} else {
+				subchr = 0;
+			}
+			if (keyn > (int)f->nkeys)		/* Skip this */
+				continue;
+			if (f->flag_keycheck
+			 && !f->keys[idx].tf_suppress) {
+				sts = 1;
+				break;
+			}
+			f->keys[idx].char_suppress = subchr;
+			f->keys[idx].tf_suppress = 1;
+		} else {
+			/* Unknown keyword so just return */
+			p = prv;
+			break;
+		}
+	}
+	if(xsts)
+		*xsts = sts;
+	if(retsts)
+		*retsts = ret;
+	return p;
+}
+
+/*
  * Read description of data file from text file and check it
  */
 int				/* Return 1 on mistmatch, else 0 */
 cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
 {
-	char	inpdd[513], ddbuf[1024], *p, wrd[32], p1[32], p2[32];
-	unsigned char subchr;
+	char	inpdd[COB_FILE_MAX], ddbuf[2048];
 	FILE	*fi;
-	int		idx, line, sts, ret, k;
-	int		nkeys, keyn, part, loc, len;
+	int		line, sts, ret;
 
 	sprintf(inpdd,"%s.%s",filename,dict_ext);
 	fi = fopen(inpdd,"r");
@@ -436,195 +689,12 @@ cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
 	sts = ret = 0;
 	if(retsts)
 		*retsts = 0;
-	nkeys = (int)f->nkeys;
 	while (fgets (ddbuf, sizeof(ddbuf)-1, fi) != NULL) {
 		if (ddbuf[0] == '#')/* Skip Comment lines */
 			continue;
 		line++;
 		if (line == 1) {	/* All file format info on first data line */
-			for (p = ddbuf; *p != 0 && *p != '\r' && *p != '\n'; ) {
-				if(*p == ' ') {
-					p++;
-					continue;
-				}
-				p = cob_dd_wrd (p, wrd);
-				if (strcmp(wrd,"type") == 0) {
-					p = cob_dd_prms (p, p1, NULL);
-					p = cob_dd_prms (p, p2, NULL);
-					if (f->organization == COB_ORG_INDEXED) {
-						if(strcmp(p1,"IX") != 0) {
-							sts = 1;
-							break;
-						}
-						for (k=0; k < COB_IO_MAX; k++) {
-							if (memcmp(p2,io_rtn_name[k],2) == 0) {
-								f->io_routine = k;
-								if (fileio_funcs[f->io_routine] == NULL) {
-									cob_runtime_error (_("ERROR %s I/O routine %s is not present"),
-														filename,io_rtn_name[f->io_routine]);
-								}
-								break;
-							}
-						}
-						if (k >= COB_IO_MAX) {
-							if (strcmp(p2,ix_type) != 0) {
-								f->io_routine = ix_routine;
-							} else {
-								sts = 1;
-								break;
-							}
-						}
-					}
-				} else if (strcmp(wrd,"recsz") == 0) {
-					p = cob_dd_prms (p, p1, NULL);
-					len = atoi (p1);
-					if (len != f->record_max) {
-						if (updt) {
-							f->record_max = len;
-						} else {
-							ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
-							sts = 1;
-							break;
-						}
-					}
-				} else if (strcmp(wrd,"minsz") == 0) {
-					p = cob_dd_prms (p, p1, NULL);
-					len = atoi (p1);
-					if (len != f->record_min) {
-						if (updt) {
-							f->record_min = len;
-						} else {
-							ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
-							sts = 1;
-							break;
-						}
-					}
-				} else if (strcmp(wrd,"nkeys") == 0) {
-					p = cob_dd_prms (p, p1, NULL);
-					nkeys = atoi (p1);
-					if ((int)f->nkeys != nkeys
-					 && !updt
-					 && f->flag_keycheck) {
-						ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
-						sts = 1;
-						break;
-					}
-					if (nkeys < (int)f->nkeys
-					 && !updt) {
-						sts = 1;
-						break;
-					}
-				} else if (memcmp(wrd,"key",3) == 0) {
-					keyn = atoi (&wrd[3]);
-					if (keyn > (int)f->nkeys
-					 && !f->flag_keycheck
-					 && !updt) {			/* Skip this key def */
-						do {
-							p = cob_dd_prms (p, p1, p2);
-						} while (*p == ',');
-						continue;
-					}
-					if(keyn > (int)f->nkeys) {
-						sts = 1;
-						break;
-					}
-					if(keyn > nkeys) {
-						sts = 1;
-						break;
-					}
-					idx = keyn - 1;
-					part = 0;
-					do {
-						p = cob_dd_prms (p, p1, p2);
-						loc = atoi (p1);
-						len = atoi (p2);
-						if(part > f->keys[idx].count_components) {
-							if (!updt) {
-								sts = 1;
-								if (f->flag_keycheck) 
-									ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
-								break;
-							}
-						}
-						if(f->keys[idx].count_components <= 1) {
-							if (f->keys[idx].offset != loc
-							 || f->keys[idx].field->size != len) {
-								if (updt) {
-									f->keys[idx].offset = loc;
-									f->keys[idx].field->size = len;
-								} else if (f->flag_keycheck) {
-									sts = 1;
-									ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
-									break;
-								}
-							}
-						} else {
-							if (f->keys[idx].component[part]->size != len
-							 || (f->keys[idx].component[part]->data - f->record->data) != loc) {
-								if (updt) {
-									f->keys[idx].component[part]->size = len;
-									f->keys[idx].component[part]->data = f->record->data + loc;
-								} else if (f->flag_keycheck) {
-									sts = 1;
-									ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
-									break;
-								}
-							}
-						}
-						part++;
-					} while (*p == ',');
-					if(sts) break;
-					
-				} else if (memcmp(wrd,"dup",3) == 0) {
-					keyn = atoi (&wrd[3]);
-					if(keyn > nkeys) {
-						sts = 1;
-						break;
-					}
-					idx = keyn - 1;
-					p = cob_dd_prms (p, p1, NULL);
-					if (keyn > (int)f->nkeys)		/* Skip this */
-						continue;
-
-					if (p1[0] == 'Y'
-					 && f->flag_keycheck
-					 && !f->keys[idx].tf_duplicates) {
-						sts = 1;
-						break;
-					}
-					if (p1[0] == 'Y')
-						f->keys[idx].tf_duplicates = 1;
-					else
-						f->keys[idx].tf_duplicates = 0;
-				} else if (memcmp(wrd,"sup",3) == 0) {
-					keyn = atoi (&wrd[3]);
-					if(keyn > nkeys) {
-						sts = 1;
-						break;
-					}
-					idx = keyn - 1;
-					if (*p == '\'') {
-						subchr = p[1];
-						p += 3;
-					} else if (*p == 'x') {
-						subchr = (unsigned char) strtol (&p[2], NULL, 16);
-						p += 5;
-					} else {
-						subchr = 0;
-					}
-					if (keyn > (int)f->nkeys)		/* Skip this */
-						continue;
-					if (f->flag_keycheck
-					 && !f->keys[idx].tf_suppress) {
-						sts = 1;
-						break;
-					}
-					f->keys[idx].char_suppress = subchr;
-					f->keys[idx].tf_suppress = 1;
-				}
-			}
-		} else {
-			continue;		/* Provide for future additional info */
+			read_file_def (f, ddbuf, updt, &ret, &sts);
 		}
 	}
 	fclose(fi);
@@ -927,8 +997,8 @@ cob_cache_del (cob_file *f)
 void
 cob_set_file_format(cob_file *f)
 {
-	int	i,j,settrue;
-	char	option[32],value[30];
+	int		i,j,settrue,ivalue;
+	char	option[32],value[256];
 
 	f->trace_io = file_setptr->cob_trace_io ? 1 : 0;
 	f->io_stats = file_setptr->cob_stats_record ? 1 : 0;
@@ -1028,11 +1098,14 @@ cob_set_file_format(cob_file *f)
 			|| file_open_io_env[i] == ';') i++;
 			if(file_open_io_env[i] == 0)
 				break;
+			ivalue = 0;
 			for(j=0; j < sizeof(option)-1 && !isspace(file_open_io_env[i])
 				&& file_open_io_env[i] != ','
 				&& file_open_io_env[i] != ';'
 				&& file_open_io_env[i] != '='
 				&& file_open_io_env[i] != 0; ) {	/* Collect one option */
+				if(isdigit(file_open_io_env[i]))
+					ivalue = ivalue * 10 + file_open_io_env[i] - '0';
 				option[j++] = file_open_io_env[i++];
 			}
 			option[j] = 0;
@@ -1095,6 +1168,28 @@ cob_set_file_format(cob_file *f)
 			if(strcasecmp(option,"retry_seconds") == 0) {
 				f->dflt_seconds = atoi(value);
 				f->dflt_retry |= COB_RETRY_SECONDS;
+				continue;
+			}
+			if (strcmp(option,"recsz") == 0) {
+				if(ivalue <= 0 || ivalue > f->record_max)
+					continue;
+				if(f->record_min == f->record_max)
+					f->record_min = f->record_max = ivalue;
+				else
+					f->record_max = ivalue;
+				continue;
+			}
+			if (strcmp(option,"minsz") == 0) {
+				if(ivalue <= 0 || ivalue > f->record_max)
+					continue;
+				f->record_min = ivalue;
+				continue;
+			}
+			if (strcmp(option,"nkeys") == 0) {
+				if(ivalue > (int)f->nkeys) {
+					f->keys = cob_cache_realloc (f->keys, sizeof (cob_file_key) * ivalue);
+				}
+				f->nkeys = ivalue;
 				continue;
 			}
 			if(strcasecmp(option,"format") == 0) {
@@ -3428,7 +3523,7 @@ relative_read (cob_file_api *a, cob_file *f, cob_field *k, const int read_opts)
 		return COB_STATUS_10_END_OF_FILE;
 	}
 	if(off >= st.st_size)
-		return COB_STATUS_23_KEY_NOT_EXISTS;
+		return COB_STATUS_14_OUT_OF_KEY_RANGE;
 	set_lock_opts (f, read_opts);
 	if(f->flag_lock_rec) {
 		lock_record (f, relnum+1, f->flag_lock_mode, &errsts);
@@ -4511,6 +4606,7 @@ cob_delete_file (cob_file *f, cob_field *fnstatus)
 	if (f->organization != COB_ORG_INDEXED) {
 		unlink (file_open_name);
 	} else {
+		f->io_routine = ix_routine;
 		cob_file_save_status (f, fnstatus,
 			fileio_funcs[get_io_ptr (f)]->fildelete (&file_api, f, file_open_name));
 		return;

@@ -705,7 +705,6 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0])
 AT_CLEANUP
 
 
-#### added for reportwriter r1566
 AT_SETUP([INDEXED File KEYCHECK])
 AT_KEYWORDS([runfile])
 
@@ -759,7 +758,7 @@ AT_DATA([prog.cob], [
            RECORD KEY IS BAD-KEY
            SOURCE IS BD-CUST-NUM, BD-COMPANY
 
-           ALTERNATE RECORD KEY IS BAD-KEY3
+           ALTERNATE RECORD KEY IS BAD-KEY2
            SOURCE IS BD-DISK,BD-TAPE WITH DUPLICATES
                 SUPPRESS WHEN ALL "*"
            FILE STATUS IS CUST-STAT
@@ -806,6 +805,7 @@ AT_DATA([prog.cob], [
            10  BD-DISK                         PICTURE X(8). 
            10  BD-TAPE                         PICTURE X(8). 
            10  BD-NO-TERMINALS                 PICTURE 9(5). 
+           10  BD-XTRA                         PICTURE 9(5). 
        
        FD  TSTFILE
            BLOCK CONTAINS 5 RECORDS.
@@ -836,6 +836,9 @@ AT_DATA([prog.cob], [
        77  BYTE-1  PICTURE 9(3).
        77  BYTE-2  PICTURE 9(3).
        77  MAX-SUB           VALUE  16         PICTURE 9(5) COMP SYNC.
+       77  DO-REWRITE   PICTURE X VALUE 'N'.
+       77  ENVVAR-IN    PICTURE X(30).
+       77  ENVVAR-OUT   PICTURE X(60).
       
        01  TEST-DATA.
       
@@ -1042,38 +1045,65 @@ AT_DATA([prog.cob], [
       
        MAINFILE.
            PERFORM LOADFILE.
+           PERFORM REWRFILE.
            PERFORM LISTFILE.
            OPEN INPUT TSTFILE
            IF CUST-STAT NOT = "00"
-               DISPLAY "Expected ERROR " CUST-STAT 
+               DISPLAY "A: Expected ERROR " CUST-STAT 
                        " opening TSTFILE, Record size different" 
                        UPON CONSOLE
            ELSE
-               DISPLAY "Un-Expected open TSTFILE, Record size different" 
-                       UPON CONSOLE
+               DISPLAY "A: Un-Expected open "
+                       "TSTFILE, Record size different" UPON CONSOLE
                CLOSE TSTFILE
            END-IF.
            OPEN INPUT BADFILE
            IF CUST-STAT NOT = "00"
-               DISPLAY "Expected ERROR " CUST-STAT 
-                       " opening BADFILE, Index mismatch" 
-                       UPON CONSOLE
+               DISPLAY "B: Expected ERROR " CUST-STAT 
+                       " opening BADFILE, Index mismatch" UPON CONSOLE
            ELSE
-               DISPLAY "Un-Expected open BADFILE, Index mismatch" 
+               DISPLAY "B: Un-Expected open BADFILE, Index mismatch" 
                        UPON CONSOLE
                CLOSE BADFILE
            END-IF.
 
-           DISPLAY "IO_BADFILE" UPON ENVIRONMENT-NAME.
-           DISPLAY "keycheck=off" UPON ENVIRONMENT-VALUE.
+           DISPLAY "IX_OPTIONS"  UPON ENVIRONMENT-NAME.
+           ACCEPT ENVVAR-IN       FROM ENVIRONMENT-VALUE.
+           IF ENVVAR-IN NOT = SPACES
+             STRING ENVVAR-IN DELIMITED BY SPACE 
+                    ",keycheck=off" INTO ENVVAR-OUT
+             DISPLAY "IX_OPTIONS"  UPON ENVIRONMENT-NAME
+             DISPLAY ENVVAR-OUT     UPON ENVIRONMENT-VALUE
+      *      DISPLAY "IX_OPTIONS = '" ENVVAR-OUT "'" UPON CONSOLE
+           ELSE
+             DISPLAY "IX_OPTIONS"  UPON ENVIRONMENT-NAME
+             DISPLAY "keycheck=off" UPON ENVIRONMENT-VALUE
+           END-IF
+           DISPLAY "IO_TESTISAM"  UPON ENVIRONMENT-NAME.
+           ACCEPT ENVVAR-IN       FROM ENVIRONMENT-VALUE.
+           IF ENVVAR-IN NOT = SPACES
+             STRING ENVVAR-IN DELIMITED BY SPACE 
+                    ",keycheck=off" INTO ENVVAR-OUT
+             DISPLAY "IO_TESTISAM"  UPON ENVIRONMENT-NAME
+             DISPLAY ENVVAR-OUT     UPON ENVIRONMENT-VALUE
+             DISPLAY "IO_TESTISAM = '" ENVVAR-OUT "'" UPON CONSOLE
+           END-IF
            OPEN INPUT BADFILE
            IF CUST-STAT NOT = "00"
-               DISPLAY "Un-Expected ERROR " CUST-STAT 
+               DISPLAY "C: Un-Expected ERROR " CUST-STAT 
                        " opening BADFILE, Index mismatch" 
                        UPON CONSOLE
            ELSE
-               DISPLAY "Expected open BADFILE, with Index mismatch" 
+               DISPLAY "C: Expected open BADFILE, with Index mismatch" 
                        UPON CONSOLE
+               MOVE SPACES                       TO BAD-RECORD
+               START BADFILE KEY GREATER THAN BAD-KEY2
+               READ  BADFILE NEXT RECORD WITH NO LOCK
+               DISPLAY "Key: " BD-CUST-NUM " is " BD-DISK " : " BD-TAPE
+               READ  BADFILE NEXT RECORD WITH NO LOCK
+               DISPLAY "Key: " BD-CUST-NUM " is " BD-DISK " : " BD-TAPE
+               READ  BADFILE NEXT RECORD WITH NO LOCK
+               DISPLAY "Key: " BD-CUST-NUM " is " BD-DISK " : " BD-TAPE
                CLOSE BADFILE
            END-IF.
            STOP RUN.
@@ -1083,7 +1113,8 @@ AT_DATA([prog.cob], [
                             UPON CONSOLE.
       
            OPEN OUTPUT TSPFILE
-           IF NOT (CUST-STAT = "00" or "05")
+           IF  CUST-STAT NOT = "00"
+           AND CUST-STAT NOT = "05"
                DIVIDE STAT-1 BY 256 GIVING BYTE-1 REMAINDER BYTE-2
                DISPLAY "Error " CUST-STAT " " BYTE-1 " " BYTE-2
                " opening 'testisam' file"
@@ -1096,6 +1127,35 @@ AT_DATA([prog.cob], [
                           UNTIL SUB > MAX-SUB.
       
            DISPLAY "Sample data file load complete."
+                            UPON CONSOLE.
+           CLOSE TSPFILE.
+      
+       REWRFILE.
+           DELETE FILE TSPFILE.
+           DISPLAY "Rewrite sample data file: " CUST-STAT
+                            UPON CONSOLE.
+      
+           OPEN I-O TSPFILE
+           IF  CUST-STAT NOT = "00"
+           AND CUST-STAT NOT = "05"
+               DIVIDE STAT-1 BY 256 GIVING BYTE-1 REMAINDER BYTE-2
+               DISPLAY "Error " CUST-STAT " " BYTE-1 " " BYTE-2
+               " opening 'testisam' file"
+                                UPON CONSOLE
+               STOP RUN
+           END-IF.
+      
+           MOVE 'N' TO DO-REWRITE.
+           PERFORM 1000-LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1 
+                          UNTIL SUB > MAX-SUB.
+           MOVE 'Y' TO DO-REWRITE.
+           PERFORM 1000-LOAD-RECORD
+                        VARYING SUB FROM 1 BY 2 
+                          UNTIL SUB > MAX-SUB.
+           MOVE 'N' TO DO-REWRITE.
+      
+           DISPLAY "Sample data file rewrite complete."
                             UPON CONSOLE.
            CLOSE TSPFILE.
       
@@ -1128,18 +1188,34 @@ AT_DATA([prog.cob], [
            IF  NULL-KEY
                MOVE ALL "*"                  TO CM-DISK
                MOVE ALL "*"                  TO CM-TAPE.
+           IF  SUB = 1 OR 6
+               MOVE "2417"                   TO CM-DISK 
+               MOVE "549  mm "               TO CM-TAPE.
       
-           WRITE TSPFL-RECORD.
-           IF CUST-STAT NOT = "00"
-           AND CUST-STAT NOT = "02"
-               DISPLAY "Key: " TSPFL-KEY ", Status: " CUST-STAT 
-                                 UPON CONSOLE.
+           IF DO-REWRITE = 'Y'
+               IF  SUB NOT = 1 AND SUB NOT = 6
+                 MOVE "REWRITE"            TO CM-DISK
+               END-IF
+               REWRITE TSPFL-RECORD
+               IF  CUST-STAT NOT = "00"
+               AND CUST-STAT NOT = "02"
+                   DISPLAY "REWRITE: " TSPFL-KEY ", Status: " 
+                           CUST-STAT UPON CONSOLE
+               END-IF
+           ELSE 
+               WRITE TSPFL-RECORD
+               IF  CUST-STAT NOT = "00"
+               AND CUST-STAT NOT = "02"
+                   DISPLAY "WRITE: " TSPFL-KEY ", Status: " 
+                           CUST-STAT UPON CONSOLE
+               END-IF
+           END-IF. 
       
        LISTFILE.
            DISPLAY "LIST SAMPLE FILE" UPON CONSOLE.
            MOVE ZERO TO REC-NUM
            OPEN INPUT TSPFILE
-           IF CUST-STAT NOT = "00"
+           IF  CUST-STAT NOT = "00"
                DISPLAY "ERROR " CUST-STAT " OPENING INPUT FILE"
                                              UPON CONSOLE
                IF CUST-STAT (1:1) = "9"
@@ -1148,6 +1224,14 @@ AT_DATA([prog.cob], [
                STOP RUN
            END-IF.
            MOVE SPACES                       TO TSPFL-RECORD.
+           START TSPFILE KEY GREATER THAN PRIME-KEY
+                             WITH SIZE 8
+           START TSPFILE KEY GREATER THAN PRIME-KEY
+                             WITH LENGTH 8
+           START TSPFILE KEY GREATER THAN PRIME-KEY
+                             WITH SIZE 8
+           START TSPFILE KEY GREATER THAN PRIME-KEY
+                             WITH LENGTH 8
            START TSPFILE KEY GREATER THAN PRIME-KEY
            IF CUST-STAT NOT = "00"
                DISPLAY "Error " CUST-STAT " starting file"
@@ -1315,11 +1399,11 @@ AT_DATA([prog.cob], [
            REWRITE TSPFL-RECORD 
            IF  CUST-STAT NOT = "02"
            AND CUST-STAT NOT = "00"
-               DISPLAY "Error " CUST-STAT " instead of 00/02"
+               DISPLAY "Error " CUST-STAT " instead of 02"
                                 UPON CONSOLE
            ELSE
-               DISPLAY "ReWrite: " CM-CUST-NUM " got 00/02"
-                         " as expected"
+               DISPLAY "ReWrite: " CM-CUST-NUM " got "
+                         CUST-STAT " as expected"
                          UPON CONSOLE
            END-IF.
            MOVE DATA-CUST-NUM      (6)       TO CM-CUST-NUM.
@@ -1330,56 +1414,59 @@ AT_DATA([prog.cob], [
            REWRITE TSPFL-RECORD 
            IF  CUST-STAT NOT = "02"
            AND CUST-STAT NOT = "00"
-               DISPLAY "Error " CUST-STAT " instead of 00/02"
+               DISPLAY "Error " CUST-STAT " instead of 02"
                                 UPON CONSOLE
            ELSE
-               DISPLAY "ReWrite: " CM-CUST-NUM " got 00/02"
-                         " as expected"
+               DISPLAY "ReWrite: " CM-CUST-NUM " got "
+                         CUST-STAT " as expected"
                          UPON CONSOLE
            END-IF.
            CLOSE TSPFILE.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
 
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [Loading sample data file.
+AT_CHECK([./prog], [0], [Loading sample data file.
 Sample data file load complete.
+Rewrite sample data file: 00
+REWRITE: EPS00000, Status: 30
+Sample data file rewrite complete.
 LIST SAMPLE FILE
-Key: ALP00000 is ALPHA ELECTRICAL CO. LTD. Disk=8417    .
+Key: ALP00000 is ALPHA ELECTRICAL CO. LTD. Disk=2417    .
 Key: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
 Key: DEL00000 is DELTA LUGGAGE REPAIRS     Disk=********.
 Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=********.
-Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
-Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
-Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
+Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=2417    .
+Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=REWRITE .
+Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=REWRITE .
 Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=********.
-Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
+Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=REWRITE .
 Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
-Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
+Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=REWRITE .
 LIST SAMPLE FILE DESCENDING
-Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
+Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=REWRITE .
 Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
-Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
+Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=REWRITE .
 Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=********.
-Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
-Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
-Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
+Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=REWRITE .
+Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=REWRITE .
+Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=2417    .
 Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=********.
 Key: DEL00000 is DELTA LUGGAGE REPAIRS     Disk=********.
 Key: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
-Key: ALP00000 is ALPHA ELECTRICAL CO. LTD. Disk=8417    .
+Key: ALP00000 is ALPHA ELECTRICAL CO. LTD. Disk=2417    .
 LIST SAMPLE FILE BY KEY3
-Key: ALP00000 is ALPHA ELECTRICAL CO. LTD. Disk=8417    .
-Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
-Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
-Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
+Key: ALP00000 is ALPHA ELECTRICAL CO. LTD. Disk=2417    .
+Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=2417    .
 Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
-Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
 Key: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
-Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
-Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=8470    .
-Key: OLD00000 is OLD TYME PIZZA MFG. CO.   Disk=8470    .
 Key: PRE00000 is PRESTIGE OFFICE FURNITURE Disk=8470    .
+Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=REWRITE .
+Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=REWRITE .
+Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=REWRITE .
+Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=REWRITE .
+Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=REWRITE .
+Key: OLD00000 is OLD TYME PIZZA MFG. CO.   Disk=REWRITE .
 Got: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
 Nxt: DEL00000 is DELTA LUGGAGE REPAIRS     Disk=********.
 Ky2: GIB00000 is GIBRALTER LIFE INSURANCE  Mach=UNI-80/6
@@ -1387,15 +1474,18 @@ Ky2: GIB00000 is GIBRALTER LIFE INSURANCE  Mach=UNI-80/6
    Read: GAM00000 got 00 as expected 00075 terminals
 ReWrite: GAM00000 got 00 as expected 00080 terminals
    Read: BET00000 got 00 as expected 00034 terminals
-ReWrite: GAM00000 got 00/02 as expected
-ReWrite: FOR00000 got 00/02 as expected
-Expected ERROR 39 opening TSTFILE, Record size different
-Expected ERROR 39 opening BADFILE, Index mismatch
-Expected open BADFILE, with Index mismatch
+ReWrite: GAM00000 got 00 as expected
+ReWrite: FOR00000 got 00 as expected
+A: Expected ERROR 39 opening TSTFILE, Record size different
+B: Expected ERROR 39 opening BADFILE, Index mismatch
+C: Expected open BADFILE, with Index mismatch
+Key: ALP00000 is 2417     : 549  mm 
+Key: FOR00000 is 2417     : 549  mm 
+Key: JOH00000 is 8417     : 1600 BPI
 ], [])
 
 AT_CLEANUP
-#### end r1566
+
 
 AT_SETUP([INDEXED File Sparse/Split keys])
 AT_KEYWORDS([runfile])
@@ -4605,21 +4695,21 @@ AT_DATA([fexists_signed.c], [
 COB_EXT_EXPORT int
 fexists_signed (char *fid, char *signature, int signature_size)
 {
-	char *bfr;
-	FILE *f;
-	int res = -1;
+    char *bfr;
+    FILE *f;
+    int res = -1;
 
-	f = fopen (fid, "r");
-	if (f != NULL) {
-		 bfr = (char *) malloc (signature_size);
-		 if (1 == fread (bfr, signature_size, 1, f)) {
-				if (!memcmp (signature, bfr, signature_size)) {
-					 res = 0;
-				}
-		 }
-		 free (bfr);
-	}
-	return res;
+    f = fopen (fid, "r");
+    if (f != NULL) {
+         bfr = (char *) malloc (signature_size);
+         if (1 == fread (bfr, signature_size, 1, f)) {
+                if (!memcmp (signature, bfr, signature_size)) {
+                     res = 0;
+                }
+         }
+         free (bfr);
+    }
+    return res;
 }
 ])
 AT_DATA([prog.cob], [
@@ -6515,6 +6605,7 @@ AT_DATA([prog.cob], [
            IF (f-status <> "00") OR
                    (file1-serial <> 4)
                DISPLAY "FAILED 3: status " f-status
+                       "serial: " file1-serial
            END-IF
 
            MOVE "aab" TO f-key2-1
@@ -6524,6 +6615,7 @@ AT_DATA([prog.cob], [
            IF (f-status <> "00") OR
                    (file1-serial <> 4)
                DISPLAY "FAILED 4: status " f-status
+                       "serial: " file1-serial
            END-IF
 
            MOVE "aab" TO f-key2-1
@@ -6533,6 +6625,7 @@ AT_DATA([prog.cob], [
            IF (f-status <> "00") OR
                    (file1-serial <> 3)
                DISPLAY "FAILED 5: status " f-status
+                       "serial: " file1-serial
            END-IF
 
            MOVE "aaa" TO f-key2-1
@@ -6542,6 +6635,7 @@ AT_DATA([prog.cob], [
            IF (f-status <> "00") OR
                    (file1-serial <> 4)
                DISPLAY "FAILED 6: status " f-status
+                       "serial: " file1-serial
            END-IF
 
            MOVE "XX-" TO f-key3-1
@@ -6552,6 +6646,7 @@ AT_DATA([prog.cob], [
            IF (f-status <> "00") OR
                    (file1-serial <> 3)
                DISPLAY "FAILED 7: status " f-status
+                       "serial: " file1-serial
            END-IF
            CLOSE f
            STOP RUN
@@ -8238,7 +8333,7 @@ AT_DATA([prog.cob], [
            END-PERFORM.
            IF CUST-STAT = "30"
                CLOSE FLATFILE
-	       STOP RUN
+           STOP RUN
            END-IF
            CLOSE FLATFILE.
 
@@ -8783,8 +8878,7 @@ Read2 EPS00000 #0004 Trms:0010
 Read2 FOR00000 #0005 Trms:0090
 Read2 GAM00000 #0006 Trms:0254
 Read2 BET00000 #0007 Trms:0013
-Invalid Read2 0008 Status: 23
-Read2 Status: 23
+Read2 Status: 14
 ], [])
 
 AT_CLEANUP

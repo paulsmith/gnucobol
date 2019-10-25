@@ -1,6 +1,8 @@
 
 2019-10-25  Ron Norman <rjn@inglenet.com>
 
+	* fileio.c: split read/write dictionary routines for future uses
+	          RELATIVE file now returns status 14 for end of file
 	* fisam.c Fixed to use correct index of xISAM file
 	      when only part of the indexed are defined in COBOL
 		  and keycheck=off

@@ -800,6 +800,8 @@ isam_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 dobuild:
 		isfd = isbuild ((void *)filename, (int)f->record_max, &fh->key[0],
 				vmode | ISINOUT | ISEXCLLOCK);
+		for(k=0; k < MAXNUMKEYS; k++)
+			fh->idxmap[k] = k;
 		f->flag_file_lock = 1;
 		if (ISERRNO == EEXIST
 		 && isfd < 0) {
