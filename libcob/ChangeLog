@@ -1,4 +1,10 @@
 
+2019-10-25  Ron Norman <rjn@inglenet.com>
+
+	* fisam.c Fixed to use correct index of xISAM file
+	      when only part of the indexed are defined in COBOL
+		  and keycheck=off
+
 2019-10-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* numeric.c (cob_add_int): fixed floating-point case (bug #603).

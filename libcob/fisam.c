@@ -127,6 +127,10 @@ static	vb_rtd_t *vbisam_rtd = NULL;
 #define ISVARLEN 0
 #endif
 
+#ifndef MAXNUMKEYS
+#define MAXNUMKEYS 32
+#endif
+
 #ifdef COB_WITH_STATUS_02
 #define COB_CHECK_DUP(s) s ? s : \
 		(isstat1 == '0' && isstat2 == '2') ? COB_STATUS_02_SUCCESS_DUPLICATE : 0
@@ -154,6 +158,7 @@ struct indexfile {
 	int		readdone;	/* A 'read' has been successfully done */
 	int		startiscur;	/* The 'start' record is current */
 	int		wrkhasrec;	/* 'recwrk' holds the next|prev record */
+	unsigned char idxmap[MAXNUMKEYS];
 	struct keydesc	key[1];		/* Table of key information */
 					/* keydesc is defined in (d|c|vb)isam.h */
 };
@@ -345,6 +350,9 @@ static int
 indexed_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 {
 	int 	k,part;
+	struct indexfile	*fh;
+
+	fh = f->file;
 	*fullkeylen = *partlen = 0;
 	for (k = 0; k < f->nkeys; ++k) {
 		if (f->keys[k].field
@@ -352,7 +360,7 @@ indexed_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 		&&  f->keys[k].field->data == kf->data) {
 			*fullkeylen = f->keys[k].field->size;
 			*partlen = kf->size;
-			return k;
+			return fh->idxmap[k];
 		}
 	}
 	for (k = 0; k < f->nkeys; ++k) {
@@ -369,7 +377,7 @@ indexed_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 				} else {
 					*partlen = *fullkeylen;
 				}
-				return k;
+				return fh->idxmap[k];
 			}
 		}
 	}
@@ -778,7 +786,7 @@ isam_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 		break;
 	}
 	fh = cob_malloc (sizeof (struct indexfile) +
-			 ((sizeof (struct keydesc)) * (f->nkeys + 1)));
+			 		((sizeof (struct keydesc)) * (f->nkeys + 1)));
 	/* Copy index information */
 	for (k = 0; k < f->nkeys; ++k) {
 		len = indexed_keydesc(f, &fh->key[k], &f->keys[k]);
@@ -848,8 +856,13 @@ dobuild:
 				fh = fh2;
 			}
 			if (f->record_max != di.di_recsize) {
-				ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+				if (f->flag_keycheck
+				|| f->record_max < di.di_recsize) {
+					ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+				}
 			}
+			for(k=0; k < MAXNUMKEYS; k++)
+				fh->idxmap[k] = k;
 			if (!f->flag_keycheck) {
 				/* Copy real ISAM file key information */
 				for (k = 0; k < fh->nkeys && !ret; ++k) {
@@ -864,11 +877,12 @@ dobuild:
 					indexed_keydesc(f, &kd, &f->keys[j]);
 					for (k = 0; k < fh->nkeys; ++k) {
 						if (indexed_keycmp(&kd, &fh->key[k]) == 0) {
+							fh->idxmap[j] = k;
 							break;
 						}
 					}
 					if (k >= fh->nkeys) {
-							ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+						ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
 					}
 				}
 			} else {
