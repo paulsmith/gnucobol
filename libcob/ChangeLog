@@ -1,4 +1,8 @@
 
+2019-10-25  Edward Hart <edward.dan.hart@gmail.com>
+
+	* numeric.c (cob_add_int): fixed floating-point case (bug #603).
+
 2019-10-24  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (internal_nanosleep): added a new parameter specifying

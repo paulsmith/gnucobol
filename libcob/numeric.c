@@ -2182,7 +2182,7 @@ cob_add_int (cob_field *f, const int n, const int opt)
 	&&  COB_FIELD_TYPE (f) <= COB_TYPE_NUMERIC_FP_BIN128) {
 		mpz_set_si (cob_d2.value, (cob_sli_t) n);
 		cob_d2.scale = 0;
-		mpz_add (cob_d1.value, cob_d1.value, cob_d2.value);
+		cob_decimal_add (&cob_d1, &cob_d2);
 		return cob_decimal_get_field (&cob_d1, f, opt);
 	}
 	else {
