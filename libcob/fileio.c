@@ -429,7 +429,7 @@ cob_key_def (cob_file *f, int keyn, char *p, int *ret, int keycheck)
 			*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
 			break;
 		}
-		if(part >= f->keys[idx].count_components) {
+		if(part > f->keys[idx].count_components) {
 			if (keycheck) {
 				*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
 				break;
