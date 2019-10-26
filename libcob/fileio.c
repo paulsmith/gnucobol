@@ -401,11 +401,13 @@ cob_dd_prms ( char *p, char *p1, char *p2 )
 		p++;
 		if (p2 != NULL) {
 			*p2 = 0;
-			while (*p != 0 && *p != ' ' && *p != ',')
+			while (*p != 0 && *p != ' ' 
+				&& *p != ',' && *p != ')')
 				*p2++ = *p++;
 			*p2 = 0;
 		}
 	}
+	if (*p == ')') p++;
 	while (*p == ' ') p++;
 	if (*p == ')') p++;
 	return p;
@@ -429,18 +431,33 @@ cob_key_def (cob_file *f, int keyn, char *p, int *ret, int keycheck)
 			*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
 			break;
 		}
-		if(part > f->keys[idx].count_components) {
+		if(part + 1 > f->keys[idx].count_components) {
 			if (keycheck) {
 				*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
 				break;
 			}
-			f->keys[idx].count_components = part;
+			f->keys[idx].count_components = part + 1;
+			if(f->keys[idx].component[part] == NULL) {
+				if (keycheck) {
+					*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+					break;
+				}
+				f->keys[idx].component[part] = cob_cache_malloc (sizeof(cob_field));
+			}
 			f->keys[idx].component[part]->attr = &const_alpha_attr;
 			f->keys[idx].component[part]->size = len;
 			f->keys[idx].component[part]->data = f->record->data + loc;
 		}
 
 		if(f->keys[idx].count_components <= 1) {
+			if(f->keys[idx].field == NULL) {
+				if (keycheck) {
+					*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+					break;
+				}
+				f->keys[idx].field = cob_cache_malloc (sizeof(cob_field));
+				f->keys[idx].field->attr = &const_alpha_attr;
+			}
 			if (f->keys[idx].offset != loc
 			 || f->keys[idx].field->size != len) {
 				if (keycheck) {
@@ -449,8 +466,18 @@ cob_key_def (cob_file *f, int keyn, char *p, int *ret, int keycheck)
 				}
 				f->keys[idx].offset = loc;
 				f->keys[idx].field->size = len;
+				f->keys[idx].field->data = f->record->data + loc;
 			}
+			f->keys[idx].component[0] = f->keys[idx].field;
 		} else {
+			if(f->keys[idx].component[part] == NULL) {
+				if (keycheck) {
+					*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+					break;
+				}
+				f->keys[idx].component[part] = cob_cache_malloc (sizeof(cob_field));
+				f->keys[idx].component[part]->attr = &const_alpha_attr;
+			}
 			if (f->keys[idx].component[part]->size != len
 			 || (f->keys[idx].component[part]->data - f->record->data) != loc) {
 				if (keycheck) {
@@ -463,6 +490,10 @@ cob_key_def (cob_file *f, int keyn, char *p, int *ret, int keycheck)
 		}
 		part++;
 	} while (*p == ',');
+	if(part <= 1)
+		f->keys[idx].count_components = 0;
+	else
+		f->keys[idx].count_components = part;
 	return p;
 }
 
@@ -544,6 +575,8 @@ read_file_def (cob_file *f, char *p, int updt, int *retsts, int *xsts)
 						f->record_min = f->record_max = len;
 					else
 						f->record_max = len;
+					f->record->size = len;
+					f->flag_redef = 1;
 				} else {
 					ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
 					sts = 1;
@@ -998,7 +1031,7 @@ void
 cob_set_file_format(cob_file *f)
 {
 	int		i,j,settrue,ivalue;
-	char	option[32],value[256];
+	char	option[32],value[256], *p;
 
 	f->trace_io = file_setptr->cob_trace_io ? 1 : 0;
 	f->io_stats = file_setptr->cob_stats_record ? 1 : 0;
@@ -1099,13 +1132,12 @@ cob_set_file_format(cob_file *f)
 			if(file_open_io_env[i] == 0)
 				break;
 			ivalue = 0;
+			p = &file_open_io_env[i];
 			for(j=0; j < sizeof(option)-1 && !isspace(file_open_io_env[i])
 				&& file_open_io_env[i] != ','
 				&& file_open_io_env[i] != ';'
 				&& file_open_io_env[i] != '='
 				&& file_open_io_env[i] != 0; ) {	/* Collect one option */
-				if(isdigit(file_open_io_env[i]))
-					ivalue = ivalue * 10 + file_open_io_env[i] - '0';
 				option[j++] = file_open_io_env[i++];
 			}
 			option[j] = 0;
@@ -1129,6 +1161,8 @@ cob_set_file_format(cob_file *f)
 					&& file_open_io_env[i] != ','
 					&& file_open_io_env[i] != ';'
 					&& file_open_io_env[i] != 0; ) {	/* Collect one option */
+					if(isdigit(file_open_io_env[i]))
+						ivalue = ivalue * 10 + file_open_io_env[i] - '0';
 					value[j++] = file_open_io_env[i++];
 				}
 				value[j] = 0;
@@ -1177,6 +1211,7 @@ cob_set_file_format(cob_file *f)
 					f->record_min = f->record_max = ivalue;
 				else
 					f->record_max = ivalue;
+				f->flag_redef = 1;
 				continue;
 			}
 			if (strcmp(option,"minsz") == 0) {
@@ -1185,19 +1220,12 @@ cob_set_file_format(cob_file *f)
 				f->record_min = ivalue;
 				continue;
 			}
-			if (strcmp(option,"nkeys") == 0) {
-				if(ivalue > (int)f->nkeys) {
-					f->keys = cob_cache_realloc (f->keys, sizeof (cob_file_key) * ivalue);
-				}
-				f->nkeys = ivalue;
-				continue;
-			}
 			if(strcasecmp(option,"format") == 0) {
 				for(j=0; j < COB_IO_MAX; j++) {
 					if(strncasecmp(value,io_rtn_name[j],2) == 0) {
 						if(fileio_funcs[j] == NULL) {
 							cob_runtime_error (_("I/O routine %s is not present for %s"),
-								io_rtn_name[j],file_open_env);
+												io_rtn_name[j],file_open_env);
 						} else {
 							f->io_routine = j;
 						}
@@ -1206,7 +1234,7 @@ cob_set_file_format(cob_file *f)
 				}
 				if(j >= COB_IO_MAX) {
 					cob_runtime_warning (_("I/O routine %s is not known for %s"),
-								value,file_open_env);
+											value,file_open_env);
 				}
 				continue;
 			}
@@ -1363,6 +1391,21 @@ cob_set_file_format(cob_file *f)
 					f->file_format = COB_FILE_IS_L64;
 				}
 			}
+			if (f->organization == COB_ORG_INDEXED) {
+				int		retsts, sts, keycheck;
+				char	*pp;
+				pp = p;
+				keycheck = f->flag_keycheck;
+				f->flag_keycheck = 0;
+				p = read_file_def (f, p, 1, &retsts, &sts);
+				f->flag_keycheck = keycheck;
+				if(p == pp) {
+					break;
+				}
+				i = p - file_open_io_env;
+				if(i > strlen(file_open_io_env))
+					i = strlen(file_open_io_env);
+			}
 		}
 		/* If SHARE or RETRY given, then override application choices */
 		if(f->dflt_share != 0)
@@ -1380,18 +1423,22 @@ cob_set_file_format(cob_file *f)
 	f->file_header = 0;
 	/* Set File type specific values */
 	if (f->organization == COB_ORG_SEQUENTIAL) {
+		f->record_slot = f->record_max + f->record_prefix;
 		if(f->record_min != f->record_max) {
 			if(f->file_format == COB_FILE_IS_GCVS0
 			|| f->file_format == COB_FILE_IS_GCVS1
 			|| f->file_format == COB_FILE_IS_GCVS2) {
 				f->record_prefix = 4;
+				f->record_slot = f->record_max + f->record_prefix;
 			} else 
 			if(f->file_format == COB_FILE_IS_GCVS3) {
 				f->record_prefix = 2;
+				f->record_slot = f->record_max + f->record_prefix;
 			} else
 			if(f->file_format == COB_FILE_IS_L32
 			|| f->file_format == COB_FILE_IS_B32) {
 				f->record_prefix = 4;
+				f->record_slot = f->record_max + f->record_prefix;
 			} else
 			if(f->file_format == COB_FILE_IS_MF) {
 				f->record_prefix = 4;
@@ -1399,9 +1446,9 @@ cob_set_file_format(cob_file *f)
 				f->record_slot = f->record_max + f->record_prefix + 1;
 			} else {
 				f->record_prefix = 4;
+				f->record_slot = f->record_max + f->record_prefix;
 			} 
 		}
-		f->record_slot = f->record_max + f->record_prefix;
 	} else
 	if (f->organization == COB_ORG_RELATIVE) {
 		f->record_prefix = sizeof(size_t);
@@ -2346,7 +2393,11 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 
 	f->share_mode = sharing;
 
-	cob_chk_file_mapping (f);
+	if(!f->flag_file_map) {
+		cob_chk_file_mapping (f);
+		f->flag_file_map = 1;
+		cob_set_file_format(f);		/* Set file format */
+	}
 
 	nonexistent = 0;
 	errno = 0;
@@ -2356,8 +2407,6 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 		}
 		nonexistent = 1;
 	}
-
-	cob_set_file_format(f);		/* Set file format */
 
 	if ((f->organization == COB_ORG_RELATIVE || f->organization == COB_ORG_SEQUENTIAL)
 	&&  nonexistent == 0
@@ -2510,7 +2559,10 @@ cob_file_open (cob_file_api *a, cob_file *f, char *filename, const int mode, con
 		return cob_fd_file_open (f, filename, mode, sharing);
 	}
 
-	cob_chk_file_mapping (f);
+	if(!f->flag_file_map) {
+		cob_chk_file_mapping (f);
+		f->flag_file_map = 1;
+	}
 
 	nonexistent = 0;
 	errno = 0;
@@ -3523,7 +3575,7 @@ relative_read (cob_file_api *a, cob_file *f, cob_field *k, const int read_opts)
 		return COB_STATUS_10_END_OF_FILE;
 	}
 	if(off >= st.st_size)
-		return COB_STATUS_14_OUT_OF_KEY_RANGE;
+		return COB_STATUS_10_END_OF_FILE;
 	set_lock_opts (f, read_opts);
 	if(f->flag_lock_rec) {
 		lock_record (f, relnum+1, f->flag_lock_mode, &errsts);
@@ -3562,6 +3614,7 @@ relative_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	}
 
 	relsize = ((off_t) f->record_max) + sizeof (f->record->size);
+	relsize = (off_t)f->record_slot;
 	if (fstat (f->fd, &st) != 0 || st.st_size == 0) {
 		return COB_STATUS_10_END_OF_FILE;
 	}
@@ -4131,6 +4184,7 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 	}
 
 	f->last_open_mode = mode;
+	f->flag_file_map = 0;
 	f->flag_nonexistent = 0;
 	f->flag_end_of_file = 0;
 	f->flag_begin_of_file = 0;
@@ -4190,6 +4244,7 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 	/* Obtain the file name */
 	cob_field_to_string (f->assign, file_open_name, (size_t)COB_FILE_MAX);
 
+	f->flag_file_map = 1;
 	cob_chk_file_mapping (f);
 
 	cob_cache_file (f);
@@ -4460,6 +4515,8 @@ cob_write (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus,
 		if (unlikely (f->record->size > rec->size)) {
 			f->record->size = rec->size;
 		}
+	} else if (f->flag_redef) {
+		f->record->size = f->record_max;
 	} else {
 		f->record->size = rec->size;
 	}
@@ -4518,6 +4575,8 @@ cob_rewrite (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus)
 			cob_file_save_status (f, fnstatus, COB_STATUS_44_RECORD_OVERFLOW);
 			return;
 		}
+	} else if (f->flag_redef) {
+		f->record->size = f->record_max;
 	}
 
 	cob_file_save_status (f, fnstatus,
