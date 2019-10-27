@@ -2,7 +2,8 @@
 2019-10-26  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: work on handling file definition parameters in IO_filename
-	          RELATIVE file now returns status 10 for end of file
+	          RELATIVE file at end-of-file now returns status 10 
+			  when ACCESS SEQUENTIAL, otherwise status 23
 
 2019-10-25  Ron Norman <rjn@inglenet.com>
 

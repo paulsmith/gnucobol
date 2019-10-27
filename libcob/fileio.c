@@ -3574,8 +3574,11 @@ relative_read (cob_file_api *a, cob_file *f, cob_field *k, const int read_opts)
 	if (fstat (f->fd, &st) != 0 || st.st_size == 0) {
 		return COB_STATUS_10_END_OF_FILE;
 	}
-	if(off >= st.st_size)
-		return COB_STATUS_10_END_OF_FILE;
+	if(off >= st.st_size) {
+		if (f->access_mode == COB_ACCESS_SEQUENTIAL) 
+			return COB_STATUS_10_END_OF_FILE;
+		return COB_STATUS_23_KEY_NOT_EXISTS;
+	}
 	set_lock_opts (f, read_opts);
 	if(f->flag_lock_rec) {
 		lock_record (f, relnum+1, f->flag_lock_mode, &errsts);
