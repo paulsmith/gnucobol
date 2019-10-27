@@ -1,4 +1,8 @@
 
+2019-10-27  Ron Norman <rjn@inglenet.com>
+
+	* tree.c: Correct computing size of REPORT lines and fields
+
 2019-10-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c (cb_name_1): prevent buffer overflows (bug #586).

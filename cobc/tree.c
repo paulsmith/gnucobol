@@ -3892,6 +3892,7 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 	struct cb_field		*p, *ff, *fld;
 	struct cb_file		*f;
 	struct cb_reference	*ref;
+	int		k;
 
 	if (report_checked != r) {
 		report_checked = r;
@@ -3939,6 +3940,31 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		}
 	}
 
+	/* Insure report record size is set large enough */
+	for (k=0; k < 2; k++) {
+		for (p = records; p; p = p->sister) {
+			if (p->storage != CB_STORAGE_REPORT)
+				continue;
+			if ((p->report_flag &  COB_REPORT_LINE) || p->level == 1) {
+				if (r->rcsz < p->size + p->offset) {
+					r->rcsz = p->size + p->offset;
+				}
+				if (k == 1
+				 && p->level == 1) {
+					if (p->size < r->rcsz)
+						p->size = r->rcsz;
+					if (p->memory_size < r->rcsz)
+						p->memory_size = r->rcsz;
+				}
+			} 
+			if (p->report_column > 0) {
+				if(p->report_column - 1 + p->size > r->rcsz) {
+					r->rcsz = p->report_column - 1 + p->size;
+				}
+			}
+		}
+	}
+
 	for (p = records; p; p = p->sister) {
 		if (p->report != NULL) {
 			continue;
@@ -3947,9 +3973,6 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		if (p->storage == CB_STORAGE_REPORT
 		 && ((p->report_flag &  COB_REPORT_LINE) || p->level == 1)) {
 			size_t size = ((size_t)r->num_lines + 2) * sizeof(struct cb_field *);
-			if (r->rcsz < p->size) {
-				r->rcsz = p->size;
-			}
 			if (r->line_ids == NULL) {
 				r->line_ids = cobc_parse_malloc (size);
 			} else {
@@ -3961,7 +3984,7 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		/* report source field */
 		if (p->report_source
 		 && CB_REF_OR_FIELD_P (p->report_source)) {
-			/* force generation of report source field TODO: Check why */
+			/* force generation of report source field */
 			fld = CB_FIELD_PTR (p->report_source);
 			if (fld->count == 0) {
 				fld->count++;
@@ -3974,7 +3997,7 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 				}
 			}
 		}
-		/* force generation of report sum counter TODO: Check why */
+		/* force generation of report sum counter */
 		if (p->report_sum_counter
 		 && CB_REF_OR_FIELD_P (p->report_sum_counter)) {
 			fld = CB_FIELD_PTR (p->report_sum_counter);
@@ -4000,20 +4023,17 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		}
 		if (p->storage == CB_STORAGE_REPORT
 		 && ((p->report_flag & COB_REPORT_LINE) || p->level == 1)) {
-			if (p->size < r->rcsz) {
-				p->size = r->rcsz;
+			if (p->size + p->offset > r->rcsz) {
+				p->size = r->rcsz - p->offset ;
 			}
-			if (p->memory_size < r->rcsz) {
-				p->memory_size = r->rcsz;
+			if (p->memory_size + p->offset > r->rcsz) {
+				p->memory_size = r->rcsz - p->offset;
 			}
 		}
 		if (p->level == 1
 		 && p->report != NULL
 		 && p->report->file != NULL) {
 			f = p->report->file;
-#if 0 /* Should not be needed as done before */
-			f->flag_report = 1;
-#endif
 			for (ff = records; ff; ff = ff->sister) {
 				if (f->record_max > 0
 				 && ff->size > f->record_max) {

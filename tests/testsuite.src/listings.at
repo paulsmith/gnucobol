@@ -5708,9 +5708,9 @@ SIZE  TYPE           LVL  NAME                           PICTURE
       REPORT SECTION
 
 00126 GROUP          01   PAGE-HEAD-GROUP
-00126 GROUP          02   FILLER
+00067 GROUP          02   FILLER
 00041 ALPHANUMERIC   03   FILLER                         X(41)
-00126 GROUP          02   FILLER
+00059 GROUP          02   FILLER
 00009 ALPHANUMERIC   03   FILLER                         X(09)
 00010 ALPHANUMERIC   03   FILLER                         X(10)
 00005 ALPHANUMERIC   03   FILLER                         X(05)
@@ -5718,7 +5718,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00009 ALPHANUMERIC   03   FILLER                         X(09)
 
 00126 GROUP          01   CHARGE-DETAIL
-00126 GROUP          02   FILLER
+00057 GROUP          02   FILLER
 00004 ALPHANUMERIC   03   FILLER                         Z(04)
 00016 ALPHANUMERIC   03   FILLER                         X(16)
 00001 ALPHANUMERIC   03   FILLER                         9(01)
