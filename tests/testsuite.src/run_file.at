@@ -1045,6 +1045,7 @@ AT_DATA([prog.cob], [
       
        MAINFILE.
            PERFORM LOADFILE.
+           PERFORM LOADFILE.
            PERFORM REWRFILE.
            PERFORM LISTFILE.
            OPEN INPUT TSTFILE
@@ -1427,6 +1428,8 @@ AT_DATA([prog.cob], [
 AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
 
 AT_CHECK([./prog], [0], [Loading sample data file.
+Sample data file load complete.
+Loading sample data file.
 Sample data file load complete.
 Rewrite sample data file: 00
 REWRITE: EPS00000, Status: 30
@@ -8878,7 +8881,8 @@ Read2 EPS00000 #0004 Trms:0010
 Read2 FOR00000 #0005 Trms:0090
 Read2 GAM00000 #0006 Trms:0254
 Read2 BET00000 #0007 Trms:0013
-Read2 Status: 10
+Invalid Read2 0008 Status: 23
+Read2 Status: 23
 ], [])
 
 AT_CLEANUP

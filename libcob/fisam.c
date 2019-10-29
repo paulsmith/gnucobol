@@ -884,7 +884,11 @@ dobuild:
 						}
 					}
 					if (k >= fh->nkeys) {
-						ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+						if (mode != COB_OPEN_INPUT
+						 || f->access_mode != COB_ACCESS_SEQUENTIAL
+						 || !f->flag_auto_type) {
+							ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+						}
 					}
 				}
 			} else {
@@ -1415,7 +1419,8 @@ isam_write (cob_file_api *a, cob_file *f, const int opt)
 		return COB_STATUS_48_OUTPUT_DENIED;
 	}
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL
-	&&  indexed_cmpkey(fh, f->record->data, 0, 0) <= 0) {
+	 && f->open_mode != COB_OPEN_OUTPUT
+	 && indexed_cmpkey(fh, f->record->data, 0, 0) <= 0) {
 		return COB_STATUS_21_KEY_INVALID;
 	}
 

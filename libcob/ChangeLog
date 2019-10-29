@@ -1,4 +1,15 @@
 
+2019-10-29  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Checks for filetype_OPTIONS (eg. IX, SQ, RL)
+	         and sets options defined
+			 If no filetype_OPTIONS then it checks for IO_OPTIONS
+			 Then it checks IO_filename for options
+
+			 Implement support for an option of format=auto which
+			 indicates fileio should assign the correct INDEXED file
+			 handler based on the existing file format
+
 2019-10-26  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: work on handling file definition parameters in IO_filename

@@ -140,6 +140,7 @@ static const char	* const prefix[] = { "DD_", "dd_", "" };
 static int dummy_stub		() {return 0;};
 static int dummy_91			() {return COB_STATUS_91_NOT_AVAILABLE;};
 
+static void cob_set_file_format(cob_file *f, char *defstr);
 static int cob_file_open	(cob_file_api *, cob_file *, char *, const int, const int);
 static int cob_file_close	(cob_file_api *, cob_file *, const int);
 static int cob_file_write_opt	(cob_file *, const int);
@@ -223,7 +224,7 @@ static struct cob_fileio_funcs	*fileio_funcs[COB_IO_MAX] = {
 
 static const char *io_rtn_name[COB_IO_MAX+1] = {
 	"SEQUENTIAL",
-	"LINE SEQUENTIAL",
+	"LINE",
 	"RELATIVE",
 	"CISAM",
 	"DISAM",
@@ -262,32 +263,112 @@ static const char *dict_ext = "dd";
 
 #if defined(WITH_INDEXED)
 static const char ix_routine = WITH_INDEXED;
-static char ix_type[3] = "XX";
+static char ix_type[12] = "XX";
 #else
 #if defined(WITH_CISAM)
 static const char ix_routine = COB_IO_CISAM;
-static const char ix_type[3] = "CI";
+static const char ix_type[12] = "CISAM";
 #elif defined(WITH_DISAM)
 static const char ix_routine = COB_IO_DISAM;
-static const char ix_type[3] = "DI";
+static const char ix_type[12] = "DISAM";
 #elif defined(WITH_VBISAM)
 static const char ix_routine = COB_IO_VBISAM;
-static const char ix_type[3] = "VB";
+static const char ix_type[12] = "VBSAM";
 #elif	WITH_DB
 static const char ix_routine = COB_IO_BDB;
-static const char ix_type[3] = "DB";
+static const char ix_type[12] = "DB";
 #elif	WITH_LMDB
 static const char ix_routine = COB_IO_LMDB;
-static const char ix_type[3] = "LM";
+static const char ix_type[12] = "LMDB";
 #elif	WITH_INDEX_EXTFH
 static const char ix_routine = COB_IO_IXEXT;
-static const char ix_type[3] = "IS";
+static const char ix_type[12] = "IX";
 #else
 static const char ix_routine = COB_IO_IXEXT;
-static const char ix_type[3] = "IS";
+static const char ix_type[12] = "IX";
 #endif
 #endif
 
+/* 
+ * Determine which of C|D|VB-ISAM the file is
+ */
+static int
+indexed_file_type(char *filename)
+{
+	char temp[COB_FILE_MAX];
+	unsigned char hbuf[1024];
+	struct stat st;
+	int		idx;
+	FILE *fdin;
+
+	if (stat(filename, &st) != -1) {
+		if (S_ISDIR(st.st_mode)) {	/* Filename is a directory */
+			sprintf(temp,"%s%cdata.mdb",filename,SLASH_CHAR);
+			if (stat(temp, &st) != -1) {
+				return COB_IO_LMDB;
+			}
+			return -1;
+		}
+	}
+	sprintf(temp,"%s.idx",filename);
+	fdin = fopen(temp,"r");
+	if(fdin == NULL) {
+		fdin = fopen(filename,"r");
+		if(fdin == NULL) {
+			return -1;
+		}
+		memset(hbuf,0,sizeof(hbuf));
+		fread(hbuf, 1, sizeof(hbuf), fdin);
+		fclose(fdin);
+		for(idx=1; idx < 32; idx++) {
+			sprintf(temp,"%s.%d",filename,idx);
+			if (stat(temp, &st) == -1) 
+				break;
+		}
+		if(memcmp(&hbuf[12],"\x62\x31\x05\x00",4) == 0)
+			return COB_IO_BDB;
+		if(memcmp(&hbuf[12],"\x00\x05\x31\x62",4) == 0)
+			return COB_IO_BDB;
+		if(memcmp(&hbuf[12],"\x61\x15\x06\x00",4) == 0)
+			return COB_IO_BDB;
+		if(memcmp(&hbuf[12],"\x00\x06\x15\x61",4) == 0)
+			return COB_IO_BDB;
+		return -1;
+	}
+	memset(hbuf,0,sizeof(hbuf));
+	fread(hbuf, 1, sizeof(hbuf), fdin);
+	fclose(fdin);
+
+	if(hbuf[0] == 0xFE 
+	&& hbuf[1] == 0x53) {		/* C|D-ISAM marker */
+		/* D-ISAM and C-ISAM are interchangable */
+		if(memcmp(hbuf+1020,"dism",4) == 0)
+#if defined(WITH_DISAM)
+			return COB_IO_DISAM;
+#elif defined(WITH_CISAM)
+			return COB_IO_CISAM;
+#else
+			return -1;
+#endif
+		else
+#if defined(WITH_CISAM)
+			return COB_IO_CISAM;
+#elif defined(WITH_DISAM)
+			return COB_IO_DISAM;
+#else
+			return -1;
+#endif
+	} else
+	if(hbuf[0] == 'V' 
+	&& hbuf[1] == 'B') {		/* VB-ISAM file marker */
+		return COB_IO_VBISAM;
+	} else
+	if(hbuf[0] == 0x33
+	&& hbuf[1] == 0xFE) {		/* Micro Focus format */
+		return COB_IO_MFIDX4;
+	}
+	return -1;
+}
 /*
  * Write data file description to a string 
  */
@@ -299,7 +380,7 @@ write_file_def (cob_file *f, char *out)
 
 	out[k] = 0;
 	if(f->organization == COB_ORG_INDEXED) {
-		k += sprintf(&out[k],"type=(IX,%.2s)",io_rtn_name[f->io_routine]);
+		k += sprintf(&out[k],"type=IX format=%s",io_rtn_name[f->io_routine]);
 	} else if(f->organization == COB_ORG_RELATIVE) {
 		k += sprintf(&out[k],"type=(%.2s",io_rtn_name[COB_IO_RELATIVE]);
 		if(f->file_format == COB_FILE_IS_MF)
@@ -359,7 +440,9 @@ write_file_def (cob_file *f, char *out)
 			}
 			if(f->keys[idx].tf_suppress) {
 				if(isprint(f->keys[idx].char_suppress)
-				&& f->keys[idx].char_suppress != '\'')
+				&& f->keys[idx].char_suppress != '\''
+				&& f->keys[idx].char_suppress != ','
+				&& f->keys[idx].char_suppress != ';')
 					k += sprintf(&out[k],"sup%d='%c' ",idx+1,f->keys[idx].char_suppress);
 				else
 					k += sprintf(&out[k],"sup%d=x'%02X' ",idx+1,f->keys[idx].char_suppress);
@@ -391,10 +474,11 @@ cob_dd_prms ( char *p, char *p1, char *p2 )
 	*p1 = 0;
 	if (*p == '(') p++;
 	if (*p == ',') p++;
+	if (*p == ';') p++;
 	while (*p == ' ') p++;
-	while (*p != 0 && *p != ' ' 
+	while (*p != 0   && *p != ' ' 
 		&& *p != ',' && *p != ':'
-		&& *p != ')')
+		&& *p != ';' && *p != ')')
 		*p1++ = *p++;
 	*p1 = 0;
 	if (*p == ':') {
@@ -535,29 +619,37 @@ read_file_def (cob_file *f, char *p, int updt, int *retsts, int *xsts)
 		prv = p;
 		p = cob_dd_wrd (p, wrd);
 		if (strcmp(wrd,"type") == 0) {
-			p = cob_dd_prms (p, p1, NULL);
-			p = cob_dd_prms (p, p2, NULL);
+			if(*p == '(') {
+				p = cob_dd_prms (p, p1, NULL);
+				p = cob_dd_prms (p, p2, NULL);
+			} else {
+				p = cob_dd_prms (p, p1, NULL);
+				p2[0] = 0;
+			}
 			if (f->organization == COB_ORG_INDEXED) {
 				if(strcmp(p1,"IX") != 0) {
 					sts = 1;
 					break;
 				}
-				for (k=0; k < COB_IO_MAX; k++) {
-					if (memcmp(p2,io_rtn_name[k],2) == 0) {
-						f->io_routine = k;
-						if (fileio_funcs[f->io_routine] == NULL) {
-							cob_runtime_error (_("ERROR %s I/O routine %s is not present"),
-												f->select_name,io_rtn_name[f->io_routine]);
+				if(p2[0] > ' ') {
+					for (k=0; k < COB_IO_MAX; k++) {
+						if (memcmp(p2,io_rtn_name[k],2) == 0
+						 || strcasecmp(p2,io_rtn_name[k]) == 0) {
+							f->io_routine = k;
+							if (fileio_funcs[f->io_routine] == NULL) {
+								cob_runtime_error (_("ERROR %s I/O routine %s is not present"),
+													f->select_name,io_rtn_name[f->io_routine]);
+							}
+							break;
 						}
-						break;
 					}
-				}
-				if (k >= COB_IO_MAX) {
-					if (strcmp(p2,ix_type) != 0) {
-						f->io_routine = ix_routine;
-					} else {
-						sts = 1;
-						break;
+					if (k >= COB_IO_MAX) {
+						if (strcasecmp(p2,ix_type) == 0) {
+							f->io_routine = ix_routine;
+						} else {
+							sts = 1;
+							break;
+						}
 					}
 				}
 			}
@@ -761,6 +853,34 @@ cob_chk_file_env (cob_file *f, const char *src)
 		s = (char *)src;
 	}
 
+	if (f->organization == COB_ORG_INDEXED) {
+		t = "IX";
+	} else if (f->organization == COB_ORG_SEQUENTIAL) {
+		t = "SQ";
+	} else if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
+		if(f->flag_line_adv)
+			t = "LA";
+		else
+			t = "LS";
+	} else if (f->organization == COB_ORG_RELATIVE) {
+		t = "RL";
+	} else {
+		t = "IO";
+	}
+	snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s_OPTIONS", t);
+	if ((file_open_io_env = getenv (file_open_env)) == NULL) {
+		snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s_options", t);
+		file_open_env[0] = tolower(file_open_env[0]);
+		file_open_env[1] = tolower(file_open_env[1]);
+		file_open_io_env = getenv (file_open_env);
+	}
+	if (file_open_io_env == NULL) {
+		file_open_io_env = getenv("IO_OPTIONS");
+	}
+	if (file_open_io_env != NULL) {
+		cob_set_file_format(f, file_open_io_env);		/* Set defaults for file type */
+	}
+
 	/* Check for IO_filename with file specific options */
 	file_open_io_env = NULL;
 	snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s%s", "IO_", s);
@@ -789,29 +909,6 @@ cob_chk_file_env (cob_file *f, const char *src)
 		}
 	}
 
-	if (file_open_io_env == NULL) {		/* Re-check for xx_OPTIONS where 'xx' depends on file type */
-		if (f->organization == COB_ORG_INDEXED) {
-			t = "IX";
-		} else if (f->organization == COB_ORG_SEQUENTIAL) {
-			t = "SQ";
-		} else if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
-			if(f->flag_line_adv)
-				t = "LA";
-			else
-				t = "LS";
-		} else if (f->organization == COB_ORG_RELATIVE) {
-			t = "RL";
-		} else {
-			t = "IO";
-		}
-		snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s_OPTIONS", t);
-		if ((file_open_io_env = getenv (file_open_env)) == NULL) {
-			snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s_options", t);
-			file_open_env[0] = tolower(file_open_env[0]);
-			file_open_env[1] = tolower(file_open_env[1]);
-			file_open_io_env = getenv (file_open_env);
-		}
-	}
 
 	p = NULL;
 	for (i = 0; i < NUM_PREFIX; ++i) {
@@ -1024,14 +1121,23 @@ cob_cache_del (cob_file *f)
 }
 
 /*
- * Set file format based on defaults, runtime.cfg and IO_filename options
+ * Set file format based on defaults, runtime.cfg 
  */
-
-void
-cob_set_file_format(cob_file *f)
+static void
+cob_set_file_defaults (cob_file *f)
 {
-	int		i,j,settrue,ivalue;
-	char	option[32],value[256], *p;
+	/*
+	 * Set default I/O routine
+	 */
+	if (f->organization == COB_ORG_INDEXED) {
+		f->io_routine = ix_routine;
+	} else if (f->organization == COB_ORG_SEQUENTIAL) {
+		f->io_routine = COB_IO_SEQUENTIAL;
+	} else if (f->organization == COB_ORG_RELATIVE) {
+		f->io_routine = COB_IO_RELATIVE;
+	} else if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
+		f->io_routine = COB_IO_LINE_SEQUENTIAL;
+	}
 
 	f->trace_io = file_setptr->cob_trace_io ? 1 : 0;
 	f->io_stats = file_setptr->cob_stats_record ? 1 : 0;
@@ -1119,26 +1225,33 @@ cob_set_file_format(cob_file *f)
 				f->file_features &= ~COB_FILE_LS_VALIDATE;
 		}
 	}
+}
 
-	/*
-	 * IO_filename was found
-	*/
-	if(file_open_io_env != NULL) {		/* Special options for just this file */
+/*
+ * Set file format based on IO_filename options
+ */
+static void
+cob_set_file_format (cob_file *f, char *defstr)
+{
+	int		i,j,settrue,ivalue;
+	char	option[32],value[256], *p;
+
+	if(defstr != NULL) {		/* Special options for just this file */
 		f->dflt_retry = 0;
-		for(i=0; file_open_io_env[i] != 0; ) {
-			while(isspace(file_open_io_env[i])	/* Skip option separators */
-			|| file_open_io_env[i] == ','
-			|| file_open_io_env[i] == ';') i++;
-			if(file_open_io_env[i] == 0)
+		for(i=0; defstr[i] != 0; ) {
+			while(isspace(defstr[i])	/* Skip option separators */
+			|| defstr[i] == ','
+			|| defstr[i] == ';') i++;
+			if(defstr[i] == 0)
 				break;
 			ivalue = 0;
-			p = &file_open_io_env[i];
-			for(j=0; j < sizeof(option)-1 && !isspace(file_open_io_env[i])
-				&& file_open_io_env[i] != ','
-				&& file_open_io_env[i] != ';'
-				&& file_open_io_env[i] != '='
-				&& file_open_io_env[i] != 0; ) {	/* Collect one option */
-				option[j++] = file_open_io_env[i++];
+			p = &defstr[i];
+			for(j=0; j < sizeof(option)-1 && !isspace(defstr[i])
+				&& defstr[i] != ','
+				&& defstr[i] != ';'
+				&& defstr[i] != '='
+				&& defstr[i] != 0; ) {	/* Collect one option */
+				option[j++] = defstr[i++];
 			}
 			option[j] = 0;
 			value[0] = 0;
@@ -1155,15 +1268,15 @@ cob_set_file_format(cob_file *f)
 				memmove(option,&option[2],j);
 				settrue = 0;
 			}
-			if(file_open_io_env[i] == '=') {
+			if(defstr[i] == '=') {
 				i++;
-				for(j=0; j < sizeof(value)-1 && !isspace(file_open_io_env[i])
-					&& file_open_io_env[i] != ','
-					&& file_open_io_env[i] != ';'
-					&& file_open_io_env[i] != 0; ) {	/* Collect one option */
-					if(isdigit(file_open_io_env[i]))
-						ivalue = ivalue * 10 + file_open_io_env[i] - '0';
-					value[j++] = file_open_io_env[i++];
+				for(j=0; j < sizeof(value)-1 && !isspace(defstr[i])
+					&& defstr[i] != ','
+					&& defstr[i] != ';'
+					&& defstr[i] != 0; ) {	/* Collect one option */
+					if(isdigit(defstr[i]))
+						ivalue = ivalue * 10 + defstr[i] - '0';
+					value[j++] = defstr[i++];
 				}
 				value[j] = 0;
 				if(value[0] == '1'
@@ -1204,7 +1317,7 @@ cob_set_file_format(cob_file *f)
 				f->dflt_retry |= COB_RETRY_SECONDS;
 				continue;
 			}
-			if (strcmp(option,"recsz") == 0) {
+			if (strcasecmp(option,"recsz") == 0) {
 				if(ivalue <= 0 || ivalue > f->record_max)
 					continue;
 				if(f->record_min == f->record_max)
@@ -1214,7 +1327,7 @@ cob_set_file_format(cob_file *f)
 				f->flag_redef = 1;
 				continue;
 			}
-			if (strcmp(option,"minsz") == 0) {
+			if (strcasecmp(option,"minsz") == 0) {
 				if(ivalue <= 0 || ivalue > f->record_max)
 					continue;
 				f->record_min = ivalue;
@@ -1222,7 +1335,7 @@ cob_set_file_format(cob_file *f)
 			}
 			if(strcasecmp(option,"format") == 0) {
 				for(j=0; j < COB_IO_MAX; j++) {
-					if(strncasecmp(value,io_rtn_name[j],2) == 0) {
+					if(strcasecmp(value,io_rtn_name[j]) == 0) {
 						if(fileio_funcs[j] == NULL) {
 							cob_runtime_error (_("I/O routine %s is not present for %s"),
 												io_rtn_name[j],file_open_env);
@@ -1233,8 +1346,12 @@ cob_set_file_format(cob_file *f)
 					}
 				}
 				if(j >= COB_IO_MAX) {
-					cob_runtime_warning (_("I/O routine %s is not known for %s"),
+					if(strcasecmp(value,"auto") == 0) {
+						f->flag_auto_type = 1;
+					} else {
+						cob_runtime_warning (_("I/O routine %s is not known for %s"),
 											value,file_open_env);
+					}
 				}
 				continue;
 			}
@@ -1402,9 +1519,9 @@ cob_set_file_format(cob_file *f)
 				if(p == pp) {
 					break;
 				}
-				i = p - file_open_io_env;
-				if(i > strlen(file_open_io_env))
-					i = strlen(file_open_io_env);
+				i = p - defstr;
+				if(i > strlen(defstr))
+					i = strlen(defstr);
 			}
 		}
 		/* If SHARE or RETRY given, then override application choices */
@@ -2396,7 +2513,7 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	if(!f->flag_file_map) {
 		cob_chk_file_mapping (f);
 		f->flag_file_map = 1;
-		cob_set_file_format(f);		/* Set file format */
+		cob_set_file_format(f, file_open_io_env);		/* Set file format */
 	}
 
 	nonexistent = 0;
@@ -2420,7 +2537,7 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 			f->file_format = COB_FILE_IS_GCVS0;	/* Try GNU Cobol format */
 			f->record_prefix = 4;
 			f->file_header = 0;
-			cob_set_file_format(f);			/* Reset file format options */
+			cob_set_file_format(f, file_open_io_env);			/* Reset file format options */
 		} else
 		if(f->file_format != COB_FILE_IS_MF
 		&& check_mf_format(f, filename)) {
@@ -2672,7 +2789,7 @@ cob_file_open (cob_file_api *a, cob_file *f, char *filename, const int mode, con
 		lingptr = f->linorkeyptr;
 		cob_set_int (lingptr->linage_ctr, 1);
 	}
-	cob_set_file_format(f);		/* Set file format */
+	cob_set_file_format(f, file_open_io_env);		/* Set file format */
 
 	if (mode == COB_OPEN_EXTEND) {
 		if(f->lock_mode == 0
@@ -4165,6 +4282,7 @@ cob_unlock_file (cob_file *f, cob_field *fnstatus)
 void
 cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 {
+	int		ftype;
 	if (f->file_version != COB_FILE_VERSION) {
 		cob_runtime_error (_("ERROR FILE %s does not match current version; Recompile the program"),
 							f->select_name);
@@ -4197,18 +4315,7 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 	f->share_mode = sharing;
 	f->record_off = 0;
 
-	/*
-	 * Set default I/O routine
-	 */
-	if (f->organization == COB_ORG_INDEXED) {
-		f->io_routine = ix_routine;
-	} else if (f->organization == COB_ORG_SEQUENTIAL) {
-		f->io_routine = COB_IO_SEQUENTIAL;
-	} else if (f->organization == COB_ORG_RELATIVE) {
-		f->io_routine = COB_IO_RELATIVE;
-	} else if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
-		f->io_routine = COB_IO_LINE_SEQUENTIAL;
-	}
+	cob_set_file_defaults (f);
 
 	if (unlikely (COB_FILE_STDIN (f))) {
 		if (mode != COB_OPEN_INPUT) {
@@ -4252,7 +4359,14 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 
 	cob_cache_file (f);
 
-	cob_set_file_format (f);
+	cob_set_file_format (f, file_open_io_env);
+
+	if (f->organization == COB_ORG_INDEXED
+	 && f->flag_auto_type) {
+		ftype = indexed_file_type (file_open_name);
+		if(ftype >= 0)
+			f->io_routine = ftype;
+	}
 
 	/* Open the file */
 	cob_file_save_status (f, fnstatus,
@@ -6110,7 +6224,7 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 	int	i,k;
 
 #if defined(WITH_INDEXED)
-	memcpy((void*)ix_type,(void*)io_rtn_name[WITH_INDEXED],2);
+	strcpy((void*)ix_type,(void*)io_rtn_name[WITH_INDEXED]);
 #endif
 	runtime_buffer = cob_fast_malloc ((size_t)(4 * COB_FILE_BUFF) + 4);
 	file_open_env = runtime_buffer + COB_FILE_BUFF;

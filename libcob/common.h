@@ -880,6 +880,9 @@ enum cob_exception_id {
 #define COB_IO_SQEXT 		9	/* SEQUENTIAL via old style WITH_SEQRA_EXTFH */
 #define COB_IO_RLEXT 		10	/* RELATIVE via old style WITH_SEQRA_EXTFH */
 #define COB_IO_MAX			11 
+/* Not yet implemented */
+#define COB_IO_MFIDX4		11	/* Micro Focus IDX4 format */
+#define COB_IO_MFIDX8		12	/* Micro Focus IDX8 format */
 
 /* Access mode */
 
@@ -1454,7 +1457,8 @@ typedef struct __cob_file {
 	unsigned int		flag_keycheck:1;	/* INDEXED file keys must match */
 	unsigned int		flag_file_map:1;	/* Filename Mapping was checked */
 	unsigned int		flag_redef:1;	/* File format has been redefined */
-	unsigned int		unused_bits:27;
+	unsigned int		flag_auto_type:1;	/* Peek at file for File format */
+	unsigned int		unused_bits:26;
 
 	cob_field		*last_key;		/* Last field used as 'key' for I/O */
 	unsigned char		last_operation;		/* Most recent I/O operation */

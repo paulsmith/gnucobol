@@ -1125,12 +1125,6 @@ lmdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 
 	}
 
-	for (i = 0; i < f->nkeys; i++) {
-		if (f->keys[i].field->size > maxsize) {
-			maxsize = f->keys[i].field->size;
-		}
-	}
-
 	if ((ret = mdb_txn_begin(p->db_env, NULL, p->txn_flags, &p->txn)) != MDB_SUCCESS) {
 		mdb_env_close(p->db_env);
 		p->db_env = NULL;
@@ -1174,8 +1168,7 @@ lmdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 	memset ((void *)&p->key, 0, sizeof (MDB_val));
 	memset ((void *)&p->data, 0, sizeof (MDB_val));
 	p->filenamelen = strlen(filename);
-	p->filename = cob_malloc(p->filenamelen + 1);
-	memcpy (p->filename, filename, strlen(filename));
+	p->filename = cob_strdup(filename);
 	p->write_cursor_open = 0;
 	p->record_locked = 0;
 	f->open_mode = mode;

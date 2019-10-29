@@ -11596,7 +11596,7 @@ Program-Id: prog
         Record# :  000003
  Line:    584            MOVE
  Line:    585            READ
-            READ FLATFILE Status: 10
+            READ FLATFILE Status: 23
         Record# :  000999
  Line:    586            CLOSE
             CLOSE FLATFILE Status: 00

@@ -1526,6 +1526,8 @@ ix_bdb_close (cob_file_api *a, cob_file *f, const int opt)
 	cob_free (p->rewrite_sec_key);
 	cob_free (p->filename);
 	cob_free (p->cursor);
+	if (p->bdb_locks)
+		cob_free (p->bdb_locks);
 	if (bdb_env != NULL) {
 		bdb_env->lock_id_free (bdb_env, p->bdb_lock_id);
 	}

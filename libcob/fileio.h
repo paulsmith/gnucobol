@@ -180,7 +180,6 @@ static const int	status_exception[] = {
 
 COB_HIDDEN int cob_write_dict (cob_file *f, char *filename);
 COB_HIDDEN int cob_read_dict (cob_file *f, char *filename, int updt, int *retsts);
-COB_HIDDEN void cob_set_file_format (cob_file *f);
 COB_HIDDEN void cob_chk_file_mapping (cob_file *f);
 COB_HIDDEN void cob_file_save_status (cob_file *f, cob_field *fnstatus, const int status);
 COB_HIDDEN void cob_file_sync (cob_file *f);
