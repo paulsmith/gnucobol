@@ -1456,9 +1456,10 @@ typedef struct __cob_file {
 	unsigned int		io_stats:1;		/* Report I/O statistics for this file */
 	unsigned int		flag_keycheck:1;	/* INDEXED file keys must match */
 	unsigned int		flag_file_map:1;	/* Filename Mapping was checked */
-	unsigned int		flag_redef:1;	/* File format has been redefined */
+	unsigned int		flag_redef:1;		/* File format has been redefined */
 	unsigned int		flag_auto_type:1;	/* Peek at file for File format */
-	unsigned int		unused_bits:26;
+	unsigned int		flag_set_type:1;	/* File type/format set via IO_asgname */
+	unsigned int		unused_bits:25;
 
 	cob_field		*last_key;		/* Last field used as 'key' for I/O */
 	unsigned char		last_operation;		/* Most recent I/O operation */

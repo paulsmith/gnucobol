@@ -140,7 +140,8 @@ static const char	* const prefix[] = { "DD_", "dd_", "" };
 static int dummy_stub		() {return 0;};
 static int dummy_91			() {return COB_STATUS_91_NOT_AVAILABLE;};
 
-static void cob_set_file_format(cob_file *f, char *defstr);
+static void cob_set_file_format(cob_file *, char *);
+static void cob_set_file_defaults (cob_file *);
 static int cob_file_open	(cob_file_api *, cob_file *, char *, const int, const int);
 static int cob_file_close	(cob_file_api *, cob_file *, const int);
 static int cob_file_write_opt	(cob_file *, const int);
@@ -415,9 +416,12 @@ write_file_def (cob_file *f, char *out)
 	}
 
 	k += sprintf(&out[k]," ");
-	k += sprintf(&out[k],"recsz=%ld ",(long)(f->record_max));
-	if(f->record_min != f->record_max)
+	if(f->record_min != f->record_max) {
+		k += sprintf(&out[k],"maxsz=%ld ",(long)(f->record_max));
 		k += sprintf(&out[k],"minsz=%ld ",(long)(f->record_min));
+	} else {
+		k += sprintf(&out[k],"recsz=%ld ",(long)(f->record_max));
+	}
 
 	if (f->organization == COB_ORG_INDEXED) {
 		/* Write Key information from cob_file */
@@ -612,13 +616,13 @@ read_file_def (cob_file *f, char *p, int updt, int *retsts, int *xsts)
 	nkeys = (int)f->nkeys;
 	sts = ret = 0;
 	while (*p != 0 && *p != '\r' && *p != '\n') {
-		if(*p == ' ') {
+		if(*p == ' ' || *p == ',') {
 			p++;
 			continue;
 		}
 		prv = p;
 		p = cob_dd_wrd (p, wrd);
-		if (strcmp(wrd,"type") == 0) {
+		if (strcasecmp(wrd,"type") == 0) {
 			if(*p == '(') {
 				p = cob_dd_prms (p, p1, NULL);
 				p = cob_dd_prms (p, p2, NULL);
@@ -626,8 +630,26 @@ read_file_def (cob_file *f, char *p, int updt, int *retsts, int *xsts)
 				p = cob_dd_prms (p, p1, NULL);
 				p2[0] = 0;
 			}
+			if ((f->organization == COB_ORG_SEQUENTIAL
+				|| f->organization == COB_ORG_RELATIVE)
+			 &&	f->access_mode == COB_ACCESS_SEQUENTIAL) {
+				if(strcasecmp(p1,"IX") == 0) {
+					f->organization = COB_ORG_INDEXED;
+				} else if(strcasecmp(p1,"RL") == 0) {
+					f->organization = COB_ORG_RELATIVE;
+				} else if(strcasecmp(p1,"SQ") == 0) {
+					f->organization = COB_ORG_SEQUENTIAL;
+				} else if(strcasecmp(p1,"LS") == 0) {
+					f->organization = COB_ORG_LINE_SEQUENTIAL;
+					f->flag_line_adv = 0;
+				} else if(strcasecmp(p1,"LA") == 0) {
+					f->organization = COB_ORG_LINE_SEQUENTIAL;
+					f->flag_line_adv = 1;
+				}
+				cob_set_file_defaults (f);
+			}
 			if (f->organization == COB_ORG_INDEXED) {
-				if(strcmp(p1,"IX") != 0) {
+				if(strcasecmp(p1,"IX") != 0) {
 					sts = 1;
 					break;
 				}
@@ -654,6 +676,32 @@ read_file_def (cob_file *f, char *p, int updt, int *retsts, int *xsts)
 				}
 			}
 		} else if (strcmp(wrd,"recsz") == 0) {
+			p = cob_dd_prms (p, p1, NULL);
+			len = atoi (p1);
+			if (len != f->record_max) {
+				if (updt) {
+					if(len > f->record_max) {
+						ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+						sts = 1;
+						break;
+					} 
+					f->record_min = f->record_max = len;
+					f->record->size = len;
+					if (f->variable_record) {
+						cob_set_int (f->variable_record, (int) f->record->size);
+					}
+					f->flag_redef = 1;
+					if (f->file_format == COB_FILE_IS_MF) {
+						f->record_prefix = 0;
+						f->file_header = 0;
+					}
+				} else {
+					ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+					sts = 1;
+					break;
+				}
+			}
+		} else if (strcmp(wrd,"maxsz") == 0) {
 			p = cob_dd_prms (p, p1, NULL);
 			len = atoi (p1);
 			if (len != f->record_max) {
@@ -1320,6 +1368,21 @@ cob_set_file_format (cob_file *f, char *defstr)
 			if (strcasecmp(option,"recsz") == 0) {
 				if(ivalue <= 0 || ivalue > f->record_max)
 					continue;
+				f->flag_redef = 1;
+				f->record_min = f->record_max = ivalue;
+				f->record->size = ivalue;
+				if (f->variable_record) {
+					cob_set_int (f->variable_record, (int) f->record->size);
+				}
+				if (f->file_format == COB_FILE_IS_MF) {
+					f->record_prefix = 0;
+					f->file_header = 0;
+				}
+				continue;
+			}
+			if (strcasecmp(option,"maxsz") == 0) {
+				if(ivalue <= 0 || ivalue > f->record_max)
+					continue;
 				if(f->record_min == f->record_max)
 					f->record_min = f->record_max = ivalue;
 				else
@@ -1429,6 +1492,7 @@ cob_set_file_format (cob_file *f, char *defstr)
 					continue;
 				}
 				if(strcasecmp(option,"mf") == 0) {	/* LS file like MF would do */
+					f->flag_set_type = 1;
 					f->file_features &= ~COB_FILE_LS_FIXED;
 					f->file_features |= COB_FILE_LS_NULLS;
 					f->file_features |= COB_FILE_LS_SPLIT;
@@ -1441,6 +1505,7 @@ cob_set_file_format (cob_file *f, char *defstr)
 					continue;
 				}
 				if(strcasecmp(option,"gc") == 0) {	/* LS file like GNUCobol used to do */
+					f->flag_set_type = 1;
 					f->file_features &= ~COB_FILE_LS_FIXED;
 					f->file_features &= ~COB_FILE_LS_NULLS;
 					f->file_features &= ~COB_FILE_LS_SPLIT;
@@ -1456,6 +1521,7 @@ cob_set_file_format (cob_file *f, char *defstr)
 			if(strcasecmp(option,"mf") == 0) {
 				if(settrue) {
 					f->file_format = COB_FILE_IS_MF;
+					f->flag_set_type = 1;
 					continue;
 				}
 				continue;
@@ -1463,12 +1529,13 @@ cob_set_file_format (cob_file *f, char *defstr)
 			if(strcasecmp(option,"gc") == 0) {
 				if(settrue) {
 					f->file_format = COB_FILE_IS_GC;
+					f->flag_set_type = 1;
 					continue;
 				}
 				continue;
 			}
 			if (f->organization == COB_ORG_SEQUENTIAL
-			&&  f->record_min != f->record_max) {		/* Variable length Sequential */
+			 && f->record_min != f->record_max) {		/* Variable length Sequential */
 				if(strcasecmp(option,"0") == 0) {
 					f->file_format = COB_FILE_IS_GCVS0;
 				} else
@@ -1489,6 +1556,7 @@ cob_set_file_format (cob_file *f, char *defstr)
 				|| strcasecmp(option,"l32") == 0) {
 					f->file_format = COB_FILE_IS_L32;
 				}
+				f->flag_set_type = 1;
 			}
 			if (f->organization == COB_ORG_RELATIVE) {	/* Relative format */
 				if(strcasecmp(option,"b4") == 0
@@ -1507,8 +1575,11 @@ cob_set_file_format (cob_file *f, char *defstr)
 				|| strcasecmp(option,"l64") == 0) {
 					f->file_format = COB_FILE_IS_L64;
 				}
+				f->flag_set_type = 1;
 			}
-			if (f->organization == COB_ORG_INDEXED) {
+			if (f->organization == COB_ORG_INDEXED
+			 || f->organization == COB_ORG_SEQUENTIAL
+			 || f->organization == COB_ORG_RELATIVE) {
 				int		retsts, sts, keycheck;
 				char	*pp;
 				pp = p;
@@ -2526,21 +2597,22 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	}
 
 	if ((f->organization == COB_ORG_RELATIVE || f->organization == COB_ORG_SEQUENTIAL)
-	&&  nonexistent == 0
-	&&  (mode == COB_OPEN_INPUT || mode == COB_OPEN_I_O || mode == COB_OPEN_EXTEND) ) {
-		if(f->file_format == COB_FILE_IS_MF
-		&& f->record_min == f->record_max) {
+	 && nonexistent == 0
+	 && !f->flag_set_type
+	 && (mode == COB_OPEN_INPUT || mode == COB_OPEN_I_O || mode == COB_OPEN_EXTEND) ) {
+		if (f->file_format == COB_FILE_IS_MF
+		 && f->record_min == f->record_max) {
 			/* Fixed size records so No file header to check */
 		} else
-		if(f->file_format == COB_FILE_IS_MF
-		&& !check_mf_format(f, filename)) {
+		if (f->file_format == COB_FILE_IS_MF
+		 && !check_mf_format(f, filename)) {
 			f->file_format = COB_FILE_IS_GCVS0;	/* Try GNU Cobol format */
 			f->record_prefix = 4;
 			f->file_header = 0;
 			cob_set_file_format(f, file_open_io_env);			/* Reset file format options */
 		} else
-		if(f->file_format != COB_FILE_IS_MF
-		&& check_mf_format(f, filename)) {
+		if (f->file_format != COB_FILE_IS_MF
+		 && check_mf_format(f, filename)) {
 			f->file_format = COB_FILE_IS_MF;	/* Use Micro Focus format */
 		}
 	}
@@ -4364,8 +4436,10 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 	if (f->organization == COB_ORG_INDEXED
 	 && f->flag_auto_type) {
 		ftype = indexed_file_type (file_open_name);
-		if(ftype >= 0)
+		if(ftype >= 0) {
+			f->record_min = f->record_max;
 			f->io_routine = ftype;
+		}
 	}
 
 	/* Open the file */

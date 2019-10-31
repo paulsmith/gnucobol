@@ -858,6 +858,12 @@ dobuild:
 				fh = fh2;
 			}
 			if (f->record_max != di.di_recsize) {
+				if (f->flag_auto_type) {
+					f->record_min = f->record_max = di.di_recsize;
+					f->record->size = di.di_recsize;
+					if (f->variable_record)
+						cob_set_int (f->variable_record, (int) f->record->size);
+				} else
 				if (f->flag_keycheck
 				|| f->record_max < di.di_recsize) {
 					ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
@@ -1137,6 +1143,8 @@ isam_read (cob_file_api *a, cob_file *f, cob_field *key, const int read_opts)
 	if (f->record_min != f->record_max) {
 		f->record->size = ISRECLEN;
 	}
+	if (f->variable_record)
+		cob_set_int (f->variable_record, (int) f->record->size);
 	return 0;
 }
 
@@ -1401,6 +1409,8 @@ isam_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	if (f->record_min != f->record_max) {
 		f->record->size = ISRECLEN;
 	}
+	if (f->variable_record)
+		cob_set_int (f->variable_record, (int) f->record->size);
 
 	return COB_CHECK_DUP (ret);
 }
