@@ -194,4 +194,8 @@ COB_HIDDEN void	cob_lmdb_init_fileio (cob_file_api *);
 #if defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
 void	cob_isam_init_fileio (cob_file_api *);
 #endif
+
+#define COB_DICTIONARY_NO	0
+#define COB_DICTIONARY_MIN	1
+#define COB_DICTIONARY_ALL	2
 #endif

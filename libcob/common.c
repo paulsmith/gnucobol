@@ -323,6 +323,8 @@ static char	varrel_dflt[8] = "gc";	/* Default Variable length Relative file form
 static char	fixrel_dflt[8] = "gc";	/* Default Fixed length Relative file format */
 static struct config_enum shareopts[]	= {{"none","0"},{"read","1"},{"all","2"},{"no","4"},{NULL,NULL}};
 static struct config_enum retryopts[]	= {{"none","0"},{"never","64"},{"forever","8"},{NULL,NULL}};
+static struct config_enum dict_opts[]	= {{"false","0"},{"true","1"},{"always","2"},
+											{"no","0"},{"min","1"},{"max","2"},{NULL,NULL}};
 static char	varseq_dflt[8] = "0";	/* varseq0: Default Variable length Sequential file format */
 static char min_conf_length = 0;
 static const char *not_set;
@@ -403,6 +405,8 @@ static struct config_tbl gc_conf[] = {
 	{"COB_SORT_MEMORY","sort_memory",	"128M",	NULL,GRP_FILE,ENV_SIZE,SETPOS(cob_sort_memory),(1024*1024),4294967294 /* max. guaranteed - 1 */},
 	{"COB_SYNC","sync",			"false",syncopts,GRP_FILE,ENV_BOOL,SETPOS(cob_do_sync)},
     {"COB_KEYCHECK","keycheck",     "on",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_keycheck)},
+    {"COB_FILE_DICTIONARY","file_dictionary",     "min",dict_opts,GRP_FILE,ENV_UINT|ENV_ENUMVAL,SETPOS(cob_file_dict),0,3},
+	{"COB_FILE_DICTIONARY_PATH","file_dictionary_path",		NULL,	NULL,GRP_FILE,ENV_FILE,SETPOS(cob_dictionary_path)},
 #ifdef  WITH_DB
 	{"DB_HOME", "db_home", 			NULL, 	NULL, GRP_FILE, ENV_FILE, SETPOS (bdb_home)},
 #endif
@@ -6506,17 +6510,13 @@ get_config_val (char *value, int pos, char *orgvalue)
 	if (gc_conf[pos].enums) {		/* Translate 'word' into alternate 'value' */
 		for (i = 0; gc_conf[pos].enums[i].match != NULL; i++) {
 			if (strcasecmp (value, gc_conf[pos].enums[i].value) == 0) {
-				if (strcmp (value, "0") != 0
-				 && strcmp (value, gc_conf[pos].default_val) != 0) {
-					strcpy (orgvalue, value);
-				}
 				strcpy (value, gc_conf[pos].enums[i].match);
-				if (strcmp (value, "not set") != 0) {
-					snprintf (value, COB_MEDIUM_MAX, _("not set"));
-					value[COB_MEDIUM_MAX] = 0;	/* fix warning */
-				}
 				break;
 			}
+		}
+		if (gc_conf[pos].enums[i].match == NULL
+		 && strcmp (value, gc_conf[pos].default_val) != 0) {
+			strcpy (orgvalue, value);
 		}
 	}
 	return value;
@@ -7761,6 +7761,12 @@ print_runtime_conf ()
 				}
 				/* Convert value back into string and display it */
 				get_config_val (value, i, orgvalue);
+				if (!(gc_conf[i].data_type & STS_ENVSET)
+				 && !(gc_conf[i].data_type & STS_CNFSET)
+				 && gc_conf[i].default_val != NULL) {
+					strcpy(value,gc_conf[i].default_val);
+					orgvalue[0] = 0;
+				}
 				if ((gc_conf[i].data_type & STS_ENVSET)
 				 || (gc_conf[i].data_type & STS_FNCSET)) {
 					putchar (' ');

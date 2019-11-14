@@ -275,6 +275,8 @@ typedef struct __cob_settings {
 	unsigned int	cob_share_mode;		/* Default file share mode */
 	unsigned int	cob_retry_mode;		/* Default file retry mode */
 	unsigned int	cob_keycheck;		/* Default KEYCHECK mode */
+	unsigned int	cob_file_dict;		/* When to use filename.dd (File definition) */
+	char		*cob_dictionary_path;	/* Place to write filename.dd stats */
 	char		*cob_stats_filename;	/* Place to write I/O stats */
 	char 		*cob_file_path;
 	char		*bdb_home;

@@ -1,4 +1,14 @@
 
+2019-11-14  Ron Norman <rjn@inglenet.com>
+
+	* coblocal.h: 
+	* common.c: Add runtime options COB_FILE_DICTIONARY &
+				COB_FILE_DICTIONARY_PATH
+	* fileio.h: 
+	* fileio.c: Clean up of code to write/read file format information
+	            default is 'asgname.dd'
+				Support for COB_FILE_DICTIONARY_PATH is not implemented
+
 2019-10-31  Ron Norman <rjn@inglenet.com>
 
 	* fisam.c: Sets record size when doing OPEN INPUT
