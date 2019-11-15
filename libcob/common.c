@@ -6510,15 +6510,36 @@ get_config_val (char *value, int pos, char *orgvalue)
 	if (gc_conf[pos].enums) {		/* Translate 'word' into alternate 'value' */
 		for (i = 0; gc_conf[pos].enums[i].match != NULL; i++) {
 			if (strcasecmp (value, gc_conf[pos].enums[i].value) == 0) {
+				if (strcmp(value,"0") != 0
+				 && gc_conf[pos].default_val != NULL
+				 && strcmp (value, gc_conf[pos].default_val) != 0) {
+					strcpy (orgvalue, value);
+				} 
 				strcpy (value, gc_conf[pos].enums[i].match);
 				break;
 			}
 		}
 		if (gc_conf[pos].enums[i].match == NULL
+		 && gc_conf[pos].default_val != NULL
 		 && strcmp (value, gc_conf[pos].default_val) != 0) {
 			strcpy (orgvalue, value);
 		}
+	} else
+	if (!(gc_conf[pos].data_type & STS_ENVSET)
+	 && !(gc_conf[pos].data_type & STS_CNFSET)
+	 && !(gc_conf[pos].data_type & ENV_BOOL)
+	 && gc_conf[pos].default_val != NULL) {
+		strcpy(value,gc_conf[pos].default_val);
+		orgvalue[0] = 0;
 	}
+
+	if (gc_conf[pos].default_val != NULL
+	 && strcmp (orgvalue, gc_conf[pos].default_val) != 0) {
+		orgvalue[0] = 0;
+	} else if(strcmp(value,orgvalue) == 0) {
+		orgvalue[0] = 0;
+	}
+
 	return value;
 }
 
@@ -7761,12 +7782,6 @@ print_runtime_conf ()
 				}
 				/* Convert value back into string and display it */
 				get_config_val (value, i, orgvalue);
-				if (!(gc_conf[i].data_type & STS_ENVSET)
-				 && !(gc_conf[i].data_type & STS_CNFSET)
-				 && gc_conf[i].default_val != NULL) {
-					strcpy(value,gc_conf[i].default_val);
-					orgvalue[0] = 0;
-				}
 				if ((gc_conf[i].data_type & STS_ENVSET)
 				 || (gc_conf[i].data_type & STS_FNCSET)) {
 					putchar (' ');

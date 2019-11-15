@@ -3124,7 +3124,7 @@ lineseq_read (cob_file_api *a, cob_file *f, const int read_opts)
 			}
 			if ((f->file_features & COB_FILE_LS_VALIDATE)
 			&& (unsigned char)n >= ' ') {		/* Should be less than a space */
-				return COB_STATUS_34_BOUNDARY_VIOLATION;
+				return COB_STATUS_71_BAD_CHAR;
 			}
 			/* LCOV_EXCL_STOP */
 		} else {
@@ -3164,6 +3164,8 @@ lineseq_read (cob_file_api *a, cob_file *f, const int read_opts)
 	return COB_STATUS_00_SUCCESS;
 }
 
+#define IS_BAD_CHAR(x) (x < ' ' && x != COB_CHAR_BS && x != COB_CHAR_ESC \
+					 && x != COB_CHAR_FF && x != COB_CHAR_SI && x != COB_CHAR_TAB)
 static int
 lineseq_write (cob_file_api *a, cob_file *f, const int opt)
 {
@@ -3233,16 +3235,11 @@ lineseq_write (cob_file_api *a, cob_file *f, const int opt)
 			}
 		} else {
 			if (unlikely (f->file_features & COB_FILE_LS_VALIDATE)) {
-				size_t i;
+				int i;
 				p = f->record->data;
-				for (i = 0; i < size; ++i, ++p) {
-					if (*p < ' '
-					 && *p != COB_CHAR_BS 
-					 && *p != COB_CHAR_ESC 
-					 && *p != COB_CHAR_FF 
-					 && *p != COB_CHAR_SI 
-					 && *p != COB_CHAR_TAB) {
-						return COB_STATUS_34_BOUNDARY_VIOLATION;
+				for (i = 0; i < (int)size; ++i, ++p) {
+					if (IS_BAD_CHAR (*p)) {
+						return COB_STATUS_71_BAD_CHAR;
 					}
 				}
 			}
@@ -3356,11 +3353,11 @@ lineseq_rewrite (cob_file_api *a, cob_file *f, const int opt)
 			}
 		} else {
 			if ((f->file_features & COB_FILE_LS_VALIDATE)) {
-				size_t i;
+				int i;
 				p = f->record->data;
-				for (i = 0; i < size; ++i, ++p) {
-					if (*p < ' ') {
-						return COB_STATUS_34_BOUNDARY_VIOLATION;
+				for (i = 0; i < (int)size; ++i, ++p) {
+					if (IS_BAD_CHAR(*p)) {
+						return COB_STATUS_71_BAD_CHAR;
 					}
 				}
 			}

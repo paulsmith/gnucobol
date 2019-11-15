@@ -1,6 +1,12 @@
 
 2019-11-14  Ron Norman <rjn@inglenet.com>
 
+	* common.c: Fix for display of runtime options
+	* fileio.c: If bad data in LINE SEQUENTIAL file cause error status 71
+	            instead of 34
+
+2019-11-14  Ron Norman <rjn@inglenet.com>
+
 	* coblocal.h: 
 	* common.c: Add runtime options COB_FILE_DICTIONARY &
 				COB_FILE_DICTIONARY_PATH
