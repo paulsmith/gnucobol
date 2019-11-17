@@ -38,7 +38,7 @@
 #define	COB_LIB_EXPIMP
 
 #include "fileio.h"
-#if defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
+#ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
 
