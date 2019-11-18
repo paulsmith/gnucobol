@@ -1,4 +1,10 @@
 
+2019-11-18  Ron Norman <rjn@inglenet.com>
+
+	* common.h,fileio.c,fextfh.c,fbdb.c: Updates to support 
+	        SET ... TO ADDRESS OF FH--FCD OF file
+	        SET ... TO ADDRESS OF FH--KEYDEF OF file
+
 2019-11-14  Ron Norman <rjn@inglenet.com>
 
 	* common.c: Fix for display of runtime options

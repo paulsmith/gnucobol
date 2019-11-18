@@ -1,4 +1,10 @@
 
+2019-11-18  Ron Norman <rjn@inglenet.com>
+
+	* tree.h,parser.y,typeck.c: Updates to support 
+	        SET ... TO ADDRESS OF FH--FCD OF file
+	        SET ... TO ADDRESS OF FH--KEYDEF OF file
+
 2019-10-27  Ron Norman <rjn@inglenet.com>
 
 	* tree.c: Correct computing size of REPORT lines and fields

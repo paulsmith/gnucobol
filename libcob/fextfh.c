@@ -45,12 +45,12 @@ free_extfh_fcd (void)
 		nff = ff->next;
 		if (ff->free_fcd) {
 			if (ff->fcd->fnamePtr != NULL)
-				cob_free ((void*)(ff->fcd->fnamePtr));
-			cob_free((void*)ff->fcd);
+				cob_cache_free ((void*)(ff->fcd->fnamePtr));
+			cob_cache_free((void*)ff->fcd);
 		} else {
-			cob_free((void*)ff->f);
+			cob_cache_free((void*)ff->f);
 		}
-		cob_free((void*)ff);
+		cob_cache_free((void*)ff);
 	}
 }
 
@@ -79,6 +79,20 @@ update_file_to_fcd (cob_file *f, FCD3 *fcd, unsigned char *fnstatus)
 	STCOMPX4(f->record_min,fcd->minRecLen);
 	STCOMPX4(f->record->size,fcd->curRecLen);
 	STCOMPX4(f->record_max,fcd->maxRecLen);
+	if (f->record_min == f->record_max)
+		fcd->recordMode = REC_MODE_FIXED;
+	else
+		fcd->recordMode = REC_MODE_VARIABLE;
+	if(f->organization == COB_ORG_LINE_SEQUENTIAL) {
+		fcd->fileOrg = ORG_LINE_SEQ;
+		STCOMPX2(0, fcd->refKey);
+		if((f->file_features & COB_FILE_LS_CRLF))
+			fcd->fstatusType |= MF_FST_CRdelim;
+		if((f->file_features & COB_FILE_LS_NULLS))
+			fcd->fstatusType |= MF_FST_InsertNulls;
+		if((f->file_features & COB_FILE_LS_FIXED))
+			fcd->fstatusType |= MF_FST_NoStripSpaces;
+	}
 }
 
 /*
@@ -128,12 +142,15 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 		fcd->recordMode = REC_MODE_FIXED;
 	}
 	fnlen = strlen(assignto);
-	if (fcd->fnamePtr != NULL) {
-		cob_free ((void*)fcd->fnamePtr);
+	if (fcd->fnamePtr == NULL) {
+		fcd->fnamePtr = cob_strdup(assignto);
+		STCOMPX2(fnlen, fcd->fnameLen);
+	} else if (f->fcd != fcd) {
+		cob_cache_free ((void*)fcd->fnamePtr);
+		fcd->fnamePtr = cob_strdup(assignto);
+		STCOMPX2(fnlen, fcd->fnameLen);
 	}
-	fcd->fnamePtr = cob_strdup(assignto);
 	fcd->openMode |= OPEN_NOT_OPEN;
-	STCOMPX2(fnlen, fcd->fnameLen);
 	STCOMPX2(0, fcd->refKey);
 	if((f->lock_mode & COB_LOCK_EXCLUSIVE)
 	|| (f->lock_mode & COB_LOCK_OPEN_EXCLUSIVE))
@@ -157,15 +174,17 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 		}
 		if (fcd->kdbPtr == NULL
 		 && f->nkeys > 0) {
-			nkeys = f->nkeys;
+			nkeys = f->nkeys < 16 ? 16 : f->nkeys;
 			kdblen = sizeof(KDB) - sizeof(kdb->key) + (sizeof(KDB_KEY) * nkeys) + (sizeof(EXTKEY) * keycomp);
-			fcd->kdbPtr = kdb = cob_malloc(kdblen + sizeof(EXTKEY));
+			nkeys = f->nkeys;
+			fcd->kdbPtr = kdb = cob_cache_malloc(kdblen + sizeof(EXTKEY));
 			STCOMPX2(kdblen, kdb->kdbLen);
 			STCOMPX2(nkeys, kdb->nkeys);
 		} else if (fcd->kdbPtr == NULL) {
-			nkeys = 0;
+			nkeys = 16;
 			kdblen = sizeof(KDB) - sizeof(kdb->key) + (sizeof(KDB_KEY) * nkeys) + (sizeof(EXTKEY) * keycomp);
-			fcd->kdbPtr = kdb = cob_malloc(kdblen + sizeof(EXTKEY));
+			nkeys = 0;
+			fcd->kdbPtr = kdb = cob_cache_malloc(kdblen + sizeof(EXTKEY));
 			STCOMPX2(kdblen, kdb->kdbLen);
 			STCOMPX2(nkeys, kdb->nkeys);
 		} else {
@@ -229,19 +248,21 @@ update_fcd_to_file (FCD3* fcd, cob_file *f, cob_field *fnstatus, int wasOpen)
 {
 	int status;
 
-	cobglobptr->cob_error_file = f;
-	if (isdigit(fcd->fileStatus[0])) {
-		cob_set_exception (status_exception[(fcd->fileStatus[0] - '0')]);
-	} else {
-		cobglobptr->cob_exception_code = 0;
+	if (wasOpen >= 0) {
+		cobglobptr->cob_error_file = f;
+		if (isdigit(fcd->fileStatus[0])) {
+			cob_set_exception (status_exception[(fcd->fileStatus[0] - '0')]);
+		} else {
+			cobglobptr->cob_exception_code = 0;
+		}
+		if (f->file_status) {
+			memcpy(f->file_status, fcd->fileStatus, 2);
+		}
+		if (fnstatus) {
+			memcpy(fnstatus->data, fcd->fileStatus, 2);
+		}
 	}
-	if (f->file_status) {
-		memcpy(f->file_status, fcd->fileStatus, 2);
-	}
-	if (fnstatus) {
-		memcpy(fnstatus->data, fcd->fileStatus, 2);
-	}
-	if (wasOpen) {
+	if (wasOpen > 0) {
 		if((fcd->openMode & OPEN_NOT_OPEN))
 			f->open_mode = 0;
 		else if((fcd->openMode&0x7f) == OPEN_INPUT)
@@ -256,6 +277,40 @@ update_fcd_to_file (FCD3* fcd, cob_file *f, cob_field *fnstatus, int wasOpen)
 	f->record_min = LDCOMPX4(fcd->minRecLen);
 	f->record_max = LDCOMPX4(fcd->maxRecLen);
 	f->record->size = LDCOMPX4(fcd->curRecLen);
+
+	if (fcd->gcFlags & MF_CALLFH_TRACE)
+		f->trace_io = 1;
+	else
+		f->trace_io = 0;
+	if (fcd->gcFlags & MF_CALLFH_STATS)
+		f->io_stats = 1;
+	else
+		f->io_stats = 0;
+
+	if((fcd->lockMode & FCD_LOCK_EXCL_LOCK))
+		f->lock_mode = COB_LOCK_EXCLUSIVE;
+	else if((fcd->lockMode & FCD_LOCK_MANU_LOCK))
+		f->lock_mode = COB_LOCK_MANUAL;
+	else if((fcd->lockMode & FCD_LOCK_AUTO_LOCK))
+		f->lock_mode = COB_LOCK_AUTOMATIC;
+
+	if(fcd->fileOrg == ORG_LINE_SEQ) {
+		f->organization = COB_ORG_LINE_SEQUENTIAL;
+#ifdef	_WIN32
+		f->file_features |= COB_FILE_LS_CRLF;
+#else
+		if((fcd->fstatusType & MF_FST_CRdelim))
+			f->file_features |= COB_FILE_LS_CRLF;
+		else
+			f->file_features |= COB_FILE_LS_LF;
+#endif
+		if((fcd->fstatusType & MF_FST_InsertNulls))
+			f->file_features |= COB_FILE_LS_NULLS;
+		if((fcd->fstatusType & MF_FST_NoStripSpaces))
+			f->file_features |= COB_FILE_LS_FIXED;
+	}
+	if (wasOpen < 0)
+		return;
 	status = 0;
 	if(isdigit(fcd->fileStatus[0])) {
 		status = fcd->fileStatus[0] - '0';
@@ -268,14 +323,54 @@ update_fcd_to_file (FCD3* fcd, cob_file *f, cob_field *fnstatus, int wasOpen)
 	cob_file_save_status (f, fnstatus, status);
 }
 
+static void
+copy_keys_fcd_to_file (FCD3 *fcd, cob_file *f)
+{
+	int		k, p, parts, off;
+	EXTKEY	*key;
+	for (k=0; k < (int)f->nkeys; k++) {
+		parts = LDCOMPX2(fcd->kdbPtr->key[k].count);
+		off   = LDCOMPX2(fcd->kdbPtr->key[k].offset);
+		key   = (EXTKEY*) ((char*)(fcd->kdbPtr) + off);
+		if (fcd->kdbPtr->key[k].keyFlags & KEY_SPARSE) {
+			f->keys[k].char_suppress = fcd->kdbPtr->key[k].sparse;
+			f->keys[k].tf_suppress = 1;
+		} else {
+			f->keys[k].tf_suppress = 0;
+		}
+		if (fcd->kdbPtr->key[k].keyFlags & KEY_DUPS) {
+			f->keys[k].tf_duplicates = 1;
+		} else {
+			f->keys[k].tf_duplicates = 0;
+		}
+		f->keys[k].count_components = parts;
+		if (f->keys[k].offset == 0)
+			f->keys[k].offset = LDCOMPX4(key->pos);
+		if(f->keys[k].field == NULL
+		|| f->keys[k].offset != LDCOMPX4(key->pos)
+		|| (parts == 1 && f->keys[k].field->size != LDCOMPX4(key->len))) {
+			f->keys[k].field = cob_cache_malloc(sizeof(cob_field));
+			f->keys[k].field->data = f->record->data + LDCOMPX4(key->pos);
+			f->keys[k].field->attr = &alnum_attr;
+			f->keys[k].field->size = LDCOMPX4(key->len);
+			f->keys[k].offset = LDCOMPX4(key->pos);
+		}
+		for (p=0; p < parts; p++) {
+			f->keys[k].component[p] = cob_cache_malloc(sizeof(cob_field));
+			f->keys[k].component[p]->data = f->record->data + LDCOMPX4(key->pos);
+			f->keys[k].component[p]->attr = &alnum_attr;
+			f->keys[k].component[p]->size = LDCOMPX4(key->len);
+			key   = (EXTKEY*) ((char*)(key) + sizeof(EXTKEY));
+		}
+	}
+}
 /*
  * Copy 'FCD' to 'cob_file' based information
  */
 static void
 copy_fcd_to_file (FCD3* fcd, cob_file *f)
 {
-	int		k, p, parts, off;
-	EXTKEY	*key;
+	int	k;
 
 	if(fcd->accessFlags == ACCESS_SEQ)
 		f->access_mode = COB_ACCESS_SEQUENTIAL;
@@ -293,13 +388,6 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 		f->flag_line_adv = 1;
 	else
 		f->flag_line_adv = 0;
-
-	if((fcd->lockMode & FCD_LOCK_EXCL_LOCK))
-		f->lock_mode = COB_LOCK_EXCLUSIVE;
-	else if((fcd->lockMode & FCD_LOCK_MANU_LOCK))
-		f->lock_mode = COB_LOCK_MANUAL;
-	else if((fcd->lockMode & FCD_LOCK_AUTO_LOCK))
-		f->lock_mode = COB_LOCK_AUTOMATIC;
 
 	if(fcd->fileOrg == ORG_INDEXED) {
 		f->organization = COB_ORG_INDEXED;
@@ -327,7 +415,7 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 
 	/* Allocate cob_file fields as needed and copy from FCD */
 	if (f->record == NULL) {
-		f->record = cob_malloc(sizeof(cob_field));
+		f->record = cob_cache_malloc(sizeof(cob_field));
 		f->record->data = fcd->recPtr;
 		f->record->size = LDCOMPX4(fcd->curRecLen);
 		f->record->attr = &alnum_attr;
@@ -335,14 +423,15 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 		f->record_max = LDCOMPX4(fcd->maxRecLen);
 	}
 	if (f->file_status == NULL) {
-		f->file_status = cob_malloc( 6 );
+		f->file_status = cob_cache_malloc( 6 );
 	}
-	if (f->assign == NULL) {
-		f->assign = cob_malloc(sizeof(cob_field));
+	if (f->assign == NULL
+	|| (f->fcd && fcd->fnamePtr)) {
+		f->assign = cob_cache_malloc(sizeof(cob_field));
 		f->assign->data = (unsigned char*)fcd->fnamePtr;
 		f->assign->size = LDCOMPX2(fcd->fnameLen);
 		f->assign->attr = &alnum_attr;
-	}
+	} 
 	if (f->select_name == NULL) {
 		char	fdname[49];
 		f->select_name = (char*)f->assign->data;
@@ -359,7 +448,7 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 	}
 	if (f->keys == NULL) {
 		if (fcd->kdbPtr != NULL
-		 && fcd->kdbPtr->nkeys > 0) {
+		 && LDCOMPX2(fcd->kdbPtr->nkeys) > 0) {
 			/* Copy Key information from FCD to cob_file */
 			f->nkeys = LDCOMPX2(fcd->kdbPtr->nkeys);
 			if (f->nkeys > MAX_FILE_KEYS) {
@@ -368,48 +457,16 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 					(int)f->nkeys, MAX_FILE_KEYS, cob_get_filename_print (f->file, 0));
 				f->nkeys = MAX_FILE_KEYS;
 			}
-			f->keys = cob_malloc (sizeof(cob_file_key) * f->nkeys);
-			for (k=0; k < (int)f->nkeys; k++) {
-				parts = LDCOMPX2(fcd->kdbPtr->key[k].count);
-				off   = LDCOMPX2(fcd->kdbPtr->key[k].offset);
-				key   = (EXTKEY*) ((char*)(fcd->kdbPtr) + off);
-				if (fcd->kdbPtr->key[k].keyFlags & KEY_SPARSE) {
-					f->keys[k].char_suppress = fcd->kdbPtr->key[k].sparse;
-					f->keys[k].tf_suppress = 1;
-				} else {
-					f->keys[k].tf_suppress = 0;
-				}
-				if (fcd->kdbPtr->key[k].keyFlags & KEY_DUPS) {
-					f->keys[k].tf_duplicates = 1;
-				} else {
-					f->keys[k].tf_duplicates = 0;
-				}
-				f->keys[k].count_components = parts;
-				f->keys[k].field = cob_malloc(sizeof(cob_field));
-				f->keys[k].field->data = f->record->data + LDCOMPX4(key->pos);
-				f->keys[k].field->attr = &alnum_attr;
-				f->keys[k].field->size = LDCOMPX4(key->len);
-				f->keys[k].offset = LDCOMPX4(key->pos);
-				for (p=0; p < parts; p++) {
-					f->keys[k].component[p] = cob_malloc(sizeof(cob_field));
-					f->keys[k].component[p]->data = f->record->data + LDCOMPX4(key->pos);
-					f->keys[k].component[p]->attr = &alnum_attr;
-					f->keys[k].component[p]->size = LDCOMPX4(key->len);
-					key   = (EXTKEY*) ((char*)(key) + sizeof(EXTKEY));
-				}
-			}
+			f->keys = cob_cache_malloc (sizeof(cob_file_key) * f->nkeys);
+			copy_keys_fcd_to_file (fcd, f);
 		} else {
-			f->keys = cob_malloc(sizeof(cob_file_key));
+			f->keys = cob_cache_malloc(sizeof(cob_file_key));
 		}
+	} else if (f->nkeys > 0
+			 && fcd->kdbPtr != NULL
+			 && LDCOMPX2(fcd->kdbPtr->nkeys) >= f->nkeys) {
+		copy_keys_fcd_to_file (fcd, f);
 	}
-	if (fcd->gcFlags & MF_CALLFH_TRACE)
-		f->trace_io = 1;
-	else
-		f->trace_io = 0;
-	if (fcd->gcFlags & MF_CALLFH_STATS)
-		f->io_stats = 1;
-	else
-		f->io_stats = 0;
 	update_fcd_to_file (fcd, f, NULL, 0);
 }
 
@@ -425,9 +482,9 @@ find_fcd (cob_file *f)
 		if(ff->f == f)
 			return ff->fcd;
 	}
-	fcd = cob_malloc(sizeof(FCD3));
+	fcd = cob_cache_malloc(sizeof(FCD3));
 	copy_file_to_fcd(f, fcd);
-	ff = cob_malloc(sizeof(struct fcd_file));
+	ff = cob_cache_malloc(sizeof(struct fcd_file));
 	ff->next = fcd_file_list;
 	ff->fcd = fcd;
 	ff->f = f;
@@ -449,10 +506,10 @@ find_file (FCD3 *fcd)
 			return ff->f;
 		}
 	}
-	f = cob_malloc(sizeof(cob_file));
+	f = cob_cache_malloc(sizeof(cob_file));
 	f->file_version = COB_FILE_VERSION;
 	copy_fcd_to_file(fcd, f);
-	ff = cob_malloc(sizeof(struct fcd_file));
+	ff = cob_cache_malloc(sizeof(struct fcd_file));
 	ff->next = fcd_file_list;
 	ff->fcd = fcd;
 	ff->f = f;
@@ -586,12 +643,12 @@ cob_extfh_close (
 				fcd_file_list = ff->next;
 			if (ff->free_fcd) {
 				if (ff->fcd->fnamePtr != NULL)
-					cob_free ((void*)(ff->fcd->fnamePtr));
-				cob_free((void*)ff->fcd);
+					cob_cache_free ((void*)(ff->fcd->fnamePtr));
+				cob_cache_free((void*)ff->fcd);
 			} else {
-				cob_free((void*)ff->f);
+				cob_cache_free((void*)ff->f);
 			}
-			cob_free((void*)ff);
+			cob_cache_free((void*)ff);
 			break;
 		}
 		pff = ff;
@@ -855,6 +912,82 @@ cob_sys_extfh (const void *opcode_ptr, void *fcd_ptr)
 	}
 
 	return EXTFH ((unsigned char *)opcode_ptr, fcd);
+}
+
+/* 
+ * Sync FCD3 values to cob_file values
+ */
+void
+cob_fcd_file_sync (cob_file *f, char *file_open_name)
+{
+	if (f == NULL
+	 || f->fcd == NULL) 
+		return;
+	if (f->last_operation == COB_LAST_OPEN) {
+		copy_fcd_to_file (f->fcd, f);
+		if (f->fcd && f->fcd->fnamePtr)
+			strncpy(file_open_name, f->fcd->fnamePtr, LDCOMPX2(f->fcd->fnameLen));
+	} else {
+		update_fcd_to_file (f->fcd, f, NULL, -1);
+	}
+	return;
+}
+
+/* 
+ * Sync cob_file values to FCD3 values
+ */
+void
+cob_file_fcd_sync (cob_file *f)
+{
+	if (f == NULL
+	 || f->fcd == NULL) 
+		return;
+	if (f->last_operation == COB_LAST_OPEN)
+		copy_file_to_fcd (f, f->fcd);
+	else
+		update_file_to_fcd(f, f->fcd, NULL);
+	return;
+}
+/* 
+ * Return address of FH--FCD for the given file
+ * Create the FCD3 is needed
+ */
+void
+cob_file_fcd_adrs (cob_file *f, void *pfcd)
+{
+	FCD3	*fcd = NULL;
+	if (f == NULL) {
+		cob_runtime_error (_("SET ... TO ADDRESS OF FH--FCD filename; Null"));
+		exit(-1);
+	}
+	if (f->fcd == NULL) {
+		f->fcd = find_fcd (f);
+	}
+	fcd = f->fcd;
+	if(fcd->openMode == OPEN_NOT_OPEN) {
+		cob_pre_open (f);
+	}
+	if (fcd->kdbPtr == NULL)
+		copy_file_to_fcd (f, fcd);
+	memcpy (pfcd, &f->fcd, sizeof(void *));
+	return;
+}
+
+/* 
+ * Return address of FH--KEYDEF for the given file
+ * Create the FCD3 is needed
+ */
+void
+cob_file_fcdkey_adrs (cob_file *f, void *pkey)
+{
+	FCD3	*fcd = NULL;
+	if (f == NULL) {
+		cob_runtime_error (_("SET ... TO ADDRESS OF FH--KEYDEF filename; Null"));
+		exit(-1);
+	}
+	cob_file_fcd_adrs (f, &fcd);
+	memcpy (pkey, &f->fcd->kdbPtr, sizeof(void *));
+	return;
 }
 
 /*

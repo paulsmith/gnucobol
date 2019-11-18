@@ -39,7 +39,9 @@
 
 #include "fileio.h"
 #ifdef HAVE_DLFCN_H
+#if defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
 #include <dlfcn.h>
+#endif
 #endif
 
 struct file_list {
@@ -2137,6 +2139,8 @@ cob_file_save_status (cob_file *f, cob_field *fnstatus, const int status)
 			}
 		}
 	}
+	if (f->fcd)
+		cob_file_fcd_sync (f);			/* Copy cob_file to app's FCD */
 	f->last_operation = 0;				/* Avoid double count/trace */
 }
 
@@ -4241,10 +4245,51 @@ cob_unlock_file (cob_file *f, cob_field *fnstatus)
 	cob_file_save_status (f, fnstatus, COB_STATUS_00_SUCCESS);
 }
 
+/*
+ * Prepare for Open of data file; Used by fextfh.c
+ */
+void
+cob_pre_open (cob_file *f)
+{
+	f->flag_file_map = 0;
+	f->flag_nonexistent = 0;
+	f->flag_end_of_file = 0;
+	f->flag_begin_of_file = 0;
+	f->flag_first_read = 2;
+	f->flag_operation = 0;
+	f->lock_mode &= ~COB_LOCK_OPEN_EXCLUSIVE;
+	f->record_off = 0;
+
+	cob_set_file_defaults (f);
+
+	/* Obtain the file name */
+	if (f->assign != NULL
+	 && f->assign->data != NULL) {
+		cob_field_to_string (f->assign, file_open_name, (size_t)COB_FILE_MAX);
+
+		f->flag_file_map = 1;
+		cob_chk_file_mapping (f);
+
+		cob_set_file_format (f, file_open_io_env, 1, NULL);
+	}
+
+	if (f->organization == COB_ORG_INDEXED
+	 && f->flag_auto_type) {
+		int		ftype;
+		ftype = indexed_file_type (file_open_name);
+		if(ftype >= 0) {
+			f->record_min = f->record_max;
+			f->io_routine = ftype;
+		}
+	}
+}
+
+/*
+ * Open the data file
+ */
 void
 cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 {
-	int		ftype;
 	if (f->file_version != COB_FILE_VERSION) {
 		cob_runtime_error (_("ERROR FILE %s does not match current version; Recompile the program"),
 							f->select_name);
@@ -4267,17 +4312,12 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 	}
 
 	f->last_open_mode = mode;
-	f->flag_file_map = 0;
-	f->flag_nonexistent = 0;
-	f->flag_end_of_file = 0;
-	f->flag_begin_of_file = 0;
-	f->flag_first_read = 2;
-	f->flag_operation = 0;
-	f->lock_mode &= ~COB_LOCK_OPEN_EXCLUSIVE;
 	f->share_mode = sharing;
-	f->record_off = 0;
 
-	cob_set_file_defaults (f);
+	if (f->fcd)
+		cob_fcd_file_sync (f, file_open_name);		/* Copy app's FCD to cob_file */
+
+	cob_pre_open (f);
 
 	if (unlikely (COB_FILE_STDIN (f))) {
 		if (mode != COB_OPEN_INPUT) {
@@ -4313,24 +4353,7 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 		return;
 	}
 
-	/* Obtain the file name */
-	cob_field_to_string (f->assign, file_open_name, (size_t)COB_FILE_MAX);
-
-	f->flag_file_map = 1;
-	cob_chk_file_mapping (f);
-
 	cob_cache_file (f);
-
-	cob_set_file_format (f, file_open_io_env, 1, NULL);
-
-	if (f->organization == COB_ORG_INDEXED
-	 && f->flag_auto_type) {
-		ftype = indexed_file_type (file_open_name);
-		if(ftype >= 0) {
-			f->record_min = f->record_max;
-			f->io_routine = ftype;
-		}
-	}
 
 	/* Open the file */
 	cob_file_save_status (f, fnstatus,

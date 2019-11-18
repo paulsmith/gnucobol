@@ -125,7 +125,7 @@ struct indexed_file {
 	unsigned char	*saverec;	/* For saving copy of record */
 	DBT		key;
 	DBT		data;
-	size_t		key_index;
+	int		key_index;
 	unsigned int	bdb_lock_id;
 	int		write_cursor_open;
 	int		filenamelen;
@@ -209,9 +209,7 @@ bdb_savekey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx
 		}
 		return totlen;
 	}
-	memcpy (keyarea,
-		record + (f->keys[idx].field->data - f->record->data),
-		f->keys[idx].field->size);
+	memcpy (keyarea, record + f->keys[idx].offset, f->keys[idx].field->size);
 	return f->keys[idx].field->size;
 }
 
@@ -261,9 +259,7 @@ bdb_cmpkey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx,
 		return 0;
 	}
 	cl = partlen > (int)(f->keys[idx].field->size) ? (int)(f->keys[idx].field->size) : partlen;
-	return memcmp (keyarea,
-			record  + (f->keys[idx].field->data - f->record->data),
-			cl);
+	return memcmp (keyarea, record + f->keys[idx].offset, cl);
 }
 
 /* Is given key data all SUPPRESS char,
