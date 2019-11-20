@@ -2267,6 +2267,10 @@ typedef struct __fcd3 {
 #define MF_FF_COBOL			3		/* IDXFORMAT"3" format (COBOL2) */
 #define MF_FF_IDX4			4		/* IDXFORMAT"4" format */
 #define MF_FF_IDX8			8		/* IDXFORMAT"8" format (BIG) */
+#define MF_FF_DISAM			16		/* D-ISAM format */
+#define MF_FF_VBISAM		17		/* VB-ISAM format */
+#define MF_FF_BDB			18		/* BDB format for INDEXED file */
+#define MF_FF_LMDB			19		/* LMDB format for INDEXED file */
 	unsigned char	deviceFlag;		
 	unsigned char	lockAction;		
 	unsigned char	compType;			/* data compression type */

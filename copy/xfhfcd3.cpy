@@ -57,9 +57,13 @@
       *>      78                               value 13.
               78 fcd--format-heap              value 14.
               78 fcd--format-esds              value 15.
+              78 fcd--format-disam             value 16.
+              78 fcd--format-vbisam            value 17.
+              78 fcd--format-bdb               value 18.
+              78 fcd--format-lmdb              value 19.
               78 fcd--format-qsamv             value 255.
       *>         1 greater than max permissible format:
-              78 fcd--max-file-format          value 16.
+              78 fcd--max-file-format          value 20.
 
            40  FCD-DEVICE-FLAG       Pic x comp-x.
               78 fcd--dev-normal               value 0.

@@ -1,4 +1,7 @@
 
+2019-11-20  Ron Norman <rjn@inglenet.com>
+	* xfhfcd3.cpy: Added file format values for DISAM, VBISAM, BDB, LMDB
+
 2019-04-17  Simon Sobisch <simonsobisch@gnu.org>
 
 	* screenio.cpy: added exception values for mouse and

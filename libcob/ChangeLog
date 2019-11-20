@@ -1,4 +1,12 @@
 
+2019-11-20  Ron Norman <rjn@inglenet.com>
+
+	* common.h,fileio.c,fextfh.c: Added more file format to FCD3
+	        and check/set the value in cob_file
+			so the COBOL program can change file format via the FCD
+	* fileio.c: Tidy up Variable Sequential file processing code
+	* fisam.c: Fix coding error related to status 21 on WRITE
+
 2019-11-18  Ron Norman <rjn@inglenet.com>
 
 	* common.h,fileio.c,fextfh.c,fbdb.c: Updates to support 

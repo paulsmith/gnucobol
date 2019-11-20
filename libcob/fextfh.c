@@ -93,6 +93,24 @@ update_file_to_fcd (cob_file *f, FCD3 *fcd, unsigned char *fnstatus)
 		if((f->file_features & COB_FILE_LS_FIXED))
 			fcd->fstatusType |= MF_FST_NoStripSpaces;
 	}
+	if (f->organization == COB_ORG_INDEXED) {
+		fcd->fileOrg = ORG_INDEXED;
+		fcd->fileFormat = MF_FF_CISAM;
+		if (f->io_routine == COB_IO_VBISAM)
+			fcd->fileFormat = MF_FF_VBISAM;
+#ifdef WITH_DISAM
+		else if (f->io_routine == COB_IO_DISAM)
+			fcd->fileFormat = MF_FF_DISAM;
+#endif
+#ifdef WITH_DB
+		else if (f->io_routine == COB_IO_BDB)
+			fcd->fileFormat = MF_FF_BDB;
+#endif
+#ifdef WITH_LMDB
+		else if (f->io_routine == COB_IO_LMDB)
+			fcd->fileFormat = MF_FF_LMDB;
+#endif
+	}
 }
 
 /*
@@ -391,6 +409,30 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 
 	if(fcd->fileOrg == ORG_INDEXED) {
 		f->organization = COB_ORG_INDEXED;
+		if (fcd->fileFormat == MF_FF_DEFAULT) {
+#ifdef WITH_INDEXED
+			f->io_routine = WITH_INDEXED;
+#elif WITH_CISAM
+			f->io_routine = COB_IO_CISAM;
+#elif WITH_DISAM
+			f->io_routine = COB_IO_DISAM;
+#elif WITH_VBISAM
+			f->io_routine = COB_IO_VBISAM;
+#elif WITH_DB
+			f->io_routine = COB_IO_BDB;
+#elif WITH_LMDB
+			f->io_routine = COB_IO_LMDB;
+#endif
+		} else if (fcd->fileFormat == MF_FF_CISAM)
+			f->io_routine = COB_IO_CISAM;
+		else if (fcd->fileFormat == MF_FF_DISAM)
+			f->io_routine = COB_IO_DISAM;
+		else if (fcd->fileFormat == MF_FF_VBISAM)
+			f->io_routine = COB_IO_VBISAM;
+		else if (fcd->fileFormat == MF_FF_BDB)
+			f->io_routine = COB_IO_BDB;
+		else if (fcd->fileFormat == MF_FF_LMDB)
+			f->io_routine = COB_IO_LMDB;
 	} else if(fcd->fileOrg == ORG_SEQ) {
 		f->organization = COB_ORG_SEQUENTIAL;
 	} else if(fcd->fileOrg == ORG_LINE_SEQ) {

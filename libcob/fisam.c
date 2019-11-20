@@ -1429,7 +1429,7 @@ isam_write (cob_file_api *a, cob_file *f, const int opt)
 		return COB_STATUS_48_OUTPUT_DENIED;
 	}
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL
-	 && f->open_mode != COB_OPEN_OUTPUT
+	 && f->open_mode == COB_OPEN_OUTPUT
 	 && indexed_cmpkey(fh, f->record->data, 0, 0) <= 0) {
 		return COB_STATUS_21_KEY_INVALID;
 	}

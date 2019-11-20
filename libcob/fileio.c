@@ -931,6 +931,30 @@ cob_set_file_defaults (cob_file *f)
 	 */
 	if (f->organization == COB_ORG_INDEXED) {
 		f->io_routine = ix_routine;
+		if (f->fcd) {
+			if (f->fcd->fileFormat == MF_FF_CISAM)
+#ifdef WITH_CISAM
+				f->io_routine = COB_IO_CISAM
+#else
+				f->io_routine = ix_routine;
+#endif
+#ifdef WITH_DISAM
+			else if (f->fcd->fileFormat == MF_FF_DISAM)
+				f->io_routine = COB_IO_DISAM;
+#endif
+#ifdef WITH_VBISAM
+			else if (f->fcd->fileFormat == MF_FF_VBISAM)
+				f->io_routine = COB_IO_VBISAM;
+#endif
+#ifdef WITH_DB
+			else if (f->fcd->fileFormat == MF_FF_BDB)
+				f->io_routine = COB_IO_BDB;
+#endif
+#ifdef WITH_LMDB
+			else if (f->fcd->fileFormat == MF_FF_LMDB)
+				f->io_routine = COB_IO_LMDB;
+#endif
+		}
 	} else if (f->organization == COB_ORG_SEQUENTIAL) {
 		f->io_routine = COB_IO_SEQUENTIAL;
 	} else if (f->organization == COB_ORG_RELATIVE) {
@@ -1508,7 +1532,8 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 	if (f->organization == COB_ORG_SEQUENTIAL) {
 		f->record_slot = f->record_max + f->record_prefix;
 		if(f->record_min != f->record_max) {
-			if(f->file_format == COB_FILE_IS_GCVS0
+			if(f->file_format == COB_FILE_IS_GC
+			|| f->file_format == COB_FILE_IS_GCVS0
 			|| f->file_format == COB_FILE_IS_GCVS1
 			|| f->file_format == COB_FILE_IS_GCVS2) {
 				f->record_prefix = 4;
@@ -2879,15 +2904,17 @@ sequential_read (cob_file_api *a, cob_file *f, const int read_opts)
 		}
 		switch (f->file_format) {
 		case COB_FILE_IS_GC:
-		case 0:
-		case 3:
+		case COB_FILE_IS_GCVS0:		/* short size plus 2 NULs */
 			f->record->size = COB_MAYSWAP_16 (recsize.sshort[0]);
 			break;
-		case 1:
+		case COB_FILE_IS_GCVS1:
 			f->record->size = COB_MAYSWAP_32 (recsize.sint);
 			break;
-		case 2:
+		case COB_FILE_IS_GCVS2:
 			f->record->size = recsize.sint;
+			break;
+		case COB_FILE_IS_GCVS3:
+			f->record->size = COB_MAYSWAP_16 (recsize.sshort[0]);
 			break;
 		case COB_FILE_IS_B32:		/* Was varseq 2 on Big Endian system */
 			f->record->size = LDCOMPX4(recsize.sbuff);
@@ -2965,11 +2992,18 @@ sequential_write (cob_file_api *a, cob_file *f, const int opt)
 
 		recsize.sint = 0;
 		switch (f->file_format) {
-		case 1:
+		case COB_FILE_IS_GC:
+		case COB_FILE_IS_GCVS0:
+			recsize.sshort[0] = COB_MAYSWAP_16 (f->record->size);
+			break;
+		case COB_FILE_IS_GCVS1:
 			recsize.sint = COB_MAYSWAP_32 (f->record->size);
 			break;
-		case 2:
+		case COB_FILE_IS_GCVS2:
 			recsize.sint = f->record->size;
+			break;
+		case COB_FILE_IS_GCVS3:
+			recsize.sshort[0] = COB_MAYSWAP_16 (f->record->size);
 			break;
 		case COB_FILE_IS_B32:		/* Was varseq 2 on Big Endian system */
 			STCOMPX4(f->record->size, recsize.sbuff);
@@ -3052,15 +3086,17 @@ sequential_rewrite (cob_file_api *a, cob_file *f, const int opt)
 		}
 		switch (f->file_format) {
 		case COB_FILE_IS_GC:
-		case 0:
-		case 3:
+		case COB_FILE_IS_GCVS0:
 			rcsz = COB_MAYSWAP_16 (recsize.sshort[0]);
 			break;
-		case 1:
+		case COB_FILE_IS_GCVS1:
 			rcsz = COB_MAYSWAP_32 (recsize.sint);
 			break;
-		case 2:
+		case COB_FILE_IS_GCVS2:
 			rcsz = recsize.sint;
+			break;
+		case COB_FILE_IS_GCVS3:
+			rcsz = COB_MAYSWAP_16 (recsize.sshort[0]);
 			break;
 		case COB_FILE_IS_B32:		/* Was varseq 2 on Big Endian system */
 			rcsz = LDCOMPX4(recsize.sbuff);
