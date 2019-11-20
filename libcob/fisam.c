@@ -1430,6 +1430,7 @@ isam_write (cob_file_api *a, cob_file *f, const int opt)
 	}
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL
 	 && f->open_mode == COB_OPEN_OUTPUT
+	 && !f->flag_set_isam
 	 && indexed_cmpkey(fh, f->record->data, 0, 0) <= 0) {
 		return COB_STATUS_21_KEY_INVALID;
 	}

@@ -1,6 +1,13 @@
 
 2019-11-20  Ron Norman <rjn@inglenet.com>
 
+	* common.h,fileio.c,fisam.c: Added flag_set_isam to cob_file
+	        and if set, then ignore sequence of keys when writing
+			to an output SEQUENTIAL INDEXED file
+			This is needed to runtime change file type to INDEXED
+
+2019-11-20  Ron Norman <rjn@inglenet.com>
+
 	* common.h,fileio.c,fextfh.c: Added more file format to FCD3
 	        and check/set the value in cob_file
 			so the COBOL program can change file format via the FCD

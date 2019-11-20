@@ -1173,6 +1173,7 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 				 &&	f->access_mode == COB_ACCESS_SEQUENTIAL) {
 					if(strcasecmp(value,"IX") == 0) {
 						f->organization = COB_ORG_INDEXED;
+						f->flag_set_isam = 1;
 					} else if(strcasecmp(value,"RL") == 0) {
 						f->organization = COB_ORG_RELATIVE;
 					} else if(strcasecmp(value,"SQ") == 0) {
@@ -1233,6 +1234,7 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 							cob_runtime_error (_("I/O routine %s is not present for %s"),
 												io_rtn_name[j],file_open_env);
 						} else {
+							f->flag_set_isam = 1;
 							f->io_routine = j;
 						}
 						break;
