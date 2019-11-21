@@ -1906,8 +1906,10 @@ ix_bdb_write (cob_file_api *a, cob_file *f, const int opt)
 	bdb_setkey (f, 0);
 	if (!p->last_key) {
 		p->last_key = cob_malloc ((size_t)p->maxkeylen);
-	} else if (f->access_mode == COB_ACCESS_SEQUENTIAL &&
-		   memcmp (p->last_key, p->key.data, (size_t)p->key.size) > 0) {
+	} else if (f->access_mode == COB_ACCESS_SEQUENTIAL
+			 && f->open_mode == COB_OPEN_OUTPUT
+			 && !f->flag_set_isam
+			 && memcmp (p->last_key, p->key.data, (size_t)p->key.size) > 0) {
 		return COB_STATUS_21_KEY_INVALID;
 	}
 	memcpy (p->last_key, p->key.data, (size_t)p->key.size);
