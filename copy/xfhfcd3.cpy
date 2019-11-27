@@ -61,9 +61,11 @@
               78 fcd--format-vbisam            value 17.
               78 fcd--format-bdb               value 18.
               78 fcd--format-lmdb              value 19.
+              78 fcd--format-odbc              value 20.
+              78 fcd--format-oci               value 21.
               78 fcd--format-qsamv             value 255.
       *>         1 greater than max permissible format:
-              78 fcd--max-file-format          value 20.
+              78 fcd--max-file-format          value 22.
 
            40  FCD-DEVICE-FLAG       Pic x comp-x.
               78 fcd--dev-normal               value 0.

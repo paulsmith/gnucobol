@@ -428,6 +428,9 @@ extern struct cob_time		current_compile_time;
 extern struct tm			current_compile_tm;
 
 extern const char		*cob_config_dir;
+extern const char		*cob_schema_dir;
+extern const char		*cb_sqldb_name;
+extern const char		*cb_sqldb_schema;
 
 extern unsigned int		cobc_gen_listing;
 
@@ -458,6 +461,9 @@ extern struct cb_field		*external_defined_fields_ws;
 extern struct cb_field		*external_defined_fields_global;
 
 /* Functions */
+
+/* field.c */
+extern void     cb_save_xfd (char *);
 
 /* cobc.c */
 

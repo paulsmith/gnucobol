@@ -879,10 +879,12 @@ enum cob_exception_id {
 #define COB_IO_IXEXT 		8	/* INDEXED via Local old style WITH_INDEX_EXTFH */
 #define COB_IO_SQEXT 		9	/* SEQUENTIAL via old style WITH_SEQRA_EXTFH */
 #define COB_IO_RLEXT 		10	/* RELATIVE via old style WITH_SEQRA_EXTFH */
-#define COB_IO_MAX			11 
+#define COB_IO_ODBC			11	/* INDEXED via ODBC */
+#define COB_IO_OCI			12	/* INDEXED via OCI */
+#define COB_IO_MAX			13 
 /* Not yet implemented */
-#define COB_IO_MFIDX4		11	/* Micro Focus IDX4 format */
-#define COB_IO_MFIDX8		12	/* Micro Focus IDX8 format */
+#define COB_IO_MFIDX4		13	/* Micro Focus IDX4 format */
+#define COB_IO_MFIDX8		14	/* Micro Focus IDX8 format */
 
 /* Access mode */
 
@@ -1482,6 +1484,7 @@ typedef struct __cob_file {
 	cob_io_stats		stats[6];		/* I/O Counts by 'operation' type */
 
 	struct __fcd3		*fcd;			/* FCD created via SET ... TO ADDRESS OF FH--FCD */
+	const char			*xfdname;
 } cob_file;
 
 
@@ -2272,6 +2275,8 @@ typedef struct __fcd3 {
 #define MF_FF_VBISAM		17		/* VB-ISAM format */
 #define MF_FF_BDB			18		/* BDB format for INDEXED file */
 #define MF_FF_LMDB			19		/* LMDB format for INDEXED file */
+#define MF_FF_ODBC			20		/* ODBC format for INDEXED file */
+#define MF_FF_OCI			21		/* OCI format for INDEXED file */
 	unsigned char	deviceFlag;		
 	unsigned char	lockAction;		
 	unsigned char	compType;			/* data compression type */
@@ -2473,6 +2478,7 @@ COB_EXPIMP void	cob_file_external_addr (const char *,
 				 const int nkeys, const int linage);
 COB_EXPIMP void	cob_file_malloc (cob_file **, cob_file_key **,
 				 const int nkeys, const int linage);
+COB_EXPIMP void	cob_file_xfdname (cob_file *, const char *);
 COB_EXPIMP void	cob_file_free   (cob_file **, cob_file_key **);
 COB_EXPIMP void cob_commit		(void);
 COB_EXPIMP void cob_rollback	(void);

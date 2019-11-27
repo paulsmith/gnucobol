@@ -75,6 +75,9 @@ static int ppwrap (void) {
 
 #include <config.h>
 
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 #ifdef	HAVE_UNISTD_H
 #include <unistd.h>
 #else
@@ -678,6 +681,9 @@ CONTROL_STATEMENT_STATE>{
   /*"AS"			{ - not available with MF compilers -
 	return AS;
   }*/
+  "XFD"		{
+	return XFD;
+  }
   {DEFNUM_LITERAL} |
   {ALNUM_LITERAL} |
   {SET_PAREN_LIT}	{
@@ -1356,12 +1362,12 @@ is_cobol_word_char (const char c)
 static int
 ppinput (char *buff, const size_t max_size)
 {
-	char	*bp;
+	char	*bp, qt, wrk[256];
 	size_t	gotcr;
 	size_t	line_overflow;
 	size_t	continuation;
 	int	ipchar;
-	int	i;
+	int	i,k;
 	int	n;
 	int	coln;
 	struct list_skip *skip;
@@ -1562,6 +1568,51 @@ start:
 			   as directives otherwise */
 		if (cb_flag_acucomment && buff[6] == '$') {
 			buff[6] = '*';
+		}
+	}
+	/*
+	 * Convert the two forms of XFD into $SET XFD
+	 * for internal processing  
+	 */
+	if (buff[6] == '$') {
+		for(k=7; buff[k] == ' '; k++);
+		if (strncasecmp(&buff[k],"XFD ",4) == 0) {
+			for(k=k+3; buff[k] == ' '; k++);
+			k = sprintf(wrk,"%s",&buff[k]);
+			while(wrk[k-1] == '\n' || wrk[k-1] == '\r')
+				wrk[--k] = 0;
+			qt = strchr(wrk,'"') ? '\'' : '"';
+			for (k=0; wrk[k] != 0; k++) {	/* Remove any 'QT' chars from string */
+				if (wrk[k] == qt)
+					wrk[k] = (qt == '"' ? '\'' : '"');
+			}
+			n = sprintf(buff,"      $SET XFD %c%s%c\n",qt,wrk,qt);
+		}
+	} else
+	if (buff[6] == '*') {
+		for(k=7; isspace(buff[k]); k++);
+		if(memcmp(&buff[k],"((",2) == 0) {
+			k = k + 2;
+			while(isspace(buff[k])) k++;
+			if (strncasecmp(&buff[k],"XFD ",4) == 0) {
+				for(k=k+4; isspace(buff[k]); k++);
+				k = sprintf(wrk,"%s",&buff[k]);
+				while (wrk[k-1] == '\r'
+					|| wrk[k-1] == '\n'
+					|| isspace(wrk[k-1]))
+					wrk[--k] = 0;
+				if(memcmp(&wrk[k-2],"))",2) == 0) {
+					k = k - 2;
+					while (isspace(wrk[k-1])) wrk[--k] = 0;
+					wrk[k] = 0;
+					qt = strchr(wrk,'"') ? '\'' : '"';
+					for (k=0; wrk[k] != 0; k++) {	/* Remove any 'QT' chars from string */
+						if (wrk[k] == qt)
+							wrk[k] = (qt == '"' ? '\'' : '"');
+					}
+					n = sprintf(buff,"      $SET XFD %c%s%c\n",qt,wrk,qt);
+				}
+			}
 		}
 	}
 

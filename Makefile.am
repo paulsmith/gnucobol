@@ -96,6 +96,7 @@ defaults.h: Makefile.am $(top_builddir)/config.status
 	  echo "#define COB_LIBS         \"$(COB_LIBS)\"";		\
 	  echo "#define COB_CONFIG_DIR   \"$(COB_CONFIG_DIR)\"";	\
 	  echo "#define COB_COPY_DIR     \"$(COB_COPY_DIR)\"";		\
+	  echo "#define COB_SCHEMA_DIR   \"$(COB_SCHEMA_DIR)\"";	\
 	  echo "#define COB_LIBRARY_PATH \"$(COB_LIBRARY_PATH)\"";	\
 	  echo "#define COB_BLD_CC       \"$(CC)\"";			\
 	  echo "#define COB_BLD_CPPFLAGS \"$(CPPFLAGS)\"";		\

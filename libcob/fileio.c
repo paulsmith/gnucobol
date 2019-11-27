@@ -28,6 +28,9 @@
  * fisam.c     has the C/D/VB-ISAM interface code for INDEXED files
  * fbdb.c      has the BDB code for INDEXED files
  * flmdb.c     has the LMDB code for INDEXED files
+ * fodbc.c     has the ODBC code for INDEXED files
+ * foci.c      has the OCI (Oracle) code for INDEXED files
+ * fsqlxfd.c   has routines common to ODBC, OCI, BDB, LMDB
  * fextfh.c    has the Microfocus EXTFH code (defacto standard)
  * focextfh.c  has code for obsolete WITH_INDEX_EXTFH/WITH_SEQRA_EXTFH 
  *
@@ -237,6 +240,8 @@ static const char *io_rtn_name[COB_IO_MAX+1] = {
 	"IXEXT",
 	"SQEXT",
 	"RLEXT",
+	"ODBC",
+	"OCI",
 	""
 };
 
@@ -284,6 +289,12 @@ static const char ix_type[12] = "DB";
 #elif	WITH_LMDB
 static const char ix_routine = COB_IO_LMDB;
 static const char ix_type[12] = "LMDB";
+#elif	WITH_ODBC
+static const char ix_routine = COB_IO_ODBC;
+static const char ix_type[12] = "ODBC";
+#elif	WITH_OCI
+static const char ix_routine = COB_IO_OCI;
+static const char ix_type[12] = "OCI";
 #elif	WITH_INDEX_EXTFH
 static const char ix_routine = COB_IO_IXEXT;
 static const char ix_type[12] = "IX";
@@ -945,6 +956,14 @@ cob_set_file_defaults (cob_file *f)
 #ifdef WITH_VBISAM
 			else if (f->fcd->fileFormat == MF_FF_VBISAM)
 				f->io_routine = COB_IO_VBISAM;
+#endif
+#ifdef WITH_ODBC
+			else if (f->fcd->fileFormat == MF_FF_ODBC)
+				f->io_routine = COB_IO_ODBC;
+#endif
+#ifdef WITH_OCI
+			else if (f->fcd->fileFormat == MF_FF_OCI)
+				f->io_routine = COB_IO_OCI;
 #endif
 #ifdef WITH_DB
 			else if (f->fcd->fileFormat == MF_FF_BDB)
@@ -4228,6 +4247,15 @@ cob_file_external_addr (const char *exname,
 }
 
 /*
+ * Save the XFD name for this file
+ */
+void
+cob_file_xfdname (cob_file *fl, const char *name)
+{
+	fl->xfdname = name;
+}
+
+/*
  * Allocate memory for cob_file
  */
 void
@@ -6361,6 +6389,12 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 #endif
 #ifdef	WITH_LMDB
 	cob_lmdb_init_fileio (&file_api);
+#endif
+#ifdef	WITH_ODBC
+	cob_odbc_init_fileio (&file_api);
+#endif
+#ifdef	WITH_OCI
+	cob_oci_init_fileio (&file_api);
 #endif
 
 #if defined(WITH_INDEX_EXTFH)

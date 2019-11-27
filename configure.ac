@@ -81,6 +81,8 @@ AH_TEMPLATE([WITH_IXDFLT], [Default INDEXED file handler])
 AH_TEMPLATE([WITH_SEQRA_EXTFH], [Compile with obsolete external SEQ/RAN handler])
 AH_TEMPLATE([WITH_DB], [Use Berkeley DB library as INDEXED handler])
 AH_TEMPLATE([WITH_LMDB], [Use Lightning Memory-Mapped Database as INDEXED handler])
+AH_TEMPLATE([WITH_ODBC], [Use ODBC for INDEXED file handler])
+AH_TEMPLATE([WITH_OCI], [Use OCI for INDEXED file handler])
 # FIXME: may be specified with different file version
 # AH_TEMPLATE([COB_BDB_BAD_DUPNO], [Retain incorrect duplicate sequence for compatibility on little endian!])
 AH_TEMPLATE([WITH_CISAM], [Use CISAM as INDEXED handler])
@@ -1067,6 +1069,14 @@ AC_ARG_WITH([indexed],
 		with_lmdb=yes
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_LMDB])
 	    AC_DEFINE([WITH_IXDFLT], ["LMDB"]);;
+    odbc)
+		with_odbc=yes
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_ODBC])
+	    AC_DEFINE([WITH_IXDFLT], ["ODBC"]);;
+    oci)
+		with_oci=yes
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_OCI])
+	    AC_DEFINE([WITH_IXDFLT], ["OCI"]);;
 	*)
   	  if test "$with_cisam" = "yes"; then
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_CISAM])
@@ -1083,6 +1093,12 @@ AC_ARG_WITH([indexed],
   	  elif test "$with_lmdb" = "yes"; then
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_LMDB])
 	    AC_DEFINE([WITH_IXDFLT], ["LMDB"])
+  	  elif test "$with_odbc" = "yes"; then
+	    AC_DEFINE([WITH_ODBC], [COB_IO_ODBC])
+	    AC_DEFINE([WITH_IXDFLT], ["ODBC"])
+  	  elif test "$with_oci" = "yes"; then
+	    AC_DEFINE([WITH_OCI], [COB_IO_OCI])
+	    AC_DEFINE([WITH_IXDFLT], ["OCI"])
 	  else
 		AC_MSG_ERROR([--with-indexed=<HANDLER>, must be one of cisam|disam|vbisam|db|lmdb])
 	  fi ;;
@@ -1103,6 +1119,12 @@ AC_ARG_WITH([indexed],
   	  elif test "$with_lmdb" = "yes"; then
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_LMDB])
 	    AC_DEFINE([WITH_IXDFLT], ["LMDB"])
+  	  elif test "$with_odbc" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_ODBC])
+	    AC_DEFINE([WITH_IXDFLT], ["ODBC"])
+  	  elif test "$with_oci" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_OCI])
+	    AC_DEFINE([WITH_IXDFLT], ["OCI"])
 	  fi
   ])
 
@@ -1193,6 +1215,22 @@ AC_ARG_WITH([index-extfh],
   [(GnuCOBOL) Use external ISAM handler (obsolete)])],
 [ if test "$with_index_extfh" = "yes"; then
   AC_DEFINE([WITH_INDEX_EXTFH], [1])
+  fi ],
+[])
+
+AC_ARG_WITH([odbc],
+[AS_HELP_STRING([--with-odbc],
+  [(GnuCOBOL) Use ODBC for INDEXED I/O])],
+[ if test "$with_odbc" = "yes"; then
+  AC_DEFINE([WITH_ODBC], [1])
+  fi ],
+[])
+
+AC_ARG_WITH([oci],
+[AS_HELP_STRING([--with-oci],
+  [(GnuCOBOL) Use Oracle OCI for INDEXED I/O])],
+[ if test "$with_oci" = "yes"; then
+  AC_DEFINE([WITH_OCI], [1])
   fi ],
 [])
 
@@ -1535,6 +1573,7 @@ if test "x$LDFLAGS" != "x"; then
 fi
 
 COB_CONFIG_DIR="$datadir/$PACKAGE_TARNAME/config"
+COB_SCHEMA_DIR="$datadir/$PACKAGE_TARNAME/schema"
 COB_COPY_DIR="$datadir/$PACKAGE_TARNAME/copy"
 COB_LIBRARY_PATH="$libdir/$PACKAGE_TARNAME"
 COB_EXE_EXT="$EXEEXT"
@@ -1705,6 +1744,7 @@ case $host_os in
   mingw*)
 	if test "$prefix" = "NONE"; then
 		COB_CONFIG_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/config"
+		COB_SCHEMA_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/schema"
 		COB_COPY_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/copy"
 	fi
 	if test "$COB_USES_GCC" = "yes"; then
@@ -1826,6 +1866,8 @@ COB_HAS_DISAM=$with_disam
 COB_HAS_VBISAM=$with_vbisam
 COB_HAS_BDB=$with_db
 COB_HAS_LMDB=$with_lmdb
+COB_HAS_ODBC=$with_odbc
+COB_HAS_OCI=$with_oci
 COB_HAS_OCEXTFH=$with_index_extfh
 
 if test "$USE_NCURSES" = "not_found" -o "$USE_NCURSES" = "no"; then
@@ -1882,6 +1924,7 @@ AC_SUBST([COB_CFLAGS])
 AC_SUBST([COB_LDFLAGS])
 AC_SUBST([COB_LIBS])
 AC_SUBST([COB_CONFIG_DIR])
+AC_SUBST([COB_SCHEMA_DIR])
 AC_SUBST([COB_COPY_DIR])
 AC_SUBST([COB_LIBRARY_PATH])
 AC_SUBST([COB_OBJECT_EXT])
@@ -1907,6 +1950,8 @@ AC_SUBST([COB_HAS_DISAM])
 AC_SUBST([COB_HAS_VBISAM])
 AC_SUBST([COB_HAS_BDB])
 AC_SUBST([COB_HAS_LMDB])
+AC_SUBST([COB_HAS_ODBC])
+AC_SUBST([COB_HAS_OCI])
 AC_SUBST([COB_HAS_OCEXTFH])
 AC_SUBST([COB_HAS_CURSES])
 AC_SUBST([COB_HAS_XML2])
@@ -1936,6 +1981,7 @@ AC_MSG_NOTICE([ COB_LDFLAGS       ${COB_LDFLAGS}])
 AC_MSG_NOTICE([ COB_LIBS          ${COB_LIBS}])
 AC_MSG_NOTICE([ COB_CONFIG_DIR    ${COB_CONFIG_DIR}])
 AC_MSG_NOTICE([ COB_COPY_DIR      ${COB_COPY_DIR}])
+AC_MSG_NOTICE([ COB_SCHEMA_DIR    ${COB_SCHEMA_DIR}])
 AC_MSG_NOTICE([ COB_LIBRARY_PATH  ${COB_LIBRARY_PATH}])
 AC_MSG_NOTICE([ COB_OBJECT_EXT    ${COB_OBJECT_EXT}])
 AC_MSG_NOTICE([ COB_MODULE_EXT    ${COB_MODULE_EXT}])

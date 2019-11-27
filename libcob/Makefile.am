@@ -42,7 +42,7 @@ endif
 
 lib_LTLIBRARIES = libcob.la $(lib_ci) $(lib_di) $(lib_vb)
 libcob_la_SOURCES = common.c move.c numeric.c strings.c \
-	fileio.c fextfh.c fisam.c fbdb.c focextfh.c flmdb.c \
+	fileio.c fextfh.c fisam.c fbdb.c focextfh.c flmdb.c fodbc.c foci.c fsqlxfd.c \
 	call.c intrinsic.c termio.c screenio.c reportio.c cobgetopt.c \
 	mlio.c
 

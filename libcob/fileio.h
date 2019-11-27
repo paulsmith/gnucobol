@@ -191,6 +191,23 @@ COB_HIDDEN void	cob_bdb_init_fileio (cob_file_api *);
 COB_HIDDEN void	cob_lmdb_init_fileio (cob_file_api *);
 #endif
 
+#if defined(WITH_ODBC) || defined(WITH_OCI) || defined(WITH_DB) || defined(WITH_LMDB)
+/* Routines in fsqlxfd.c common to all Database interfaces */
+int db_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen);
+int db_keylen (cob_file *f, int idx);
+int db_savekey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx);
+int db_cmpkey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx, int partlen);
+#endif
+#if defined(WITH_ODBC) || defined(WITH_OCI)
+/* Routines in fsqlxfd.c common to ODBC/OCI interfaces */
+#endif
+#ifdef	WITH_ODBC
+COB_HIDDEN void	cob_odbc_init_fileio (cob_file_api *);
+#endif
+#ifdef	WITH_OCI
+COB_HIDDEN void	cob_oci_init_fileio (cob_file_api *);
+#endif
+
 #if defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
 void	cob_isam_init_fileio (cob_file_api *);
 #endif

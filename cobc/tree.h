@@ -861,6 +861,9 @@ struct cb_field {
 	enum cb_storage		storage;	/* Storage section */
 	enum cb_usage		usage;		/* USAGE */
 
+	char	*	sql_name;			/* Defined SQL field name */
+	char	*	sql_date_format;	/* Date field format string */
+	char	*	sql_when;			/* WHEN condition */
 	/* Flags */
 	unsigned char flag_base;		/* Has memory allocation */
 	unsigned char flag_external;		/* EXTERNAL */
@@ -913,9 +916,16 @@ struct cb_field {
 	unsigned int flag_internal_constant	: 1;	/* Is an internally generated CONSTANT */
 	unsigned int flag_comp_1	: 1;	/* Is USAGE COMP-1 */
 	unsigned int flag_volatile	: 1;	/* VOLATILE */
+
 	unsigned int flag_validated	: 1;	/* 'usage' was validated */
 	unsigned int flag_ignore_sync	: 1;	/* Ignore SYNCHRONIZED */
 	unsigned int flag_usage_defined	: 1;	/* 'usage' was specifically coded */
+	unsigned int flag_sql_binary	: 1;	/* Store field as BINARY */
+	unsigned int flag_sql_char	: 1;		/* Store field as CHAR */
+	unsigned int flag_sql_varchar : 1;		/* Store field as VARCHAR */
+	unsigned int flag_sql_numeric : 1;		/* Store field as DECIMAL */
+	unsigned int flag_sql_date : 1;			/* Store field as DATE */
+	unsigned int flag_sql_group : 1;		/* Keep group as a field */
 };
 
 #define CB_FIELD(x)		(CB_TREE_CAST (CB_TAG_FIELD, struct cb_field, x))
@@ -1039,6 +1049,7 @@ struct cb_file {
 	struct cb_alphabet_name	*code_set;		/* CODE-SET */
 	struct cb_list		*code_set_items;	/* CODE-SET FOR items */
 	struct cb_xref		xref;			/* xref elements */
+	char		*sql_name;		/* Table name for ODBC/SQL */
 	int			record_min;		/* RECORD CONTAINS */
 	int			record_max;		/* RECORD CONTAINS */
 	int			optional;		/* OPTIONAL */
@@ -1048,6 +1059,7 @@ struct cb_file {
 	int			fd_share_mode;		/* SHARING mode */
 	int			special;		/* Special file */
 	int			same_clause;		/* SAME clause */
+	int			max_sql_name_len;		/* Max length of SQL column name */
 	unsigned int		flag_finalized	: 1;	/* Is finalized */
 	unsigned int		flag_external	: 1;	/* Is EXTERNAL */
 	unsigned int		flag_ext_assign	: 1;	/* ASSIGN EXTERNAL */
@@ -1056,9 +1068,13 @@ struct cb_file {
 	unsigned int		flag_fl_debug	: 1;	/* DEBUGGING */
 	unsigned int		flag_line_adv	: 1;	/* LINE ADVANCING */
 	unsigned int		flag_delimiter	: 1;	/* RECORD DELIMITER */
+
 	unsigned int		flag_report	: 1;	/* Used by REPORT */
 	/* Implied RECORD VARYING limits need checking */
 	unsigned int		flag_check_record_varying_limits	: 1;
+	unsigned int		flag_sql_xfd : 1;		/* Emit the XFD/ddl for this file */
+	unsigned int		flag_sql_trim_prefix : 1;	/* Trim common prefix for SQL column name */
+	unsigned int		flag_sql_trim_dash : 1;		/* Remove dash/underscore from SQL column name */
 };
 
 #define CB_FILE(x)	(CB_TREE_CAST (CB_TAG_FILE, struct cb_file, x))
@@ -2010,6 +2026,9 @@ extern void		group_error (cb_tree, const char *);
 extern void		level_require_error (cb_tree, const char *);
 extern void		level_except_error (cb_tree, const char *);
 extern int		cb_set_ignore_error (int state);
+
+/* sqlxfdgen.c */
+extern void		output_xfd_file (struct cb_file *);
 
 /* field.c */
 extern size_t		cb_needs_01;

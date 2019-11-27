@@ -118,6 +118,8 @@ const char		*cb_cobc_build_stamp = NULL;
 const char		*demangle_name = NULL;
 const char		*cb_storage_file_name = NULL;
 const char		*cb_call_extfh = NULL;
+const char		*cb_sqldb_name = NULL;
+const char		*cb_sqldb_schema = NULL;
 struct cb_text_list	*cb_include_list = NULL;
 struct cb_text_list	*cb_intrinsic_list = NULL;
 struct cb_text_list	*cb_extension_list = NULL;
@@ -125,6 +127,7 @@ struct cb_text_list	*cb_static_call_list = NULL;
 struct cb_text_list	*cb_early_exit_list = NULL;
 char			**cb_saveargv = NULL;
 const char		*cob_config_dir = NULL;
+const char		*cob_schema_dir = NULL;
 FILE			*cb_storage_file = NULL;
 FILE			*cb_listing_file = NULL;
 
@@ -2170,6 +2173,10 @@ cobc_print_info (void)
 	if ((s = getenv ("COB_COPY_DIR")) != NULL) {
 		cobc_var_print ("COB_COPY_DIR",	s, 1);
 	}
+	cobc_var_print ("COB_SCHEMA_DIR",	COB_SCHEMA_DIR, 0);
+	if ((s = getenv ("COB_SCHEMA_DIR")) != NULL) {
+		cobc_var_print ("COB_SCHEMA_DIR",	s, 1);
+	}
 	if ((s = getenv ("COBCPY")) != NULL) {
 		cobc_var_print ("COBCPY",	s, 1);
 	}
@@ -2225,7 +2232,8 @@ cobc_print_info (void)
 
 
 #if defined(WITH_INDEX_EXTFH) || defined(WITH_CISAM) || defined(WITH_DISAM) \
-	|| defined(WITH_VBISAM) || defined(WITH_DB) || defined(WITH_LMDB)
+	|| defined(WITH_VBISAM) || defined(WITH_DB) || defined(WITH_LMDB) \
+	|| defined(WITH_ODBC) || defined(WITH_OCI)
 #if defined	(WITH_INDEX_EXTFH)
 	cobc_var_print (_("indexed file handler"),		"EXTFH (obsolete)", 0);
 #endif
@@ -2259,6 +2267,12 @@ cobc_print_info (void)
 # else
 	cobc_var_print (_("indexed file handler"),		"VBISAM", 0);
 # endif
+#endif
+#if defined	(WITH_ODBC)
+	cobc_var_print (_("indexed file handler"),		"ODBC", 0);
+#endif
+#if defined	(WITH_OCI)
+	cobc_var_print (_("indexed file handler"),		"OCI (Oracle)", 0);
 #endif
 #if defined(WITH_IXDFLT) && defined(WITH_MULTI_ISAM)
 	cobc_var_print (_("default indexed handler"),    WITH_IXDFLT, 0);
@@ -3177,6 +3191,28 @@ process_command_line (const int argc, char **argv)
 		case 10:
 			/* -fintrinsics=<xx> : Intrinsic name or ALL */
 			cobc_deciph_funcs (cob_optarg);
+			break;
+
+		case 11:
+			/* -fsqldb=<dbname> : Database type for XFD */
+			cb_sqldb_name = cobc_main_strdup (cob_optarg);
+			break;
+
+		case 12:
+			/* -fsqlschema=<name> : Database schema name for XFD */
+			cb_sqldb_schema = cobc_main_strdup (cob_optarg);
+			if (cob_schema_dir != NULL) {
+				char	temp_buff[COB_MEDIUM_BUFF];
+				strcpy(temp_buff,cob_schema_dir);
+				cobc_main_free ((void*)cob_schema_dir);
+				cob_schema_dir = cobc_main_malloc (strlen(temp_buff) + strlen(cb_sqldb_schema) + 8);
+				sprintf((void*)cob_schema_dir,"%s%s%s",temp_buff,SLASH_STR,cb_sqldb_schema);
+			} else {
+				cob_schema_dir = cobc_main_malloc (strlen(COB_SCHEMA_DIR) + strlen(cb_sqldb_schema) + 8);
+				sprintf((void*)cob_schema_dir,"%s%s%s",COB_SCHEMA_DIR,SLASH_STR,cb_sqldb_schema);
+			}
+			mkdir (cob_schema_dir, 0777);
+			chmod (cob_schema_dir, 0777);
 			break;
 
 		case 'A':
@@ -7692,6 +7728,13 @@ set_cobc_defaults (void)
 	cob_config_dir = cobc_getenv_path ("COB_CONFIG_DIR");
 	if (cob_config_dir == NULL) {
 		cob_config_dir = COB_CONFIG_DIR;
+	}
+	cob_schema_dir = cobc_getenv_path ("COB_SCHEMA_DIR");
+	if (cob_schema_dir == NULL) {
+		cob_schema_dir = cobc_main_malloc (strlen(COB_SCHEMA_DIR) + 4);
+		strcpy((void*)cob_schema_dir, COB_SCHEMA_DIR);
+		mkdir (cob_schema_dir, 0777);
+		chmod (cob_schema_dir, 0777);
 	}
 
 	p = cobc_getenv ("COB_CFLAGS");

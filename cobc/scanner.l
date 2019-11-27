@@ -223,6 +223,21 @@ static void *	copy_literal (cb_tree l);
 	}
 }
 
+<*>^[ ]?"#XFD".*\n {
+	char	*p1;
+	char	*p2;
+	p1 = strchr (yytext, '"');
+	if (p1) {
+		++p1;
+		p2 = strrchr (p1, '"');
+		if (p2) {
+			*p2 = 0;
+			/* Quotes are removed and string passed
+			 * for processing with the next field */
+			cb_save_xfd (p1);
+		}
+	}
+}
 
 <*>^[ ]?"#DEFLIT".*\n {
 	scan_define_options (yytext);

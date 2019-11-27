@@ -585,6 +585,7 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 %token ADDRSV
 %token ADDSYN
 %token CALLFH
+%token XFD
 %token COMP1
 %token CONSTANT
 %token FOLDCOPYNAME
@@ -755,6 +756,13 @@ set_choice:
 | CALLFH
   {
 	fprintf (ppout, "#CALLFH \"EXTFH\"\n");
+  }
+| XFD LITERAL
+  {
+	char	*p = $2;
+	++p;
+	p[strlen (p) - 1] = '\0';
+	fprintf (ppout, "#XFD \"%s\"\n", p);
   }
 | COMP1 LITERAL
   {

@@ -82,6 +82,13 @@ CB_FLAG_NQ (1, "intrinsics", 10,
 	_("  -fintrinsics=[ALL|intrinsic function name(,name,...)]\n"
 	  "                        intrinsics to be used without FUNCTION keyword\n"))
 
+CB_FLAG_RQ (cb_def_sqldb, 1, "sqldb", -1, 11,
+	_("  -fsqldb=<dbtype>      Which Database is used (MySQL, MSSQL, Oracle10,\n"
+	  "                        Oracle11, Oracle12)"))
+
+CB_FLAG_RQ (cb_def_sqlschema, 1, "sqlschema", -1, 12,
+	_("  -fsqlschema=<name>    Define database schema name"))
+
 /* Binary flags */
 
 /* Flags with suppressed help */
