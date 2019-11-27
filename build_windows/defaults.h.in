@@ -64,6 +64,7 @@
 // Do not put quotation marks here:
 #define COB_CONFIG_DIR   COB_MAIN_DIR "\\config"
 #define COB_COPY_DIR     COB_MAIN_DIR "\\copy"
+#define COB_SCHEMA_DIR   COB_MAIN_DIR "\\schema"
 
 #define COB_LIBRARY_PATH "."
 

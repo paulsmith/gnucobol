@@ -1209,10 +1209,12 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 				continue;
 			}
 			if (strcasecmp(option,"recsz") == 0) {
-				if(ivalue <= 0 || ivalue > maxrecsz)
+				if (ivalue <= 0 || ivalue > maxrecsz) {
 					continue;
-				if(ivalue == f->record_max && ivalue == f->record_min)
+				}
+				if (ivalue == f->record_max && ivalue == f->record_min) {
 					continue;
+				}
 				f->flag_redef = 1;
 				f->record_min = f->record_max = ivalue;
 				f->record->size = ivalue;

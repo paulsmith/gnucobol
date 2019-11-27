@@ -168,6 +168,9 @@
     <ClCompile Include="..\..\libcob\fisam.c" />
     <ClCompile Include="..\..\libcob\flmdb.c" />
     <ClCompile Include="..\..\libcob\focextfh.c" />
+    <ClCompile Include="..\..\libcob\foci.c" />
+    <ClCompile Include="..\..\libcob\fodbc.c" />
+    <ClCompile Include="..\..\libcob\fsqlxfd.c" />
     <ClCompile Include="..\..\libcob\intrinsic.c" />
     <ClCompile Include="..\..\libcob\mlio.c" />
     <ClCompile Include="..\..\libcob\move.c" />

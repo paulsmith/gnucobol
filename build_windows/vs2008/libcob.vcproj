@@ -390,6 +390,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libcob\foci.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob\fodbc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob\fsqlxfd.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libcob\intrinsic.c"
 				>
 			</File>

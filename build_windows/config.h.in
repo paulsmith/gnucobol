@@ -8,6 +8,8 @@
 #define VBISAM       3
 #define DISAM        4
 #define CISAM        5
+#define ODBC         6
+#define OCI          7
 
 #define NOCURSES     0
 #define PDCURSES     1
@@ -346,6 +348,8 @@
 /* Define if you have the iconv() function and it works. */
 #if CONFIGURED_XML == XML2
 #define HAVE_ICONV 1
+#else
+/* #undef HAVE_ICONV */
 #endif
 
 /* Define to 1 if you have the <inttypes.h> header file. */
@@ -563,6 +567,9 @@
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
 
+/* Define to 1 if you have the <sys/sysmacros.h> header file. */
+#undef HAVE_SYS_SYSMACROS_H
+
 /* Define to 1 if you have the <sys/time.h> header file. */
 #if defined(__ORANGEC__)
 #define HAVE_SYS_TIME_H 1
@@ -706,11 +713,56 @@
 /* #undef WITH_DISAM */
 #endif
 
+/* Default INDEXED file handler */
+#if CONFIGURED_ISAM == VBISAM
+#define WITH_IXDFLT  "VB-ISAM"
+#define WITH_INDEXED COB_IO_VBISAM
+#elif CONFIGURED_ISAM == DISAM
+#define WITH_IXDFLT  "D-ISAM"
+#define WITH_INDEXED COB_IO_DISAM
+#elif CONFIGURED_ISAM == BDB
+#define WITH_IXDFLT  "BDB"
+#define WITH_INDEXED COB_IO_BDB
+#elif CONFIGURED_ISAM == LMDB
+#define WITH_IXDFLT  "LMDB"
+#define WITH_INDEXED COB_IO_LMDB
+#elif CONFIGURED_ISAM == ODBC
+#define WITH_IXDFLT  "ODBC"
+#define WITH_INDEXED COB_IO_ODBC
+#elif CONFIGURED_ISAM == OCI
+#define WITH_IXDFLT  "OCI"
+#define WITH_INDEXED COB_IO_OCI
+#else
+/* #undef WITH_IXDFLT */
+/* #undef WITH_INDEXED */
+#endif /* CONFIGURED_ISAM */
+
 /* Compile with obsolete external INDEXED handler */
 /* #undef WITH_INDEX_EXTFH */
 
 /* Use Lightning Memory-Mapped Database as INDEXED handler */
+#if CONFIGURED_ISAM == LMDB
+#define WITH_LMDB 1
+#else
 /* #undef WITH_LMDB */
+#endif
+
+/* Using more than 1 of C/D/VB-ISAM */
+/* #undef WITH_MULTI_ISAM */
+
+/* Use OCI for INDEXED file handler */
+#if CONFIGURED_ISAM == OCI
+#define WITH_OCI 1
+#else
+/* #undef WITH_OCI */
+#endif
+
+/* Use ODBC for INDEXED file handler */
+#if CONFIGURED_ISAM == ODBC
+#define WITH_ODBC 1
+#else
+/* #undef WITH_ODBC */
+#endif
 
 /* Compile with obsolete external SEQ/RAN handler */
 /* #undef WITH_SEQRA_EXTFH */
@@ -777,8 +829,10 @@
 #undef BDB
 #undef LMDB
 #undef VBISAM
-#undef CISAM
 #undef DISAM
+#undef CISAM
+#undef ODBC
+#undef OCI
 #undef CONFIGURED_ISAM
 #undef NOCURSES
 #undef PDCURSES

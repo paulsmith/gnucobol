@@ -3211,8 +3211,10 @@ process_command_line (const int argc, char **argv)
 				cob_schema_dir = cobc_main_malloc (strlen(COB_SCHEMA_DIR) + strlen(cb_sqldb_schema) + 8);
 				sprintf((void*)cob_schema_dir,"%s%s%s",COB_SCHEMA_DIR,SLASH_STR,cb_sqldb_schema);
 			}
+#if 0 /* CHECK later, for now only existing folders may be specified */
 			mkdir (cob_schema_dir, 0777);
 			chmod (cob_schema_dir, 0777);
+#endif
 			break;
 
 		case 'A':
@@ -7731,10 +7733,11 @@ set_cobc_defaults (void)
 	}
 	cob_schema_dir = cobc_getenv_path ("COB_SCHEMA_DIR");
 	if (cob_schema_dir == NULL) {
-		cob_schema_dir = cobc_main_malloc (strlen(COB_SCHEMA_DIR) + 4);
-		strcpy((void*)cob_schema_dir, COB_SCHEMA_DIR);
+		cob_schema_dir = COB_SCHEMA_DIR;
+#if 0 /* CHECK later, for now only existing folders may be specified */
 		mkdir (cob_schema_dir, 0777);
 		chmod (cob_schema_dir, 0777);
+#endif
 	}
 
 	p = cobc_getenv ("COB_CFLAGS");

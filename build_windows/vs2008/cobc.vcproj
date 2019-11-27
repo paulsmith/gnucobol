@@ -507,6 +507,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\cobc\sqlxfdgen.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\cobc\reserved.c"
 				>
 			</File>

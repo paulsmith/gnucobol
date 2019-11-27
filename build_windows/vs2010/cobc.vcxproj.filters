@@ -66,6 +66,9 @@
     <ClCompile Include="..\..\cobc\help.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\cobc\sqlxfdgen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\cobc\codeoptim.def">

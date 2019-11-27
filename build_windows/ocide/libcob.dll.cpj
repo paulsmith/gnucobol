@@ -46,6 +46,9 @@
 				<FILE NAME="..\..\libcob\fisam.c" TITLE="fisam.c" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\flmdb.c" TITLE="flmdb.c" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\focextfh.c" TITLE="focextfh.c" CLEAN="0"/>
+				<FILE NAME="..\..\libcob\foci.c" TITLE="foci.c" CLEAN="0"/>
+				<FILE NAME="..\..\libcob\fodbc.c" TITLE="fodbc.c" CLEAN="0"/>
+				<FILE NAME="..\..\libcob\fsqlxfd.c" TITLE="fsqlxfd.c" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\intrinsic.c" TITLE="intrinsic.c" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\mlio.c" TITLE="mlio.c" CLEAN="0"/>
 				<FILE NAME="..\..\libcob\move.c" TITLE="move.c" CLEAN="0"/>
