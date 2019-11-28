@@ -501,7 +501,7 @@ cb_parse_xfd (struct cb_file *fn, struct cb_field *f)
 			if (f->sql_when == NULL) {
 				sprintf(expr,"%s %s %s",p2,p3,p4);
 			} else {
-				sprintf(expr,"%s AND %s %s %s",f->sql_when,p2,p3,p4);
+				sprintf(expr,"%s OR %s %s %s",f->sql_when,p2,p3,p4);
 				cobc_parse_free (f->sql_when);
 			}
 			f->sql_when = cobc_parse_strdup (expr);
