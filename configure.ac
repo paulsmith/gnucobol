@@ -79,15 +79,15 @@ AH_TEMPLATE([WITH_INDEX_EXTFH], [Compile with obsolete external INDEXED handler]
 AH_TEMPLATE([WITH_INDEXED], [Default INDEXED file handler])
 AH_TEMPLATE([WITH_IXDFLT], [Default INDEXED file handler])
 AH_TEMPLATE([WITH_SEQRA_EXTFH], [Compile with obsolete external SEQ/RAN handler])
+AH_TEMPLATE([WITH_VBISAM], [Use VBISAM as INDEXED handler])
+AH_TEMPLATE([WITH_DISAM], [Use DISAM as INDEXED handler])
+AH_TEMPLATE([WITH_CISAM], [Use CISAM as INDEXED handler])
 AH_TEMPLATE([WITH_DB], [Use Berkeley DB library as INDEXED handler])
+# FIXME: may be specified with different file version
+# AH_TEMPLATE([COB_BDB_BAD_DUPNO], [Retain incorrect duplicate sequence for compatibility on little endian!])
 AH_TEMPLATE([WITH_LMDB], [Use Lightning Memory-Mapped Database as INDEXED handler])
 AH_TEMPLATE([WITH_ODBC], [Use ODBC for INDEXED file handler])
 AH_TEMPLATE([WITH_OCI], [Use OCI for INDEXED file handler])
-# FIXME: may be specified with different file version
-# AH_TEMPLATE([COB_BDB_BAD_DUPNO], [Retain incorrect duplicate sequence for compatibility on little endian!])
-AH_TEMPLATE([WITH_CISAM], [Use CISAM as INDEXED handler])
-AH_TEMPLATE([WITH_DISAM], [Use DISAM as INDEXED handler])
-AH_TEMPLATE([WITH_VBISAM], [Use VBISAM as INDEXED handler])
 AH_TEMPLATE([WITH_MULTI_ISAM], [Using more than 1 of C/D/VB-ISAM])
 AH_TEMPLATE([WITH_XML2], [Use libxml2 as XML handler])
 AH_TEMPLATE([WITH_CJSON], [Use cJSON as JSON handler])
@@ -1049,44 +1049,44 @@ AC_ARG_WITH([indexed],
   [AS_HELP_STRING([--with-indexed],
     [Define default INDEXED file handler])],
   [ case "$with_indexed" in
+    vbisam)
+	    with_vbisam=yes
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_VBISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["VB-ISAM"]);;
     disam)
-		with_disam=yes
+	    with_disam=yes
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_DISAM])
 	    AC_DEFINE([WITH_IXDFLT], ["D-ISAM"]);;
     cisam)
-		with_cisam=yes
+	    with_cisam=yes
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_CISAM])
 	    AC_DEFINE([WITH_IXDFLT], ["C-ISAM"]);;
-    vbisam)
-		with_vbisam=yes
-	    AC_DEFINE([WITH_INDEXED], [COB_IO_VBISAM])
-	    AC_DEFINE([WITH_IXDFLT], ["VB-ISAM"]);;
     db)
-		with_db=yes
+	    with_db=yes
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_BDB])
 	    AC_DEFINE([WITH_IXDFLT], ["BDB"]);;
     lmdb)
-		with_lmdb=yes
+	    with_lmdb=yes
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_LMDB])
 	    AC_DEFINE([WITH_IXDFLT], ["LMDB"]);;
     odbc)
-		with_odbc=yes
+	    with_odbc=yes
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_ODBC])
 	    AC_DEFINE([WITH_IXDFLT], ["ODBC"]);;
     oci)
-		with_oci=yes
+	    with_oci=yes
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_OCI])
 	    AC_DEFINE([WITH_IXDFLT], ["OCI"]);;
 	*)
-  	  if test "$with_cisam" = "yes"; then
-	    AC_DEFINE([WITH_INDEXED], [COB_IO_CISAM])
-	    AC_DEFINE([WITH_IXDFLT], ["C-ISAM"])
+  	  if test "$with_vbisam" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_VBISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["VB-ISAM"])
   	  elif test "$with_disam" = "yes"; then
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_DISAM])
 	    AC_DEFINE([WITH_IXDFLT], ["D-ISAM"])
-  	  elif test "$with_vbisam" = "yes"; then
-	    AC_DEFINE([WITH_INDEXED], [COB_IO_VBISAM])
-	    AC_DEFINE([WITH_IXDFLT], ["VB-ISAM"])
+  	  elif test "$with_cisam" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_CISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["C-ISAM"])
   	  elif test "$with_db" = "yes"; then
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_BDB])
 	    AC_DEFINE([WITH_IXDFLT], ["BDB"])
@@ -1100,19 +1100,19 @@ AC_ARG_WITH([indexed],
 	    AC_DEFINE([WITH_OCI], [COB_IO_OCI])
 	    AC_DEFINE([WITH_IXDFLT], ["OCI"])
 	  else
-		AC_MSG_ERROR([--with-indexed=<HANDLER>, must be one of cisam|disam|vbisam|db|lmdb])
+		AC_MSG_ERROR([--with-indexed=<HANDLER>, must be one of vbisam|disam|cisam|db|lmdb|odbc|oci])
 	  fi ;;
     esac
   ], [
-  	  if test "$with_cisam" = "yes"; then
-	    AC_DEFINE([WITH_INDEXED], [COB_IO_CISAM])
-	    AC_DEFINE([WITH_IXDFLT], ["C-ISAM"])
+  	  if test "$with_vbisam" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_VBISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["VB-ISAM"])
   	  elif test "$with_disam" = "yes"; then
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_DISAM])
 	    AC_DEFINE([WITH_IXDFLT], ["D-ISAM"])
-  	  elif test "$with_vbisam" = "yes"; then
-	    AC_DEFINE([WITH_INDEXED], [COB_IO_VBISAM])
-	    AC_DEFINE([WITH_IXDFLT], ["VB-ISAM"])
+  	  elif test "$with_cisam" = "yes"; then
+	    AC_DEFINE([WITH_INDEXED], [COB_IO_CISAM])
+	    AC_DEFINE([WITH_IXDFLT], ["C-ISAM"])
   	  elif test "$with_db" = "yes"; then
 	    AC_DEFINE([WITH_INDEXED], [COB_IO_BDB])
 	    AC_DEFINE([WITH_IXDFLT], ["BDB"])
@@ -1129,25 +1129,30 @@ AC_ARG_WITH([indexed],
   ])
 
 LIBCOB_ISAM=""
-LIBCOB_CISAM=""
-LIBCOB_DISAM=""
 LIBCOB_VBISAM=""
+LIBCOB_DISAM=""
+LIBCOB_CISAM=""
 cob_multi_isam=no
-cob_gen_cisam=no
-cob_gen_disam=no
 cob_gen_vbisam=no
-AC_ARG_WITH([cisam],
-  [AS_HELP_STRING([--with-cisam],
-    [(GnuCOBOL) Use CISAM for ISAM I/O])],
-  [ if test "$with_cisam" = "yes"; then
-	cob_gen_cisam=yes
-	AC_CHECK_HEADERS([isam.h], [],
-		AC_MSG_ERROR([isam.h is required for CISAM]))
-	AC_CHECK_LIB([ifisam], [isopen],
-		[AC_DEFINE([WITH_CISAM], [1])
-		LIBCOB_ISAM="$LIBCOB_ISAM -lifisam -lifisamx"
-		LIBCOB_CISAM="-lifisam -lifisamx"],
-		AC_MSG_ERROR([libifisam is required for CISAM]), [-lifisamx])
+cob_gen_disam=no
+cob_gen_cisam=no
+
+  AC_ARG_WITH([vbisam],
+  [AS_HELP_STRING([--with-vbisam],
+    [(GnuCOBOL) Use VBISAM for ISAM I/O])],
+  [ if test "$with_vbisam" = "yes"; then
+	AC_CHECK_HEADERS([vbisam.h], [],
+		AC_MSG_ERROR([vbisam.h is required for VBISAM]))
+	# note: isfullclose is available since 2.0, isopen since 1.0
+	AC_CHECK_LIB([vbisam], [isfullclose],
+		[AC_DEFINE([WITH_VBISAM], [1])
+		LIBCOB_ISAM="$LIBCOB_ISAM -lvbisam"
+		LIBCOB_VBISAM="-lvbisam"],
+		AC_MSG_ERROR([libvbisam >= 2.0 is required for VBISAM]), [])
+	if test "$with_cisam" = "yes" -o "$with_disam" = "yes"; then
+		cob_multi_isam=yes
+	fi
+	cob_gen_vbisam=yes
     fi ],
   [])
 
@@ -1182,30 +1187,26 @@ AC_ARG_WITH([cisam],
     fi ],
   [])
 
-  AC_ARG_WITH([vbisam],
-  [AS_HELP_STRING([--with-vbisam],
-    [(GnuCOBOL) Use VBISAM for ISAM I/O])],
-  [ if test "$with_vbisam" = "yes"; then
-	AC_CHECK_HEADERS([vbisam.h], [],
-		AC_MSG_ERROR([vbisam.h is required for VBISAM]))
-	# note: isfullclose is available since 2.0, isopen since 1.0
-	AC_CHECK_LIB([vbisam], [isfullclose],
-		[AC_DEFINE([WITH_VBISAM], [1])
-		LIBCOB_ISAM="$LIBCOB_ISAM -lvbisam"
-		LIBCOB_VBISAM="-lvbisam"],
-		AC_MSG_ERROR([libvbisam >= 2.0 is required for VBISAM]), [])
-	if test "$with_cisam" = "yes" -o "$with_disam" = "yes"; then
-		cob_multi_isam=yes
-	fi
-	cob_gen_vbisam=yes
+  AC_ARG_WITH([cisam],
+  [AS_HELP_STRING([--with-cisam],
+    [(GnuCOBOL) Use CISAM for ISAM I/O])],
+  [ if test "$with_cisam" = "yes"; then
+	cob_gen_cisam=yes
+	AC_CHECK_HEADERS([isam.h], [],
+		AC_MSG_ERROR([isam.h is required for CISAM]))
+	AC_CHECK_LIB([ifisam], [isopen],
+		[AC_DEFINE([WITH_CISAM], [1])
+		LIBCOB_ISAM="$LIBCOB_ISAM -lifisam -lifisamx"
+		LIBCOB_CISAM="-lifisam -lifisamx"],
+		AC_MSG_ERROR([libifisam is required for CISAM]), [-lifisamx])
     fi ],
   [])
 
 if test "$cob_multi_isam" = "no"; then
 	LIBCOB_LIBS="$LIBCOB_LIBS $LIBCOB_ISAM"
-	LIBCOB_CISAM=""
-	LIBCOB_DISAM=""
 	LIBCOB_VBISAM=""
+	LIBCOB_DISAM=""
+	LIBCOB_CISAM=""
 else
 	AC_DEFINE([WITH_MULTI_ISAM], [1])
 fi
@@ -1230,8 +1231,20 @@ AC_ARG_WITH([oci],
 [AS_HELP_STRING([--with-oci],
   [(GnuCOBOL) Use Oracle OCI for INDEXED I/O])],
 [ if test "$with_oci" = "yes"; then
-  AC_DEFINE([WITH_OCI], [1])
+	AC_CHECK_HEADERS([oci.h], [],
+		AC_MSG_ERROR([oci.h is required for Oracle OCI]))
+
+#	AC_CHECK_LIB([clntsh], [isopen],
+#		[AC_DEFINE([WITH_OCI], [1])
+#		],
+#		AC_MSG_ERROR([libclnt is required for Oracle OCI]), [])
   fi ],
+[])
+
+AC_ARG_WITH([db],
+[AS_HELP_STRING([--with-db],
+  [(GnuCOBOL) Use Berkeley DB >= 4.1 for ISAM I/O (default)])],
+[],
 [])
 
 AC_ARG_WITH([lmdb],
@@ -1242,13 +1255,10 @@ AC_ARG_WITH([lmdb],
   fi ],
 [])
 
-AC_ARG_WITH([db],
-[AS_HELP_STRING([--with-db],
-  [(GnuCOBOL) Use Berkeley DB >= 4.1 for ISAM I/O (default)])],
-[],
-[])
+#
+## Checks for indexed handlers
+#
 
-# Checks for db.
 if test "$with_db" = "yes"; then
 	AC_MSG_NOTICE([Checks for Berkeley DB ...])
 
@@ -1338,7 +1348,6 @@ if test "$with_db" = "yes"; then
 	unset COB_BDB_HEADER
 fi
 
-# Checks for lmdb.
 
 if test "$with_lmdb" = "yes"; then
 	AC_MSG_NOTICE([Checks for Lightning Memory-Mapped Database (LMDB) ...])
@@ -2011,7 +2020,7 @@ case "$USE_NCURSES" in
 	;;
 esac
 if test "$with_debug_log" = "yes"; then
-  AC_MSG_NOTICE([ Enabled Compiler Developer logger            yes])
+  AC_MSG_NOTICE([ Enable GnuCOBOL developer logging            yes])
 fi
 if test "$with_seqra_extfh" = "yes"; then
   AC_MSG_NOTICE([ Use external SEQ/RAN file handler            yes])
@@ -2019,14 +2028,14 @@ fi
 if test "$with_index_extfh" = "yes"; then
   AC_MSG_NOTICE([ Use external ISAM file handler               yes])
 fi
-if test "$with_cisam" = "yes"; then
-  AC_MSG_NOTICE([ Use CISAM for ISAM I/O                       yes])
+if test "$with_vbisam" = "yes"; then
+  AC_MSG_NOTICE([ Use VBISAM for ISAM I/O                      yes])
 fi
 if test "$with_disam" = "yes"; then
   AC_MSG_NOTICE([ Use DISAM for ISAM I/O                       yes])
 fi
-if test "$with_vbisam" = "yes"; then
-  AC_MSG_NOTICE([ Use VBISAM for ISAM I/O                      yes])
+if test "$with_cisam" = "yes"; then
+  AC_MSG_NOTICE([ Use CISAM for ISAM I/O                       yes])
 fi
 if test "$with_db" = "yes"; then
   AC_MSG_NOTICE([ Use Berkeley DB for ISAM I/O:                yes])
@@ -2034,6 +2043,13 @@ fi
 if test "$with_lmdb" = "yes"; then
   AC_MSG_NOTICE([ Use LMDB for ISAM I/O:                       yes])
 fi
+if test "$with_odbc" = "yes"; then
+  AC_MSG_NOTICE([ Use ODBC for ISAM I/O:                       yes])
+fi
+if test "$with_oci" = "yes"; then
+  AC_MSG_NOTICE([ Use Oracle DB (OCI) for ISAM I/O:            yes])
+fi
+
 if test "$COB_HAS_ISAM" = no; then
   AC_MSG_NOTICE([ ISAM I/O (no handler configured):            NO])
 fi
