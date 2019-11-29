@@ -1,4 +1,9 @@
 
+2019-11-28  Ron Norman <rjn@inglenet.com>
+	* Updates to prepare framework for generated
+	  an exernal file description and SQL
+	  and adding support for ODBC/OCI use for INDEXED file
+
 2019-11-18  Ron Norman <rjn@inglenet.com>
 
 	* tree.h,parser.y,typeck.c: Updates to support 

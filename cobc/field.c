@@ -460,7 +460,12 @@ cb_parse_xfd (struct cb_file *fn, struct cb_field *f)
 	}
 	for(k=0; k < hasxfd; k++) {
 		p = cb_get_param (xfd[k], p1, 1);
-		skipeq = strcasecmp(p1,"WHEN") == 0 ? 0 : 1;
+		if (strcasecmp(p1,"WHEN") == 0
+		 || strcasecmp(p1,"AND") == 0
+		 || strcasecmp(p1,"OR") == 0)
+			skipeq = 0;
+		else
+			skipeq = 1;
 		p = cb_get_param (p, p2, skipeq);
 		p = cb_get_param (p, p3, skipeq);
 		p = cb_get_param (p, p4, skipeq);
