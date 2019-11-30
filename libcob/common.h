@@ -856,6 +856,30 @@ enum cob_exception_id {
 #define COB_FILE_IS_GC		10	/* GnuCOBOL default format */
 #define COB_FILE_IS_MF		11	/* Micro Focus default format */
 
+/* Data type code for eXternal file Description */
+enum xfd_data_type {
+	COB_XFDT_BIN = 1,		/* Arbitrary Binary Data */
+	COB_XFDT_COMP5S,		/* PIC S9 COMP-5 */
+	COB_XFDT_COMP5U,		/* PIC 9  COMP-5 */
+	COB_XFDT_COMP6,			/* PIC 9  COMP-6 */
+	COB_XFDT_COMPS,			/* PIC S9 BINARY/COMP/COMP-4 */
+	COB_XFDT_COMPU,			/* PIC 9  BINARY/COMP/COMP-4 */
+	COB_XFDT_COMPX,			/* PIC x  COMP-X */
+	COB_XFDT_FLOAT,			/* COMP-1/COMP-2 */
+	COB_XFDT_PACKS,			/* PIC S9 COMP-3/PACKED DECIMAL */
+	COB_XFDT_PACKU,			/* PIC 9  COMP-3/PACKED DECIMAL */
+	COB_XFDT_PIC9L,			/* PIC S9 SIGN LEADING */
+	COB_XFDT_PIC9LS,		/* PIC S9 SIGN LEADING SEPARATE */
+	COB_XFDT_PIC9S,			/* PIC S9 */
+	COB_XFDT_PIC9T,			/* PIC 9  SIGN TRAILING */
+	COB_XFDT_PIC9TS,		/* PIC 9  SIGN TRAILING SEPARATE */
+	COB_XFDT_PIC9U,			/* PIC 9  */
+	COB_XFDT_PICA,			/* PIC A */
+	COB_XFDT_PICN,			/* PIC X National characters */
+	COB_XFDT_PICW,			/* PIC X Wide characters */
+	COB_XFDT_PICX,			/* PIC X */
+	COB_XFDT_MAX 			/* Max possible value for this enum */
+};
 
 /* Organization */
 

@@ -7650,6 +7650,12 @@ print_info (void)
 	var_print (_("indexed file handler"), 		"VB-ISAM", "", 0);
 #endif
 #endif
+#if defined	(WITH_ODBC)
+	var_print (_("indexed file handler"), 		"ODBC", "", 0);
+#endif
+#if defined	(WITH_OCI)
+	var_print (_("indexed file handler"), 		"OCI (Oracle)", "", 0);
+#endif
 #if defined(WITH_IXDFLT) && defined(WITH_MULTI_ISAM)
 	var_print (_("default indexed handler"), 	WITH_IXDFLT, "", 0);
 #endif

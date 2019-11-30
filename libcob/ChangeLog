@@ -1,4 +1,9 @@
 
+2019-11-30  Ron Norman <rjn@inglenet.com>
+
+	* common.c: Have cobcrun --info display of ODBC or OCI are possible
+	* common.h: Flags added for created of eXternal file Description
+
 2019-11-21  Ron Norman <rjn@inglenet.com>
 
 	* fbdb.c: Change to ignore sequence of keys when writing
