@@ -2028,6 +2028,8 @@ extern void		level_except_error (cb_tree, const char *);
 extern int		cb_set_ignore_error (int state);
 
 /* sqlxfdgen.c */
+extern void     cb_save_xfd (char *);
+extern void		cb_parse_xfd (struct cb_file *, struct cb_field *);
 extern void		output_xfd_file (struct cb_file *);
 
 /* field.c */

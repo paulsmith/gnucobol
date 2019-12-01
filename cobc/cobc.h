@@ -462,9 +462,6 @@ extern struct cb_field		*external_defined_fields_global;
 
 /* Functions */
 
-/* field.c */
-extern void     cb_save_xfd (char *);
-
 /* cobc.c */
 
 extern struct reserved_word_list	*cob_user_res_list;

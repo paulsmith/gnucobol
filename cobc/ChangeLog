@@ -1,20 +1,18 @@
 
-2019-11-30  Ron Norman <rjn@inglenet.com> 
-
-	* sqlxfdgen.c: Starter version to create DDL/XD files from record
-	  descriptions and $XFD directives (more to come)
+2019-12-01  Ron Norman <rjn@inglenet.com>
+	* field.c,sqlxfdgen.c: Fix up some compile warnings
+	  moved cb_parse_xfd from field.c to sqlxfdgen.c
 
 2019-11-28  Ron Norman <rjn@inglenet.com>
-
 	* Updates to prepare framework for generated
 	  an exernal file description and SQL
 	  and adding support for ODBC/OCI use for INDEXED file
 
 2019-11-18  Ron Norman <rjn@inglenet.com>
 
-	* tree.h, parser.y, typeck.c: Updates to support 
-	  SET ... TO ADDRESS OF FH--FCD OF file
-	  SET ... TO ADDRESS OF FH--KEYDEF OF file
+	* tree.h,parser.y,typeck.c: Updates to support 
+	        SET ... TO ADDRESS OF FH--FCD OF file
+	        SET ... TO ADDRESS OF FH--KEYDEF OF file
 
 2019-10-27  Ron Norman <rjn@inglenet.com>
 

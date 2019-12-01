@@ -272,35 +272,25 @@ static const char *dict_ext = "dd";
 
 #if defined(WITH_INDEXED)
 static const char ix_routine = WITH_INDEXED;
-static char ix_type[12] = "XX";
 #else
 #if defined(WITH_CISAM)
 static const char ix_routine = COB_IO_CISAM;
-static const char ix_type[12] = "CISAM";
 #elif defined(WITH_DISAM)
 static const char ix_routine = COB_IO_DISAM;
-static const char ix_type[12] = "DISAM";
 #elif defined(WITH_VBISAM)
 static const char ix_routine = COB_IO_VBISAM;
-static const char ix_type[12] = "VBSAM";
 #elif	WITH_DB
 static const char ix_routine = COB_IO_BDB;
-static const char ix_type[12] = "DB";
 #elif	WITH_LMDB
 static const char ix_routine = COB_IO_LMDB;
-static const char ix_type[12] = "LMDB";
 #elif	WITH_ODBC
 static const char ix_routine = COB_IO_ODBC;
-static const char ix_type[12] = "ODBC";
 #elif	WITH_OCI
 static const char ix_routine = COB_IO_OCI;
-static const char ix_type[12] = "OCI";
 #elif	WITH_INDEX_EXTFH
 static const char ix_routine = COB_IO_IXEXT;
-static const char ix_type[12] = "IX";
 #else
 static const char ix_routine = COB_IO_IXEXT;
-static const char ix_type[12] = "IX";
 #endif
 #endif
 
@@ -6277,9 +6267,6 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 	char	*p;
 	int	i,k;
 
-#if defined(WITH_INDEXED)
-	strcpy((void*)ix_type,(void*)io_rtn_name[WITH_INDEXED]);
-#endif
 	runtime_buffer = cob_fast_malloc ((size_t)(4 * COB_FILE_BUFF) + 4);
 	file_open_env = runtime_buffer + COB_FILE_BUFF;
 	file_open_name = runtime_buffer + (2 * COB_FILE_BUFF);

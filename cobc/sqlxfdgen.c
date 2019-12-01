@@ -36,6 +36,10 @@
 #include "cobc.h"
 #include "tree.h"
 
+#define MAX_XFD 24
+static int	hasxfd = 0;
+static char xfd[MAX_XFD][80];
+
 #define MAX_OCC_NEST 16
 static char eol[6] = "";
 static char prefix[8] = "";
@@ -44,6 +48,137 @@ static int	next_lbl = 1;
 static short COMPtoDig[10]   = {3,8,11,13,16,18,21,23,27};	/* SQL storage size for Binary field */
 
 /* Local functions */
+void
+cb_save_xfd (char *str)
+{
+	if (cb_sqldb_name == NULL) {
+		hasxfd = 0;
+		return;
+	}
+	if (hasxfd >= MAX_XFD) {
+		cb_error (_("XFD table overflow at: %s"), str);
+		return;
+	}
+	strcpy(xfd[hasxfd],str);
+	hasxfd++;
+}
+
+static char *
+cb_get_param (char *p, char *prm, int skipeq)
+{
+	char	eq = 0x01;
+	char	qt = 0x00;
+	if (skipeq)
+		eq = '=';
+	while (isspace(*p) || *p == eq) p++;
+	if (*p == '"' || *p == '\'') {
+		qt = *p;
+		do {
+			*prm++ = *p++;
+		} while (*p != 0 && *p != qt);
+		if (*p == qt)
+			*prm++ = *p++;
+	} else {
+		while (*p != 0 && *p != ',' 
+			&& *p != eq && !isspace(*p)) {
+			*prm++ = *p++;
+		}
+	}
+	*prm = 0;
+	while (*p == ',' || isspace(*p)) p++;
+	return p;
+}
+
+static void
+cb_use_name (struct cb_field *f, char *n)
+{
+	if(*n > ' ') {
+		if (f->sql_name) {
+			cb_warning (warningopt, _("XFD replaced %s with %s for %s"), f->sql_name, n, f->name);
+		}
+		f->sql_name = cobc_parse_strdup (n);
+	}
+}
+
+void
+cb_parse_xfd (struct cb_file *fn, struct cb_field *f)
+{
+	int		k, skipeq;
+	char	*p, p1[64], p2[64], p3[64], p4[64], expr[512];
+	if (hasxfd <= 0)
+		return;
+	if (!fn->flag_sql_xfd) {
+		fn->max_sql_name_len = 24;
+		fn->flag_sql_trim_prefix = 1;
+		fn->flag_sql_xfd = 1;
+	}
+	for(k=0; k < hasxfd; k++) {
+		p = cb_get_param (xfd[k], p1, 1);
+		if (strcasecmp(p1,"WHEN") == 0
+		 || strcasecmp(p1,"AND") == 0
+		 || strcasecmp(p1,"OR") == 0)
+			skipeq = 0;
+		else
+			skipeq = 1;
+		p = cb_get_param (p, p2, skipeq);
+		p = cb_get_param (p, p3, skipeq);
+		p = cb_get_param (p, p4, skipeq);
+		if (strcasecmp(p1,"USE") == 0) {
+			strcpy(p1,p2);
+			strcpy(p2,p3);
+			strcpy(p3,"");
+		}
+		if (strcasecmp(p1,"NAME") == 0 
+		 && p2[0] > ' ') {
+			if (f->level == 1
+			 && fn->sql_name == NULL) {
+				fn->sql_name = cobc_parse_strdup (p2);
+			} else {
+				cb_use_name (f, p2);
+			}
+		} else if (strcasecmp(p1,"GROUP") == 0) {
+			f->flag_sql_group = 1;
+			cb_use_name (f, p2);
+		} else if (strcasecmp(p1,"BINARY") == 0) {
+			f->flag_sql_binary = 1;
+			cb_use_name (f, p2);
+		} else if (strcasecmp(p1,"CHAR") == 0) {
+			f->flag_sql_char = 1;
+			cb_use_name (f, p2);
+		} else if (strcasecmp(p1,"VARCHAR") == 0) {
+			f->flag_sql_varchar = 1;
+			cb_use_name (f, p2);
+		} else if (strcasecmp(p1,"NUMERIC") == 0) {
+			f->flag_sql_numeric = 1;
+			cb_use_name (f, p2);
+		} else if (strcasecmp(p1,"DATE") == 0) {
+			f->flag_sql_date = 1;
+			if(p2[0] > ' ')
+				f->sql_date_format = cobc_parse_strdup (p2);
+			cb_use_name (f, p3);
+		} else if (strcasecmp(p1,"WHEN") == 0) {
+			if (f->sql_when == NULL) {
+				snprintf(expr,sizeof(expr)-1,"%s %s %s",p2,p3,p4);
+			} else {
+				snprintf(expr,sizeof(expr)-1,"%s OR %s %s %s",f->sql_when,p2,p3,p4);
+				cobc_parse_free (f->sql_when);
+			}
+			f->sql_when = cobc_parse_strdup (expr);
+		} else if (strcasecmp(p1,"AND") == 0
+				|| strcasecmp(p1,"OR") == 0) {
+			if (f->sql_when == NULL) {
+				snprintf(expr,sizeof(expr)-1,"%s %s %s",p2,p3,p4);
+			} else {
+				snprintf(expr,sizeof(expr)-1,"%s %s %s %s %s",f->sql_when,p1,p2,p3,p4);
+				cobc_parse_free (f->sql_when);
+			}
+			f->sql_when = cobc_parse_strdup (expr);
+		} else {
+			cb_warning (warningopt, _("XFD unknown %s %s"), p1, p2);
+		}
+	}
+	hasxfd = 0;
+}
 static struct cb_field *
 cb_code_field (cb_tree x)
 {
@@ -345,7 +480,7 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 {
 	int		i, j, k;
 	int		numrdf, numwhen, numother, numdisp, toother;
-	int		dowhen = 1;
+	int		dowhen = 1, savelbl;
 	char	expr[1024], name[80];
 	struct cb_field *s, *l, *n, *oth, *x;
 
@@ -357,6 +492,7 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 	if (f->flag_sql_group)
 		return f;
 	n = f;
+	savelbl = next_lbl;
 	if (f->sister
 	 && f->sister->redefines == f) {
 		numrdf = numwhen = numother = numdisp = 0;
@@ -411,6 +547,7 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 		}
 		/* Emit When Conditions */
 		if (!dowhen) {
+			next_lbl = savelbl;
 			s = f;
 			do {
 				s->step_count = 0;

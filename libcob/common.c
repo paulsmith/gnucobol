@@ -6064,6 +6064,8 @@ cob_expand_env_string (char *strval)
 					penv = (char *)COB_CONFIG_DIR;
 				} else if (strcmp (ename, "COB_COPY_DIR") == 0) {
 					penv = (char *)COB_COPY_DIR;
+				} else if (strcmp (ename, "COB_SCHEMA_DIR") == 0) {
+					penv = (char *)COB_SCHEMA_DIR;
 				}
 			}
 			if (penv != NULL) {
