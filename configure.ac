@@ -1223,7 +1223,24 @@ AC_ARG_WITH([odbc],
 [AS_HELP_STRING([--with-odbc],
   [(GnuCOBOL) Use ODBC for INDEXED I/O])],
 [ if test "$with_odbc" = "yes"; then
-  AC_DEFINE([WITH_ODBC], [1])
+	PKG_CHECK_MODULES([ODBC], [odbc], [], [#])
+
+	if test -n "$ODBC_CFLAGS"; then
+		CPPFLAGS="$CPPFLAGS $ODBC_CFLAGS"
+	fi
+	AC_CHECK_HEADERS([sql.h sqlext.h], [],
+		AC_MSG_ERROR([sql.h and sqlext.h are required for ODBC]))
+# later on: also allow DB2 (possibly similar to xISAM)
+#	AC_CHECK_HEADERS([sqlcli1.h sqlca.h sqludf.h], [],
+#		AC_MSG_ERROR([sqlcli1.h, sqlca.h, and sqludf.h are required for ODBC (DB2)]))
+
+	if test -n "$ODBC_LIBS"; then
+		LIBS="$LIBS $ODBC_LIBS"
+	fi
+	AC_CHECK_LIB([odbc], [SQLConnect],
+		[AC_DEFINE([WITH_ODBC], [1])
+		],
+		AC_MSG_ERROR([libodbc is required for ODBC]), [])
   fi ],
 [])
 
@@ -1231,13 +1248,23 @@ AC_ARG_WITH([oci],
 [AS_HELP_STRING([--with-oci],
   [(GnuCOBOL) Use Oracle OCI for INDEXED I/O])],
 [ if test "$with_oci" = "yes"; then
+	if test -n "$OCI_CFLAGS"; then
+		CPPFLAGS="$CPPFLAGS $OCI_CFLAGS"
+	elif test -n "$ORACLE_HOME"; then
+		CPPFLAGS="$CPPFLAGS -I${ORACLE_HOME}/rdbms/public"
+	fi
 	AC_CHECK_HEADERS([oci.h], [],
 		AC_MSG_ERROR([oci.h is required for Oracle OCI]))
 
-#	AC_CHECK_LIB([clntsh], [isopen],
-#		[AC_DEFINE([WITH_OCI], [1])
-#		],
-#		AC_MSG_ERROR([libclnt is required for Oracle OCI]), [])
+	if test -n "$OCI_LIBS"; then
+		LIBS="$LIBS $OCI_LIBS"
+	elif test -n "$ORACLE_HOME"; then
+		LIBS="$LIBS -I${ORACLE_HOME}/lib"
+	fi
+	AC_CHECK_LIB([clntsh], [OCIEnvCreate],
+		[AC_DEFINE([WITH_OCI], [1])
+		],
+		AC_MSG_ERROR([libclnt is required for Oracle OCI]), [])
   fi ],
 [])
 

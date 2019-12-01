@@ -1,20 +1,20 @@
 
-2019-10-30  Ron Norman <rjn@inglenet.com> 
+2019-12-01  Simon Sobisch <simonsobisch@gnu.org>
 
-	* sqlxfdgen.c: Starter version to create DDL/XD files from record
-			descriptions and $XFD directives (more to come)
+	* configure.ac: new options --with-indexed=odbc/oci, supporting
+	  ODBC_CFLAGS ODBC_LIBS OCI_CFLAGS OCI_LIBS
 
 2019-10-24  Ron Norman <rjn@inglenet.com> 
 
 	* configure.ac: The -with-indexed now check that the handler had
-				also been include via -with-db|lmdb|cisam|disam|vbisam
+	  also been include via -with-db|lmdb|cisam|disam|vbisam
 
 2019-10-21  Ron Norman <rjn@inglenet.com> 
 
 	* configure.ac: Updated for multiple INDEXED file handlers
-	               --with-indexed=db|lmdb|cisam|disam|vbisam defines default
-				   handler. If multiple of C/D/VB-ISAM are used then they are 
-				   built as a shared library and loaded at run time
+	  --with-indexed=db|lmdb|cisam|disam|vbisam defines default
+	  handler. If multiple of C/D/VB-ISAM are used then they are 
+	  built as a shared library and loaded at run time
 
 2019-08-12  Simon Sobisch <simonsobisch@gnu.org>
 
