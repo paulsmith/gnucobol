@@ -708,8 +708,7 @@ AT_CLEANUP
 AT_SETUP([INDEXED File KEYCHECK])
 AT_KEYWORDS([runfile])
 
-# skip if not configured with ISAM
-AT_SKIP_IF([test "$COB_HAS_ISAM" != "yes"])
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -1425,7 +1424,8 @@ AT_DATA([prog.cob], [
            CLOSE TSPFILE.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+# CHECKME do we need -std=mf -w?
+AT_CHECK([$COMPILE -std=mf -w prog.cob], [0], [], [])
 
 AT_CHECK([./prog], [0], [Loading sample data file.
 Sample data file load complete.
@@ -8195,7 +8195,7 @@ AT_DATA([prog.cob], [
 ])
 
 # FIXME: by default comp-x should not be truncated (see rw-branch)
-AT_CHECK([$COMPILE -fnotrun prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fnotrunc prog.cob], [0], [], [])
 
 AT_CHECK([TESTOUT=TEST-OUT $COBCRUN_DIRECT ./prog], [0],
 [FCD SIZE 00216
@@ -8223,7 +8223,6 @@ AT_DATA([reference],
 AT_CHECK([diff reference TEST-OUT], [0], [], [])
 
 AT_CLEANUP
-
 
 
 AT_SETUP([RELATIVE Multi-Record])
@@ -11962,8 +11961,11 @@ AT_CHECK([gcdiff reference TEST-FILE], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([Indexed with FH--FCD])
 AT_KEYWORDS([FH--FCD])
+
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -12478,7 +12480,8 @@ AT_DATA([prog.cob], [
            CLOSE TSPFILE.
 ])
 
-AT_CHECK([cobc -x -std=mf -w prog.cob ], [0], [], [])
+# CHECKME do we need -std=mf -w?
+AT_CHECK([$COMPILE -std=mf -w prog.cob], [0], [], [])
 
 AT_CHECK([./prog], [0], [Other Flags 000.
 File has 0003 keys.

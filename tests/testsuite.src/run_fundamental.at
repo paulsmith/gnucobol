@@ -1538,7 +1538,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 AT_CLEANUP
 
 
-AT_SETUP([GLOBAL FD (1)])
+AT_SETUP([GLOBAL FD (RELATIVE 1)])
 AT_KEYWORDS([fundamental])
 
 AT_DATA([prog.cob], [
@@ -1584,12 +1584,15 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
 
-AT_SETUP([GLOBAL FD (2)])
+AT_SETUP([GLOBAL FD (INDEXED 1)])
 AT_KEYWORDS([fundamental])
+
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1634,11 +1637,12 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
 
-AT_SETUP([GLOBAL FD (3)])
+AT_SETUP([GLOBAL FD (RELATIVE 2)])
 AT_KEYWORDS([fundamental])
 
 AT_DATA([prog.cob], [
@@ -1688,8 +1692,10 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([GLOBAL FD (4)])
+AT_SETUP([GLOBAL FD (INDEXED 2)])
 AT_KEYWORDS([fundamental])
+
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

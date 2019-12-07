@@ -441,7 +441,7 @@ cb_build_field_tree (cb_tree level, cb_tree name, struct cb_field *last_field,
 	} else {
 		f->level = lv;
 	}
-	if (f->level == 01 && storage == CB_STORAGE_FILE && fn) {
+	if (storage == CB_STORAGE_FILE && fn && f->level == 01) {
 		if (fn->flag_external) {
 			f->flag_external = 1;
 			current_program->flag_has_external = 1;
@@ -464,11 +464,11 @@ cb_build_field_tree (cb_tree level, cb_tree name, struct cb_field *last_field,
 		} else {
 			for (l = r->word->items; l; l = CB_CHAIN (l)) {
 				x = CB_VALUE (l);
-				if (!CB_FIELD_P (x) ||
-				    CB_FIELD (x)->level == 01 ||
-				    CB_FIELD (x)->level == 77 ||
-				    (last_field && f->level == last_field->level &&
-				     CB_FIELD (x)->parent == last_field->parent)) {
+				if (!CB_FIELD_P (x)
+				 || CB_FIELD (x)->level == 01
+				 || CB_FIELD (x)->level == 77
+				 || (last_field && last_field->level == f->level
+				  && last_field->parent == CB_FIELD (x)->parent)) {
 					redefinition_warning (name, x);
 					break;
 				}

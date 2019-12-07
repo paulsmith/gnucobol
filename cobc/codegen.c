@@ -1906,6 +1906,7 @@ output_local_base_cache (void)
 
 	local_base_cache = list_cache_sort (local_base_cache, &base_cache_cmp);
 	for (blp = local_base_cache; blp; blp = blp->next) {
+		// if (!blp->f->count) continue;
 		if (blp->f->index_type == CB_INT_INDEX) {
 			output_local ("int		%s%d;",
 				      CB_PREFIX_BASE, blp->f->id);
@@ -7525,38 +7526,35 @@ output_handler (struct cb_statement *stmt)
  * set the current address of the field at OPEN time
  */
 static void
-output_file_variable (cb_tree x, struct cb_file *fl, struct cb_statement *p, const char *set_field, int always)
+output_file_variable (cb_tree x, struct cb_file *fl,
+	struct cb_funcall *c, const char *set_field, int always)
 {
-	struct cb_funcall	*c;
 	struct cb_field		*f;
-	int			set_address;
-	if (x == NULL)
-		return;
-	 if (!CB_REF_OR_FIELD_P (x))
-		 return;
+
+	if (x == NULL || !CB_REF_OR_FIELD_P (x)) return;
+
 	f = cb_code_field(x);
-	if (f) {
-		if (f->flag_local
-		 || f->flag_item_based
-		 || f->flag_local_storage
-		 || f->storage == CB_STORAGE_LINKAGE
-		 || f->storage == CB_STORAGE_LOCAL)
-			set_address = 1;
-		else
-			set_address = 0;
-		if (set_address
-		&& p->body
-		&& CB_TREE_TAG (CB_VALUE(p->body)) == CB_TAG_FUNCALL) {
-			c = CB_FUNCALL (CB_VALUE(p->body));
-			if (strcmp(c->name,"cob_open") == 0
-			 || strcmp(c->name,"cob_extfh_open") == 0
-			 || always) {
-				output_prefix ();
-				output ("%s%s->%s = ", CB_PREFIX_FILE, fl->cname, set_field);
-				output_param (x, -1);
-				output (";\n");
-			}
-		}
+	if (!f) return;
+
+	/* Check: do we need to set the fields address at OPEN time? */
+	if (f->flag_local
+	 || f->flag_item_based
+	 || f->flag_local_storage
+	 || f->storage == CB_STORAGE_LINKAGE
+	 || f->storage == CB_STORAGE_LOCAL) {
+		/* result: yes */
+	} else {
+		return;
+	}
+
+	if (strcmp(c->name, "cob_open") == 0
+	 || strcmp(c->name, "cob_extfh_open") == 0
+	 || always) {
+		output_prefix ();
+		output ("%s%s->%s = ", CB_PREFIX_FILE, fl->cname, set_field);
+		output_param (x, -1);
+		output (";");
+		output_newline ();
 	}
 }
 
@@ -7571,7 +7569,6 @@ output_stmt (cb_tree x)
 	struct cb_if		*ip;
 	struct cb_para_label	*pal;
 	struct cb_set_attr	*sap;
-	struct cb_file		*fl;
 	struct cb_field		*f1, *f2;
 	FILE			*savetarget;
 	char	*px;
@@ -7580,7 +7577,6 @@ output_stmt (cb_tree x)
 #endif
 	size_t			size;
 	int			code, skip_else;
-	char			assgn[80];
 
 	stack_id = 0;
 	if (x == NULL) {
@@ -7640,48 +7636,59 @@ output_stmt (cb_tree x)
 			last_line = x->source_line;
 		}
 
-		if (!p->file && (p->ex_handler || p->not_ex_handler)) {
-			output_line ("COB_RESET_EXCEPTION (0);");
-		} else
-		if (!p->file 
-		 && cobc_wants_debug) {
-			output_line ("cob_global_exception = -1;");
-		}
+		if (!p->file) {
 
-
-		if (p->file) {
-			fl = CB_FILE (p->file);
-
-			if (fl->organization == COB_ORG_RELATIVE) {
-				output_file_variable (fl->key, fl, p, "keys[0].field", 1);
-			}
-			output_file_variable (fl->assign, fl, p, "assign", 0);
-		}
-
-		if(p->file) {
-			fl = CB_FILE (p->file);
-			if(p->flag_retry_forever) {
-				strcpy(assgn,"COB_RETRY_FOREVER");
+			if (p->ex_handler || p->not_ex_handler) {
+				output_line ("COB_RESET_EXCEPTION (0);");
 			} else
-			if(p->flag_retry_times) {
-				strcpy(assgn,"COB_RETRY_TIMES");
+			if (cobc_wants_debug) {
+				output_line ("cob_global_exception = -1;");
+			}
+
+		} else {
+
+			const char			*retry_mode;
+			struct cb_file		*fl = CB_FILE (p->file);
+			
+			if (p->body && CB_VALUE (p->body)
+			 && CB_TREE_TAG (CB_VALUE (p->body)) == CB_TAG_FUNCALL) {
+				struct cb_funcall	*c = CB_FUNCALL (CB_VALUE (p->body));
+				if (fl->organization == COB_ORG_RELATIVE) {
+					output_file_variable (fl->key, fl, c, "keys[0].field", 1);
+				}
+				output_file_variable (fl->assign, fl, c, "assign", 0);
+
+			/* LCOV_EXCL_START */
+			} else {
+				cobc_err_msg ("unexpected state");
+				COBC_ABORT ();
+			}
+			/* LCOV_EXCL_END */
+
+			if (p->flag_retry_forever) {
+				retry_mode = "COB_RETRY_FOREVER";
+			} else
+			if (p->flag_retry_times) {
 				output_prefix ();
 				output ("%s%s->retry_times = ", CB_PREFIX_FILE, fl->cname);
 				output_integer (p->retry);
-				output (";\n");
+				output (";");
+				output_newline ();
+				retry_mode = "COB_RETRY_TIMES";
 			} else
-			if(p->flag_retry_seconds) {
-				strcpy(assgn,"COB_RETRY_SECONDS");
+			if (p->flag_retry_seconds) {
 				output_prefix ();
 				output ("%s%s->retry_seconds = ", CB_PREFIX_FILE, fl->cname);
 				output_integer (p->retry);
-				output (";\n");
+				output (";");
+				output_newline ();
+				retry_mode = "COB_RETRY_SECONDS";
 			} else {
-				strcpy(assgn,"0");
+				retry_mode = "0";
 			}
-
-			output_line ("%s%s->retry_mode = %s;", CB_PREFIX_FILE, fl->cname,assgn);
+			output_line ("%s%s->retry_mode = %s;", CB_PREFIX_FILE, fl->cname, retry_mode);
 		}
+
 		if (p->null_check) {
 			output_stmt (p->null_check);
 		}
@@ -10183,15 +10190,11 @@ setup_param (cb_tree l, int *is_value_parm, int *is_any_numeric)
 
 /* Set given parameter address to NULL */
 static void
-setnull_param (cb_tree l, char *cmt)
+setnull_param (cb_tree l)
 {
 	struct cb_field *f;
 	f = cb_code_field (CB_VALUE (l));
 
-	if(*cmt >= ' ') {
-		output_line ("/* %s */",cmt);
-		*cmt = 0;
-	}
 	output_line ("%s%d.data = NULL;", CB_PREFIX_FIELD, f->id);
 	return;
 }
@@ -10421,8 +10424,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	struct base_list	*bl;
 	struct literal_list	*m;
 	const char		*s;
-	char			fdname[48];
-	char			key_ptr[64], comment[80];
 	int			i, j;
 	cob_u32_t		inc;
 	unsigned int		name_hash;
@@ -10892,9 +10893,9 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	 && !prog->flag_chained
 	 && prog->prog_type != COB_MODULE_TYPE_FUNCTION
 	 && cb_list_length(parameter_list) > 0) {
-		strcpy (comment,"No sticky-linkage so NULL LINKAGE addresses");
+		output_line ("/* No sticky-linkage so NULL LINKAGE addresses */");
 		for (l2 = parameter_list; l2; l2 = CB_CHAIN (l2)) {
-			setnull_param (l2, comment);
+			setnull_param (l2);
 		}
 	}
 
@@ -11388,8 +11389,9 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		fl = CB_FILE(CB_VALUE (l));
 		if (fl->record
 	 	&& (cb_flag_dump & COB_DUMP_FD)) {
-			sprintf(fdname,"FD %s",fl->name);
-			output_line ("/* Dump %s */",fdname);
+			char			fdname[48];
+			sprintf (fdname, "FD %s", fl->name);
+			output_line ("/* Dump %s */", fdname);
 			output_line ("cob_dump_field (-1, \"%s\", NULL, 0, 0);", fdname);
 			output_line ("cob_dump_field (-2, (const char*)%s%s, NULL, 0, 0);",
 							CB_PREFIX_FILE, fl->cname);
@@ -11489,13 +11491,15 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			output_line ("cob_close (%s%s, NULL, COB_CLOSE_NORMAL, 1);",
 					CB_PREFIX_FILE, fl->cname);
 			if (!fl->flag_external) {
+				char			key_ptr[64];
 				if (fl->organization == COB_ORG_RELATIVE
 				 || fl->organization == COB_ORG_INDEXED) {
-					sprintf (key_ptr,"&%s%s",CB_PREFIX_KEYS, fl->cname);
+					sprintf (key_ptr, "&%s%s", CB_PREFIX_KEYS, fl->cname);
 				} else {
-					strcpy(key_ptr,"NULL");
+					strcpy (key_ptr,"NULL");
 				}
-				output_line ("cob_file_free (&%s%s,%s);",CB_PREFIX_FILE, fl->cname,key_ptr);
+				output_line ("cob_file_free (&%s%s,%s);",
+					CB_PREFIX_FILE, fl->cname, key_ptr);
 			}
 		} else {
 			output_line ("cob_cache_free (%s%s);",

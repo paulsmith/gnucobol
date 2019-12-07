@@ -864,6 +864,7 @@ struct cb_field {
 	char	*	sql_name;			/* Defined SQL field name */
 	char	*	sql_date_format;	/* Date field format string */
 	char	*	sql_when;			/* WHEN condition */
+
 	/* Flags */
 	unsigned char flag_base;		/* Has memory allocation */
 	unsigned char flag_external;		/* EXTERNAL */
@@ -917,15 +918,17 @@ struct cb_field {
 	unsigned int flag_comp_1	: 1;	/* Is USAGE COMP-1 */
 	unsigned int flag_volatile	: 1;	/* VOLATILE */
 
-	unsigned int flag_validated	: 1;	/* 'usage' was validated */
-	unsigned int flag_ignore_sync	: 1;	/* Ignore SYNCHRONIZED */
-	unsigned int flag_usage_defined	: 1;	/* 'usage' was specifically coded */
 	unsigned int flag_sql_binary	: 1;	/* Store field as BINARY */
 	unsigned int flag_sql_char	: 1;		/* Store field as CHAR */
 	unsigned int flag_sql_varchar : 1;		/* Store field as VARCHAR */
 	unsigned int flag_sql_numeric : 1;		/* Store field as DECIMAL */
 	unsigned int flag_sql_date : 1;			/* Store field as DATE */
 	unsigned int flag_sql_group : 1;		/* Keep group as a field */
+	unsigned int flag_validated : 1;	/* 'usage' was validated */
+	unsigned int flag_usage_defined : 1;	/* 'usage' was specifically coded */
+
+	unsigned int flag_ignore_sync : 1;	/* Ignore SYNCHRONIZED */
+
 };
 
 #define CB_FIELD(x)		(CB_TREE_CAST (CB_TAG_FIELD, struct cb_field, x))

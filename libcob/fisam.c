@@ -643,7 +643,7 @@ isam_file_delete (cob_file_api *a, cob_file *f, char *filename)
 #if defined(WITH_DISAM)
 	struct stat	st;
 #endif
-	char	file_name_buf [COB_FILE_MAX+1];
+	char	file_name_buf [COB_FILE_BUFF];
 
 	COB_UNUSED (a);
 	COB_UNUSED (f);
@@ -652,9 +652,11 @@ isam_file_delete (cob_file_api *a, cob_file *f, char *filename)
 	file_name_buf[COB_FILE_MAX] = 0;
 	unlink (file_name_buf);
 	snprintf (file_name_buf, (size_t)COB_FILE_MAX, "%s.dat", filename);
+	file_name_buf[COB_FILE_MAX] = 0;
 #if defined(WITH_DISAM)
 	if (stat(file_name_buf, &st) != 0) {	/* Micro Focus naming style has no .dat */
 		snprintf (file_name_buf, (size_t)COB_FILE_MAX, "%s", filename);
+		file_name_buf[COB_FILE_MAX] = 0;
 	}
 #endif
 	unlink (file_name_buf);
