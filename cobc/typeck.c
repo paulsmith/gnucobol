@@ -3138,6 +3138,42 @@ validate_relative_key_field (struct cb_file *file)
 	}
 }
 
+static cb_tree
+cb_validate_crt_status (cb_tree ref, cb_tree field_tree) {
+	struct cb_field	*field;
+	/* LCOV_EXCL_START */
+	if (ref == NULL || !CB_REFERENCE_P (ref)) {
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"cb_validate_crt_status", "ref");;
+		COBC_ABORT ();
+	}
+	/* LCOV_EXCL_STOP */
+	if (field_tree == NULL) {
+		field_tree = cb_ref (ref);
+	}
+	if (field_tree == cb_error_node) {
+		return NULL;
+	}
+	if (!CB_FIELD_P (field_tree)) {
+		cb_error_x (ref, _("'%s' is not a valid data name"), cb_name (ref));
+		return NULL;
+	}
+	field = CB_FIELD (field_tree);
+	if (field->storage != CB_STORAGE_WORKING
+	 && field->storage != CB_STORAGE_LOCAL) {
+		cb_error_x (ref,
+			_("CRT STATUS item '%s' should be defined in "
+			  "WORKING-STORAGE or LOCAL-STORAGE"), field->name);
+		return NULL;
+	}
+	if (field->size != 4) {
+		cb_error_x (ref, _("'%s' CRT STATUS must be 4 characters long"),
+			field->name);
+		return NULL;
+	}
+	return ref;
+}
+
 void
 cb_validate_program_data (struct cb_program *prog)
 {
@@ -3248,28 +3284,26 @@ cb_validate_program_data (struct cb_program *prog)
 		}
 	}
 	if (prog->crt_status) {
-		x = cb_ref (prog->crt_status);
-		if (x == cb_error_node) {
-			prog->crt_status = NULL;
-		} else if (CB_FIELD(x)->size != 4) {
-			cb_error_x (prog->crt_status, _("'%s' CRT STATUS must be 4 characters long"),
-				    cb_name (prog->crt_status));
-			prog->crt_status = NULL;
-		}
+		prog->crt_status = cb_validate_crt_status (prog->crt_status, NULL);
 	} else {
 		/* TO-DO: Add to registers list */
 		l = cb_build_reference ("COB-CRT-STATUS");
-		p = CB_FIELD (cb_build_field (l));
-		p->usage = CB_USAGE_DISPLAY;
-		p->pic = CB_PICTURE (cb_build_picture ("9(4)"));
-		cb_validate_field (p);
-		p->flag_no_init = 1;
-		/* Do not initialize/bump ref count here
-		p->values = CB_LIST_INIT (cb_zero);
-		p->count++;
-		*/
-		CB_FIELD_ADD (prog->working_storage, p);
-		prog->crt_status = l;
+		x = cb_try_ref (l);
+		if (x == cb_error_node) {
+			p = CB_FIELD (cb_build_field (l));
+			p->usage = CB_USAGE_DISPLAY;
+			p->pic = CB_PICTURE (cb_build_picture ("9(4)"));
+			cb_validate_field (p);
+			p->flag_no_init = 1;
+			/* Do not initialize/bump ref count here
+			p->values = CB_LIST_INIT (cb_zero);
+			p->count++;
+			*/
+			CB_FIELD_ADD (prog->working_storage, p);
+			prog->crt_status = l;
+		} else {
+			prog->crt_status = cb_validate_crt_status (l, x);
+		}
 	}
 
 	/* Resolve all references so far */
@@ -6052,49 +6086,22 @@ is_reference_with_value (cb_tree pos)
 
 }
 
-static COB_INLINE COB_A_INLINE int
-value_has_picture_clause (cb_tree pos)
+static int
+numeric_screen_pos_type (struct cb_field *pos)
 {
-	return (CB_FIELD ((CB_REFERENCE (pos))->value))->pic != NULL;
-}
-
-static COB_INLINE COB_A_INLINE int
-value_pic_is_numeric (cb_tree pos)
-{
-	return (CB_FIELD ((CB_REFERENCE (pos))->value))->pic->category == CB_CATEGORY_NUMERIC;
-}
-
-static COB_INLINE COB_A_INLINE int
-value_pic_has_no_scale (cb_tree pos)
-{
-	return (CB_FIELD ((CB_REFERENCE (pos))->value))->pic->scale == 0;
+	return pos->pic
+		&& pos->pic->category == CB_CATEGORY_NUMERIC
+		&& pos->pic->scale == 0;
 }
 
 static int
-numeric_screen_pos_type (cb_tree pos)
+numeric_children_screen_pos_type (struct cb_field* child)
 {
-	return is_reference_with_value (pos)
-		&& value_has_picture_clause (pos)
-		&& value_pic_is_numeric (pos)
-		&& value_pic_has_no_scale (pos);
-}
-
-static int
-has_children (cb_tree pos)
-{
-	return (CB_FIELD ((CB_REFERENCE (pos))->value))->children != NULL;
-}
-
-static int
-children_are_numeric (cb_tree pos)
-{
-	struct cb_field	*child
-		= (CB_FIELD ((CB_REFERENCE (pos))->value))->children;
+	child = child->children;
+	if (!child) return 0;
 
 	for (; child; child = child->sister) {
-		if (!(child->pic
-		      && child->pic->category == CB_CATEGORY_NUMERIC
-		      && child->pic->scale == 0)) {
+		if (!numeric_screen_pos_type (child)) {
 			return 0;
 		}
 	}
@@ -6103,36 +6110,43 @@ children_are_numeric (cb_tree pos)
 }
 
 static int
-numeric_children_screen_pos_type (cb_tree pos)
-{
-	return is_reference_with_value (pos)
-		&& has_children (pos)
-		&& children_are_numeric (pos);
-}
-
-static int
 valid_screen_pos (cb_tree pos)
 {
-	int	size;
+	cb_tree pos_ref = pos;
+	int	size = -1;
 
 	/* Find size of pos value, if possible */
-	if (CB_NUMERIC_LITERAL_P (pos)) {
-		size = (CB_LITERAL (pos))->size;
-	} else if (numeric_screen_pos_type (pos)) {
-		size = (CB_FIELD ((CB_REFERENCE (pos))->value))->pic->size;
-	} else if (numeric_children_screen_pos_type (pos)) {
-		size = (CB_FIELD ((CB_REFERENCE (pos))->value))->size;
-	} else if (pos == cb_zero) {
-		cb_error_x (pos, _("cannot specify figurative constant ZERO in AT clause"));
+	if (CB_INVALID_TREE (pos)) {
 		return 0;
-	} else {
-		cb_error_x (pos, _("value in AT clause is not numeric"));
+	}
+	if (CB_REFERENCE_P (pos)) {
+		pos = cb_ref (pos);
+	}
+	if (CB_LITERAL_P (pos)) {
+		if (CB_TREE_CATEGORY (pos) == CB_CATEGORY_NUMERIC) {
+			size = CB_LITERAL (pos)->size;
+		} else {
+			size = -1;
+		}
+	} else if (CB_FIELD_P (pos)) {
+		struct cb_field *field = CB_FIELD (pos);
+		if (numeric_screen_pos_type (field)) {
+			size = field->pic->size;
+		} else if (numeric_children_screen_pos_type (field)) {
+			size = field->size;
+		}
+	} else if (pos == cb_zero) {
+		cb_error_x (pos_ref, _("cannot specify figurative constant ZERO in AT clause"));
+		return 0;
+	}
+	if (size == -1) {
+		cb_error_x (pos_ref, _("value in AT clause is not numeric"));
 		return 0;
 	}
 
 	/* Check if size is valid. If it isn't, display error. */
 	if (size != 4 && size != 6) {
-		cb_error_x (pos, _("value in AT clause must have 4 or 6 digits"));
+		cb_error_x (pos_ref, _("value in AT clause must have 4 or 6 digits"));
 		return 0;
 	} else {
 		return 1;
@@ -6140,23 +6154,23 @@ valid_screen_pos (cb_tree pos)
 }
 
 static void
-get_line_and_column_from_pos (const cb_tree pos, cb_tree * const line,
+get_line_and_column_from_pos (const cb_tree pos, cb_tree * const line_or_pos,
 	cb_tree * const column)
 {
 	if (!pos) {
-		*line = NULL;
+		*line_or_pos = NULL;
 		*column = NULL;
 	} else if (CB_PAIR_P (pos)) {
-		*line = CB_PAIR_X (pos);
+		*line_or_pos = CB_PAIR_X (pos);
 		*column = CB_PAIR_Y (pos);
 		/* Note: This must not be done for column where we need the 0,
 		         otherwise screenio.c (extract_line_and_col_vals) would
 				 evaluate the field "line" as a combined position */
-		if (*line == cb_int0) {
-			*line = NULL;
+		if (*line_or_pos == cb_int0) {
+			*line_or_pos = NULL;
 		}
 	} else if (valid_screen_pos (pos)) {
-		*line = pos;
+		*line_or_pos = pos;
 		*column = NULL;
 	}
 }
@@ -7411,12 +7425,12 @@ emit_field_display (const cb_tree x, const cb_tree pos, const cb_tree fgc,
 		    const cb_tree bgc, const cb_tree scroll,
 		    const cb_tree size_is, const cob_flags_t disp_attrs)
 {
-	cb_tree	line = NULL;
+	cb_tree	line_or_pos = NULL;
 	cb_tree	column = NULL;
 
-	get_line_and_column_from_pos (pos, &line, &column);
+	get_line_and_column_from_pos (pos, &line_or_pos, &column);
 	cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
-				     x, line, column, fgc, bgc,
+				     x, line_or_pos, column, fgc, bgc,
 				     scroll, size_is,
 				     cb_flags_t (disp_attrs)));
 }

@@ -706,7 +706,7 @@ pass_cursor_to_program (void)
 		int		sline;
 		int		scolumn;
 		getyx (stdscr, sline, scolumn);
-		sline++;	/* zero-based in curses */
+		sline++; scolumn++;	/* zero-based in curses */
 		if (COB_FIELD_IS_NUMERIC (cursor_field) &&
 			COB_FIELD_TYPE (cursor_field) != COB_TYPE_NUMERIC_DISPLAY) {
 			sline *= 1000;
@@ -748,7 +748,7 @@ get_cursor_from_program (int *line, int *column)
 			}
 			/* LCOV_EXCL_STOP */
 			memcpy (buff, cursor_field->data, maxsize);
-			buff[6] = 0;
+			buff[maxsize + 1] = 0;
 			if (unlikely (!sscanf (buff, "%d", &cursor_pos))) {
 				cob_fatal_error (COB_FERROR_CODEGEN);
 			}
@@ -2174,7 +2174,8 @@ screen_accept (cob_screen *s, const int line, const int column,
 
 	accept_timeout = get_accept_timeout (ftimeout);
 
-	/* Sort input fields on line, column */
+	/* Sort input fields on line, column
+	   --> breaks standard and other vendors compatiblilty "in the order defined" */
 	qsort (cob_base_inp, totl_index,
 	       sizeof(struct cob_inp_struct), compare_yx);
 

@@ -817,10 +817,10 @@ AC_ARG_WITH([curses],
      check (default), ncursesw, ncurses, pdcurses, curses, no])],
   [case "$with_curses" in
     ncursesw | ncurses | pdcurses | curses | check | no)
-		USE_NCURSES="$with_curses"
+		USE_CURSES="$with_curses"
 		;;
 	"yes")
-		USE_NCURSES="check"
+		USE_CURSES="check"
 		;;
     *)
 		AC_MSG_ERROR([invalid value "$with_curses" for --with-curses,
@@ -830,84 +830,84 @@ AC_ARG_WITH([curses],
   no  (disable curses usage)])
 		;;
   esac],
-  [USE_NCURSES="check"])
+  [USE_CURSES="check"])
 
-if test "$USE_NCURSES" = "ncursesw" -o "$USE_NCURSES" = "check"; then
+if test "$USE_CURSES" = "ncursesw" -o "$USE_CURSES" = "check"; then
   AC_CHECK_LIB([ncursesw], [initscr], [], [], [])
   if test "x$ac_cv_lib_ncursesw_initscr" = "xyes"; then
-    AC_CHECK_HEADERS([ncursesw/ncurses.h], [USE_NCURSES="ncursesw"],
-      [AC_CHECK_HEADERS([ncursesw/curses.h], [USE_NCURSES="ncursesw"],
-        [if test "$USE_NCURSES" = "ncursesw"; then
-           USE_NCURSES="missing_header"
+    AC_CHECK_HEADERS([ncursesw/ncurses.h], [USE_CURSES="ncursesw"],
+      [AC_CHECK_HEADERS([ncursesw/curses.h], [USE_CURSES="ncursesw"],
+        [if test "$USE_CURSES" = "ncursesw"; then
+           USE_CURSES="missing_header"
          fi], [])], [])
-    if test "$USE_NCURSES" = "ncursesw"; then
+    if test "$USE_CURSES" = "ncursesw"; then
       LIBCOB_LIBS="$LIBCOB_LIBS -lncursesw"
     fi
   else
-    if test "$USE_NCURSES" = "ncursesw"; then
-      USE_NCURSES="missing_lib"
+    if test "$USE_CURSES" = "ncursesw"; then
+      USE_CURSES="missing_lib"
     fi
   fi
 fi
 
-if test "$USE_NCURSES" = "ncurses" -o "$USE_NCURSES" = "check"; then
+if test "$USE_CURSES" = "ncurses" -o "$USE_CURSES" = "check"; then
   AC_CHECK_LIB([ncurses], [initscr], [], [], [])
   if test "x$ac_cv_lib_ncurses_initscr" = "xyes"; then
-    AC_CHECK_HEADERS([ncurses.h], [USE_NCURSES="ncurses"],
-      [AC_CHECK_HEADERS([ncurses/ncurses.h], [USE_NCURSES="ncurses"],
-         [AC_CHECK_HEADERS([curses.h], [USE_NCURSES="ncurses"],
-           [if test "$USE_NCURSES" = "ncurses"; then
-              USE_NCURSES="missing_header"
+    AC_CHECK_HEADERS([ncurses.h], [USE_CURSES="ncurses"],
+      [AC_CHECK_HEADERS([ncurses/ncurses.h], [USE_CURSES="ncurses"],
+         [AC_CHECK_HEADERS([curses.h], [USE_CURSES="ncurses"],
+           [if test "$USE_CURSES" = "ncurses"; then
+              USE_CURSES="missing_header"
             fi], [])], [])], [])
-    if test "$USE_NCURSES" = "ncurses"; then
+    if test "$USE_CURSES" = "ncurses"; then
       LIBCOB_LIBS="$LIBCOB_LIBS -lncurses"
     fi
   else
-    if test "$USE_NCURSES" = "ncurses"; then
-      USE_NCURSES="missing_lib"
+    if test "$USE_CURSES" = "ncurses"; then
+      USE_CURSES="missing_lib"
     fi
   fi
 fi
 
 
-if test "$USE_NCURSES" = "pdcurses" -o "$USE_NCURSES" = "check"; then
+if test "$USE_CURSES" = "pdcurses" -o "$USE_CURSES" = "check"; then
   AC_CHECK_LIB([pdcurses], [initscr], [], [], [])
   if test "x$ac_cv_lib_pdcurses_initscr" = "xyes"; then
-    AC_CHECK_HEADERS([pdcurses.h], [USE_NCURSES="pdcurses"],
-      [AC_CHECK_HEADERS([curses.h], [USE_NCURSES="pdcurses"],
-         [if test "$USE_NCURSES" = "pdcurses"; then
-            USE_NCURSES="missing_header"
+    AC_CHECK_HEADERS([pdcurses.h], [USE_CURSES="pdcurses"],
+      [AC_CHECK_HEADERS([curses.h], [USE_CURSES="pdcurses"],
+         [if test "$USE_CURSES" = "pdcurses"; then
+            USE_CURSES="missing_header"
           fi], [])], [])
-    if test "$USE_NCURSES" = "pdcurses"; then
+    if test "$USE_CURSES" = "pdcurses"; then
       LIBCOB_LIBS="$LIBCOB_LIBS -lpdcurses"
     fi
   else
-    if test "$USE_NCURSES" = "pdcurses"; then
-      USE_NCURSES="missing_lib"
+    if test "$USE_CURSES" = "pdcurses"; then
+      USE_CURSES="missing_lib"
     fi
   fi
 fi
 
-if test "$USE_NCURSES" = "curses" -o "$USE_NCURSES" = "check"; then
+if test "$USE_CURSES" = "curses" -o "$USE_CURSES" = "check"; then
   AC_CHECK_LIB([curses], [initscr], [], [], [])
   if test "x$ac_cv_lib_curses_initscr" = "xyes"; then
-    AC_CHECK_HEADERS([curses.h], [USE_NCURSES="curses"],
-      [if test "$USE_NCURSES" = "curses"; then
-         USE_NCURSES="missing_header"
+    AC_CHECK_HEADERS([curses.h], [USE_CURSES="curses"],
+      [if test "$USE_CURSES" = "curses"; then
+         USE_CURSES="missing_header"
        fi], [])
-    if test "$USE_NCURSES" != "no"; then
+    if test "$USE_CURSES" != "no"; then
       LIBCOB_LIBS="$LIBCOB_LIBS -lcurses"
     fi
   fi
 else
-  if test "$USE_NCURSES" = "curses"; then
-    USE_NCURSES="missing_lib"
+  if test "$USE_CURSES" = "curses"; then
+    USE_CURSES="missing_lib"
   fi
 fi
 
-case "$USE_NCURSES" in
+case "$USE_CURSES" in
   check)
-	USE_NCURSES="not_found"
+	USE_CURSES="not_found"
 	AC_DEFINE([WITH_CURSES], ["no curses found"])
 	;;
   no)
@@ -934,7 +934,7 @@ case "$USE_NCURSES" in
 esac
 
 
-if test "$USE_NCURSES" = "ncurses" -o "$USE_NCURSES" = "ncursesw"; then
+if test "$USE_CURSES" = "ncurses" -o "$USE_CURSES" = "ncursesw"; then
     AC_MSG_CHECKING([for ncurses _nc_freeall function])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[
     extern void _nc_freeall (void);]],
@@ -951,7 +951,7 @@ if test "$USE_NCURSES" = "ncurses" -o "$USE_NCURSES" = "ncursesw"; then
     [])
 fi
 
-if test "$USE_NCURSES" != "no" -a "$USE_NCURSES" != "not_found"; then
+if test "$USE_CURSES" != "no" -a "$USE_CURSES" != "not_found"; then
 	AC_MSG_CHECKING([for curses color_set function])
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 	#ifdef HAVE_NCURSESW_NCURSES_H
@@ -1906,7 +1906,7 @@ COB_HAS_ODBC=$with_odbc
 COB_HAS_OCI=$with_oci
 COB_HAS_OCEXTFH=$with_index_extfh
 
-if test "$USE_NCURSES" = "not_found" -o "$USE_NCURSES" = "no"; then
+if test "$USE_CURSES" = "not_found" -o "$USE_CURSES" = "no"; then
 	COB_HAS_CURSES=no
 else
 	COB_HAS_CURSES=yes
@@ -2035,7 +2035,7 @@ else
 fi
 AC_MSG_NOTICE([ Use gettext for international messages:      ${USE_NLS}])
 AC_MSG_NOTICE([ Use fcntl for file locking:                  ${ac_cv_func_fcntl}])
-case "$USE_NCURSES" in
+case "$USE_CURSES" in
   not_found)
     AC_MSG_NOTICE([ screen I/O (no curses found):                NO])
 	;;
@@ -2043,14 +2043,14 @@ case "$USE_NCURSES" in
     AC_MSG_NOTICE([ screen I/O (disabled):                       NO])
 	;;
   *)
-    AC_MSG_NOTICE([ Use ncurses/pdcurses/curses for screen I/O:  ${USE_NCURSES}])
+    AC_MSG_NOTICE([ Use curses library for screen I/O:           ${USE_CURSES}])
 	;;
 esac
 if test "$with_debug_log" = "yes"; then
   AC_MSG_NOTICE([ Enable GnuCOBOL developer logging            yes])
 fi
 if test "$with_seqra_extfh" = "yes"; then
-  AC_MSG_NOTICE([ Use external SEQ/RAN file handler            yes])
+  AC_MSG_NOTICE([ Use external SEQ/RAN file handler:           yes])
 fi
 if test "$with_index_extfh" = "yes"; then
   AC_MSG_NOTICE([ Use external ISAM file handler               yes])
@@ -2080,6 +2080,6 @@ fi
 if test "$COB_HAS_ISAM" = no; then
   AC_MSG_NOTICE([ ISAM I/O (no handler configured):            NO])
 fi
-AC_MSG_NOTICE([ Use libxml2 for XML I/O                      ${COB_HAS_XML2}])
-AC_MSG_NOTICE([ Use cJSON for JSON I/O                       $with_cjson])  
+AC_MSG_NOTICE([ Use libxml2 for XML I/O:                     ${COB_HAS_XML2}])
+AC_MSG_NOTICE([ Use cJSON for JSON I/O:                      $with_cjson])  
 unset DEFINE_DL

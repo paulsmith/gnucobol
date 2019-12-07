@@ -108,7 +108,13 @@ CB_FLAG (cb_flag_alt_ebcdic, 0, "alternate-ebcdic",
 	_("  -falternate-ebcdic    use restricted ASCII to EBCDIC translate"))
 
 CB_FLAG (cb_flag_extra_brace, 0, "extra-brace",
-	_("  -fextra-brace         generate extra braces in generated C code"))
+	_("  -fextra-brace         generate extra braces in C source"))
+
+CB_FLAG (cb_flag_c_line_directives, 0, "gen-c-line-directives",
+	_("  -fgen-c-line-directives\tgenerate source location directives in C code"))
+
+CB_FLAG (cb_flag_c_labels, 0, "gen-c-labels",
+	_("  -fgen-c-labels       generate extra labels in C sources"))
 
 CB_FLAG (cb_flag_correct_numeric, 0, "correct-numeric",
 	_("  -fcorrect-numeric     attempt correction of invalid numeric display items"))

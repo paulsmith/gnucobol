@@ -23,11 +23,35 @@
 	  an exernal file description and SQL
 	  and adding support for ODBC/OCI use for INDEXED file
 
+2019-11-18  Simon Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_key_components): extracted
+	  from (output_file_initialization)
+	* codegen.c (perform_label): minor refactoring
+	* codgenc.c: call output_storage instead of output where the result is
+	  fixed to be in the header
+	* tree.h, parser.y: added flag_entry_for_goto to cb_field
+
 2019-11-18  Ron Norman <rjn@inglenet.com>
 
 	* tree.h, parser.y, typeck.c: Updates to support 
 	  SET ... TO ADDRESS OF FH--FCD OF file
 	  SET ... TO ADDRESS OF FH--KEYDEF OF file
+
+2019-11-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_header): use current output target instead of
+	  file pointer
+	* codegen.c (output_indent): replaced by new functions
+	  (output_block_open, output_block_close)
+	* codegen.c: count lines in generated source file in output_line_number,
+	  to do so adjust many calls to use the "correct" output function and never
+	  include a newline within the output string
+	* codegen.c (codegen), tree.h, cobc.c: adjust function to get generated
+	  sourcefile name, keep static reference to it in "output_name"
+	* flag.def, cobc.c: added flags for adjusted C source generation
+	  -fgen-c-line-directives and -fgen-c-labels
+	* codegen.c (output_cobol_info, output_c_info): added
 
 2019-10-27  Ron Norman <rjn@inglenet.com>
 
@@ -39,6 +63,11 @@
 	* parser.y (end_scope_of_program_name): free correct program when a
 	  nested program has the same name as a containing program (bug #587).
 	* codegen.c, parser.y: fixed minor memory leaks.
+
+2019-10-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (valid_screen_pos): inlining some macro-like functions back
+	* typeck.c (cb_validate_crt_status, valid_screen_pos): more validation
 
 2019-09-30  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -102,6 +131,11 @@
 	          multiple of sizeof(long long)
 	* cobc.c: Use COB_MEM_SIZE as size of cob_mem_struct
 	          To avoid aborts on system that requires aligned data
+
+2019-09-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l, parser.y: allow LENGTH *OF* to remove the ambiguity for
+	  REPOSITORY. FUNCTION LENGTH INTRINSIC. and register LENGTH OF
 
 2019-09-09  Ron Norman <rjn@inglenet.com>
 

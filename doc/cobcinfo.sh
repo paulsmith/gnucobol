@@ -22,7 +22,7 @@
 # use GREP from configure, passed when called from Makefile
 GREP_ORIG="$GREP";
 if test "x$GREP" = "x"; then GREP=grep; fi
-if test "x$SED" = "x"; then SED=sed; fi
+if test "x$SED" = "x" ; then SED=sed  ; fi
 
 # default to POSIX, Solaris for example uses "tail +"
 if test "x$TAIL_START" = "x"; then TAIL_START="tail -n +"; fi
@@ -83,18 +83,20 @@ _create_file () {
 		$COBC -q --help | $GREP -E "ptions.*:" | cut -d: -f1 | \
 		while read section; do
 			header_found=""
-			$COBC -q --help                | \
+#			FIXME: re-adjust as this currently results in two SIGSEGV
+#			       which are just hidden here (and shouldn't)
+			$COBC -q --help               2>/dev/null | \
 				$GREP    -A2000 "$section" | \
 				$GREP -E -B2000 "^$" -m 1  | \
 				$SED -e 's/^\t/D~/g'            \
-				    -e 's/\t/~/g'              \
-				    -e 's/* NOT \(.\+\)/; @emph{not \1}/g' \
-				    -e 's/* ALWAYS \(.\+\)/; @emph{always \1}/g' \
-				    -e 's/* /; /g' \
-				    -e 's/^    \+/D~/g'         \
-				    -e 's/^ \+//g'                \
-				    -e 's/  \+/~/g'               \
-				    -e 's/<\([^>]\+\)>/@var{\1}/g'| \
+				     -e 's/\t/~/g'              \
+				     -e 's/* NOT \(.\+\)/; @emph{not \1}/g' \
+				     -e 's/* ALWAYS \(.\+\)/; @emph{always \1}/g' \
+				     -e 's/* /; /g' \
+				     -e 's/^    \+/D~/g'         \
+				     -e 's/^ \+//g'                \
+				     -e 's/  \+/~/g'               \
+				     -e 's/<\([^>]\+\)>/@var{\1}/g'| \
 			while IFS='~' read -r name desc; do
 				if test -z "$name"; then continue; fi
 				if test -z "$header_found"; then
@@ -122,9 +124,9 @@ _create_file () {
 			$GREP -E -A2000 -E "ptions.*:" | \
 			$GREP -E -B2000 "^$" -m 1       | \
 			$SED -e 's/^    \+/D~/g'         \
-			    -e 's/^ \+//g'                \
-			    -e 's/  \+/~/g'               \
-			    -e 's/<\([^>]\+\)>/@var{\1}/g'| \
+			     -e 's/^ \+//g'               \
+			     -e 's/  \+/~/g'               \
+			     -e 's/<\([^>]\+\)>/@var{\1}/g'| \
 		while IFS='~' read -r name desc; do
 			if test -z "$name"; then continue; fi
 			if test -z "$header_found"; then
@@ -148,9 +150,9 @@ _create_file () {
 		$COBC -q --list-reserved | \
 			$GREP -E -B9999 "^$" -m 2 | \
 			$SED -e 's/  \+/;/g' \
-			    -e 's/ (Context sensitive/\t(C\/S/g' \
-			    -e 's/(aliased with \([^)]*\))/;@code{\1}/g' \
-			    -e 's/ ;/;/g' | \
+			     -e 's/ (Context sensitive/\t(C\/S/g' \
+			     -e 's/(aliased with \([^)]*\))/;@code{\1}/g' \
+			     -e 's/ ;/;/g' | \
 		while IFS=';' read -r name impl aliases; do
 			if test -z "$name"; then continue; fi
 			if test -z "$header_found"; then

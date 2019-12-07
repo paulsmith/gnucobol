@@ -2512,7 +2512,6 @@ process_command_line (const int argc, char **argv)
 	int 			argnum;
 #endif
 	enum cob_exception_id	i;
-	struct stat		st;
 	char			ext[COB_MINI_BUFF];
 	char			*conf_label;	/* we want a dynamic address for erroc.c, not a static one */
 	char			*conf_entry;
@@ -2895,6 +2894,10 @@ process_command_line (const int argc, char **argv)
 			gflag_set = 1;
 			cb_flag_stack_check = 1;
 			cb_flag_source_location = 1;
+#if 0	/* possibly auto-include: */
+			cb_flag_c_line_directives = 1;
+			cb_flag_c_labels = 1;
+#endif
 			cb_flag_remove_unreachable = 0;
 #ifndef	_MSC_VER
 #ifndef __ORANGEC__
@@ -2936,14 +2939,16 @@ process_command_line (const int argc, char **argv)
 			/* --save-temps : Save intermediary files */
 			save_temps = 1;
 			if (cob_optarg) {
+				struct stat		st;
+				if (save_temps_dir) {
+					cobc_free (save_temps_dir);
+					save_temps_dir = NULL;
+				}
 				if (stat (cob_optarg, &st) != 0 ||
 				    !(S_ISDIR (st.st_mode))) {
 					cobc_err_msg (_("warning: '%s' is not a directory, defaulting to current directory"),
 						cob_optarg);
 				} else {
-					if (save_temps_dir) {
-						cobc_free (save_temps_dir);
-					}
 					save_temps_dir = cobc_strdup (cob_optarg);
 				}
 			}
@@ -2977,6 +2982,7 @@ process_command_line (const int argc, char **argv)
 		case 'P':
 			/* -P : Generate preproc listing */
 			if (cob_optarg) {
+				struct stat		st;
 				if (cobc_list_dir) {
 					cobc_free (cobc_list_dir);
 					cobc_list_dir = NULL;
@@ -3032,9 +3038,12 @@ process_command_line (const int argc, char **argv)
 			if (strlen (cob_optarg) > COB_SMALL_MAX) {
 				cobc_err_exit (COBC_INV_PAR, "-I");
 			}
-			if (stat (cob_optarg, &st) != 0
-			|| !(S_ISDIR (st.st_mode))) {
-				break;
+			{
+				struct stat		st;
+				if (stat (cob_optarg, &st) != 0
+				 || !(S_ISDIR (st.st_mode))) {
+					break;
+				}
 			}
 #ifdef	_MSC_VER
 			COBC_ADD_STR (cobc_include, " /I \"", cob_optarg, "\"");
@@ -3051,9 +3060,12 @@ process_command_line (const int argc, char **argv)
 			if (strlen (cob_optarg) > COB_SMALL_MAX) {
 				cobc_err_exit (COBC_INV_PAR, "-L");
 			}
-			if (stat (cob_optarg, &st) != 0
-			||  !(S_ISDIR (st.st_mode))) {
-				break;
+			{
+				struct stat		st;
+				if (stat (cob_optarg, &st) != 0
+				 || !(S_ISDIR (st.st_mode))) {
+					break;
+				}
 			}
 #ifdef	_MSC_VER
 			COBC_ADD_STR (cobc_lib_paths, " /LIBPATH:\"", cob_optarg, "\"");
@@ -3753,9 +3765,6 @@ process_run (const char *name)
 	int		ret, status;
 	size_t	curr_size;
 	const char	*buffer;
-#ifdef	_WIN32
-	char		*ptr;
-#endif
 
 	if (cb_compile_level < CB_LEVEL_MODULE) {
 		fputs (_("nothing for -j to run"), stderr);
@@ -3795,6 +3804,7 @@ process_run (const char *name)
 	}
 #ifdef	_WIN32 /* "fix" given output name */
 	if (output_name) {
+		char		*ptr;
 		for (ptr = cobc_buffer; *ptr; ptr++) {
 			if (*ptr == '/') *ptr = '\\';
 		}
@@ -5766,7 +5776,7 @@ print_errors_for_line (const struct list_error * const first_error,
 		       const int line_num)
 {
 	const struct list_error	*err;
-	const int	max_chars_on_line = cb_listing_wide ? 120 : 80;
+	const unsigned int	max_chars_on_line = cb_listing_wide ? 120 : 80;
 	size_t msg_off;
 
 	for (err = first_error; err; err = err->next) {
@@ -6981,6 +6991,10 @@ process_translate (struct filename *fn)
 			 fn->preprocess, fn->translate, fn->source);
 		fflush (stderr);
 	}
+	current_section = NULL;
+	current_paragraph = NULL;
+	current_statement = NULL;
+	cb_source_line = 0;
 
 	/* Open the output file */
 	if (cb_unix_lf) {
@@ -7072,10 +7086,10 @@ process_translate (struct filename *fn)
 	/* Temporarily disable cross-reference during C generation */
 	if (cb_listing_xref) {
 		cb_listing_xref = 0;
-		codegen (current_program, 0);
+		codegen (current_program, fn->translate, 0);
 		cb_listing_xref = 1;
 	} else {
-		codegen (current_program, 0);
+		codegen (current_program, fn->translate, 0);
 	}
 
 	/* Close files */
@@ -7083,7 +7097,7 @@ process_translate (struct filename *fn)
 		cobc_terminate (fn->trstorage);
 	}
 	cb_storage_file = NULL;
-	if (unlikely(fclose (yyout) != 0)) {
+	if (unlikely (fclose (yyout) != 0)) {
 		cobc_terminate (fn->translate);
 	}
 	yyout = NULL;

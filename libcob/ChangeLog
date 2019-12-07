@@ -127,6 +127,12 @@
 	* You can now configure multiple INDEXED file handlers but only one of
 	  C-ISAM, D-ISAM or VB-ISAM
 
+2019-10-15  Simon Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (pass_cursor_to_program): fixed return column being off by -1
+	* screenio.c (get_cursor_from_program): fixed alphanumeric CURSOR to only
+	  work for size 6
+
 2019-10-03  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Removed definition of off_t as it needs to be defined

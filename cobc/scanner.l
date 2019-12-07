@@ -858,6 +858,11 @@ H#[0-9A-Za-z]+ {
 	RETURN_TOK (WORD);
 }
 
+"LENGTH"[ ,;\n]+"OF"/[ .,;\n] {
+	count_lines (yytext);
+	RETURN_TOK (LENGTH_OF);
+}
+
 [A-Z0-9\x80-\xFF]([_A-Z0-9\x80-\xFF-]*[A-Z0-9\x80-\xFF]+)? {
 	struct cb_level_78		*p78;
 	struct cb_intrinsic_table	*cbp;

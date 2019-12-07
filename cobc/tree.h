@@ -991,6 +991,7 @@ struct cb_label {
 	unsigned int		flag_debugging_mode	: 1;	/* DEBUGGING MODE */
 	unsigned int		flag_is_debug_sect	: 1;	/* DEBUGGING sect */
 	unsigned int		flag_skip_label		: 1;	/* Skip label gen */
+	unsigned int		flag_entry_for_goto	: 1;	/* is ENTRY FOR GO TO */
 };
 
 #define CB_LABEL(x)		(CB_TREE_CAST (CB_TAG_LABEL, struct cb_label, x))
@@ -2300,7 +2301,7 @@ extern cb_tree		cobc_tree_cast_check (const cb_tree, const char *,
 
 
 /* codegen.c */
-extern void		codegen (struct cb_program *, const int);
+extern void		codegen (struct cb_program *, const char *, const int);
 extern struct cb_field *chk_field_variable_size (struct cb_field *f);
 extern unsigned int	chk_field_variable_address (struct cb_field *fld);
 

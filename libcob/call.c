@@ -598,20 +598,13 @@ lookup (const char *name)
 	return NULL;
 }
 
-/** encode given name
-  \param name to encode
-  \param name_buff to place the encoded name to
-  \param buff_size available
-  \param fold_case may be COB_FOLD_UPPER or COB_FOLD_LOWER
-  \return size of the encoded name, negative if the buffer size would be exceeded
- */
-int
-cob_encode_program_id (const unsigned char *const name,
-	unsigned char *const name_buff,
-	const int buff_size, const int fold_case)
+static int
+cob_encode_invalid_chars (const unsigned char* const name,
+	unsigned char* const name_buff,
+	const int buff_size, int *external_pos)
 {
 	const unsigned char *s = name;
-	int pos = 0;
+	int pos = *external_pos;
 
 #ifndef	HAVE_DESIGNATED_INITS
 	if (init_valid_char) {
@@ -623,10 +616,7 @@ cob_encode_program_id (const unsigned char *const name,
 		}
 	}
 #endif
-	/* Encode the initial digit */
-	if (unlikely (*name <= (unsigned char)'9' && *name >= (unsigned char)'0')) {
-		name_buff[pos++] = (unsigned char)'_';
-	}
+
 	/* Encode invalid letters */
 	for (; *s; ++s) {
 		if (pos >= buff_size - 3) {
@@ -645,6 +635,31 @@ cob_encode_program_id (const unsigned char *const name,
 			}
 		}
 	}
+
+	*external_pos = pos;
+	return pos;
+}
+
+/** encode given name
+  \param name to encode
+  \param name_buff to place the encoded name to
+  \param buff_size available
+  \param fold_case may be COB_FOLD_UPPER or COB_FOLD_LOWER
+  \return size of the encoded name, negative if the buffer size would be exceeded
+ */
+int
+cob_encode_program_id (const unsigned char *const name,
+	unsigned char *const name_buff,
+	const int buff_size, const int fold_case)
+{
+	int pos = 0;
+	/* Encode the initial digit */
+	if (unlikely (*name <= (unsigned char)'9' && *name >= (unsigned char)'0')) {
+		name_buff[pos++] = (unsigned char)'_';
+	}
+	/* Encode invalid letters */
+	cob_encode_invalid_chars (name, name_buff, buff_size, &pos);
+
 	name_buff[pos] = 0;
 
 	/* Check case folding */
@@ -1738,13 +1753,11 @@ cob_get_s64_param (int n)
 		return cob_get_s64_pic9 (cbl_data, size);
 	case COB_TYPE_NUMERIC_BINARY:
 #ifndef WORDS_BIGENDIAN
-		if (COB_FIELD_BINARY_SWAP (f)) {
-			return cob_get_s64_compx (cbl_data, size);
+		if (!COB_FIELD_BINARY_SWAP (f)) {
+			return cob_get_s64_comp5 (cbl_data, size);
 		}
-		return cob_get_s64_comp5 (cbl_data, size);
-#else
-		return cob_get_s64_compx (cbl_data, size);
 #endif
+		return cob_get_s64_compx (cbl_data, size);
 	case COB_TYPE_NUMERIC_PACKED:
 		return cob_get_s64_comp3 (cbl_data, size);
 	case COB_TYPE_NUMERIC_FLOAT:
@@ -1786,20 +1799,15 @@ cob_get_u64_param (int n)
 	switch (COB_MODULE_PTR->cob_procedure_params[n - 1]->attr->type) {
 	case COB_TYPE_NUMERIC_DISPLAY:
 		return cob_get_u64_pic9 (cbl_data, size);
-
 	case COB_TYPE_NUMERIC_BINARY:
 #ifndef WORDS_BIGENDIAN
-		if (COB_FIELD_BINARY_SWAP (f)) {
-			return cob_get_u64_compx (cbl_data, size);
+		if (!COB_FIELD_BINARY_SWAP (f)) {
+			return cob_get_u64_comp5 (cbl_data, size);
 		}
-		return cob_get_u64_comp5 (cbl_data, size);
-#else
-		return cob_get_u64_compx (cbl_data, size);
 #endif
-
+		return cob_get_u64_compx (cbl_data, size);
 	case COB_TYPE_NUMERIC_PACKED:
 		return cob_get_u64_comp3 (cbl_data, size);
-
 	case COB_TYPE_NUMERIC_FLOAT:
 		dbl = cob_get_comp1 (cbl_data);
 		val = (cob_u64_t)dbl; /* possible data loss is explicit requested */
@@ -1857,28 +1865,22 @@ cob_put_s64_param (int n, cob_s64_t val)
 	case COB_TYPE_NUMERIC_DISPLAY:
 		cob_put_s64_pic9 (val, cbl_data, size);
 		return;
-
 	case COB_TYPE_NUMERIC_BINARY:
 #ifndef WORDS_BIGENDIAN
-		if (COB_FIELD_BINARY_SWAP (f)) {
-			cob_put_s64_compx (val, cbl_data, size);
-		} else {
+		if (!COB_FIELD_BINARY_SWAP (f)) {
 			cob_put_s64_comp5 (val, cbl_data, size);
+			return;
 		}
-#else
-		cob_put_s64_compx (val, cbl_data, size);
 #endif
+		cob_put_s64_compx (val, cbl_data, size);
 		return;
-
 	case COB_TYPE_NUMERIC_PACKED:
 		cob_put_s64_comp3 (val, cbl_data, size);
 		return;
-
 	case COB_TYPE_NUMERIC_FLOAT:
 		flt = (float)val;  /* possible data loss is explicit requested */
 		cob_put_comp1 (flt, cbl_data);
 		return;
-
 	case COB_TYPE_NUMERIC_DOUBLE:
 		dbl = (double)val; /* possible data loss is explicit requested */
 		cob_put_comp2 (dbl, cbl_data);
@@ -1919,28 +1921,22 @@ cob_put_u64_param (int n, cob_u64_t val)
 	case COB_TYPE_NUMERIC_DISPLAY:
 		cob_put_u64_pic9 (val, cbl_data, size);
 		return;
-
 	case COB_TYPE_NUMERIC_BINARY:
 #ifndef WORDS_BIGENDIAN
-		if (COB_FIELD_BINARY_SWAP (f)) {
-			cob_put_u64_compx (val, cbl_data, size);
-		} else {
+		if (!COB_FIELD_BINARY_SWAP (f)) {
 			cob_put_u64_comp5 (val, cbl_data, size);
+			return;
 		}
-#else
-		cob_put_u64_compx (val, cbl_data, size);
 #endif
+		cob_put_u64_compx (val, cbl_data, size);
 		return;
-
 	case COB_TYPE_NUMERIC_PACKED:
 		cob_put_u64_comp3 (val, cbl_data, size);
 		return;
-
 	case COB_TYPE_NUMERIC_FLOAT:
 		flt = (float)val;  /* possible data loss is explicit requested */
 		cob_put_comp1 (flt, cbl_data);
 		return;
-
 	case COB_TYPE_NUMERIC_DOUBLE:
 		dbl = (double)val;  /* possible data loss is explicit requested */
 		cob_put_comp2 (dbl, cbl_data);
