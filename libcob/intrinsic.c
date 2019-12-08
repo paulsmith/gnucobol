@@ -6403,7 +6403,7 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 		date_format_str[COB_DATESTR_MAX] = 0;
 	} else { /* time_present */
 		memcpy (time_format_str, datetime_format_str, COB_TIMESTR_MAX);
-		time_format_str[COB_DATESTR_MAX] = 0;
+		time_format_str[COB_TIMESTR_MAX] = 0;
 	}
 
 	if (date_present && time_present) {
