@@ -1168,6 +1168,11 @@ AT_DATA([prog.cob], [
            MOVE SPACES                       TO TSPFL-RECORD.
            MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
            MOVE CM-CUST-NUM                  TO TSPFL-KEY.
+           IF DO-REWRITE = 'Y'
+               READ  TSPFILE WITH LOCK
+               MOVE DATA-CUST-NUM  (SUB)     TO CM-CUST-NUM
+               MOVE CM-CUST-NUM              TO TSPFL-KEY
+           END-IF
            MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
            MOVE DATA-ADDRESS-1     (SUB)     TO CM-ADDRESS-1.
            MOVE DATA-ADDRESS-2     (SUB)     TO CM-ADDRESS-2.
@@ -1190,7 +1195,7 @@ AT_DATA([prog.cob], [
                MOVE ALL "*"                  TO CM-TAPE.
            IF  SUB = 1 OR 6
                MOVE "2417"                   TO CM-DISK 
-               MOVE "549  mm "               TO CM-TAPE.
+               MOVE "549  mmm"               TO CM-TAPE.
       
            IF DO-REWRITE = 'Y'
                IF  SUB NOT = 1 AND SUB NOT = 6
@@ -1382,8 +1387,8 @@ AT_DATA([prog.cob], [
                DISPLAY "Error " CUST-STAT " instead of 02"
                                 UPON CONSOLE
            ELSE
-               DISPLAY "ReWrite: " CM-CUST-NUM " got "
-                         CUST-STAT " as expected "
+               DISPLAY "ReWrite: " CM-CUST-NUM " got 00/02"
+                         " as expected "
                          CM-NO-TERMINALS " terminals"
                          UPON CONSOLE
            END-IF.
@@ -1402,8 +1407,8 @@ AT_DATA([prog.cob], [
                DISPLAY "Error " CUST-STAT " instead of 02"
                                 UPON CONSOLE
            ELSE
-               DISPLAY "ReWrite: " CM-CUST-NUM " got "
-                         CUST-STAT " as expected"
+               DISPLAY "ReWrite: " CM-CUST-NUM " got 00/02"
+                         " as expected"
                          UPON CONSOLE
            END-IF.
            MOVE DATA-CUST-NUM      (6)       TO CM-CUST-NUM.
@@ -1417,8 +1422,8 @@ AT_DATA([prog.cob], [
                DISPLAY "Error " CUST-STAT " instead of 02"
                                 UPON CONSOLE
            ELSE
-               DISPLAY "ReWrite: " CM-CUST-NUM " got "
-                         CUST-STAT " as expected"
+               DISPLAY "ReWrite: " CM-CUST-NUM " got 00/02"
+                         " as expected"
                          UPON CONSOLE
            END-IF.
            CLOSE TSPFILE.
@@ -1432,13 +1437,12 @@ Sample data file load complete.
 Loading sample data file.
 Sample data file load complete.
 Rewrite sample data file: 00
-REWRITE: EPS00000, Status: 30
 Sample data file rewrite complete.
 LIST SAMPLE FILE
 Key: ALP00000 is ALPHA ELECTRICAL CO. LTD. Disk=2417    .
 Key: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
 Key: DEL00000 is DELTA LUGGAGE REPAIRS     Disk=********.
-Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=********.
+Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=REWRITE .
 Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=2417    .
 Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=REWRITE .
 Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=REWRITE .
@@ -1454,7 +1458,7 @@ Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=********.
 Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=REWRITE .
 Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=REWRITE .
 Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=2417    .
-Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=********.
+Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=REWRITE .
 Key: DEL00000 is DELTA LUGGAGE REPAIRS     Disk=********.
 Key: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
 Key: ALP00000 is ALPHA ELECTRICAL CO. LTD. Disk=2417    .
@@ -1464,26 +1468,26 @@ Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=2417    .
 Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
 Key: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
 Key: PRE00000 is PRESTIGE OFFICE FURNITURE Disk=8470    .
+Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=REWRITE .
 Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=REWRITE .
 Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=REWRITE .
 Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=REWRITE .
 Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=REWRITE .
 Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=REWRITE .
-Key: OLD00000 is OLD TYME PIZZA MFG. CO.   Disk=REWRITE .
 Got: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
 Nxt: DEL00000 is DELTA LUGGAGE REPAIRS     Disk=********.
 Ky2: GIB00000 is GIBRALTER LIFE INSURANCE  Mach=UNI-80/6
   Write: GIB00000 got 22 as expected
    Read: GAM00000 got 00 as expected 00075 terminals
-ReWrite: GAM00000 got 00 as expected 00080 terminals
+ReWrite: GAM00000 got 00/02 as expected 00080 terminals
    Read: BET00000 got 00 as expected 00034 terminals
-ReWrite: GAM00000 got 00 as expected
-ReWrite: FOR00000 got 00 as expected
+ReWrite: GAM00000 got 00/02 as expected
+ReWrite: FOR00000 got 00/02 as expected
 A: Expected ERROR 39 opening TSTFILE, Record size different
 B: Expected ERROR 39 opening BADFILE, Index mismatch
 C: Expected open BADFILE, with Index mismatch
-Key: ALP00000 is 2417     : 549  mm 
-Key: FOR00000 is 2417     : 549  mm 
+Key: ALP00000 is 2417     : 549  mmm
+Key: FOR00000 is 2417     : 549  mmm
 Key: JOH00000 is 8417     : 1600 BPI
 ], [])
 
@@ -12357,7 +12361,7 @@ AT_DATA([prog.cob], [
                MOVE ALL "*"                  TO CM-TAPE.
            IF  SUB = 1 OR 6
                MOVE "2417"                   TO CM-DISK 
-               MOVE "549  mm "               TO CM-TAPE.
+               MOVE "549  mmm"               TO CM-TAPE.
       
            WRITE TSPFL-RECORD
            IF  CUST-STAT NOT = "00"
