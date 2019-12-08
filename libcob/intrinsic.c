@@ -2458,7 +2458,7 @@ split_around_t (const char *str, char *first, char *second)
 			if (second_length > COB_TIMESTR_MAX) {
 				second_length = COB_TIMESTR_MAX;;
 			}
-			strncpy (second, str + i + 1U, second_length);
+			memcpy (second, str + i + 1U, second_length);
 			second[second_length] = '\0';
 		}
 	}
@@ -6399,17 +6399,19 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 	if (date_present && time_present) {
 		split_around_t (datetime_format_str, date_format_str, time_format_str);
 	} else if (date_present) {
-		strncpy (date_format_str, datetime_format_str, COB_DATESTR_MAX);
+		memcpy (date_format_str, datetime_format_str, COB_DATESTR_MAX);
+		date_format_str[COB_DATESTR_MAX] = 0;
 	} else { /* time_present */
-		strncpy (time_format_str, datetime_format_str, COB_TIMESTR_MAX);
+		memcpy (time_format_str, datetime_format_str, COB_TIMESTR_MAX);
+		time_format_str[COB_DATESTR_MAX] = 0;
 	}
 
 	if (date_present && time_present) {
 		split_around_t (formatted_datetime, formatted_date, formatted_time);
 	} else if (date_present) {
-		strncpy (formatted_date, formatted_datetime, COB_DATESTR_MAX);
+		memcpy (formatted_date, formatted_datetime, COB_DATESTR_MAX);
 	} else { /* time_present */
-		strncpy (formatted_time, formatted_datetime, COB_TIMESTR_MAX);
+		memcpy (formatted_time, formatted_datetime, COB_TIMESTR_MAX);
 	}
 	/* silence warnings */
 	formatted_date[COB_DATESTR_MAX] = formatted_time[COB_TIMESTR_MAX] = 0;
