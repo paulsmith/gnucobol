@@ -47,6 +47,10 @@
 #endif
 #endif
 
+#ifdef	HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+
 struct file_list {
 	struct file_list	*next;
 	cob_file		*file;
