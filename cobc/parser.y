@@ -1781,11 +1781,18 @@ check_not_88_level (cb_tree x)
 	f = CB_FIELD_PTR (x);
 
 	if (f->level == 88) {
+#if 0	/* note: we may consider to support the extension (if existing) to
+		         reference a condition-name target by the condition-name */
+		if (cb_verify (cb_condition_references_data, _("use of condition-name in place of data-name"))) {
+			return CB_TREE (f->parent);
+		}
+#else
 		cb_error (_("condition-name not allowed here: '%s'"), cb_name (x));
 		/* invalidate field to prevent same error in typeck.c (validate_one) */
 		/* FIXME: If we really need the additional check here then we missed
 		          a call to cb_validate_one() somewhere */
 		return cb_error_node;
+#endif
 	} else {
 		return x;
 	}
@@ -16796,7 +16803,7 @@ x_common:
   }
 | ADDRESS _of identifier_1
   {
-	$$ = cb_build_address ($3);
+	$$ = cb_build_address (check_not_88_level ($3));
   }
 | MNEMONIC_NAME
   {

@@ -6174,10 +6174,10 @@ AT_KEYWORDS([misc MOVE STRING UNSTRING COMPUTE])
 AT_DATA([prog.cob], [
        identification   division.
        program-id.      prog.
-       environment      division.
        data             division.
        working-storage  section.
-       01 val pic x(10).
+       77 p        usage pointer.
+       01 val      pic x(10).
           88 val-i1 value 'some'.
           88 val-i2 value 'val'.
        77 val2     pic x(50).
@@ -6203,7 +6203,8 @@ AT_DATA([prog.cob], [
            compute vnum    = vnum-1 /
                              vnum-2
            go to val-i1
-           .
+           set p to val-i1
+           set p to address of val-i2.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
@@ -6219,6 +6220,8 @@ prog.cob:27: error: condition-name not allowed here: 'val-i1'
 prog.cob:29: error: condition-name not allowed here: 'vnum-1'
 prog.cob:30: error: condition-name not allowed here: 'vnum-1'
 prog.cob:31: error: condition-name not allowed here: 'vnum-2'
+prog.cob:33: error: condition-name not allowed here: 'val-i1'
+prog.cob:34: error: condition-name not allowed here: 'val-i2'
 prog.cob:32: error: 'val-i1 (MAIN SECTION:)' is not a procedure name
 ])
 AT_CLEANUP
