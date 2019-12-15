@@ -46,6 +46,7 @@
 #define	WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #undef MOUSE_MOVED
+#include <direct.h>
 #include <io.h>
 #include <fcntl.h>
 #endif
@@ -3223,8 +3224,13 @@ process_command_line (const int argc, char **argv)
 				cob_schema_dir = cobc_main_malloc (strlen(COB_SCHEMA_DIR) + strlen(cb_sqldb_schema) + 8);
 				sprintf((void*)cob_schema_dir,"%s%s%s",COB_SCHEMA_DIR,SLASH_STR,cb_sqldb_schema);
 			}
+#ifdef _WIN32	/* simon: come back to this later... */
+			_mkdir (cob_schema_dir);
+			_chmod (cob_schema_dir, _S_IREAD | _S_IWRITE);
+#else
 			mkdir (cob_schema_dir, 0777);
 			chmod (cob_schema_dir, 0777);
+#endif
 			break;
 
 		case 'A':
