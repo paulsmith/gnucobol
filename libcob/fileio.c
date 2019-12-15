@@ -6295,7 +6295,7 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 		chk_file_path = 0;
 		if (file_setptr->cob_file_path) {
 			for(i=k=0; file_setptr->cob_file_path[i] != 0; i++) {
-				if(file_setptr->cob_file_path[i] == ':')
+				if(file_setptr->cob_file_path[i] == PATHSEP_CHAR)
 					k++;
 			}
 			/* Split list of paths apart */
@@ -6303,7 +6303,7 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 			p = cob_strdup (file_setptr->cob_file_path);
 			file_paths[0] = p;
 			for(i=k=0; p[i] != 0; i++) {
-				if(p[i] == ':') {
+				if(p[i] == PATHSEP_CHAR) {
 					p[i] = 0;
 					file_paths[++k] = &p[i+1];
 				}
