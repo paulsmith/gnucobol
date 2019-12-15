@@ -38,14 +38,14 @@
 #include <ieeefp.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #ifndef isnan
 #define isnan(x)	_isnan(x)
 #endif
 #endif
 
 #if !defined(isinf)
-#if defined(WIN32)
+#if defined(_WIN32)
 #define isinf(x) ((_fpclass(x) == _FPCLASS_PINF) || (_fpclass(x) == _FPCLASS_NINF))
 #else
 #define isinf(x) (!ISFINITE(x))
