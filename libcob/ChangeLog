@@ -1,4 +1,8 @@
 
+2019-12-16  Ron Norman <rjn@inglenet.com>
+
+	* fisam.c: Adjusted for correct use of snprintf
+
 2019-11-30  Ron Norman <rjn@inglenet.com>
 
 	* common.c: Have cobcrun --info display of ODBC or OCI are possible

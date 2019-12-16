@@ -1,4 +1,8 @@
 
+2019-12-16  Ron Norman <rjn@inglenet.com>
+
+	* sqlxfdgen.c: Outputs 'WHEN' conditions in 'posfix' sequence
+
 2019-12-15  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: #543 check for condition-name in ADDRESS OF

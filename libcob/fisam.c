@@ -31,17 +31,20 @@
 
 #ifdef FOR_CISAM
 #define WITH_CISAM
+#define ISAM_TYPE "C-ISAM"
 #ifdef VB_RTD
 #undef VB_RTD
 #endif
 #endif
 #ifdef FOR_DISAM
 #define WITH_DISAM
+#define ISAM_TYPE "D-ISAM"
 #ifdef VB_RTD
 #undef VB_RTD
 #endif
 #endif
 #ifdef FOR_VBISAM
+#define ISAM_TYPE "VB-ISAM"
 #define WITH_VBISAM
 #endif
 #endif
@@ -643,20 +646,17 @@ isam_file_delete (cob_file_api *a, cob_file *f, char *filename)
 #if defined(WITH_DISAM)
 	struct stat	st;
 #endif
-	char	file_name_buf [COB_FILE_BUFF];
+	char	file_name_buf [COB_FILE_MAX];
 
 	COB_UNUSED (a);
 	COB_UNUSED (f);
 
 	snprintf (file_name_buf, (size_t)COB_FILE_MAX, "%s.idx", filename);
-	file_name_buf[COB_FILE_MAX] = 0;
 	unlink (file_name_buf);
 	snprintf (file_name_buf, (size_t)COB_FILE_MAX, "%s.dat", filename);
-	file_name_buf[COB_FILE_MAX] = 0;
 #if defined(WITH_DISAM)
 	if (stat(file_name_buf, &st) != 0) {	/* Micro Focus naming style has no .dat */
 		snprintf (file_name_buf, (size_t)COB_FILE_MAX, "%s", filename);
-		file_name_buf[COB_FILE_MAX] = 0;
 	}
 #endif
 	unlink (file_name_buf);
@@ -697,7 +697,6 @@ isam_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 	}
 
 	snprintf (a->file_open_buff, (size_t)COB_FILE_MAX, "%s.idx", filename);
-	a->file_open_buff[COB_FILE_MAX] = 0;
 	errno = 0;
 	if (access (a->file_open_buff, checkvalue)) {
 		if (!(errno == ENOENT && (mode == COB_OPEN_OUTPUT || f->flag_optional == 1))) {
@@ -713,7 +712,6 @@ isam_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 	}
 
 	snprintf (a->file_open_buff, (size_t)COB_FILE_MAX, "%s.dat", filename);
-	a->file_open_buff[COB_FILE_MAX] = 0;
 	errno = 0;
 #if defined(WITH_DISAM)
 	if (access (a->file_open_buff, checkvalue)
@@ -774,7 +772,7 @@ isam_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 			if (isfd >= 0) {
 				isfullclose (isfd);
 			}
-			iserase ((void *)filename);
+			isam_file_delete (a, f, filename);
 			ISERRNO = 0;
 		}
 		dobld = 1;

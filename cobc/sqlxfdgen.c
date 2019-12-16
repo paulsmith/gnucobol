@@ -100,11 +100,29 @@ cb_use_name (struct cb_field *f, char *n)
 	}
 }
 
+static int
+compstr(char *tst, const char *val)
+{
+	int k;
+	for (k=0; tst[k] != 0; k++) {
+		if (tst[k] == '-' || tst[k] == '_') {
+			if (val[k] != '-' && val[k] != '_')
+				return 1;
+			continue;
+		}
+		if (toupper (tst[k]) != toupper (val[k]))
+			return 1;
+	}
+	if (val[k] != 0)
+		return 1;
+	return 0;
+}
+
 void
 cb_parse_xfd (struct cb_file *fn, struct cb_field *f)
 {
 	int		k, skipeq;
-	char	*p, p1[64], p2[64], p3[64], p4[64], expr[512];
+	char	*p, p1[64], p2[64], p3[64], p4[64], *pw, expr[COB_NORMAL_BUFF];
 	if (hasxfd <= 0)
 		return;
 	if (!fn->flag_sql_xfd) {
@@ -113,22 +131,24 @@ cb_parse_xfd (struct cb_file *fn, struct cb_field *f)
 		fn->flag_sql_xfd = 1;
 	}
 	for(k=0; k < hasxfd; k++) {
-		p = cb_get_param (xfd[k], p1, 1);
-		if (strcasecmp(p1,"WHEN") == 0
-		 || strcasecmp(p1,"AND") == 0
-		 || strcasecmp(p1,"OR") == 0)
+		pw = cb_get_param (xfd[k], p1, 1);
+		if (compstr(p1,"WHEN") == 0
+		 || compstr(p1,"DATE") == 0
+		 || compstr(p1,"AND") == 0
+		 || compstr(p1,"OR") == 0)
 			skipeq = 0;
 		else
 			skipeq = 1;
-		p = cb_get_param (p, p2, skipeq);
+		p = cb_get_param (pw, p2, skipeq);
 		p = cb_get_param (p, p3, skipeq);
 		p = cb_get_param (p, p4, skipeq);
-		if (strcasecmp(p1,"USE") == 0) {
+		if (compstr(p1,"USE") == 0) {
 			strcpy(p1,p2);
 			strcpy(p2,p3);
-			strcpy(p3,"");
+			strcpy(p3,p4);
+			strcpy(p4,"");
 		}
-		if (strcasecmp(p1,"NAME") == 0 
+		if (compstr(p1,"NAME") == 0 
 		 && p2[0] > ' ') {
 			if (f->level == 1
 			 && fn->sql_name == NULL) {
@@ -136,40 +156,71 @@ cb_parse_xfd (struct cb_file *fn, struct cb_field *f)
 			} else {
 				cb_use_name (f, p2);
 			}
-		} else if (strcasecmp(p1,"GROUP") == 0) {
+		} else if (compstr(p1,"GROUP") == 0) {
+			f->flag_sql_group = 1;
+			if (compstr(p2,"BINARY") == 0) {
+				f->flag_sql_binary = 1;
+				cb_use_name (f, p3);
+			} else if (compstr(p2,"ALPHA") == 0) {
+				f->flag_sql_char = 1;
+				cb_use_name (f, p3);
+			} else if (compstr(p2,"CHAR") == 0) {
+				f->flag_sql_char = 1;
+				cb_use_name (f, p3);
+			} else if (compstr(p2,"VAR_LENGTH") == 0) {
+				f->flag_sql_varchar = 1;
+				cb_use_name (f, p3);
+			} else if (compstr(p2,"VARCHAR") == 0) {
+				f->flag_sql_varchar = 1;
+				cb_use_name (f, p3);
+			} else if (compstr(p2,"NUMERIC") == 0) {
+				f->flag_sql_numeric = 1;
+				cb_use_name (f, p3);
+			} else {
+				cb_use_name (f, p2);
+			}
+		} else if (compstr(p1,"BINARY") == 0) {
+			f->flag_sql_binary = 1;
 			f->flag_sql_group = 1;
 			cb_use_name (f, p2);
-		} else if (strcasecmp(p1,"BINARY") == 0) {
-			f->flag_sql_binary = 1;
-			cb_use_name (f, p2);
-		} else if (strcasecmp(p1,"CHAR") == 0) {
+		} else if (compstr(p1,"ALPHA") == 0) {
 			f->flag_sql_char = 1;
+			f->flag_sql_group = 1;
 			cb_use_name (f, p2);
-		} else if (strcasecmp(p1,"VARCHAR") == 0) {
+		} else if (compstr(p1,"CHAR") == 0) {
+			f->flag_sql_char = 1;
+			f->flag_sql_group = 1;
+			cb_use_name (f, p2);
+		} else if (compstr(p1,"VAR_LENGTH") == 0) {
 			f->flag_sql_varchar = 1;
+			f->flag_sql_group = 1;
 			cb_use_name (f, p2);
-		} else if (strcasecmp(p1,"NUMERIC") == 0) {
+		} else if (compstr(p1,"VARCHAR") == 0) {
+			f->flag_sql_varchar = 1;
+			f->flag_sql_group = 1;
+			cb_use_name (f, p2);
+		} else if (compstr(p1,"NUMERIC") == 0) {
 			f->flag_sql_numeric = 1;
 			cb_use_name (f, p2);
-		} else if (strcasecmp(p1,"DATE") == 0) {
+		} else if (compstr(p1,"DATE") == 0) {
 			f->flag_sql_date = 1;
 			if(p2[0] > ' ')
 				f->sql_date_format = cobc_parse_strdup (p2);
 			cb_use_name (f, p3);
-		} else if (strcasecmp(p1,"WHEN") == 0) {
+		} else if (compstr(p1,"WHEN") == 0) {
 			if (f->sql_when == NULL) {
-				snprintf(expr,sizeof(expr)-1,"%s %s %s",p2,p3,p4);
+				snprintf(expr,sizeof(expr),"%s",pw);
 			} else {
-				snprintf(expr,sizeof(expr)-1,"%s OR %s %s %s",f->sql_when,p2,p3,p4);
+				snprintf(expr,sizeof(expr),"(%s) OR (%s)",f->sql_when,pw);
 				cobc_parse_free (f->sql_when);
 			}
 			f->sql_when = cobc_parse_strdup (expr);
-		} else if (strcasecmp(p1,"AND") == 0
-				|| strcasecmp(p1,"OR") == 0) {
+		} else if (compstr(p1,"AND") == 0
+				|| compstr(p1,"OR") == 0) {
 			if (f->sql_when == NULL) {
-				snprintf(expr,sizeof(expr)-1,"%s %s %s",p2,p3,p4);
+				snprintf(expr,sizeof(expr),"%s",pw);
 			} else {
-				snprintf(expr,sizeof(expr)-1,"%s %s %s %s %s",f->sql_when,p1,p2,p3,p4);
+				snprintf(expr,sizeof(expr),"(%s) %s (%s)",f->sql_when,p1,pw);
 				cobc_parse_free (f->sql_when);
 			}
 			f->sql_when = cobc_parse_strdup (expr);
@@ -179,6 +230,7 @@ cb_parse_xfd (struct cb_file *fn, struct cb_field *f)
 	}
 	hasxfd = 0;
 }
+
 static struct cb_field *
 cb_code_field (cb_tree x)
 {
@@ -458,11 +510,163 @@ is_key_field (struct cb_file *fl, struct cb_field *f)
 	return 0;
 }
 
+#define MAX_NEST 24
+static char *
+out_part(char *exp)
+{
+	static char wrk[80];
+	char	lop[64],rop[64],opcd[16];
+	int		i,j;
+	for(j=0; exp[j] == ' '; j++);
+	for(i=0; exp[j] != 0 && exp[j] != ' '; j++) {
+		if (exp[j] == ' '
+		 && exp[j+1] == ' ')
+			continue;
+		lop[i++] = exp[j];
+	}
+	lop[i] = 0;
+	while(exp[j] == ' ') j++;
+	for(i=0; exp[j] != 0 && exp[j] != ' '; j++) {
+		if (exp[j] == ' '
+		 && exp[j+1] == ' ')
+			continue;
+		opcd[i++] = exp[j];
+	}
+	opcd[i] = 0;
+	while(exp[j] == ' ') j++;
+	for(i=0; exp[j] != 0; j++) {
+		if (exp[j] == ' '
+		 && exp[j+1] == ' ')
+			continue;
+		rop[i++] = exp[j];
+	}
+	rop[i] = 0;
+	snprintf(wrk,sizeof(wrk),"%s,%s,%s",opcd,lop,rop);
+	return wrk;
+}
+
+static void
+write_postfix(FILE *fx, int golbl, char *expr)
+{
+	int		k,nexp,nopcd,gto;
+	int 	opcode[MAX_NEST];
+	char	partexp[MAX_NEST][68], *p;
+	if (*expr == '('
+	 || strstr(expr," AND ")
+	 || strstr(expr," OR ")) {
+		fprintf(fx,"*C,%d,%s\n",golbl,expr);	/* Comment for debugging */
+	}
+
+	nexp = nopcd = gto = 0;
+	for(p = expr; *p != 0; ) {
+		if (*p == '(') {
+			p++;
+			opcode[nexp++] = '(';
+		} if (*p == ')') {
+			p++;
+			while (nexp > 0
+				&& opcode[nexp-1] != '(') {
+				gto = 0;
+				if (nexp == 1 && *p == 0) {
+					gto = golbl;
+					golbl = 0;
+				}
+				if (nopcd > 1) {
+					fprintf(fx,"C,0,%s\n",out_part(partexp[nopcd-2]));
+					fprintf(fx,"C,0,%s\n",out_part(partexp[nopcd-1]));
+					nopcd -= 2;
+				} else if (nopcd > 0) {
+					fprintf(fx,"C,0,%s\n",out_part(partexp[--nopcd]));
+				}
+				if (opcode[nexp-1] == 'A') {
+					fprintf(fx,"C,%d,%s\n",gto,"&&");
+				} else if (opcode[nexp-1] == 'O') {
+					fprintf(fx,"C,%d,%s\n",gto,"||");
+				} else if (opcode[nexp-1] == '!') {
+					fprintf(fx,"C,%d,%s\n",gto,"!");
+				}
+				nexp--;
+			}
+			if (opcode[nexp-1] == '(') {
+				nexp--;
+			} else if(*p == 0) {
+				break;
+			} else {
+				cb_warning (warningopt, _("Incorrect XFD expression: %s"),expr);
+				break;
+			}
+		} else if (strncasecmp(p," AND ",5) == 0) {
+			p += 5;
+			opcode[nexp++] = 'A';
+		} else if (strncasecmp(p," OR ",4) == 0) {
+			p += 4;
+			opcode[nexp++] = 'O';
+		} else if (strncasecmp(p,"NOT ",4) == 0) {
+			p += 4;
+			opcode[nexp++] = '!';
+		} else if (memcmp(p," && ",4) == 0) {
+			p += 4;
+			opcode[nexp++] = 'A';
+		} else if (memcmp(p," || ",4) == 0) {
+			p += 4;
+			opcode[nexp++] = 'O';
+		} else if (memcmp(p," || ",4) == 0) {
+			p += 4;
+			opcode[nexp++] = 'O';
+		} else {
+			for(k=0; *p != 0; k++,p++) {
+				if (strncasecmp(p," AND ",5) == 0
+				 || strncasecmp(p," OR ",4) == 0
+				 || strncasecmp(p," && ",4) == 0
+				 || strncasecmp(p," || ",4) == 0
+				 || *p == '('
+				 || *p == ')')
+					break;
+				partexp[nopcd][k] = *p;
+			}
+			partexp[nopcd][k] = 0;
+			if (k > 0)
+				nopcd++;
+		}
+	}
+	while (nopcd > 0) {
+		if (nopcd > 1) {
+			fprintf(fx,"C,0,%s\n",out_part(partexp[nopcd-2]));
+			fprintf(fx,"C,0,%s\n",out_part(partexp[nopcd-1]));
+			nopcd -= 2;
+		} else if (nopcd > 0) {
+			gto = 0;
+			if (nexp == 0) {
+				gto = golbl;
+				golbl = 0;
+			}
+			fprintf(fx,"C,%d,%s\n",gto,out_part(partexp[--nopcd]));
+		}
+	}
+	while (nexp > 0) {
+		gto = 0;
+		if (nexp == 1) {
+			gto = golbl;
+			golbl = 0;
+		}
+		if (opcode[nexp-1] == 'A') {
+			fprintf(fx,"C,%d,%s\n",gto,"&&");
+		} else if (opcode[nexp-1] == 'O') {
+			fprintf(fx,"C,%d,%s\n",gto,"||");
+		} else if (opcode[nexp-1] == '!') {
+			fprintf(fx,"C,%d,%s\n",gto,"!");
+		}
+		nexp--;
+	}
+	if(golbl > 0)
+		fprintf(fx,"C,%d\n",golbl);
+}
+
 static struct cb_field *
 find_field (struct cb_field *f, char *name)
 {
 	struct cb_field *s;
-	if (strcasecmp(f->name,name) == 0)
+	if (compstr((char*)f->name,(const char*)name) == 0)
 		return f;
 	if (f->children) {
 		if ((s = find_field (f->children, name)) != NULL)
@@ -481,7 +685,7 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 	int		i, j, k;
 	int		numrdf, numwhen, numother, numdisp, toother;
 	int		dowhen = 1, savelbl;
-	char	expr[1024], name[80];
+	char	expr[COB_NORMAL_BUFF], name[80];
 	struct cb_field *s, *l, *n, *oth, *x;
 
 	if (f->flag_sql_binary
@@ -509,7 +713,7 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 				while (k > 0 
 					&& s->sql_when[k-1] == ' ')
 					s->sql_when[--k] = 0;
-				if (strcasecmp(s->sql_when,"OTHER") == 0)
+				if (compstr(s->sql_when,"OTHER") == 0)
 					numother++;
 				else
 					numwhen++;
@@ -562,7 +766,7 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 			toother = 0;
 			do {
 				if (s->sql_when) {
-					if (strcasecmp(s->sql_when,"OTHER") == 0) {
+					if (compstr(s->sql_when,"OTHER") == 0) {
 						toother = s->step_count;
 					} else {
 						expr[0] = 0;
@@ -608,7 +812,7 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 							expr[k] = s->sql_when[i++];
 							expr[k+1] = 0;
 						}
-						fprintf(fx,"C,%d,%s\n",s->step_count,expr);
+						write_postfix (fx, s->step_count, expr);
 					}
 					s->report_decl_id = l->next_group_line;
 				}
@@ -616,8 +820,12 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 					break;
 				s = s->sister;
 			} while (s->redefines == f);
-			if (toother > 0)
-				fprintf(fx,"G,%d\n",toother);
+			if (toother > 0) {
+				if(f->step_count != toother)
+					fprintf(fx,"G,%d\n",toother);
+				else
+					f->step_count = 0;
+			}
 		}
 	}
 	return n;
@@ -634,8 +842,13 @@ write_xfd (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int idx[])
 	} else {
 		fprintf(fx,"0,0,");
 	}
-	if (f->sql_date_format)
-		fprintf(fx,"'%s'",f->sql_date_format);
+	if (f->sql_date_format) {
+		if (f->sql_date_format[0] == '"'
+		 || f->sql_date_format[0] == '\'')
+			fprintf(fx,"%s",f->sql_date_format);
+		else
+			fprintf(fx,"'%s'",f->sql_date_format);
+	}
 	fprintf(fx,",%02d,%s\n",f->level,get_col_name(fl,f,sub,idx));
 }
 
