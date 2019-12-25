@@ -1632,11 +1632,14 @@ cob_realloc (void * optr, const size_t osize, const size_t nsize)
 	}
 	/* LCOV_EXCL_STOP */
 
-	if (unlikely (osize <= nsize)) {
+	if (unlikely (osize == nsize)) {	/* No size change */
+		return optr;
+	} 
+	if (unlikely (osize > nsize)) {		/* Reducing size */
 		return realloc (optr, nsize);
 	}
 
-	mptr = calloc ((size_t)1, nsize);
+	mptr = calloc ((size_t)1, nsize);	/* New memory, past old is cleared */
 	/* LCOV_EXCL_START */
 	if (unlikely (!mptr)) {
 		cob_fatal_error (COB_FERROR_MEMORY);
