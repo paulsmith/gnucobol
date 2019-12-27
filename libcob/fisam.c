@@ -153,7 +153,6 @@ struct indexfile {
 	int		saverecnum;	/* isrecnum of next record to process */
 	int		saveerrno;	/* savefileposition errno */
 	int		lmode;		/* File lock mode for 'isread' */
-	int		curkey;		/* Current active index */
 	int		startcond;	/* Previous 'start' condition value */
 	int		readdir;	/* Read direction: ISPREV or ISNEXT */
 	int		lenkey;		/* Length of savekey area */
@@ -359,8 +358,9 @@ indexed_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 	*fullkeylen = *partlen = 0;
 	for (k = 0; k < f->nkeys; ++k) {
 		if (f->keys[k].field
-		&&  f->keys[k].count_components <= 1
-		&&  f->keys[k].field->data == kf->data) {
+		 && f->keys[k].count_components <= 1
+		 && f->keys[k].field->data == kf->data) {
+			f->last_key = f->keys[k].field;
 			*fullkeylen = f->keys[k].field->size;
 			*partlen = kf->size;
 			return fh->idxmap[k];
@@ -369,13 +369,14 @@ indexed_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 	for (k = 0; k < f->nkeys; ++k) {
 		if (f->keys[k].count_components > 1) {
 			if ((f->keys[k].field
-			&&  f->keys[k].field->data == kf->data
-			&&  f->keys[k].field->size == kf->size)
-			||  (f->keys[k].component[0]->data == kf->data)) {
+			 && f->keys[k].field->data == kf->data
+			 && f->keys[k].field->size == kf->size)
+			 || (f->keys[k].component[0]->data == kf->data)) {
 				f->last_key = f->keys[k].field;
 				for(part=0; part < f->keys[k].count_components; part++)
 					*fullkeylen += f->keys[k].component[part]->size;
-				if (f->keys[k].field && f->keys[k].field->data == kf->data) {
+				if (f->keys[k].field 
+				 && f->keys[k].field->data == kf->data) {
 					*partlen = kf->size;
 				} else {
 					*partlen = *fullkeylen;
@@ -486,7 +487,7 @@ restorefileposition (cob_file *f)
 		isstart (fh->isfd, &k0, 0, (void *)fh->recwrk, ISEQUAL);
 		/* Read by record number */
 		isread (fh->isfd, (void *)fh->recwrk, ISEQUAL);
-		isstart (fh->isfd, &fh->key[fh->curkey], 0,
+		isstart (fh->isfd, &fh->key[f->curkey], 0,
 			 (void *)fh->recwrk, ISEQUAL);
 		isread (fh->isfd, (void *)fh->recwrk, ISEQUAL);
 		while (ISRECNUM != fh->saverecnum) {
@@ -503,9 +504,9 @@ restorefileposition (cob_file *f)
 				isread (fh->isfd, (void *)fh->recwrk, ISNEXT);
 			}
 		}
-	} else if (fh->readdone && fh->curkey == 0) {
+	} else if (fh->readdone && f->curkey == 0) {
 		indexed_restorekey(fh, NULL, 0);
-		isstart (fh->isfd, &fh->key[fh->curkey], 0,
+		isstart (fh->isfd, &fh->key[f->curkey], 0,
 			 (void *)fh->recwrk, ISGTEQ);
 	}
 }
@@ -518,7 +519,7 @@ savefileposition (cob_file *f)
 	struct indexfile	*fh;
 
 	fh = f->file;
-	if (fh->curkey >= 0 && fh->readdir != -1) {
+	if (f->curkey >= 0 && fh->readdir != -1) {
 		/* Switch back to index */
 		if (fh->wrkhasrec != fh->readdir) {
 			fh->eofpending = 0;
@@ -948,7 +949,7 @@ dobuild:
 	fh->savekey = cob_malloc ((size_t)(fh->lenkey + 1));
 	fh->recwrk = cob_malloc ((size_t)(f->record_max + 1));
 	/* Active index is unknown at this time */
-	fh->curkey = -1;
+	f->curkey = -1;
 	f->flag_nonexistent = 0;
 	f->flag_end_of_file = 0;
 	f->flag_begin_of_file = 0;
@@ -1046,7 +1047,7 @@ isam_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 	if (isstart (fh->isfd, &fh->key[k], klen, (void *)f->record->data, mode)) {
 		if (cond == COB_LE || cond == COB_LT) {
 			if (isstart (fh->isfd, &fh->key[k], klen, (void *)f->record->data, ISLAST)) {
-				fh->curkey = -1;
+				f->curkey = -1;
 				fh->startcond = -1;
 				fh->readdir = -1;
 				fh->startiscur = 0;
@@ -1055,7 +1056,7 @@ isam_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 				savecond = COB_LA;
 			}
 		} else {
-			fh->curkey = -1;
+			f->curkey = -1;
 			fh->startcond = -1;
 			fh->readdir = -1;
 			fh->startiscur = 0;
@@ -1064,7 +1065,7 @@ isam_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 	}
 	fh->startcond = savecond;
 	indexed_savekey(fh, f->record->data, k);
-	fh->curkey = k;
+	f->curkey = k;
 	f->flag_end_of_file = 0;
 	f->flag_begin_of_file = 0;
 	f->flag_first_read = 1;
@@ -1092,11 +1093,11 @@ isam_read (cob_file_api *a, cob_file *f, cob_field *key, const int read_opts)
 	if(k < 0) {
 		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
-	if (fh->curkey != (int)k) {
+	if (f->curkey != (int)k) {
 		/* Switch to this index */
 		isstart (fh->isfd, &fh->key[k], 0,
 			 (void *)f->record->data, ISEQUAL);
-		fh->curkey = k;
+		f->curkey = k;
 		fh->wrkhasrec = 0;
 	}
 	fh->startcond = -1;
@@ -1163,10 +1164,10 @@ isam_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	ret = COB_STATUS_00_SUCCESS;
 	lmode = 0;
 
-	if (fh->curkey == -1) {
+	if (f->curkey == -1) {
 		/* Switch to primary index */
 		isstart (fh->isfd, &fh->key[0], 0, NULL, ISFIRST);
-		fh->curkey = 0;
+		f->curkey = 0;
 		fh->readdir = ISNEXT;
 		fh->startcond = -1;
 		fh->startiscur = 0;
@@ -1224,7 +1225,7 @@ isam_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 				case COB_GE:
 					domoveback = 0;
 					while (ISERRNO == 0
-					&& indexed_cmpkey(fh, f->record->data, fh->curkey, 0) == 0) {
+					&& indexed_cmpkey(fh, f->record->data, f->curkey, 0) == 0) {
 						isread (fh->isfd, (void *)f->record->data, ISPREV);
 						domoveback = 1;
 					}
@@ -1235,7 +1236,7 @@ isam_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 				case COB_LE:
 					domoveback = 0;
 					while (ISERRNO == 0
-					&& indexed_cmpkey(fh, f->record->data, fh->curkey, 0) == 0) {
+					&& indexed_cmpkey(fh, f->record->data, f->curkey, 0) == 0) {
 						isread (fh->isfd, (void *)f->record->data, ISNEXT);
 						domoveback = 1;
 					}
@@ -1245,13 +1246,13 @@ isam_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 					break;
 				case COB_LT:
 					while (ISERRNO == 0
-					&& indexed_cmpkey(fh, f->record->data, fh->curkey, 0) >= 0) {
+					&& indexed_cmpkey(fh, f->record->data, f->curkey, 0) >= 0) {
 						isread (fh->isfd, (void *)f->record->data, ISPREV);
 					}
 					break;
 				case COB_GT:
 					while (ISERRNO == 0
-					&& indexed_cmpkey(fh, f->record->data, fh->curkey, 0) <= 0) {
+					&& indexed_cmpkey(fh, f->record->data, f->curkey, 0) <= 0) {
 						isread (fh->isfd, (void *)f->record->data, ISNEXT);
 					}
 					break;
@@ -1303,12 +1304,12 @@ isam_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 			} else {
 				switch (fh->startcond) {
 				case COB_LE:
-					if(indexed_cmpkey(fh, f->record->data, fh->curkey, 0) > 0)
+					if(indexed_cmpkey(fh, f->record->data, f->curkey, 0) > 0)
 						domoveback = 1;
 					else
 						domoveback = 0;
 					while (ISERRNO == 0
-					&& indexed_cmpkey(fh, f->record->data, fh->curkey, 0) == 0) {
+					&& indexed_cmpkey(fh, f->record->data, f->curkey, 0) == 0) {
 						isread (fh->isfd, (void *)f->record->data, ISNEXT);
 						domoveback = 1;
 					}
@@ -1320,20 +1321,20 @@ isam_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 				case COB_LT:
 					isread (fh->isfd, (void *)f->record->data, ISPREV);
 					while (ISERRNO == 0
-					&& indexed_cmpkey(fh, f->record->data, fh->curkey, 0) >= 0) {
+					&& indexed_cmpkey(fh, f->record->data, f->curkey, 0) >= 0) {
 						isread (fh->isfd, (void *)f->record->data, ISPREV);
 						skip_read = ISPREV;
 					}
 					break;
 				case COB_GT:
 					while (ISERRNO == 0
-					&& indexed_cmpkey(fh, f->record->data, fh->curkey, 0) <= 0) {
+					&& indexed_cmpkey(fh, f->record->data, f->curkey, 0) <= 0) {
 						isread (fh->isfd, (void *)f->record->data, ISNEXT);
 					}
 					break;
 				case COB_GE:
 					while (ISERRNO == 0
-					&& indexed_cmpkey(fh, f->record->data, fh->curkey, 0) < 0) {
+					&& indexed_cmpkey(fh, f->record->data, f->curkey, 0) < 0) {
 						isread (fh->isfd, (void *)f->record->data, ISNEXT);
 					}
 					break;
@@ -1476,15 +1477,15 @@ isam_delete (cob_file_api *a, cob_file *f)
 	if (f->flag_nonexistent) {
 		return COB_STATUS_49_I_O_DENIED;
 	}
-	if (fh->curkey == -1) {
+	if (f->curkey == -1) {
 		/* Switch to primary index */
 		isstart (fh->isfd, &fh->key[0], 0,
 			 (void *)f->record->data, ISEQUAL);
-		fh->curkey = 0;
+		f->curkey = 0;
 		fh->readdir = ISNEXT;
 	} else {
 		savefileposition (f);
-		if (fh->curkey != 0) {
+		if (f->curkey != 0) {
 			/* Switch to primary index */
 			isstart (fh->isfd, &fh->key[0], 0,
 				 (void *)f->record->data, ISEQUAL);
@@ -1522,14 +1523,14 @@ isam_rewrite (cob_file_api *a, cob_file *f, const int opt)
 	&&  indexed_cmpkey(fh, f->record->data, 0, 0) != 0) {
 		return COB_STATUS_21_KEY_INVALID;
 	}
-	if (fh->curkey >= 0) { 	
+	if (f->curkey >= 0) { 	
 		/* Index is active */
 		/* Save record data */
 		memcpy (fh->recwrk, f->record->data, f->record_max);
 		fh->readdir = ISNEXT;
 		savefileposition (f);
 		memcpy (fh->recwrk, f->record->data, f->record_max);
-		if (fh->curkey != 0) {
+		if (f->curkey != 0) {
 			/* Activate primary index */
 			isstart (fh->isfd, &fh->key[0], 0, (void *)fh->recwrk, ISEQUAL);
 		}
