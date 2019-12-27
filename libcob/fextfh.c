@@ -573,41 +573,6 @@ save_fcd_status (FCD3 *fcd, int sts)
 	}
 }
 
-/* Return index number for given key */
-static int
-cob_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
-{
-	unsigned int 	k,part;
-	*fullkeylen = *partlen = 0;
-
-	for (k = 0; k < f->nkeys; ++k) {
-		if (f->keys[k].field
-		&&  f->keys[k].count_components <= 1
-		&&  f->keys[k].field->data == kf->data) {
-			*fullkeylen = f->keys[k].field->size;
-			*partlen = kf->size;
-			return (int)k;
-		}
-	}
-	for (k = 0; k < f->nkeys; ++k) {
-		if (f->keys[k].count_components > 1) {
-			if ((f->keys[k].field
-			&&  f->keys[k].field->data == kf->data
-			&&  f->keys[k].field->size == kf->size)
-			||  (f->keys[k].component[0]->data == kf->data)) {
-				for(part=0; part < f->keys[k].count_components; part++)
-					*fullkeylen += f->keys[k].component[part]->size;
-				if(f->keys[k].field && f->keys[k].field->data == kf->data)
-					*partlen = kf->size;
-				else
-					*partlen = *fullkeylen;
-				return (int)k;
-			}
-		}
-	}
-	return 0;
-}
-
 /*
  * NOTES: It would be best if 'cob_file' had a pointer to the full/complete file name
  *        ISAM & BDB already keep this in a separate structure

@@ -1,4 +1,12 @@
 
+2019-12-27  Ron Norman <rjn@inglenet.com>
+
+	* common.h: Added cob_file.curkey to record recent file index 
+	* fileio.c: cob_read_next will check for records returned with
+	            a key that has all SUPPRESS character and skip the
+				record. This will handle old VBISAM, ODBC & OCI
+				which do not support key suppression
+
 2019-12-16  Ron Norman <rjn@inglenet.com>
 
 	* fisam.c: Adjusted for correct use of snprintf

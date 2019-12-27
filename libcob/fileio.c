@@ -151,6 +151,7 @@ static int dummy_91			() {return COB_STATUS_91_NOT_AVAILABLE;};
 
 static void cob_set_file_format(cob_file *, char *, int, int *);
 static void cob_set_file_defaults (cob_file *);
+static int cob_savekey (cob_file *f, int idx, unsigned char *data);
 static int cob_file_open	(cob_file_api *, cob_file *, char *, const int, const int);
 static int cob_file_close	(cob_file_api *, cob_file *, const int);
 static int cob_file_write_opt	(cob_file *, const int);
@@ -4361,6 +4362,7 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 
 	f->last_operation = COB_LAST_OPEN;
 	f->flag_read_done = 0;
+	f->curkey = -1;
 
 	/* File was previously closed with lock */
 	if (f->open_mode == COB_OPEN_LOCKED) {
@@ -4599,7 +4601,7 @@ cob_read (cob_file *f, cob_field *key, cob_field *fnstatus, const int read_opts)
 void
 cob_read_next (cob_file *f, cob_field *fnstatus, const int read_opts)
 {
-	int	ret;
+	int	ret,idx,pos;
 
 	f->last_operation = COB_LAST_READ_SEQ;
 	f->flag_read_done = 0;
@@ -4630,11 +4632,25 @@ cob_read_next (cob_file *f, cob_field *fnstatus, const int read_opts)
 		return;
 	}
 
+Again:
 	ret = fileio_funcs[get_io_ptr (f)]->read_next (&file_api, f, read_opts);
 
 	switch (ret) {
 	case COB_STATUS_00_SUCCESS:
 	case COB_STATUS_02_SUCCESS_DUPLICATE:
+		/* If record has suppressed key, skip it */
+		/* This is to catch old VBISAM, ODBC & OCI */
+		idx = f->curkey;
+		if ((idx >= 0 && idx < f->nkeys) 
+		 && f->keys[idx].tf_suppress) {	
+			pos = cob_savekey (f, idx, f->keys[idx].field->data);
+			for (pos = 0; pos < f->keys[idx].field->size 
+				&& f->keys[idx].field->data[pos] == (unsigned char)f->keys[idx].char_suppress;
+				pos++);
+			if (pos == f->keys[idx].field->size) 	/* All SUPPRESS char so skip */
+				goto Again;
+		}
+
 		f->flag_first_read = 0;
 		f->flag_read_done = 1;
 		f->flag_end_of_file = 0;
@@ -4840,7 +4856,64 @@ cob_delete_file (cob_file *f, cob_field *fnstatus)
 	cob_file_save_status (f, fnstatus, errno_cob_sts(COB_STATUS_00_SUCCESS));
 }
 
+/* Return index number for given key */
+int
+cob_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
+{
+	int 	k,part;
+	*fullkeylen = *partlen = 0;
+
+	for (k = 0; k < f->nkeys; ++k) {
+		if (f->keys[k].field
+		 && f->keys[k].count_components <= 1
+		 && f->keys[k].field->data == kf->data) {
+			f->last_key = f->keys[k].field;
+			*fullkeylen = f->keys[k].field->size;
+			*partlen = kf->size;
+			return k;
+		}
+	}
+	for (k = 0; k < f->nkeys; ++k) {
+		if (f->keys[k].count_components > 1) {
+			if ((f->keys[k].field
+			 &&  f->keys[k].field->data == kf->data
+			 &&  f->keys[k].field->size == kf->size)
+			 || (f->keys[k].component[0]->data == kf->data)) {
+				f->last_key = f->keys[k].field;
+				for(part=0; part < f->keys[k].count_components; part++)
+					*fullkeylen += f->keys[k].component[part]->size;
+				if(f->keys[k].field && f->keys[k].field->data == kf->data)
+					*partlen = kf->size;
+				else
+					*partlen = *fullkeylen;
+				return k;
+			}
+		}
+	}
+	return -1;
+}
+
 /* System routines */
+
+/* Copy key data and return length of data copied */
+static int
+cob_savekey (cob_file *f, int idx, unsigned char *data)
+{
+	int 	len,part;
+
+	if (f->keys[idx].field == NULL)
+		return -1;
+	if (f->keys[idx].count_components <= 1) {
+		memcpy (data, f->keys[idx].field->data, f->keys[idx].field->size);
+		return (int)f->keys[idx].field->size;
+	}
+	for(len=part=0; part < f->keys[idx].count_components; part++) {
+		memcpy (&data[len], f->keys[idx].component[part]->data,
+							f->keys[idx].component[part]->size);
+		len += f->keys[idx].component[part]->size;
+	}
+	return len;
+}
 
 static void *
 cob_param_no_quotes (int n)

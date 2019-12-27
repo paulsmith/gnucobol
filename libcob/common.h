@@ -1503,12 +1503,12 @@ typedef struct __cob_file {
 #define COB_LAST_DELETE_FILE	9
 
 	unsigned char		io_routine;		/* Index to I/O routine function pointers */
-	unsigned char		unused[2];		
+	short 				curkey;			/* Current file index read sequentially */
 
 	cob_io_stats		stats[6];		/* I/O Counts by 'operation' type */
 
 	struct __fcd3		*fcd;			/* FCD created via SET ... TO ADDRESS OF FH--FCD */
-	const char			*xfdname;
+	const char			*xfdname;		/* Name for SQL table */
 } cob_file;
 
 
@@ -2507,6 +2507,7 @@ COB_EXPIMP void	cob_file_free   (cob_file **, cob_file_key **);
 COB_EXPIMP void cob_commit		(void);
 COB_EXPIMP void cob_rollback	(void);
 COB_EXPIMP void cob_pre_open	(cob_file *f);
+COB_EXPIMP int	cob_findkey (cob_file *, cob_field *, int *, int *);
 
 /******************************************/
 /* Functions in fileio.c  API for codegen */
