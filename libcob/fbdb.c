@@ -839,6 +839,7 @@ ix_bdb_start_internal (cob_file *f, const int cond, cob_field *key,
 		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
 	p->key_index = (unsigned int)key_index;
+	f->curkey = (short)key_index;
 
 	/* Search */
 	bdb_setkey (f, p->key_index);
@@ -1162,6 +1163,7 @@ ix_bdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const
 
 	p = cob_malloc (sizeof (struct indexed_file));
 	f->flag_file_lock = 0;	
+	f->curkey = -1;
 	if (bdb_env != NULL) {
 		if ((f->share_mode & COB_SHARE_ALL_OTHER)) {
 			lock_mode = DB_LOCK_READ;
