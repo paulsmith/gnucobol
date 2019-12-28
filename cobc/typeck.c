@@ -1694,7 +1694,7 @@ cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 		/*
 		  ASSIGN DYNAMIC: assume the word in the ASSIGN is a
 		  variable name. (If no variable is defined with the same name,
-		  we'll create such a variable later.)
+		  we *may* create such a variable later.)
 		*/
 		current_program->reference_list =
 			cb_list_add (current_program->reference_list, name);
