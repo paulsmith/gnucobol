@@ -677,15 +677,14 @@ cb_config_entry (char *buff, const char *fname, const int line)
 
 	case CB_ANY:
 		if (strcmp (name, "assign-clause") == 0) {
-			if (strcmp (val, "cobol2002") == 0) {
-				unsupported_value (fname, line, name, val);
-				return -1;
-			} else if (strcmp (val, "mf") == 0) {
-				cb_assign_clause = CB_ASSIGN_MF;
-			} else if (strcmp (val, "ibm") == 0) {
-				cb_assign_clause = CB_ASSIGN_IBM;
+		        if ((strcmp (val, "dynamic") == 0)
+			    || (strcmp (val, "mf") == 0)) {
+				cb_assign_type_default = CB_ASSIGN_DYNAMIC;
+			} else if ((strcmp (val, "external") == 0)
+				   || (strcmp (val, "ibm") == 0)) {
+				cb_assign_type_default = CB_ASSIGN_EXTERNAL;
 			} else {
-				invalid_value (fname, line, name, val, "cobol2002, mf, ibm", 0, 0);
+				invalid_value (fname, line, name, val, "dynamic, external, mf, ibm", 0, 0);
 				return -1;
 			}
 			break;

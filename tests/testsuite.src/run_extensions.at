@@ -2171,35 +2171,88 @@ AT_CLEANUP
 
 ## ASSIGN
 
-AT_SETUP([ASSIGN clause])
+AT_SETUP([ASSIGN DYNAMIC and EXTERNAL])
 AT_KEYWORDS([extensions runfile])
 
 AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION.
-       INPUT-OUTPUT     SECTION.
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-       SELECT TEST-FILE ASSIGN FILENAME.
-       DATA             DIVISION.
-       FILE             SECTION.
-       FD TEST-FILE.
-       01 TEST-REC      PIC X(4).
-       PROCEDURE        DIVISION.
-           MOVE "TEST-FILE" TO FILENAME.
-           OPEN OUTPUT TEST-FILE.
-           CLOSE TEST-FILE.
-           STOP RUN.
+           SELECT f ASSIGN whatever
+               ORGANIZATION LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f.
+       01  f-rec PIC XXX.
+
+       WORKING-STORAGE SECTION.
+       01  whatever PIC X(10) VALUE "out.txt".
+       
+       PROCEDURE DIVISION.
+           OPEN OUTPUT f
+           WRITE f-rec FROM "hi"
+           CLOSE f
+           .
 ])
 
-AT_CHECK([$COMPILE -fassign-clause=mf prog.cob], [0], [],
-[prog.cob:12: warning: 'FILENAME' will be implicitly defined
-])
+AT_CHECK([$COMPILE -fassign=external prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CAPTURE_FILE(./whatever)
+AT_DATA([reference],
+[hi
+])
+AT_CHECK([diff reference whatever], [0], [], [])
+
+AT_CHECK([$COMPILE -fassign=dynamic -fno-implicit-assign-dynamic-var prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CAPTURE_FILE(./whatever)
+AT_CHECK([diff reference whatever], [0], [], [])
+
+AT_CHECK([$COMPILE -fassign=dynamic prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CAPTURE_FILE(./out.txt)
+AT_CHECK([diff reference out.txt], [0], [], [])
 
 AT_CLEANUP
 
-AT_SETUP([ASSIGN clause IBM])
+
+AT_SETUP([ASSIGN DYNAMIC implicit variable])
+AT_KEYWORDS([extensions runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN whatever
+               ORGANIZATION LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f.
+       01  f-rec PIC XXX.
+
+       PROCEDURE DIVISION.
+           MOVE "out.txt" TO whatever
+           OPEN OUTPUT f
+           WRITE f-rec FROM "hi"
+           CLOSE f
+           .
+])
+
+AT_CHECK([$COMPILE -fassign-clause=dynamic prog.cob], [0], [],
+[prog.cob:16: warning: variable 'whatever' will be implicitly defined
+])
+AT_CLEANUP
+  
+
+AT_SETUP([ASSIGN EXTERNAL parsing])
 AT_KEYWORDS([extensions runfile])
 
 AT_DATA([prog.cob], [
@@ -2208,22 +2261,72 @@ AT_DATA([prog.cob], [
        ENVIRONMENT      DIVISION.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
-       SELECT TEST-FILE ASSIGN DA-S-FILENAME.
+           *> Labels should be removed from EXTERNAL name.
+           SELECT TEST-FILE   ASSIGN DA-S-FILENAME.
+           *> EXTERNAL name allowed to duplicate FD name.
+           SELECT TESTFILE2 ASSIGN TESTFILE2.
        DATA             DIVISION.
        FILE             SECTION.
        FD TEST-FILE.
        01 TEST-REC      PIC X(4).
+       FD TESTFILE2.
+       01 TESTREC2      PIC X(4).
        PROCEDURE        DIVISION.
            OPEN OUTPUT TEST-FILE.
            CLOSE TEST-FILE.
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -fassign-clause=ibm prog.cob], [0], [],
-[prog.cob:7: warning: ASSIGN DA-S-FILENAME interpreted as 'FILENAME'
+AT_CHECK([$COMPILE -fassign-clause=external prog.cob], [0], [],
+[prog.cob:8: warning: ASSIGN DA-S-FILENAME interpreted as 'FILENAME'
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CHECK([test -f FILENAME], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ASSIGN directive])
+AT_KEYWORDS([extensions runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN whatever
+               ORGANIZATION LINE SEQUENTIAL.
+      $SET ASSIGN "EXTERNAL"
+           SELECT g ASSIGN whatever
+               ORGANIZATION LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f.
+       01  f-rec PIC XXX.
+       FD  g.
+       01  g-rec PIC XXX.
+
+       PROCEDURE DIVISION.
+           MOVE "out.txt" TO whatever
+
+           OPEN OUTPUT f
+           WRITE f-rec FROM "hi"
+           CLOSE f
+
+           OPEN OUTPUT g
+           WRITE g-rec FROM "hi"
+           CLOSE g
+           .
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE -fassign=dynamic prog.cob], [0], [],
+[prog.cob:21: warning: variable 'whatever' will be implicitly defined
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 

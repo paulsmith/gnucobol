@@ -1093,7 +1093,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob:60: warning: 'GLOB-PATH' will be implicitly defined
+[prog.cob:60: warning: variable 'GLOB-PATH' will be implicitly defined
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [GLOBP1GLOBV1

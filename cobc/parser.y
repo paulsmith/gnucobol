@@ -4862,6 +4862,9 @@ _line_adv_file:
 
 _ext_clause:
   /* empty */
+  {
+	current_file->flag_ext_assign = cb_assign_type_default == CB_ASSIGN_EXTERNAL;
+  }
 | EXTERNAL
   {
 	current_file->flag_ext_assign = 1;

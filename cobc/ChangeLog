@@ -1,4 +1,12 @@
 
+2019-12-28  Edward Hart <edward.dan.hart@gmail.com>
+
+	* config.c, config.def, ppparse.y, pplex.l: added ASSIGN directive and new option
+	  implict-assign-dynamic-var (see bug #571).
+	* config.c: added options external (= ibm) and dynamic (= mf) to
+	  assign-clause.
+	* typeck.c (cb_build_assignment_name): refactored.
+
 2019-12-16  Ron Norman <rjn@inglenet.com>
 
 	* sqlxfdgen.c: Outputs 'WHEN' conditions in 'posfix' sequence

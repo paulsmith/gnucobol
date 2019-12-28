@@ -288,6 +288,11 @@ static void *	copy_literal (cb_tree l);
 	cobc_free (word);
 }
 
+<*>^[ ]?"#ASSIGN".*\n {
+	char	*text = cobc_strdup (yytext);
+	cb_assign_type_default = (enum cb_assign_type)(text[1] - '0');
+}
+
 <*>\n {
 	cb_source_line++;
 }

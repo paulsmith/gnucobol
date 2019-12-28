@@ -195,6 +195,12 @@ enum cb_screen_clauses_rules {
 	CB_XOPEN_SCREEN_RULES
 };
 
+/* How to interpret identifiers in ASSIGN clause */
+enum cb_assign_type {
+	CB_ASSIGN_DYNAMIC,
+	CB_ASSIGN_EXTERNAL
+};
+
 /* Generic text list structure */
 struct cb_text_list {
 	struct cb_text_list	*next;			/* next pointer */

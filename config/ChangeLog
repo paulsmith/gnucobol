@@ -1,4 +1,10 @@
 
+2019-12-28  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: changed assign-clause directives to use more descriptive
+	  dynamic/external instead of mf/ibm.
+	* general: added option implicit-assign-dynamic-var.
+
 2019-09-30  Edward Hart <edward.dan.hart@gmail.com>
 
 	* realia.words: Removed words belonging to other dialects - word list

@@ -77,7 +77,7 @@ CB_CONFIG_ANY (enum cb_binary_size_options, cb_binary_size, "binary-size",
 CB_CONFIG_ANY (enum cb_binary_byteorder_options, cb_binary_byteorder, "binary-byteorder",
 	_("binary byte order, may be one of: native, big-endian"))
 
-CB_CONFIG_ANY (enum cb_assign_clause_options, cb_assign_clause, "assign-clause",
+CB_CONFIG_ANY (enum cb_assign_type, cb_assign_type_default, "assign-clause",
 	_("set way of interpreting ASSIGN"))
 
 CB_CONFIG_ANY (enum cb_screen_clauses_rules, cb_screen_section_clauses, "screen-section-rules",
@@ -159,6 +159,9 @@ CB_CONFIG_BOOLEAN (cb_binary_comp_1, "binary-comp-1",
 
 CB_CONFIG_BOOLEAN (cb_move_nonnumlit_to_numeric_is_zero, "move-non-numeric-lit-to-numeric-is-zero",
 	_("imply zero in move of non-numeric literal to numeric items"))
+
+CB_CONFIG_BOOLEAN (cb_implicit_assign_dynamic_var, "implicit-assign-dynamic-var",
+	_("implicitly define a variable if an ASSIGN DYNAMIC does not match any data item"))
 
 /* Support flags */
 

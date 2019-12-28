@@ -1196,7 +1196,7 @@ cb_build_generic_register (const char *name, const char *external_definition)
 
 	strncpy (definition, external_definition, COB_MINI_MAX);
 	definition[COB_MINI_MAX] = 0;
-	
+
 	/* check for GLOBAL, leave if we don't need to define it again (nested program)*/
 	p = strstr (definition, "GLOBAL");
 	if (p) {
@@ -1631,15 +1631,47 @@ cb_build_section_name (cb_tree name, const int sect_or_para)
 	return name;
 }
 
+static const char *
+remove_labels_from_filename (const char *name_ptr)
+{
+	const char	*p = NULL;
+
+	p = strrchr (name_ptr, '-');
+	if (p) {
+		return p + 1;
+	} else {
+		return name_ptr;
+	}
+}
+
+/*
+  Build name for ASSIGN EXTERNAL: convert the word in the ASSIGN clause into
+  a literal.
+ */
+static cb_tree
+build_external_assignment_name (cb_tree name)
+{
+	const char	*name_ptr;
+	const char	*orig_ptr;
+
+	name_ptr = orig_ptr = CB_NAME (name);
+
+	/* Remove (and warn about) labels */
+	name_ptr = remove_labels_from_filename (name_ptr);
+	if (name_ptr != orig_ptr) {
+		cb_warning (warningopt, _("ASSIGN %s interpreted as '%s'"),
+			orig_ptr, name_ptr);
+	}
+
+	/* Convert the EXTERNAL name into literal */
+	return cb_build_alphanumeric_literal (name_ptr, strlen (name_ptr));
+}
+
 /* build name for ASSIGN, to be resolved later as we don't have any
    field info at this point (postponed to cb_validate_program_data) */
 cb_tree
 cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 {
-	const char	*name_ptr;
-	const char	*orig_ptr;
-	const char	*p;
-
 	if (name == cb_error_node) {
 		return cb_error_node;
 	}
@@ -1648,62 +1680,26 @@ cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 		return NULL;
 	}
 
-	switch (CB_TREE_TAG (name)) {
-	case CB_TAG_LITERAL:
+	if (CB_LITERAL_P (name)) {
 		return name;
+	}
 
-	case CB_TAG_REFERENCE:
-		name_ptr = orig_ptr = CB_NAME (name);
-		switch (cb_assign_clause) {
-		case CB_ASSIGN_MF:
-			if (cfile->flag_ext_assign) {
-				p = strrchr (name_ptr, '-');
-				if (p) {
-					name_ptr = p + 1;
-				}
-				goto build_lit;
-			}
-			current_program->reference_list =
-			    cb_list_add (current_program->reference_list, name);
-			return name;
-		case CB_ASSIGN_IBM:
-			p = name_ptr;
-			/* Check organization */
-			if (strncmp (name_ptr, "S-", (size_t)2) == 0 ||
-			    strncmp (name_ptr, "AS-", (size_t)3) == 0) {
-				goto org;
-			}
-			/* Skip the device label if exists,
-			   CHECKME: this likely should have consequences... */
-			if ((p = strchr (name_ptr, '-')) != NULL) {
-				name_ptr = p + 1;
-			}
-			/* Check organization again */
-			if (strncmp (name_ptr, "S-", (size_t)2) == 0 ||
-			    strncmp (name_ptr, "AS-", (size_t)3) == 0) {
-org:
-				/* Skip it for now,
-				   CHECKME: the organization prefixes
-				   should likely have consequences... */
-				name_ptr = strchr (name_ptr, '-') + 1;
-			}
-			goto build_lit;
-		case CB_ASSIGN_COBOL2002:
-			/* CHECKME - To be looked at */
-			break;
-		}
-		/* Fall through */
-	default:
+	if (!CB_REFERENCE_P (name)) {
 		return cb_error_node;
 	}
-build_lit:
-	/* Warn if name was changed */
-	if (name_ptr != orig_ptr) {
-		cb_warning (warningopt, _("ASSIGN %s interpreted as '%s'"),
-			orig_ptr, name_ptr);
+
+	if (cfile->flag_ext_assign) {
+		return build_external_assignment_name (name);
+	} else {
+		/*
+		  ASSIGN DYNAMIC: assume the word in the ASSIGN is a
+		  variable name. (If no variable is defined with the same name,
+		  we'll create such a variable later.)
+		*/
+		current_program->reference_list =
+			cb_list_add (current_program->reference_list, name);
+		return name;
 	}
-	/* Convert the EXTERNAL name into literal */
-	return cb_build_alphanumeric_literal (name_ptr, strlen (name_ptr));
 }
 
 cb_tree
@@ -3174,6 +3170,105 @@ cb_validate_crt_status (cb_tree ref, cb_tree field_tree) {
 	return ref;
 }
 
+static void
+create_implicit_assign_dynamic_var (struct cb_program * const prog,
+				    cb_tree assign)
+{
+	cb_tree	x;
+	struct cb_field	*p;
+
+	if (cb_warn_implicit_define) {
+		cb_warning (cb_warn_implicit_define,
+			    _("variable '%s' will be implicitly defined"), CB_NAME (assign));
+	}
+	x = cb_build_implicit_field (assign, COB_SMALL_BUFF);
+	CB_FIELD (x)->count++;
+	p = prog->working_storage;
+	if (p) {
+		while (p->sister) {
+			p = p->sister;
+		}
+		p->sister = CB_FIELD (x);
+	} else {
+		prog->working_storage = CB_FIELD (x);
+	}
+
+}
+
+/*
+  If an ASSIGN EXTERNAL name does not match any defined variable, define the
+  variable ourselves and issue a warning.
+ */
+static void
+create_undeclared_assign_name (struct cb_file * const f,
+			       struct cb_program * const prog)
+{
+	cb_tree	assign = f->assign;
+	cb_tree	x;
+	struct cb_field	*p;
+	unsigned char	*c;
+	cb_tree	l;
+	cb_tree	ll;
+
+	if (!assign) {
+		return;
+	}
+
+	if (!CB_REFERENCE_P (assign)) {
+		return;
+	}
+
+	/* Error if assign name is same as a file name */
+	for (x = prog->file_list; x; x = CB_CHAIN (x)) {
+		if (!strcmp (CB_FILE (CB_VALUE (x))->name,
+			     CB_NAME (assign))) {
+			redefinition_error (assign);
+		}
+	}
+
+	/* If assign is a 78-level, change assign to the 78-level's literal. */
+	p = check_level_78 (CB_NAME (assign));
+	if (p) {
+		c = (unsigned char *)CB_LITERAL(CB_VALUE(p->values))->data;
+		assign = CB_TREE (build_literal (CB_CATEGORY_ALPHANUMERIC, c, strlen ((char *)c)));
+		f->assign = assign;
+		return;
+	}
+
+	/* If no data item has the same name as assign */
+	if (CB_WORD_COUNT (assign) == 0) {
+		if (cb_implicit_assign_dynamic_var) {
+			create_implicit_assign_dynamic_var (prog, assign);
+		} else {
+			/* Remove reference */
+			for (l = prog->reference_list;
+			     CB_VALUE (l) != assign && CB_VALUE (CB_CHAIN (l)) != assign;
+			     l = CB_CHAIN (l));
+			if (CB_VALUE (l) == assign) {
+				prog->reference_list = CB_CHAIN (l);
+			} else {
+				ll = CB_CHAIN (CB_CHAIN (l));
+				cobc_parse_free (CB_CHAIN (l));
+				CB_CHAIN (l) = ll;
+			}
+
+			/* Reinterpret word */
+			f->assign = build_external_assignment_name (assign);
+		}
+	} else {
+		/*
+		  assign is a valid reference, so we can check it's not an
+		  88-level.
+		*/
+		x = cb_ref (assign);
+		if (CB_FIELD_P (x)
+		    && CB_FIELD (x)->level == 88) {
+			cb_error_x (assign, _("ASSIGN data item '%s' is invalid"),
+				    CB_NAME (assign));
+		}
+	}
+}
+
 void
 cb_validate_program_data (struct cb_program *prog)
 {
@@ -3182,7 +3277,6 @@ cb_validate_program_data (struct cb_program *prog)
 	struct cb_field		*q;
 	struct cb_field		*field;
 	struct cb_file		*file;
-	unsigned char		*c;
 	char			buff[COB_MINI_BUFF];
 
 	prog->report_list = cb_list_reverse (prog->report_list);
@@ -3223,54 +3317,10 @@ cb_validate_program_data (struct cb_program *prog)
 		}
 	}
 
-	/* Build undeclared assignment name now */
-	if (cb_assign_clause == CB_ASSIGN_MF) {
-		for (l = prog->file_list; l; l = CB_CHAIN (l)) {
-			cb_tree assign = CB_FILE (CB_VALUE (l))->assign;
-			if (!assign) {
-				continue;
-			}
-			if (CB_REFERENCE_P (assign)) {
-				for (x = prog->file_list; x; x = CB_CHAIN (x)) {
-					if (!strcmp (CB_FILE (CB_VALUE (x))->name,
-					     CB_NAME (assign))) {
-						redefinition_error (assign);
-					}
-				}
-				p = check_level_78 (CB_NAME (assign));
-				if (p) {
-					c = (unsigned char *)CB_LITERAL(CB_VALUE(p->values))->data;
-					assign = CB_TREE (build_literal (CB_CATEGORY_ALPHANUMERIC, c, strlen ((char *)c)));
-					CB_FILE (CB_VALUE (l))->assign = assign;
-				}
-			}
-			if (CB_REFERENCE_P (assign) &&
-			    CB_WORD_COUNT (assign) == 0) {
-				if (cb_warn_implicit_define) {
-					cb_warning (cb_warn_implicit_define,
-						_("'%s' will be implicitly defined"), CB_NAME (assign));
-				}
-				x = cb_build_implicit_field (assign, COB_SMALL_BUFF);
-				CB_FIELD (x)->count++;
-				p = prog->working_storage;
-				if (p) {
-					while (p->sister) {
-						p = p->sister;
-					}
-					p->sister = CB_FIELD (x);
-				} else {
-					prog->working_storage = CB_FIELD (x);
-				}
-			}
-			if (CB_REFERENCE_P (assign)) {
-				x = cb_ref (assign);
-				if (CB_FIELD_P (x)
-				 && CB_FIELD (x)->level == 88) {
-					cb_error_x (assign, _("ASSIGN data item '%s' is invalid"),
-						CB_NAME (assign));
-				}
-			}
-		}
+	/* Build undeclared assignment names now */
+	for (l = prog->file_list; l; l = CB_CHAIN (l)) {
+		create_undeclared_assign_name (CB_FILE (CB_VALUE (l)),
+					       prog);
 	}
 
 	if (prog->cursor_pos) {
@@ -12681,7 +12731,7 @@ cb_emit_json_generate (cb_tree out, cb_tree from, cb_tree count,
 
 	tree->sibling = current_program->ml_trees;
 	current_program->ml_trees = tree;
-	
+
 	cb_emit (cb_build_ml_suppress_checks (tree));
 	cb_emit (CB_BUILD_FUNCALL_3 ("cob_json_generate", out, CB_TREE (tree), count));
 }

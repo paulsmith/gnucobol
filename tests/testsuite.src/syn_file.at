@@ -1110,7 +1110,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:11: error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
 prog.cob:8: error: missing file description for FILE testfile
-prog.cob:13: warning: 'filename' will be implicitly defined
+prog.cob:13: warning: variable 'filename' will be implicitly defined
 ])
 AT_CLEANUP
 
@@ -1625,34 +1625,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob:10: warning: VALUE OF is obsolete in GnuCOBOL
-prog.cob:12: warning: 'fid-file1' will be implicitly defined
-])
-AT_CLEANUP
-
-
-AT_SETUP([Implicit declaration of FILE-ID variable])
-AT_KEYWORDS([file])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION.
-       INPUT-OUTPUT     SECTION.
-       FILE-CONTROL.
-       SELECT TEST-FILE ASSIGN FILENAME.
-       DATA             DIVISION.
-       FILE             SECTION.
-       FD TEST-FILE.
-       01 TEST-REC      PIC X(4).
-       PROCEDURE        DIVISION.
-           MOVE "TEST-FILE" TO FILENAME.
-           OPEN OUTPUT TEST-FILE.
-           CLOSE TEST-FILE.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY -std=cobol2002 -fassign-clause=mf prog.cob], [0], [],
-[prog.cob:12: warning: 'FILENAME' will be implicitly defined
+prog.cob:12: warning: variable 'fid-file1' will be implicitly defined
 ])
 AT_CLEANUP
 
