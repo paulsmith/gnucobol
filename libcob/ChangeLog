@@ -11,6 +11,13 @@
 
 	* fisam.c: Adjusted for correct use of snprintf
 
+2019-12-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (BUTTON3_DOUBLE_CLICKED): fix value for BUTTON3_DOUBLE_CLICKED
+	* screenio.c (field_accept): pass mouse position on KEY_MOUSE
+	* screenio.c (cob_display_formatted_text): fix early return for broken data
+	* common.c (set_config_val): pass COB_MOUSE_INTERVAL changes to screenio.c
+
 2019-11-30  Ron Norman <rjn@inglenet.com>
 
 	* common.c: Have cobcrun --info display of ODBC or OCI are possible
