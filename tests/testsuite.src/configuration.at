@@ -1,4 +1,4 @@
-## Copyright (C) 2014-2019 Free Software Foundation, Inc.
+## Copyright (C) 2014-2020 Free Software Foundation, Inc.
 ## Written by Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -453,6 +453,7 @@ test.conf: missing definitions:
 	no definition of 'value-of-clause'
 	no definition of 'data-records-clause'
 	no definition of 'top-level-occurs-clause'
+	no definition of 'same-as-clause'
 	no definition of 'synchronized-clause'
 	no definition of 'goto-statement-without-name'
 	no definition of 'stop-literal-statement'

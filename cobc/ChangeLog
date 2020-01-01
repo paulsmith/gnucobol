@@ -1,4 +1,10 @@
 
+2020-01-01  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, field.c (copy_into_field), tree.h, config.def:
+	  FR #193 implementation of SAME AS
+	* cobc.c: Copyright year update
+
 2020-01-01  Ron Norman <rjn@inglenet.com>
 
 	* sqlxfdgen.c: Updates for ODBC interface
@@ -17,7 +23,7 @@
 
 2019-12-15  Simon Sobisch <simonsobisch@gnu.org>
 
-	* parser.y: #543 check for condition-name in ADDRESS OF
+	* parser.y: bug #543 check for condition-name in ADDRESS OF
 
 2019-12-03  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -7230,7 +7236,7 @@
 	* cobc.h (cobc_verbose_flag): Declared.
 
 
-Copyright 2002-2019 Free Software Foundation, Inc.
+Copyright 2002-2020 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

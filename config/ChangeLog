@@ -1,4 +1,8 @@
 
+2020-01-01 Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: FR #193 added same-as-clause
+
 2019-12-28  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: changed assign-clause directives to use more descriptive
@@ -510,7 +514,7 @@
 	* default.inc, Makefile.am: New files.
 
 
-Copyright 2003,2005-2007-2010,2014-2019 Free Software Foundation, Inc.
+Copyright 2003,2005-2007-2010,2014-2020 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

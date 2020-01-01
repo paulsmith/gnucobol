@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2016-2019 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2016-2020 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Edward Hart, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -1913,6 +1913,70 @@ prog.cob:8: error: RENAMES of 01-, 66- and 77-level items does not conform to CO
 prog.cob:11: error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
 ])
 AT_CHECK([$COMPILE_ONLY -frenames-uncommon-levels=ok prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SAME AS clause])
+AT_KEYWORDS([definition EXTERNAL GLOBAL ])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  MESSAGE-TEXT-2 EXTERNAL.
+         02 AUSGABE-FILE-NAME     PIC X(50).
+         02 FILLER REDEFINES AUSGABE-FILE-NAME.
+             05 FILLER PIC 9999.
+         02 AUSGABE-FILE-NAME-2.
+             05 FILLER PIC 9999.
+             05 DETAIL-NO PIC 9999.
+         02 FILLER SAME AS AUSGABE-FILE-NAME.
+      
+       77 OUTPUT-NAME SAME AS DETAIL-NO GLOBAL.
+
+       01 Z-MESSAGE-T2 SAME AS AUSGABE-FILE-NAME-2.       
+       01 Z-MESSAGE-T3.
+          49 MT3       SAME AS MESSAGE-TEXT-2.
+          49 MT3-REN  REDEFINES MT3 SAME AS MESSAGE-TEXT-2.
+
+       PROCEDURE DIVISION.
+           DISPLAY AUSGABE-FILE-NAME OF MESSAGE-TEXT-2
+           DISPLAY DETAIL-NO         OF Z-MESSAGE-T2
+           DISPLAY AUSGABE-FILE-NAME OF MT3
+           DISPLAY OUTPUT-NAME
+           GOBACK.
+])
+
+AT_DATA([badprog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  MESSAGE-TEXT-2.
+         02 AUSGABE-FILE-NAME     PIC X(50).
+         02 F1 SAME AS MESSAGE-TEXT-2.
+       01 MT2 SAME AS MESSAGE-TEXT-2.
+             05 FILLER PIC 9999.
+       01 MT3 SAME AS MESSAGE-TEXT-2 PIC X.
+       77 OUTPUT-NAME  SAME AS MESSAGE-TEXT-2.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [1], [],
+[prog.cob:13: error: SAME AS clause does not conform to Micro Focus COBOL
+prog.cob:15: error: SAME AS clause does not conform to Micro Focus COBOL
+prog.cob:17: error: SAME AS clause does not conform to Micro Focus COBOL
+prog.cob:19: error: SAME AS clause does not conform to Micro Focus COBOL
+prog.cob:20: error: SAME AS clause does not conform to Micro Focus COBOL
+])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY badprog.cob], [1], [],
+[badprog.cob:8: error: SAME AS item may not reference itself
+badprog.cob:10: error: entry following SAME AS may not be subordinate to it
+badprog.cob:11: error: illegal combination of SAME AS with other clauses
+badprog.cob:12: error: elementary item expected
+])
 
 AT_CLEANUP
 

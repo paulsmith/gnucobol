@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
    Edward Hart
 
@@ -1500,6 +1500,24 @@ set_current_field (cb_tree level, cb_tree name)
 	return 0;
 }
 
+/* verifies that no conflicting clauses are used and inherits the definition of the original field */
+static void
+inherit_same_as ()
+{
+	/* note: REDEFINES (clause 1) is allowed with RM/COBOL but not COBOL 2002+ */
+	static const cob_flags_t	allowed_clauses =
+		SYN_CLAUSE_1 | SYN_CLAUSE_2 | SYN_CLAUSE_3 | SYN_CLAUSE_7;
+	cob_flags_t	tested = check_pic_duplicate & ~(allowed_clauses);
+	if (tested != SYN_CLAUSE_30) {
+		cb_error_x (CB_TREE(current_field), _("illegal combination of %s with other clauses"), "SAME AS");
+		current_field->flag_is_verified = 1;
+		current_field->flag_invalid = 1;
+	} else {
+		struct cb_field* fld = CB_FIELD (current_field->same_as);
+		current_field = copy_into_field (fld, current_field, 1);
+	}
+}
+
 static void
 check_not_both (const cob_flags_t flag1, const cob_flags_t flag2,
 		const char *flag1_name, const char *flag2_name,
@@ -1791,7 +1809,7 @@ check_not_88_level (cb_tree x)
 		/* invalidate field to prevent same error in typeck.c (validate_one) */
 		/* FIXME: If we really need the additional check here then we missed
 		          a call to cb_validate_one() somewhere */
-		return cb_error_node;
+		return cb_error_node; 
 #endif
 	} else {
 		return x;
@@ -6240,6 +6258,10 @@ _record_description_list:
   record_description_list
   {
 	struct cb_field *p;
+	/* finalize last field if target of SAME AS */
+	if (current_field && !CB_INVALID_TREE (current_field->same_as)) {
+		inherit_same_as ();
+	}
 
 	for (p = description_field; p; p = p->sister) {
 		cb_validate_field (p);
@@ -6259,6 +6281,10 @@ data_description:
 | condition_name_entry
 | level_number _entry_name
   {
+	if (current_field && !CB_INVALID_TREE (current_field->same_as)) {
+		/* finalize last field if target of SAME AS */
+		inherit_same_as ();
+	}
 	if (set_current_field ($1, $2)) {
 		YYERROR;
 	}
@@ -6590,6 +6616,7 @@ data_description_clause_sequence:
 
 data_description_clause:
   redefines_clause
+| same_as_clause
 | external_clause
 | global_clause
 | picture_clause
@@ -6624,6 +6651,66 @@ redefines_clause:
 		current_field->flag_is_verified = 1;
 		current_field->flag_invalid = 1;
 		YYERROR;
+	}
+  }
+;
+
+
+/* SAME AS clause ("AS" optional with RM-COBOL, not with COBOL2002+) */
+
+same_as_clause:
+  SAME _as identifier_field
+  {
+	cb_tree x = $3;
+	check_repeated ("SAME AS", SYN_CLAUSE_30, &check_pic_duplicate);
+	
+	/* note: syntax checks for conflicting clauses done in inherit_same_as */
+	if (cb_verify (cb_same_as_clause, _("SAME AS clause"))
+	 && x != cb_error_node) {
+		struct cb_field *f = CB_FIELD (cb_ref (x));
+		if (f->storage == CB_STORAGE_SCREEN) {
+			cb_error (_("SCREEN item cannot be used here"));
+			x = cb_error_node;
+		} else if (f->storage == CB_STORAGE_REPORT) {
+			cb_error (_("REPORT item cannot be used here"));
+			x = cb_error_node;
+		} else if (f->level == 88) {
+			cb_error (_("condition-name not allowed here: '%s'"), cb_name (x));
+			x = cb_error_node;
+		} else if (current_field->level == 77) {
+			if (f->children) {
+				cb_error (_("elementary item expected"));
+				x = cb_error_node;
+			}
+		} else {
+			struct cb_field *p;
+			for (p = current_field; p; p = p->parent) {
+				if (p == f) {
+					cb_error (_ ("SAME AS item may not reference itself"));
+					x = cb_error_node;
+					break;
+				}
+			}
+			for (p = f->parent; p; p = p->parent) {
+				if (p->usage != CB_USAGE_DISPLAY) {
+					cb_error (_("SAME AS item may not be subordinate to any item with USAGE clause"));
+				} else if (p->flag_sign_clause) {
+					cb_error (_("SAME AS item may not be subordinate to any item with SIGN clause"));
+				} else {
+					continue;
+				}
+				x = cb_error_node;
+				break;
+			}
+		}
+	}
+
+	if (x == cb_error_node) {
+		current_field->flag_is_verified = 1;
+		current_field->flag_invalid = 1;
+		current_field->same_as = x;
+	} else {
+		current_field->same_as = cb_ref (x);
 	}
   }
 ;
@@ -7308,7 +7395,7 @@ synchronized_clause:
   SYNCHRONIZED _left_or_right
   {
 	check_repeated ("SYNCHRONIZED", SYN_CLAUSE_9, &check_pic_duplicate);
-	if (cb_verify (cb_synchronized_clause, "SYNC")) {
+	if (cb_verify (cb_synchronized_clause, _("SYNCHRONIZED clause"))) {
 		current_field->flag_synchronized = 1;
 	}
   }
@@ -9809,7 +9896,7 @@ _segment:
 	int segnum = cb_get_int ($1);
 
 	$$ = NULL;
-	if (cb_verify (cb_section_segments, "SECTION segment")) {
+	if (cb_verify (cb_section_segments, _("section segments"))) {
 		if (segnum > 99) {
 			cb_error (_("SECTION segment-number must be less than or equal to 99"));
 		} else {

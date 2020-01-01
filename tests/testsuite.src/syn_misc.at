@@ -1,4 +1,4 @@
-## Copyright (C) 2007-2012, 2014-2019 Free Software Foundation, Inc.
+## Copyright (C) 2007-2012, 2014-2020 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart,
 ## Ron Norman
 ##
@@ -2846,49 +2846,49 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: in section 'DEC-1':
-prog.cob:9: warning: SECTION segment ignored
+prog.cob:9: warning: section segments ignored
 prog.cob: in section 'DEC-2':
-prog.cob:12: warning: SECTION segment ignored
+prog.cob:12: warning: section segments ignored
 prog.cob: in section 'SEC-1':
-prog.cob:17: warning: SECTION segment ignored
+prog.cob:17: warning: section segments ignored
 prog.cob: in section 'SEC-2':
-prog.cob:20: warning: SECTION segment ignored
+prog.cob:20: warning: section segments ignored
 prog.cob: in section 'SEC-3':
 prog.cob:23: error: unsigned integer value expected
-prog.cob:23: warning: SECTION segment ignored
+prog.cob:23: warning: section segments ignored
 prog.cob: in section 'SEC-4':
-prog.cob:26: warning: SECTION segment ignored
+prog.cob:26: warning: section segments ignored
 prog.cob: in section 'SEC-5':
-prog.cob:29: warning: SECTION segment ignored
+prog.cob:29: warning: section segments ignored
 prog.cob: in section 'SEC-6':
-prog.cob:32: warning: SECTION segment ignored
+prog.cob:32: warning: section segments ignored
 prog.cob: in section 'SEC-7':
-prog.cob:35: warning: SECTION segment ignored
+prog.cob:35: warning: section segments ignored
 ])
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
 [prog.cob: in section 'DEC-1':
-prog.cob:9: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:9: warning: section segments is obsolete in COBOL 85
 prog.cob:9: warning: SECTION segment within DECLARATIVES is not implemented
 prog.cob: in section 'DEC-2':
-prog.cob:12: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:12: warning: section segments is obsolete in COBOL 85
 prog.cob:12: error: SECTION segment-number in DECLARATIVES must be less than 50
 prog.cob:12: warning: SECTION segment within DECLARATIVES is not implemented
 prog.cob: in section 'SEC-1':
-prog.cob:17: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:17: warning: section segments is obsolete in COBOL 85
 prog.cob: in section 'SEC-2':
-prog.cob:20: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:20: warning: section segments is obsolete in COBOL 85
 prog.cob: in section 'SEC-3':
 prog.cob:23: error: unsigned integer value expected
-prog.cob:23: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:23: warning: section segments is obsolete in COBOL 85
 prog.cob: in section 'SEC-4':
-prog.cob:26: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:26: warning: section segments is obsolete in COBOL 85
 prog.cob:26: error: SECTION segment-number must be less than or equal to 99
 prog.cob: in section 'SEC-5':
-prog.cob:29: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:29: warning: section segments is obsolete in COBOL 85
 prog.cob: in section 'SEC-6':
-prog.cob:32: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:32: warning: section segments is obsolete in COBOL 85
 prog.cob: in section 'SEC-7':
-prog.cob:35: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:35: warning: section segments is obsolete in COBOL 85
 ])
 AT_CLEANUP
 

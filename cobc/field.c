@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2019 Free Software Foundation, Inc.
+   Copyright (C) 2001-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
    Edward Hart
 
@@ -450,6 +450,10 @@ cb_build_field_tree (cb_tree level, cb_tree name, struct cb_field *last_field,
 		}
 	}
 	if (last_field) {
+		if (last_field->same_as && f->level != 77 && f->level != 66 && f->level > last_field->level) {
+			cb_error_x (name, _("entry following SAME AS may not be subordinate to it"));
+			return cb_error_node;
+		}
 		if (last_field->level == 77 && f->level != 01 &&
 		    f->level != 77 && f->level != 66 && f->level != 88) {
 			cb_error_x (name, _("level number must begin with 01 or 77"));
@@ -645,6 +649,107 @@ cb_resolve_redefines (struct cb_field *field, cb_tree redefines)
 		f = f->redefines;
 	}
 	return f;
+}
+
+struct cb_field *
+copy_into_field (struct cb_field *source, struct cb_field *target, const int first)
+{
+	/* backup some entries */
+	struct cb_tree_common	common = target->common;
+	int		id = target->id;
+	int		level = target->level;
+	int		occurs_min = target->occurs_min;
+	int		occurs_max = target->occurs_max;
+	unsigned int		occurs = target->flag_occurs;
+	unsigned char		external = target->flag_external;
+	unsigned char		global = target->flag_is_global;
+	enum cb_storage storage = target->storage;
+	const char *name = target->name;
+	const char *ename = target->ename;
+	struct cb_field *parent = target->parent;
+	struct cb_field *result_fld = target;
+	struct cb_field *redefines = target->redefines;
+
+	/* copy everything and restore */
+	memcpy (target, source, sizeof (struct cb_field));
+
+	target->common = common;
+	target->id = id;
+	target->level = level;
+	target->storage = storage;
+	target->flag_is_global = global;
+	target->flag_external = external;
+	target->flag_occurs = occurs;
+	target->occurs_min = occurs_min;
+	target->occurs_max = occurs_max;
+	if (name) {
+		target->name = name;
+	}
+	if (ename) {
+		target->name = ename;
+	}
+	target->parent = parent;
+#if 0 /* temporary code to resolve a redefine from the source, likely not reasonable... */
+	if (target->redefines) {
+		cb_tree x = cb_build_reference (target->redefines->name);
+		if (x != cb_error_node) {
+			target->redefines = cb_resolve_redefines (target, x);
+		}
+	}
+#else
+	target->redefines = redefines;
+#endif
+
+	/* duplicate and reset */
+	if (target->pic) {
+		target->pic = CB_PICTURE (cb_build_picture (target->pic->orig));
+	}
+	target->children = NULL;
+	target->sister = NULL;
+
+	/* likely more to reset here ... */
+
+	if (source->children) {
+		cb_tree n, x;
+		int level_new;
+		if (source->children->level > level) {
+			level_new = source->children->level;
+		} else {
+			level_new = level + 1;
+			if (level_new == 66 || level_new == 77
+			 || level_new == 78 || level_new == 88) {
+				level_new++;
+			}
+		}
+
+		if (source->children->name) {
+			n = cb_build_reference (source->children->name);
+		} else {
+			n = cb_build_filler ();
+		}
+		x = cb_build_field_tree (NULL, n, target, storage, NULL, level_new);
+		if (x != cb_error_node) {
+			result_fld = copy_into_field (source->children, CB_FIELD (x), 0);
+		}
+	}
+	if (first) {
+		/* adjust reference counter to allow "no codegen" if only used as type */
+		source->count--;
+		target->count--;
+	} else if (source->sister) {
+		/* for children: all sister entries need to be copied */
+		cb_tree n, x;
+		if (source->sister->name) {
+			n = cb_build_reference (source->sister->name);
+		} else {
+			n = cb_build_filler ();
+		}
+		x = cb_build_field_tree (NULL, n, target, storage, NULL, level);
+		if (x != cb_error_node) {
+			result_fld = copy_into_field (source->sister, CB_FIELD (x), 0);
+		}
+	}
+	return result_fld;
 }
 
 static COB_INLINE COB_A_INLINE void
