@@ -495,7 +495,7 @@ cb_init_codegen (void)
 
 /* Output routines */
 
-static inline void
+static COB_INLINE COB_A_INLINE void
 increase_output_line ()
 {
 	if (output_target == yyout) {
