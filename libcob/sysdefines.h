@@ -237,6 +237,37 @@
 #define HAVE_8DOT3_FILENAMES
 #endif
 
+/*
+ * Mapping of COBOL Numeric to an SQL DATE
+ *   (used in cobc/sqlxfdgen.c and libcob/fsqlxfd.c)
+ */
+struct sql_date {
+	unsigned char	digits;		/* Total number of digits */
+	unsigned char	hasDate;	/* Some part of YYMMDD is present */
+	unsigned char	hasTime;	/* Some part of HHMISS is present */
+	char			yyRule;		/* Rule code for adjusting Year */
+								/* '+': real year := yy + yyAdj */
+								/* '%': real year := yy pivot value yyAdj */
+	short 			yyAdj;		/* Value to adjust year by */
+	unsigned char	ccLen;		/* length of Century */
+	unsigned char	ccPos;		/* position of Century */
+	unsigned char	yyLen;		/* length of Year */
+	unsigned char	yyPos;		/* position of year */
+	unsigned char	mmLen;		/* length of Month */
+	unsigned char	mmPos;		/* position of Month */
+	unsigned char	ddLen;		/* length of Day */
+	unsigned char	ddPos;		/* position of Day */
+	unsigned char	hhLen;		/* length of Hour */
+	unsigned char	hhPos;		/* position of Hour */
+	unsigned char	miLen;		/* length of Minute */
+	unsigned char	miPos;		/* position of Minute */
+	unsigned char	ssLen;		/* length of Seconds */
+	unsigned char	ssPos;		/* position of Seconds */
+	unsigned char	huLen;		/* length of Hundredths of Second */
+	unsigned char	huPos;		/* position of Hundredths of Second */
+	char			format[32];	/* Date format string; Used for date conversion */
+};
+
 /* End compiler stuff */
 
 /* EBCDIC determination */

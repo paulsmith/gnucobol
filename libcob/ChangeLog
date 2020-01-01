@@ -1,4 +1,12 @@
 
+2020-01-01  Ron Norman <rjn@inglenet.com>
+	* fileio.c: removed wrong setting of io_routine
+	* fileio.h: Updates for ODBC interface
+	* sysdefines.h: Add SQL Date structure
+	* fodbc.c,fsqlxfd.c: Preliminary checkin of ODBC interface
+				ODBC is not ready for production yet
+				OCI will be developed/tested next based on ODBC
+
 2019-12-27  Ron Norman <rjn@inglenet.com>
 
 	* common.h: Added cob_file.curkey to record recent file index 

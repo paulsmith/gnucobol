@@ -4848,7 +4848,6 @@ cob_delete_file (cob_file *f, cob_field *fnstatus)
 	if (f->organization != COB_ORG_INDEXED) {
 		unlink (file_open_name);
 	} else {
-		f->io_routine = ix_routine;
 		cob_file_save_status (f, fnstatus,
 			fileio_funcs[get_io_ptr (f)]->fildelete (&file_api, f, file_open_name));
 		return;

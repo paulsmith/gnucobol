@@ -112,6 +112,9 @@
 #endif	/* _WIN32 */
 
 #include "sysdefines.h"
+#ifndef MAXNUMKEYS
+#define MAXNUMKEYS 32
+#endif
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
@@ -193,14 +196,218 @@ COB_HIDDEN void	cob_lmdb_init_fileio (cob_file_api *);
 
 #if defined(WITH_ODBC) || defined(WITH_OCI) || defined(WITH_DB) || defined(WITH_LMDB)
 /* Routines in fsqlxfd.c common to all Database interfaces */
-int db_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen);
-int db_keylen (cob_file *f, int idx);
-int db_savekey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx);
-int db_cmpkey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx, int partlen);
+COB_HIDDEN int db_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen);
+COB_HIDDEN int db_keylen (cob_file *f, int idx);
+COB_HIDDEN int db_savekey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx);
+COB_HIDDEN int db_cmpkey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx, int partlen);
 #endif
 #if defined(WITH_ODBC) || defined(WITH_OCI)
-/* Routines in fsqlxfd.c common to ODBC/OCI interfaces */
+#ifndef FALSE
+#define FALSE 0
 #endif
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#define SQL_BIND_NO		0
+#define SQL_BIND_COLS	2
+#define SQL_BIND_PRMS	4
+#define SQL_BIND_EQ		8
+#define SQL_BIND_WHERE	16
+
+typedef struct sql_stmt {
+	void    	*handle;		/* Database 'handle' */
+	char		*text;			/* SQL statement text */
+	int			status;			/* Recent status */
+	unsigned char preped;		/* has been Prepared for execution */
+	unsigned char bound;		/* Variables have been bound */
+	unsigned char params;		/* Parameters are bound */
+	unsigned char iscursor;		/* CURSOR is open */
+	short		bindpos;		/* Last column bound to statement */
+} SQL_STMT;
+
+/*
+ * Holds Database State information
+ */
+struct db_state {
+	cob_u32_t	isodbc:1;
+	cob_u32_t	db2:1;
+	cob_u32_t	mssql:1;
+	cob_u32_t	mysql:1;
+	cob_u32_t	isoci:1;
+	cob_u32_t	oracle:1;
+	cob_u32_t	scanForNulls:1;
+	cob_u32_t	isconnected :1;
+	cob_u32_t	iscommitpend:1;
+	cob_u32_t	isopen:1;
+	cob_u32_t	optFastRead:1;
+	 
+	int		dbStatus;			/* Status of last DB call */
+	int		dbFatalStatus;		/* Fatal Status from last DB call */
+	char	odbcState[6];		/* Long ODBC status code */
+	short	indsz;				/* Sizeof SQL Indicator */
+	char	dbType[32];			/* Actual DB type */
+	char	dbSchema[32];		/* Schema name */
+	char	dbSid[32];			/* DB 'session id' (OCI) */
+	char	dbUser[32];			/* DB UserId to connect with */
+	char	dbPwd[32];			/* DB Password to connect with */
+	char	dbDsn[32];			/* DB DSN to connect with */
+	char	dbCon[80];			/* Full connect string */
+
+	int		intRecWait;
+	int		nRecWaitTry;
+	int		nMaxRetry;
+	int		arrayFetch;
+	int		stmtCache;
+
+	/*	Various Status Codes, Actual value set by Data Base Interface */
+	/*			for checking  'dbStatus'	Oracle value as example   */
+	int		dbStsOk;			/*    0: Operation OK */
+	int		dbStsNullCol;		/* 1405: Operation OK, some Column was NULL */
+	int		dbStsNotFound;		/*  100: Record not found */
+	int		dbStsNotFound2;		/* 1403: Record not found */
+	int		dbStsDupKey;		/*    1: Duplicate Key */
+	int		dbStsRecLock;		/*   54: Record Locked */
+	int		dbStsDeadLock;		/*   60: Dead lock detected */
+	int		dbStsNoSpace;		/* 1653: Out of disk space */
+	int		dbStsInvlNum;		/* 1722: Invalid number   */
+	int		dbStsBadRowid;		/* 1410: bad ROWID */
+	int		dbStsNoTable;		/* 1146: Table does not exist */
+
+	char	*dateFormat;		/* Default DATE format */
+	void	*dbEnvH;			/* DB Environment handle */
+	void	*dbDbcH;			/* DB database handle */
+	void	*dbhnd1;			/* DB spare handles */
+	void	*dbhnd2;
+	void	*dbhnd3;
+	void	*dbhnd4;
+};
+
+/*
+ * Holds one action/description
+ */
+struct map_xfd {
+	enum {
+		XC_DATA = 1,
+		XC_GOTO,
+		XC_WHEN
+	} 		cmd;
+	enum {
+		XO_NULL = 0,
+		XO_GE = 1,
+		XO_GT,
+		XO_LE,
+		XO_LT,
+		XO_EQ,
+		XO_NE,
+		XO_AND,
+		XO_OR,
+		XO_NOT
+	} 		opcode;			/* Operation code */
+	int		type;			/* Data type (COB_XFDT_xxxx) */
+	int		offset;			/* Offset to data field within record */
+	int		size;			/* Size of COBOL data field */
+	int		digits;			/* Digits in field */
+	int		scale;			/* Decimal scale of field, decimal places */
+	int		sqlsize;		/* Size for holding SQL data */
+	int		hostType;		/* Host/C data type */
+	int		sqlType;		/* SQL Column type */
+	int		sqlColSize;		/* SQL Column size */
+	int		sqlDecimals;	/* Decimal places */
+	int		sqlinlen;		/* Length of data returned from SQL */
+	int		sqloutlen;		/* Length of data given to SQL */
+	int		level;			/* Original COBOL data level number */
+	short	target;			/* Target position */
+	short	jumpto;			/* Resolved target position */
+	short	lncolname;		/* Length of column name */
+	short	lnvalue;		/* Length of 'value' */
+	short	colpos;			/* Position in 'map' of this column def */
+	char	valnum;			/* Value is numeric */
+	char	setnull;		/* Indicator was/is NULL */
+	char	notnull;		/* Column is set NOT NULL */
+	char	iskey;			/* Column is a key field */
+	char	*colname;		/* Column name */
+	char	*value;			/* Value to test */
+	struct sql_date	*dtfrm;	/* Date format to use */
+	unsigned char *sdata;	/* SQL data storage area (within 'sqlbf') */
+	int		*ind;			/* SQL Indicator */
+	cob_field		recfld;	/* Data field found in File record area */
+	cob_field_attr	recattr;
+	cob_pic_symbol	recpic[6];
+	cob_field		sqlfld;	/* Data field found in SQL buffer area */
+	cob_field_attr	sqlattr;
+	cob_pic_symbol	sqlpic[6];
+};
+
+/*
+ * Defines a key
+ */
+#define MAXKEYCOLS	32
+struct key_xfd {
+	unsigned char	keyn;		/* Key # */
+	unsigned char	dups;		/* 1 if DUPS allowed */
+	unsigned char	sup;		/* 1 if SUPPRESS (but not supported by ODBC/OCI */
+	unsigned char	supchar;	/* Character to indicate key suppression */
+	short			ncols;		/* Number of Columns in index */
+	short			lncols;		/* Length of all column names in index */
+	short			col[MAXKEYCOLS];	/* Offset in file_xfd.map to column def */
+	int				lncreate;
+	char			*create_index;	/* SQL CREATE INDEX */
+	SQL_STMT		where_eq;	/* SELECT WHERE index EQ */
+	SQL_STMT		where_ne;	/* SELECT WHERE index NE */
+	SQL_STMT		where_le;	/* SELECT WHERE index LE */
+	SQL_STMT		where_lt;	/* SELECT WHERE index LT */
+	SQL_STMT		where_ge;	/* SELECT WHERE index GE */
+	SQL_STMT		where_gt;	/* SELECT WHERE index GT */
+	SQL_STMT		where_fi;	/* SELECT index first */
+	SQL_STMT		where_la;	/* SELECT index last */
+};
+
+/*
+ * Primary table for in memory XFD
+ */
+struct file_xfd {
+	cob_file *fl;			/* File used */
+	char	*tablename;		/* SQL Table Name */
+	int		nmap;			/* Number of data mapping directives */
+	struct map_xfd	*map;	/* Table of data mapping directives */
+	unsigned char	*sqlbf;	/* Large buffer for SQL data */
+	SQL_STMT	insert;		/* Insert statement */
+	SQL_STMT	update;		/* Update statement */
+	SQL_STMT	delete;		/* Delete statement */
+	char	*select;		/* List of columns for a select statement */
+	char	*create_table;	/* SQL CREATE TABLE */
+	int		lncreate;
+	int		lnselect;		/* Length of all column for SELECT */
+	int		lnind;			/* Length of one 'SQL Indicator' */
+	int		nkeys;			/* Number of indexes on table */
+	int		ndate;			/* Number of unique 'date formats' used */
+	int		nlbl;			/* Number of labels used */
+	int		ncols;			/* Number of columns */
+	int		lncols;			/* Length of all Column names */
+	int		*xlbl;			/* Label to map[subscript] table */
+	struct sql_date	**date;	/* Date formats used */
+	SQL_STMT	*start;		/* Active SELECT statement */
+	struct key_xfd	*key[MAXNUMKEYS];
+};
+
+/* Routines in fsqlxfd.c common to ODBC/OCI interfaces */
+COB_HIDDEN struct file_xfd* cob_load_xfd (cob_file *fl, char *alt_name, int indsize);
+COB_HIDDEN void 	cob_dump_xfd (struct file_xfd *fx, FILE *fo);
+COB_HIDDEN void 	cob_load_ddl (struct file_xfd *fx);
+COB_HIDDEN char *	getSchemaEnvName (struct db_state *db, char *envnm, const char *suf, char *out);
+COB_HIDDEN void 	logSchemaEnvName (struct db_state *db, const char *suffix);
+COB_HIDDEN char *	cob_sql_stmt (struct db_state *db, struct file_xfd *fx, char *stmt, int idx, const char *cond);
+COB_HIDDEN void 	cob_xfd_to_file (struct db_state *db, struct file_xfd *fx, cob_file *fl);
+COB_HIDDEN void 	cob_file_to_xfd (struct db_state *db, struct file_xfd *fx, cob_file *fl);
+COB_HIDDEN void		cob_index_to_xfd (struct db_state *db, struct file_xfd *fx, cob_file *fl, int idx);
+COB_HIDDEN void		cob_drop_xfd (struct file_xfd *fx);
+COB_HIDDEN void 	cob_sql_dump_stmt (struct db_state  *db, char *stmt, int doall);
+COB_HIDDEN void 	cob_sql_dump_data (struct db_state *db, struct file_xfd *fx);
+COB_HIDDEN void 	cob_sql_dump_index (struct db_state *db, struct file_xfd *fx, int idx);
+
+#endif
+
 #ifdef	WITH_ODBC
 COB_HIDDEN void	cob_odbc_init_fileio (cob_file_api *);
 #endif

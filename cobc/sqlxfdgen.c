@@ -40,6 +40,10 @@
 static int	hasxfd = 0;
 static char xfd[MAX_XFD][80];
 
+#define MAX_DATE 16
+static int	ndate = 0;
+static char dateformat[MAX_DATE][40];
+
 #define MAX_OCC_NEST 16
 static char eol[6] = "";
 static char prefix[8] = "";
@@ -47,7 +51,6 @@ static int	prefixlen = 0;
 static int	next_lbl = 1;
 static short COMPtoDig[10]   = {3,8,11,13,16,18,21,23,27};	/* SQL storage size for Binary field */
 
-/* Local functions */
 void
 cb_save_xfd (char *str)
 {
@@ -61,6 +64,185 @@ cb_save_xfd (char *str)
 	}
 	strcpy(xfd[hasxfd],str);
 	hasxfd++;
+}
+
+/* Local functions */
+
+static void
+save_date (struct cb_field *f)
+{
+	int		k;
+	do {
+		if (f->level < 1
+		 || f->level >= 66) {
+			f = f->sister;
+			if (f == NULL)
+				return;
+			continue;
+		}
+		if (f->children) {
+			save_date (f->children);
+		}
+		if (f->sql_date_format) {
+			for(k=0; k < ndate; k++) {
+				if (strcmp(dateformat[k],f->sql_date_format) == 0)
+					break;
+			}
+			if(k == ndate
+			&& ndate < MAX_DATE) {
+				strcpy(dateformat[ndate++],f->sql_date_format);
+			}
+		}
+		f = f->sister;
+	} while (f);
+}
+
+static int
+find_date (struct cb_field *f)
+{
+	int		k;
+	if (f->sql_date_format) {
+		for(k=0; k < ndate; k++) {
+			if (strcmp(dateformat[k],f->sql_date_format) == 0)
+				return k;
+		}
+	}
+	return -1;
+}
+
+/*
+ * Parse the Date Format String
+ * Returns NULL if all good, else address of bad character in 'format'
+ */
+static char *
+cb_date_str ( struct sql_date *sdf, char *format)
+{
+	int	len, pos, extra;
+	char	*dp;
+	struct sql_date lcl[1];
+
+	if (sdf == NULL)
+		sdf = lcl;
+	memset((void*)sdf,0,sizeof(struct sql_date));
+	strcpy(sdf->format,format);
+	len = strlen(sdf->format);
+	if (sdf->format[0] == '\'') {
+		if (sdf->format[len-1] == '\'')
+			sdf->format[len-1] = 0;
+		memmove(sdf->format,sdf->format+1,len);
+	} else if (sdf->format[0] == '"') {
+		if (sdf->format[len-1] == '"')
+			sdf->format[len-1] = 0;
+		memmove(sdf->format,sdf->format+1,len);
+	}
+	sdf->hasTime = 0;
+	sdf->hasDate = 0;
+	sdf->yyRule = ' ';
+	dp = sdf->format;
+	len = pos = extra = 0;
+	while(*dp != 0) {
+		len = 0;
+		if(*dp == 'Y') {			/* Year */
+			sdf->hasDate = 1;
+			sdf->yyPos = pos;
+			while(*dp == 'Y') {
+				len++;
+				dp++;
+				pos++;
+			}
+			sdf->yyLen = len;
+			if(*dp == '+'				/* '+' Add to YY to get full year */
+			|| *dp == '%') {			/* '%' define pivot year to compute full year */
+				sdf->yyRule = *dp;
+				dp++;
+				sdf->yyAdj = 0;
+				while(isdigit(*dp)) {
+					sdf->yyAdj = (sdf->yyAdj * 10) + (*dp - '0');
+					dp++;
+				}
+			}
+		} else if(*dp == 'M') {
+			if(dp[1] == 'I') {		/* MInutes */
+				sdf->hasTime = 1;
+				sdf->miPos = pos;
+				sdf->miLen = 2;
+				dp += 2;
+				pos += 2;
+			} else {
+				sdf->hasDate = 1;
+				sdf->mmPos = pos;
+				while(*dp == 'M') {	/* Month */
+					len++;
+					dp++;
+					pos++;
+				}
+				sdf->mmLen = len;
+			}
+		} else if(*dp == 'D') {		/* Day of Month */
+			sdf->hasDate = 1;
+			sdf->ddPos = pos;
+			while(*dp == 'D') {
+				len++;
+				dp++;
+				pos++;
+			}
+			sdf->ddLen = len;
+		} else if(*dp == 'C') {		/* Century */
+			sdf->hasDate = 1;
+			sdf->ccPos = pos;
+			while(*dp == 'C') {
+				len++;
+				dp++;
+				pos++;
+			}
+			sdf->ccLen = len;
+		} else if(*dp == 'H') {		/* Hour */
+			sdf->hasTime = 1;
+			sdf->hhPos = pos;
+			while(*dp == 'H') {
+				len++;
+				dp++;
+				pos++;
+			}
+			sdf->hhLen = len;
+			if(memcmp(dp,"24",2) == 0)
+				dp += 2;
+			else if(memcmp(dp,"12",2) == 0)
+				dp += 2;
+		} else if(*dp == 'S') {		/* Seconds */
+			sdf->hasTime = 1;
+			sdf->ssPos = pos;
+			while(*dp == 'S') {
+				len++;
+				dp++;
+				pos++;
+			}
+			sdf->ssLen = len;
+		} else if(*dp == 'U') {		/* Hundredths of Second */
+			sdf->hasTime = 1;
+			sdf->huPos = pos;
+			while(*dp == 'U') {
+				len++;
+				dp++;
+				pos++;
+			}
+			sdf->huLen = len;
+		} else if (*dp == '/' 
+				|| *dp == '-' 
+				|| *dp == ' ' 
+				|| *dp == '.' 
+				|| *dp == ':') {	/* Noise/editing characters */
+			dp++;
+			pos++;
+			extra++;
+		} else {
+			return dp;
+		}
+	}
+	sdf->digits = sdf->ccLen + sdf->yyLen + sdf->mmLen + sdf->ddLen
+				+ sdf->hhLen + sdf->miLen + sdf->ssLen + sdf->huLen
+				+ extra;
+	return NULL;
 }
 
 static char *
@@ -94,7 +276,10 @@ cb_use_name (struct cb_field *f, char *n)
 {
 	if(*n > ' ') {
 		if (f->sql_name) {
-			cb_warning (warningopt, _("XFD replaced %s with %s for %s"), f->sql_name, n, f->name);
+			cb_source_line--;
+			cb_warning (warningopt, _("XFD replaced %s with %s for %s"), 
+								f->sql_name, n, f->name);
+			cb_source_line++;
 		}
 		f->sql_name = cobc_parse_strdup (n);
 	}
@@ -203,9 +388,32 @@ cb_parse_xfd (struct cb_file *fn, struct cb_field *f)
 			f->flag_sql_numeric = 1;
 			cb_use_name (f, p2);
 		} else if (compstr(p1,"DATE") == 0) {
-			f->flag_sql_date = 1;
-			if(p2[0] > ' ')
+			char	*err;
+			int		len;
+			if(p2[0] > ' ') {
+				len = strlen(p2);
+				if (p2[0] == '\'') {
+					if (p2[len-1] == '\'')
+						p2[len-1] = 0;
+					memmove(p2,p2+1,len);
+				} else if (p2[0] == '"') {
+					if (p2[len-1] == '"')
+						p2[len-1] = 0;
+					memmove(p2,p2+1,len);
+				}
 				f->sql_date_format = cobc_parse_strdup (p2);
+			} else {
+				f->sql_date_format = cobc_parse_strdup ("YYYYMMDD");
+			}
+			if ((err = cb_date_str (NULL, f->sql_date_format)) != NULL) {
+				cb_source_line--;
+				cb_error (_("DATE %s incorrect at '%c'"), f->sql_date_format, *err);
+				cb_source_line++;
+				cobc_parse_free (f->sql_date_format);
+				f->sql_date_format = NULL;
+			} else {
+				f->flag_sql_date = 1;
+			}
 			cb_use_name (f, p3);
 		} else if (compstr(p1,"WHEN") == 0) {
 			if (f->sql_when == NULL) {
@@ -225,7 +433,9 @@ cb_parse_xfd (struct cb_file *fn, struct cb_field *f)
 			}
 			f->sql_when = cobc_parse_strdup (expr);
 		} else {
+			cb_source_line--;
 			cb_warning (warningopt, _("XFD unknown %s %s"), p1, p2);
+			cb_source_line++;
 		}
 	}
 	hasxfd = 0;
@@ -396,15 +606,18 @@ get_xfd_type (struct cb_field *f)
 	} else {
 		switch (f->usage) {
 		case CB_USAGE_BINARY:
+		case CB_USAGE_LENGTH:
 			if (f->pic
 			&& f->pic->category == CB_CATEGORY_NUMERIC) {
 				sqlsz = f->pic->digits + 3;
+				if (sqlsz < COMPtoDig[f->size-1])
+					sqlsz = COMPtoDig[f->size-1];
 				if (f->pic->have_sign > 0)
 					sqltype = COB_XFDT_COMPS;
 				else
 					sqltype = COB_XFDT_COMPU;
 			} else {
-				sqlsz = COMPtoDig[f->size];
+				sqlsz = COMPtoDig[f->size-1];
 				sqltype = COB_XFDT_COMPU;
 			}
 			break;
@@ -412,17 +625,19 @@ get_xfd_type (struct cb_field *f)
 			if (f->pic
 			&& f->pic->category == CB_CATEGORY_NUMERIC) {
 				sqlsz = f->pic->digits + 3;
+				if (sqlsz < COMPtoDig[f->size-1])
+					sqlsz = COMPtoDig[f->size-1];
 				if (f->pic->have_sign > 0)
 					sqltype = COB_XFDT_COMP5S;
 				else
 					sqltype = COB_XFDT_COMP5U;
 			} else {
-				sqlsz = COMPtoDig[f->size];
+				sqlsz = COMPtoDig[f->size-1];
 				sqltype = COB_XFDT_COMP5U;
 			}
 			break;
 		case CB_USAGE_COMP_X:
-			sqlsz = COMPtoDig[f->size];
+			sqlsz = COMPtoDig[f->size-1];
 			sqltype = COB_XFDT_COMPX;
 			break;
 		case CB_USAGE_PACKED:
@@ -461,21 +676,24 @@ get_xfd_type (struct cb_field *f)
 		case CB_USAGE_UNSIGNED_SHORT:
 		case CB_USAGE_UNSIGNED_INT:
 		case CB_USAGE_UNSIGNED_LONG:
-			sqlsz = COMPtoDig[f->size];
+			sqlsz = COMPtoDig[f->size-1];
 			sqltype = COB_XFDT_COMP5U;
 			break;
 		case CB_USAGE_SIGNED_CHAR:
 		case CB_USAGE_SIGNED_SHORT:
 		case CB_USAGE_SIGNED_INT:
 		case CB_USAGE_SIGNED_LONG:
-			sqlsz = COMPtoDig[f->size];
+			sqlsz = COMPtoDig[f->size-1];
 			sqltype = COB_XFDT_COMP5S;
 			break;
 		default:
-			cb_error (_("%s unexpected USAGE: %d"), __FILE__, f->usage);
+			cb_error (_("%s unexpected USAGE: %d for SQL/XFD"), __FILE__, f->usage);
 			sqltype = COB_XFDT_BIN;
 		}
 	}
+	if (f->sql_date_format
+	 && sqlsz < 32)
+		sqlsz = 32;
 	sprintf(datatype,"%02d,%04d",sqltype,sqlsz);
 	return datatype;
 }
@@ -514,8 +732,8 @@ is_key_field (struct cb_file *fl, struct cb_field *f)
 static char *
 out_part(char *exp)
 {
-	static char wrk[80];
-	char	lop[64],rop[64],opcd[16];
+	static char wrk[256];
+	char	lop[80],rop[80],opcd[32];
 	int		i,j;
 	for(j=0; exp[j] == ' '; j++);
 	for(i=0; exp[j] != 0 && exp[j] != ' '; j++) {
@@ -551,11 +769,6 @@ write_postfix(FILE *fx, int golbl, char *expr)
 	int		k,nexp,nopcd,gto;
 	int 	opcode[MAX_NEST];
 	char	partexp[MAX_NEST][68], *p;
-	if (*expr == '('
-	 || strstr(expr," AND ")
-	 || strstr(expr," OR ")) {
-		fprintf(fx,"*C,%d,%s\n",golbl,expr);	/* Comment for debugging */
-	}
 
 	nexp = nopcd = gto = 0;
 	for(p = expr; *p != 0; ) {
@@ -834,7 +1047,7 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 static void
 write_xfd (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int idx[])
 {
-	fprintf(fx,"D,%04d,%04d,",(int)f->offset,(int)f->size);
+	fprintf(fx,"F,%04d,%04d,",(int)f->offset,(int)f->size);
 	fprintf(fx,"%s,",get_xfd_type (f));
 	if (f->pic
 	 && f->pic->category == CB_CATEGORY_NUMERIC) {
@@ -843,11 +1056,7 @@ write_xfd (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int idx[])
 		fprintf(fx,"0,0,");
 	}
 	if (f->sql_date_format) {
-		if (f->sql_date_format[0] == '"'
-		 || f->sql_date_format[0] == '\'')
-			fprintf(fx,"%s",f->sql_date_format);
-		else
-			fprintf(fx,"'%s'",f->sql_date_format);
+		fprintf(fx,"%d",find_date (f) + 1);
 	}
 	fprintf(fx,",%02d,%s\n",f->level,get_col_name(fl,f,sub,idx));
 }
@@ -912,6 +1121,8 @@ write_field (struct cb_file *fl, struct cb_field *f, FILE *fs, FILE *fx, int sub
 			strcpy(eol,",\n");
 			write_xfd (fx,fl,f,sub,idx);
 		}
+		if (is_key_field (fl,f)) 
+			fprintf(fs," NOT NULL");
 		if (f->occurs_max > 1
 		 && !f->flag_occurs) 
 			return;
@@ -960,6 +1171,7 @@ output_xfd_file (struct cb_file *fl)
 	struct cb_field		*f;
 	struct cb_alt_key	*l;
 	struct cb_key_component *c;
+	struct sql_date sdf[1];
 	int		i,k,sub,idx[MAX_OCC_NEST];
 
 	f = fl->record;
@@ -1044,8 +1256,29 @@ output_xfd_file (struct cb_file *fl)
 		cb_warning (warningopt, _("Unable to open %s; '%s'"),outname,cb_get_strerror ());
 		return;
 	}
+	for (f=fl->record->sister; f; f = f->sister) {
+		save_date (f);
+	}
 	fprintf(fx,"# Generated on %s from %s\n",time_stamp,cb_source_file);
-	fprintf(fx,"H,1,%s,',','.',0\n",tblname);
+	fprintf(fx,"H,1,%s,%d,',','.',0\n",tblname,ndate);
+	for (k=0; k < ndate; k++) {
+		cb_date_str (sdf, dateformat[k]);
+		fprintf(fx,"D,%d,'%s'",k+1,dateformat[k]);
+		fprintf(fx,",%d,%d,%d",sdf->digits,sdf->hasDate,sdf->hasTime);
+		if (sdf->yyRule > ' ')
+			fprintf(fx,",%c,%d",sdf->yyRule,sdf->yyAdj);
+		else
+			fprintf(fx,",,0");
+		fprintf(fx,",%d:%d",sdf->yyPos,sdf->yyLen);
+		fprintf(fx,",%d:%d",sdf->mmPos,sdf->mmLen);
+		fprintf(fx,",%d:%d",sdf->ddPos,sdf->ddLen);
+		fprintf(fx,",%d:%d",sdf->hhPos,sdf->hhLen);
+		fprintf(fx,",%d:%d",sdf->miPos,sdf->miLen);
+		fprintf(fx,",%d:%d",sdf->ssPos,sdf->ssLen);
+		fprintf(fx,",%d:%d",sdf->ccPos,sdf->ccLen);
+		fprintf(fx,"\n");
+	}
+	fprintf(fs,"DROP TABLE %s;\n",tblname);
 	fprintf(fs,"CREATE TABLE %s (\n",tblname);
 	sub = 0;
 	strcpy(eol,"");
