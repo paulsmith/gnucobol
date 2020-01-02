@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -31,7 +31,7 @@
  * fodbc.c     has the ODBC code for INDEXED files
  * foci.c      has the OCI (Oracle) code for INDEXED files
  * fsqlxfd.c   has routines common to ODBC, OCI, BDB, LMDB
- * fextfh.c    has the EXTFH code (defacto standard, used by MicroFocus, IBM, ...)
+ * fextfh.c    has the Microfocus EXTFH code (defacto standard) 
  * focextfh.c  has code for obsolete OpenCOBOL WITH_INDEX_EXTFH/WITH_SEQRA_EXTFH 
  *
  */
@@ -2011,6 +2011,14 @@ cob_file_save_status (cob_file *f, cob_field *fnstatus, const int status)
 				break;
 			case COB_LAST_CLOSE:
 				fprintf(file_setptr->cob_trace_file,"CLOSE %s Status: %.2s\n",
+									f->select_name,f->file_status);
+				break;
+			case COB_LAST_COMMIT:
+				fprintf(file_setptr->cob_trace_file,"COMMIT %s Status: %.2s\n",
+									f->select_name,f->file_status);
+				break;
+			case COB_LAST_ROLLBACK:
+				fprintf(file_setptr->cob_trace_file,"ROLLBACK %s Status: %.2s\n",
 									f->select_name,f->file_status);
 				break;
 			case COB_LAST_OPEN:
@@ -4796,7 +4804,9 @@ cob_commit (void)
 
 	for (l = file_cache; l; l = l->next) {
 		if (l->file) {
+			l->file->last_operation = COB_LAST_COMMIT;
 			cob_file_unlock (l->file);
+			l->file->last_operation = COB_LAST_COMMIT;
 			fileio_funcs[get_io_ptr (l->file)]->commit (&file_api, l->file);
 		}
 	}
@@ -4809,7 +4819,9 @@ cob_rollback (void)
 
 	for (l = file_cache; l; l = l->next) {
 		if (l->file) {
+			l->file->last_operation = COB_LAST_ROLLBACK;
 			cob_file_unlock (l->file);
+			l->file->last_operation = COB_LAST_ROLLBACK;
 			fileio_funcs[get_io_ptr (l->file)]->rollback (&file_api, l->file);
 		}
 	}

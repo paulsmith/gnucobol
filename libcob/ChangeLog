@@ -1,4 +1,9 @@
 
+2020-01-02  Ron Norman <rjn@inglenet.com>
+
+	* common.h: 	Add COB_LAST_COMMIT and COB_LAST_ROLLBACK
+	* fileio.c: 	Add trace code for COMMIT/ROLLBACK
+
 2020-01-02  Simon Sobisch <simonsobisch@gnu.org>
 
 	* fextfh.c (copy_fcd_to_file) [_WIN32]: fix file_features for ORG_LINE_SEQ

@@ -1501,6 +1501,8 @@ typedef struct __cob_file {
 #define COB_LAST_OPEN		7
 #define COB_LAST_CLOSE		8
 #define COB_LAST_DELETE_FILE	9
+#define COB_LAST_COMMIT		10
+#define COB_LAST_ROLLBACK	11
 
 	unsigned char		io_routine;		/* Index to I/O routine function pointers */
 	short 				curkey;			/* Current file index read sequentially */
