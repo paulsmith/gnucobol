@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -21,9 +21,9 @@
 
 #include "fileio.h"
 
-/************************************************************************************/
-/* Following routines are for the Micro Focus style External File Handler interface */
-/************************************************************************************/
+/********************************************************************************/
+/* Following routines are for the External File Handler interface commonly used */
+/********************************************************************************/
 static struct fcd_file {
 	struct fcd_file	*next;
 	FCD3		*fcd;
@@ -312,21 +312,6 @@ update_fcd_to_file (FCD3* fcd, cob_file *f, cob_field *fnstatus, int wasOpen)
 	else if((fcd->lockMode & FCD_LOCK_AUTO_LOCK))
 		f->lock_mode = COB_LOCK_AUTOMATIC;
 
-	if(fcd->fileOrg == ORG_LINE_SEQ) {
-		f->organization = COB_ORG_LINE_SEQUENTIAL;
-#ifdef	_WIN32
-		f->file_features |= COB_FILE_LS_CRLF;
-#else
-		if((fcd->fstatusType & MF_FST_CRdelim))
-			f->file_features |= COB_FILE_LS_CRLF;
-		else
-			f->file_features |= COB_FILE_LS_LF;
-#endif
-		if((fcd->fstatusType & MF_FST_InsertNulls))
-			f->file_features |= COB_FILE_LS_NULLS;
-		if((fcd->fstatusType & MF_FST_NoStripSpaces))
-			f->file_features |= COB_FILE_LS_FIXED;
-	}
 	if (wasOpen < 0)
 		return;
 	status = 0;
@@ -438,12 +423,18 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 	} else if(fcd->fileOrg == ORG_LINE_SEQ) {
 		f->organization = COB_ORG_LINE_SEQUENTIAL;
 #ifdef	_WIN32
-		f->file_features |= COB_FILE_LS_CRLF;
-#else
-		if((fcd->fstatusType & MF_FST_CRdelim))
-			f->file_features |= COB_FILE_LS_CRLF;
-		else
+		if (file_setptr->cob_unix_lf &&
+		  !(fcd->fstatusType & MF_FST_CRdelim)) {
 			f->file_features |= COB_FILE_LS_LF;
+		} else {
+			f->file_features |= COB_FILE_LS_CRLF;
+		}
+#else
+		if ((fcd->fstatusType & MF_FST_CRdelim)) {
+			f->file_features |= COB_FILE_LS_CRLF;
+		} else {
+			f->file_features |= COB_FILE_LS_LF;
+		}
 #endif
 		if((fcd->fstatusType & MF_FST_InsertNulls))
 			f->file_features |= COB_FILE_LS_NULLS;
@@ -543,15 +534,15 @@ find_file (FCD3 *fcd)
 {
 	cob_file	*f;
 	struct fcd_file	*ff;
-	for(ff = fcd_file_list; ff; ff=ff->next) {
-		if(ff->fcd == fcd) {
+	for (ff = fcd_file_list; ff; ff=ff->next) {
+		if (ff->fcd == fcd) {
 			return ff->f;
 		}
 	}
-	f = cob_cache_malloc(sizeof(cob_file));
+	f = cob_cache_malloc (sizeof(cob_file));
 	f->file_version = COB_FILE_VERSION;
-	copy_fcd_to_file(fcd, f);
-	ff = cob_cache_malloc(sizeof(struct fcd_file));
+	copy_fcd_to_file (fcd, f);
+	ff = cob_cache_malloc (sizeof(struct fcd_file));
 	ff->next = fcd_file_list;
 	ff->fcd = fcd;
 	ff->f = f;
@@ -638,7 +629,7 @@ cob_extfh_close (
 	STCOMPX2(OP_CLOSE, opcode);
 
 	/* Keep table of 'fcd' created */
-	(void)callfh (opcode,fcd);
+	(void)callfh (opcode, fcd);
 	update_fcd_to_file (fcd, f, fnstatus, 0);
 
 	pff = NULL;
@@ -901,7 +892,7 @@ cob_sys_extfh (const void *opcode_ptr, void *fcd_ptr)
 	 || !COB_MODULE_PTR->cob_procedure_params[1]
 	 || COB_MODULE_PTR->cob_procedure_params[1]->size < 5) {
 		cob_set_exception (COB_EC_PROGRAM_ARG_MISMATCH);
-		return 0;	/* correct? */
+		return 1;	/* correct? */
 	}
 	if (COB_MODULE_PTR->cob_procedure_params[1]->size < sizeof(FCD3)) {
 		fcd->fileStatus[0] = '9';
@@ -915,7 +906,7 @@ cob_sys_extfh (const void *opcode_ptr, void *fcd_ptr)
 			exit(-1);
 #endif
 		}
-		return 0;
+		return 1;	/* correct? */
 	}
 
 	return EXTFH ((unsigned char *)opcode_ptr, fcd);
@@ -1014,8 +1005,14 @@ EXTFH (unsigned char *opcode, FCD3 *fcd)
 	if (fcd->fcdVer != FCD_VER_64Bit) {
 		fcd->fileStatus[0] = '9';
 		fcd->fileStatus[1] = 161;
+#if 1
 		cob_runtime_warning (_("ERROR: EXTFH called with FCD version %d"), fcd->fcdVer);
 		return 1;
+#else
+		cob_set_exception (COB_EC_PROGRAM_ARG_MISMATCH);
+		cob_runtime_error (_("ERROR: EXTFH called with FCD version %d"), fcd->fcdVer);
+		exit(-1);
+#endif
 	}
 	sts = opts = 0;
 	fs->data = fnstatus;
@@ -1031,7 +1028,7 @@ EXTFH (unsigned char *opcode, FCD3 *fcd)
 		COB_MODULE_PTR = cob_malloc( sizeof(cob_module) );
 		COB_MODULE_PTR->module_name = "GnuCOBOL-fileio";
 		COB_MODULE_PTR->module_source = "GnuCOBOL-fileio";
-		COB_MODULE_PTR->module_formatted_date = "2018/07/01 12:00:00";
+		COB_MODULE_PTR->module_formatted_date = "2020/01/02 12:01:20";
 	}
 
 	if (*opcode == 0xFA) {

@@ -1,5 +1,12 @@
 
+2020-01-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fextfh.c (copy_fcd_to_file) [_WIN32]: fix file_features for ORG_LINE_SEQ
+	* fextfh.c (update_fcd_to_file): removed special handling of ORG_LINE_SEQ
+	  as already done in copy_fcd_to_file
+
 2020-01-01  Ron Norman <rjn@inglenet.com>
+
 	* fileio.c: removed wrong setting of io_routine
 	* fileio.h: Updates for ODBC interface
 	* sysdefines.h: Add SQL Date structure

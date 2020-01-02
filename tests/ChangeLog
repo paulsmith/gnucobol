@@ -1,4 +1,8 @@
 
+2020-01-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src: moved trace related tests from run_misc.at to run_file.at
+
 2019-06-30  Simon Sobisch <simonsobisch@gnu.org>
 
 	* run_prog_manual.sh.in, Makefile.am: changed the manual test runner
