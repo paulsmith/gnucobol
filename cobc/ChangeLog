@@ -1,4 +1,8 @@
 
+2020-01-02  Ron Norman <rjn@inglenet.com>
+
+	* sqlxfdgen.c: Check for SQL reserved words used as column names
+
 2020-01-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, field.c (copy_into_field), tree.h, config.def:

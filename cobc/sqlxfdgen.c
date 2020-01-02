@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2019 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
    Edward Hart
 
@@ -481,6 +481,29 @@ is_all_display (struct cb_field *f)
 	return 1;
 }
 
+static const char *sqlnames[] = {
+	"BIGINT",
+	"CHAR", 
+	"CREATE",
+	"DATE",
+	"DATETIME",
+	"DECIMAL",
+	"DOUBLE",
+	"FLOAT",
+	"INDEX",
+	"INTEGER",
+	"NOT",
+	"NULL",
+	"NUMBER",
+	"SMALLINT",
+	"TABLE",
+	"TIME",
+	"TIMESTAMP",
+	"UNIQUE",
+	"VARCHAR", 
+	"VARCHAR2", 
+	NULL};
+
 /* Return the SQL column name */
 static char *
 get_col_name (struct cb_file *fl, struct cb_field *f, int sub, int idx[])
@@ -511,8 +534,17 @@ get_col_name (struct cb_file *fl, struct cb_field *f, int sub, int idx[])
 		if(isupper(name[i]))
 			name[i] = tolower(name[i]);
 	}
-	for (i=0; i < sub; i++) {
-		j += sprintf(&name[j],"_%02d",idx[i]);
+	if (sub > 0) {
+		for (i=0; i < sub; i++) {
+			j += sprintf(&name[j],"_%02d",idx[i]);
+		}
+	} else {
+		for (i=0; sqlnames[i] != NULL; i++) {
+			if (strcasecmp(sqlnames[i],name) == 0) {
+				strcat(name,"_x");
+				break;
+			}
+		}
 	}
 	return name;
 }
@@ -529,7 +561,10 @@ get_col_type (struct cb_field *f)
 		sprintf(datatype,"CHAR(%d)",f->size);
 	} else
 	if (f->flag_sql_varchar) {
-		sprintf(datatype,"VARCHAR(%d)",f->size);
+		if (strncasecmp (cb_sqldb_name, "Oracle", 6) == 0)
+			sprintf(datatype,"VARCHAR2(%d)",f->size);
+		else
+			sprintf(datatype,"VARCHAR(%d)",f->size);
 	} else
 	if (f->flag_sql_group) {
 		sprintf(datatype,"CHAR(%d)",f->size);
@@ -567,6 +602,8 @@ get_col_type (struct cb_field *f)
 		case CB_USAGE_FLOAT:
 			return (char*)"FLOAT";
 		case CB_USAGE_DOUBLE:
+			if (strncasecmp (cb_sqldb_name, "Oracle", 6) == 0)
+				return (char*)"FLOAT";
 			return (char*)"DOUBLE";
 		case CB_USAGE_UNSIGNED_CHAR:
 		case CB_USAGE_SIGNED_CHAR:
