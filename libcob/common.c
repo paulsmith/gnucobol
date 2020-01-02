@@ -8071,14 +8071,12 @@ cob_init (const int argc, char **argv)
 	/* Copy COB_PHYSICAL_CANCEL from settings (internal) to global structure */
 	cobglobptr->cob_physical_cancel = cobsetptr->cob_physical_cancel;
 
+#ifdef COB_DEBUG_LOG
 	/* Internal Debug Log */
 	if (cobsetptr->cob_debug_log) {
-#ifndef COB_DEBUG_LOG
-		cob_runtime_warning (_("compiler was not built with --enable-debug-log; COB_DEBUG_LOG ignored"));
-#else
 		cob_debug_open ();
-#endif
 	}
+#endif
 
 	/* Call inits with cobsetptr to get the addresses of all */
 	/* Screen-IO might be needed for error outputs */

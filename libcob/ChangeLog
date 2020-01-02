@@ -1,6 +1,10 @@
 
 2020-01-02  Ron Norman <rjn@inglenet.com>
 
+	* common.c: 	Removed warning about COB_DEBUG_LOG
+
+2020-01-02  Ron Norman <rjn@inglenet.com>
+
 	* common.h: 	Add COB_LAST_COMMIT and COB_LAST_ROLLBACK
 	* fileio.c: 	Add trace code for COMMIT/ROLLBACK
 
