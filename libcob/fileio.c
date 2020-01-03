@@ -31,7 +31,7 @@
  * fodbc.c     has the ODBC code for INDEXED files
  * foci.c      has the OCI (Oracle) code for INDEXED files
  * fsqlxfd.c   has routines common to ODBC, OCI, BDB, LMDB
- * fextfh.c    has the EXTFH code (defacto standard, used by MicroFocus, IBM, ...)
+ * fextfh.c    has the EXTFH code (defacto standard used by MicroFocus, IBM, ...) 
  * focextfh.c  has code for obsolete OpenCOBOL WITH_INDEX_EXTFH/WITH_SEQRA_EXTFH 
  *
  */
@@ -6325,7 +6325,7 @@ cob_exit_fileio (void)
 			if (COB_FILE_SPECIAL (l->file)) {
 				continue;
 			}
-			cob_close (l->file, NULL, COB_CLOSE_NORMAL, 0);
+			cob_close (l->file, NULL, COB_CLOSE_ABORT, 0);
 			cob_runtime_warning (_("implicit CLOSE of %s"),
 				cob_get_filename_print (l->file, 0));
 		}

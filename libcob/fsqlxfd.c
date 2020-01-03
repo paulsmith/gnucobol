@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -153,6 +153,9 @@ hex_dump (unsigned char *in, int len, char *out)
 		strcpy(out,"e-m-p-t-y");
 		return out;
 	}
+	while (len > 1
+		&& in[len-1] == 0x00)
+		len--;
 	for(k=0; k < len && isprint(in[k]); k++);
 	if (k == len) {
 		if (len < 40) {
@@ -780,22 +783,31 @@ convert_to_date(
 	}
 	*dateOk = !bDateBad;
 	if(db->oracle) {
+		if (df->hasTime && !df->hasDate) {
+			k = sprintf(dataout,"%02d%02d%02d",
+								date.hour,date.minute,date.second);
+		} else
 		if(outlen < 8) {
 			k = sprintf(dataout,"%02d%02d%02d",date.year%100,date.month,date.day);
 		} else if(outlen > 13 && df->hasTime) {
 			k = sprintf(dataout,"%04d%02d%02d%02d%02d%02d",
-										date.year,date.month,date.day,
-										date.hour,date.minute,date.second);
+								date.year,date.month,date.day,
+								date.hour,date.minute,date.second);
 		} else {
 			k = sprintf(dataout,"%04d%02d%02d",date.year,date.month,date.day);
 		}
 	} else {
-		if(outlen > 11 && df->hasTime)
+		if (df->hasTime && !df->hasDate) {
+			k = sprintf(dataout,"%02d:%02d:%02d.%03d",
+								date.hour,date.minute,date.second,date.hund);
+		} else
+		if(outlen > 11 && df->hasTime) {
 			k = sprintf(dataout,"%04d-%02d-%02d %02d:%02d:%02d.%03d",
-										date.year,date.month,date.day,
-										date.hour,date.minute,date.second,date.hund);
-		else
-			k = sprintf(dataout,"%04d-%02d-%02d", date.year,date.month,date.day);
+								date.year,date.month,date.day,
+								date.hour,date.minute,date.second,date.hund);
+		} else {
+			k = sprintf(dataout,"%04d-%02d-%02d",date.year,date.month,date.day);
+		}
 	}
 	return k;
 }
@@ -1000,6 +1012,8 @@ cob_load_xfd (cob_file *fl, char *alt_name, int indsize)
 			p = getStr (p, colname);
 			mx->colname = cob_strdup (colname);
 			mx->lncolname = strlen(colname);
+			if (mx->lncolname > fx->maxcolnmln)
+				fx->maxcolnmln = mx->lncolname;
 			ncols++;
 			lncols += mx->lncolname;
 			fx->lncols = lncols;
@@ -1198,7 +1212,6 @@ cob_load_xfd (cob_file *fl, char *alt_name, int indsize)
 		}
 	}
 	fclose(fi);
-	cob_load_ddl (fx);
 	return fx;
 }
 
@@ -1206,7 +1219,7 @@ cob_load_xfd (cob_file *fl, char *alt_name, int indsize)
  * Read the 'file.ddl' and save CREATE TABLE/INDEX
  */
 void 
-cob_load_ddl (struct file_xfd *fx)
+cob_load_ddl (struct db_state  *db, struct file_xfd *fx)
 {
 	char	xfdbuf[COB_NORMAL_BUFF],*sdir,*p;
 	int		j,k, idx, ctsz, cisz;
@@ -1273,11 +1286,18 @@ cob_load_ddl (struct file_xfd *fx)
 				fx->create_table = cob_realloc (fx->create_table, ctsz, ctsz + 256);
 				ctsz += 256;
 			}
+			if (db->isoci || db->mssql) {
+				if ((p=strcasestr(xfdbuf," DOUBLE,")) != NULL) {
+					memcpy(p,"  FLOAT,",8);
+				}
+				if (fx->lncreate > 2)
+					fx->create_table[fx->lncreate++] = ' ';
+			}
 			strcpy(&fx->create_table[fx->lncreate], xfdbuf);
 			fx->lncreate += j;
 			if (fx->create_table[fx->lncreate-1] == ';') {
 				fx->create_table[fx->lncreate-1] = 0;
-				fx->create_table = cob_realloc (fx->create_table, ctsz, fx->lncreate + 1);
+				fx->create_table = cob_realloc (fx->create_table, ctsz, fx->lncreate + 2);
 				ctsz = fx->lncreate;
 				fx->lncreate--;
 			}
@@ -1287,7 +1307,7 @@ cob_load_ddl (struct file_xfd *fx)
 			if (fx->key[idx]->create_index[fx->key[idx]->lncreate-1] == ';') {
 				fx->key[idx]->create_index[fx->key[idx]->lncreate-1] = 0;
 				fx->key[idx]->create_index = cob_realloc (fx->key[idx]->create_index,
-								cisz, fx->key[idx]->lncreate);
+								cisz, fx->key[idx]->lncreate + 2);
 				fx->key[idx]->lncreate--;
 			}
 		}
@@ -1380,15 +1400,8 @@ cob_sql_dump_data (
 	COB_UNUSED (db);
 	COB_UNUSED (fx);
 #else
-	int		k,pos,len,ln;
+	int		k,pos,len;
 	char	hexwrk[80];
-	for (k=ln=0; k < fx->nmap; k++) {
-		if (fx->map[k].cmd == XC_DATA
-		 && fx->map[k].colname) {
-			if (ln < fx->map[k].lncolname)
-				ln = fx->map[k].lncolname;
-		}
-	}
 	for (k=pos=0; k < fx->nmap; k++) {
 		if (fx->map[k].cmd == XC_DATA
 		 && fx->map[k].colname) {
@@ -1397,7 +1410,8 @@ cob_sql_dump_data (
 			if (len <= 0)
 				len = strlen((char*)fx->map[k].sdata);
 			hex_dump( fx->map[k].sdata, len, hexwrk);
-			DEBUG_LOG("db",("Dump%3d: %-*s %s\n",pos,ln,fx->map[k].colname,
+			DEBUG_LOG("db",("Dump%3d: %-*s %s\n",pos,
+								fx->maxcolnmln,fx->map[k].colname,
 								fx->map[k].setnull?"NULL":hexwrk));
 		}
 	}
@@ -1803,11 +1817,15 @@ cob_sql_stmt (struct db_state *db, struct file_xfd *fx, char *stmt, int idx, con
 		sbuf = cob_malloc (bufsz + 1);
 		strcpy(comma,"");
 		pos = sprintf(sbuf,"UPDATE %s SET ",fx->tablename);
+		if (db->isodbc)
+			fmt = "%s%s %s ?";
+		else
+			fmt = "%s%s %s :%d";
 		j = 0;
 		for (k=0; k < fx->nmap; k++) {
 			if (fx->map[k].cmd == XC_DATA
 			 && fx->map[k].colname) {
-				pos += sprintf(&sbuf[pos],fmt,comma,fx->map[k].colname,"=",j+1);
+				pos += sprintf(&sbuf[pos],fmt,comma,fx->map[k].colname,"=",++j);
 				strcpy(comma,",");
 			}
 		}
@@ -1825,6 +1843,10 @@ cob_sql_stmt (struct db_state *db, struct file_xfd *fx, char *stmt, int idx, con
 		strcpy(comma,"");
 		pos = sprintf(sbuf,"DELETE FROM %s ",fx->tablename);
 		pos += sprintf(&sbuf[pos],"WHERE ");
+		if (db->isodbc)
+			fmt = "%s%s %s ?";
+		else
+			fmt = "%s%s %s :%d";
 		strcpy(comma,"");
 		for (j=0; j < fx->key[0]->ncols; j++) {
 			k = fx->key[0]->col[j];

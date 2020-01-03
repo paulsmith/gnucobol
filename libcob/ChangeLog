@@ -1,4 +1,14 @@
 
+2020-01-03  Ron Norman <rjn@inglenet.com>
+
+	* common.c: 	Moved close of DEBUG_LOG file after exit_fileio
+	* common.h: 	Add COB_CLOSE_ABORT
+	* fileio.c: 	On 'implicit close' pass COB_CLOSE_ABORT
+	* fsqlxfd.c:	Updates for OCI/ODBC
+	* foci.c:	Working module. More testing coming and add Array fetches
+	* fodbc.c:	Tested with MySQL and MS SQL Server, later adding Bulk ADD
+	* OCI/ODBC has had some testing and more will be done, Standby
+
 2020-01-03  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c: bump copyright year

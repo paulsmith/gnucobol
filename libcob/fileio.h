@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -237,10 +237,10 @@ struct db_state {
 	cob_u32_t	isoci:1;
 	cob_u32_t	oracle:1;
 	cob_u32_t	scanForNulls:1;
-	cob_u32_t	isconnected :1;
-	cob_u32_t	iscommitpend:1;
+	cob_u32_t	autocommit:1;
 	cob_u32_t	isopen:1;
 	cob_u32_t	optFastRead:1;
+	cob_u32_t	attachDbName:1;
 	 
 	int		dbStatus;			/* Status of last DB call */
 	int		dbFatalStatus;		/* Fatal Status from last DB call */
@@ -249,16 +249,19 @@ struct db_state {
 	char	dbType[32];			/* Actual DB type */
 	char	dbSchema[32];		/* Schema name */
 	char	dbSid[32];			/* DB 'session id' (OCI) */
+	char	dbName[32];			/* DB Name 'session id' (OCI) */
 	char	dbUser[32];			/* DB UserId to connect with */
 	char	dbPwd[32];			/* DB Password to connect with */
 	char	dbDsn[32];			/* DB DSN to connect with */
-	char	dbCon[80];			/* Full connect string */
+	char	dbCon[128];			/* Full connect string */
 
-	int		intRecWait;
-	int		nRecWaitTry;
-	int		nMaxRetry;
-	int		arrayFetch;
-	int		stmtCache;
+	int		dbVer;				/* Data Base version */
+	int		updatesDone;		/* Updates done since last COMMIT */
+	int		commitInterval;		/* COMMIT every N updates */
+	int		intRecWait;			/* Time to wait for record lock */
+	int		nRecWaitTry;		/* Retry counter for lock */
+	int		nMaxRetry;			/* Max retries for lock */
+	int		arrayFetch;			/* Size of array fetch */
 
 	/*	Various Status Codes, Actual value set by Data Base Interface */
 	/*			for checking  'dbStatus'	Oracle value as example   */
@@ -274,13 +277,20 @@ struct db_state {
 	int		dbStsBadRowid;		/* 1410: bad ROWID */
 	int		dbStsNoTable;		/* 1146: Table does not exist */
 
+	char	lastErrMsg[80];		/* Recent DB Error msg */
 	char	*dateFormat;		/* Default DATE format */
+	void	*dbHome;			/* ORACLE_HOME value */
+
 	void	*dbEnvH;			/* DB Environment handle */
 	void	*dbDbcH;			/* DB database handle */
+	void	*dbErrH;			/* DB Error Handle */
+	void	*dbSvcH;			/* DB Service Context Handle */
+	void	*dbSvrH;			/* DB Server Handle */
+	void	*dbSesH;			/* DB Session Handle */
+	void	*dbBindV;			/* DB Bind Variable handle */
 	void	*dbhnd1;			/* DB spare handles */
 	void	*dbhnd2;
 	void	*dbhnd3;
-	void	*dbhnd4;
 };
 
 /*
@@ -317,11 +327,14 @@ struct map_xfd {
 	int		sqlinlen;		/* Length of data returned from SQL */
 	int		sqloutlen;		/* Length of data given to SQL */
 	int		level;			/* Original COBOL data level number */
+	int		nRlen4;			/* Oracle column length (int) */
 	short	target;			/* Target position */
 	short	jumpto;			/* Resolved target position */
 	short	lncolname;		/* Length of column name */
 	short	lnvalue;		/* Length of 'value' */
 	short	colpos;			/* Position in 'map' of this column def */
+	short	nRlen2;			/* Oracle column length (short) */
+	short	nRcode;			/* Oracle column return code */
 	char	valnum;			/* Value is numeric */
 	char	setnull;		/* Indicator was/is NULL */
 	char	notnull;		/* Column is set NOT NULL */
@@ -384,6 +397,7 @@ struct file_xfd {
 	int		ndate;			/* Number of unique 'date formats' used */
 	int		nlbl;			/* Number of labels used */
 	int		ncols;			/* Number of columns */
+	int		maxcolnmln;		/* Length of longest column name */
 	int		lncols;			/* Length of all Column names */
 	int		*xlbl;			/* Label to map[subscript] table */
 	struct sql_date	**date;	/* Date formats used */
@@ -394,7 +408,7 @@ struct file_xfd {
 /* Routines in fsqlxfd.c common to ODBC/OCI interfaces */
 COB_HIDDEN struct file_xfd* cob_load_xfd (cob_file *fl, char *alt_name, int indsize);
 COB_HIDDEN void 	cob_dump_xfd (struct file_xfd *fx, FILE *fo);
-COB_HIDDEN void 	cob_load_ddl (struct file_xfd *fx);
+COB_HIDDEN void 	cob_load_ddl (struct db_state  *db, struct file_xfd *fx);
 COB_HIDDEN char *	getSchemaEnvName (struct db_state *db, char *envnm, const char *suf, char *out);
 COB_HIDDEN void 	logSchemaEnvName (struct db_state *db, const char *suffix);
 COB_HIDDEN char *	cob_sql_stmt (struct db_state *db, struct file_xfd *fx, char *stmt, int idx, const char *cond);

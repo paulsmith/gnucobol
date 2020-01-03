@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -41,7 +41,10 @@ void cob_odbc_init_fileio (cob_file_api *a);
 
 /* Local variables */
 
+static int odbcStmt			(struct db_state *db, char *stmt);
 static int odbc_sync		(cob_file_api *, cob_file *);
+static int odbc_commit		(cob_file_api *, cob_file *);
+static int odbc_rollback	(cob_file_api *, cob_file *);
 static int odbc_open		(cob_file_api *, cob_file *, char *, const int, const int);
 static int odbc_close		(cob_file_api *, cob_file *, const int);
 static int odbc_start		(cob_file_api *, cob_file *, const int, cob_field *);
@@ -54,8 +57,6 @@ static int odbc_rewrite		(cob_file_api *, cob_file *, const int);
 static int odbc_file_unlock (cob_file_api *, cob_file *);
 static void odbc_exit_fileio(cob_file_api *);
 static int odbc_fork 		(cob_file_api *);
-
-static int odbc_dummy () { return 0; }
 
 static const struct cob_fileio_funcs odbc_indexed_funcs = {
 	odbc_open,
@@ -71,9 +72,9 @@ static const struct cob_fileio_funcs odbc_indexed_funcs = {
 	odbc_exit_fileio,
 	odbc_fork,
 	odbc_sync,
-	(void*)odbc_dummy,
-	odbc_file_unlock,
-	(void*)odbc_dummy
+	odbc_commit,
+	odbc_rollback,
+	odbc_file_unlock
 };
 
 static int		db_join = 1;
@@ -224,7 +225,6 @@ getOdbcMsg(
 						(SQLCHAR *)msgtxt,szErrMsg,errLen);
 	if(sts == SQL_SUCCESS) {
 		sprintf(szState,"%.5s",lState);
-		strcpy(db->dbType,"ODBC");
 		cp = msgtxt;
 		if(memcmp(cp,"[ma-",3) == 0) {
 			cp += 3;
@@ -243,7 +243,6 @@ getOdbcMsg(
 			}
 			cp += 1;
 			*errLen = *errLen - 1;
-			strcpy(db->dbType,"ODBC MariaDB");
 			db->mysql = TRUE;
 			db->mssql = FALSE;
 		}
@@ -258,7 +257,6 @@ getOdbcMsg(
 		if(memcmp(cp,"[SQL Server Driver]",19) == 0) {
 			cp += 19;
 			*errLen = *errLen - 19;
-			strcpy(db->dbType,"MS SQL Server");
 			db->mysql = FALSE;
 			db->mssql = TRUE;
 		}
@@ -681,6 +679,104 @@ odbc_free_stmt ( SQL_STMT *s)
 }
 
 static int
+odbc_commit (cob_file_api *a, cob_file *f)
+{
+	COB_UNUSED (a);
+	COB_UNUSED (f);
+	if (!db->isopen)
+		return 0;
+	if (f->last_operation == COB_LAST_COMMIT) {
+		DEBUG_LOG("db",("COMMIT from application!\n"));
+		if (db->autocommit) {
+			if (db->mysql) {
+				odbcStmt (db, (char*)"COMMIT");
+				odbcStmt (db, (char*)"SET autocommit=0");
+				odbcStmt (db, (char*)"BEGIN");
+			} else
+		 	if (chkSts(db,(char*)"AUTO COMMIT OFF",db->dbDbcH,
+				SQLSetConnectAttr(db->dbDbcH,SQL_ATTR_AUTOCOMMIT,
+										(SQLPOINTER)SQL_AUTOCOMMIT_OFF,SQL_IS_UINTEGER))) {
+				DEBUG_LOG("db",("AutoCommit Off status %d; Failed!\n",db->dbStatus));
+				return COB_STATUS_30_PERMANENT_ERROR;
+			}
+			DEBUG_LOG("db",("AutoCommit is OFF!\n"));
+		}
+		db->autocommit = FALSE;
+	} else if (db->updatesDone < db->commitInterval
+			&& f->last_operation != COB_LAST_CLOSE)
+		return 0;
+	if (db->mysql) {
+		odbcStmt (db, (char*)"COMMIT");
+		odbcStmt (db, (char*)"SET autocommit=0");
+		odbcStmt (db, (char*)"BEGIN");
+	} else {
+		if (chkSts(db,(char*) "Commit EndTran ENV",db->dbEnvH,
+					SQLEndTran(SQL_HANDLE_ENV,db->dbEnvH,SQL_COMMIT))) {
+			db->updatesDone = 0;
+			return COB_STATUS_30_PERMANENT_ERROR;
+		}
+		if (chkSts(db, (char*)"Commit EndTran DBC",db->dbDbcH,
+					SQLEndTran(SQL_HANDLE_DBC,db->dbDbcH,SQL_COMMIT))) {
+			db->updatesDone = 0;
+			return COB_STATUS_30_PERMANENT_ERROR;
+		}
+	}
+	if (db->updatesDone < 0x7FFFFFF)
+		DEBUG_LOG("db",("%s Commit %d updates\n",db->dbType,db->updatesDone));
+	db->updatesDone = 0;
+	return 0;
+}
+
+static int
+odbc_rollback (cob_file_api *a, cob_file *f)
+{
+	COB_UNUSED (a);
+	COB_UNUSED (f);
+	if (!db->isopen)
+		return 0;
+	if (f->last_operation == COB_LAST_ROLLBACK) {
+		DEBUG_LOG("db",("ROLLBACK from application!\n"));
+		if (db->mysql) {
+			odbcStmt (db, (char*)"ROLLBACK");
+			odbcStmt (db, (char*)"SET autocommit=0");
+			odbcStmt (db, (char*)"BEGIN");
+		} else
+		if (db->autocommit) {
+		 	if (chkSts(db,(char*)"AUTO COMMIT OFF",db->dbDbcH,
+				SQLSetConnectAttr(db->dbDbcH,SQL_ATTR_AUTOCOMMIT,
+										(SQLPOINTER)SQL_AUTOCOMMIT_OFF,SQL_IS_UINTEGER))) {
+				DEBUG_LOG("db",("AutoCommit Off status %d; Failed!\n",db->dbStatus));
+				return COB_STATUS_30_PERMANENT_ERROR;
+			}
+			DEBUG_LOG("db",("AutoCommit is OFF!\n"));
+		}
+		db->autocommit = FALSE;
+	} else if (db->updatesDone < db->commitInterval)
+		return 0;
+	if (db->mysql) {
+		odbcStmt (db, (char*)"ROLLBACK");
+		odbcStmt (db, (char*)"SET autocommit=0");
+		odbcStmt (db, (char*)"BEGIN");
+	} else {
+		if (chkSts(db,(char*) "Rollback EndTran ENV",db->dbEnvH,
+					SQLEndTran(SQL_HANDLE_ENV,db->dbEnvH,SQL_ROLLBACK))) {
+			db->updatesDone = 0;
+			return COB_STATUS_30_PERMANENT_ERROR;
+		}
+		if (chkSts(db, (char*)"Rollback EndTran DBC",db->dbDbcH,
+					SQLEndTran(SQL_HANDLE_DBC,db->dbDbcH,SQL_ROLLBACK))) {
+			db->updatesDone = 0;
+			return COB_STATUS_30_PERMANENT_ERROR;
+		}
+	}
+	db->updatesDone = 0;
+	if (f->last_operation != COB_LAST_ROLLBACK) {
+		DEBUG_LOG("db",("%s Rollback %d updates\n",db->dbType,db->updatesDone));
+	}
+	return 0;
+}
+
+static int
 odbc_sync (cob_file_api *a, cob_file *f)
 {
 	if (!db->isopen)
@@ -746,12 +842,16 @@ odbc_create_table (
 	struct file_xfd *fx)
 {
 	int	k;
-	cob_load_ddl (fx);
-	if (odbcStmt (db, fx->create_table))
+	cob_load_ddl (db, fx);
+	if (odbcStmt (db, fx->create_table)) {
+		DEBUG_LOG ("db",("%s\n",fx->create_table));
 		return;
+	}
 	for (k=0; k < fx->nkeys; k++) {
-		if (odbcStmt (db, fx->key[k]->create_index))
+		if (odbcStmt (db, fx->key[k]->create_index)) {
+			DEBUG_LOG ("db",("%s\n",fx->key[k]->create_index));
 			return;
+		}
 	}
 }
 
@@ -769,18 +869,11 @@ join_environment (cob_file_api *a)
 	db->dbStsDupKey		= 2601;
 	db->dbStsNotFound	= SQL_NO_DATA;
 	db->dbStsNotFound2	= SQL_NO_DATA;
-#ifdef WITH_OCI
-	db->isoci			= TRUE;
-	db->oracle			= TRUE;
-	db->dbStsRecLock	= 54;		/*  Oracle row locked by other */
-	strcpy(db->dbType,"Oracle OCI");
-#endif
-#ifdef WITH_ODBC
 	db->dbStsRecLock	= -54999;	/* No such status for SQL Server */
 	db->dbStsNoTable	= 1146;
 	db->isodbc			= TRUE;
+	db->updatesDone		= 0;
 	strcpy(db->dbType,"ODBC");
-#endif
 #ifdef WITH_DB2
 	db->dbStsRecLock	= -54999;	/* No such status for SQL Server */
 	db->isodbc			= TRUE;
@@ -818,6 +911,12 @@ join_environment (cob_file_api *a)
 	}
 	if((env=getSchemaEnvName(db,tmp,"_CON",db->dbCon)) != NULL) {
 		DEBUG_LOG("db",("Env: %s -> %s\n",tmp,env));
+	}
+	if((env=getSchemaEnvName(db,tmp,"_COMMIT",NULL)) != NULL) {
+		DEBUG_LOG("db",("Env: %s -> %s\n",tmp,env));
+		db->commitInterval = atoi(env);
+	} else {
+		db->commitInterval = (int)0x7FFFFFF;
 	}
 #if !defined(WITH_DB2)
 	if(useDriverCursor) {
@@ -942,15 +1041,14 @@ join_environment (cob_file_api *a)
 		DEBUG_LOG("db",("DB2 Connect: DSN: %s, User %s, Pwd %s\n",
 								db->dbDsn,db->dbUser,db->dbPwd));
 	}
-	if(db->arrayFetch > 1
-	|| db->stmtCache > 0) {
+	if(db->arrayFetch > 1) {
 		char	amsg[40];
 		if(db->arrayFetch > 1)
 			sprintf(amsg,"; Array fetch %d",db->arrayFetch);
 		else
 			strcpy(amsg,"");
-		DEBUG_LOG("db",("%s: Version %s  Cache %d Selects%s\n",
-							db->dbType,"Experimental",db->stmtCache,amsg));
+		DEBUG_LOG("db",("%s: Version %s  %s\n",
+							db->dbType,"Experimental",amsg));
 	}
 
 	if((env=getSchemaEnvName(db,tmp,"_TRC",NULL)) != NULL) {
@@ -981,12 +1079,7 @@ join_environment (cob_file_api *a)
 		}
 	}
 
-	if(chkSts(db,(char*)"AUTO COMMIT OFF",db->dbEnvH,
-		SQLSetConnectAttr(db->dbDbcH,SQL_ATTR_AUTOCOMMIT,
-									(SQLPOINTER)SQL_AUTOCOMMIT_OFF,SQL_IS_UINTEGER))) {
-		DEBUG_LOG("db",("AutoCommit status %d; Failed!\n",db->dbStatus));
-		return;
-	}
+	db->autocommit = FALSE;
 	db_join = 0;			/* All connect steps completed */
 	DEBUG_LOG("db",("%s successful connection\n",db->dbType));
 	if(odbcStmt(db,(char*)"SELECT @@version")) {
@@ -996,14 +1089,18 @@ join_environment (cob_file_api *a)
 			db->mssql = FALSE;
 			db->db2 = FALSE;
 			db->mysql = TRUE;
+			strcpy(db->dbType,"ODBC MariaDB");
 		} else if (strcasestr(varFetch,"MySQL")) {
 			db->mssql = FALSE;
 			db->db2 = FALSE;
 			db->mysql = TRUE;
+			strcpy(db->dbType,"ODBC MySQL");
 		} else if (strcasestr(varFetch,"Microsoft SQL")) {
 			db->mssql = TRUE;
 			db->db2 = FALSE;
 			db->mysql = FALSE;
+			db->dbStsNoTable = 4701;
+			strcpy(db->dbType,"ODBC MS SQL");
 			if ((env = strcasestr(varFetch,"Server")) != NULL) {
 				env += 7;
 				if (isdigit(*env))
@@ -1014,8 +1111,11 @@ join_environment (cob_file_api *a)
 			db->mssql = FALSE;
 			db->db2 = TRUE;
 			db->mysql = FALSE;
+			strcpy(db->dbType,"DB2");
 		}
 	}
+	db->dbVer = mssqlver;
+	db->isopen = TRUE;
 }
 
 /* Delete file */
@@ -1052,7 +1152,8 @@ odbc_file_delete (cob_file_api *a, cob_file *f, char *filename)
 	}
 	DEBUG_LOG("db",("%s\n",buff));
 	if (odbcStmt(db,buff)
-	 && db->dbStatus == db->dbStsNoTable) {
+	 && (db->dbStatus == db->dbStsNoTable
+	 ||  db->dbStatus == 1042)) {
 		return 0;
 	} 
 	if (db->dbStatus != db->dbStsOk) {
@@ -1108,21 +1209,38 @@ odbc_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 #endif
 		snprintf(buff,sizeof(buff),"TRUNCATE TABLE %s",fx->tablename);
 		if (odbcStmt(db,buff)
-		 && db->dbStatus == db->dbStsNoTable) {
+		 && (db->dbStatus == db->dbStsNoTable
+		 ||  db->dbStatus == 1042)) {
 			odbc_create_table (db, fx);
 		} 
 		if (db->dbStatus != db->dbStsOk) {
 			return COB_STATUS_30_PERMANENT_ERROR;
 		}
-		if(chkSts(db,(char*)"AUTO COMMIT ON",db->dbDbcH,
-			SQLSetConnectAttr(db->dbDbcH,SQL_ATTR_AUTOCOMMIT,
-										(SQLPOINTER)SQL_AUTOCOMMIT_ON,SQL_IS_UINTEGER))) {
-			break;
+		if (db->mysql) {
+			odbcStmt (db, (char*)"SET autocommit=1");
+		} else {
+			if(chkSts(db,(char*)"AUTO COMMIT ON",db->dbDbcH,
+				SQLSetConnectAttr(db->dbDbcH,SQL_ATTR_AUTOCOMMIT,
+											(SQLPOINTER)SQL_AUTOCOMMIT_ON,SQL_IS_UINTEGER))) {
+				break;
+			}
+			DEBUG_LOG("db",("AutoCommit is ON!\n"));
 		}
-		DEBUG_LOG("db",("AutoCommit is ON!\n"));
+		db->autocommit = TRUE;
 		break;
-	case COB_OPEN_INPUT:
 	case COB_OPEN_I_O:
+		if (db->mysql) {
+			odbcStmt (db, (char*)"SET autocommit=1");
+		} else {
+			if(chkSts(db,(char*)"AUTO COMMIT ON",db->dbDbcH,
+				SQLSetConnectAttr(db->dbDbcH,SQL_ATTR_AUTOCOMMIT,
+											(SQLPOINTER)SQL_AUTOCOMMIT_ON,SQL_IS_UINTEGER))) {
+				break;
+			}
+			DEBUG_LOG("db",("AutoCommit is ON!\n"));
+		}
+		db->autocommit = TRUE;
+	case COB_OPEN_INPUT:
 	case COB_OPEN_EXTEND:
 #ifdef COB_DEBUG_LOG
 		if (mode == COB_OPEN_INPUT)
@@ -1134,7 +1252,8 @@ odbc_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 #endif
 		snprintf(buff,sizeof(buff),"SELECT 1 FROM %s WHERE 1 = 0",fx->tablename);
 		if (odbcStmt(db,buff)
-		 && db->dbStatus == db->dbStsNoTable) {
+		 && (db->dbStatus == db->dbStsNoTable
+		 ||  db->dbStatus == 1042)) {
 			odbc_create_table (db, fx);
 			if (db->dbStatus != db->dbStsOk)
 				return COB_STATUS_30_PERMANENT_ERROR;
@@ -1212,9 +1331,14 @@ odbc_close (cob_file_api *a, cob_file *f, const int opt)
 	struct indexed_file	*p;
 	struct file_xfd	*fx;
 	int		k;
-	COB_UNUSED (a);
-	COB_UNUSED (opt);
 
+	if (opt == COB_CLOSE_ABORT) {
+		odbc_rollback (a, f);
+	} else
+	if (db->updatesDone > 0) {
+		db->updatesDone = db->commitInterval + 1;	/* Force COMMIT */
+		odbc_commit (a, f);
+	}
 	p = f->file;
 
 	if (p) {
@@ -1619,7 +1743,10 @@ odbc_write (cob_file_api *a, cob_file *f, const int opt)
 		}
 		return ret;
 	}
+	db->updatesDone++;
 	DEBUG_LOG("db",("WRITE: %.40s... status %d; Good!\n",fx->insert.text,db->dbStatus));
+	if (!db->autocommit)
+		odbc_commit (a, f);
 
 	return ret;
 }
@@ -1669,8 +1796,11 @@ odbc_delete (cob_file_api *a, cob_file *f)
 		ret = COB_STATUS_23_KEY_NOT_EXISTS;
 	else if (k > 1)
 		ret = COB_STATUS_30_PERMANENT_ERROR;
+	db->updatesDone++;
 	DEBUG_LOG("db",("DELETE: %s status %d; %d deleted, return %02d\n",f->select_name,
 							db->dbStatus,k,ret));
+	if (!db->autocommit)
+		odbc_commit (a, f);
 
 	return ret;
 }
@@ -1722,8 +1852,11 @@ odbc_rewrite (cob_file_api *a, cob_file *f, const int opt)
 		ret = COB_STATUS_21_KEY_INVALID;
 	else if (k > 1)
 		ret = COB_STATUS_30_PERMANENT_ERROR;
+	db->updatesDone++;
 	DEBUG_LOG("db",("REWRITE: %s, status %d; %d updated, return %02d!\n",f->select_name,
 						db->dbStatus,k,ret));
+	if (!db->autocommit)
+		odbc_commit (a, f);
 
 	return ret;
 }
@@ -1733,17 +1866,7 @@ static int
 odbc_file_unlock (cob_file_api *a, cob_file *f)
 {
 	COB_UNUSED (a);
-	if (COB_FILE_SPECIAL(f)) {
-		return 0;
-	}
-	if (f->organization == COB_ORG_SORT) {
-		return 0;
-	}
-
-	if (f->open_mode != COB_OPEN_CLOSED 
-	 && f->open_mode != COB_OPEN_LOCKED) {
-		return 0;
-	}
+	COB_UNUSED (f);
 	return 0;
 }
 

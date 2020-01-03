@@ -986,6 +986,7 @@ enum xfd_data_type {
 #define COB_CLOSE_NO_REWIND	2
 #define COB_CLOSE_UNIT		3
 #define COB_CLOSE_UNIT_REMOVAL	4
+#define COB_CLOSE_ABORT		-1
 
 /* Write options */
 

@@ -599,6 +599,22 @@ cob_terminate_routines (void)
 		cobsetptr->cob_dump_file = NULL;
 	}
 
+	if (cobsetptr->cob_trace_file
+	 && cobsetptr->cob_trace_file != stderr
+	 && !cobsetptr->external_trace_file	/* note: may include stdout */) {
+		fclose (cobsetptr->cob_trace_file);
+	}
+	cobsetptr->cob_trace_file = NULL;
+
+	/* close punch file if self-opened */
+	if (cobsetptr->cob_display_punch_file
+	 && cobsetptr->cob_display_punch_filename) {
+		fclose (cobsetptr->cob_display_punch_file);
+		cobsetptr->cob_display_punch_file = NULL;
+	}
+
+	cob_exit_screen ();
+	cob_exit_fileio ();
 #ifdef COB_DEBUG_LOG
 	/* close debug log (delete file if empty) */
 	if (cob_debug_file
@@ -623,22 +639,6 @@ cob_terminate_routines (void)
 	}
 #endif
 
-	if (cobsetptr->cob_trace_file
-	 && cobsetptr->cob_trace_file != stderr
-	 && !cobsetptr->external_trace_file	/* note: may include stdout */) {
-		fclose (cobsetptr->cob_trace_file);
-	}
-	cobsetptr->cob_trace_file = NULL;
-
-	/* close punch file if self-opened */
-	if (cobsetptr->cob_display_punch_file
-	 && cobsetptr->cob_display_punch_filename) {
-		fclose (cobsetptr->cob_display_punch_file);
-		cobsetptr->cob_display_punch_file = NULL;
-	}
-
-	cob_exit_screen ();
-	cob_exit_fileio ();
 	cob_exit_intrinsic ();
 	cob_exit_strings ();
 	cob_exit_numeric ();
