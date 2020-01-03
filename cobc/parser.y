@@ -2965,6 +2965,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token TRADITIONAL_FONT		"TRADITIONAL-FONT"
 %token TRAILING
 %token TRAILING_SHIFT		"TRAILING-SHIFT"
+%token TRANSACTION
 %token TRANSFORM
 %token TRANSPARENT
 %token TREE_VIEW		"TREE-VIEW"
