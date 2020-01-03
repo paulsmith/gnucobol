@@ -1663,7 +1663,7 @@ struct cb_program {
 	unsigned int	flag_common		: 1;	/* COMMON PROGRAM */
 	unsigned int	flag_initial		: 1;	/* INITIAL PROGRAM */
 	unsigned int	flag_recursive		: 1;	/* RECURSIVE PROGRAM */
-	unsigned int	flag_screen		: 1;	/* Have SCREEN SECTION */
+	unsigned int	flag_resident		: 1;	/* RESIDENT PROGRAM */
 	unsigned int	flag_validated		: 1;	/* End program validate */
 	unsigned int	flag_chained		: 1;	/* PROCEDURE CHAINING */
 	unsigned int	flag_global_use		: 1;	/* USE GLOBAL */
@@ -1679,6 +1679,7 @@ struct cb_program {
 
 	unsigned int	flag_save_exception	: 1;	/* Save exception code */
 	unsigned int	flag_report		: 1;	/* Have REPORT SECTION */
+	unsigned int	flag_screen		: 1;	/* Have SCREEN SECTION */
 	unsigned int	flag_void		: 1;	/* void return for subprogram */
 	unsigned int	flag_decimal_comp	: 1;	/* program group has decimal computations */
 };

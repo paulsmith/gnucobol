@@ -13,6 +13,10 @@
 	* tree.c (cb_tree_category), tree.h: guard cb_category by CB_CATEGORY_ERROR
 	* error.c (print_error): used fixed COB_SMALL_BUFF instead of
 	  unrelated system-specific BUFSIZ
+	* parser.y, reserved.c: PROGRAM-ID/FUNCTION-ID added prototype parsing
+	* parser.y, reserved.c, tree.h: added PROGRAM-ID IS RESIDENT
+	  (without any codegen yet)
+	* parser.y, reserved.c: added parsing for ACUCOBOL transaction management
 
 2020-01-02  Ron Norman <rjn@inglenet.com>
 

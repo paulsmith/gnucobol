@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -2173,7 +2173,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PROTECTED",		0, 1, PROTECTED,		/* Extension PROTECTED SIZE */
 				0, CB_CS_ACCEPT
   },
-  { "PROTOTYPE",		0, 0, -1,			/* 2002 */
+  { "PROTOTYPE",		0, 0, PROTOTYPE,			/* 2002 */
 				0, 0
   },
   { "PURGE",			0, 0, PURGE,			/* Communication Section */
@@ -2329,6 +2329,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "RESET-TABS",			0, 1, RESET_TABS,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
+  },
+  { "RESIDENT",			0, 1, RESIDENT,			/* ACU extension */
+				0, CB_CS_PROGRAM_ID
   },
   { "RESUME",			0, 0, -1,			/* 2002 */
 				0, 0
@@ -2800,6 +2803,9 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "TRANSFORM",		0, 0, TRANSFORM,		/* OSVS */
+				0, 0
+  },
+  { "TRANSACTION",		0, 0, TRANSACTION,		/* ACU */
 				0, 0
   },
   { "TRANSPARENT",		0, 1, TRANSPARENT,		/* ACU extension */

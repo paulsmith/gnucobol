@@ -1492,6 +1492,8 @@ output_attr (const cb_tree x)
 		flags = 0;
 		if (r->offset) {
 			id = lookup_attr (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL, 0);
+		} else if (f->usage == CB_USAGE_CONTROL) {
+			id = lookup_attr (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL, 0);
 		} else {
 			int	type = cb_tree_type (x, f);
 			switch (type) {
@@ -4345,6 +4347,10 @@ deduce_initialize_type (struct cb_initialize *p, struct cb_field *f,
 	}
 
 	if (f->flag_filler && p->flag_no_filler_init && !f->children) {
+		return INITIALIZE_NONE;
+	}
+
+	if (f->usage == CB_USAGE_CONTROL) {
 		return INITIALIZE_NONE;
 	}
 
@@ -8846,6 +8852,9 @@ output_screen_init (struct cb_field *p, struct cb_field *previous)
 	output_newline ();
 	output_line ("\t\t  %d, %d, 0x" CB_FMT_LLX ");",
 		type, p->occurs_min, p->screen_flag);
+
+	/* TODO: pass information for USAGE CONTROL items here */
+
 	if (p->parent) {
 		/* Generate useless reference to avoid C compile warning */
 		output_prefix ();

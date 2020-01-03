@@ -2745,6 +2745,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token PROPERTIES
 %token PROPERTY
 %token PROTECTED
+%token PROTOTYPE
 %token PURGE
 %token PUSH_BUTTON		"PUSH-BUTTON"
 %token QUERY_INDEX		"QUERY-INDEX"
@@ -2795,6 +2796,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token RESET_GRID		"RESET-GRID"
 %token RESET_LIST		"RESET-LIST"
 %token RESET_TABS		"RESET-TABS"
+%token RESIDENT
 %token RETRY
 %token RETURN
 %token RETURNING
@@ -3355,7 +3357,7 @@ function_id_paragraph:
   {
 	cobc_in_id = 1;
   }
-  TOK_DOT program_id_name _as_literal TOK_DOT
+  TOK_DOT program_id_name _as_literal _is_prototype TOK_DOT
   {
 	if (setup_program ($4, $5, COB_MODULE_TYPE_FUNCTION)) {
 		YYABORT;
@@ -3398,7 +3400,9 @@ _as_literal:
 ;
 
 _program_type:
+  /* empty */
 | _is program_type_clause _program
+| is_prototype
 ;
 
 program_type_clause:
@@ -3411,7 +3415,7 @@ program_type_clause:
 		cb_add_common_prog (current_program);
 	}
   }
-| init_or_recurse_and_common
+| init_or_recurse_or_resident_and_common
   {
 	if (!current_program->nested_level) {
 		cb_error (_("COMMON may only be used in a contained program"));
@@ -3420,19 +3424,19 @@ program_type_clause:
 		cb_add_common_prog (current_program);
 	}
   }
-| init_or_recurse
+| init_or_recurse_or_resident
 | EXTERNAL
   {
 	CB_PENDING (_("CALL prototypes"));
   }
 ;
 
-init_or_recurse_and_common:
-  init_or_recurse COMMON
-| COMMON init_or_recurse
+init_or_recurse_or_resident_and_common:
+  init_or_recurse_or_resident COMMON
+| COMMON init_or_recurse_or_resident
 ;
 
-init_or_recurse:
+init_or_recurse_or_resident:
   TOK_INITIAL
   {
 	current_program->flag_initial = 1;
@@ -3440,6 +3444,22 @@ init_or_recurse:
 | RECURSIVE
   {
 	current_program->flag_recursive = 1;
+  }
+| RESIDENT
+  {
+	current_program->flag_resident = 1;
+  }
+;
+
+_is_prototype:
+  /* empty */
+| is_prototype
+;
+
+is_prototype:
+_is PROTOTYPE
+  {
+	CB_PENDING (_("CALL prototypes"));
   }
 ;
 
@@ -10036,6 +10056,7 @@ statement:
 | set_statement
 | sort_statement
 | start_statement
+| start_transaction_statement
 | stop_statement
 | string_statement
 | subtract_statement
@@ -11352,7 +11373,7 @@ _end_compute:
 /* COMMIT statement */
 
 commit_statement:
-  COMMIT
+  COMMIT _transaction
   {
 	begin_statement ("COMMIT", 0);
 	cb_emit_commit ();
@@ -14099,7 +14120,7 @@ _end_rewrite:
 /* ROLLBACK statement */
 
 rollback_statement:
-  ROLLBACK
+  ROLLBACK _transaction
   {
 	begin_statement ("ROLLBACK", 0);
 	cb_emit_rollback ();
@@ -14652,6 +14673,24 @@ _end_start:
 | END_START
   {
 	TERMINATOR_CLEAR ($-2, START);
+  }
+;
+
+/* START TRANSACTION statement (activates transaction logging
+   for all files with lock_mode & COB_LOCK_ROLLBACK) */
+
+start_transaction_statement:
+  START transaction
+;
+
+_transaction:
+| transaction
+;
+
+transaction:
+  TRANSACTION
+  {
+	CB_PENDING ("TRANSACTION");
   }
 ;
 
