@@ -77,6 +77,13 @@
 #ifdef	WITH_DB
 #include <db.h>
 #endif
+#ifdef	WITH_OCI
+#include <oci.h>
+#endif
+#if defined	(WITH_ODBC)
+#include <sql.h>
+#include <sqlext.h>
+#endif
 #ifdef	WITH_LMDB
 #include <lmdb.h>
 #endif
@@ -7660,10 +7667,20 @@ print_info (void)
 #endif
 #endif
 #if defined	(WITH_ODBC)
+#if defined (SQL_SPEC_STRING)
+	var_print (_("indexed file handler"), 		"ODBC " SQL_SPEC_STRING, "", 0);
+#else
 	var_print (_("indexed file handler"), 		"ODBC", "", 0);
 #endif
+#endif
 #if defined	(WITH_OCI)
-	var_print (_("indexed file handler"), 		"OCI (Oracle)", "", 0);
+#if defined(OCI_MAJOR_VERSION) && defined(OCI_MINOR_VERSION)
+	snprintf (versbuff, 55, "%s - %d.%d",
+			"OCI (Oracle)", OCI_MAJOR_VERSION, OCI_MINOR_VERSION);
+	var_print (_("indexed file handler"), 		versbuff, "", 0);
+#else
+	var_print (_("indexed file handler"),		"OCI (Oracle)", "", 0);
+#endif
 #endif
 #if defined(WITH_IXDFLT) && defined(WITH_MULTI_ISAM)
 	var_print (_("default indexed handler"), 	WITH_IXDFLT, "", 0);

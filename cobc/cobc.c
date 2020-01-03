@@ -77,6 +77,13 @@
 #ifdef	WITH_LMDB
 #include <lmdb.h>
 #endif
+#ifdef	WITH_OCI
+#include <oci.h>
+#endif
+#if defined	(WITH_ODBC)
+#include <sql.h>
+#include <sqlext.h>
+#endif
 
 #if defined (COB_EXPERIMENTAL) || 1
 #define COB_INTERNAL_XREF
@@ -2270,10 +2277,20 @@ cobc_print_info (void)
 # endif
 #endif
 #if defined	(WITH_ODBC)
+#if defined (SQL_SPEC_STRING)
+	cobc_var_print (_("indexed file handler"),		"ODBC " SQL_SPEC_STRING, 0);
+#else
 	cobc_var_print (_("indexed file handler"),		"ODBC", 0);
 #endif
+#endif
 #if defined	(WITH_OCI)
+#if defined(OCI_MAJOR_VERSION) && defined(OCI_MINOR_VERSION)
+	snprintf (versbuff, 55, "%s - %d.%d",
+			"OCI (Oracle)", OCI_MAJOR_VERSION, OCI_MINOR_VERSION);
+	cobc_var_print (_("indexed file handler"), 		versbuff, 0);
+#else
 	cobc_var_print (_("indexed file handler"),		"OCI (Oracle)", 0);
+#endif
 #endif
 #if defined(WITH_IXDFLT) && defined(WITH_MULTI_ISAM)
 	cobc_var_print (_("default indexed handler"),    WITH_IXDFLT, 0);
