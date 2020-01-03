@@ -2,7 +2,7 @@
 # Configure template for GnuCOBOL
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2014-2020 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
 # Edward Hart
 #
@@ -1239,6 +1239,7 @@ AC_ARG_WITH([odbc],
 	fi
 	AC_CHECK_LIB([odbc], [SQLConnect],
 		[AC_DEFINE([WITH_ODBC], [1])
+		 LIBCOB_LIBS="$LIBCOB_LIBS $ODBC_LIBS -lodbc"
 		],
 		AC_MSG_ERROR([libodbc is required for ODBC]), [])
   fi ],
@@ -1259,10 +1260,12 @@ AC_ARG_WITH([oci],
 	if test -n "$OCI_LIBS"; then
 		LIBS="$LIBS $OCI_LIBS"
 	elif test -n "$ORACLE_HOME"; then
-		LIBS="$LIBS -I${ORACLE_HOME}/lib"
+		OCI_LIBS="-L${ORACLE_HOME}/lib"
+		LIBS="$LIBS $OCI_LIBS"
 	fi
 	AC_CHECK_LIB([clntsh], [OCIEnvCreate],
 		[AC_DEFINE([WITH_OCI], [1])
+		 LIBCOB_LIBS="$LIBCOB_LIBS $OCI_LIBS -lclntsh"
 		],
 		AC_MSG_ERROR([libclnt is required for Oracle OCI]), [])
   fi ],

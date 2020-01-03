@@ -8142,8 +8142,6 @@ output_stmt (cb_tree x)
 				} else if (ip->test->source_line || (w && w->source_line)) {
 					if (ip->test->source_line) {
 						w = ip->test;
-					} else {
-						w = w;
 					}
 					output_prefix ();
 					output ("/* Line: %-10d: %-19s", w->source_line, "WHEN");
