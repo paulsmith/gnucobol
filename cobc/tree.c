@@ -1157,15 +1157,19 @@ char *
 cb_name_errmsg (cb_tree x)
 {
 	char	*s;
-	char	tmp[COB_NORMAL_BUFF] = { 0 };
+	char	tmp[COB_SMALL_BUFF] = { 0 };
 	size_t	tlen;
 
-	tlen = cb_name_1 (tmp, x, COB_NORMAL_MAX);
+	tlen = cb_name_1 (tmp, x, COB_SMALL_MAX);
 
 	/* adjust literal for output, snip if too long */
 	if (x && CB_LITERAL_P(x)) {
-		char	tmp2[40] = { 0 };		
-		strcpy (tmp + 36, "...");
+		char	tmp2[40] = { 0 };
+		if (tlen > 39) {
+			strcpy (tmp + 36, "...");
+		} else {
+			tmp[tlen - 1] = 0;
+		}
 		strcpy (tmp2, tmp + 1);
 		tlen = sprintf (tmp, _("literal '%s'"), tmp2);
 	}

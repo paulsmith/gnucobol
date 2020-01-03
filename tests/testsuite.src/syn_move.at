@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2015-2018 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2015-2018,2020 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ## 
 ## This file is part of GnuCOBOL.
@@ -511,7 +511,7 @@ prog.cob: in paragraph 'MAIN':
 prog.cob:15: error: invalid MOVE target: MAIN
 prog.cob:16: error: invalid MOVE target: repo-prog
 prog.cob:17: error: invalid MOVE target: QUOTE
-prog.cob:18: error: invalid MOVE target: "A"
+prog.cob:18: error: invalid MOVE target: literal 'A'
 ])
 
 AT_CLEANUP
