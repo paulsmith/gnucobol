@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -31,7 +31,7 @@
  * fodbc.c     has the ODBC code for INDEXED files
  * foci.c      has the OCI (Oracle) code for INDEXED files
  * fsqlxfd.c   has routines common to ODBC, OCI, BDB, LMDB
- * fextfh.c    has the Microfocus EXTFH code (defacto standard) 
+ * fextfh.c    has the EXTFH code (defacto standard, used by MicroFocus, IBM, ...)
  * focextfh.c  has code for obsolete OpenCOBOL WITH_INDEX_EXTFH/WITH_SEQRA_EXTFH 
  *
  */
