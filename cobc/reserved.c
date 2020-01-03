@@ -993,6 +993,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "ENABLE",			0, 0, ENABLE,			/* Communication Section */
 				0, 0
   },
+  { "ENABLED",			0, 1, ENABLED,			/* ACU extension */
+				0, CB_CS_SCREEN
+  },
   { "ENCODING",			0, 1, ENCODING,			/* IBM extension */
 				0, CB_CS_XML_GENERATE | CB_CS_XML_PARSE
   },
@@ -1425,6 +1428,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "HEIGHT-IN-CELLS",		0, 1, HEIGHT_IN_CELLS,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
+  },
+  { "HELP-ID",			0, 1, HELP_ID,			/* ACU extension */
+				0, CB_CS_SCREEN
   },
   { "HIDDEN-DATA",		0, 1, HIDDEN_DATA,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -1943,6 +1949,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "NUMERIC-EDITED",		0, 0, NUMERIC_EDITED,		/* 2002 */
 				0, 0
+  },
+  { "NUMERIC-FILL",		0, 1, -1,			/* Extension */
+				0, CB_CS_SCREEN
   },
   { "OBJECT",			0, 0, OBJECT,			/* 2002, ACU extension */
 				0, 0
@@ -2958,6 +2967,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "VIRTUAL-WIDTH",			0, 1, VIRTUAL_WIDTH,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
+  },
+  { "VISIBLE",			0, 1, VISIBLE,			/* ACU extension */
+				0, CB_CS_SCREEN
   },
   { "VOLATILE",			0, 0, VOLATILE,			/* IBM Extension */
 				0, 0

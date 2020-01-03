@@ -2357,6 +2357,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token EGI
 %token EIGHTY_EIGHT		"level-number 88"
 %token ENABLE
+%token ENABLED
 %token ELEMENT
 %token ELSE
 %token EMI
@@ -2497,6 +2498,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token HEADING_FONT				"HEADING-FONT"
 %token HEAVY
 %token HEIGHT_IN_CELLS		"HEIGHT-IN-CELLS"
+%token HELP_ID			"HELP-ID"
 %token HIDDEN_DATA		"HIDDEN-DATA"
 %token HIGHLIGHT
 %token HIGH_COLOR		"HIGH-COLOR"
@@ -3018,6 +3020,7 @@ set_record_size (cb_tree min, cb_tree max)
 %token VERTICAL
 %token VERY_HEAVY		"VERY-HEAVY"
 %token VIRTUAL_WIDTH	"VIRTUAL-WIDTH"
+%token VISIBLE
 %token VOLATILE
 %token VPADDING
 %token VSCROLL
@@ -8415,9 +8418,9 @@ screen_description:
   control_definition
   {
 	CB_PENDING ("GRAPHICAL CONTROL");
+	current_field->usage = CB_USAGE_CONTROL;
   }
-  _control_attributes
-  _screen_options	/* FIXME: must be included in control_attributes */
+  _control_attributes_and_screen_options
   {
 	cob_flags_t	flags;
 
@@ -8749,9 +8752,10 @@ control_item:
 | CONTROL	/* the actual control is defined by AT, LINE, COLUMN, CLINE, and CCOL */
 ;
 
-_control_attributes:
+_control_attributes_and_screen_options:
   /* empty */
-| control_attributes
+| _control_attributes_and_screen_options control_attribute
+| _control_attributes_and_screen_options screen_option
 ;
 
 control_attributes:
@@ -8834,12 +8838,17 @@ control_style_name_generic:
 control_property_name_generic:
   TERMINATION_VALUE        /* P-TERMINATION-VALUE         --> 1 */
 | EXCEPTION_VALUE          /* P-EXCEPTION-VALUE           --> 2 */
+/* | TITLE */
+| LAYOUT_DATA
+| ENABLED
+| VISIBLE
+| HELP_ID
 ;
 
 /* LABEL style and property names */
 control_style_name_label:
   LEFT                     /* LS-LEFT                     --> 1  */
-| RIGHT                    /* LS-RIGHT                    --> 2  */
+/* | RIGHT                    /* LS-RIGHT                    --> 2  */
 | CENTER                   /* LS-CENTER                   --> 4  */
 | NO_KEY_LETTER            /* LS-NO-KEY-LETTER            --> 8  */
 | TRANSPARENT              /* LS-TRANSPARENT              --> 16 */
@@ -8893,7 +8902,7 @@ control_style_name_push_button:
 | OK_BUTTON                /* PBS-OK-BUTTON               --> 4     */
 | CANCEL_BUTTON            /* PBS-CANCEL-BUTTON           --> 8     */
 | NO_AUTO_DEFAULT          /* PBS-NO-AUTO-DEFAULT         --> 16    */
-| BITMAP                   /* PBS-BITMAP                  --> 32768 */
+/* | BITMAP                   /* PBS-BITMAP                  --> 32768 */
 | SQUARE                   /* PBS-SQUARE                  --> 16384 */
 | FRAMED                   /* PBS-FRAMED                  --> 8192  */
 | UNFRAMED                 /* PBS-UNFRAMED                --> 4096  */
@@ -9269,7 +9278,6 @@ changeable_control_properties:
 
 changeable_control_property:
   control_property _in_equal identifier
-| LAYOUT_DATA  _in_equal identifier
 /* more to add here ... */
 ;
 

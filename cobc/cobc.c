@@ -4642,6 +4642,7 @@ set_picture (struct cb_field *field, char *picture, size_t picture_len)
 	case CB_USAGE_UNSIGNED_SHORT:
 	case CB_USAGE_UNSIGNED_INT:
 	case CB_USAGE_UNSIGNED_LONG:
+	case CB_USAGE_CONTROL:
 		return 0;
 	default:
 		break;

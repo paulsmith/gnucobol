@@ -766,6 +766,7 @@ is_numeric_usage (const enum cb_usage usage)
 	case CB_USAGE_DISPLAY:
 	case CB_USAGE_NATIONAL:
 	case CB_USAGE_OBJECT:
+	case CB_USAGE_CONTROL:
 		return 0;
 	/* case CB_USAGE_ERROR: assume numeric */
 	default:
@@ -1186,6 +1187,7 @@ validate_pic (struct cb_field *f)
 	case CB_USAGE_UNSIGNED_SHORT:
 	case CB_USAGE_UNSIGNED_INT:
 	case CB_USAGE_UNSIGNED_LONG:
+	case CB_USAGE_CONTROL:
 		need_picture = 0;
 		break;
 	case CB_USAGE_ERROR:
@@ -1291,10 +1293,19 @@ validate_usage (struct cb_field * const f)
 {
 	cb_tree	x = CB_TREE (f);
 
-	if ((f->storage == CB_STORAGE_SCREEN
-	  || f->storage == CB_STORAGE_REPORT)
-	 &&  f->usage   != CB_USAGE_DISPLAY
-	 &&  f->usage   != CB_USAGE_NATIONAL) {
+	if (f->storage == CB_STORAGE_REPORT
+	 && f->usage   != CB_USAGE_DISPLAY
+	 && f->usage   != CB_USAGE_NATIONAL) {
+		cb_error_x (CB_TREE(f),
+			_("%s item '%s' should be USAGE DISPLAY"),
+			enum_explain_storage (f->storage), cb_name (x));
+		return 1;
+	}
+
+	if (f->storage == CB_STORAGE_SCREEN
+	 && f->usage   != CB_USAGE_DISPLAY
+	 && f->usage   != CB_USAGE_NATIONAL
+	 && f->usage   != CB_USAGE_CONTROL) {
 		cb_error_x (CB_TREE(f),
 			_("%s item '%s' should be USAGE DISPLAY"),
 			enum_explain_storage (f->storage), cb_name (x));
@@ -2726,6 +2737,8 @@ unbounded_again:
 		case CB_USAGE_PROGRAM_POINTER:
 			f->size = sizeof (void *);
 			break;
+		case CB_USAGE_CONTROL:
+			break;
 		case CB_USAGE_BIT:
 			/* note: similar is found in DISPLAY */
 			f->size = f->pic->size / 8;
@@ -2766,7 +2779,11 @@ static int
 validate_field_value (struct cb_field *f)
 {
 	if (f->values) {
-		validate_move (CB_VALUE (f->values), CB_TREE (f), 1, NULL);
+		if (f->usage != CB_USAGE_CONTROL) {
+			validate_move (CB_VALUE (f->values), CB_TREE (f), 1, NULL);
+		} else {
+			/* CHECK: possibly add validation according to control type */
+		}
 	}
 
 	if (f->children) {
@@ -3147,6 +3164,8 @@ cb_get_usage_string (const enum cb_usage usage)
 		return "VARIANT";
 	case CB_USAGE_HNDL_LM:
 		return "HANDLE OF LAYOUT-MANAGER";
+	case CB_USAGE_CONTROL:
+		return "CONTROL";
 	/* LCOV_EXCL_START */
 	default:
 		cb_error (_("unexpected USAGE: %d"), usage);

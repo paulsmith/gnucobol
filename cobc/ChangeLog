@@ -17,6 +17,12 @@
 	* parser.y, reserved.c, tree.h: added PROGRAM-ID IS RESIDENT
 	  (without any codegen yet)
 	* parser.y, reserved.c: added parsing for ACUCOBOL transaction management
+	* parser.y: fixed parsing for ACUCOBOL's graphical control syntax -
+	  screen and control options may be intermixed now
+	* parser.y, reserved.c: parsing for screen clauses ENABLED, VISIBLE, HELP-ID
+	* tree.h, parser.y, field.c, codegen.c, cobc.c: added CB_USAGE_CONTROL and
+	  handling it which fixes several internal compiler errors for sources
+	  that contain those
 
 2020-01-02  Ron Norman <rjn@inglenet.com>
 
