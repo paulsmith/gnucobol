@@ -1,4 +1,19 @@
 
+2020-01-03  Simon Sobisch <simonsobisch@gnu.org>
+
+	* tree.c (cb_name_errmsg), tree.h, typeck.c (cb_emit_move): new function
+	  for better error messages
+	* tree.c (cb_field_size), tree.h, field.c, typeck.c: use new define
+	  FIELD_SIZE_UNKNOWN instead of -1
+	* typeck.c (validate_move): skip truncation warnings if target and/or
+	  source sizes are unknown
+	* codegen.c, tree.h: replacing old conflicting constant prefix s_
+	  by new CB_PREFIX_SCR_FIELD
+	* codegen.c: partially limited variable scope
+	* tree.c (cb_tree_category), tree.h: guard cb_category by CB_CATEGORY_ERROR
+	* error.c (print_error): used fixed COB_SMALL_BUFF instead of
+	  unrelated system-specific BUFSIZ
+
 2020-01-02  Ron Norman <rjn@inglenet.com>
 
 	* sqlxfdgen.c: Check for SQL reserved words used as column names
@@ -312,7 +327,7 @@
 	  to get the size of the complete entry (only reasonable to call with the
 	  "main" entry normally attached to a program)
 	* typeck.c (cb_validate_program_data): set alphabet->custom_list to error
-	  node once seen as bad, partially limitted variable scope
+	  node once seen as bad, partially limited variable scope
 	* tree.c (validate_file): explicit check for number of keys (limited
 	  to MAX_FILE_KEYS, currently 255, per file)
 

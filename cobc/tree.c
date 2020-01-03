@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2019 Free Software Foundation, Inc.
+   Copyright (C) 2001-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
    Edward Hart
 
@@ -481,8 +481,6 @@ cb_name_1 (char *s, cb_tree x, const int size)
 		break;
 
 	case CB_TAG_LITERAL:
-		/* TODO: for warning/error messages (do we use this for other parts?):
-		   use cb_word_length as max-length for the output */
 		if (CB_TREE_CLASS (x) == CB_CLASS_NUMERIC) {
 			strncpy (s, (char *)CB_LITERAL (x)->data, size);
 		} else {
@@ -1156,6 +1154,28 @@ build_literal (const enum cb_category category, const void *data,
 }
 
 char *
+cb_name_errmsg (cb_tree x)
+{
+	char	*s;
+	char	tmp[COB_NORMAL_BUFF] = { 0 };
+	size_t	tlen;
+
+	tlen = cb_name_1 (tmp, x, COB_NORMAL_MAX);
+
+	/* adjust literal for output, snip if too long */
+	if (x && CB_LITERAL_P(x)) {
+		char	tmp2[40] = { 0 };		
+		strcpy (tmp + 36, "...");
+		strcpy (tmp2, tmp + 1);
+		tlen = sprintf (tmp, _("literal '%s'"), tmp2);
+	}
+	s = cobc_parse_malloc (tlen + 1);
+	strncpy (s, tmp, tlen);
+
+	return s;
+}
+
+char *
 cb_name (cb_tree x)
 {
 	char	*s;
@@ -1179,6 +1199,14 @@ cb_tree_category (cb_tree x)
 	if (x == cb_error_node) {
 		return (enum cb_category)0;
 	}
+
+	/* LCOV_EXCL_START */
+	if (x->category >= CB_CATEGORY_ERROR) {
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"cb_tree_category", "x");
+		COBC_ABORT ();
+	}
+	/* LCOV_EXCL_STOP */
 	if (x->category != CB_CATEGORY_UNKNOWN) {
 		return x->category;
 	}
@@ -3640,7 +3668,8 @@ cb_field_add (struct cb_field *f, struct cb_field *p)
 }
 
 /* get size of given field/literal (or its reference),
-   returns -1 if size isn't known at compile time */
+   returns FIELD_SIZE_UNKNOWN (-1) if size isn't known
+   at compile time */
 int
 cb_field_size (const cb_tree x)
 {
@@ -3652,29 +3681,29 @@ cb_field_size (const cb_tree x)
 		return CB_LITERAL (x)->size;
 	case CB_TAG_FIELD:
 		f = CB_FIELD (x);
-		if(f->usage == CB_USAGE_COMP_X
-		&& f->compx_size > 0)
+		if (f->usage == CB_USAGE_COMP_X
+		 && f->compx_size > 0) {
 			return f->compx_size;
+		}
 		return CB_FIELD (x)->size;
 	case CB_TAG_REFERENCE:
 		r = CB_REFERENCE (x);
 		f = CB_FIELD (r->value);
-
 		if (r->length) {
 			if (CB_LITERAL_P (r->length)) {
 				return cb_get_int (r->length);
 			} else {
-				return -1;
+				return FIELD_SIZE_UNKNOWN;
 			}
 		} else if (r->offset) {
 			if (CB_LITERAL_P (r->offset)) {
 				return f->size - cb_get_int (r->offset) + 1;
 			} else {
-				return -1;
+				return FIELD_SIZE_UNKNOWN;
 			}
-		} else if(f->usage == CB_USAGE_COMP_X
-			&& f->compx_size > 0) {
-				return f->compx_size;
+		} else if (f->usage == CB_USAGE_COMP_X
+			 && f->compx_size > 0) {
+			return f->compx_size;
 		} else {
 			return f->size;
 		}

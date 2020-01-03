@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2019 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
    Edward Hart
 
@@ -1058,16 +1058,9 @@ is_index_1 (cb_tree x)
 static void
 output_data (cb_tree x)
 {
-	struct cb_literal	*l;
-	struct cb_reference	*r;
-	struct cb_field		*f;
-	struct cb_field		*o_slide;
-	struct cb_field		*o;
-	cb_tree			lsub;
-
 	switch (CB_TREE_TAG (x)) {
-	case CB_TAG_LITERAL:
-		l = CB_LITERAL (x);
+	case CB_TAG_LITERAL: {
+		struct cb_literal	*l = CB_LITERAL (x);
 		if (CB_TREE_CLASS (x) == CB_CLASS_NUMERIC) {
 			output ("(cob_u8_ptr)\"%s%s\"",
 					(l->sign < 0) ? "-" : (l->sign > 0) ? "+" : "",
@@ -1077,24 +1070,26 @@ output_data (cb_tree x)
 			output_string (l->data, (int) l->size, l->llit);
 		}
 		break;
-	case CB_TAG_FIELD:
-		f = CB_FIELD (x);
+	}
+	case CB_TAG_FIELD: {
+		struct cb_field		*f = CB_FIELD (x);
 		output("/* %s */",f->name);
 		/* Base address */
 		output_base (f, 0);
 		break;
-	case CB_TAG_REFERENCE:
-		r = CB_REFERENCE (x);
-		f = CB_FIELD (r->value);
+	}
+	case CB_TAG_REFERENCE: {
+		struct cb_reference	*r = CB_REFERENCE (x);
+		struct cb_field		*f = CB_FIELD (r->value);
 
 		/* Base address */
 		output_base (f, 0);
 
 		/* Subscripts */
 		if (r->subs) {
-			lsub = r->subs;
-			o_slide = NULL;
-			o = f;
+			struct cb_field		*o_slide = NULL;
+			struct cb_field		*o = f;
+			cb_tree			lsub = r->subs;
 			for (; f && lsub; f = f->parent) {
 				/* add current field size for OCCURS */
 				if (f->flag_occurs) {
@@ -1148,6 +1143,7 @@ output_data (cb_tree x)
 			output_index (r->offset);
 		}
 		break;
+	}
 	case CB_TAG_CAST:
 		output ("&");
 		output_param (x, 0);
@@ -1467,17 +1463,13 @@ lookup_attr (const int type, const cob_u32_t digits, const int scale,
 static void
 output_attr (const cb_tree x)
 {
-	struct cb_literal	*l;
-	struct cb_reference	*r;
-	struct cb_field		*f;
 	int			id;
-	int			type;
 	cob_u32_t		flags;
 
 	id = 0;
 	switch (CB_TREE_TAG (x)) {
-	case CB_TAG_LITERAL:
-		l = CB_LITERAL (x);
+	case CB_TAG_LITERAL: {
+		struct cb_literal	*l = CB_LITERAL (x);
 		if (CB_TREE_CLASS (x) == CB_CLASS_NUMERIC) {
 			flags = COB_FLAG_CONSTANT;
 			if (l->sign != 0) {
@@ -1493,18 +1485,17 @@ output_attr (const cb_tree x)
 			}
 		}
 		break;
-	case CB_TAG_REFERENCE:
-		r = CB_REFERENCE (x);
-		f = CB_FIELD (r->value);
+	}
+	case CB_TAG_REFERENCE: {
+		struct cb_reference	*r = CB_REFERENCE (x);
+		struct cb_field		*f = CB_FIELD (r->value);
 		flags = 0;
 		if (r->offset) {
 			id = lookup_attr (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL, 0);
+		} else if (f->usage == CB_USAGE_CONTROL) {
+			id = lookup_attr (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL, 0);
 		} else {
-			if (f->usage != CB_USAGE_COMP_X) {
-				type = cb_tree_type (x, f);
-			} else {
-				type = COB_TYPE_NUMERIC_BINARY;
-			}
+			int	type = cb_tree_type (x, f);
 			switch (type) {
 			case COB_TYPE_GROUP:
 			case COB_TYPE_ALPHANUMERIC:
@@ -1573,6 +1564,7 @@ output_attr (const cb_tree x)
 			}
 		}
 		break;
+	}
 	case CB_TAG_ALPHABET_NAME:
 		id = lookup_attr (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL, 0);
 		break;
@@ -2029,14 +2021,9 @@ output_field (cb_tree x)
 static void
 output_data_sub (cb_tree x, int subscript)
 {
-	struct cb_literal	*l;
-	struct cb_reference	*r;
-	struct cb_field		*f;
-	cb_tree			lsub;
-
 	switch (CB_TREE_TAG (x)) {
-	case CB_TAG_LITERAL:
-		l = CB_LITERAL (x);
+	case CB_TAG_LITERAL: {
+		struct cb_literal	*l = CB_LITERAL (x);
 		if (CB_TREE_CLASS (x) == CB_CLASS_NUMERIC) {
 			output ("(cob_u8_ptr)\"%s%s\"", (char *)l->data,
 				(l->sign < 0) ? "-" : (l->sign > 0) ? "+" : "");
@@ -2045,9 +2032,10 @@ output_data_sub (cb_tree x, int subscript)
 			output_string (l->data, (int) l->size, l->llit);
 		}
 		break;
-	case CB_TAG_REFERENCE:
-		r = CB_REFERENCE (x);
-		f = CB_FIELD (r->value);
+	}
+	case CB_TAG_REFERENCE: {
+		struct cb_reference	*r = CB_REFERENCE (x);
+		struct cb_field		*f = CB_FIELD (r->value);
 
 		/* Base address */
 		output_base (f, 0);
@@ -2063,7 +2051,7 @@ output_data_sub (cb_tree x, int subscript)
 
 		/* Subscripts */
 		if (r->subs) {
-			lsub = r->subs;
+			cb_tree			lsub = r->subs;
 			for (; f && lsub; f = f->parent) {
 				if (f->flag_occurs) {
 					output (" + ");
@@ -2082,12 +2070,14 @@ output_data_sub (cb_tree x, int subscript)
 			output_index (r->offset);
 		}
 		break;
-	case CB_TAG_FIELD:
-		f = CB_FIELD (x);
-		output("/* %s */",f->name);
+	}
+	case CB_TAG_FIELD: {
+		struct cb_field		*f = CB_FIELD (x);
+		output("/* %s */", f->name);
 		/* Base address */
 		output_base (f, 0);
 		break;
+	}
 	case CB_TAG_CAST:
 		output ("&");
 		output_param (x, 0);
@@ -2715,7 +2705,6 @@ output_source_cache (void)
 int
 cb_lookup_literal (cb_tree x, int make_decimal)
 {
-
 	struct cb_literal	*literal;
 	struct literal_list	*l;
 	FILE			*savetarget;
@@ -2723,15 +2712,16 @@ cb_lookup_literal (cb_tree x, int make_decimal)
 	literal = CB_LITERAL (x);
 	/* Search literal cache */
 	for (l = literal_cache; l; l = l->next) {
-		if (CB_TREE_CLASS (literal) == CB_TREE_CLASS (l->literal) &&
-		    literal->size == l->literal->size &&
-		    literal->all == l->literal->all &&
-		    literal->sign == l->literal->sign &&
-		    literal->scale == l->literal->scale &&
-		    memcmp (literal->data, l->literal->data,
+		if (CB_TREE_CLASS (literal) == CB_TREE_CLASS (l->literal)
+		 && literal->size == l->literal->size
+		 && literal->all == l->literal->all
+		 && literal->sign == l->literal->sign
+		 && literal->scale == l->literal->scale
+		 && memcmp (literal->data, l->literal->data,
 			    (size_t)literal->size) == 0) {
-			if (make_decimal)
+			if (make_decimal) {
 				l->make_decimal = 1;
+			}
 			return l->id;
 		}
 	}
@@ -3722,7 +3712,7 @@ output_param (cb_tree x, int id)
 					output (")");
 			} else {
 				if (screenptr && f->storage == CB_STORAGE_SCREEN) {
-					output ("&s_%d", f->id);
+					output ("&%s%d", CB_PREFIX_SCR_FIELD, f->id);
 				} else {
 					output ("&%s%d", CB_PREFIX_FIELD, f->id);
 				}
@@ -6528,10 +6518,10 @@ output_set_attribute (const struct cb_field *f, cob_flags_t val_on,
 	}
 
 	if (val_on) {
-		output_line ("s_%d.attr |= 0x" CB_FMT_LLX ";", f->id, val_on);
+		output_line ("%s%d.attr |= 0x" CB_FMT_LLX ";", CB_PREFIX_SCR_FIELD, f->id, val_on);
 	}
 	if (val_off) {
-		output_line ("s_%d.attr &= ~0x" CB_FMT_LLX ";", f->id, val_off);
+		output_line ("%s%d.attr &= ~0x" CB_FMT_LLX ";", CB_PREFIX_SCR_FIELD, f->id, val_off);
 	}
 }
 
@@ -8755,7 +8745,7 @@ output_screen_definition (struct cb_field *p)
 		p->count++;
 	}
 
-	output_local ("static cob_screen\ts_%d;\n", p->id);
+	output_local ("static cob_screen\t%s%d;\n", CB_PREFIX_SCR_FIELD, p->id);
 }
 
 static void
@@ -8767,16 +8757,16 @@ output_screen_init (struct cb_field *p, struct cb_field *previous)
 		p->values ? COB_SCREEN_TYPE_VALUE :
 		(p->size > 0) ? COB_SCREEN_TYPE_FIELD : COB_SCREEN_TYPE_ATTRIBUTE);
 	output_prefix ();
-	output ("cob_set_screen (&s_%d, ", p->id);
+	output ("cob_set_screen (&%s%d, ", CB_PREFIX_SCR_FIELD, p->id);
 
 	if (p->sister && p->sister->level != 1) {
-		output ("&s_%d, ", p->sister->id);
+		output ("&%s%d, ", CB_PREFIX_SCR_FIELD, p->sister->id);
 	} else {
 		output ("NULL, ");
 	}
 
 	if (previous && previous->level != 1) {
-		output ("&s_%d, ", previous->id);
+		output ("&%s%d, ", CB_PREFIX_SCR_FIELD, previous->id);
 	} else {
 		output ("NULL, ");
 	}
@@ -8786,13 +8776,13 @@ output_screen_init (struct cb_field *p, struct cb_field *previous)
 	output ("\t\t  ");
 
 	if (type == COB_SCREEN_TYPE_GROUP) {
-		output ("&s_%d, ", p->children->id);
+		output ("&%s%d, ", CB_PREFIX_SCR_FIELD, p->children->id);
 	} else {
 		output ("NULL, ");
 	}
 
 	if (p->parent) {
-		output ("&s_%d, ", p->parent->id);
+		output ("&%s%d, ", CB_PREFIX_SCR_FIELD, p->parent->id);
 	} else {
 		output ("NULL, ");
 	}
@@ -11491,8 +11481,8 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		if (CB_TREE_CLASS (m->x) == CB_CLASS_NUMERIC
 		 && m->make_decimal) {
 			if (i) {
-				output_line ("/* Set Decimal Constant values */");
 				i = 0;
+				output_line ("/* Set Decimal Constant values */");
 			}
 			output_line ("%s%d = &%s%d;", 	CB_PREFIX_DEC_CONST,m->id,
 				     CB_PREFIX_DEC_FIELD,m->id);

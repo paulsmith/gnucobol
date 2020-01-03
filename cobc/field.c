@@ -813,7 +813,7 @@ create_implicit_picture (struct cb_field *f)
 					is_numeric = 0;
 				}
 			} else {
-				/* ToDo: add appropriate message (untranslated) */
+				cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 				COBC_ABORT ();	/* LCOV_EXCL_LINE */
 			}
 		}
@@ -840,7 +840,7 @@ create_implicit_picture (struct cb_field *f)
 				size_implied = cb_field_size (impl_tree);
 				is_numeric = CB_TREE_CATEGORY (impl_tree) == CB_CATEGORY_NUMERIC;
 			} else {
-				size_implied = -1;
+				size_implied = FIELD_SIZE_UNKNOWN;
 			}
 		} else if (first_value) {
 			/* done later*/
@@ -850,7 +850,7 @@ create_implicit_picture (struct cb_field *f)
 			return 0;
 		}
 
-		if (size_implied == -1) {
+		if (size_implied == FIELD_SIZE_UNKNOWN) {
 			cb_error_x (x, _("PICTURE clause required for '%s'"),
 				    cb_name (x));
 			return 1;

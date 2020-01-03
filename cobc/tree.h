@@ -48,6 +48,7 @@
 #define CB_PREFIX_DEC_FIELD	"kc_"	/* Decimal Constant for literal (cob_field) */
 #define CB_PREFIX_DEC_CONST	"dc_"	/* Decimal Constant (cob_decimal) */
 #define CB_PREFIX_FIELD		"f_"	/* Field (cob_field) */
+#define CB_PREFIX_SCR_FIELD		"fs_"	/* Screen field (cob_field) */
 #define CB_PREFIX_FILE		"h_"	/* File (cob_file) */
 #define CB_PREFIX_KEYS		"k_"	/* File keys (cob_file_key []) */
 #define CB_PREFIX_LABEL		"l_"	/* Label */
@@ -304,7 +305,8 @@ enum cb_category {
 	CB_CATEGORY_OBJECT_REFERENCE,		/* 10 */
 	CB_CATEGORY_DATA_POINTER,		/* 11 */
 	CB_CATEGORY_PROGRAM_POINTER,		/* 12 */
-	CB_CATEGORY_FLOATING_EDITED		/* 13 */
+	CB_CATEGORY_FLOATING_EDITED,	/* 13 */
+	CB_CATEGORY_ERROR		/* 14, always last */
 };
 
 /* Storage sections */
@@ -1794,6 +1796,7 @@ extern cb_tree			cb_depend_check;
 extern unsigned int		gen_screen_ptr;
 
 extern char			*cb_name (cb_tree);
+extern char			*cb_name_errmsg (cb_tree);
 extern enum cb_class		cb_tree_class (cb_tree);
 extern enum cb_category		cb_tree_category (cb_tree);
 extern int			cb_tree_type (const cb_tree,
@@ -1859,6 +1862,7 @@ extern void			cb_build_symbolic_chars (const cb_tree,
 extern struct cb_field		*cb_field_add (struct cb_field *,
 					       struct cb_field *);
 extern int				cb_field_size (const cb_tree x);
+#define FIELD_SIZE_UNKNOWN -1
 extern struct cb_field		*cb_field_founder (const struct cb_field * const);
 extern struct cb_field		*cb_field_variable_size (const struct cb_field *);
 extern unsigned int		cb_field_variable_address (const struct cb_field *);

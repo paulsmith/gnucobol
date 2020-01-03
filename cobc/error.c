@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -69,7 +69,7 @@ static void
 print_error (const char *file, int line, const char *prefix,
 	     const char *fmt, va_list ap)
 {
-	char			errmsg[BUFSIZ];
+	char	errmsg[COB_SMALL_BUFF];
 
 	if (!file) {
 		file = cb_source_file;

@@ -1191,7 +1191,7 @@ error_literal (const char *type, const char *literal)
 			cb_error (_("invalid national literal"), lit_out);
 		} else {
 #endif
-		/* snip literal for output, if too long */
+			/* snip literal for output, if too long */
 			strncpy (lit_out, literal, 38);
 			if (strlen (literal) > 38) {
 				strcpy (lit_out + 35, "...");
