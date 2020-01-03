@@ -1492,8 +1492,6 @@ output_attr (const cb_tree x)
 		flags = 0;
 		if (r->offset) {
 			id = lookup_attr (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL, 0);
-		} else if (f->usage == CB_USAGE_CONTROL) {
-			id = lookup_attr (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL, 0);
 		} else {
 			int	type = cb_tree_type (x, f);
 			switch (type) {
