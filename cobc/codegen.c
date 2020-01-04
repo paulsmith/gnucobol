@@ -7776,14 +7776,27 @@ output_stmt (cb_tree x)
 			const char			*retry_mode;
 			struct cb_file		*fl = CB_FILE (p->file);
 
-			if (p->body && CB_VALUE (p->body)
-			 && CB_TREE_TAG (CB_VALUE (p->body)) == CB_TAG_FUNCALL) {
-				struct cb_funcall	*c = CB_FUNCALL (CB_VALUE (p->body));
-				if (fl->organization == COB_ORG_RELATIVE) {
-					output_file_variable (fl->key, fl, c, "keys[0].field", 1);
+			if (p->body && CB_VALUE (p->body)) {
+				cb_tree body_value = CB_VALUE (p->body);
+				switch (CB_TREE_TAG (body_value)) {
+				case CB_TAG_FUNCALL: {
+					struct cb_funcall	*c = CB_FUNCALL (body_value);
+					if (fl->organization == COB_ORG_RELATIVE) {
+						output_file_variable (fl->key, fl, c, "keys[0].field", 1);
+					}
+					output_file_variable (fl->assign, fl, c, "assign", 0);
+					break;
 				}
-				output_file_variable (fl->assign, fl, c, "assign", 0);
-
+				case CB_TAG_DEBUG:
+					/* CHECKME: anything needed here? */
+					break;
+				/* LCOV_EXCL_START */
+				default:
+					cobc_err_msg (_("unexpected tree tag: %d"),
+						(int)CB_TREE_TAG (body_value));
+					COBC_ABORT ();
+				/* LCOV_EXCL_END */
+				}
 			/* LCOV_EXCL_START */
 			} else {
 				cobc_err_msg ("unexpected state");

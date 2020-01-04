@@ -189,12 +189,14 @@ check_valid_value (const char *fname, const int line, const char *name, const ch
 	return ret;
 }
 
+#if 0
 static void
 unsupported_value (const char *fname, const int line, const char *name, const char *val)
 {
 	configuration_error (fname, line, 1,
 		_("unsupported value '%s' for configuration tag '%s'"), val, name);
 }
+#endif
 
 static void
 split_and_iterate_on_comma_separated_str (

@@ -21,10 +21,12 @@
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
-#include "../defaults.h"
 #include "fileio.h"
 
 #if defined(WITH_ODBC) || defined(WITH_OCI) || defined(WITH_DB) || defined(WITH_LMDB)
+
+#include "defaults.h"
+
 /* Routines in fsqlxfd.c common to all Database interfaces */                        
 
 int

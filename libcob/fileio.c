@@ -720,8 +720,9 @@ cob_chk_file_env (cob_file *f, const char *src)
 	for (i = 0; i < NUM_PREFIX; ++i) {
 		snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s%s", prefix[i], s);
 		file_open_env[COB_FILE_MAX] = 0;
-		if((p = getenv (file_open_env)) != NULL)
+		if ((p = getenv (file_open_env)) != NULL) {
 			break;
+		}
 	}
 	if (p == NULL) {		/* Try all Upper case env var name */
 		for (i = 0; i < NUM_PREFIX; ++i) {
@@ -732,11 +733,13 @@ cob_chk_file_env (cob_file *f, const char *src)
 					file_open_env[i] = toupper((unsigned char)file_open_env[i]);
 				}
 			}
-			if ((p = getenv (file_open_env)) != NULL)
+			if ((p = getenv (file_open_env)) != NULL) {
 				break;
+			}
 		}
-		if (p == NULL)
+		if (p == NULL) {
 			strcpy (file_open_env, file_open_name);
+		}
 	}
 	if (unlikely (q)) {
 		cob_free (q);
