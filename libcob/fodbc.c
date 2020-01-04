@@ -81,7 +81,6 @@ static int		db_join = 1;
 static struct db_state db[1];
 static int	useDriverCursor  = FALSE;
 static int	useIfneededCursor= TRUE;
-static int	mssqlver = 2008;
 static char	varFetch[80];
 
 struct indexed_file {
@@ -721,7 +720,7 @@ odbc_commit (cob_file_api *a, cob_file *f)
 			return COB_STATUS_30_PERMANENT_ERROR;
 		}
 	}
-	if (db->updatesDone < 0x7FFFFFF)
+	if (db->updatesDone < BIGCOMMIT)
 		DEBUG_LOG("db",("%s Commit %d updates\n",db->dbType,db->updatesDone));
 	db->updatesDone = 0;
 	return 0;
@@ -916,7 +915,7 @@ join_environment (cob_file_api *a)
 		DEBUG_LOG("db",("Env: %s -> %s\n",tmp,env));
 		db->commitInterval = atoi(env);
 	} else {
-		db->commitInterval = (int)0x7FFFFFF;
+		db->commitInterval = (int)BIGCOMMIT;
 	}
 #if !defined(WITH_DB2)
 	if(useDriverCursor) {
@@ -1100,13 +1099,13 @@ join_environment (cob_file_api *a)
 			db->db2 = FALSE;
 			db->mysql = FALSE;
 			db->dbStsNoTable = 4701;
-			strcpy(db->dbType,"ODBC MS SQL");
+			db->dbVer = 2008;
 			if ((env = strcasestr(varFetch,"Server")) != NULL) {
 				env += 7;
 				if (isdigit(*env))
-					mssqlver = atoi(env);
-				DEBUG_LOG("db",("MS SQL Server %d\n",mssqlver));
+					db->dbVer = atoi(env);
 			}
+			snprintf(db->dbType,sizeof(db->dbType),"ODBC MSSQL %d",db->dbVer);
 		} else if (strcasestr(varFetch,"DB2")) {
 			db->mssql = FALSE;
 			db->db2 = TRUE;
@@ -1114,7 +1113,6 @@ join_environment (cob_file_api *a)
 			strcpy(db->dbType,"DB2");
 		}
 	}
-	db->dbVer = mssqlver;
 	db->isopen = TRUE;
 }
 

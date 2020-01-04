@@ -316,11 +316,11 @@ oci_commit (cob_file_api *a, cob_file *f)
 	}
 #ifdef COB_DEBUG_LOG
 	if (db->updatesDone <= 0
-	 || db->updatesDone > (int)0x7FFFFFF)
+	 || db->updatesDone > (int)BIGCOMMIT)
 		strcpy(msg,"");
 	else
 		sprintf(msg,"%d ",db->updatesDone);
-	DEBUG_LOG("db",("OCI Commit %supdates\n",msg));
+	DEBUG_LOG("db",("%s Commit %supdates\n",db->dbType,msg));
 #endif
 	db->updatesDone = 0;
 	return 0;
@@ -348,11 +348,11 @@ oci_rollback (cob_file_api *a, cob_file *f)
 	}
 #ifdef COB_DEBUG_LOG
 	if (db->updatesDone <= 0
-	 || db->updatesDone > (int)0x7FFFFFF)
+	 || db->updatesDone > (int)BIGCOMMIT)
 		strcpy(msg,"");
 	else
 		sprintf(msg,"%d ",db->updatesDone);
-	DEBUG_LOG("db",("OCI Rollback %supdates\n",msg));
+	DEBUG_LOG("db",("%s Rollback %supdates\n",db->dbType,msg));
 #endif
 	db->updatesDone = 0;
 	return 0;
@@ -724,7 +724,7 @@ oci_create_table (
 static void
 join_environment (cob_file_api *a)
 {
-	char	*env, tmp[256];
+	char	*env, *p, tmp[256];
 
 	db_join = -1;
 	db->isopen = FALSE;
@@ -801,7 +801,7 @@ join_environment (cob_file_api *a)
 		DEBUG_LOG("db",("Env: %s -> %s\n",tmp,env));
 		db->commitInterval = atoi(env);
 	} else {
-		db->commitInterval = (int)0x7FFFFFF;
+		db->commitInterval = (int)BIGCOMMIT;
 	}
 	if (db->dbName[0] > ' ' 
 	 && db->attachDbName) {
@@ -865,12 +865,33 @@ join_environment (cob_file_api *a)
 		DEBUG_LOG("db",("%s: User %s, Pwd %s\n",db->dbType,db->dbUser,db->dbPwd));
 		return;
 	}
-	chkSts(db,(char*)"AttrSet Ses",OCIAttrSet(	db->dbSvcH, OCI_HTYPE_SVCCTX,
-								db->dbSesH, 0, OCI_ATTR_SESSION, db->dbErrH ));
-	if(db->dbStatus) {
+	if (chkSts(db,(char*)"AttrSet Ses",OCIAttrSet( db->dbSvcH, OCI_HTYPE_SVCCTX,
+								db->dbSesH, 0, OCI_ATTR_SESSION, db->dbErrH ))) {
 		DEBUG_LOG("db",("OCIAttrSet Session status %d; Failed!\n",db->dbStatus));
 		return;
 	}
+
+	if (chkSts(db,(char*)"AttrSet Ses",
+			OCIServerVersion( db->dbSvcH, db->dbErrH, 
+							(text*)tmp, sizeof(tmp), OCI_HTYPE_SVCCTX))) {
+		DEBUG_LOG("db",("OCIAttrSet Session status %d; Failed!\n",db->dbStatus));
+		return;
+	}
+	DEBUG_LOG("db",("%s\n",tmp));
+	if ((env = strcasestr (tmp,"Release")) != NULL) {
+		int	num = 0;
+		env += 8;
+		while(*env == ' ') env++;
+		for (p=env; *p != ' '; p++) {
+			if (*p == '.') num++;
+			if (num > 1) break;
+		}
+		*p = 0;
+		snprintf(db->dbType,sizeof(db->dbType),"OCI Oracle %s",env);
+		db->dbVer = atoi(env);
+	}
+	if (db->dbVer < 10)
+		db->dbVer = 10;
 
 	if ((env=getSchemaEnvName(db,tmp,"_TRC",NULL)) != NULL) {
 		if (ociStmt(db,(char*)"ALTER SESSION SET SQL_TRACE = TRUE"))

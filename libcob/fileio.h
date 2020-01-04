@@ -219,28 +219,31 @@ typedef struct sql_stmt {
 	void    	*handle;		/* Database 'handle' */
 	char		*text;			/* SQL statement text */
 	int			status;			/* Recent status */
-	unsigned char preped;		/* has been Prepared for execution */
-	unsigned char bound;		/* Variables have been bound */
-	unsigned char params;		/* Parameters are bound */
-	unsigned char iscursor;		/* CURSOR is open */
-	short		bindpos;		/* Last column bound to statement */
+	cob_u32_t	preped:1;		/* has been Prepared for execution */
+	cob_u32_t	bound:1;		/* Variables have been bound */
+	cob_u32_t	params:1;		/* Parameters are bound */
+	cob_u32_t	iscursor:1;		/* CURSOR is open */
+	cob_u32_t	isdesc:1;		/* ORDER DESC */
+	cob_u32_t	forUpdate:1;	/* Has FOR UPDATE */
+	short		bindpos;		/* Last column position bound to statement */
 } SQL_STMT;
 
 /*
  * Holds Database State information
  */
 struct db_state {
-	cob_u32_t	isodbc:1;
-	cob_u32_t	db2:1;
-	cob_u32_t	mssql:1;
-	cob_u32_t	mysql:1;
-	cob_u32_t	isoci:1;
-	cob_u32_t	oracle:1;
-	cob_u32_t	scanForNulls:1;
-	cob_u32_t	autocommit:1;
-	cob_u32_t	isopen:1;
-	cob_u32_t	optFastRead:1;
-	cob_u32_t	attachDbName:1;
+	cob_u32_t	isopen:1;		/* Connected to database */
+	cob_u32_t	isodbc:1;		/* ODBC interface active */
+	cob_u32_t	isoci:1;		/* Oracle Call Interface active */
+	cob_u32_t	oracle:1;		/* DB is Oracle */
+	cob_u32_t	mssql:1;		/* DB is Microsoft SQL Server */
+	cob_u32_t	mysql:1;		/* DB is MySQL (MariaDB) */
+	cob_u32_t	db2:1;			/* Using IBM DB2 (Untested) */
+	cob_u32_t	postgres:1;		/* Using PostgreSQL (Untested) */
+	cob_u32_t	sqlite:1;		/* Using SQLite (Untested) */
+	cob_u32_t	autocommit:1;	/* Running in AUTO COMMIT mode */
+	cob_u32_t	scanForNulls:1;	/* Check for NULL columns returned */
+	cob_u32_t	attachDbName:1;	/* Attach to specific Oracle instance name */
 	 
 	int		dbStatus;			/* Status of last DB call */
 	int		dbFatalStatus;		/* Fatal Status from last DB call */
@@ -256,8 +259,9 @@ struct db_state {
 	char	dbCon[128];			/* Full connect string */
 
 	int		dbVer;				/* Data Base version */
-	int		updatesDone;		/* Updates done since last COMMIT */
+	int		updatesDone;		/* # Updates done since last COMMIT */
 	int		commitInterval;		/* COMMIT every N updates */
+#define BIGCOMMIT	0x7FFFFFF
 	int		intRecWait;			/* Time to wait for record lock */
 	int		nRecWaitTry;		/* Retry counter for lock */
 	int		nMaxRetry;			/* Max retries for lock */

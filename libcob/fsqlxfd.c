@@ -24,9 +24,7 @@
 #include "fileio.h"
 
 #if defined(WITH_ODBC) || defined(WITH_OCI) || defined(WITH_DB) || defined(WITH_LMDB)
-
 #include "defaults.h"
-
 /* Routines in fsqlxfd.c common to all Database interfaces */                        
 
 int
@@ -1711,7 +1709,7 @@ cob_sql_stmt (struct db_state *db, struct file_xfd *fx, char *stmt, int idx, con
 	const char *fmt;
 	int		bufsz,j,k,pos;
 	if (idx >= fx->nkeys) {
-		printf("DBG Problem: idx %d nkeys %d\n",idx,fx->nkeys);
+		cob_runtime_error (_("SQL Index %d incorrect: %d max!"),idx,fx->nkeys);
 		return NULL;
 	}
 	sbuf = NULL;
@@ -1856,11 +1854,15 @@ cob_sql_stmt (struct db_state *db, struct file_xfd *fx, char *stmt, int idx, con
 			strcpy(comma," AND ");
 		}
 	} else {
-		printf("DBG Unknown statement: %.20s\n",stmt);
+		cob_runtime_error (_("Unknown SQL statement: %.20s!"),stmt);
 		return NULL;
 	}
-	if (bufsz > (pos+1))
+	if (strncasecmp(stmt,"SELECT",6) == 0) {
+		/* Leave space for adding ' FOR UPDATE'; 11 bytes */
+		sbuf = cob_realloc (sbuf, (size_t)bufsz, (size_t)pos+12);
+	} else if (bufsz > (pos+1)) {
 		sbuf = cob_realloc (sbuf, (size_t)bufsz, (size_t)pos+1);
+	}
 	sbuf[pos] = 0;
 	cob_sql_dump_stmt (db, sbuf, TRUE);
 	return sbuf;
