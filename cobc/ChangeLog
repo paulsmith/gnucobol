@@ -3,6 +3,14 @@
 
 	* codegen.c (output_stmt): fixed bad check in file related statements
 
+2020-01-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.h, parser.y, tree.h, typeck.c: strengthened ASSIGN syntax checks
+	  (bug #553).
+	* config.def: added new options assign-variable, assign-using-variable,
+	  assign-ext-dyn and assign-disk-from.
+	* config.def: improved assign-clause help.
+
 2020-01-03  Simon Sobisch <simonsobisch@gnu.org>
 
 	* tree.c (cb_name_errmsg), tree.h, typeck.c (cb_emit_move): new function
