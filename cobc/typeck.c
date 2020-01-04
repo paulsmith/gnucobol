@@ -3467,7 +3467,9 @@ cb_validate_program_data (struct cb_program *prog)
 		if (file->assign != NULL) {
 			if (CB_LITERAL_P (file->assign)) {
 				/* ASSIGN TO 'literal' */
-			} else if (CB_REF_OR_FIELD_P (file->assign)) {
+			} else if ((CB_REFERENCE_P (file->assign)
+				    && cb_ref (file->assign) != cb_error_node)
+				   || CB_FIELD_P (file->assign)) {
 				field = CB_FIELD_PTR (file->assign);
 				if (cb_select_working
 					&& field->storage != CB_STORAGE_WORKING
