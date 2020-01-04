@@ -1688,14 +1688,9 @@ cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 		return cb_error_node;
 	}
 
-	if (cfile->flag_ext_assign) {
+	if (cfile->assign_type == CB_ASSIGN_EXT_FILE_NAME_REQUIRED) {
 		return build_external_assignment_name (name);
 	} else {
-		/*
-		  ASSIGN DYNAMIC: assume the word in the ASSIGN is a
-		  variable name. (If no variable is defined with the same name,
-		  we *may* create such a variable later.)
-		*/
 		current_program->reference_list =
 			cb_list_add (current_program->reference_list, name);
 		return name;
@@ -3195,20 +3190,53 @@ create_implicit_assign_dynamic_var (struct cb_program * const prog,
 
 }
 
-/*
-  If an ASSIGN EXTERNAL name does not match any defined variable, define the
-  variable ourselves and issue a warning.
- */
 static void
-create_undeclared_assign_name (struct cb_file * const f,
+process_undefined_assign_name (struct cb_file * const f,
 			       struct cb_program * const prog)
+{
+	cb_tree	assign = f->assign;
+	cb_tree	l;
+	cb_tree	ll;
+
+	if (f->assign_type != CB_ASSIGN_VARIABLE_DEFAULT) {
+		/* An error is emitted later */
+		return;
+	}
+
+	/*
+	  Either create a variable or treat the assign name as an external-file-
+	  name.
+	*/
+	if (cb_implicit_assign_dynamic_var) {
+		cb_verify_x (CB_TREE (f), cb_assign_variable, _("ASSIGN variable"));
+		create_implicit_assign_dynamic_var (prog, assign);
+	} else {
+		/* Remove reference */
+		for (l = prog->reference_list;
+		     CB_VALUE (l) != assign && CB_VALUE (CB_CHAIN (l)) != assign;
+		     l = CB_CHAIN (l));
+		if (CB_VALUE (l) == assign) {
+			prog->reference_list = CB_CHAIN (l);
+		} else {
+			ll = CB_CHAIN (CB_CHAIN (l));
+			cobc_parse_free (CB_CHAIN (l));
+			CB_CHAIN (l) = ll;
+		}
+
+		/* Reinterpret word */
+		f->assign = build_external_assignment_name (assign);
+	}
+}
+
+/* Ensure ASSIGN name refers to a valid identifier */
+static void
+validate_assign_name (struct cb_file * const f,
+		      struct cb_program * const prog)
 {
 	cb_tree	assign = f->assign;
 	cb_tree	x;
 	struct cb_field	*p;
 	unsigned char	*c;
-	cb_tree	l;
-	cb_tree	ll;
 
 	if (!assign) {
 		return;
@@ -3235,34 +3263,19 @@ create_undeclared_assign_name (struct cb_file * const f,
 		return;
 	}
 
-	/* If no data item has the same name as assign */
 	if (CB_WORD_COUNT (assign) == 0) {
-		if (cb_implicit_assign_dynamic_var) {
-			create_implicit_assign_dynamic_var (prog, assign);
-		} else {
-			/* Remove reference */
-			for (l = prog->reference_list;
-			     CB_VALUE (l) != assign && CB_VALUE (CB_CHAIN (l)) != assign;
-			     l = CB_CHAIN (l));
-			if (CB_VALUE (l) == assign) {
-				prog->reference_list = CB_CHAIN (l);
-			} else {
-				ll = CB_CHAIN (CB_CHAIN (l));
-				cobc_parse_free (CB_CHAIN (l));
-				CB_CHAIN (l) = ll;
-			}
-
-			/* Reinterpret word */
-			f->assign = build_external_assignment_name (assign);
-		}
+		process_undefined_assign_name (f, prog);
 	} else {
 		/*
-		  assign is a valid reference, so we can check it's not an
-		  88-level.
+		  We now know we have a variable, so can validate whether it is
+		  is allowed
 		*/
+		if (f->flag_assign_no_keyword) {
+			cb_verify_x (CB_TREE (f), cb_assign_variable, _("ASSIGN variable"));
+		}
+
 		x = cb_ref (assign);
-		if (CB_FIELD_P (x)
-		    && CB_FIELD (x)->level == 88) {
+		if (CB_FIELD_P (x) && CB_FIELD (x)->level == 88) {
 			cb_error_x (assign, _("ASSIGN data item '%s' is invalid"),
 				    CB_NAME (assign));
 		}
@@ -3319,8 +3332,7 @@ cb_validate_program_data (struct cb_program *prog)
 
 	/* Build undeclared assignment names now */
 	for (l = prog->file_list; l; l = CB_CHAIN (l)) {
-		create_undeclared_assign_name (CB_FILE (CB_VALUE (l)),
-					       prog);
+	        validate_assign_name (CB_FILE (CB_VALUE (l)), prog);
 	}
 
 	if (prog->cursor_pos) {

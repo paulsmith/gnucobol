@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2017, 2019 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2017, 2019-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -30,6 +30,7 @@
 #include <limits.h>
 
 #include "cobc.h"
+#include "tree.h"
 
 enum cb_config_type {
 	CB_ANY = 0,
@@ -679,10 +680,10 @@ cb_config_entry (char *buff, const char *fname, const int line)
 		if (strcmp (name, "assign-clause") == 0) {
 		        if ((strcmp (val, "dynamic") == 0)
 			    || (strcmp (val, "mf") == 0)) {
-				cb_assign_type_default = CB_ASSIGN_DYNAMIC;
+				cb_assign_type_default = CB_ASSIGN_VARIABLE_DEFAULT;
 			} else if ((strcmp (val, "external") == 0)
 				   || (strcmp (val, "ibm") == 0)) {
-				cb_assign_type_default = CB_ASSIGN_EXTERNAL;
+				cb_assign_type_default = CB_ASSIGN_EXT_FILE_NAME_REQUIRED;
 			} else {
 				invalid_value (fname, line, name, val, "dynamic, external, mf, ibm", 0, 0);
 				return -1;

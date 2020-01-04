@@ -1025,6 +1025,13 @@ struct cb_alt_key {
 	struct cb_key_component	*component_list;	/* List of fields making up key */
 };
 
+/* How to interpret identifiers in a file's ASSIGN clause */
+enum cb_assign_type {
+	CB_ASSIGN_VARIABLE_DEFAULT,		/* default to ASSIGN variable, where allowed by implicit-assign-dynamic-var */
+	CB_ASSIGN_VARIABLE_REQUIRED,		/* require ASSIGN variable */
+	CB_ASSIGN_EXT_FILE_NAME_REQUIRED	/* require ASSIGN external-file-name */
+};
+
 struct cb_file {
 	struct cb_tree_common	common;			/* Common values */
 	const char		*name;			/* Original name */
@@ -1057,7 +1064,7 @@ struct cb_file {
 	struct cb_alphabet_name	*code_set;		/* CODE-SET */
 	struct cb_list		*code_set_items;	/* CODE-SET FOR items */
 	struct cb_xref		xref;			/* xref elements */
-	char		*sql_name;		/* Table name for ODBC/SQL */
+	char			*sql_name;		/* Table name for ODBC/SQL */
 	int			record_min;		/* RECORD CONTAINS */
 	int			record_max;		/* RECORD CONTAINS */
 	int			optional;		/* OPTIONAL */
@@ -1068,6 +1075,7 @@ struct cb_file {
 	int			special;		/* Special file */
 	int			same_clause;		/* SAME clause */
 	int			max_sql_name_len;		/* Max length of SQL column name */
+	enum cb_assign_type	assign_type;		/* How to interpret ASSIGN clause */
 	unsigned int		flag_finalized	: 1;	/* Is finalized */
 	unsigned int		flag_external	: 1;	/* Is EXTERNAL */
 	unsigned int		flag_ext_assign	: 1;	/* ASSIGN EXTERNAL */
@@ -1083,6 +1091,9 @@ struct cb_file {
 	unsigned int		flag_sql_xfd : 1;		/* Emit the XFD/ddl for this file */
 	unsigned int		flag_sql_trim_prefix : 1;	/* Trim common prefix for SQL column name */
 	unsigned int		flag_sql_trim_dash : 1;		/* Remove dash/underscore from SQL column name */
+	/* Whether the file's ASSIGN is like "ASSIGN word", not "ASSIGN
+           EXTERNAL/DYNAMIC/USING/... word" */
+	unsigned int		flag_assign_no_keyword : 1;
 };
 
 #define CB_FILE(x)	(CB_TREE_CAST (CB_TAG_FILE, struct cb_file, x))

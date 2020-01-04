@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch,
    Edward Hart, Ron Norman, Dave Pitts
 
@@ -178,11 +178,16 @@ enum cb_binary_byteorder_options {
 	CB_BYTEORDER_NATIVE
 };
 
-/* ASSIGN clause interpretation */
-enum cb_assign_clause_options {
-	CB_ASSIGN_MF = 0,	/* Micro Focus compatibility */
-	CB_ASSIGN_IBM,			/* IBM compatibility */
-	CB_ASSIGN_COBOL2002		/* COBOL 2002 standard */
+/* Type of device specified in ASSIGN clause */
+enum cb_assign_device {
+	CB_ASSIGN_NO_DEVICE,
+	CB_ASSIGN_GENERAL_DEVICE,
+	CB_ASSIGN_LINE_SEQ_DEVICE,
+	CB_ASSIGN_DISPLAY_DEVICE,
+	CB_ASSIGN_KEYBOARD_DEVICE,
+	CB_ASSIGN_PRINTER_DEVICE,
+	CB_ASSIGN_PRINTER_1_DEVICE,
+	CB_ASSIGN_PRINT_DEVICE
 };
 
 /* Clauses an elementary screen item is required to have */
@@ -193,12 +198,6 @@ enum cb_screen_clauses_rules {
 	CB_RM_SCREEN_RULES,
 	CB_STD_SCREEN_RULES,
 	CB_XOPEN_SCREEN_RULES
-};
-
-/* How to interpret identifiers in ASSIGN clause */
-enum cb_assign_type {
-	CB_ASSIGN_DYNAMIC,
-	CB_ASSIGN_EXTERNAL
 };
 
 /* Generic text list structure */

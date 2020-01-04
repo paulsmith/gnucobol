@@ -1,4 +1,4 @@
-## Copyright (C) 2014-2019 Free Software Foundation, Inc.
+## Copyright (C) 2014-2020 Free Software Foundation, Inc.
 ## Written by Ron Norman, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -3897,7 +3897,8 @@ AT_DATA([prog.cob], [
        
 ])
 
-AT_CHECK([$COMPILE -std=cobol2002 prog.cob ], [0], [], [prog.cob:40: warning: Duplicate LINE 2 ignored
+AT_CHECK([$COMPILE -std=cobol2002 -fassign-ext-dyn=ok prog.cob ], [0], [],
+[prog.cob:40: warning: Duplicate LINE 2 ignored
 ])
 
 AT_CHECK([DD_INVFILE="./inp_data" DD_REPORT4="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
@@ -4312,7 +4313,7 @@ AT_DATA([progv.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=cobol2002 progv.cob], [0], [],
+AT_CHECK([$COMPILE -std=cobol2002 -fassign-ext-dyn=ok progv.cob], [0], [],
 [progv.cob:39: warning: RW VARYING clause is not implemented
 ])
 
@@ -4408,7 +4409,7 @@ AT_DATA([progl.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=cobol2002 progl.cob], [0], [],
+AT_CHECK([$COMPILE -std=cobol2002 -fassign-ext-dyn=ok progl.cob], [0], [],
 [progl.cob:37: warning: RW VARYING clause is not implemented
 ])
 

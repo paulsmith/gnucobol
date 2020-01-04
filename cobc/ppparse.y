@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2015-2019 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2015-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -755,9 +755,9 @@ set_choice:
 	p[size] = '\0';
 
 	if (!strcasecmp (p, "EXTERNAL")) {
-		fprintf (ppout, "#ASSIGN %d\n", (int)CB_ASSIGN_EXTERNAL);
+		fprintf (ppout, "#ASSIGN %d\n", (int)CB_ASSIGN_EXT_FILE_NAME_REQUIRED);
 	} else if (!strcasecmp (p, "DYNAMIC")) {
-		fprintf (ppout, "#ASSIGN %d\n", (int)CB_ASSIGN_DYNAMIC);
+		fprintf (ppout, "#ASSIGN %d\n", (int)CB_ASSIGN_VARIABLE_DEFAULT);
 	} else {
 		ppp_error_invalid_option ("ASSIGN", p);
 	}	

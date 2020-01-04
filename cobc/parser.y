@@ -227,6 +227,9 @@ static enum tallying_phrase	previous_tallying_phrase;
 static cb_tree			default_rounded_mode;
 static enum key_clause_type	key_type;
 
+static int			ext_dyn_specified;
+static enum cb_assign_device	assign_device;
+ 
 static enum cb_display_type	display_type;
 static int			is_first_display_item;
 static cb_tree			advancing_value;
@@ -4790,90 +4793,127 @@ select_clause:
 
 /* ASSIGN clause */
 
+/*
+  Most cases include a pointless _ext_clause to prevent a shift/reduce error
+*/
 assign_clause:
-  ASSIGN _to_using_varying _ext_clause _line_adv_file assignment_name
+  ASSIGN _to _ext_clause _assign_device_or_line_adv_file literal
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
+	if (ext_dyn_specified) {
+		cb_error (_("EXTERNAL/DYNAMIC cannot be used with literals"));
+	}
+
+	current_file->assign_type = CB_ASSIGN_EXT_FILE_NAME_REQUIRED;
 	current_file->assign = cb_build_assignment_name (current_file, $5);
   }
-| ASSIGN _to_using_varying _ext_clause general_device_name _assignment_name
+| ASSIGN _to _ext_clause _assign_device_or_line_adv_file qualified_word
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
-	if ($5) {
-		current_file->assign = cb_build_assignment_name (current_file, $5);
-	} else {
-		current_file->flag_fileid = 1;
+
+	/* current_file->assign_type is set by _ext_clause */
+	if (!ext_dyn_specified) {
+		current_file->flag_assign_no_keyword = 1;
 	}
+	current_file->assign = cb_build_assignment_name (current_file, $5);
   }
-| ASSIGN _to_using_varying _ext_clause line_seq_device_name _assignment_name
+| ASSIGN _to _ext_clause _assign_device_or_line_adv_file using_or_varying qualified_word
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
-	current_file->organization = COB_ORG_LINE_SEQUENTIAL;
-	if ($5) {
-		current_file->assign = cb_build_assignment_name (current_file, $5);
-	} else {
-		current_file->flag_fileid = 1;
+	if (ext_dyn_specified) {
+		cb_error (_("EXTERNAL/DYNAMIC cannot be used with USING/VARYING"));
 	}
+        cb_verify (cb_assign_using_variable, "ASSIGN USING/VARYING variable");
+
+	current_file->assign_type = CB_ASSIGN_VARIABLE_REQUIRED;
+	current_file->assign = cb_build_assignment_name (current_file, $6);
   }
-| ASSIGN _to_using_varying _ext_clause DISPLAY _assignment_name
+| ASSIGN _to _ext_clause DISK FROM qualified_word
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
-	if ($5) {
-		current_file->assign = cb_build_assignment_name (current_file, $5);
-	} else {
-		current_file->flag_ext_assign = 0;
+	if (ext_dyn_specified) {
+		cb_error (_("EXTERNAL/DYNAMIC cannot be used with DISK FROM"));
+	}
+	cb_verify (cb_assign_disk_from, _("ASSIGN DISK FROM"));
+
+	current_file->assign_type = CB_ASSIGN_VARIABLE_REQUIRED;
+	current_file->assign = cb_build_assignment_name (current_file, $6);
+  }
+| ASSIGN _to _ext_clause assign_device
+  {
+	if (assign_device == CB_ASSIGN_DISPLAY_DEVICE) {
 		current_file->assign =
 			cb_build_alphanumeric_literal ("stdout", (size_t)6);
 		current_file->special = COB_SELECT_STDOUT;
-	}
-  }
-| ASSIGN _to_using_varying _ext_clause KEYBOARD _assignment_name
-  {
-	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
-	if ($5) {
-		current_file->assign = cb_build_assignment_name (current_file, $5);
-	} else {
-		current_file->flag_ext_assign = 0;
+	} else if (assign_device == CB_ASSIGN_KEYBOARD_DEVICE) {
 		current_file->assign =
 			cb_build_alphanumeric_literal ("stdin", (size_t)5);
 		current_file->special = COB_SELECT_STDIN;
-	}
-  }
-| ASSIGN _to_using_varying _ext_clause printer_name _assignment_name
-  {
-	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
-	current_file->organization = COB_ORG_LINE_SEQUENTIAL;
-	if ($5) {
-		current_file->assign = cb_build_assignment_name (current_file, $5);
-	} else {
-		/* RM/COBOL always expects an assignment name here - we ignore this
-		   for PRINTER + PRINTER-1 as ACUCOBOL allows this for using as alias */
-		current_file->flag_ext_assign = 0;
-		if ($4 == cb_int0) {
-			current_file->assign =
-				cb_build_alphanumeric_literal ("PRINTER", (size_t)7);
-		} else if ($4 == cb_int1) {
-			current_file->assign =
-				cb_build_alphanumeric_literal ("PRINTER-1", (size_t)9);
-		} else {
-			current_file->assign =
-				cb_build_alphanumeric_literal ("LPT1", (size_t)4);
-		}
-
+	} else if (assign_device == CB_ASSIGN_PRINTER_DEVICE) {
+		current_file->organization = COB_ORG_LINE_SEQUENTIAL;
+		current_file->assign =
+			cb_build_alphanumeric_literal ("PRINTER", (size_t)7);
+	} else if (assign_device == CB_ASSIGN_PRINTER_1_DEVICE) {
+		current_file->organization = COB_ORG_LINE_SEQUENTIAL;
+		current_file->assign =
+			cb_build_alphanumeric_literal ("PRINTER-1", (size_t)9);
+	} else if (assign_device == CB_ASSIGN_PRINT_DEVICE) {
+		current_file->organization = COB_ORG_LINE_SEQUENTIAL;
+		current_file->assign =
+			cb_build_alphanumeric_literal ("LPT1", (size_t)4);
+	} else if (assign_device == CB_ASSIGN_LINE_SEQ_DEVICE
+		   || assign_device == CB_ASSIGN_GENERAL_DEVICE) {
+		current_file->flag_fileid = 1;
 	}
   }
 ;
 
+_assign_device_or_line_adv_file:
+  /* empty */
+  {
+	assign_device = CB_ASSIGN_NO_DEVICE;
+  }
+| line_adv_file
+  {
+	assign_device = CB_ASSIGN_NO_DEVICE;
+  }
+| assign_device
+;
 
-/* Indicates a print-file */
+assign_device:
+  general_device_name
+  {
+	assign_device = CB_ASSIGN_GENERAL_DEVICE;
+  }
+| line_seq_device_name
+  {
+	current_file->organization = COB_ORG_LINE_SEQUENTIAL;
+	assign_device = CB_ASSIGN_LINE_SEQ_DEVICE;
+  }
+| DISPLAY
+  {
+	assign_device = CB_ASSIGN_DISPLAY_DEVICE;
+  }
+| KEYBOARD
+  {
+	assign_device = CB_ASSIGN_KEYBOARD_DEVICE;
+  }
 /* Hint: R/M-COBOL has PRINTER01 thru PRINTER99 !
          MF-COBOL handles these identical to PRINTER-1,
          with an optional file name PRINTER01 thru PRINTER99
 */
-printer_name:
-  PRINTER	{ $$ = cb_int0; }
-| PRINTER_1	{ $$ = cb_int1; }
-| PRINT		{ $$ = cb_int4; }
+| PRINTER
+  {
+	assign_device = CB_ASSIGN_PRINTER_DEVICE;
+  }
+| PRINTER_1
+  {
+	assign_device = CB_ASSIGN_PRINTER_1_DEVICE;
+  }
+| PRINT
+  {
+	assign_device = CB_ASSIGN_PRINT_DEVICE;
+  }
 ;
 
 /* Indicates no special processing */
@@ -4894,9 +4934,8 @@ line_seq_device_name:
 | OUTPUT
 ;
 
-_line_adv_file:
-  /* empty */
-| LINE ADVANCING _file
+line_adv_file:
+  LINE ADVANCING _file
   {
 	current_file->flag_line_adv = 1;
   }
@@ -4905,29 +4944,31 @@ _line_adv_file:
 _ext_clause:
   /* empty */
   {
-	current_file->flag_ext_assign = cb_assign_type_default == CB_ASSIGN_EXTERNAL;
+	ext_dyn_specified = 0;
+	current_file->assign_type = cb_assign_type_default;
   }
-| EXTERNAL
+| ext_clause
   {
-	current_file->flag_ext_assign = 1;
+	ext_dyn_specified = 1;
+	cb_verify (cb_assign_ext_dyn, _("ASSIGN EXTERNAL/DYNAMIC"));
+  }
+;
+
+ext_clause:
+  EXTERNAL
+  {
+	current_file->assign_type = CB_ASSIGN_EXT_FILE_NAME_REQUIRED;
   }
 | DYNAMIC
+  {
+	current_file->assign_type = CB_ASSIGN_VARIABLE_REQUIRED;
+  }
 ;
 
 assignment_name:
   LITERAL
 | qualified_word
 ;
-
-_assignment_name:
-  /* empty */
-  {
-	$$ = NULL;
-  }
-| LITERAL
-| qualified_word
-;
-
 
 /* ACCESS MODE clause */
 
@@ -18157,7 +18198,6 @@ _terminal:		| TERMINAL ;
 _then:		| THEN ;
 _times:		| TIMES ;
 _to:		| TO ;
-_to_using_varying:	| TO | USING | _to VARYING;
 _up:		| UP ;
 _when:		| WHEN ;
 _when_set_to:	| WHEN SET TO ;
@@ -18183,6 +18223,7 @@ reel_or_unit:		REEL | UNIT ;
 size_or_length:		SIZE | LENGTH ;
 length_of:		LENGTH | LENGTH_OF;
 track_or_tracks:	TRACK | TRACKS ;
+using_or_varying:	USING | VARYING ;
 
 /* Mandatory R/W keywords */
 detail_keyword:		DETAIL | DE ;

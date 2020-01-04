@@ -511,6 +511,10 @@ test.conf: missing definitions:
 	no definition of 'depending-on-not-fixed'
 	no definition of 'binary-sync-clause'
 	no definition of 'nonnumeric-with-numeric-group-usage'
+	no definition of 'assign-variable'
+	no definition of 'assign-using-variable'
+	no definition of 'assign-ext-dyn'
+	no definition of 'assign-disk-from'
 ])
 
 AT_CLEANUP
