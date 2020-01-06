@@ -953,7 +953,9 @@ cob_load_xfd (cob_file *fl, char *alt_name, int indsize)
 	ncols = lncols = lndata = 0;
 	if (indsize < 4)
 		indsize = sizeof(long);
-	if ((sdir = getenv("COB_SCHEMA_DIR")) == NULL)
+	if (fl->xfdschema != NULL)
+		sdir = (char*)fl->xfdschema;
+	else if ((sdir = getenv("COB_SCHEMA_DIR")) == NULL)
 		sdir = (char*)COB_SCHEMA_DIR;
 	if (alt_name != NULL)
 		fname = alt_name;
@@ -962,8 +964,8 @@ cob_load_xfd (cob_file *fl, char *alt_name, int indsize)
 		fname = (char*)fl->xfdname;
 	else
 		fname = (char*)fl->select_name;
-	k = sprintf (xfdbuf, "%s%s",sdir,SLASH_STR);
-	for(j=0; fname[j] != 0; j++)
+	k = snprintf (xfdbuf,sizeof(xfdbuf)-4,"%s%s",sdir,SLASH_STR);
+	for(j=0; fname[j] != 0 && k < (sizeof(xfdbuf)-4); j++)
 		xfdbuf[k++] = fname[j];
 	strcpy(tblname,fname);
 	strcpy(&xfdbuf[k],".xd");
@@ -1703,7 +1705,13 @@ bld_where (struct db_state *db, struct file_xfd *fx, int idx, char *cond, int po
  * Build SQL Statement and return as malloced string
  */
 char *
-cob_sql_stmt (struct db_state *db, struct file_xfd *fx, char *stmt, int idx, const char *cond)
+cob_sql_stmt (
+	struct db_state *db, 
+	struct file_xfd *fx, 
+	char	*stmt, 
+	int		idx, 
+	const char *cond,
+	int		forUpdate)
 {
 	char	*sbuf,comma[8];
 	const char *fmt;
@@ -1738,6 +1746,8 @@ cob_sql_stmt (struct db_state *db, struct file_xfd *fx, char *stmt, int idx, con
 
 		bufsz = 16 + strlen(stmt) + fx->lnselect + (fx->key[idx]->lncols * 3);
 		bufsz += (fx->key[idx]->ncols * 20);
+		if (forUpdate)
+			bufsz += 16;
 		if (strcmp(cond,"<") == 0
 		 || strcmp(cond,"<=") == 0
 		 || strcmp(cond,">") == 0
@@ -1784,6 +1794,8 @@ cob_sql_stmt (struct db_state *db, struct file_xfd *fx, char *stmt, int idx, con
 			pos += sprintf(&sbuf[pos],"%s%s%s",comma,fx->map[k].colname,fmt);
 			strcpy(comma,",");
 		}
+		if (forUpdate) 
+			pos += sprintf(&sbuf[pos]," FOR UPDATE");
 		DEBUG_TRACE("db",("Build %s %s Index %d\n",stmt,cond,idx));
 
 	} else if (strcasecmp(stmt,"INSERT") == 0) {
@@ -1866,6 +1878,22 @@ cob_sql_stmt (struct db_state *db, struct file_xfd *fx, char *stmt, int idx, con
 	sbuf[pos] = 0;
 	cob_sql_dump_stmt (db, sbuf, TRUE);
 	return sbuf;
+}
+
+int 
+cob_sql_for_update (cob_file *f, int read_opts)
+{
+	int		lmode = 0;
+	if (read_opts & COB_READ_LOCK) {
+		lmode = TRUE;
+	} else if (read_opts & COB_READ_WAIT_LOCK) {
+		lmode = TRUE;		
+	}
+	if ((read_opts & COB_READ_IGNORE_LOCK)
+	 || (read_opts & COB_READ_NO_LOCK) ) {
+		lmode = FALSE;
+	}
+	return lmode;
 }
 
 /*

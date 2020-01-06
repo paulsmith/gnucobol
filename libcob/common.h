@@ -1512,6 +1512,7 @@ typedef struct __cob_file {
 
 	struct __fcd3		*fcd;			/* FCD created via SET ... TO ADDRESS OF FH--FCD */
 	const char			*xfdname;		/* Name for SQL table */
+	const char			*xfdschema;		/* Override of COB_SCHEMA_DIR for this file */
 } cob_file;
 
 

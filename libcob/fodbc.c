@@ -1114,6 +1114,19 @@ join_environment (cob_file_api *a)
 		}
 	}
 	db->isopen = TRUE;
+
+	/* Default to AUTO COMMIT ON */
+	if (db->mysql) {
+		odbcStmt (db, (char*)"SET autocommit=1");
+	} else {
+		if(chkSts(db,(char*)"AUTO COMMIT ON",db->dbDbcH,
+			SQLSetConnectAttr(db->dbDbcH,SQL_ATTR_AUTOCOMMIT,
+										(SQLPOINTER)SQL_AUTOCOMMIT_ON,SQL_IS_UINTEGER))) {
+			return;
+		}
+	}
+	DEBUG_LOG("db",("AutoCommit is ON!\n"));
+	db->autocommit = TRUE;
 }
 
 /* Delete file */
@@ -1214,30 +1227,8 @@ odbc_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 		if (db->dbStatus != db->dbStsOk) {
 			return COB_STATUS_30_PERMANENT_ERROR;
 		}
-		if (db->mysql) {
-			odbcStmt (db, (char*)"SET autocommit=1");
-		} else {
-			if(chkSts(db,(char*)"AUTO COMMIT ON",db->dbDbcH,
-				SQLSetConnectAttr(db->dbDbcH,SQL_ATTR_AUTOCOMMIT,
-											(SQLPOINTER)SQL_AUTOCOMMIT_ON,SQL_IS_UINTEGER))) {
-				break;
-			}
-			DEBUG_LOG("db",("AutoCommit is ON!\n"));
-		}
-		db->autocommit = TRUE;
 		break;
 	case COB_OPEN_I_O:
-		if (db->mysql) {
-			odbcStmt (db, (char*)"SET autocommit=1");
-		} else {
-			if(chkSts(db,(char*)"AUTO COMMIT ON",db->dbDbcH,
-				SQLSetConnectAttr(db->dbDbcH,SQL_ATTR_AUTOCOMMIT,
-											(SQLPOINTER)SQL_AUTOCOMMIT_ON,SQL_IS_UINTEGER))) {
-				break;
-			}
-			DEBUG_LOG("db",("AutoCommit is ON!\n"));
-		}
-		db->autocommit = TRUE;
 	case COB_OPEN_INPUT:
 	case COB_OPEN_EXTEND:
 #ifdef COB_DEBUG_LOG
@@ -1264,12 +1255,6 @@ odbc_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const i
 	if ((f->share_mode & COB_SHARE_NO_OTHER)
 	 || (f->lock_mode & COB_FILE_EXCLUSIVE) ) {
 		p->lmode = LEXCLLOCK;
-	} else if (!f->lock_mode) {
-		if (mode != COB_OPEN_INPUT) {
-			p->lmode = LEXCLLOCK;
-		} else {
-			p->lmode = LMANULOCK;
-		}
 	} else if ((f->lock_mode & COB_LOCK_AUTOMATIC) && mode != COB_OPEN_INPUT) {
 		p->lmode = LAUTOLOCK;
 	} else {
@@ -1396,7 +1381,7 @@ odbc_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 	switch (cond) {
 	case COB_EQ:
 		if (fx->key[ky]->where_eq.text == NULL) {
-			fx->key[ky]->where_eq.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="=");
+			fx->key[ky]->where_eq.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="=",0);
 		}
 		fx->start = &fx->key[ky]->where_eq;
 		p->isdesc = FALSE;
@@ -1404,7 +1389,7 @@ odbc_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 		break;
 	case COB_GE:
 		if (fx->key[ky]->where_ge.text == NULL) {
-			fx->key[ky]->where_ge.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type=">=");
+			fx->key[ky]->where_ge.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type=">=",0);
 		}
 		fx->start = &fx->key[ky]->where_ge;
 		p->isdesc = FALSE;
@@ -1412,7 +1397,7 @@ odbc_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 		break;
 	case COB_GT:
 		if (fx->key[ky]->where_gt.text == NULL) {
-			fx->key[ky]->where_gt.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type=">");
+			fx->key[ky]->where_gt.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type=">",0);
 		}
 		fx->start = &fx->key[ky]->where_gt;
 		p->isdesc = FALSE;
@@ -1420,7 +1405,7 @@ odbc_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 		break;
 	case COB_LE:
 		if (fx->key[ky]->where_le.text == NULL) {
-			fx->key[ky]->where_le.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="<=");
+			fx->key[ky]->where_le.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="<=",0);
 		}
 		fx->start = &fx->key[ky]->where_le;
 		p->isdesc = TRUE;
@@ -1428,7 +1413,7 @@ odbc_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 		break;
 	case COB_LT:
 		if (fx->key[ky]->where_lt.text == NULL) {
-			fx->key[ky]->where_lt.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="<");
+			fx->key[ky]->where_lt.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="<",0);
 		}
 		fx->start = &fx->key[ky]->where_lt;
 		p->isdesc = TRUE;
@@ -1436,7 +1421,7 @@ odbc_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 		break;
 	case COB_NE:
 		if (fx->key[ky]->where_ne.text == NULL) {
-			fx->key[ky]->where_ne.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="!");
+			fx->key[ky]->where_ne.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="!",0);
 		}
 		fx->start = &fx->key[ky]->where_ne;
 		p->isdesc = TRUE;
@@ -1444,7 +1429,7 @@ odbc_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 		break;
 	case COB_FI:
 		if (fx->key[ky]->where_fi.text == NULL) {
-			fx->key[ky]->where_fi.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="*");
+			fx->key[ky]->where_fi.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="*",0);
 		}
 		fx->start = &fx->key[ky]->where_fi;
 		p->isdesc = FALSE;
@@ -1452,7 +1437,7 @@ odbc_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 		break;
 	case COB_LA:
 		if (fx->key[ky]->where_la.text == NULL) {
-			fx->key[ky]->where_la.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="$");
+			fx->key[ky]->where_la.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, type="$",0);
 		}
 		fx->start = &fx->key[ky]->where_la;
 		p->isdesc = TRUE;
@@ -1496,23 +1481,15 @@ odbc_read (cob_file_api *a, cob_file *f, cob_field *key, const int read_opts)
 	fx = p->fx;
 	f->curkey = ky;
 	p->startcond = -1;
-	if (read_opts & COB_READ_LOCK) {
-		p->lmode = LEXCLLOCK;
-	} else if (read_opts & COB_READ_WAIT_LOCK) {
-		if (f->retry_mode == 0
-		|| (f->retry_mode & COB_RETRY_FOREVER)) {
-			p->lmode = LEXCLLOCK;
-		} else {
-			p->lmode = LEXCLLOCK;
-		}
-	} else if ((f->lock_mode & COB_LOCK_AUTOMATIC)
-		&& (f->open_mode != COB_OPEN_INPUT) ) {
-		p->lmode = LAUTOLOCK;
-	}
+	p->lmode = cob_sql_for_update (f, read_opts);
 	if (fx->start)
 		odbc_close_stmt (fx->start);
 	if (fx->key[ky]->where_eq.text == NULL) {
-		fx->key[ky]->where_eq.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, "=");
+		fx->key[ky]->where_eq.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, "=", p->lmode);
+	} else if (p->lmode != fx->key[ky]->where_eq.forUpdate) {
+		cob_free (fx->key[ky]->where_eq.text);
+		fx->key[ky]->where_eq.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, "=", p->lmode);
+		fx->key[ky]->where_eq.forUpdate = p->lmode;
 	}
 	fx->start = &fx->key[ky]->where_eq;
 	odbc_close_stmt (fx->start);
@@ -1571,12 +1548,13 @@ odbc_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	if (f->curkey < 0)
 		f->curkey = 0;
 	ky = f->curkey;
+	p->lmode = cob_sql_for_update (f, read_opts);
 	switch (read_opts & COB_READ_MASK) {
 	default:
     case COB_READ_NEXT:                 
 		if (p->startcond != COB_GT) {
 			if (fx->key[ky]->where_gt.text == NULL) {
-				fx->key[ky]->where_gt.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, ">");
+				fx->key[ky]->where_gt.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, ">", p->lmode);
 			}
 			fx->start = &fx->key[ky]->where_gt;
 			odbc_close_stmt (fx->start);
@@ -1608,7 +1586,7 @@ odbc_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	case COB_READ_PREVIOUS:
 		if (p->startcond != COB_LT) {
 			if (fx->key[ky]->where_lt.text == NULL) {
-				fx->key[ky]->where_lt.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, "<");
+				fx->key[ky]->where_lt.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, "<", p->lmode);
 			}
 			fx->start = &fx->key[ky]->where_lt;
 			odbc_close_stmt (fx->start);
@@ -1639,7 +1617,7 @@ odbc_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 		break;
 	case COB_READ_FIRST:
 		if (fx->key[ky]->where_fi.text == NULL) {
-			fx->key[ky]->where_fi.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, "*");
+			fx->key[ky]->where_fi.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, "*", p->lmode);
 		}
 		fx->start = &fx->key[ky]->where_fi;
 		odbc_close_stmt (fx->start);
@@ -1669,7 +1647,7 @@ odbc_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 		break;
 	case COB_READ_LAST:
 		if (fx->key[ky]->where_fi.text == NULL) {
-			fx->key[ky]->where_fi.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, "$");
+			fx->key[ky]->where_fi.text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, "$", p->lmode);
 		}
 		fx->start = &fx->key[ky]->where_fi;
 		odbc_close_stmt (fx->start);
@@ -1720,7 +1698,7 @@ odbc_write (cob_file_api *a, cob_file *f, const int opt)
 	p = f->file;
 	fx = p->fx;
 	if (fx->insert.text == NULL) {
-		fx->insert.text = cob_sql_stmt (db, fx, (char*)"INSERT", 0, NULL);
+		fx->insert.text = cob_sql_stmt (db, fx, (char*)"INSERT", 0, NULL, 0);
 	}
 
 	cob_file_to_xfd (db, fx, f);
@@ -1767,7 +1745,7 @@ odbc_delete (cob_file_api *a, cob_file *f)
 	p = f->file;
 	fx = p->fx;
 	if (fx->delete.text == NULL) {
-		fx->delete.text = cob_sql_stmt (db, fx, (char*)"DELETE", 0, NULL);
+		fx->delete.text = cob_sql_stmt (db, fx, (char*)"DELETE", 0, NULL, 0);
 	}
 
 	cob_index_to_xfd (db, fx, f, 0);
@@ -1820,7 +1798,7 @@ odbc_rewrite (cob_file_api *a, cob_file *f, const int opt)
 	p = f->file;
 	fx = p->fx;
 	if (fx->update.text == NULL) {
-		fx->update.text = cob_sql_stmt (db, fx, (char*)"UPDATE", 0, NULL);
+		fx->update.text = cob_sql_stmt (db, fx, (char*)"UPDATE", 0, NULL, 0);
 	}
 
 	cob_file_to_xfd (db, fx, f);

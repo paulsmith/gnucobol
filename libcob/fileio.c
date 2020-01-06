@@ -40,6 +40,7 @@
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
 
+#include "defaults.h"
 #include "fileio.h"
 #ifdef HAVE_DLFCN_H
 #if defined(WITH_CISAM) || defined(WITH_DISAM) || defined(WITH_VBISAM)
@@ -1078,7 +1079,7 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 {
 	int		i,j,settrue,ivalue,nkeys,keyn,xret,idx;
 	unsigned int	maxrecsz;
-	char	option[32],value[256];
+	char	option[64],value[COB_FILE_BUFF];
 
 	if (ret)
 		*ret = 0;
@@ -1137,6 +1138,15 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 					}
 					value[j] = 0;
 					if(defstr[i] == '"') i++;
+				} else if(defstr[i] == '\'') {
+					i++;
+					for(j=0; j < sizeof(value)-1 
+						&& defstr[i] != '\''
+						&& defstr[i] != 0; ) {	/* Collect complete option */
+						value[j++] = defstr[i++];
+					}
+					value[j] = 0;
+					if(defstr[i] == '\'') i++;
 				} else {
 					for(j=0; j < sizeof(value)-1 && !isspace(defstr[i])
 						&& defstr[i] != ','
@@ -1294,6 +1304,24 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 											value,file_open_env);
 					}
 				}
+				continue;
+			}
+			if(strcasecmp(option,"schema") == 0) {
+#ifdef	_WIN32
+				if (value[0] == '\\'
+				 || value[1] == ':') {
+#else
+				if (value[0] == '/') {
+#endif
+					f->xfdschema = cob_strdup (value);
+				} else {
+					f->xfdschema = cob_cache_malloc (strlen(value) + strlen(COB_SCHEMA_DIR) + 8);
+					sprintf(f->xfdschema, "%s%c%s",COB_SCHEMA_DIR,SLASH_CHAR,value);
+				}
+				continue;
+			}
+			if(strcasecmp(option,"table") == 0) {
+				f->xfdname = cob_strdup (value);
 				continue;
 			}
 			if(strcasecmp(option,"retry_forever") == 0) {
