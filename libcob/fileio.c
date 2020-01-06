@@ -1309,7 +1309,8 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 			if(strcasecmp(option,"schema") == 0) {
 #ifdef	_WIN32
 				if (value[0] == '\\'
-				 || value[1] == ':') {
+				 || value[1] == ':'
+				 || value[0] == '/') {
 #else
 				if (value[0] == '/') {
 #endif
