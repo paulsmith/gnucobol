@@ -1316,7 +1316,7 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 					f->xfdschema = cob_strdup (value);
 				} else {
 					f->xfdschema = cob_cache_malloc (strlen(value) + strlen(COB_SCHEMA_DIR) + 8);
-					sprintf(f->xfdschema, "%s%c%s",COB_SCHEMA_DIR,SLASH_CHAR,value);
+					sprintf((char*)f->xfdschema, "%s%c%s",COB_SCHEMA_DIR,SLASH_CHAR,value);
 				}
 				continue;
 			}
