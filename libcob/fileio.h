@@ -219,12 +219,12 @@ typedef struct sql_stmt {
 	void    	*handle;		/* Database 'handle' */
 	char		*text;			/* SQL statement text */
 	int			status;			/* Recent status */
+	int			readopts;		/* Recent status */
 	cob_u32_t	preped:1;		/* has been Prepared for execution */
 	cob_u32_t	bound:1;		/* Variables have been bound */
 	cob_u32_t	params:1;		/* Parameters are bound */
 	cob_u32_t	iscursor:1;		/* CURSOR is open */
 	cob_u32_t	isdesc:1;		/* ORDER DESC */
-	cob_u32_t	forUpdate:1;	/* Has FOR UPDATE */
 	short		bindpos;		/* Last column position bound to statement */
 } SQL_STMT;
 
@@ -237,7 +237,9 @@ struct db_state {
 	cob_u32_t	isoci:1;		/* Oracle Call Interface active */
 	cob_u32_t	oracle:1;		/* DB is Oracle */
 	cob_u32_t	mssql:1;		/* DB is Microsoft SQL Server */
-	cob_u32_t	mysql:1;		/* DB is MySQL (MariaDB) */
+	cob_u32_t	mssqlnfu:1;		/* DB is SQL Server does not accept FOR UPDATE */
+	cob_u32_t	mysql:1;		/* DB is MySQL */
+	cob_u32_t	mariadb:1;		/* DB is MySQL (MariaDB) */
 	cob_u32_t	db2:1;			/* Using IBM DB2 (Untested) */
 	cob_u32_t	postgres:1;		/* Using PostgreSQL (Untested) */
 	cob_u32_t	sqlite:1;		/* Using SQLite (Untested) */
@@ -415,8 +417,8 @@ COB_HIDDEN void 	cob_dump_xfd (struct file_xfd *fx, FILE *fo);
 COB_HIDDEN void 	cob_load_ddl (struct db_state  *db, struct file_xfd *fx);
 COB_HIDDEN char *	getSchemaEnvName (struct db_state *db, char *envnm, const char *suf, char *out);
 COB_HIDDEN void 	logSchemaEnvName (struct db_state *db, const char *suffix);
-COB_HIDDEN int 		cob_sql_for_update (cob_file *, int);
-COB_HIDDEN char *	cob_sql_stmt (struct db_state *, struct file_xfd *, char *, int, const char *, int);
+COB_HIDDEN char *	cob_sql_stmt (struct db_state *, struct file_xfd *, char *, int, int, int);
+COB_HIDDEN SQL_STMT *	cob_sql_select (struct db_state *, struct file_xfd *, int, int, int, void (*freeit)());
 COB_HIDDEN void 	cob_xfd_to_file (struct db_state *db, struct file_xfd *fx, cob_file *fl);
 COB_HIDDEN void 	cob_file_to_xfd (struct db_state *db, struct file_xfd *fx, cob_file *fl);
 COB_HIDDEN void		cob_index_to_xfd (struct db_state *db, struct file_xfd *fx, cob_file *fl, int idx);

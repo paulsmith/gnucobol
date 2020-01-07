@@ -7822,6 +7822,9 @@ output_stmt (cb_tree x)
 				output (";");
 				output_newline ();
 				retry_mode = "COB_RETRY_SECONDS";
+			} else
+			if (p->flag_advancing_lock) {
+				retry_mode = "COB_ADVANCING_LOCK";
 			} else {
 				retry_mode = "0";
 			}

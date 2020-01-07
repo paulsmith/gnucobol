@@ -13911,7 +13911,7 @@ ignoring_lock:
 advancing_lock_or_retry:
   ADVANCING _on LOCK
   {
-	CB_PENDING ("ADVANCING ON LOCK");
+	current_statement->flag_advancing_lock = 1;
   }
 | retry_phrase
 ;
@@ -13924,7 +13924,6 @@ _retry_phrase:
 retry_phrase:
   retry_options
   {
-	CB_PENDING ("RETRY");
 	cobc_cs_check = 0;
   }
 ;

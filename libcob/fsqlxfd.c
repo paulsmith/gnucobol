@@ -1666,8 +1666,10 @@ logSchemaEnvName(
 	return;
 }
 
+static const char *condstr[9] = {"?","=","<","<=",">",">=","<>",">","<"};
+
 static int
-bld_where (struct db_state *db, struct file_xfd *fx, int idx, char *cond, int pos, char *sbuf)
+bld_where (struct db_state *db, struct file_xfd *fx, int idx, int cond, int pos, char *sbuf)
 {
 	int		j,k,lparen;
 	char	andstr[12], orstr[12];
@@ -1677,8 +1679,8 @@ bld_where (struct db_state *db, struct file_xfd *fx, int idx, char *cond, int po
 		fmt = "%s%s %s ?";
 	else
 		fmt = "%s%s %s :%d";
-	if (strcmp(cond,">=") == 0
-	 || strcmp(cond,">") == 0) 
+	if (cond == COB_GE
+	 || cond == COB_GT)
 		rel = ">";
 	else
 		rel = "<";
@@ -1693,7 +1695,7 @@ bld_where (struct db_state *db, struct file_xfd *fx, int idx, char *cond, int po
 		strcpy(andstr," AND (");
 	}
 	k = fx->key[idx]->col[j];
-	pos += sprintf(&sbuf[pos],fmt,andstr,fx->map[k].colname,cond,j+1);
+	pos += sprintf(&sbuf[pos],fmt,andstr,fx->map[k].colname,condstr[cond],j+1);
 	while (lparen >= 0) {
 		pos += sprintf(&sbuf[pos],")");
 		lparen--;
@@ -1710,12 +1712,16 @@ cob_sql_stmt (
 	struct file_xfd *fx, 
 	char	*stmt, 
 	int		idx, 
-	const char *cond,
-	int		forUpdate)
+	int 	cond,
+	int		read_opts)
 {
 	char	*sbuf,comma[8];
 	const char *fmt;
+	cob_file	*f = fx->fl;
 	int		bufsz,j,k,pos;
+	int		lmode = FALSE;
+	int		waitsecs = 0;
+
 	if (idx >= fx->nkeys) {
 		cob_runtime_error (_("SQL Index %d incorrect: %d max!"),idx,fx->nkeys);
 		return NULL;
@@ -1727,6 +1733,34 @@ cob_sql_stmt (
 		fmt = "%s%s %s :%d";
 	k = 0;
 	if (strncasecmp(stmt,"SELECT",6) == 0) {
+		if (f->retry_mode == COB_RETRY_SECONDS) {
+			if (f->retry_times > 0)
+				waitsecs = f->retry_seconds * f->retry_times;
+			else
+				waitsecs = f->retry_seconds;
+		}
+		if ((f->retry_mode & COB_RETRY_FOREVER)) {
+			waitsecs = 0;
+		} else
+		if ((f->retry_mode & COB_RETRY_SECONDS)) {
+			waitsecs = f->retry_seconds;
+		} else
+		if ((f->retry_mode & COB_RETRY_TIMES)) {
+			waitsecs = f->retry_times / COB_RETRY_PER_SECOND;
+			if (waitsecs <= 0)
+				waitsecs = 1;
+		} else
+		if ((f->retry_mode & COB_RETRY_NEVER)) {
+			waitsecs = -1;
+		}
+		if ((read_opts & COB_READ_LOCK)
+		 || (read_opts & COB_READ_WAIT_LOCK)) {
+			lmode = TRUE;		
+		}
+		if ((read_opts & COB_READ_IGNORE_LOCK)
+		 || (read_opts & COB_READ_NO_LOCK) ) {
+			lmode = FALSE;
+		}
 		db->dbStatus = 0;
 		if (fx->select == NULL) {			/* Build list of Column Names */
 			bufsz = 8 + fx->lncols + fx->ncols;
@@ -1746,44 +1780,52 @@ cob_sql_stmt (
 
 		bufsz = 16 + strlen(stmt) + fx->lnselect + (fx->key[idx]->lncols * 3);
 		bufsz += (fx->key[idx]->ncols * 20);
-		if (forUpdate)
-			bufsz += 16;
-		if (strcmp(cond,"<") == 0
-		 || strcmp(cond,"<=") == 0
-		 || strcmp(cond,">") == 0
-		 || strcmp(cond,">=") == 0)
+		if (lmode)
+			bufsz += 32;
+		if (cond == COB_GT
+		 || cond == COB_GE
+		 || cond == COB_LT
+		 || cond == COB_LE)
 			bufsz += (fx->key[idx]->ncols * 12);
 		sbuf = cob_malloc (bufsz + 1);
 		strcpy(comma,"");
 		pos = sprintf(sbuf,"%s %s FROM %s",stmt,fx->select,fx->tablename);
-		if (strcmp(cond,"*") != 0
-		 && strcmp(cond,"$") != 0)
+		if (db->mssql) {
+			if (lmode
+			 && db->mssqlnfu) 
+				pos += sprintf(&sbuf[pos]," WITH (XLOCK, ROWLOCK)");
+			if ((f->retry_mode & COB_ADVANCING_LOCK)) {
+				pos += sprintf(&sbuf[pos]," WITH (READPAST)");
+			} else if (waitsecs > 0) {
+			} else if (waitsecs < 0) {
+				pos += sprintf(&sbuf[pos]," WITH (NOWAIT)");
+			} 
+		}
+		if (cond != COB_FI
+		 && cond != COB_LA)
 			pos += sprintf(&sbuf[pos]," WHERE ");
 		strcpy(comma,"");
-		/* cond is one of =, >=, >, <=, <
-		 * or  *  for first in ascending order
-		 * or  $  for last in descending order
-		 */
-		if (cond == NULL
-		 || strcmp(cond,"=") == 0) {
+		if (cond == 0
+		 || cond == COB_EQ) {
 			for (j=0; j < fx->key[idx]->ncols; j++) {
 				k = fx->key[idx]->col[j];
 				pos += sprintf(&sbuf[pos],fmt,comma,fx->map[k].colname,"=",j+1);
 				strcpy(comma," AND ");
 			}
-		} else if (strcmp(cond,"!") == 0) {
+		} else if (cond == COB_NE) {
 			for (j=0; j < fx->key[idx]->ncols; j++) {
 				k = fx->key[idx]->col[j];
 				pos += sprintf(&sbuf[pos],fmt,comma,fx->map[k].colname,"<>", j+1);
 				strcpy(comma," OR ");
 			}
-		} else if (strcmp(cond,"*") != 0) {
+		} else if (cond != COB_FI
+				&& cond != COB_LA) {
 			k = pos;
-			pos = bld_where (db, fx, idx, (char*)cond, pos, sbuf);
+			pos = bld_where (db, fx, idx, cond, pos, sbuf);
 		}
-		if (strcmp(cond,"<") == 0
-		 || strcmp(cond,"<=") == 0
-		 || strcmp(cond,"$") == 0)
+		if (cond == COB_LT
+		 || cond == COB_LE
+		 || cond == COB_LA)
 			fmt = " DESC";
 		else 
 			fmt = "";
@@ -1794,9 +1836,31 @@ cob_sql_stmt (
 			pos += sprintf(&sbuf[pos],"%s%s%s",comma,fx->map[k].colname,fmt);
 			strcpy(comma,",");
 		}
-		if (forUpdate) 
-			pos += sprintf(&sbuf[pos]," FOR UPDATE");
-		DEBUG_TRACE("db",("Build %s %s Index %d\n",stmt,cond,idx));
+		if (lmode) {
+			if (!db->mssqlnfu) 
+				pos += sprintf(&sbuf[pos]," FOR UPDATE");
+		}
+		if (db->mysql) {
+			if ((f->retry_mode & COB_ADVANCING_LOCK)) {
+				if (!db->mariadb) 
+					pos += sprintf(&sbuf[pos]," SKIP LOCKED");
+			} else if (waitsecs > 0) {
+				if (db->mariadb) 
+					pos += sprintf(&sbuf[pos]," WAIT %d",waitsecs);
+			} else if (waitsecs < 0) {
+				if (db->mariadb) 
+					pos += sprintf(&sbuf[pos]," NOWAIT");
+			} 
+		} else if (db->isoci) {
+			if ((f->retry_mode & COB_ADVANCING_LOCK)) {
+				pos += sprintf(&sbuf[pos]," SKIP LOCKED");
+			} else if (waitsecs > 0) {
+				pos += sprintf(&sbuf[pos]," WAIT %d",waitsecs);
+			} else if (waitsecs < 0) {
+				pos += sprintf(&sbuf[pos]," NOWAIT");
+			} 
+		}
+		DEBUG_TRACE("db",("Build %s %d Index %d\n",stmt,cond,idx));
 
 	} else if (strcasecmp(stmt,"INSERT") == 0) {
 		idx = 0;
@@ -1880,20 +1944,51 @@ cob_sql_stmt (
 	return sbuf;
 }
 
-int 
-cob_sql_for_update (cob_file *f, int read_opts)
+SQL_STMT *
+cob_sql_select ( 
+	struct db_state *db, 
+	struct file_xfd *fx, 
+	int		ky, 
+	int		cond,
+	int		read_opts,
+	void  (*freeit)( SQL_STMT *))
 {
-	int		lmode = 0;
-	if (read_opts & COB_READ_LOCK) {
-		lmode = TRUE;
-	} else if (read_opts & COB_READ_WAIT_LOCK) {
-		lmode = TRUE;		
+	SQL_STMT *s;
+
+	if (cond == COB_EQ)
+		s = &fx->key[ky]->where_eq;
+	else if (cond == COB_GE)
+		s = &fx->key[ky]->where_ge;
+	else if (cond == COB_LE)
+		s = &fx->key[ky]->where_le;
+	else if (cond == COB_LT)
+		s = &fx->key[ky]->where_lt;
+	else if (cond == COB_GT)
+		s = &fx->key[ky]->where_gt;
+	else if (cond == COB_FI)
+		s = &fx->key[ky]->where_fi;
+	else if (cond == COB_LA)
+		s = &fx->key[ky]->where_la;
+	else if (cond == COB_NE)
+		s = &fx->key[ky]->where_ne;
+	else
+		return NULL;
+
+	if (s->text == NULL) {
+		s->text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, cond, read_opts);
+	} else if (s->readopts != read_opts) {
+		DEBUG_LOG ("db",("Free %d Statement\n",cond));
+		freeit (s);
+		s->text = cob_sql_stmt (db, fx, (char*)"SELECT", ky, cond, read_opts);
 	}
-	if ((read_opts & COB_READ_IGNORE_LOCK)
-	 || (read_opts & COB_READ_NO_LOCK) ) {
-		lmode = FALSE;
-	}
-	return lmode;
+	s->readopts = read_opts;
+	if (cond == COB_LT
+	 || cond == COB_LE
+	 || cond == COB_LA) 
+		s->isdesc = TRUE;
+	else
+		s->isdesc = FALSE;
+	return s;
 }
 
 /*

@@ -1,4 +1,9 @@
 
+2020-01-02  Ron Norman <rjn@inglenet.com>
+
+	* parser.y: Reenable READ ADVANCING/RETRY/IGNORE clauses
+	* codegen.c: Add code back for READ ADVANCING
+
 2020-01-04  Simon Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (output_stmt): fixed bad check in file related statements
