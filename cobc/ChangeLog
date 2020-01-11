@@ -1,4 +1,13 @@
 
+2020-01-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_module_init): split module initialization into
+	  calling of new generated function which includes every static reference
+	  and the "local" part that references program-local variables,
+	  fixing #611 RECURSIVE programs without correct source references
+	* codegen.c (output_function_prototypes, output_internal_function):
+	  generate module initialization function and invoke it
+
 2020-01-02  Ron Norman <rjn@inglenet.com>
 
 	* parser.y: Reenable READ ADVANCING/RETRY/IGNORE clauses

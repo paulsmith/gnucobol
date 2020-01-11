@@ -10218,12 +10218,27 @@ output_module_register_init (cb_tree reg, const char *name)
 	output_newline ();
 }
 
+/* outputs function for setting variables in the module structure
+   that reference static values */
 static void
-output_module_init (struct cb_program *prog)
+output_module_init_function (struct cb_program *prog)
 {
-	int	opt;
-#if	0	/* Module comments, maybe extend and only include if
-			   explicit requested via flag (auto-active for C generation)? */
+	output_indent_level = 0;
+	if (!prog->nested_level) {
+		output_line ("/* Initialize module structure for %s */", 
+			prog->orig_program_id);
+		output_line ("static void %s_module_init (cob_module *module)",
+			prog->program_id);
+	} else {
+		output_line ("/* Initialize module structure for %s (nested %d) */",
+			prog->program_id, prog->toplev_count);
+		output_line ("static void %s_%d_module_init (cob_module *module)",
+			prog->program_id, prog->toplev_count);
+	}
+	output_block_open ();
+
+#if	0  /* Module comments, maybe extend and only include if
+          explicit requested via flag (auto-active for -c + -g)? */
 	output_line ("/* Next pointer, Parameter list pointer, Module name, */");
 	output_line ("/* Module formatted date, Module source, */");
 	output_line ("/* Module entry, Module cancel, */");
@@ -10236,12 +10251,10 @@ output_module_init (struct cb_program *prog)
 	output_line ("/* Numeric separator, File name mapping, Binary truncate, */");
 	output_line ("/* Alternate numeric display, Host sign, No physical cancel */");
 	output_line ("/* Flag main program, Fold call, Exit after CALL */");
-	output_newline ();
 #endif
 
 	recent_prog = prog;
 	/* Do not initialize next pointer, parameter list pointer + count */
-	output_line ("/* Initialize module structure */");
 	output_line ("module->module_name = \"%s\";", prog->orig_program_id);
 	output_line ("module->module_formatted_date = COB_MODULE_FORMATTED_DATE;");
 	output_line ("module->module_source = COB_SOURCE_FILE;");
@@ -10259,20 +10272,6 @@ output_module_init (struct cb_program *prog)
 		output_line ("module->module_cancel.funcvoid = NULL;");
 	}
 
-	output_module_register_init (prog->collating_sequence, "collating_sequence");
-
-	if (prog->crt_status && cb_code_field (prog->crt_status)->count) {
-		output_prefix ();
-		output ("module->crt_status = ");
-		output_param (cb_ref (prog->crt_status), -1);
-		output (";");
-		output_newline ();
-	} else {
-		output_line ("module->crt_status = NULL;");
-	}
-
-	output_module_register_init (prog->cursor_pos, "cursor_pos");
-
 	if (!cobc_flag_main && non_nested_count > 1) {
 		output_line ("module->module_ref_count = &cob_reference_count;");
 	} else {
@@ -10284,13 +10283,8 @@ output_module_init (struct cb_program *prog)
 	output_line ("module->module_time = COB_MODULE_TIME;");
 	output_line ("module->module_type = %u;", prog->prog_type);
 	output_line ("module->module_param_cnt = %u;", prog->num_proc_params);
-#if 0 /* currently not checked anywhere, may use for void or more general type*/
-	if (prog->flag_void) {
-		opt = 0;
-	} else {
-		opt = 1;
-	}
-	output_line ("module->module_returning = %u;", (unsigend int)opt);
+#if 0 /* currently not checked anywhere, may use for void or more general type */
+	output_line ("module->module_returning = %u;", prog->flag_void ? 0 : 1);
 #endif
 	output_line ("module->ebcdic_sign = %d;", cb_ebcdic_sign);
 	output_line ("module->decimal_point = '%c';", prog->decimal_point);
@@ -10304,20 +10298,18 @@ output_module_init (struct cb_program *prog)
 	output_line ("module->flag_main = %d;", cobc_flag_main);
 	output_line ("module->flag_fold_call = %d;", cb_fold_call);
 	output_line ("module->flag_exit_program = 0;");
-	opt = 0;
-	if (cb_flag_traceall) {
-		opt |= COB_MODULE_TRACE;
-		opt |= COB_MODULE_TRACEALL;
-	} else
-	if (cb_flag_trace) {
-		opt |= COB_MODULE_TRACE;
+	{
+		int	opt = 0;
+		if (cb_flag_traceall) {
+			opt |= COB_MODULE_TRACE;
+			opt |= COB_MODULE_TRACEALL;
+		} else
+		if (cb_flag_trace) {
+			opt |= COB_MODULE_TRACE;
+		}
+		output_line ("module->flag_debug_trace = %d;", opt);
 	}
-	output_line ("module->flag_debug_trace = %d;", opt);
-	if (cb_flag_dump) {
-		output_line ("module->flag_dump_ready = 1;");
-	} else {
-		output_line ("module->flag_dump_ready = 0;");
-	}
+	output_line ("module->flag_dump_ready = %u;", cb_flag_dump ? 1 : 0);
 	output_line ("module->module_stmt = 0;");
 	if (source_cache) {
 		output_line ("module->module_sources = %ssource_files;",
@@ -10326,8 +10318,30 @@ output_module_init (struct cb_program *prog)
 		output_line ("module->module_sources = NULL;");
 	}
 
-	/* Check for possible implementation without adding a multitude
+	output_block_close ();
+	output_newline ();
+}
+
+/* outputs code for setting variables in the module structure
+   that reference non-static values */
+static void
+output_module_init_non_static (struct cb_program *prog)
+{
+	output_module_register_init (prog->collating_sequence, "collating_sequence");
+	if (prog->crt_status && cb_code_field (prog->crt_status)->count) {
+		output_prefix ();
+		output ("module->crt_status = ");
+		output_param (cb_ref (prog->crt_status), -1);
+		output (";");
+		output_newline ();
+	} else {
+		output_line ("module->crt_status = NULL;");
+	}
+
+	/* TODO for later: Check for possible implementation without adding a multitude
 	   of module local registers to cob_module structure */
+	output_module_register_init (prog->cursor_pos, "cursor_pos");
+
 	output_module_register_init (prog->xml_code, "xml_code");
 	output_module_register_init (prog->xml_event, "xml_event");
 	output_module_register_init (prog->xml_information, "xml_information");
@@ -10340,7 +10354,20 @@ output_module_init (struct cb_program *prog)
 
 	output_module_register_init (prog->json_code, "json_code");
 	output_module_register_init (prog->json_status, "json_status");
+}
 
+static void
+output_module_init (struct cb_program *prog)
+{
+	if (!prog->nested_level) {
+		output_line ("%s_module_init (module);",
+			prog->program_id);
+	} else {
+		output_line ("%s_%d_module_init (module);",
+			prog->program_id, prog->toplev_count);
+	}
+	output_newline ();
+	output_module_init_non_static (prog);
 	output_newline ();
 }
 
@@ -11442,8 +11469,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_module_init (prog);
 	}
 
-
-
 	/* Setup up CANCEL callback */
 	if (!prog->nested_level && prog->prog_type == COB_MODULE_TYPE_PROGRAM) {
 		output_line ("/* Initialize cancel callback */");
@@ -11794,6 +11819,7 @@ prog_cancel_end:
 	}
 	output_line ("/* End %s '%s' */", s, prog->orig_program_id);
 	output_newline ();
+	output_module_init_function (prog);
 }
 
 /* Output the entry function for a COBOL function. */
@@ -12277,9 +12303,6 @@ output_function_prototypes (struct cb_program *prog)
 {
 	struct cb_program	*cp;
 	struct cb_file		*f;
-	cb_tree			entry;
-	cb_tree			entry_param;
-	cb_tree			prog_param;
 	cb_tree			l;
 
 	/* LCOV_EXCL_START */
@@ -12300,7 +12323,9 @@ output_function_prototypes (struct cb_program *prog)
 		  Collect all items used as parameters in the PROCEDURE DIVISION
 		  header and ENTRY statements in the parameter list.
 		*/
+		cb_tree		entry;
 		for (entry = cp->entry_list; entry; entry = CB_CHAIN (entry)) {
+			cb_tree		entry_param, prog_param;
 			for (entry_param = CB_VALUE (CB_VALUE (entry)); entry_param;
 			     entry_param = CB_CHAIN (entry_param)) {
 				for (prog_param = cp->parameter_list; prog_param;
@@ -12384,9 +12409,18 @@ output_function_prototypes (struct cb_program *prog)
 			if (f->extfh
 			 && strcmp (prog->extfh, CB_CONST (f->extfh)->val) != 0
 			 && strcmp ("EXTFH", CB_CONST (f->extfh)->val) != 0) {
-				output ("extern int %s (unsigned char *opcode, FCD3 *fcd);", CB_CONST (f->extfh)->val);
-				output_newline ();
+				output_line ("extern int %s (unsigned char *opcode, FCD3 *fcd);",
+					CB_CONST (f->extfh)->val);
 			}
+		}
+
+		/* prototype for module initialization */
+		if (!cp->nested_level) {
+			output_line ("static void\t\t%s_module_init (cob_module *module);",
+				cp->program_id);
+		} else {
+			output_line ("static void\t\t%s_%d_module_init (cob_module *module);",
+				cp->program_id, cp->toplev_count);
 		}
 
 	}
