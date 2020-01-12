@@ -26,7 +26,7 @@
 %error-verbose
 
 %{
-#include <config.h>
+#include "config.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -7122,38 +7122,26 @@ usage:
 | BINARY_SHORT _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_SHORT);
-	if (cb_binary_sync_clause == CB_IGNORE)
-		current_field->flag_ignore_sync = 1;
   }
 | BINARY_SHORT UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_SHORT);
-	if (cb_binary_sync_clause == CB_IGNORE)
-		current_field->flag_ignore_sync = 1;
   }
 | BINARY_LONG _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_INT);
-	if (cb_binary_sync_clause == CB_IGNORE)
-		current_field->flag_ignore_sync = 1;
   }
 | BINARY_LONG UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_INT);
-	if (cb_binary_sync_clause == CB_IGNORE)
-		current_field->flag_ignore_sync = 1;
   }
 | BINARY_DOUBLE _signed
   {
 	check_and_set_usage (CB_USAGE_SIGNED_LONG);
-	if (cb_binary_sync_clause == CB_IGNORE)
-		current_field->flag_ignore_sync = 1;
   }
 | BINARY_DOUBLE UNSIGNED
   {
 	check_and_set_usage (CB_USAGE_UNSIGNED_LONG);
-	if (cb_binary_sync_clause == CB_IGNORE)
-		current_field->flag_ignore_sync = 1;
   }
 | BINARY_C_LONG _signed
   {
@@ -7463,18 +7451,23 @@ synchronized_clause:
 	if (cb_verify (cb_synchronized_clause, _("SYNCHRONIZED clause"))) {
 		current_field->flag_synchronized = 1;
 	}
+	if (with_attrs && cb_verify (cb_sync_left_right, _("LEFT/RIGHT phrases in SYNCHRONIZED clause"))) {
+		if (current_field->flag_synchronized) {
+			if (with_attrs == 1) {
+				current_field->flag_sync_left = 1;
+			} else {
+				current_field->flag_sync_right = 1;
+			}
+		}
+		CB_PENDING ("SYNCHRONIZED LEFT/RIGHT");
+	}
   }
 ;
 
 _left_or_right:
-  /* empty -> implemented as LEFT */
-| LEFT
-| RIGHT
-  {
-	/* Stay quiet on this
-	PENDING ("SYNCHRONIZED RIGHT");
-	*/
-  }
+  /* empty */	{ with_attrs = 0; }
+| LEFT		{ with_attrs = 1; }
+| RIGHT		{ with_attrs = -1; }
 ;
 
 

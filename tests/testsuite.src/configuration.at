@@ -455,6 +455,7 @@ test.conf: missing definitions:
 	no definition of 'top-level-occurs-clause'
 	no definition of 'same-as-clause'
 	no definition of 'synchronized-clause'
+	no definition of 'sync-left-right'
 	no definition of 'goto-statement-without-name'
 	no definition of 'stop-literal-statement'
 	no definition of 'stop-identifier-statement'

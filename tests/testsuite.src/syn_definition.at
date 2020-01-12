@@ -851,9 +851,8 @@ AT_CLEANUP
 AT_SETUP([SYNCHRONIZED clause])
 AT_KEYWORDS([definition sync])
 
-# GC simply ignored RIGHT which seems to be wrong according to ISO (but right for MF).
-# The check / correction is TODO as the current warning shows up in the COBOL85 tests.
-#AT_XFAIL_IF(true)
+# GC simply ignored RIGHT which is wrong according to ANSI/ISO;
+# most dialects just skip this, but according to docs IBM handles it
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -870,11 +869,12 @@ AT_DATA([prog.cob], [
 ])
 
 # currently is:
-#AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-#[prog.cob: 9: Warning: 'SYNCHRONIZED RIGHT' not implemented
-#])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:8: warning: SYNCHRONIZED LEFT/RIGHT is not implemented
+prog.cob:9: warning: SYNCHRONIZED LEFT/RIGHT is not implemented
+])
 #should be
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+#AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CLEANUP
 

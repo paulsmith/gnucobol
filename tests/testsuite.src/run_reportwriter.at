@@ -3898,7 +3898,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -std=cobol2002 -fassign-ext-dyn=ok prog.cob ], [0], [],
-[prog.cob:40: warning: Duplicate LINE 2 ignored
+[prog.cob:40: warning: duplicate LINE 2 ignored
 ])
 
 AT_CHECK([DD_INVFILE="./inp_data" DD_REPORT4="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])

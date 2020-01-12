@@ -931,7 +931,8 @@ struct cb_field {
 	unsigned int flag_validated : 1;	/* 'usage' was validated */
 	unsigned int flag_usage_defined : 1;	/* 'usage' was specifically coded */
 
-	unsigned int flag_ignore_sync : 1;	/* Ignore SYNCHRONIZED */
+	unsigned int flag_sync_left : 1;	/* SYNCHRONIZED LEFT */
+	unsigned int flag_sync_right : 1;	/* SYNCHRONIZED RIGHT */
 
 };
 
