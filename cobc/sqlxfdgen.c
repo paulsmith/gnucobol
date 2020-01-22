@@ -1347,7 +1347,8 @@ output_xfd_file (struct cb_file *fl)
 		}
 		k = 1;
 		for (l = fl->alt_key_list; l; l = l->next) {
-			fprintf(fs,"CREATE %sINDEX k%d_%s ON %s ",l->duplicates?"":"UNIQUE ",k,tblname,tblname);
+			fprintf(fs,"CREATE %sINDEX k%d_%s ON %s ",
+					l->duplicates||l->tf_suppress?"":"UNIQUE ",k,tblname,tblname);
 			fprintf(fx,"K,%d,%s,",k,l->duplicates?"Y":"N");
 			if (l->tf_suppress) {
 				fprintf(fx,"Y,0x%02X,",l->char_suppress);
