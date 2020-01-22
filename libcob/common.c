@@ -333,6 +333,11 @@ static struct config_enum retryopts[]	= {{"none","0"},{"never","64"},{"forever",
 static struct config_enum dict_opts[]	= {{"false","0"},{"true","1"},{"always","2"},
 											{"no","0"},{"min","1"},{"max","2"},{NULL,NULL}};
 static char	varseq_dflt[8] = "0";	/* varseq0: Default Variable length Sequential file format */
+static struct config_enum bdborder[]	= {
+						{"native","0"},
+						{"big-endian","1"},{"little-endian","2"},
+						{"big_endian","1"},{"little_endian","2"},
+						{NULL,NULL}};
 static char min_conf_length = 0;
 static const char *not_set;
 
@@ -395,6 +400,7 @@ static struct config_tbl gc_conf[] = {
 	{"COB_FIXREL_FORMAT","fixrel_format",	fixrel_dflt,relopts,GRP_FILE,ENV_UINT|ENV_ENUM,SETPOS(cob_fixrel_type)},
 	{"COB_VARREL_FORMAT","varrel_format",	varrel_dflt,relopts,GRP_FILE,ENV_UINT|ENV_ENUM,SETPOS(cob_varrel_type)},
 	{"COB_VARSEQ_FORMAT","varseq_format",	varseq_dflt,varseqopts,GRP_FILE,ENV_UINT|ENV_ENUM,SETPOS(cob_varseq_type)},
+	{"COB_BDB_BYTEORDER","bdb_byteorder",	"native",bdborder,GRP_FILE,ENV_UINT|ENV_ENUM,SETPOS(cob_bdb_byteorder)},
 	{"COB_LS_FIXED","ls_fixed",		"0",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_fixed)},
 	{"STRIP_TRAILING_SPACES","strip_trailing_spaces",		NULL,	NULL,GRP_HIDE,ENV_BOOL|ENV_NOT,SETPOS(cob_ls_fixed)},
 	{"COB_LS_NULLS","ls_nulls",				"false",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_nulls)},

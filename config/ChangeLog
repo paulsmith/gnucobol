@@ -1,4 +1,8 @@
 
+2020-01-22  Ron Norman <rjn@inglenet.com>
+
+	* general: added option bdb_byteorder
+
 2020-01-12 Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: bug #513 (partial) added sync-left-right

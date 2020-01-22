@@ -1,4 +1,12 @@
 
+2020-01-22  Ron Norman <rjn@inglenet.com>
+	* coblocal.h: Added cob_bdb_byteorder
+	* common.h: Added flags for BDB Byteorder
+	* common.c: Added bdb_byteorder to runtime config processing
+	* fileio.c: Added code to handle byteorder options
+	* fbdb.c: Added code to use byteorder options for both BDB set_lorder
+				and for the numeric duplicate key value
+
 2020-01-06  Ron Norman <rjn@inglenet.com>
 	* fileio.h,fsqlxfd.c,foci.c,fodbc.c:
 			Implemented READ locking options (RETRY, IGNORE, ADVANCING)

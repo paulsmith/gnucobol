@@ -844,6 +844,11 @@ enum cob_exception_id {
 
 #define COB_FILE_MODE		0666
 
+/* File: 'bdb_byteorder' for int/short/long as stored on disk */
+#define COB_BDB_IS_NATIVE	0	/* Default to what the system uses */
+#define COB_BDB_IS_BIG		1	/* Use little-endian */
+#define COB_BDB_IS_LITTLE	2	/* Use big-endian */
+
 /* File: 'file_format' as stored on disk */
 #define COB_FILE_IS_GCVS0	0	/* GnuCOBOL VarSeq 0 */
 #define COB_FILE_IS_GCVS1	1	/* GnuCOBOL VarSeq 1 */
@@ -1488,7 +1493,9 @@ typedef struct __cob_file {
 	unsigned int		flag_auto_type:1;	/* Peek at file for File format */
 	unsigned int		flag_set_type:1;	/* File type/format set via IO_asgname */
 	unsigned int		flag_set_isam:1;	/* INDEXED type/format set via IO_asgname */
-	unsigned int		unused_bits:24;
+	unsigned int		flag_big_endian:1;	/* Force use of big-endian in BDB */
+	unsigned int		flag_little_endian:1;/* Force use of little-endian in BDB */
+	unsigned int		unused_bits:22;
 
 	cob_field		*last_key;		/* Last field used as 'key' for I/O */
 	unsigned char		last_operation;		/* Most recent I/O operation */

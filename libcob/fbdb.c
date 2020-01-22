@@ -91,18 +91,7 @@ static int		bdb_join = 1;
 #endif
 #define	cob_dbtsize_t		u_int32_t
 
-#if	defined(WORDS_BIGENDIAN)
-/* Big Endian then leave 'int' alone */
-#define	COB_DUPSWAP(x)		((unsigned int)(x))
-
-#elif	defined(COB_BDB_BAD_DUPNO) || 1 /* FIXME: may be added to a file specific flag */
-/* Want to retain incorrect storing of Little Endian value backwards */
-#define	COB_DUPSWAP(x)		((unsigned int)(x))
-
-#else
-/* Little Endian so swap byte around to have dupno value stored in bigendian sequence */
-#define	COB_DUPSWAP(x)		(COB_BSWAP_32((unsigned int)(x)))
-#endif
+#define	COB_DUPSWAP(x)		bdb_dupswap(f,(unsigned int)(x))
 
 #define DBT_SET(key,fld)			\
 	key.data = fld->data;			\
@@ -137,6 +126,22 @@ struct indexed_file {
 	DB_LOCK		*bdb_locks;
 };
 
+static unsigned int
+bdb_dupswap (cob_file *f, unsigned int value)
+{
+	if (!f->flag_little_endian
+	 && !f->flag_big_endian)
+		return ((unsigned int)(value));	/* Native format */
+#if	defined(WORDS_BIGENDIAN)
+	if (f->flag_little_endian)
+		return (COB_BSWAP_32((unsigned int)(value)));	/* big */
+	return ((unsigned int)(value));
+#else
+	if (f->flag_big_endian)
+		return (COB_BSWAP_32((unsigned int)(value)));	/* little */
+	return ((unsigned int)(value));
+#endif
+}
 
 static void
 bdb_setkey (cob_file *f, int idx)
@@ -1237,6 +1242,21 @@ ix_bdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const
 		ret = db_create (&p->db[i], bdb_env, 0);
 		if (!ret) {
 			handle_created = 1;
+			if (f->flag_big_endian) {
+				ret = p->db[i]->set_lorder (p->db[i], 1234);
+				if (ret) {
+					cob_runtime_error (_("cannot set BDB byteorder (%s), error: %d %s"),
+							   "set_lorder", ret, db_strerror (ret));
+					return COB_STATUS_39_CONFLICT_ATTRIBUTE;
+				}
+			} else if (f->flag_little_endian) {
+				ret = p->db[i]->set_lorder (p->db[i], 4321);
+				if (ret) {
+					cob_runtime_error (_("cannot set BDB byteorder (%s), error: %d %s"),
+							   "set_lorder", ret, db_strerror (ret));
+					return COB_STATUS_39_CONFLICT_ATTRIBUTE;
+				}
+			}
 			if (mode == COB_OPEN_OUTPUT) {
 				if (bdb_env) {
 					if (!bdb_nofile(runtime_buffer)) {

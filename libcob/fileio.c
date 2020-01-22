@@ -381,6 +381,21 @@ indexed_file_type(char *filename)
 	return -1;
 }
 
+static int
+keycmp (char *keyword, char *val)
+{
+	while (*keyword && *val) {
+		if (toupper(*keyword) != toupper(*val)) {
+			if (!((*keyword == '-' || *keyword == '_')
+			 && (*val == '-' || *val == '_')))
+				break;
+		}
+		keyword++;
+		val++;
+	}
+	return (toupper(*keyword)-toupper(*val));
+}
+
 /*
  * Write data file description to a string 
  */
@@ -423,6 +438,10 @@ write_file_def (cob_file *f, char *out)
 		if((f->file_features & COB_FILE_LS_SPLIT))
 			k += sprintf(&out[k],",ls_split");
 	}
+	if (f->flag_big_endian)
+		k += sprintf(&out[k],",big-endian");
+	else if (f->flag_little_endian)
+		k += sprintf(&out[k],",little-endian");
 
 	if(f->organization == COB_ORG_LINE_SEQUENTIAL) {
 		k += sprintf(&out[k]," recsz=%d ",(int)(f->record_max));
@@ -995,6 +1014,10 @@ cob_set_file_defaults (cob_file *f)
 	f->dflt_seconds = file_setptr->cob_retry_seconds;
 	f->dflt_share = file_setptr->cob_share_mode;
 	f->dflt_retry = file_setptr->cob_retry_mode;
+	if (file_setptr->cob_bdb_byteorder == COB_BDB_IS_BIG)
+		f->flag_big_endian = 1;
+	else if (file_setptr->cob_bdb_byteorder == COB_BDB_IS_LITTLE)
+		f->flag_little_endian = 1;
 	if(f->dflt_retry == 0) {
 		if(f->dflt_times > 0)
 				f->dflt_retry |= COB_RETRY_TIMES;
@@ -1187,12 +1210,12 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 				f->flag_keycheck = settrue;
 				continue;
 			}
-			if(strcasecmp(option,"retry_times") == 0) {
+			if(keycmp(option,"retry_times") == 0) {
 				f->dflt_times = atoi(value);
 				f->dflt_retry |= COB_RETRY_TIMES;
 				continue;
 			}
-			if(strcasecmp(option,"retry_seconds") == 0) {
+			if(keycmp(option,"retry_seconds") == 0) {
 				f->dflt_seconds = atoi(value);
 				f->dflt_retry |= COB_RETRY_SECONDS;
 				continue;
@@ -1325,57 +1348,67 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 				f->xfdname = cob_strdup (value);
 				continue;
 			}
-			if(strcasecmp(option,"retry_forever") == 0) {
+			if(keycmp(option,"big_endian") == 0) {
+				f->flag_big_endian = 1;
+				f->flag_little_endian = 0;
+				continue;
+			}
+			if(keycmp(option,"little_endian") == 0) {
+				f->flag_big_endian = 0;
+				f->flag_little_endian = 1;
+				continue;
+			}
+			if(keycmp(option,"retry_forever") == 0) {
 				f->dflt_retry = COB_RETRY_FOREVER;
 				continue;
 			}
-			if(strcasecmp(option,"retry_never") == 0) {
+			if(keycmp(option,"retry_never") == 0) {
 				f->dflt_retry = COB_RETRY_NEVER;
 				continue;
 			}
-			if(strcasecmp(option,"ignore_lock") == 0) {
+			if(keycmp(option,"ignore_lock") == 0) {
 				f->dflt_retry |= COB_IGNORE_LOCK;
 				continue;
 			}
-			if(strcasecmp(option,"advancing_lock") == 0) {
+			if(keycmp(option,"advancing_lock") == 0) {
 				f->dflt_retry |= COB_ADVANCING_LOCK;
 				continue;
 			}
-			if(strcasecmp(option,"share_all") == 0) {
+			if(keycmp(option,"share_all") == 0) {
 				f->dflt_share = COB_SHARE_ALL_OTHER;
 				continue;
 			}
-			if(strcasecmp(option,"share_read") == 0) {
+			if(keycmp(option,"share_read") == 0) {
 				f->dflt_share = COB_SHARE_READ_ONLY;
 				continue;
 			}
-			if(strcasecmp(option,"share_no") == 0) {
+			if(keycmp(option,"share_no") == 0) {
 				f->dflt_share = COB_SHARE_NO_OTHER;
 				continue;
 			}
 			if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
-				if(strcasecmp(option,"ls_nulls") == 0) {
+				if(keycmp(option,"ls_nulls") == 0) {
 					if(settrue)
 						f->file_features |= COB_FILE_LS_NULLS;
 					else
 						f->file_features &= ~COB_FILE_LS_NULLS;
 					continue;
 				}
-				if(strcasecmp(option,"ls_fixed") == 0) {
+				if(keycmp(option,"ls_fixed") == 0) {
 					if(settrue)
 						f->file_features |= COB_FILE_LS_FIXED;
 					else
 						f->file_features &= ~COB_FILE_LS_FIXED;
 					continue;
 				}
-				if(strcasecmp(option,"ls_split") == 0) {
+				if(keycmp(option,"ls_split") == 0) {
 					if(settrue)
 						f->file_features |= COB_FILE_LS_SPLIT;
 					else
 						f->file_features &= ~COB_FILE_LS_SPLIT;
 					continue;
 				}
-				if(strcasecmp(option,"ls_validate") == 0) {
+				if(keycmp(option,"ls_validate") == 0) {
 					if(settrue)
 						f->file_features |= COB_FILE_LS_VALIDATE;
 					else
