@@ -382,7 +382,7 @@ indexed_file_type(char *filename)
 }
 
 static int
-keycmp (char *keyword, char *val)
+keycmp (char *keyword, const char *val)
 {
 	while (*keyword && *val) {
 		if (toupper(*keyword) != toupper(*val)) {
