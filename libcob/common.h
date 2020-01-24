@@ -850,16 +850,19 @@ enum cob_exception_id {
 #define COB_BDB_IS_LITTLE	2	/* Use big-endian */
 
 /* File: 'file_format' as stored on disk */
-#define COB_FILE_IS_GCVS0	0	/* GnuCOBOL VarSeq 0 */
-#define COB_FILE_IS_GCVS1	1	/* GnuCOBOL VarSeq 1 */
-#define COB_FILE_IS_GCVS2	2	/* GnuCOBOL VarSeq 2 */
-#define COB_FILE_IS_GCVS3	3	/* GnuCOBOL VarSeq 3 */
-#define COB_FILE_IS_B32		4	/* 32-bit BigEndian record prefix */
-#define COB_FILE_IS_B64		5	/* 64-bit BigEndian record prefix */
-#define COB_FILE_IS_L32		6	/* 32-bit LittleEndian record prefix */
-#define COB_FILE_IS_L64		7	/* 64-bit LittleEndian record prefix */
-#define COB_FILE_IS_GC		10	/* GnuCOBOL default format */
-#define COB_FILE_IS_MF		11	/* Micro Focus default format */
+enum cob_file_format {
+	 COB_FILE_IS_GCVS0	= 0,	/* GnuCOBOL VarSeq 0 */
+	 COB_FILE_IS_GCVS1	= 1,	/* GnuCOBOL VarSeq 1 */
+	 COB_FILE_IS_GCVS2	= 2,	/* GnuCOBOL VarSeq 2 */
+	 COB_FILE_IS_GCVS3	= 3,	/* GnuCOBOL VarSeq 3 */
+	 COB_FILE_IS_B32	= 4,	/* 32-bit BigEndian record prefix */
+	 COB_FILE_IS_B64	= 5,	/* 64-bit BigEndian record prefix */
+	 COB_FILE_IS_L32	= 6,	/* 32-bit LittleEndian record prefix */
+	 COB_FILE_IS_L64	= 7,	/* 64-bit LittleEndian record prefix */
+	 COB_FILE_IS_GC		= 10,	/* GnuCOBOL default format */
+	 COB_FILE_IS_MF		= 11,	/* Micro Focus default format */
+	 COB_FILE_IS_DFLT	= 255	/* Figure out file format at runtime */
+};
 
 /* Data type code for eXternal file Description */
 enum xfd_data_type {
@@ -888,12 +891,22 @@ enum xfd_data_type {
 
 /* Organization */
 
-#define COB_ORG_SEQUENTIAL	0
-#define COB_ORG_LINE_SEQUENTIAL	1
-#define COB_ORG_RELATIVE	2
-#define COB_ORG_INDEXED		3
-#define COB_ORG_SORT		4
-#define COB_ORG_MAX			5 
+enum cob_file_org {
+	COB_ORG_SEQUENTIAL	= 0,
+	COB_ORG_LINE_SEQUENTIAL	= 1,
+	COB_ORG_RELATIVE	= 2,
+	COB_ORG_INDEXED	= 3,
+	COB_ORG_SORT	= 4,
+	COB_ORG_MAX		= 5
+};
+
+/* Access mode */
+
+enum cob_file_access {
+	COB_ACCESS_SEQUENTIAL = 1,
+	COB_ACCESS_DYNAMIC = 2,
+	COB_ACCESS_RANDOM = 3
+};
 
 /* io_routine */
 
@@ -914,12 +927,6 @@ enum xfd_data_type {
 /* Not yet implemented */
 #define COB_IO_MFIDX4		13	/* Micro Focus IDX4 format */
 #define COB_IO_MFIDX8		14	/* Micro Focus IDX8 format */
-
-/* Access mode */
-
-#define COB_ACCESS_SEQUENTIAL	1
-#define COB_ACCESS_DYNAMIC	2
-#define COB_ACCESS_RANDOM	3
 
 /* SELECT features */
 
@@ -1403,15 +1410,16 @@ struct cob_func_loc {
 #define COB_MAX_KEYCOMP 8	/* max number of parts in a compound key (disam.h :: NPARTS ) */
 
 typedef struct __cob_file_key {
-	cob_field	*field;	/* Key field */
-	int		flag;				/* ASCENDING/DESCENDING (for SORT) */
-	int		tf_duplicates;			/* WITH DUPLICATES (for RELATIVE/INDEXED) */
-	int		tf_ascending;			/* ASCENDING/DESCENDING (for SORT)*/
-	int		tf_suppress;			/* supress keys where all chars = char_suppress */
-	int		char_suppress;			/* key supression character  */
-	unsigned int	offset;			/* Offset of field */
-	int		count_components;		/* 0..1::simple-key  2..n::split-key   */
-	cob_field	*component[COB_MAX_KEYCOMP];	/* key-components iff split-key   */
+	cob_field	*	field;			/* Key field */
+	unsigned int	offset;			/* Offset of field within record */
+	unsigned char	tf_duplicates;	/* WITH DUPLICATES (for RELATIVE/INDEXED) */
+	unsigned char	tf_ascending;	/* ASCENDING/DESCENDING (for SORT)*/
+	unsigned char	tf_suppress;	/* supress keys where all chars = char_suppress */
+	unsigned char	char_suppress;	/* key supression character  */
+	short			len_suppress;	/* length of SUPPRESS "string" */
+	short			count_components;	/* 0..1::simple-key  2..n::split-key   */
+	unsigned char *	str_suppress;	/* Complete SUPPRESS "string" */
+	cob_field	*component[COB_MAX_KEYCOMP];/* key-components iff split-key   */
 } cob_file_key;
 
 typedef struct cob_io_stat_s {
@@ -1419,15 +1427,31 @@ typedef struct cob_io_stat_s {
 	unsigned int	fail_io;
 } cob_io_stats;
 
+/* Linage structure */
+
+typedef struct __cob_linage {
+	cob_field		*linage;		/* LINAGE */
+	cob_field		*linage_ctr;		/* LINAGE-COUNTER */
+	cob_field		*latfoot;		/* LINAGE FOOTING */
+	cob_field		*lattop;		/* LINAGE AT TOP */
+	cob_field		*latbot;		/* LINAGE AT BOTTOM */
+	int			lin_lines;		/* Current Linage */
+	int			lin_foot;		/* Current Footage */
+	int			lin_top;		/* Current Top */
+	int			lin_bot;		/* Current Bottom */
+} cob_linage;
+
 /* File version */
-#define	COB_FILE_VERSION	4
+#define	COB_FILE_VERSION	5
 
 /* File structure */
 
-/*NOTE: *** Add new fields to end  ***
- *       cob_file is now allocated by cob_file_malloc in common.c
- *       so as long as you add new fields to the end there should be no
- *       need to change COB_FILE_VERSION
+/*NOTE: 
+ *       cob_file is now allocated by cob_file_create in common.c
+ *
+ *       This is now setup using a few functions in order
+ *       to keep 'cob_file' private from the code emmitted
+ *       by codegen.c allowing more flexibility in the future
  */
 typedef struct __cob_file {
 	unsigned char		file_version;		/* File handler version */
@@ -1440,13 +1464,13 @@ typedef struct __cob_file {
 	unsigned char		file_features;		/* File I/O features: 0 means unspecified */
 
 	const char		*select_name;		/* Name in SELECT */
-	unsigned char		*file_status;		/* FILE STATUS */
+	unsigned char		file_status[4];		/* FILE STATUS */
 	cob_field		*assign;		/* ASSIGN TO */
 	cob_field		*record;		/* Record area */
 	cob_field		*variable_record;	/* Record size variable */
 	cob_file_key		*keys;			/* ISAM/RANDOM/SORT keys */
 	void			*file;			/* File specific pointer */
-	void			*linorkeyptr;		/* LINAGE or SPLIT KEY */
+	cob_linage		*linage;		/* LINAGE */
 	const unsigned char	*sort_collating;	/* SORT collating */
 	void			*extfh_ptr;		/* For EXTFH usage */
 	size_t			record_min;		/* Record min size */
@@ -1495,7 +1519,8 @@ typedef struct __cob_file {
 	unsigned int		flag_set_isam:1;	/* INDEXED type/format set via IO_asgname */
 	unsigned int		flag_big_endian:1;	/* Force use of big-endian in BDB */
 	unsigned int		flag_little_endian:1;/* Force use of little-endian in BDB */
-	unsigned int		unused_bits:22;
+	unsigned int		flag_ready:1;		/* cob_file has been built completely */
+	unsigned int		unused_bits:21;
 
 	cob_field		*last_key;		/* Last field used as 'key' for I/O */
 	unsigned char		last_operation;		/* Most recent I/O operation */
@@ -1521,21 +1546,6 @@ typedef struct __cob_file {
 	const char			*xfdname;		/* Name for SQL table */
 	const char			*xfdschema;		/* Override of COB_SCHEMA_DIR for this file */
 } cob_file;
-
-
-/* Linage structure */
-
-typedef struct __cob_linage {
-	cob_field		*linage;		/* LINAGE */
-	cob_field		*linage_ctr;		/* LINAGE-COUNTER */
-	cob_field		*latfoot;		/* LINAGE FOOTING */
-	cob_field		*lattop;		/* LINAGE AT TOP */
-	cob_field		*latbot;		/* LINAGE AT BOTTOM */
-	int			lin_lines;		/* Current Linage */
-	int			lin_foot;		/* Current Footage */
-	int			lin_top;		/* Current Top */
-	int			lin_bot;		/* Current Bottom */
-} cob_linage;
 
 
 /********************/
@@ -2519,6 +2529,24 @@ COB_EXPIMP void cob_commit		(void);
 COB_EXPIMP void cob_rollback	(void);
 COB_EXPIMP void cob_pre_open	(cob_file *f);
 COB_EXPIMP int	cob_findkey (cob_file *, cob_field *, int *, int *);
+COB_EXPIMP void cob_file_create (cob_file ** pfl, const char *exname, const char *select_name,
+					const int fileorg, const int accessmode, const int optional,
+					const int format, const int select_features, const int nkeys, 
+					const int minrcsz, const int maxrcsz, cob_field * assign, cob_field * record);
+COB_EXPIMP void cob_file_destroy (cob_file ** pfl);
+COB_EXPIMP void cob_file_set_attr (cob_file * fl, cob_field * varsize,
+					const int lineadv, const int features,
+					const unsigned char *codeset, cob_field * password, cob_field * cryptkey);
+COB_EXPIMP void cob_file_set_key (cob_file * fl, const int keyn, cob_field * key,
+					const int dups, const int ascdesc, const int len_suppress,
+					const unsigned char *suppress, const int parts, ...);
+COB_EXPIMP void cob_file_set_key_extra (cob_file * fl, const int keyn, const int compress,
+					const int encrypt, cob_field * password, const unsigned char *collate);
+COB_EXPIMP void cob_file_set_linage (cob_file * fl, cob_field *linage, cob_field *linage_ctr,
+					cob_field *latfoot, cob_field *lattop, cob_field *latbot);
+COB_EXPIMP void cob_file_set_retry (cob_file * fl, const int mode, const int value);
+COB_EXPIMP void cob_file_set_lock  (cob_file * fl, const int mode);
+COB_EXPIMP void cob_file_complete (cob_file * fl);
 
 /******************************************/
 /* Functions in fileio.c  API for codegen */

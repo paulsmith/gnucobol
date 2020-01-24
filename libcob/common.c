@@ -1357,7 +1357,7 @@ sort_compare (const void *data1, const void *data2)
 			cmp = common_cmps (f1.data, f2.data, f1.size, sort_collate);
 		}
 		if (cmp != 0) {
-			return (sort_keys[i].flag == COB_ASCENDING) ? cmp : -cmp;
+			return (sort_keys[i].tf_ascending == COB_ASCENDING) ? cmp : -cmp;
 		}
 	}
 	return 0;
@@ -3046,7 +3046,7 @@ cob_table_sort_init_key (cob_field *field, const int flag,
 			 const unsigned int offset)
 {
 	sort_keys[sort_nkeys].field = field;
-	sort_keys[sort_nkeys].flag = flag;
+	sort_keys[sort_nkeys].tf_ascending = flag;
 	sort_keys[sort_nkeys].offset = offset;
 	sort_nkeys++;
 }

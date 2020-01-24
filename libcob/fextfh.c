@@ -455,9 +455,11 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 		f->record_min = LDCOMPX4(fcd->minRecLen);
 		f->record_max = LDCOMPX4(fcd->maxRecLen);
 	}
+#if 0
 	if (f->file_status == NULL) {
 		f->file_status = cob_cache_malloc( 6 );
 	}
+#endif
 	if (f->assign == NULL
 	|| (f->fcd && fcd->fnamePtr)) {
 		f->assign = cob_cache_malloc(sizeof(cob_field));

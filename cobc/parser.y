@@ -5009,6 +5009,11 @@ alternative_record_key_clause:
 		p->duplicates = 0;
 	}
 	p->password = $8;
+	if ($9
+	 && CB_LITERAL_P ($9)
+	 && !CB_NUMERIC_LITERAL_P($9)) {
+		p->suppress = $9;
+	} else 
 	if ($9) {
 		p->tf_suppress = 1;
 		p->char_suppress = CB_INTEGER ($9)->val;
@@ -5087,6 +5092,10 @@ _suppress_clause:
 | SUPPRESS WHEN space_or_zero
   {
 	$$ = cb_int (literal_value ($3));
+  }
+| SUPPRESS WHEN LITERAL
+  {
+	$$ = $3;
   }
 ;
 

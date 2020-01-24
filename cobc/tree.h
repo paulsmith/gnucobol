@@ -50,7 +50,6 @@
 #define CB_PREFIX_FIELD		"f_"	/* Field (cob_field) */
 #define CB_PREFIX_SCR_FIELD		"fs_"	/* Screen field (cob_field) */
 #define CB_PREFIX_FILE		"h_"	/* File (cob_file) */
-#define CB_PREFIX_KEYS		"k_"	/* File keys (cob_file_key []) */
 #define CB_PREFIX_LABEL		"l_"	/* Label */
 #define CB_PREFIX_ML_ATTR	"ma_"	/* JSON/XML GENERATE attribute */
 #define CB_PREFIX_ML_TREE	"mt_"	/* JSON/XML GENERATE tree */
@@ -1019,6 +1018,7 @@ struct cb_alt_key {
 	cb_tree			key;			/* Key item */
 	cb_tree			password;			/* Password item */
 	cb_tree			collating_sequence_key;	/* COLLATING */
+	cb_tree			suppress;			/* Suppress Literal */
 	int			duplicates;		/* DUPLICATES */
 	int			offset;			/* Offset from start */
 	int			tf_suppress;		/* !0 for SUPPRESS */

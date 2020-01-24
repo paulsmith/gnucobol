@@ -7773,7 +7773,6 @@ output_stmt (cb_tree x)
 
 		} else {
 
-			const char			*retry_mode;
 			struct cb_file		*fl = CB_FILE (p->file);
 
 			if (p->body && CB_VALUE (p->body)) {
@@ -7805,30 +7804,29 @@ output_stmt (cb_tree x)
 			/* LCOV_EXCL_END */
 
 			if (p->flag_retry_forever) {
-				retry_mode = "COB_RETRY_FOREVER";
+				output_line ("cob_file_set_retry (%s%s,COB_RETRY_FOREVER,0);",
+									CB_PREFIX_FILE, fl->cname);
 			} else
 			if (p->flag_retry_times) {
 				output_prefix ();
-				output ("%s%s->retry_times = ", CB_PREFIX_FILE, fl->cname);
+				output ("cob_file_set_retry (%s%s,COB_RETRY_TIMES,",
+									CB_PREFIX_FILE, fl->cname);
 				output_integer (p->retry);
-				output (";");
+				output (");");
 				output_newline ();
-				retry_mode = "COB_RETRY_TIMES";
 			} else
 			if (p->flag_retry_seconds) {
 				output_prefix ();
-				output ("%s%s->retry_seconds = ", CB_PREFIX_FILE, fl->cname);
+				output ("cob_file_set_retry (%s%s,COB_RETRY_SECONDS,",
+									CB_PREFIX_FILE, fl->cname);
 				output_integer (p->retry);
-				output (";");
+				output (");");
 				output_newline ();
-				retry_mode = "COB_RETRY_SECONDS";
 			} else
 			if (p->flag_advancing_lock) {
-				retry_mode = "COB_ADVANCING_LOCK";
-			} else {
-				retry_mode = "0";
+				output_line ("cob_file_set_retry (%s%s,COB_ADVANCING_LOCK,0);",
+									CB_PREFIX_FILE, fl->cname);
 			}
-			output_line ("%s%s->retry_mode = %s;", CB_PREFIX_FILE, fl->cname, retry_mode);
 		}
 
 		if (p->null_check) {
@@ -8432,47 +8430,31 @@ static int
 output_file_allocation (struct cb_file *f)
 {
 	if (f->flag_global) {
-#if	0	/* RXWRXW - Global status */
-		if (f->file_status) {
-			/* Force status into main storage file */
-			CB_FIELD_PTR (f->file_status)->flag_is_global = 1;
-		}
-#endif
 		output_storage ("\n/* Global file %s */\n", f->name);
+		output_storage ("static cob_file\t\t*%s%s = NULL;\n",CB_PREFIX_FILE, f->cname);
+		if (f->organization == COB_ORG_RELATIVE
+		 && f->key == NULL) {
+			int i = lookup_attr (COB_TYPE_NUMERIC_DISPLAY, 0, 0, 0, NULL, 0);
+			output_storage ("static unsigned char\t%s%s_recnum[12+1] = \"000000000000\";\n",
+				CB_PREFIX_SEQUENCE, f->cname);
+			output_storage ("static cob_field %s%s_recnum = { 12, (cob_u8_ptr)%s%s_recnum, &%s%d };\n",
+				CB_PREFIX_FIELD, f->cname,
+				CB_PREFIX_SEQUENCE, f->cname,
+				CB_PREFIX_ATTR, i);
+		}
 	} else {
 		output_local ("\n/* File %s */\n", f->name);
-	}
-	/* Output RELATIVE/RECORD KEY's */
-	if (f->organization == COB_ORG_RELATIVE ||
-	    f->organization == COB_ORG_INDEXED) {
-		if (f->flag_global) {
-			output_storage ("static cob_file_key\t*%s%s = NULL;\n",
-				CB_PREFIX_KEYS, f->cname);
-		} else {
-			output_local ("static cob_file_key\t*%s%s = NULL;\n",
-				CB_PREFIX_KEYS, f->cname);
+		output_local ("static cob_file\t\t*%s%s = NULL;\n",CB_PREFIX_FILE, f->cname);
+		if (f->organization == COB_ORG_RELATIVE
+		 && f->key == NULL) {
+			int i = lookup_attr (COB_TYPE_NUMERIC_DISPLAY, 0, 0, 0, NULL, 0);
+			output_local ("static unsigned char\t%s%s_recnum[12+1] = \"000000000000\";\n",
+				CB_PREFIX_SEQUENCE, f->cname);
+			output_local ("static cob_field %s%s_recnum = { 12, (cob_u8_ptr)%s%s_recnum, &%s%d };\n",
+				CB_PREFIX_FIELD, f->cname,
+				CB_PREFIX_SEQUENCE, f->cname,
+				CB_PREFIX_ATTR, i);
 		}
-	}
-	if (f->flag_global) {
-		output_storage ("static cob_file\t\t*%s%s = NULL;\n",
-			CB_PREFIX_FILE, f->cname);
-		output_storage ("static unsigned char\t%s%s_status[4];\n",
-			CB_PREFIX_FILE, f->cname);
-	} else {
-		output_local ("static cob_file\t\t*%s%s = NULL;\n",
-			CB_PREFIX_FILE, f->cname);
-		output_local ("static unsigned char\t%s%s_status[4];\n",
-			CB_PREFIX_FILE, f->cname);
-	}
-	if (f->organization == COB_ORG_RELATIVE
-	 && f->key == NULL) {
-		int i = lookup_attr (COB_TYPE_NUMERIC_DISPLAY, 0, 0, 0, NULL, 0);
-		output_local ("static unsigned char\t%s%s_recnum[12+1] = \"000000000000\";\n",
-			CB_PREFIX_SEQUENCE, f->cname);
-		output_local ("static cob_field %s%s_recnum = { 12, (cob_u8_ptr)%s%s_recnum, &%s%d };\n",
-			CB_PREFIX_FIELD, f->cname,
-			CB_PREFIX_SEQUENCE, f->cname,
-			CB_PREFIX_ATTR, i);
 	}
 
 	if (f->code_set) {
@@ -8501,21 +8483,29 @@ output_file_allocation (struct cb_file *f)
 static void
 output_key_components (struct cb_file* f, struct cb_key_component* key_component, int key)
 {
+	int		parts;
+	struct cb_key_component* comp = key_component;
 	if (key_component != NULL) {
-		int			i_keycomp;
-		for (i_keycomp = 0;
-			key_component != NULL;
-			key_component = key_component->next, ++i_keycomp) {
-			output_prefix ();
-			output ("(%s%s + %d)->component[%d] = ",
-				CB_PREFIX_KEYS, f->cname, key, i_keycomp);
-			output_param (key_component->component, -1);
-			output (";");
+		for (parts = 0; comp != NULL; comp = comp->next, ++parts);
+		output (",");
+		if (parts > 1) {
 			output_newline ();
+			output_indent_level += 18;
+			output_prefix ();
 		}
-		output_line ("(%s%s + %d)->count_components = %d;",
-			CB_PREFIX_KEYS, f->cname, key, i_keycomp);
+		output ("%d",parts);
+		for (comp = key_component; comp != NULL; comp = comp->next) {
+			output (",");
+			output_param (comp->component, -1);
+		}
+		if (parts > 1) {
+			output_indent_level -= 18;
+		}
+	} else {
+		output (",0,NULL");
 	}
+	output (");");
+	output_newline ();
 }
 
 static void
@@ -8523,213 +8513,218 @@ output_file_initialization (struct cb_file *f)
 {
 	struct cb_alt_key	*l;
 	int			nkeys;
-	int			features;
-	char			key_ptr[64];
+	char		nxt[8];
+	char		features[128];
+	char		file_name[64],extname[64];
+	const char	*org_name = "0";
+	const char	*acc_name = "0";
+	const char	*fmt_name = "0";
+	const char	*file_features = "0";
+	switch (f->organization) {
+	case COB_ORG_SEQUENTIAL:
+		org_name = "COB_ORG_SEQUENTIAL";
+		break;
+	case COB_ORG_RELATIVE:
+		org_name = "COB_ORG_RELATIVE";
+		break;
+	case COB_ORG_LINE_SEQUENTIAL:
+		org_name = "COB_ORG_LINE_SEQUENTIAL";
+		break;
+	case COB_ORG_INDEXED:
+		org_name = "COB_ORG_INDEXED";
+		break;
+	case COB_ORG_SORT:
+		org_name = "COB_ORG_SORT";
+		break;
+	}
+	switch (f->access_mode) {
+	case COB_ACCESS_SEQUENTIAL:
+		acc_name = "COB_ACCESS_SEQUENTIAL";
+		break;
+	case COB_ACCESS_RANDOM:
+		acc_name = "COB_ACCESS_RANDOM";
+		break;
+	case COB_ACCESS_DYNAMIC:
+		acc_name = "COB_ACCESS_DYNAMIC";
+		break;
+	}
+	if (cb_mf_files) {
+		fmt_name = "COB_FILE_IS_MF";
+		if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
+			file_features = "COB_FILE_LS_NULLS";
+		}
+	} else {
+		fmt_name = "COB_FILE_IS_DFLT";
+	}
+	strcpy(features,"");
+	strcpy(nxt,"");
+	if (f->file_status) {
+		sprintf(&features[strlen(features)],"%sCOB_SELECT_FILE_STATUS",nxt);
+		strcpy(nxt,"|");
+	}
+	if (f->linage) {
+		sprintf(&features[strlen(features)],"%sCOB_SELECT_LINAGE",nxt);
+		strcpy(nxt,"|");
+	}
+	if (f->flag_ext_assign) {
+		sprintf(&features[strlen(features)],"%sCOB_SELECT_EXTERNAL",nxt);
+		strcpy(nxt,"|");
+	}
+	if (f->special) { /* Special assignment */
+		sprintf(&features[strlen(features)],"%s%d",nxt,f->special);
+		strcpy(nxt,"|");
+	}
+	if (features[0] < ' ')
+		strcpy(features,"0");
 
 	output_line ("/* File initialization for %s */", f->name);
+	sprintf (file_name, "%s%s", CB_PREFIX_FILE, f->cname);
 	if (f->organization == COB_ORG_RELATIVE
 	 || f->organization == COB_ORG_INDEXED) {
 		nkeys = 1;
 		for (l = f->alt_key_list; l; l = l->next) {
 			nkeys++;
 		}
-		sprintf (key_ptr, "&%s%s", CB_PREFIX_KEYS, f->cname);
 	} else {
 		nkeys = 0;
-		strcpy(key_ptr,"NULL");
 	}
 	if (f->flag_external) {
-		output_line ("cob_file_external_addr (\"%s\", &%s%s, %s, %d, %d);",
-							f->cname,
-							CB_PREFIX_FILE, f->cname,
-							key_ptr, nkeys, f->linage?1:0);
-		output_line ("if (cob_glob_ptr->cob_initial_external)");
-		output_block_open ();
+		sprintf(extname,"\"%s\"",file_name);
 	} else {
-		output_line ("cob_file_malloc (&%s%s, %s, %d, %d);",
-							CB_PREFIX_FILE, f->cname,
-							key_ptr, nkeys, f->linage?1:0);
+		strcpy(extname,"NULL");
 	}
+	output_line ("cob_file_create (&%s, %s, \"%s\",",file_name,extname,f->name);
+	output_indent_level += 17;
+	output_line ("%s,%s,%d,",org_name,acc_name,f->optional);
+	output_line ("%s,%s,%d,%d,%d,",fmt_name,features,nkeys,f->record_min,f->record_max);
+	output_prefix ();
+	output_param (f->assign, -1);
+	output (",");
+	output_param (CB_TREE (f->record), -1);
+	output (");");
+	output_indent_level -= 17;
+	output_newline ();
+
 	nkeys = 1;
 	/* Output RELATIVE/RECORD KEY's */
 	if (f->organization == COB_ORG_RELATIVE
 	 || f->organization == COB_ORG_INDEXED) {
 		output_prefix ();
-		output ("%s%s->field = ", CB_PREFIX_KEYS, f->cname);
+		output ("cob_file_set_key (%s,0,",file_name);
 		if (f->organization == COB_ORG_RELATIVE
 		 && f->key == NULL) {
 			output ("&%s%s_recnum", CB_PREFIX_FIELD, f->cname);
 		} else {
 			output_param (f->key, -1);
 		}
-		output (";");
-		output_newline ();
-		output_line ("%s%s->tf_duplicates = 0;", CB_PREFIX_KEYS, f->cname);
+		output (",0,0,-1,NULL");
 		output_key_components (f, f->component_list, 0);
-		if (f->key) {
-			output_line ("%s%s->offset = %d;", CB_PREFIX_KEYS, f->cname,
-				cb_code_field (f->key)->offset);
-		} else {
-			output_line ("%s%s->offset = 0;", CB_PREFIX_KEYS, f->cname);
-		}
+
 		for (l = f->alt_key_list; l; l = l->next) {
 			output_prefix ();
-			output ("(%s%s + %d)->field = ", CB_PREFIX_KEYS, f->cname,
-				nkeys);
+			output ("cob_file_set_key (%s,%d,",file_name,nkeys);
 			output_param (l->key, -1);
-			output (";");
-			output_newline ();
-			output_line ("(%s%s + %d)->tf_duplicates = %d;", CB_PREFIX_KEYS,
-				f->cname, nkeys, l->duplicates);
-			output_line ("(%s%s + %d)->tf_suppress = %d;", CB_PREFIX_KEYS,
-				f->cname, nkeys, l->tf_suppress);
-			output_line ("(%s%s + %d)->char_suppress = %d;", CB_PREFIX_KEYS, f->cname,
-				nkeys, l->char_suppress);
-			output_line ("(%s%s + %d)->offset = %d;", CB_PREFIX_KEYS,
-				f->cname, nkeys, cb_code_field (l->key)->offset);
+			output (",%d,0",l->duplicates);
+			if (l->suppress
+			 && CB_LITERAL_P(l->suppress)) {
+				struct cb_literal	*lit = CB_LITERAL (l->suppress);
+				output (",%d,\"%.*s\"",lit->size,lit->size,lit->data);
+			} else
+			if (l->tf_suppress) {
+				if (isprint((char)l->char_suppress))
+					output (",0,(const unsigned char *)\"%c\"",l->char_suppress);
+				else
+					output (",0,(const unsigned char *)\"\\%03o\"",l->char_suppress);
+			} else {
+				output (",-1,NULL");
+			}
 			output_key_components (f, l->component_list, nkeys);
 			nkeys++;
 		}
 	}
 
-	output_line ("%s%s->select_name = (const char *)\"%s\";", CB_PREFIX_FILE,
-		     f->cname, f->name);
-	if (f->flag_external && !f->file_status) {
-		output_line ("%s%s->file_status = cob_external_addr (\"%s%s_status\", 4);",
-			     CB_PREFIX_FILE, f->cname, CB_PREFIX_FILE, f->cname);
-	} else {
-		output_line ("%s%s->file_status = %s%s_status;", CB_PREFIX_FILE,
-			     f->cname, CB_PREFIX_FILE, f->cname);
-		output_line ("memset (%s%s_status, '0', 2);", CB_PREFIX_FILE,
-			     f->cname);
+	if (f->flag_line_adv
+	 || f->record_depending
+	 || strcmp(file_features,"0") != 0) {
+		output_prefix ();
+		output ("cob_file_set_attr (%s,",file_name);
+		if (f->record_depending) {
+			output_param (f->record_depending, -1);
+		} else {
+			output ("NULL");
+		}
+		output (",%d,%s", f->flag_line_adv,file_features);
+		output (",NULL");	/* codeset */
+		output (",NULL");	/* password */
+		output (",NULL");	/* cryptkey */
+		output (");");
+		output_newline ();
 	}
-	output_prefix ();
-	output ("%s%s->assign = ", CB_PREFIX_FILE, f->cname);
-	output_param (f->assign, -1);
-	output (";");
-	output_newline ();
-	output_prefix ();
-	output ("%s%s->record = ", CB_PREFIX_FILE, f->cname);
-	output_param (CB_TREE (f->record), -1);
-	output (";");
-	output_newline ();
-	output_prefix ();
-	output ("%s%s->variable_record = ", CB_PREFIX_FILE, f->cname);
-	if (f->record_depending) {
-		output_param (f->record_depending, -1);
-	} else {
-		output ("NULL");
-	}
-	output (";");
-	output_newline ();
-	output_line ("%s%s->record_min = %d;", CB_PREFIX_FILE,
-		     f->cname, f->record_min);
-	output_line ("%s%s->record_max = %d;", CB_PREFIX_FILE,
-		     f->cname, f->record_max);
 
-	if (f->organization == COB_ORG_RELATIVE
-	 || f->organization == COB_ORG_INDEXED) {
-		output_line ("%s%s->nkeys = %d;", CB_PREFIX_FILE,
-			     f->cname, nkeys);
-		output_line ("%s%s->keys = %s%s;", CB_PREFIX_FILE,
-			     f->cname, CB_PREFIX_KEYS, f->cname);
-	} else {
-		output_line ("%s%s->nkeys = 0;", CB_PREFIX_FILE, f->cname);
-		output_line ("%s%s->keys = NULL;", CB_PREFIX_FILE, f->cname);
+	if (f->lock_mode) {
+		strcpy(nxt,"");
+		output_prefix ();
+		output ("cob_file_set_lock (%s,",file_name);
+		if ((f->lock_mode & COB_LOCK_OPEN_EXCLUSIVE)) {
+			output("%sCOB_LOCK_OPEN_EXCLUSIVE",nxt);
+			strcpy(nxt,"|");
+		}
+		if ((f->lock_mode & COB_LOCK_EXCLUSIVE)) {
+			output("%sCOB_LOCK_EXCLUSIVE",nxt);
+			strcpy(nxt,"|");
+		}
+		if ((f->lock_mode & COB_LOCK_MANUAL)) {
+			output("%sCOB_LOCK_MANUAL",nxt);
+			strcpy(nxt,"|");
+		}
+		if ((f->lock_mode & COB_LOCK_AUTOMATIC)) {
+			output("%sCOB_LOCK_AUTOMATIC",nxt);
+			strcpy(nxt,"|");
+		}
+		if ((f->lock_mode & COB_LOCK_MULTIPLE)) {
+			output("%sCOB_LOCK_MULTIPLE",nxt);
+			strcpy(nxt,"|");
+		}
+		if ((f->lock_mode & COB_LOCK_ROLLBACK)) {
+			output("%sCOB_LOCK_ROLLBACK",nxt);
+			strcpy(nxt,"|");
+		}
+		if (nxt[0] < ' ')
+			output("%d",f->lock_mode);
+		output (");");
+		output_newline ();
 	}
-	output_line ("%s%s->file = NULL;", CB_PREFIX_FILE, f->cname);
 
 	if (f->linage) {
-		output_line ("lingptr = %s%s->linorkeyptr;",
-				CB_PREFIX_FILE, f->cname);
 		output_prefix ();
-		output ("lingptr->linage = ");
+		output ("cob_file_set_linage (%s,",file_name);
 		output_param (f->linage, -1);
-		output (";");
-		output_newline ();
-		output_prefix ();
-		output ("lingptr->linage_ctr = ");
+		output (",");
 		output_param (f->linage_ctr, -1);
-		output (";");
-		output_newline ();
+		output (",");
 		if (f->latfoot) {
-			output_prefix ();
-			output ("lingptr->latfoot = ");
 			output_param (f->latfoot, -1);
-			output (";");
-			output_newline ();
 		} else {
-			output_line ("lingptr->latfoot = NULL;");
+			output ("NULL");
 		}
+		output (",");
+		output_newline ();
+		output_indent_level += 18;
+		output_prefix ();
 		if (f->lattop) {
-			output_prefix ();
-			output ("lingptr->lattop = ");
 			output_param (f->lattop, -1);
-			output (";");
-			output_newline ();
 		} else {
-			output_line ("lingptr->lattop = NULL;");
+			output ("NULL");
 		}
+		output (",");
 		if (f->latbot) {
-			output_prefix ();
-			output ("lingptr->latbot = ");
 			output_param (f->latbot, -1);
-			output (";");
-			output_newline ();
 		} else {
-			output_line ("lingptr->latbot = NULL;");
+			output ("NULL");
 		}
-		output_line ("lingptr->lin_lines = 0;");
-		output_line ("lingptr->lin_foot = 0;");
-		output_line ("lingptr->lin_top = 0;");
-		output_line ("lingptr->lin_bot = 0;");
-	}
-
-	output_line ("%s%s->fd = -1;", CB_PREFIX_FILE, f->cname);
-	output_line ("%s%s->organization = %d;", CB_PREFIX_FILE, f->cname,
-		     f->organization);
-	output_line ("%s%s->access_mode = %d;", CB_PREFIX_FILE, f->cname,
-		     f->access_mode);
-	output_line ("%s%s->lock_mode = %d;", CB_PREFIX_FILE, f->cname,
-		     f->lock_mode);
-	output_line ("%s%s->open_mode = 0;", CB_PREFIX_FILE, f->cname);
-	output_line ("%s%s->flag_optional = %d;", CB_PREFIX_FILE, f->cname,
-		     f->optional);
-	output_line ("%s%s->flag_line_adv = %d;", CB_PREFIX_FILE, f->cname,
-		     f->flag_line_adv);
-	features = 0;
-	if (f->file_status) {
-		features |= COB_SELECT_FILE_STATUS;
-	}
-	if (f->linage) {
-		features |= COB_SELECT_LINAGE;
-	}
-	if (f->flag_ext_assign) {
-		features |= COB_SELECT_EXTERNAL;
-	}
-	if (f->special) {
-		/* Special assignment */
-		features |= f->special;
-	}
-	output_line ("%s%s->flag_select_features = %d;", CB_PREFIX_FILE, f->cname,
-		     features);
-
-	/* These may get set with values via some compile option in the future */
-	if (cb_mf_files) {
-		output_line ("%s%s->file_format = COB_FILE_IS_MF;", CB_PREFIX_FILE, f->cname);
-		if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
-			output_line ("%s%s->file_features = COB_FILE_LS_NULLS;", CB_PREFIX_FILE, f->cname);
-		} else {
-			output_line ("%s%s->file_features = 0;", CB_PREFIX_FILE, f->cname);
-		}
-	} else {
-		output_line ("%s%s->file_format = 255;", CB_PREFIX_FILE, f->cname);
-		output_line ("%s%s->file_features = 0;", CB_PREFIX_FILE, f->cname);
-	}
-	/**********************************************************************/
-
-	if (f->flag_external) {
-		output_block_close ();
+		output (");");
+		output_indent_level -= 18;
+		output_newline ();
 	}
 
 	if (f->flag_sql_xfd
@@ -8739,6 +8734,7 @@ output_file_initialization (struct cb_file *f)
 		}
 		output_xfd_file (f);
 	}
+	output_line ("cob_file_complete (%s);",file_name);
 	output_newline ();
 }
 
@@ -11723,15 +11719,8 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			output_line ("cob_close (%s%s, NULL, COB_CLOSE_NORMAL, 1);",
 					CB_PREFIX_FILE, fl->cname);
 			if (!fl->flag_external) {
-				char			key_ptr[64];
-				if (fl->organization == COB_ORG_RELATIVE
-				 || fl->organization == COB_ORG_INDEXED) {
-					sprintf (key_ptr, "&%s%s", CB_PREFIX_KEYS, fl->cname);
-				} else {
-					strcpy (key_ptr,"NULL");
-				}
-				output_line ("cob_file_free (&%s%s,%s);",
-					CB_PREFIX_FILE, fl->cname, key_ptr);
+				output_line ("cob_file_destroy (&%s%s);",
+					CB_PREFIX_FILE, fl->cname);
 			}
 		} else {
 			output_line ("cob_cache_free (%s%s);",

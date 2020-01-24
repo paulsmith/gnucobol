@@ -653,7 +653,7 @@ lmdb_start_internal (cob_file *f, const int cond, cob_field *key,
 			ret = mdb_cursor_get(p->cursor[p->key_index], &p->key, &p->data, MDB_LAST);
 		} else if (db_cmpkey(f, p->key.mv_data, f->record->data, p->key_index, partlen) !=0) {
 			ret = mdb_cursor_get(p->cursor[p->key_index], &p->key, &p->data, MDB_PREV);
-		} else if (f->keys[p->key_index].flag) {
+		} else if (f->keys[p->key_index].tf_ascending == COB_ASCENDING) {
 			ret = mdb_cursor_get(p->cursor[p->key_index], &p->key, &p->data, MDB_NEXT_NODUP);
 			if (ret != MDB_SUCCESS) {
 				ret = mdb_cursor_get(p->cursor[p->key_index], &p->key, &p->data, MDB_LAST);

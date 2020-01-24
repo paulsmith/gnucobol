@@ -1,4 +1,11 @@
 
+2020-01-24  Ron Norman <rjn@inglenet.com>
+
+	* parser.y: Add SUPPRESS WHEN "string"
+	* tree.h: Removed CB_PREFIX_KEYS and added 'suppress' to cb_alt_key
+	* codegen.c: Changed to no longer reference field in cob_file
+			All setup for cob_file is now done with function calls
+
 2020-01-12  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, config.def: bug #513 (partial) added dialect option

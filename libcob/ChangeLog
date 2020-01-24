@@ -1,4 +1,16 @@
 
+2020-01-24  Ron Norman <rjn@inglenet.com>
+	* Makefile.am: --version-info changed to 5:0:0
+	* common.h: cob_file and cob_file_key updated
+				some #define replaced by enum
+				COB_FILE_VERSION is now 5
+	* common.c: Changes to match updated cob_file_key
+	* fileio.c: New routines added for setup of cob_file and cob_file_key
+				Now skips records having SUPPRESS WHEN "string"
+				Several place holders added and code will come later
+	* fextfh.c: Changes to match updated cob_file
+	* flmdb.c: Changes to match updated cob_file
+
 2020-01-22  Ron Norman <rjn@inglenet.com>
 	* coblocal.h: Added cob_bdb_byteorder
 	* common.h: Added flags for BDB Byteorder

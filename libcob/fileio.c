@@ -2259,6 +2259,9 @@ cob_file_save_status (cob_file *f, cob_field *fnstatus, const int status)
 	if (f->fcd)
 		cob_file_fcd_sync (f);			/* Copy cob_file to app's FCD */
 	f->last_operation = 0;				/* Avoid double count/trace */
+	f->retry_mode = f->dflt_retry;
+	f->retry_times = f->dflt_times;
+	f->retry_seconds = f->dflt_seconds;
 }
 
 /* Regular file */
@@ -2304,7 +2307,7 @@ file_linage_check (cob_file *f)
 {
 	cob_linage	*lingptr;
 
-	lingptr = f->linorkeyptr;
+	lingptr = f->linage;
 	lingptr->lin_lines = cob_get_int (lingptr->linage);
 	if (lingptr->lin_lines < 1) {
 		goto linerr;
@@ -2350,7 +2353,7 @@ cob_linage_write_opt (cob_file *f, const int opt)
 	int			ret;
 
 	fp = (FILE *)f->file;
-	lingptr = f->linorkeyptr;
+	lingptr = f->linage;
 	if (unlikely (opt & COB_WRITE_PAGE)) {
 		i = cob_get_int (lingptr->linage_ctr);
 		if (i == 0) {
@@ -2872,7 +2875,7 @@ cob_file_open (cob_file_api *a, cob_file *f, char *filename, const int mode, con
 			return COB_STATUS_57_I_O_LINAGE;
 		}
 		f->flag_needs_top = 1;
-		lingptr = f->linorkeyptr;
+		lingptr = f->linage;
 		cob_set_int (lingptr->linage_ctr, 1);
 	}
 	cob_set_file_format(f, file_open_io_env, 1, NULL);		/* Set file format */
@@ -3328,7 +3331,7 @@ lineseq_write (cob_file_api *a, cob_file *f, const int opt)
 		if (f->flag_needs_top) {
 			int i;
 			f->flag_needs_top = 0;
-			lingptr = f->linorkeyptr;
+			lingptr = f->linage;
 			for (i = 0; i < lingptr->lin_top; ++i) {
 				COB_CHECKED_PUTC ('\n', (FILE *)f->file);
 			}
@@ -4289,6 +4292,259 @@ cob_file_unlock (cob_file *f)
 /* Global functions */
 
 /*
+ * Allocate memory for cob_file
+ */
+void
+cob_file_create (
+	cob_file **	pfl, 
+	const char *exname,
+	const char *select_name,
+	const int	fileorg,
+	const int	accessmode,
+	const int	optional,
+	const int	format,
+	const int	select_features,
+	const int	nkeys,
+	const int	minrcsz,
+	const int	maxrcsz,
+	cob_field *	assign,
+	cob_field *	record)
+{
+	cob_file	*fl;
+	int	extra = 4;
+	if (exname == NULL) {
+		fl = cob_cache_malloc (sizeof (cob_file) + extra);
+		fl->file_version = COB_FILE_VERSION;
+	} else {
+		fl = cob_external_addr (exname, sizeof (cob_file) + extra);
+		if (fl->file_version == 0)
+			fl->file_version = COB_FILE_VERSION;
+	}
+	if (!fl->flag_ready) {
+		if (nkeys > 0
+		 && fl->keys == NULL) {
+			fl->keys = cob_cache_malloc (sizeof (cob_file_key) * nkeys);
+		}
+		fl->nkeys = nkeys;
+		memset(fl->file_status,'0',4);
+		fl->select_name = select_name;
+		fl->organization = fileorg;
+		fl->access_mode = accessmode;
+		fl->flag_optional = optional;
+		fl->file_format = format;
+		fl->flag_select_features = select_features;
+		fl->assign = assign;
+		fl->record = record;
+		fl->record_min = minrcsz;
+		fl->record_max = maxrcsz;
+		fl->fd = -1;
+	}
+	*pfl = fl;
+}
+
+/*
+ * Free memory for cob_file
+ */
+void
+cob_file_destroy (cob_file **pfl)
+{
+	cob_file	*fl;
+	if (pfl != NULL 
+	 && *pfl != NULL) {
+		fl = *pfl;
+		if (fl->linage) {
+			cob_cache_free (fl->linage);
+			fl->linage = NULL;
+		}
+		if (fl->keys) {
+			cob_cache_free (fl->keys);
+			fl->keys = NULL;
+		}
+		cob_cache_free (fl);
+		*pfl = NULL;
+	}
+}
+
+/*
+ * Set some attributes of the file
+ */
+void
+cob_file_set_attr (
+	cob_file *	fl,
+	cob_field *	varsize,
+	const int	lineadv,
+	const int	features,
+	const unsigned char	*codeset,
+	cob_field * password,
+	cob_field * cryptkey)
+{
+	if (fl->flag_ready)
+		return;
+	COB_UNUSED(codeset);
+	fl->variable_record = varsize;
+	fl->flag_line_adv = lineadv;
+	fl->file_features = features;
+	if(password) {
+		/* Nothing implemented at this time */
+	}
+	if(cryptkey) {
+		/* Nothing implemented at this time */
+	}
+	if(codeset) {
+		/* Nothing implemented at this time */
+	}
+}
+
+/*
+ * Define an index of the file
+ */
+void
+cob_file_set_key (
+	cob_file *	fl,
+	const int	keyn,
+	cob_field *	key,
+	const int	dups,
+	const int	ascdesc,
+	const int	len_suppress,
+	const unsigned char	*suppress,
+	const int	parts,
+	...)				/* cob_field * for each component */
+{
+	cob_field	*kp;
+	va_list     args;
+	int			i;
+
+	if (keyn > fl->nkeys
+	 || fl->flag_ready)
+		return;
+	fl->keys[keyn].tf_ascending = COB_ASCENDING;
+	fl->keys[keyn].field = key;
+	if (key)
+		fl->keys[keyn].offset = key->data - fl->record->data;
+	else
+		fl->keys[keyn].offset = 0;
+	fl->keys[keyn].tf_duplicates = dups;
+	fl->keys[keyn].tf_ascending = ascdesc;
+	if (len_suppress < 0
+	 || suppress == NULL) {
+		fl->keys[keyn].tf_suppress = 0;
+		fl->keys[keyn].char_suppress = 0;
+	} else  {
+		if (len_suppress == 0) {
+			fl->keys[keyn].tf_suppress = 1;
+			fl->keys[keyn].char_suppress = (unsigned char)*suppress;
+		} else {
+			fl->keys[keyn].len_suppress = len_suppress;
+			fl->keys[keyn].str_suppress = (unsigned char*)suppress;
+		}
+	}
+	fl->keys[keyn].count_components = parts;
+	va_start (args, parts);
+	for (i=0; i < parts && i < COB_MAX_KEYCOMP; i++) {
+		kp = va_arg (args, cob_field *);
+		fl->keys[keyn].component[i] = kp;
+		if (i == 0)
+			fl->keys[keyn].offset = kp->data - fl->record->data;
+	}
+	va_end (args);
+}
+
+/*
+ * Extra Define for index of the file
+ */
+void
+cob_file_set_key_extra (
+	cob_file *	fl,
+	const int	keyn,
+	const int	compress,
+	const int	encrypt,
+	cob_field *	password,
+	const unsigned char	*collate)
+{
+	COB_UNUSED(compress);
+	COB_UNUSED(encrypt);
+	COB_UNUSED(collate);
+
+	if (keyn > fl->nkeys
+	 || fl->flag_ready)
+		return;
+	if(password) {
+		/* Nothing implemented at this time */
+	}
+}
+
+/*
+ * Set the file LINAGE
+ */
+void
+cob_file_set_linage (
+	cob_file *	fl,
+	cob_field	*linage,		/* LINAGE */
+	cob_field	*linage_ctr,	/* LINAGE-COUNTER */
+	cob_field	*latfoot,		/* LINAGE FOOTING */
+	cob_field	*lattop,		/* LINAGE AT TOP */
+	cob_field	*latbot)		/* LINAGE AT BOTTOM */
+{
+	cob_linage *l;
+	if (fl->linage == NULL) {
+		fl->linage = cob_cache_malloc (sizeof (cob_linage));
+	}
+	l = (cob_linage *)fl->linage;
+	l->linage = linage;
+	l->linage_ctr = linage_ctr;
+	l->latfoot = latfoot;
+	l->lattop = lattop;
+	l->latbot = latbot;
+	l->lin_lines = 0;
+	l->lin_foot = 0;
+	l->lin_top = 0;
+	l->lin_bot = 0;
+}
+
+/*
+ * Set the file lock/retry option
+ */
+void
+cob_file_set_retry (
+	cob_file *	fl,
+	const int	mode,
+	const int	value)
+{
+	fl->retry_mode = mode;
+	if (mode == COB_RETRY_TIMES)
+		fl->retry_times = value;
+	else if (mode == COB_RETRY_SECONDS)
+		fl->retry_seconds = value;
+
+	if (!fl->flag_ready) {
+		fl->dflt_retry = mode;
+		if (mode == COB_RETRY_TIMES)
+			fl->dflt_times = value;
+		else if (mode == COB_RETRY_SECONDS)
+			fl->dflt_seconds = value;
+	}
+}
+
+/*
+ * Set the file lock option
+ */
+void
+cob_file_set_lock (
+	cob_file *	fl,
+	const int	mode)
+{
+	fl->lock_mode = mode;
+}
+
+/*
+ * Setup of the file is now complete 
+ */
+void
+cob_file_complete ( cob_file * fl)
+{
+	fl->flag_ready = 1;
+}
+/*
  * Allocate memory for 'IS EXTERNAL' cob_file
  */
 void
@@ -4311,8 +4567,8 @@ cob_file_external_addr (const char *exname,
 	}
 
 	if (linage > 0
-	 && fl->linorkeyptr == NULL) {
-		fl->linorkeyptr = cob_cache_malloc (sizeof (cob_linage));
+	 && fl->linage == NULL) {
+		fl->linage = cob_cache_malloc (sizeof (cob_linage));
 	}
 	*pfl = fl;
 }
@@ -4343,7 +4599,7 @@ cob_file_malloc (cob_file **pfl, cob_file_key **pky,
 	}
 
 	if (linage > 0) {
-		fl->linorkeyptr = cob_cache_malloc (sizeof (cob_linage));
+		fl->linage = cob_cache_malloc (sizeof (cob_linage));
 	}
 	*pfl = fl;
 }
@@ -4363,9 +4619,9 @@ cob_file_free (cob_file **pfl, cob_file_key **pky)
 	}
 	if (pfl != NULL && *pfl != NULL) {
 		fl = *pfl;
-		if (fl->linorkeyptr) {
-			cob_cache_free (fl->linorkeyptr);
-			fl->linorkeyptr = NULL;
+		if (fl->linage) {
+			cob_cache_free (fl->linage);
+			fl->linage = NULL;
 		}
 		if (*pfl != NULL) {
 			cob_cache_free (*pfl);
@@ -4714,6 +4970,14 @@ Again:
 		/* If record has suppressed key, skip it */
 		/* This is to catch old VBISAM, ODBC & OCI */
 		idx = f->curkey;
+		if ((idx >= 0 && idx < f->nkeys) 
+		&& f->keys[idx].len_suppress > 0) {
+			pos = cob_savekey (f, idx, f->keys[idx].field->data);
+			if (memcmp(f->keys[idx].field->data, f->keys[idx].str_suppress,
+						f->keys[idx].len_suppress) == 0) {
+				goto Again;
+			}
+		} else
 		if ((idx >= 0 && idx < f->nkeys) 
 		 && f->keys[idx].tf_suppress) {	
 			pos = cob_savekey (f, idx, f->keys[idx].field->data);
@@ -5670,7 +5934,7 @@ cob_file_sort_compare (struct cobitem *k1, struct cobitem *k2, void *pointer)
 					 f->sort_collating);
 		}
 		if (cmp != 0) {
-			return (f->keys[i].flag == COB_ASCENDING) ? cmp : -cmp;
+			return (f->keys[i].tf_ascending == COB_ASCENDING) ? cmp : -cmp;
 		}
 	}
 	unique_copy ((unsigned char *)&u1, k1->unique);
@@ -6267,7 +6531,7 @@ cob_file_sort_init_key (cob_file *f, cob_field *field, const int flag,
 			const unsigned int offset)
 {
 	f->keys[f->nkeys].field = field;
-	f->keys[f->nkeys].flag = flag;
+	f->keys[f->nkeys].tf_ascending = flag;
 	f->keys[f->nkeys].offset = offset;
 	f->nkeys++;
 }
