@@ -8515,7 +8515,9 @@ output_file_initialization (struct cb_file *f)
 	int			nkeys;
 	char		nxt[8];
 	char		features[128];
-	char		file_name[64],extname[64];
+#define FNAME_SIZE	64
+	char		file_name[FNAME_SIZE], extname[FNAME_SIZE + 2];
+#undef FNAME_SIZE
 	const char	*org_name = "0";
 	const char	*acc_name = "0";
 	const char	*fmt_name = "0";
@@ -8556,8 +8558,8 @@ output_file_initialization (struct cb_file *f)
 	} else {
 		fmt_name = "COB_FILE_IS_DFLT";
 	}
-	strcpy(features,"");
-	strcpy(nxt,"");
+	strcpy (features,"");
+	strcpy (nxt,"");
 	if (f->file_status) {
 		sprintf(&features[strlen(features)],"%sCOB_SELECT_FILE_STATUS",nxt);
 		strcpy(nxt,"|");
@@ -8589,11 +8591,11 @@ output_file_initialization (struct cb_file *f)
 		nkeys = 0;
 	}
 	if (f->flag_external) {
-		sprintf(extname,"\"%s\"",file_name);
+		sprintf (extname, "\"%s\"", file_name);
 	} else {
-		strcpy(extname,"NULL");
+		strcpy (extname, "NULL");
 	}
-	output_line ("cob_file_create (&%s, %s, \"%s\",",file_name,extname,f->name);
+	output_line ("cob_file_create (&%s, %s, \"%s\",", file_name, extname, f->name);
 	output_indent_level += 17;
 	output_line ("%s,%s,%d,",org_name,acc_name,f->optional);
 	output_line ("%s,%s,%d,%d,%d,",fmt_name,features,nkeys,f->record_min,f->record_max);
