@@ -706,9 +706,7 @@ AT_CLEANUP
 
 
 AT_SETUP([INDEXED File KEYCHECK])
-AT_KEYWORDS([runfile])
-
-AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
+AT_KEYWORDS([runfile SUPPRESS WHEN])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -1432,7 +1430,9 @@ AT_DATA([prog.cob], [
 # CHECKME do we need -std=mf -w?
 AT_CHECK([$COMPILE -std=mf -w prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [Loading sample data file.
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [Loading sample data file.
 Sample data file load complete.
 Loading sample data file.
 Sample data file load complete.
@@ -1492,6 +1492,7 @@ Key: JOH00000 is 8417     : 1600 BPI
 ], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([SUPPRESS WHEN string])
 AT_KEYWORDS([FILE-IO])
@@ -1895,9 +1896,12 @@ AT_DATA([prog.cob], [
            CLOSE TSPFILE.
 ])
 
-AT_CHECK([cobc -x -std=mf -debug -Wall prog.cob ], [0], [], [])
+# CHECKME do we need -std=mf?
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [Loading sample data file.
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [Loading sample data file.
 WRITE: FOR00000, Duplicate Status: 22 Phone=8009329492.
 Sample data file load complete.
 LIST SAMPLE FILE
@@ -2023,6 +2027,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
+
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0])
 
 AT_CLEANUP
@@ -16656,10 +16663,9 @@ AT_DATA([prog.cob], [
 # AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
 AT_CHECK([$COMPILE -std=mf -fmf-files prog.cob], [0], [], [])
 
-
 AT_CHECK([export DD_INFILE=./inp_data
 export OUTFILE=TEST-FILE
-./prog], [0],
+$COBCRUN_DIRECT ./prog], [0],
 [ Read 1: STATUS IS 00 LENGTH IS 040
        :Record 1................................:
  Read 2: STATUS IS 00 LENGTH IS 008
@@ -17206,7 +17212,7 @@ AT_DATA([prog.cob], [
 # CHECKME do we need -std=mf -w?
 AT_CHECK([$COMPILE -std=mf -w prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [Other Flags 000.
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [Other Flags 000.
 File has 0003 keys.
 Key def  0320 bytes.
 File assigned is 'mytstisam'
