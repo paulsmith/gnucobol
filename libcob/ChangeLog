@@ -1,4 +1,10 @@
 
+2020-01-25  Ron Norman <rjn@inglenet.com>
+	* fileio.c: Skips reading records having SUPPRESS WHEN "string"
+	            and checks for duplicates on (RE)WRITE if there was
+				no WITH DUPLICATES because the underlying file 
+				needs to allow DUPLICATES
+
 2020-01-24  Ron Norman <rjn@inglenet.com>
 	* Makefile.am: --version-info changed to 5:0:0
 	* common.h: cob_file and cob_file_key updated

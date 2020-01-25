@@ -1413,6 +1413,7 @@ typedef struct __cob_file_key {
 	cob_field	*	field;			/* Key field */
 	unsigned int	offset;			/* Offset of field within record */
 	unsigned char	tf_duplicates;	/* WITH DUPLICATES (for RELATIVE/INDEXED) */
+									/* 0=NO DUPS, 1=DUPS OK, 2=NO DUPS precheck */
 	unsigned char	tf_ascending;	/* ASCENDING/DESCENDING (for SORT)*/
 	unsigned char	tf_suppress;	/* supress keys where all chars = char_suppress */
 	unsigned char	char_suppress;	/* key supression character  */
@@ -1520,7 +1521,8 @@ typedef struct __cob_file {
 	unsigned int		flag_big_endian:1;	/* Force use of big-endian in BDB */
 	unsigned int		flag_little_endian:1;/* Force use of little-endian in BDB */
 	unsigned int		flag_ready:1;		/* cob_file has been built completely */
-	unsigned int		unused_bits:21;
+	unsigned int		flag_write_chk_dups:1;/* Do precheck for DUPLICATES on WRITE */
+	unsigned int		unused_bits:20;
 
 	cob_field		*last_key;		/* Last field used as 'key' for I/O */
 	unsigned char		last_operation;		/* Most recent I/O operation */

@@ -8568,7 +8568,7 @@ output_file_initialization (struct cb_file *f)
 		sprintf(&features[strlen(features)],"%sCOB_SELECT_LINAGE",nxt);
 		strcpy(nxt,"|");
 	}
-	if (f->flag_ext_assign) {
+	if (f->flag_external) {
 		sprintf(&features[strlen(features)],"%sCOB_SELECT_EXTERNAL",nxt);
 		strcpy(nxt,"|");
 	}

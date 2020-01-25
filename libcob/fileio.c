@@ -262,6 +262,21 @@ void cob_seqra_init_fileio (cob_file_api *);
 
 /* Local functions */
 
+static int
+isdirname (char *value)
+{
+#ifdef	_WIN32
+	if (value[0] == '\\'
+	 || value[1] == ':'
+	 || value[0] == '/') 
+		return 1;
+#else
+	if (value[0] == '/') 
+		return 1;
+#endif
+	return 0;
+}
+
 static COB_INLINE int
 get_io_ptr (cob_file *f)
 {
@@ -469,10 +484,15 @@ write_file_def (cob_file *f, char *out)
 				}
 			}
 			k += sprintf(&out[k],") ");
-			if(f->keys[idx].tf_duplicates) {
+			if (f->keys[idx].tf_duplicates) {
 				k += sprintf(&out[k],"dup%d=Y ",idx+1);
 			}
-			if(f->keys[idx].tf_suppress) {
+			if (f->keys[idx].len_suppress > 0
+			 && f->keys[idx].str_suppress != NULL) {
+				k += sprintf(&out[k],"skip%d='%.*s' ",idx+1,
+								f->keys[idx].len_suppress,f->keys[idx].str_suppress);
+			} else
+			if (f->keys[idx].tf_suppress) {
 				if (isalnum(f->keys[idx].char_suppress)
 				 || f->keys[idx].char_suppress == '@'
 				 || f->keys[idx].char_suppress == '#'
@@ -1102,7 +1122,7 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 {
 	int		i,j,settrue,ivalue,nkeys,keyn,xret,idx;
 	unsigned int	maxrecsz;
-	char	option[64],value[COB_FILE_BUFF];
+	char	qt,option[64],value[COB_FILE_BUFF];
 
 	if (ret)
 		*ret = 0;
@@ -1127,6 +1147,7 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 			}
 			option[j] = 0;
 			value[0] = 0;
+			qt = 0;
 			settrue = 1;
 			if(strncasecmp(option,"no-",3) == 0) {
 				memmove(option,&option[3],j);
@@ -1153,6 +1174,7 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 					if(defstr[i] == ')') i++;
 					value[j] = 0;
 				} else if(defstr[i] == '"') {
+					qt = '"';
 					i++;
 					for(j=0; j < sizeof(value)-1 
 						&& defstr[i] != '"'
@@ -1162,6 +1184,7 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 					value[j] = 0;
 					if(defstr[i] == '"') i++;
 				} else if(defstr[i] == '\'') {
+					qt = '\'';
 					i++;
 					for(j=0; j < sizeof(value)-1 
 						&& defstr[i] != '\''
@@ -1330,13 +1353,7 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 				continue;
 			}
 			if(strcasecmp(option,"schema") == 0) {
-#ifdef	_WIN32
-				if (value[0] == '\\'
-				 || value[1] == ':'
-				 || value[0] == '/') {
-#else
-				if (value[0] == '/') {
-#endif
+				if (isdirname(value)) {
 					f->xfdschema = cob_strdup (value);
 				} else {
 					f->xfdschema = cob_cache_malloc (strlen(value) + strlen(COB_SCHEMA_DIR) + 8);
@@ -1581,8 +1598,8 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 					if(keyn > nkeys)
 						continue;
 					idx = keyn - 1;
-					if (value[0] == '\'') {
-						subchr = value[1];
+					if (qt != 0) {
+						subchr = value[0];
 					} else if (value[0] == 'x') {
 						subchr = (unsigned char) strtol (&value[2], NULL, 16);
 					} else {
@@ -1594,6 +1611,17 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 						break;
 					f->keys[idx].char_suppress = subchr;
 					f->keys[idx].tf_suppress = 1;
+				} else if (strncasecmp(option,"skip",4) == 0) {
+					keyn = atoi (&option[4]);
+					if(keyn > nkeys)
+						continue;
+					idx = keyn - 1;
+					if (f->flag_keycheck
+					 && !updt
+					 && !f->keys[idx].tf_suppress)
+						break;
+					f->keys[idx].str_suppress = (unsigned char *)cob_strdup (value);
+					f->keys[idx].len_suppress = strlen (value);
 				}
 			}
 		}
@@ -4311,12 +4339,14 @@ cob_file_create (
 	cob_field *	record)
 {
 	cob_file	*fl;
+	int select = select_features;
 	int	extra = 4;
 	if (exname == NULL) {
 		fl = cob_cache_malloc (sizeof (cob_file) + extra);
 		fl->file_version = COB_FILE_VERSION;
 	} else {
 		fl = cob_external_addr (exname, sizeof (cob_file) + extra);
+		select |= COB_SELECT_EXTERNAL;
 		if (fl->file_version == 0)
 			fl->file_version = COB_FILE_VERSION;
 	}
@@ -4332,7 +4362,7 @@ cob_file_create (
 		fl->access_mode = accessmode;
 		fl->flag_optional = optional;
 		fl->file_format = format;
-		fl->flag_select_features = select_features;
+		fl->flag_select_features = select;
 		fl->assign = assign;
 		fl->record = record;
 		fl->record_min = minrcsz;
@@ -4423,7 +4453,7 @@ cob_file_set_key (
 		fl->keys[keyn].offset = key->data - fl->record->data;
 	else
 		fl->keys[keyn].offset = 0;
-	fl->keys[keyn].tf_duplicates = dups;
+	fl->keys[keyn].tf_duplicates = dups ? 1 : 0;
 	fl->keys[keyn].tf_ascending = ascdesc;
 	if (len_suppress < 0
 	 || suppress == NULL) {
@@ -4436,6 +4466,10 @@ cob_file_set_key (
 		} else {
 			fl->keys[keyn].len_suppress = len_suppress;
 			fl->keys[keyn].str_suppress = (unsigned char*)suppress;
+			if (!dups) {
+				fl->keys[keyn].tf_duplicates = 2;	/* Precheck on RE/WRITE */
+				fl->flag_write_chk_dups = 1;
+			}
 		}
 	}
 	fl->keys[keyn].count_components = parts;
@@ -4927,6 +4961,40 @@ cob_read (cob_file *f, cob_field *key, cob_field *fnstatus, const int read_opts)
 	cob_file_save_status (f, fnstatus, ret);
 }
 
+static int
+cob_chk_dups (cob_file *f)
+{
+	void *savrec;
+	int		k;
+	int		ret = COB_STATUS_00_SUCCESS;
+
+	savrec = cob_malloc (f->record->size);
+	memcpy (savrec, f->record->data, f->record->size);
+
+	for (k = 0; k < f->nkeys; ++k) {
+		if (f->keys[k].tf_duplicates == 2) {
+			memcpy (f->record->data, savrec, f->record->size);
+			if (f->keys[k].len_suppress > 0) {
+				cob_savekey (f, k, f->keys[k].field->data);
+				if (memcmp(f->keys[k].field->data, f->keys[k].str_suppress,
+							f->keys[k].len_suppress) == 0) 
+					continue;
+			}
+			ret = fileio_funcs[get_io_ptr (f)]->read (&file_api, f, f->keys[k].field, 0);
+			if (ret == COB_STATUS_00_SUCCESS
+			 || ret == COB_STATUS_02_SUCCESS_DUPLICATE) {
+				ret = COB_STATUS_22_KEY_EXISTS;
+				break;
+			}
+			ret = COB_STATUS_00_SUCCESS;
+		}
+	}
+
+	memcpy (f->record->data, savrec, f->record->size);
+	cob_free (savrec);
+	return ret;
+}
+
 void
 cob_read_next (cob_file *f, cob_field *fnstatus, const int read_opts)
 {
@@ -5012,6 +5080,8 @@ void
 cob_write (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus,
 	   					const unsigned int check_eop)
 {
+	int		ret;
+
 	f->last_operation = COB_LAST_WRITE;
 	f->last_key = NULL;
 	f->flag_read_done = 0;
@@ -5046,6 +5116,13 @@ cob_write (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus,
 		return;
 	}
 
+	if (f->flag_write_chk_dups) {
+		if ((ret = cob_chk_dups (f))) {
+			cob_file_save_status (f, fnstatus, ret);
+			return;
+		}
+	}
+
 	check_eop_status = check_eop;
 	cob_file_save_status (f, fnstatus,
 		     fileio_funcs[get_io_ptr (f)]->write (&file_api, f, opt));
@@ -5055,7 +5132,7 @@ cob_write (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus,
 void
 cob_rewrite (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus)
 {
-	int	read_done;
+	int	read_done, ret;
 
 	read_done = f->flag_read_done;
 	f->flag_read_done = 0;
@@ -5099,6 +5176,12 @@ cob_rewrite (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus)
 		f->record->size = f->record_max;
 	}
 
+	if (f->flag_write_chk_dups) {
+		if ((ret = cob_chk_dups (f))) {
+			cob_file_save_status (f, fnstatus, ret);
+			return;
+		}
+	}
 	cob_file_save_status (f, fnstatus,
 		     fileio_funcs[get_io_ptr (f)]->rewrite (&file_api, f, opt));
 }
