@@ -740,7 +740,7 @@ get_cursor_from_program (int *line, int *column)
 		if (COB_FIELD_IS_NUMERIC (cursor_field)) {
 			cursor_pos = cob_get_int (cursor_field);
 		} else {
-			char buff[7];
+			char buff[32];
 			int maxsize = cursor_field->size;
 			/* LCOV_EXCL_START */
 			if (unlikely (maxsize != 4 && maxsize != 6)) {
@@ -3526,7 +3526,7 @@ cob_settings_screenio (void)
 	mouseinterval (COB_MOUSE_INTERVAL);
 #endif
 #ifdef NCURSES_MOUSE_VERSION
-	if (curr_setting_mouse_flags != COB_MOUSE_FLAGS) {
+	if ((int)curr_setting_mouse_flags != (int)COB_MOUSE_FLAGS) {
 		mmask_t 	mask_applied = cob_mask_routine;
 		if (COB_MOUSE_FLAGS) {
 			/* COB_MOUSE_FLAGS & 1 --> auto-handling active

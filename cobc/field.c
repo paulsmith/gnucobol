@@ -1256,9 +1256,9 @@ validate_pic (struct cb_field *f)
 		  || f->usage == CB_USAGE_FP_BIN64
 		  || f->usage == CB_USAGE_FP_BIN128
 		  || f->usage == CB_USAGE_LONG_DOUBLE)) {
-			struct cb_field *p;
-			for (p = f->parent; p; p = p->parent) {
-				if (p->flag_synchronized) {
+			struct cb_field *pp;
+			for (pp = f->parent; pp; pp = pp->parent) {
+				if (pp->flag_synchronized) {
 					f->flag_synchronized = 1;
 					break;
 				}

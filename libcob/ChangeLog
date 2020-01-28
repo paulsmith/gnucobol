@@ -1,4 +1,8 @@
 
+2020-01-28  Ron Norman <rjn@inglenet.com>
+	* fileio.c,fbdb.c,fsqlxfd.c: Adding casts to avoid C compile warnings
+	* fextfh.c,screenio.c,common.c: Adding casts to avoid C compile warnings
+
 2020-01-25  Ron Norman <rjn@inglenet.com>
 	* fileio.c: Skips reading records having SUPPRESS WHEN "string"
 	            and checks for duplicates on (RE)WRITE if there was

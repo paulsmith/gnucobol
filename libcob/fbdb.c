@@ -243,12 +243,13 @@ static int
 ix_bdb_sync (cob_file_api *a, cob_file *f)
 {
 	struct indexed_file	*p;
-	size_t			i;
+	int			i;
+	COB_UNUSED(s);
 
 	if (f->organization == COB_ORG_INDEXED) {
 		p = f->file;
 		if (p) {
-			for (i = 0; i < f->nkeys; ++i) {
+			for (i = 0; i < (int)f->nkeys; ++i) {
 				if (p->db[i]) {
 					DB_SYNC (p->db[i]);
 				}
@@ -485,8 +486,9 @@ bdb_lock_record (cob_file *f, const char *key, const unsigned int keylen)
 			p->bdb_lock_num = 0;
 		}
 		if (p->bdb_lock_num+1 >= p->bdb_lock_max) {
+			p->bdb_locks = cob_realloc(p->bdb_locks, p->bdb_lock_max, 
+							(p->bdb_lock_max + COB_MAX_BDB_LOCKS) * sizeof(DB_LOCK));
 			p->bdb_lock_max += COB_MAX_BDB_LOCKS;
-			p->bdb_locks = realloc(p->bdb_locks, p->bdb_lock_max * sizeof(DB_LOCK));
 		}
 		for(k = 0; k < p->bdb_lock_num; k++) {
 			if (memcmp(&p->bdb_record_lock, &p->bdb_locks[k], sizeof(DB_LOCK)) == 0) {
@@ -721,7 +723,7 @@ check_alt_keys (cob_file *f, const int rewrite)
 	int			ret;
 
 	p = f->file;
-	for (i = 1; i < f->nkeys; ++i) {
+	for (i = 1; i < (int)f->nkeys; ++i) {
 		if (!f->keys[i].tf_duplicates) {
 			bdb_setkey (f, i);
 			ret = DB_GET (p->db[i], 0);
@@ -978,6 +980,7 @@ ix_bdb_delete_internal (cob_file *f, const int rewrite, int bdb_opts)
 	int			ret;
 	cob_u32_t		flags;
 	int			close_cursor = 0;
+	COB_UNUSED(bdb_opts);
 
 	p = f->file;
 	if (!(f->lock_mode & COB_LOCK_MULTIPLE)) {
@@ -1060,8 +1063,9 @@ ix_bdb_file_delete (cob_file_api *a, cob_file *f, char *filename)
 {
 	int	i;
 	char	file_open_buff[COB_FILE_MAX+1];
+	COB_UNUSED(a);
 
-	for (i = 0; i < f->nkeys; ++i) {
+	for (i = 0; i < (int)f->nkeys; ++i) {
 		if (i == 0) {
 			snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s", filename);
 		} else {
@@ -1152,6 +1156,7 @@ ix_bdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const
 	int			ret = 0;
 	int			nonexistent;
 	char		runtime_buffer[COB_FILE_MAX+1];
+	COB_UNUSED (sharing);
 
 	if (bdb_join) {			/* Join BDB, on first OPEN of INDEXED file */
 		join_environment (a);
@@ -1327,7 +1332,7 @@ ix_bdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const
 					if (mode == COB_OPEN_I_O) {
 						return COB_STATUS_30_PERMANENT_ERROR;
 					}
-					f->open_mode = mode;
+					f->open_mode = (unsigned char)mode;
 					f->flag_nonexistent = 1;
 					f->flag_end_of_file = 1;
 					f->flag_begin_of_file = 1;

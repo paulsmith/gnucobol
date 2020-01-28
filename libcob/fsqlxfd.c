@@ -33,7 +33,7 @@ db_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 	int 	k, part;
 
 	*fullkeylen = *partlen = 0;
-	for (k = 0; k < f->nkeys; ++k) {
+	for (k = 0; k < (int)f->nkeys; ++k) {
 		if (f->keys[k].field
 		&&  f->keys[k].count_components <= 1
 		&&  f->keys[k].field->data == kf->data) {
@@ -122,7 +122,8 @@ db_cmpkey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx, 
 	if (f->keys[idx].count_components > 0) {
 		totlen = 0;
 		for (part = 0; part < f->keys[idx].count_components && partlen > 0; part++) {
-			cl = partlen > f->keys[idx].component[part]->size ? f->keys[idx].component[part]->size : partlen;
+			cl = (size_t)partlen > f->keys[idx].component[part]->size 
+					? f->keys[idx].component[part]->size : (size_t)partlen;
 			sts = memcmp (keyarea + totlen,
 					record + (f->keys[idx].component[part]->data - f->record->data),
 					cl);

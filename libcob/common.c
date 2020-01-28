@@ -7810,7 +7810,7 @@ print_runtime_conf ()
 	for (j = 1; j < GRP_MAX; j++) {
 		dohdg = 1;
 		for (i = 0; i < NUM_CONFIG; i++) {
-			if (gc_conf[i].env_group == j) {
+			if (gc_conf[i].env_group == (int)j) {
 				if (dohdg) {
 					dohdg = 0;
 					if (j > 1) {
@@ -7829,7 +7829,7 @@ print_runtime_conf ()
 						printf ("Ovr");
 					} else {
 						printf ("env");
-						if (gc_conf[i].data_loc == offsetof(cob_settings,cob_preload_str)
+						if (gc_conf[i].data_loc == (int)offsetof(cob_settings,cob_preload_str)
 						 && cobsetptr->cob_preload_str_set != NULL) {
 							printf (": %-*s : ", hdlen, gc_conf[i].env_name);
 							printf ("%s\n", cobsetptr->cob_preload_str_set);
@@ -7847,7 +7847,7 @@ print_runtime_conf ()
 					} else {
 						printf ("    ");
 					}
-					if (gc_conf[i].data_loc == offsetof(cob_settings,cob_preload_str)
+					if (gc_conf[i].data_loc == (int)offsetof(cob_settings,cob_preload_str)
 					 && cobsetptr->cob_preload_str_set != NULL) {
 						printf (": %-*s : ",hdlen,
 							gc_conf[i].set_by > 0 ? gc_conf[i].env_name
@@ -8431,10 +8431,10 @@ cob_alloc_attr(int type, int digits, int scale, int flags)
 	da = cob_cache_malloc (sizeof(struct dyn_attr));
 	da->next = dyn_attr_list;
 	dyn_attr_list = da;
-	da->attr.type   = type;
-	da->attr.digits = digits;
-	da->attr.scale  = scale;
-	da->attr.flags  = flags;
+	da->attr.type   = (unsigned short)type;
+	da->attr.digits = (unsigned short)digits;
+	da->attr.scale  = (short)scale;
+	da->attr.flags  = (unsigned short)flags;
 	return &da->attr;
 }
 

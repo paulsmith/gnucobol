@@ -144,13 +144,13 @@ cb_date_str ( struct sql_date *sdf, char *format)
 		len = 0;
 		if(*dp == 'Y') {			/* Year */
 			sdf->hasDate = 1;
-			sdf->yyPos = pos;
+			sdf->yyPos = (unsigned char)pos;
 			while(*dp == 'Y') {
 				len++;
 				dp++;
 				pos++;
 			}
-			sdf->yyLen = len;
+			sdf->yyLen = (unsigned char)len;
 			if(*dp == '+'				/* '+' Add to YY to get full year */
 			|| *dp == '%') {			/* '%' define pivot year to compute full year */
 				sdf->yyRule = *dp;
@@ -164,23 +164,23 @@ cb_date_str ( struct sql_date *sdf, char *format)
 		} else if(*dp == 'M') {
 			if(dp[1] == 'I') {		/* MInutes */
 				sdf->hasTime = 1;
-				sdf->miPos = pos;
+				sdf->miPos = (unsigned char)pos;
 				sdf->miLen = 2;
 				dp += 2;
 				pos += 2;
 			} else {
 				sdf->hasDate = 1;
-				sdf->mmPos = pos;
+				sdf->mmPos = (unsigned char)pos;
 				while(*dp == 'M') {	/* Month */
 					len++;
 					dp++;
 					pos++;
 				}
-				sdf->mmLen = len;
+				sdf->mmLen = (unsigned char)len;
 			}
 		} else if(*dp == 'D') {		/* Day of Month */
 			sdf->hasDate = 1;
-			sdf->ddPos = pos;
+			sdf->ddPos = (unsigned char)pos;
 			while(*dp == 'D') {
 				len++;
 				dp++;
@@ -189,7 +189,7 @@ cb_date_str ( struct sql_date *sdf, char *format)
 			sdf->ddLen = len;
 		} else if(*dp == 'C') {		/* Century */
 			sdf->hasDate = 1;
-			sdf->ccPos = pos;
+			sdf->ccPos = (unsigned char)pos;
 			while(*dp == 'C') {
 				len++;
 				dp++;
@@ -198,13 +198,13 @@ cb_date_str ( struct sql_date *sdf, char *format)
 			sdf->ccLen = len;
 		} else if(*dp == 'H') {		/* Hour */
 			sdf->hasTime = 1;
-			sdf->hhPos = pos;
+			sdf->hhPos = (unsigned char)pos;
 			while(*dp == 'H') {
 				len++;
 				dp++;
 				pos++;
 			}
-			sdf->hhLen = len;
+			sdf->hhLen = (unsigned char)len;
 			if(memcmp(dp,"24",2) == 0)
 				dp += 2;
 			else if(memcmp(dp,"12",2) == 0)
@@ -226,7 +226,7 @@ cb_date_str ( struct sql_date *sdf, char *format)
 				dp++;
 				pos++;
 			}
-			sdf->huLen = len;
+			sdf->huLen = (unsigned char)len;
 		} else if (*dp == '/' 
 				|| *dp == '-' 
 				|| *dp == ' ' 
@@ -239,9 +239,9 @@ cb_date_str ( struct sql_date *sdf, char *format)
 			return dp;
 		}
 	}
-	sdf->digits = sdf->ccLen + sdf->yyLen + sdf->mmLen + sdf->ddLen
+	sdf->digits = (unsigned char)(sdf->ccLen + sdf->yyLen + sdf->mmLen + sdf->ddLen
 				+ sdf->hhLen + sdf->miLen + sdf->ssLen + sdf->huLen
-				+ extra;
+				+ extra);
 	return NULL;
 }
 
@@ -532,7 +532,7 @@ get_col_name (struct cb_file *fl, struct cb_field *f, int sub, int idx[])
 		name[j=fl->max_sql_name_len] = 0;
 	for(i=0; i < j; i++) {
 		if(isupper(name[i]))
-			name[i] = tolower(name[i]);
+			name[i] = (char)tolower(name[i]);
 	}
 	if (sub > 0) {
 		for (i=0; i < sub; i++) {
@@ -808,6 +808,10 @@ write_postfix(FILE *fx, int golbl, char *expr)
 	char	partexp[MAX_NEST][68], *p;
 
 	nexp = nopcd = gto = 0;
+	for(k=0; k < MAX_NEST; k++) {
+		opcode[k] = 0;
+		memset(partexp[k],0,32);
+	}
 	for(p = expr; *p != 0; ) {
 		if (*p == '(') {
 			p++;
@@ -1237,7 +1241,7 @@ output_xfd_file (struct cb_file *fl)
 		if (tblname[i] == '-')
 			tblname[i] = '_';
 		else if(isupper(tblname[i]))
-			tblname[i] = tolower(tblname[i]);
+			tblname[i] = (char)tolower(tblname[i]);
 	}
 	strcpy(prefix,"");
 	prefixlen = 0;

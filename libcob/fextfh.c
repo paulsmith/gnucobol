@@ -230,7 +230,7 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 				keypos = keypos + sizeof(EXTKEY);
 			} else {
 				STCOMPX2(f->keys[idx].count_components, kdb->key[idx].count);
-				for(k=0; k < f->keys[idx].count_components; k++) {
+				for(k=0; k < (int)f->keys[idx].count_components; k++) {
 					key = (EXTKEY*)((char*)((char*)kdb) + keypos);
 					STCOMPX4(f->keys[idx].component[k]->data - f->record->data, key->pos);
 					STCOMPX4(f->keys[idx].component[k]->size, key->len);
@@ -346,7 +346,7 @@ copy_keys_fcd_to_file (FCD3 *fcd, cob_file *f)
 		} else {
 			f->keys[k].tf_duplicates = 0;
 		}
-		f->keys[k].count_components = parts;
+		f->keys[k].count_components = (short)parts;
 		if (f->keys[k].offset == 0)
 			f->keys[k].offset = LDCOMPX4(key->pos);
 		if(f->keys[k].field == NULL
@@ -499,7 +499,7 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 		}
 	} else if (f->nkeys > 0
 			 && fcd->kdbPtr != NULL
-			 && LDCOMPX2(fcd->kdbPtr->nkeys) >= f->nkeys) {
+			 && LDCOMPX2(fcd->kdbPtr->nkeys) >= (int)f->nkeys) {
 		copy_keys_fcd_to_file (fcd, f);
 	}
 	update_fcd_to_file (fcd, f, NULL, 0);

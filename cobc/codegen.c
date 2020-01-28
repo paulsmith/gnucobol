@@ -8485,6 +8485,8 @@ output_key_components (struct cb_file* f, struct cb_key_component* key_component
 {
 	int		parts;
 	struct cb_key_component* comp = key_component;
+	COB_UNUSED(f);
+	COB_UNUSED(key);
 	if (key_component != NULL) {
 		for (parts = 0; comp != NULL; comp = comp->next, ++parts);
 		output (",");

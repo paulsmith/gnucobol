@@ -1,4 +1,8 @@
 
+2020-01-28  Ron Norman <rjn@inglenet.com>
+	* sqlxfdgen.c,typeck.c : Update to avoid C compile warnings
+	* field.c,codegen.c : Update to avoid C compile warnings
+
 2020-01-24  Ron Norman <rjn@inglenet.com>
 
 	* parser.y: Add SUPPRESS WHEN "string"

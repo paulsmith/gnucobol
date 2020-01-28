@@ -10161,9 +10161,9 @@ cb_build_move (cb_tree src, cb_tree dst)
 		src = cb_zero;
 	} else if (CB_LITERAL_P (src)
 			&& CB_LITERAL (src)->data[0] == ' ') {
-		for (k=0; k < CB_LITERAL (src)->size
+		for (k=0; k < (int)CB_LITERAL (src)->size
 				&& CB_LITERAL (src)->data[k] == ' '; k++);
-		if (k == CB_LITERAL (src)->size)
+		if (k == (int)CB_LITERAL (src)->size)
 			src = cb_space;
 	}
 
