@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -18,12 +18,13 @@
    along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#if defined(WITH_INDEX_EXTFH) || defined(WITH_SEQRA_EXTFH)
+/* this file handles the obsolete OpenCOBOL external file handlers */
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
-
 #include "fileio.h"
+
+#if defined(WITH_INDEX_EXTFH) || defined(WITH_SEQRA_EXTFH)
 static int extfh_dummy () { return 91; }
 static struct cob_fileio_funcs **fileio_funcs = NULL;
 static const char *io_rtn_name[COB_IO_MAX+1] = {

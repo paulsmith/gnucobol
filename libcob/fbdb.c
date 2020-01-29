@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -244,7 +244,7 @@ ix_bdb_sync (cob_file_api *a, cob_file *f)
 {
 	struct indexed_file	*p;
 	int			i;
-	COB_UNUSED(s);
+	COB_UNUSED(a);
 
 	if (f->organization == COB_ORG_INDEXED) {
 		p = f->file;
