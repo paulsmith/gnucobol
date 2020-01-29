@@ -796,7 +796,7 @@ out_part(char *exp)
 		rop[i++] = exp[j];
 	}
 	rop[i] = 0;
-	snprintf(wrk,sizeof(wrk),"%s,%s,%s",opcd,lop,rop);
+	snprintf(wrk,sizeof(wrk)-1,"%s,%s,%s",opcd,lop,rop);
 	return wrk;
 }
 
@@ -810,9 +810,9 @@ write_postfix(FILE *fx, int golbl, char *expr)
 	nexp = nopcd = gto = 0;
 	for(k=0; k < MAX_NEST; k++) {
 		opcode[k] = 0;
-		memset(partexp[k],0,32);
+		memset(partexp[k],0,68);
 	}
-	for(p = expr; *p != 0; ) {
+	for(p = expr; *p != 0 && nexp < MAX_NEST; ) {
 		if (*p == '(') {
 			p++;
 			opcode[nexp++] = '(';
@@ -826,11 +826,11 @@ write_postfix(FILE *fx, int golbl, char *expr)
 					golbl = 0;
 				}
 				if (nopcd > 1) {
-					fprintf(fx,"C,0,%s\n",out_part(partexp[nopcd-2]));
-					fprintf(fx,"C,0,%s\n",out_part(partexp[nopcd-1]));
+					fprintf(fx,"C,0,%.255s\n",out_part(partexp[nopcd-2]));
+					fprintf(fx,"C,0,%.255s\n",out_part(partexp[nopcd-1]));
 					nopcd -= 2;
 				} else if (nopcd > 0) {
-					fprintf(fx,"C,0,%s\n",out_part(partexp[--nopcd]));
+					fprintf(fx,"C,0,%.255s\n",out_part(partexp[--nopcd]));
 				}
 				if (opcode[nexp-1] == 'A') {
 					fprintf(fx,"C,%d,%s\n",gto,"&&");
@@ -841,7 +841,8 @@ write_postfix(FILE *fx, int golbl, char *expr)
 				}
 				nexp--;
 			}
-			if (opcode[nexp-1] == '(') {
+			if (nexp > 0
+			 && opcode[nexp-1] == '(') {
 				nexp--;
 			} else if(*p == 0) {
 				break;
@@ -868,7 +869,7 @@ write_postfix(FILE *fx, int golbl, char *expr)
 			p += 4;
 			opcode[nexp++] = 'O';
 		} else {
-			for(k=0; *p != 0; k++,p++) {
+			for(k=0; *p != 0 && k < 64; k++,p++) {
 				if (strncasecmp(p," AND ",5) == 0
 				 || strncasecmp(p," OR ",4) == 0
 				 || strncasecmp(p," && ",4) == 0
@@ -885,8 +886,8 @@ write_postfix(FILE *fx, int golbl, char *expr)
 	}
 	while (nopcd > 0) {
 		if (nopcd > 1) {
-			fprintf(fx,"C,0,%s\n",out_part(partexp[nopcd-2]));
-			fprintf(fx,"C,0,%s\n",out_part(partexp[nopcd-1]));
+			fprintf(fx,"C,0,%.255s\n",out_part(partexp[nopcd-2]));
+			fprintf(fx,"C,0,%.255s\n",out_part(partexp[nopcd-1]));
 			nopcd -= 2;
 		} else if (nopcd > 0) {
 			gto = 0;
@@ -894,7 +895,7 @@ write_postfix(FILE *fx, int golbl, char *expr)
 				gto = golbl;
 				golbl = 0;
 			}
-			fprintf(fx,"C,%d,%s\n",gto,out_part(partexp[--nopcd]));
+			fprintf(fx,"C,%d,%.255s\n",gto,out_part(partexp[--nopcd]));
 		}
 	}
 	while (nexp > 0) {
@@ -1019,6 +1020,8 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 			s = f;
 			toother = 0;
 			do {
+				if (s == NULL)
+					break;
 				if (s->sql_when) {
 					if (compstr(s->sql_when,"OTHER") == 0) {
 						toother = s->step_count;
@@ -1068,6 +1071,8 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 						}
 						write_postfix (fx, s->step_count, expr);
 					}
+					if (l == NULL)
+						break;
 					s->report_decl_id = l->next_group_line;
 				}
 				if (s->sister == NULL)

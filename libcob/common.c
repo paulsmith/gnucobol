@@ -5201,7 +5201,7 @@ get_sleep_nanoseconds_from_seconds (cob_field *decimal_seconds) {
 }
 
 static void
-internal_nanosleep (const cob_s64_t nsecs, int round_to_minmal)
+internal_nanosleep (cob_s64_t nsecs, int round_to_minmal)
 {
 	if (nsecs > 0) {
 #if defined	(HAVE_NANO_SLEEP)

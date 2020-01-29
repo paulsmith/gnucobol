@@ -3066,7 +3066,8 @@ sequential_read (cob_file_api *a, cob_file *f, const int read_opts)
 	&&  f->file_format == COB_FILE_IS_MF) {
 		padlen = ((f->record->size + f->record_prefix + 3) / 4 * 4) - (f->record->size + f->record_prefix);
 		if(padlen > 0)
-			read(f->fd, recsize.sbuff, padlen);	/* Read past padding chars */
+			if (read(f->fd, recsize.sbuff, padlen) != padlen) /* Read past padding chars */
+				return COB_STATUS_30_PERMANENT_ERROR;
 	}
 	if (unlikely(bytesread != (int)f->record->size)) {
 		if (bytesread == 0) {
@@ -3161,7 +3162,8 @@ sequential_write (cob_file_api *a, cob_file *f, const int opt)
 	&&  f->file_format == COB_FILE_IS_MF) {
 		padlen = ((f->record->size + f->record_prefix + 3) / 4 * 4) - (f->record->size + f->record_prefix);
 		while(padlen-- > 0)
-			write(f->fd, " ",1);
+			if(write(f->fd, " ",1) != 1)
+				return COB_STATUS_30_PERMANENT_ERROR;
 	}
 
 	/* WRITE BEFORE */
@@ -3252,7 +3254,8 @@ sequential_rewrite (cob_file_api *a, cob_file *f, const int opt)
 	if (f->record_min != f->record_max
 	&&  f->file_format == COB_FILE_IS_MF) {
 		while(padlen-- > 0)
-			write(f->fd, " ",1);
+			if(write(f->fd, " ",1) != 1)
+				return COB_STATUS_30_PERMANENT_ERROR;
 	}
 	return COB_STATUS_00_SUCCESS;
 }
@@ -3618,7 +3621,8 @@ relative_read_size (cob_file *f, off_t off, int *isdeleted)
 			return -1;
 		}
 		rechdr[0] = 0;
-		read (f->fd, rechdr, 1);	/* 0x00 means deleted record */
+		if (read (f->fd, rechdr, 1) != 1)
+			return COB_STATUS_30_PERMANENT_ERROR;
 		lseek (f->fd, off, SEEK_SET);
 		if (rechdr[0] == 0) {
 			*isdeleted = 1;
@@ -3786,7 +3790,8 @@ relative_read_off (cob_file *f, off_t off)
 		if(f->record_min != f->record_max) {
 			lseek (f->fd, (off_t)(off + (off_t)f->record_slot - 1), SEEK_SET);
 		}
-		read (f->fd, recmark, 1);	/* Active Record marker */
+		if (read (f->fd, recmark, 1) != 1)	/* Active Record marker */
+			return COB_STATUS_30_PERMANENT_ERROR;
 		if (recmark[0] == 0x00) {	/* Flagged Deleted */
 			f->record->size = 0;
 			lseek (f->fd, off, SEEK_SET);
@@ -4003,17 +4008,21 @@ relative_write_size (cob_file *f, off_t off, int recsize)
 	return recsize;
 }
 
-static void
+static int
 relative_padout(cob_file *f, char pad, int len)
 {
 	unsigned char wrk[32];
 	memset(wrk, pad, sizeof(wrk));
 	while(len > sizeof(wrk)) {
-		write (f->fd, wrk, sizeof(wrk));	/* Pad out record on disk */
+		/* Pad out record on disk */
+		if (write (f->fd, wrk, sizeof(wrk)) != sizeof(wrk))
+			return 1;
 		len -= sizeof(wrk);
 	}
 	if(len > 0)
-		write (f->fd, wrk, len);
+		if (write (f->fd, wrk, len) != len)
+			return 1;
+	return 0;
 }
 
 static int
@@ -4076,13 +4085,16 @@ relative_write (cob_file_api *a, cob_file *f, const int opt)
 	if (write (f->fd, f->record->data, f->record->size) != (int)f->record->size) {
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
-	relative_padout(f, ' ', f->record_max - f->record->size); /* Pad out with SPACES */
+	if (relative_padout(f, ' ', f->record_max - f->record->size)) /* Pad out with SPACES */
+		return COB_STATUS_30_PERMANENT_ERROR;
 
 	if (f->file_format == COB_FILE_IS_MF) {
 		if ((f->file_features & COB_FILE_LS_CRLF)) {	/* Windows format */
-			write (f->fd, "\r", 1);
+			if (write (f->fd, "\r", 1) != 1)
+				return COB_STATUS_30_PERMANENT_ERROR;
 		}
-		write (f->fd, "\n", 1);
+		if (write (f->fd, "\n", 1) != 1)
+			return COB_STATUS_30_PERMANENT_ERROR;
 	}
 
 	/* Update RELATIVE KEY */
@@ -4153,11 +4165,13 @@ relative_rewrite (cob_file_api *a, cob_file *f, const int opt)
 	if (write (f->fd, f->record->data, f->record->size) != (int)f->record->size) {
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
-	relative_padout(f, ' ', f->record_max - f->record->size); /* Pad out with SPACES */
+	if (relative_padout(f, ' ', f->record_max - f->record->size)) /* Pad out with SPACES */
+		return COB_STATUS_30_PERMANENT_ERROR;
 
 	if (f->file_format == COB_FILE_IS_MF) {
 		if(f->record_min == f->record_max) {	/* Fixed size */
-			write (f->fd, "\n", 1);
+			if (write (f->fd, "\n", 1) != 1)
+				return COB_STATUS_30_PERMANENT_ERROR;
 		} else {
 			lseek (f->fd, (off_t)((off_t)off + (off_t)f->record_slot), SEEK_SET);
 		}
@@ -4258,7 +4272,8 @@ relative_delete (cob_file_api *a, cob_file *f)
 				return COB_STATUS_30_PERMANENT_ERROR;
 			}
 			rechdr[0] = 0;
-			write (f->fd, rechdr, 1);	/* 0x00 means deleted record */
+			if (write (f->fd, rechdr, 1) != 1)	/* 0x00 means deleted record */
+				return COB_STATUS_30_PERMANENT_ERROR;
 		}
 	} else
 	if (f->file_format == COB_FILE_IS_MF) {
@@ -4266,7 +4281,8 @@ relative_delete (cob_file_api *a, cob_file *f)
 			return COB_STATUS_30_PERMANENT_ERROR;
 		}
 		rechdr[0] = 0;
-		write (f->fd, rechdr, 1);	/* 0x00 means deleted record */
+		if (write (f->fd, rechdr, 1) != 1)	/* 0x00 means deleted record */
+			return COB_STATUS_30_PERMANENT_ERROR;
 	}
 	lseek (f->fd, (off_t) f->record_off, SEEK_SET);
 	if (f->flag_record_lock) {
