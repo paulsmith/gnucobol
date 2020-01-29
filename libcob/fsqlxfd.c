@@ -941,11 +941,11 @@ cob_load_xfd (cob_file *fl, char *alt_name, int indsize)
 {
 	char	xfdbuf[COB_NORMAL_BUFF],*sdir,*fname,*p,*mp;
 	char	colname[80], tblname[80];
-	char	dups[4], sup[4], supchar[8];
+	char	dups[4], sup[4], supchar[80];
 	char	opcode[16],tstval[48];
 	int		i,j,k,lbl,keyn,xfdver;
 	int		ncols, lncols, lndata;
-	unsigned char	supch;
+	unsigned char	supch, qt;
 	struct file_xfd *fx;
 	struct map_xfd	*mx = NULL;
 	FILE	*fi;
@@ -1106,6 +1106,7 @@ cob_load_xfd (cob_file *fl, char *alt_name, int indsize)
 				fx->nkeys = keyn+1;
 			p = getPrm (p, dups);
 			p = getPrm (p, sup);
+			qt = *p;
 			p = getPrm (p, supchar);
 			if (memcmp(supchar,"0x",2) == 0) {
 				supch = (unsigned char) strtol (supchar, NULL, 16);
@@ -1126,7 +1127,11 @@ cob_load_xfd (cob_file *fl, char *alt_name, int indsize)
 				fx->key[keyn]->sup = TRUE;
 			else
 				fx->key[keyn]->sup = FALSE;
-			fx->key[keyn]->supchar = supch;
+			if (qt == '"') {
+				fx->key[keyn]->str_sup = (unsigned char*)cob_strdup (supchar);
+			} else {
+				fx->key[keyn]->supchar = supch;
+			}
 			do {
 				p = getPrm (p, colname);
 				if ((k = cob_find_xfd_col (fx, colname)) < 0) {

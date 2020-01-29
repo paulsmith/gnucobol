@@ -1359,6 +1359,11 @@ output_xfd_file (struct cb_file *fl)
 			fprintf(fs,"CREATE %sINDEX k%d_%s ON %s ",
 					l->duplicates||l->tf_suppress?"":"UNIQUE ",k,tblname,tblname);
 			fprintf(fx,"K,%d,%s,",k,l->duplicates?"Y":"N");
+			if (l->suppress
+			 && CB_LITERAL_P(l->suppress)) {
+				struct cb_literal	*lit = CB_LITERAL (l->suppress);
+				fprintf(fx,"Y,\"%.*s\",",lit->size,lit->data);
+			} else
 			if (l->tf_suppress) {
 				fprintf(fx,"Y,0x%02X,",l->char_suppress);
 			} else {

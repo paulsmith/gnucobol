@@ -367,6 +367,7 @@ struct key_xfd {
 	unsigned char	dups;		/* 1 if DUPS allowed */
 	unsigned char	sup;		/* 1 if SUPPRESS (but not supported by ODBC/OCI */
 	unsigned char	supchar;	/* Character to indicate key suppression */
+	unsigned char	*str_sup;	/* Suppress if this string appears */
 	short			ncols;		/* Number of Columns in index */
 	short			lncols;		/* Length of all column names in index */
 	short			col[MAXKEYCOLS];	/* Offset in file_xfd.map to column def */
