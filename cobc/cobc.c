@@ -7821,6 +7821,8 @@ set_cobc_defaults (void)
 		*p == 'T' || *p == 't' ||
 		*p == '1') {
 		cb_unix_lf = 1;
+	} else {
+		cb_unix_lf = 0;
 	}
 }
 

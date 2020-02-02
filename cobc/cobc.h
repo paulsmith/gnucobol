@@ -410,7 +410,7 @@ extern int			cb_flag_dump;
 #define COB_DUMP_ALL	(COB_DUMP_FD|COB_DUMP_WS|COB_DUMP_RD|COB_DUMP_SD|COB_DUMP_SC|COB_DUMP_LS)
 
 
-extern int			cb_unix_lf = 0;
+extern int			cb_unix_lf;
 
 extern int			cb_flag_main;	/* set if "main" requested by -x */
 extern int			cobc_flag_main;	/* set only until first program compiled, for general: use cb_flag_main*/
