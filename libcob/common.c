@@ -203,8 +203,6 @@ static int			last_exception_code;	/* Last exception: code */
 static int			active_error_handler = 0;
 static char			*runtime_err_str = NULL;
 
-static int			cannot_check_subscript = 0;
-
 static const cob_field_attr	const_alpha_attr =
 				{COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL};
 static const cob_field_attr	const_bin_nano_attr =
@@ -1771,92 +1769,9 @@ cob_cache_free (void *ptr)
 	}
 }
 
-/* cob_set_location is kept for backward compatibility (pre 3.0) */
-void
-cob_set_location (const char *sfile, const unsigned int sline,
-		  const char *csect, const char *cpara,
-		  const char *cstatement)
-{
-	const char	*s;
+/* routines for handling 'trace' follow */
 
-	cob_current_program_id = COB_MODULE_PTR->module_name;
-	cob_source_file = sfile;
-	cob_source_line = sline;
-	cob_current_section = csect;
-	cob_current_paragraph = cpara;
-	if (cstatement) {
-		cob_source_statement = cstatement;
-	}
-	if (cobsetptr->cob_line_trace) {
-		if (!cobsetptr->cob_trace_file) {
-			cob_check_trace_file ();
-#if _MSC_VER /* fix dumb warning */
-			if (!cobsetptr->cob_trace_file) {
-				return;
-			}
-#endif
-		}
-		if (!cob_last_sfile || strcmp (cob_last_sfile, sfile)) {
-			if (cob_last_sfile) {
-				cob_free ((void *)cob_last_sfile);
-			}
-			cob_last_sfile = cob_strdup (sfile);
-			fprintf (cobsetptr->cob_trace_file, "Source :    '%s'\n", sfile);
-		}
-		if (COB_MODULE_PTR->module_name) {
-			s = COB_MODULE_PTR->module_name;
-		} else {
-			s = _("unknown");
-		}
-		fprintf (cobsetptr->cob_trace_file,
-			 "Program-Id: %-16s Statement: %-21.21s  Line: %u\n",
-			 s, cstatement ? (char *)cstatement : _("unknown"),
-			 sline);
-		fflush (cobsetptr->cob_trace_file);
-	}
-}
-
-/* cob_trace_section is kept for backward compatibility, but should be eventually removed */
-void
-cob_trace_section (const char *para, const char *source, const int line)
-{
-	const char	*s;
-
-	if (cobsetptr->cob_line_trace) {
-		if (!cobsetptr->cob_trace_file) {
-			cob_check_trace_file ();
-#if _MSC_VER /* fix dumb warning */
-			if (!cobsetptr->cob_trace_file) {
-				return;
-			}
-#endif
-		}
-		if (source &&
-		    (!cob_last_sfile || strcmp (cob_last_sfile, source))) {
-			if (cob_last_sfile) {
-				cob_free ((void *)cob_last_sfile);
-			}
-			cob_last_sfile = cob_strdup (source);
-			fprintf (cobsetptr->cob_trace_file, "Source:     '%s'\n", source);
-		}
-		if (COB_MODULE_PTR && COB_MODULE_PTR->module_name) {
-			s = COB_MODULE_PTR->module_name;
-		} else {
-			s = _("unknown");
-		}
-		fprintf (cobsetptr->cob_trace_file, "Program-Id: %-16s ", s);
-		if (line) {
-			fprintf (cobsetptr->cob_trace_file, "%-34.34sLine: %d\n", para, line);
-		} else {
-			fprintf (cobsetptr->cob_trace_file, "%s\n", para);
-		}
-		fflush (cobsetptr->cob_trace_file);
-	}
-}
-
-/* New routines for handling 'trace' follow */
-/* Note: As oposed to the old tracing these functions are only called
-         if the following vars are set:
+/* Note: these functions are only called if the following vars are set:
          COB_MODULE_PTR + ->module_stmt + ->module_sources
 */
 static int
@@ -2424,7 +2339,7 @@ cob_check_version (const char *prog, const char *packver_prog, const int patchle
 		minor_prog = major_prog = -1;
 	}
 
-	if (status != 2 || major_prog > major_cob
+	if (status != 2 || major_prog < 4 || major_prog > major_cob
 	 || (major_prog == major_cob && minor_prog > minor_cob)
 	 || (major_prog == major_cob && minor_prog == minor_cob && patchlev_prog > PATCH_LEVEL)) {
 		cob_runtime_error (_("version mismatch"));
@@ -2433,9 +2348,6 @@ cob_check_version (const char *prog, const char *packver_prog, const int patchle
 		cob_runtime_hint (_("%s has version %s.%d"), "libcob",
 				   PACKAGE_VERSION, PATCH_LEVEL);
 		cob_stop_run (1);
-	}
-	if (major_prog == 2 && minor_prog < 2) {
-		cannot_check_subscript = 1;
 	}
 }
 
@@ -3181,16 +3093,6 @@ cob_check_odo (const int i, const int min,
 	if (i < min || i > max) {
 		cob_set_exception (COB_EC_BOUND_ODO);
 
-		/* Hack for call from 2.0 modules as the module signature was changed :-(
-		   Note: depending on the actual C runtime this may work or directly break
-		*/
-		/* LCOV_EXCL_START */
-		if (dep_name == NULL) {
-			dep_name = name;
-			name = "unknown field";
-		}
-		/* LCOV_EXCL_STOP */
-
 		cob_runtime_error (_("OCCURS DEPENDING ON '%s' out of bounds: %d"),
 					dep_name, i);
 		if (i > max) {
@@ -3206,23 +3108,6 @@ void
 cob_check_subscript (const int i, const int max,
 			const char *name, const int odo_item)
 {
-#if 1
-	/* Hack for call from 2.0 modules as the module signature was changed :-(
-	   Note: depending on the actual C runtime this may work or directly break
-	*/
-	/* LCOV_EXCL_START */
-	if (cannot_check_subscript) {
-		/* Check zero subscript */
-		if (i == 0) {
-			cob_set_exception (COB_EC_BOUND_SUBSCRIPT);
-			cob_runtime_error (_("subscript of '%s' out of bounds: %d"), "unknown field", i);
-			cob_stop_run (1);
-		}
-		return;
-	}
-	/* LCOV_EXCL_STOP */
-#endif
-
 	/* Check subscript */
 	if (i < 1 || i > max) {
 		cob_set_exception (COB_EC_BOUND_SUBSCRIPT);
@@ -7227,18 +7112,9 @@ cob_fatal_error (const enum cob_fatal_error fatal_error)
 	/* LCOV_EXCL_STOP */
 	/* Note: can be simply tested; therefore no exclusion */
 	case COB_FERROR_RECURSIVE:
-		/* LCOV_EXCL_LINE */
-		if (cob_module_err) {
-			cob_runtime_error (_("recursive CALL from %s to %s which is NOT RECURSIVE"),
-					COB_MODULE_PTR->module_name, cob_module_err->module_name);
-			cob_module_err = NULL;
-		/* LCOV_EXCL_START */
-		/* Note: only in for old modules - not active with current generation */
-		} else {
-			cob_runtime_error (_("invalid recursive COBOL CALL to '%s'"),
-					   COB_MODULE_PTR->module_name);
-		}
-		/* LCOV_EXCL_STOP */
+		cob_runtime_error (_("recursive CALL from %s to %s which is NOT RECURSIVE"),
+				COB_MODULE_PTR->module_name, cob_module_err->module_name);
+		cob_module_err = NULL;
 		break;
 	/* LCOV_EXCL_START */
 	case COB_FERROR_FREE:

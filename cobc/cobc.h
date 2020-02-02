@@ -369,9 +369,6 @@ extern struct cb_exception	cb_exception_table[];
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 
-/* Flag to emit Old style: cob_set_location, cob_trace_section */
-extern int cb_old_trace;
-
 #define	CB_WARNDEF(var,name,doc)	extern int var;
 #define	CB_ONWARNDEF(var,name,doc)	extern int var;
 #define	CB_NOWARNDEF(var,name,doc)	extern int var;

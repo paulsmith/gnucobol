@@ -234,9 +234,6 @@ struct cb_exception cb_exception_table[] = {
 #undef	CB_FLAG_NQ
 int cb_mf_ibm_comp = -1;
 
-/* Flag to emit Old style: cob_set_location, cob_trace_section */
-int	cb_old_trace = 0;
-
 #define	CB_WARNDEF(var,name,doc)	int var = 0;
 #define	CB_ONWARNDEF(var,name,doc)	int var = 1;
 #define	CB_NOWARNDEF(var,name,doc)	int var = 0;
@@ -2335,7 +2332,6 @@ static void
 cobc_def_dump_opts (const char *opt)
 {
 	char	*p, *q;
-	cb_old_trace = 0;			/* Use new methods */
 	if (!strcasecmp (opt, "ALL")) {
 		cb_flag_dump = COB_DUMP_ALL;
 		return;
@@ -7906,8 +7902,6 @@ finish_setup_compiler_env (void)
 static void
 begin_setup_internal_and_compiler_env (void)
 {
-	char			*p;
-
 	/* register signal handlers from cobc */
 	cob_reg_sighnd (&cobc_sig_handler);
 
@@ -7948,12 +7942,6 @@ begin_setup_internal_and_compiler_env (void)
 	   allowing test to be run under WIN32 (implied in cob_init(),
 	   no need to call outside of GnuCOBOL) */
 	cob_common_init (NULL);
-
-	/* Flag to emit Old style: cob_set_location, cob_trace_section */
-	p = getenv ("COB_OLD_TRACE");
-	if (p && (*p == 'Y' || *p == 'y' || *p == '1')) {
-		cb_old_trace = 1;
-	}
 
 	/* Initialize variables */
 	begin_setup_compiler_env ();

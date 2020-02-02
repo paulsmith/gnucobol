@@ -7372,37 +7372,6 @@ output_section_info (struct cb_label *lp)
 	if (lp->flag_dummy_exit) {
 		return;
 	}
-	if (cb_old_trace) {		/* Old code retained for testing */
-		if (lp->flag_section) {
-			if (!lp->flag_dummy_section) {
-				sprintf (string_buffer, "Section:   %s", lp->orig_name);
-			} else {
-				sprintf (string_buffer, "Section:   (None)");
-			}
-		} else if (lp->flag_entry) {
-			sprintf (string_buffer, "Entry:     %s", lp->orig_name);
-		} else {
-			if (!lp->flag_dummy_paragraph) {
-				sprintf (string_buffer, "Paragraph: %s", lp->orig_name);
-			} else {
-				sprintf (string_buffer, "Paragraph: (None)");
-			}
-		}
-		if (CB_TREE (lp)->source_file) {
-			output_line ("cob_trace_section (%s%d, %s%d, %d);",
-				     CB_PREFIX_STRING,
-				     lookup_string (string_buffer),
-				     CB_PREFIX_STRING,
-				     lookup_string (CB_TREE (lp)->source_file),
-				     CB_TREE (lp)->source_line);
-		} else {
-			output_line ("cob_trace_section (%s%d, NULL, %d);",
-				     CB_PREFIX_STRING,
-				     lookup_string (string_buffer),
-				     CB_TREE (lp)->source_line);
-		}
-		return;
-	}
 
 	if (CB_TREE (lp)->source_file) {
 		if (last_line != CB_TREE (lp)->source_line) {
@@ -7440,36 +7409,9 @@ static void
 output_trace_info (cb_tree x, const char *name)
 {
 	if (!cb_flag_source_location) return;
-	if (cb_old_trace) {
-		output_prefix ();
-		output ("cob_set_location (%s%d, %d, ",
-			CB_PREFIX_STRING,
-			lookup_string (x->source_file),
-			x->source_line);
-		if (excp_current_section) {
-			output ("%s%d, ",
-				CB_PREFIX_STRING, lookup_string (excp_current_section));
-		} else {
-			output ("NULL, ");
-		}
-		if (excp_current_paragraph) {
-			output ("%s%d, ",
-				CB_PREFIX_STRING, lookup_string (excp_current_paragraph));
-		} else {
-			output ("NULL, ");
-		}
-		if (name) {
-			output ("%s%d);",
+	if (name) {
+		output_line ("cob_trace_stmt (%s%d);",
 				CB_PREFIX_STRING, lookup_string (name));
-		} else {
-			output ("NULL);");
-		}
-		output_newline ();
-	} else {
-		if (name) {
-			output_line ("cob_trace_stmt (%s%d);",
-					CB_PREFIX_STRING, lookup_string (name));
-		}
 	}
 }
 
@@ -11351,15 +11293,8 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	if (cb_flag_trace) {
 		output_line ("/* Trace program exit */");
-		if (cb_old_trace) {		/* Old code retained for testing */
-			sprintf (string_buffer, "Exit:      %s", excp_current_program_id);
-			output_line ("cob_trace_section (%s%d, NULL, 0);",
-				     CB_PREFIX_STRING,
-				     lookup_string (string_buffer));
-		} else {
-			output_line ("cob_trace_exit (%s%d);",
-				     CB_PREFIX_STRING, lookup_string(excp_current_program_id));
-		}
+		output_line ("cob_trace_exit (%s%d);",
+			     CB_PREFIX_STRING, lookup_string(excp_current_program_id));
 		output_newline ();
 	}
 
