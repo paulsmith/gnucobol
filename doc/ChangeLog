@@ -1,4 +1,8 @@
 
+2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: suppress some output
+
 2019-08-15  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobcinfo.sh (_create_file): cut down creation-time of tex-includes
@@ -220,7 +224,7 @@
 	* open-cobol.texi (Customize): Add COB_LDADD, COB_CONFIG_FILE.
 
 
-Copyright 2002,2005,2009-2019 Free Software Foundation, Inc.
+Copyright 2002,2005,2009-2020 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

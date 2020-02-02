@@ -2,6 +2,7 @@
 2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: version bump to 4.0 (lt-version 5.0.0)
+	* extras/Makefile.am: use of return_path instead of atlocal
 
 2020-01-03  Simon Sobisch <simonsobisch@gnu.org>
 

@@ -70,7 +70,7 @@ if test "$1" != "fixtimestamps"; then
 
 fi
 
-# Make sure to source atconfig/atlocal before running this shell
+# Make sure to run this in scope of pre-inst-env
 # to use the currently compiled version of cobc
 # (is done in the makefile for automated calls)
 

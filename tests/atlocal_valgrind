@@ -4,7 +4,7 @@
 # This script is a special variant of the atlocal script for testing
 # with Valgrind.
 
-# Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2020 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -99,7 +99,7 @@ PATHSEP=":"
 # Helper script to unify listings (replace version, date, time)
 UNIFY_LISTING="${abs_srcdir}/listings-sed.sh"
 
-# Test runner for manual tests, content may changed by the user
+# test runner for manual tests, content may be changed by the user
 RUN_PROG_MANUAL="${abs_builddir}/run_prog_manual.sh"
 
 # be sure to use the English messages
@@ -111,16 +111,22 @@ export PATH
 
 # possible path conversion for running the testsuite in an environment
 # that doesn't match the one where the tested binaries were built
-# Note: not needed for running the testsuite with MSYS as this translates the path
 _return_path () {
-	echo "$1"
+	${abs_top_srcdir}/bin/return_path "$1"
+}
+# unset option if not internally set
+_unset_option () {
+	if test "$1" != "COB_CONFIG_DIR" \
+	     -a "$1" != "COB_RUNTIME_CONFIG"; then
+		unset $1
+	fi
 }
 
 # unset all environment variables that are used in libcob
 # for runtime configuration
 COB_RUNTIME_CONFIG="${abs_top_srcdir}/config/runtime_empty.cfg"
-for cobenv in `$COBCRUN_WITHOUT_VG --runtime-conf | grep COB_ | cut -d: -f2`; \
-	do unset $cobenv; \
+for cobenv in `"${abs_top_builddir}/pre-inst-env" $COBCRUN_WITHOUT_VG --runtime-conf | grep COB_ | cut -d: -f2 | cut -d= -f1`; \
+	do _unset_option $cobenv; \
 done
 
 COB_CFLAGS="-I${abs_top_srcdir} -I${abs_top_srcdir}/libcob @COB_CFLAGS@"

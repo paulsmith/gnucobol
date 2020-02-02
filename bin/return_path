@@ -1,8 +1,9 @@
+#! /bin/sh
 #
-# Makefile gnucobol/extras
+# return_path gnucobol
 #
-# Copyright (C) 2012, 2014, 2017-2020 Free Software Foundation, Inc.
-# Written by Roger While, Simon Sobisch
+# Copyright (C) 2015,2017,2020 Free Software Foundation, Inc.
+# Written by Simon Sobisch, 
 #
 # This file is part of GnuCOBOL.
 #
@@ -19,16 +20,25 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
-extrasdir = @COB_LIBRARY_PATH@
-if COB_MAKE_RUN_BINARIES
-extras_DATA = CBL_OC_DUMP.$(COB_MODULE_EXT)
-endif
+# possible path conversion for running the testsuite in an environment
+# that doesn't match the one where the tested binaries were built
 
-EXTRA_DIST = CBL_OC_DUMP.cob
-CLEANFILES = $(extras_DATA)
+if ! test "$1" = "convert"; then
+	echo "$1"
+else
 
-SUFFIXES = .cob .$(COB_MODULE_EXT)
-.cob.$(COB_MODULE_EXT):	$(top_builddir)/pre-inst-env
-	@echo "building $<" && \
-	 ("$(top_builddir)/pre-inst-env" cobc$(EXEEXT) -m -Wall -O2 -o "$@" "$$(${abs_top_srcdir}/bin/return_path $<)" || \
-	  "$(top_builddir)/pre-inst-env" cobc$(EXEEXT) -m -Wall -vv -o "$@" "$$(${abs_top_srcdir}/bin/return_path $<)")
+	shift
+	
+	# Note: not needed for running the testsuite with MSYS as this translates the path
+	if test "$OSTYPE" = "cygwin"; then
+		cygpath -pw "$1"
+	else
+		# check for WSL / Bash on Windows; ignore error messages (file not available)
+		if $(grep -q "Microsoft" /proc/sys/kernel/osrelease 2>/dev/null); then
+			wslpath -w "$1"
+		else
+			echo "$1"
+		fi
+	fi
+
+fi

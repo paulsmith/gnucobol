@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/doc
 #
-# Copyright (C) 2003-2012, 2015-2019 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2015-2020 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -39,37 +39,37 @@ cbhelp.tex: $(top_srcdir)/cobc/help.c \
 	$(top_srcdir)/cobc/warning.def $(top_srcdir)/cobc/flag.def \
 	$(top_srcdir)/cobc/config.def \
 	$(top_srcdir)/doc/cobcinfo.sh
-	$(COBCINFOSH) $@
+	@$(COBCINFOSH) $@
 
 cbchelp.tex: $(top_srcdir)/bin/cobcrun.c \
 	$(top_srcdir)/doc/cobcinfo.sh
-	$(COBCINFOSH) $@
+	@$(COBCINFOSH) $@
 endif
 
 cbconf.tex: $(top_srcdir)/config/default.conf \
 	$(top_srcdir)/doc/cobcinfo.sh
-	$(COBCINFOSH) $@
+	@$(COBCINFOSH) $@
 
 cbrunt.tex: $(top_srcdir)/config/runtime.cfg \
 	$(top_srcdir)/doc/cobcinfo.sh
-	$(COBCINFOSH) $@
+	@$(COBCINFOSH) $@
 
 if COB_MAKE_RUN_BINARIES
 cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
 	$(top_srcdir)/cobc/reserved.c \
 	$(top_srcdir)/doc/cobcinfo.sh
-	$(COBCINFOSH) $@
+	@$(COBCINFOSH) $@
 else
 cbhelp.tex cbchelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
 	$(top_srcdir)/doc/cobcinfo.sh
-	$(COBCINFOSH) "fixtimestamps"
+	@$(COBCINFOSH) "fixtimestamps"
 endif
 
 touch-tex:
-	$(COBCINFOSH) "fixtimestamps" "includes"
+	@$(COBCINFOSH) "fixtimestamps" "includes"
 
 touch:
-	$(COBCINFOSH) "fixtimestamps"
+	@$(COBCINFOSH) "fixtimestamps"
 
 clean-tex:
 	rm -rf $(GENINCLUDES)

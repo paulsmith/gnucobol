@@ -61,7 +61,7 @@ _unset_option () {
 # for runtime configuration
 COB_RUNTIME_CONFIG="${abs_top_srcdir}/config/runtime_empty.cfg"
 export COB_RUNTIME_CONFIG
-for cobenv in `"${abs_top_builddir}/pre-inst-env" cobcrun@COB_EXE_EXT@ --runtime-conf | grep COB_ | cut -d: -f2 | cut -d= -f1`; \
+for cobenv in `"${abs_top_builddir}/pre-inst-env" $COBCRUN --runtime-conf | grep COB_ | cut -d: -f2 | cut -d= -f1`; \
 	do _unset_option $cobenv; \
 done
 
@@ -113,9 +113,8 @@ export COB_SCHEMA_DIR=.
 
 # possible path conversion for running the testsuite in an environment
 # that doesn't match the one where the tested binaries were built
-# Note: not needed for running the testsuite with MSYS as this translates the path
 _return_path () {
-	echo "$1"
+	${abs_top_srcdir}/bin/return_path "$1"
 }
 
 # options that are also used in pre-inst-env (always add to both)
