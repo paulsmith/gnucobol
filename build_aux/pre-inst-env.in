@@ -23,7 +23,7 @@
 abs_top_srcdir="@abs_top_srcdir@"
 abs_top_builddir="@abs_top_builddir@"
 
-sep='@PATH_SEPARATOR@';
+sep='@PATH_SEPARATOR@'
 
 PATH="$abs_top_builddir/cobc/.libs${sep}$abs_top_builddir/cobc${sep}$PATH"
 PATH="$abs_top_builddir/bin/.libs${sep}$abs_top_builddir/bin${sep}$PATH"

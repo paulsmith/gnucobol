@@ -128,7 +128,7 @@ cobc_print_usage_warnings (void)
 	puts (_("Warning options:"));
 	puts (_("  -W                    enable all warnings"));
 	puts (_("  -Wall                 enable most warnings (all except as noted below)"));
-	puts (_("  -Wno-<warning>        disable warning enabled by -W or -Wall"));
+	puts (_("  -Wno-<warning>        disable warning enabled by default, -W or -Wall"));
 #define	CB_WARNDEF(var,name,doc)		\
 	puts (doc);
 #define	CB_ONWARNDEF(var,name,doc)		\

@@ -1291,13 +1291,21 @@ output_xfd_file (struct cb_file *fl)
 	}
 
 	sprintf(outname,"%s%s%s.xd",cob_schema_dir,SLASH_STR,tblname);
-	fx = fopen(outname,"w");
+	if (cb_unix_lf) {
+		fx = fopen (outname, "wb");
+	} else {
+		fx = fopen (outname, "w");
+	}
 	if (fx == NULL) {
 		cb_warning (warningopt, _("Unable to open %s; '%s'"),outname,cb_get_strerror ());
 		return;
 	}
 	sprintf(outname,"%s%s%s.ddl",cob_schema_dir,SLASH_STR,tblname);
-	fs = fopen(outname,"w");
+	if (cb_unix_lf) {
+		fs = fopen (outname, "wb");
+	} else {
+		fs = fopen (outname, "w");
+	}
 	if (fs == NULL) {
 		cb_warning (warningopt, _("Unable to open %s; '%s'"),outname,cb_get_strerror ());
 		return;

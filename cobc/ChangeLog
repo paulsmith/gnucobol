@@ -1,7 +1,13 @@
 
+2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, cobc.h: added check for COB_UNIX_LF again,
+	  externalized cb_unix_lf for use in sqlxfdgen.c
+
 2020-01-28  Ron Norman <rjn@inglenet.com>
-	* sqlxfdgen.c,typeck.c : Update to avoid C compile warnings
-	* field.c,codegen.c : Update to avoid C compile warnings
+
+	* sqlxfdgen.c, typeck.c : Update to avoid C compile warnings
+	* field.c, codegen.c : Update to avoid C compile warnings
 
 2020-01-24  Ron Norman <rjn@inglenet.com>
 
