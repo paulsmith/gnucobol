@@ -66,6 +66,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies=""
+				OutputFile="$(OutDir)\$(ProjectName)-5.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)"
 				ModuleDefinitionFile=""
@@ -150,6 +151,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies=""
+				OutputFile="$(OutDir)\$(ProjectName)-5.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)"
 				ModuleDefinitionFile=""
@@ -234,6 +236,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies=""
+				OutputFile="$(OutDir)\$(ProjectName)-5.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)$(PlatformName)"
 				ModuleDefinitionFile=""
@@ -313,6 +316,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies=""
+				OutputFile="$(OutDir)\$(ProjectName)-5.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)$(PlatformName)"
 				ModuleDefinitionFile=""

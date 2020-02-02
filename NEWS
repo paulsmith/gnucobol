@@ -1,9 +1,19 @@
 NEWS - user visible changes				-*- outline -*-
 
- GnuCOBOL development (currently as 3.2-early-dev)
- 
- *** anything may change during development of this version
-     in this change including incompatible changes ***
+ GnuCOBOL development (currently as 4.0-early-dev)
+
+ *** this version has no backward compatibility to modules created with
+     a previous version; the internal library-number was therefore increased
+     (libcob-5 instead of libcob-4).
+
+ *** anything may still change during development of this version,
+     including incompatible changes ***
+
+* New GnuCOBOL features
+
+** file handling: added backends for ODBC and OCI, along with new directory
+   COB_SCHEMA_DIR containing the necessary internal schema files to match the
+   indexed file definition to the database table
 
 * internal change: fileio splitted
 

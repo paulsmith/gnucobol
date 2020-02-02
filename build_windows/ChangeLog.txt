@@ -1,4 +1,8 @@
 
+2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: changed libcob target to libcob-5
+
 2019-06-17  Simon Sobisch <simonsobisch@gnu.org>
 
 	* config.h.in: allow to override library names by define LIB_...
@@ -219,7 +223,7 @@
 	  version_libcob.rc, version_cobcrun.rc provided by Simon)
 
 
-Copyright 2014-2019 Free Software Foundation, Inc.
+Copyright 2014-2020 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

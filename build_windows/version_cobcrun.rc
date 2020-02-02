@@ -19,8 +19,8 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 #endif
 
 VS_VERSION_INFO    VERSIONINFO
-  FILEVERSION      3,2,PATCH_LEVEL,0
-  PRODUCTVERSION   3,2,PATCH_LEVEL,0
+  FILEVERSION      4,0,PATCH_LEVEL,0
+  PRODUCTVERSION   4,0,PATCH_LEVEL,0
 
   FILEOS           VOS_NT_WINDOWS32
 
@@ -38,7 +38,7 @@ VS_VERSION_INFO    VERSIONINFO
       // VALUE "Comments",         "Free for general use, including commercial (distribution bound to GPL).\0"
       // VALUE "CompanyName",      "No Company\0"
       VALUE "FileDescription",  PACKAGE_NAME " module loader"
-      VALUE "FileVersion",      "3.2.3273"
+      VALUE "FileVersion",      "4.0.3458"
       VALUE "InternalName",     "cobcrun"
       VALUE "LegalCopyright",   "Copyright (C) 2004-2012, 2014-2019 Free Software Foundation, Inc."
       VALUE "LegalTrademarks",  "Module Loader: GNU General Public License v3 - see COPYING,\x0ADocumentation: GNU Free Documentation License."
@@ -51,7 +51,7 @@ VS_VERSION_INFO    VERSIONINFO
       VALUE "SpecialBuild",     ""
 
       /* Non-Standard entries */
-      VALUE "Build",            "Sept 2019"
+      VALUE "Build",            "Feb 2020"
       VALUE "Developer",        "Roger While, Simon Sobisch, Brian Tiffin (see AUTHORS and THANKS)"
       VALUE "Support",          "https://www.gnu.org/software/gnucobol/"
       VALUE "Users",            "Unlimited."

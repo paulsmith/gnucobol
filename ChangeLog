@@ -1,4 +1,8 @@
 
+2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: version bump to 4.0 (lt-version 5.0.0)
+
 2020-01-03  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: fix auto-setup for OCI via ORACLE_HOME

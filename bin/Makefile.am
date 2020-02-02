@@ -42,4 +42,3 @@ MAINTAINERCLEANFILES = cobcrun.1
 
 cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac | $(COBCRUN)
 	"$(top_builddir)/pre-inst-env" $(HELP2MAN) --output=$@ --info-page=$(PACKAGE) "$(COBCRUN) -q"
-
