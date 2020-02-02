@@ -113,8 +113,10 @@ export COB_SCHEMA_DIR=.
 
 # possible path conversion for running the testsuite in an environment
 # that doesn't match the one where the tested binaries were built
+# Note: not needed for running the testsuite with MSYS as this translates the path
+#       if MSYS_NO_PATHCONV=1 is not set
 _return_path () {
-	${abs_top_srcdir}/bin/return_path "$1"
+	echo "$1"
 }
 
 # options that are also used in pre-inst-env (always add to both)

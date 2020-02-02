@@ -56,8 +56,19 @@ export PATH
 
 # possible path conversion for running the testsuite in an environment
 # that doesn't match the one where the tested binaries were built
+# Note: not needed for running the testsuite with MSYS as this translates the path
+#       if MSYS_NO_PATHCONV=1 is not set
 _return_path () {
-	${abs_top_srcdir}/bin/return_path convert "$1"
+	if test "$OSTYPE" = "cygwin"; then
+		cygpath -pw "$1"
+	else
+		# check for WSL / Bash on Windows; ignore error messages (file not available)
+		if $(grep -q "Microsoft" /proc/sys/kernel/osrelease 2>/dev/null); then
+			wslpath -w "$1"
+		else
+			echo "$1"
+		fi
+	fi
 }
 
 # unset all environment variables that are used in libcob

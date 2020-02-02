@@ -28,7 +28,9 @@ EXTRA_DIST = CBL_OC_DUMP.cob
 CLEANFILES = $(extras_DATA)
 
 SUFFIXES = .cob .$(COB_MODULE_EXT)
-.cob.$(COB_MODULE_EXT):	$(top_builddir)/pre-inst-env
+.cob.$(COB_MODULE_EXT):
 	@echo "building $<" && \
-	 ("$(top_builddir)/pre-inst-env" cobc$(EXEEXT) -m -Wall -O2 -o "$@" "$$(${abs_top_srcdir}/bin/return_path $<)" || \
-	  "$(top_builddir)/pre-inst-env" cobc$(EXEEXT) -m -Wall -vv -o "$@" "$$(${abs_top_srcdir}/bin/return_path $<)")
+	. $(top_builddir)/tests/atconfig && . $(top_builddir)/tests/atlocal \
+		&& ("$(top_builddir)/pre-inst-env" cobc$(EXEEXT) -m -Wall -O2 -o "$@" "$$(_return_path "$<")" || \
+		    "$(top_builddir)/pre-inst-env" cobc$(EXEEXT) -m -Wall -O2 -o "$@" "$<" || \
+		    "$(top_builddir)/pre-inst-env" cobc$(EXEEXT) -m -Wall -vv -o "$@" "$$(_return_path "$<")")

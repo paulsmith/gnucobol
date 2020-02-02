@@ -75,7 +75,6 @@ clean-tex:
 	rm -rf $(GENINCLUDES)
 
 EXTRA_DIST = gnucobol.pdf
-dist_noinst_SCRIPTS = cobcinfo.sh
 
 AM_MAKEINFOHTMLFLAGS = --no-headers --no-split
 CLEANFILES = *.aux  *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.vrs

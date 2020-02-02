@@ -1,7 +1,8 @@
 
 2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
 
-	* Makefile.am: suppress some output
+	* Makefile.am: suppress some output,
+	  remove duplicated dist_noinst_SCRIPTS (defined in top Makefile)
 
 2019-08-15  Simon Sobisch <simonsobisch@gnu.org>
 
