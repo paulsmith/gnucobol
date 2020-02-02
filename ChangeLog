@@ -2,6 +2,8 @@
 2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: version bump to 4.0 (lt-version 5.0.0)
+	* configure.ac: document the existing environment vars LIBCOB_CPPFLAGS,
+	  LIBCOB_LIBS and COBC_LIBS and test if those actually work
 	* Makefile.am (dist_noinst_SCRIPTS): moved doc/cobcinfo.sh here
 	* extras/Makefile.am: use of return_path instead of atlocal
 

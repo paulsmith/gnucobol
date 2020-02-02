@@ -242,6 +242,46 @@ AC_PROG_CPP
 
 AC_USE_SYSTEM_EXTENSIONS
 
+
+# general flags for compiler and linker and tests for those
+AC_ARG_VAR([LIBCOB_CPPFLAGS], [see CPPFLAGS, but only applied during generation of libcob])
+if test "x$LIBCOB_CPPFLAGS" != "x"; then
+	AC_MSG_CHECKING([if compilation with LIBCOB_CPPFLAGS works])
+	curr_cppflags="$CPPFLAGS"
+	CPPFLAGS="$CPPFLAGS $LIBCOB_CPPFLAGS"
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+		[[static int i = 1;]])],
+		[AC_MSG_RESULT([yes])],
+		[AC_MSG_RESULT([no])
+		AC_MSG_ERROR([not possible to compile with LIBCOB_CPPFLAGS="$LIBCOB_CPPFLAGS"])])
+	CPPFLAGS="$curr_cppflags"
+fi
+
+curr_libs="$LIBS"
+AC_ARG_VAR([LIBCOB_LIBS], [see LIBS, but only applied during generation of libcob])
+if test "x$LIBCOB_LIBS" != "x"; then
+	AC_MSG_CHECKING([if linking with LIBCOB_LIBS works])
+	LIBS="$LIBS $LIBCOB_LIBS"
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+		  [[return 0;]])],
+		  [AC_MSG_RESULT([yes])],
+		  [AC_MSG_RESULT([no])
+		   AC_MSG_ERROR([not possible to link with LIBCOB_LIBS="$LIBCOB_LIBS"])])
+fi
+
+AC_ARG_VAR([COBC_LIBS], [see LIBS, but only applied during generation of cobc])
+if test "x$COBC_LIBS" != "x"; then
+	AC_MSG_CHECKING([if linking with COBC_LIBS works])
+	LIBS="$LIBS $COBC_LIBS"
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+		  [[return 0;]])],
+		  [AC_MSG_RESULT([yes])],
+		  [AC_MSG_RESULT([no])
+		   AC_MSG_ERROR([not possible to link with COBC_LIBS="$COBC_LIBS"])])
+fi
+LIBS="$curr_libs"
+
+
 LT_INIT([dlopen win32-dll])
 
 AC_PROG_EGREP
@@ -372,7 +412,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]],
 	]])],
 	[AC_DEFINE([HAVE_DESIGNATED_INITS], [1]) AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])])
-
 
 # Check gcc/icc/clang
 COB_USES_GCC="no"
