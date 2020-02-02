@@ -200,6 +200,7 @@ int			cobc_wants_debug = 0;
 int			cb_flag_functions_all = 0;
 int			cb_flag_dump = 0;
 int			cobc_seen_stdin = 0;
+int			cb_unix_lf = 0;
 
 int 		fatal_startup_error = 0;
 int			errorcount = 0;
@@ -7821,8 +7822,6 @@ set_cobc_defaults (void)
 		*p == 'T' || *p == 't' ||
 		*p == '1') {
 		cb_unix_lf = 1;
-	} else {
-		cb_unix_lf = 0;
 	}
 }
 
