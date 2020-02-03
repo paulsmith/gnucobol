@@ -290,9 +290,8 @@ AM_PROG_CC_C_O
 AM_PROG_LEX
 AC_PROG_YACC
 
-# only GNU Bison is supported, so drop yacc-compatibility warnings if possible
-# note: that breaks old Bison versions which we still support,
-#       if that changes the test may be obsolete
+# only GNU Bison 3+ is supported, so drop yacc-compatibility warnings
+# TODO: check for Bison 3+ here
 AC_MSG_CHECKING([how to disable yacc compatibility warnings])
 case "$YACC $YFLAGS $AM_YFLAGS" in 
   *-Wno-yacc*)

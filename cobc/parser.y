@@ -23,7 +23,7 @@
 
 %defines
 %verbose
-%error-verbose
+%define parse.error verbose
 
 %{
 #include "config.h"

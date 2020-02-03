@@ -6,6 +6,7 @@
 	  LIBCOB_LIBS and COBC_LIBS and test if those actually work
 	* Makefile.am (dist_noinst_SCRIPTS): moved doc/cobcinfo.sh here
 	* extras/Makefile.am: use of return_path instead of atlocal
+	* removed support for Bison < 3
 
 2020-01-03  Simon Sobisch <simonsobisch@gnu.org>
 

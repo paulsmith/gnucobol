@@ -3,6 +3,8 @@
 
 	* cobc.c, cobc.h: added check for COB_UNIX_LF again,
 	  externalized cb_unix_lf for use in sqlxfdgen.c
+	* parser.y, ppparse.y: removed support for Bison < 3,
+	  fixing deprecation warnings
 
 2020-01-28  Ron Norman <rjn@inglenet.com>
 
