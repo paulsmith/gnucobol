@@ -10,6 +10,8 @@
 #define COB_CC           "occ.exe"
 #endif
 
+#define COB_LT_VERSION   "-5"
+
 #ifdef MAKE_DIST
 #define COB_MAIN_DIR     "C:\\" PACKAGE_NAME "_" PACKAGE_VERSION
 #define COB_CFLAGS       "-I \"" COB_MAIN_DIR "\\include\""
@@ -56,9 +58,9 @@
 
 
 #ifndef __ORANGEC__
-#define COB_LIBS         "libcob.lib"
+#define COB_LIBS         "libcob"COB_LT_VERSION".lib"
 #else
-#define COB_LIBS         "libcob.l"
+#define COB_LIBS         "libcob"COB_LT_VERSION".l"
 #endif
 
 // Do not put quotation marks here:

@@ -630,7 +630,7 @@
 #define PACKAGE_NAME "GnuCOBOL"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "GnuCOBOL 3.2-early-dev"
+#define PACKAGE_STRING "GnuCOBOL 4.0-early-dev"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "gnucobol"
@@ -639,7 +639,7 @@
 #define PACKAGE_URL "https://www.gnu.org/software/gnucobol/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.2-early-dev"
+#define PACKAGE_VERSION "4.0-early-dev"
 
 /* Define a patch level (numeric, max. 8 digits) */
 #define PATCH_LEVEL COB_NUM_TAR_DATE
@@ -676,7 +676,7 @@
 
 
 /* Version number of package */
-#define VERSION "3.2-early-dev"
+#define VERSION "4.0-early-dev"
 
 /* Use CISAM as INDEXED handler */
 #if CONFIGURED_ISAM == CISAM

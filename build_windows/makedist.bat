@@ -1,4 +1,4 @@
-:: Copyright (C) 2014-2019 Free Software Foundation, Inc.
+:: Copyright (C) 2014-2020 Free Software Foundation, Inc.
 :: Written by Simon Sobisch, Edward Hart
 ::
 :: This file is part of GnuCOBOL.
@@ -62,6 +62,9 @@ if /i "%1%"=="DEBUG" (
 ) else (
    set config=Release
 )
+
+rem TODO: read this from defaults.h
+set "ltversion=-5"
 
 if exist "%cob_build_path%Win32\%config%\cobc.exe" (
    set have_32=1
@@ -249,7 +252,7 @@ set "copy_from=%cob_build_path%%platform%\%config%"
 
 echo Copying binaries for %platform%...
 mkdir %copy_to_bin%
-set "exe_lib_list=cobc.exe cobc.pdb cobcrun.exe cobcrun.pdb libcob.dll libcob.pdb"
+set "exe_lib_list=cobc.exe cobc.pdb cobcrun.exe cobcrun.pdb libcob%ltversion%.dll libcob%ltversion%.pdb"
 for %%f in (%exe_lib_list%) do (
     copy "%copy_from%\%%f"	%copy_to_bin%\	1>nul
 )
@@ -321,7 +324,7 @@ call :copy_lib_if_exists "zlib1.dll" %copy_to_bin% "zlib"
 call :copy_lib_if_exists "libcharset-1.dll" %copy_to_bin% "charset"
 
 mkdir %copy_to_lib%
-copy "%copy_from%\libcob.lib"			%copy_to_lib%\	1>nul
+copy "%copy_from%\libcob%ltversion%.lib"			%copy_to_lib%\	1>nul
 
 goto :eof
 
