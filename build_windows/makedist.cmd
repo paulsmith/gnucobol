@@ -69,7 +69,6 @@ set "ltversion=-5"
 if exist "%cob_build_path%Win32\%config%\cobc.exe" (
    set have_32=1
    echo 32-bit %config% binaries: found
-   
 ) else (
    set have_32=0
    echo 32-bit %config% binaries: not found
@@ -98,7 +97,7 @@ pushd "%cob_dist_path%"
 echo.
 
 echo Copying docs...
-set "txt_doc_list=AUTHORS COPYING COPYING.LESSER COPYING.DOC NEWS README THANKS TODO"
+set "txt_doc_list=AUTHORS COPYING COPYING.LESSER COPYING.DOC NEWS README THANKS TODO HACKING"
 for %%f in (%txt_doc_list%) do (
     copy  %cob_source_path%%%f .\%%f.TXT 1>nul
 )
@@ -128,7 +127,6 @@ mkdir include\libcob
 copy "%cob_source_path%libcob.h"		include\	1>nul
 copy "%cob_source_path%libcob\common.h"		include\libcob\	1>nul
 copy "%cob_source_path%libcob\exception.def"	include\libcob\	1>nul
-copy "%cob_header_path%gmp.h"			include\	1>nul
 
 echo Copying translations...
 mkdir po
@@ -182,7 +180,7 @@ echo Compiling extras...
 echo.
 
 if "%have_32%"=="1" (
-   call :compile_extras "Win32"
+   call :compile_extras "Win32" "x86-windows"
    if !cb_errorlevel! neq 0 (
       goto :abort
    )
@@ -191,7 +189,7 @@ if "%have_64%"=="1" (
    if "%have_32%"=="1" (
        echo.
    )
-   call :compile_extras "x64"
+   call :compile_extras "x64"  "x64-windows"
    if !cb_errorlevel! neq 0 (
       goto :abort
    )
@@ -257,9 +255,24 @@ for %%f in (%exe_lib_list%) do (
     copy "%copy_from%\%%f"	%copy_to_bin%\	1>nul
 )
 
+if "%VCPKG_EXPORT_DIR%"=="" (
+   call :copy_deps
+) else (
+   echo no dependencies copied as VCPKG_EXPORT_DIR is set
+)
+
+mkdir %copy_to_lib%
+copy "%copy_from%\libcob%ltversion%.lib"			%copy_to_lib%\	1>nul
+
+goto :eof
+
+
+:copy_deps
 :: Copy math library.
 if exist "%copy_from%\mpir.dll" (
    copy "%copy_from%\mpir.dll"			%copy_to_bin%\	1>nul
+) else if exist "%copy_from%\libgmp.dll" (
+   copy "%copy_from%\libgmp.dll"			%copy_to_bin%\	1>nul
 ) else if exist "%copy_from%\gmp.dll" (
    copy "%copy_from%\gmp.dll"			%copy_to_bin%\	1>nul
 ) else (
@@ -310,21 +323,23 @@ if exist "%copy_from%\libvbisam.dll" (
    echo No ISAM handler found.
 )
 
-:: Copy the intl/iconv library.
+:: Copy the intl library.
 call :copy_lib_if_exists "libintl.dll" %copy_to_bin% "intl"
-call :copy_lib_if_exists "libiconv.dll" %copy_to_bin% "iconv"
+
+:: Copy the cJSON library.
+call :copy_lib_if_exists "cjson.dll" %copy_to_bin% "cJSON"
 
 :: Copy the curses library.
 call :copy_lib_if_exists "pdcurses.dll" %copy_to_bin% "curses"
 
-:: Copy the XML libary (and its dependents)
-call :copy_lib_if_exists "libxml2-2.dll" %copy_to_bin% "XML"
-call :copy_lib_if_exists "libiconv-2.dll" %copy_to_bin% "iconv-2"
+:: Copy the XML libary (and its dependencies)
+call :copy_lib_if_exists "libxml2.dll" %copy_to_bin% "XML"
 call :copy_lib_if_exists "zlib1.dll" %copy_to_bin% "zlib"
-call :copy_lib_if_exists "libcharset-1.dll" %copy_to_bin% "charset"
+call :copy_lib_if_exists "libcharset.dll" %copy_to_bin% "charset"
+call :copy_lib_if_exists "lzma.dll" %copy_to_bin% "lzma"
 
-mkdir %copy_to_lib%
-copy "%copy_from%\libcob%ltversion%.lib"			%copy_to_lib%\	1>nul
+:: Copy the iconv library.
+call :copy_lib_if_exists "libiconv.dll" %copy_to_bin% "iconv"
 
 goto :eof
 
@@ -334,6 +349,10 @@ call :set_platform_and_ext %1%
 echo Using created GnuCOBOL distribution -%platform%- to compile extras...
 pushd "%cob_dist_path%bin%platform_ext%"
 call ..\set_env_vs%platform_ext%.bat
+if not [%VCPKG_EXPORT_DIR%]==[] (
+   echo using vcpgk binaries...
+   set "PATH=%VCPKG_EXPORT_DIR%\%2\bin;%PATH%"
+)
 cobc -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
 if %errorlevel% neq 0 (
    echo.
@@ -385,7 +404,7 @@ goto :eof
 if exist "%copy_from%\%~1%" (
    copy "%copy_from%\%~1"	"%2%\"	1>nul
 ) else (
-   echo No %~3 library found.	
+   echo %~3 library not found.
 )
 echo off
 goto :eof

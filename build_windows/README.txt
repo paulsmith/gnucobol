@@ -43,8 +43,8 @@ How to create the dist package:
 * set up the above
 * compile the *release version* you want (x86/Win32 and/or x64)
 * sign the binaries if needed
-* if you want a 7z and have a non-standard installation: change "makedist.bat"
-* call "makedist.bat" (uses the last build from Win32\release and x64\release)
+* if you want a 7z and have a non-standard installation: change "makedist.cmd"
+* call "makedist.cmd" (uses the last build from Win32\release and x64\release)
 
 How to use the dist package:
 
