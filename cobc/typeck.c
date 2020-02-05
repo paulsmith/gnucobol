@@ -12711,6 +12711,9 @@ cb_emit_xml_generate (cb_tree out, cb_tree from, cb_tree count,
 {
 	struct cb_ml_generate_tree	*tree;
 
+#ifndef WITH_XML2
+	cb_warning_x (COBC_WARN_FILLER, out, _("compiler is not configured to support XML"));
+#endif
 	if (syntax_check_ml_generate (out, from, count, encoding,
 				       namespace_and_prefix, name_list,
 				       type_list, suppress_list)) {
@@ -12747,6 +12750,9 @@ cb_emit_json_generate (cb_tree out, cb_tree from, cb_tree count,
 {
 	struct cb_ml_generate_tree	*tree;
 
+#ifndef WITH_JSON
+	cb_warning_x (COBC_WARN_FILLER, out, _("compiler is not configured to support JSON"));
+#endif
 	if (syntax_check_ml_generate (out, from, count, NULL,
 				      NULL, name_list, NULL,
 				      suppress_list)) {

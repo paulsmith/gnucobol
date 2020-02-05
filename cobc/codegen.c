@@ -8551,6 +8551,16 @@ output_file_initialization (struct cb_file *f)
 	output_indent_level -= 17;
 	output_newline ();
 
+#if defined(WITH_INDEX_EXTFH) || defined(WITH_CISAM) || defined(WITH_DISAM) \
+	|| defined(WITH_VBISAM) || defined(WITH_DB) || defined(WITH_LMDB) \
+	|| defined(WITH_ODBC) || defined(WITH_OCI)
+	/* INDEXED is supported */
+#else
+	if (f->organization == COB_ORG_INDEXED) {
+		cb_warning (warningopt, _("FD %s ORGANIZATION INDEXED is not configured"), f->name);
+	}
+#endif
+
 	nkeys = 1;
 	/* Output RELATIVE/RECORD KEY's */
 	if (f->organization == COB_ORG_RELATIVE

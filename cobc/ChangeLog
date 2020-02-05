@@ -1,4 +1,8 @@
 
+2020-02-05  Ron Norman <rjn@inglenet.com>
+	* codegen.c: Emit warning if ORANIZATION INDEXED used but not supported
+	* typeck.c: Emit warning if XML or JSON used but not supported
+
 2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, cobc.h: added check for COB_UNIX_LF again,
