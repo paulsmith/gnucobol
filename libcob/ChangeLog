@@ -1,4 +1,8 @@
 
+2020-02-05  Ron Norman <rjn@inglenet.com>
+	* common.h: cob_file and cob_file_key updated
+	* fileio.c,fbdb.c: Corrections for using filedef.dd for BDB
+
 2020-01-28  Ron Norman <rjn@inglenet.com>
 	* fileio.c,fbdb.c,fsqlxfd.c: Adding casts to avoid C compile warnings
 	* fextfh.c,screenio.c,common.c: Adding casts to avoid C compile warnings

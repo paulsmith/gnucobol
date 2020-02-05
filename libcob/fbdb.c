@@ -1147,9 +1147,9 @@ static int
 ix_bdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const int sharing)
 {
 	struct indexed_file	*p;
-	size_t			i;
-	size_t			j;
-	size_t			maxsize;
+	int			i;
+	int			j;
+	int			maxsize;
 	db_lockmode_t		lock_mode;
 	int			handle_created;
 	cob_u32_t		flags = 0;
@@ -1210,6 +1210,15 @@ ix_bdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const
 		break;
 	}
 
+	if (mode != COB_OPEN_OUTPUT) {
+		if (bdb_nofile(filename) == 0) {
+			if (a->cob_read_dict (f, bdb_buff, !f->flag_keycheck, &ret)) {
+				return ret ? ret : COB_STATUS_39_CONFLICT_ATTRIBUTE;
+			}
+		} else if (a->cob_read_dict (f, filename, !f->flag_keycheck, &ret)) {
+			return ret ? ret : COB_STATUS_39_CONFLICT_ATTRIBUTE;
+		}
+	}
 
 	p->db = cob_malloc (sizeof (DB *) * f->nkeys);
 	p->cursor = cob_malloc (sizeof (DBC *) * f->nkeys);
@@ -1224,15 +1233,6 @@ ix_bdb_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const
 			maxsize = j;
 	}
 	p->maxkeylen = maxsize;
-	if (mode != COB_OPEN_OUTPUT) {
-		if (bdb_nofile(filename) == 0) {
-			if (a->cob_read_dict (f, bdb_buff, 0, &ret)) {
-				return ret ? ret : COB_STATUS_39_CONFLICT_ATTRIBUTE;
-			}
-		} else if (a->cob_read_dict (f, filename, 0, &ret)) {
-			return ret ? ret : COB_STATUS_39_CONFLICT_ATTRIBUTE;
-		}
-	}
 
 	for (i = 0; i < f->nkeys; ++i) {
 		/* File name */

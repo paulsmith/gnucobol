@@ -536,21 +536,44 @@ cob_dd_prms ( char *p, char *p1, char *p2 )
 	return p;
 }
 
+static void
+cob_order_keys (cob_file *f)
+{
+	int		didswap = 1;
+	int		k;
+	cob_file_key kx;
+	while (didswap) {
+		didswap = 0;
+		for (k=0; k < (int)f->nkeys-1; k++) {
+			if (f->keys[k].keyn > f->keys[k+1].keyn) {
+				didswap = 1;
+				memcpy(&kx, &f->keys[k], sizeof(cob_file_key));
+				memcpy(&f->keys[k], &f->keys[k+1], sizeof(cob_file_key));
+				memcpy(&f->keys[k+1], &kx, sizeof(cob_file_key));
+			}
+		}
+	}
+}
+
 /*
  * Parse one key definition and update 'cob_file'
  */
 static void
 cob_key_def (cob_file *f, int keyn, char *p, int *ret, int keycheck)
 {
-	int		idx,part,parts,loc,len;
+	int		k,idx,part,parts,loc,len,ttl;
 	char	p1[32], p2[32];
 	int		cloc[COB_MAX_KEYCOMP],clen[COB_MAX_KEYCOMP];
+	if (f->flag_redo_keydef)
+		keycheck = 0;
 	idx = keyn - 1;
 	cloc[0] = clen[0] = 0;
+	ttl = 0;
 	for (parts = 0; parts < COB_MAX_KEYCOMP; parts++) {
 		p = cob_dd_prms (p, p1, p2);
 		cloc[parts] = atoi (p1);
 		clen[parts] = atoi (p2);
+		ttl += clen[parts];
 		if(*p != ',') {
 			parts++;
 			break;
@@ -562,63 +585,84 @@ cob_key_def (cob_file *f, int keyn, char *p, int *ret, int keycheck)
 	}
 	loc = cloc[0];
 	len = clen[0];
-	if(f->keys[idx].field == NULL) {
-		if (keycheck) {
-			*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
-			return;
-		}
-		f->keys[idx].field = cob_cache_malloc (sizeof(cob_field));
-		f->keys[idx].field->attr = &const_alpha_attr;
-		f->keys[idx].offset = loc;
-		f->keys[idx].field->size = len;
-		f->keys[idx].field->data = f->record->data + loc;
-	}
-	if (parts == 1) {
-		if ((int)(f->keys[idx].offset) != loc
-		 || (int)(f->keys[idx].field->size) != len) {
-			if (keycheck) {
-				*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+	for (k=0; k < (int)f->nkeys && f->keys[k].field != NULL; k++) {
+		if (parts == 1) {
+			if (f->keys[k].count_components > 1) 
+				continue;
+			if ((f->keys[k].component[0]
+			 && cloc[0] == (int)(f->keys[k].component[0]->data - f->record->data)
+			 && clen[0] == (int)f->keys[k].component[0]->size)
+			|| (cloc[0] == (int)(f->keys[k].field->data - f->record->data)
+			 && clen[0] == (int)f->keys[k].field->size)) {
+				f->keys[k].keyn = (unsigned char)idx;
+				if (idx == (int)f->nkeys-1)
+					cob_order_keys (f);
 				return;
 			}
-			f->keys[idx].offset = loc;
-			f->keys[idx].field->size = len;
-			f->keys[idx].field->data = f->record->data + loc;
+		} else if (parts == f->keys[k].count_components) {
+			for(part = 0; part < parts; part++) {
+				if(f->keys[k].component[part] == NULL) {
+					*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
+					return;
+				}
+				if ((int)f->keys[k].component[part]->size != clen[part]
+				 || (int)(f->keys[k].component[part]->data - f->record->data) != cloc[part]) {
+					break;
+				}
+			}
+			if (part == parts) {		/* Found the index */
+				f->keys[k].keyn = (unsigned char)idx;
+				if (idx == (int)f->nkeys-1)
+					cob_order_keys (f);
+				return;
+			}
 		}
-		f->keys[idx].component[0] = f->keys[idx].field;
-		f->keys[idx].count_components = 0;
+	}
+	if (k >= (int)f->nkeys) {
+		*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
 		return;
 	}
-	if (keycheck
-	 && f->keys[idx].count_components != parts) {
+	if (f->keys[k].field != NULL) {
 		*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
 		return;
 	}
 
-	f->keys[idx].count_components = (short)parts;
-	for(part = 0; part < parts; part++) {
-		loc = cloc[part];
-		len = clen[part];
-		if(f->keys[idx].component[part] == NULL) {
-			if (keycheck) {
-				*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
-				break;
-			}
-			f->keys[idx].component[part] = cob_cache_malloc (sizeof(cob_field));
-			f->keys[idx].component[part]->attr = &const_alpha_attr;
+	/* No match so add this index to table */
+	loc = cloc[0];
+	len = clen[0];
+	f->keys[k].field = cob_cache_malloc (sizeof(cob_field));
+	f->keys[k].field->attr = &const_alpha_attr;
+	f->keys[k].offset = loc;
+	if (parts == 1) {
+		f->keys[k].field->size = len;
+		f->keys[k].field->data = f->record->data + loc;
+		if ((int)(f->keys[k].offset) != loc
+		 || (int)(f->keys[k].field->size) != len) {
+			f->keys[k].offset = loc;
+			f->keys[k].field->size = len;
+			f->keys[k].field->data = f->record->data + loc;
 		}
-		if ((int)f->keys[idx].component[part]->size != len
-		 || (f->keys[idx].component[part]->data - f->record->data) != loc) {
-			if (keycheck) {
-				*ret = COB_STATUS_39_CONFLICT_ATTRIBUTE;
-				break;
-			}
-			if(part == 0)
-				f->keys[idx].offset = loc;
-			f->keys[idx].component[part]->size = len;
-			f->keys[idx].component[part]->data = f->record->data + loc;
+		f->keys[k].component[0] = f->keys[k].field;
+		f->keys[k].count_components = 0;
+
+	} else {
+
+		f->keys[k].field->size = ttl;
+		f->keys[k].field->data = cob_cache_malloc ((size_t)ttl+1);
+		f->keys[k].count_components = (short)parts;
+		for(part = 0; part < parts; part++) {
+			loc = cloc[part];
+			len = clen[part];
+			f->keys[k].component[part] = cob_cache_malloc (sizeof(cob_field));
+			f->keys[k].component[part]->attr = &const_alpha_attr;
+			f->keys[k].component[part]->size = len;
+			f->keys[k].component[part]->data = f->record->data + loc;
 		}
 	}
 
+	f->keys[k].keyn = (unsigned char)idx;
+	if (idx == (int)f->nkeys-1)
+		cob_order_keys (f);
 	return;
 }
 
@@ -1556,6 +1600,7 @@ cob_set_file_format (cob_file *f, char *defstr, int updt, int *ret)
 					&& (int)f->nkeys != nkeys) {
 						if(nkeys > (int)f->nkeys) {
 							f->keys = cob_cache_realloc (f->keys, sizeof (cob_file_key) * nkeys);
+							f->flag_redo_keydef = 1;
 						}
 						f->nkeys = nkeys;
 					} else {
@@ -4464,10 +4509,11 @@ cob_file_set_key (
 	if (keyn > (int)fl->nkeys
 	 || fl->flag_ready)
 		return;
+	fl->keys[keyn].keyn = (unsigned char)keyn;
 	fl->keys[keyn].tf_ascending = COB_ASCENDING;
 	fl->keys[keyn].field = key;
 	if (key)
-		fl->keys[keyn].offset = key->data - fl->record->data;
+		fl->keys[keyn].offset = (unsigned int)(key->data - fl->record->data);
 	else
 		fl->keys[keyn].offset = 0;
 	fl->keys[keyn].tf_duplicates = dups ? 1 : 0;
@@ -4495,7 +4541,7 @@ cob_file_set_key (
 		kp = va_arg (args, cob_field *);
 		fl->keys[keyn].component[i] = kp;
 		if (i == 0)
-			fl->keys[keyn].offset = kp->data - fl->record->data;
+			fl->keys[keyn].offset = (unsigned int)(kp->data - fl->record->data);
 	}
 	va_end (args);
 }

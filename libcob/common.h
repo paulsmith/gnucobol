@@ -1410,15 +1410,16 @@ struct cob_func_loc {
 #define COB_MAX_KEYCOMP 8	/* max number of parts in a compound key (disam.h :: NPARTS ) */
 
 typedef struct __cob_file_key {
-	cob_field	*	field;			/* Key field */
 	unsigned int	offset;			/* Offset of field within record */
+	short			len_suppress;	/* length of SUPPRESS "string" */
+	short			count_components;	/* 0..1::simple-key  2..n::split-key   */
+	unsigned char	keyn;			/* Index Number */
 	unsigned char	tf_duplicates;	/* WITH DUPLICATES (for RELATIVE/INDEXED) */
 									/* 0=NO DUPS, 1=DUPS OK, 2=NO DUPS precheck */
 	unsigned char	tf_ascending;	/* ASCENDING/DESCENDING (for SORT)*/
 	unsigned char	tf_suppress;	/* supress keys where all chars = char_suppress */
 	unsigned char	char_suppress;	/* key supression character  */
-	short			len_suppress;	/* length of SUPPRESS "string" */
-	short			count_components;	/* 0..1::simple-key  2..n::split-key   */
+	cob_field	*	field;			/* Key field (or SPLIT key save area) */
 	unsigned char *	str_suppress;	/* Complete SUPPRESS "string" */
 	cob_field	*component[COB_MAX_KEYCOMP];/* key-components iff split-key   */
 } cob_file_key;
@@ -1476,7 +1477,7 @@ typedef struct __cob_file {
 	void			*extfh_ptr;		/* For EXTFH usage */
 	size_t			record_min;		/* Record min size */
 	size_t			record_max;		/* Record max size */
-	size_t			nkeys;			/* Number of keys */
+	int				nkeys;			/* Number of keys */
 	cob_s64_t		record_off;		/* Starting position of last record read/written */
 	int			fd;			/* File descriptor */
 	int			record_slot;		/* Record size on disk including prefix/suffix */
@@ -1522,7 +1523,8 @@ typedef struct __cob_file {
 	unsigned int		flag_little_endian:1;/* Force use of little-endian in BDB */
 	unsigned int		flag_ready:1;		/* cob_file has been built completely */
 	unsigned int		flag_write_chk_dups:1;/* Do precheck for DUPLICATES on WRITE */
-	unsigned int		unused_bits:20;
+	unsigned int		flag_redo_keydef:1;	/* Keys are being redefined from dictionary */
+	unsigned int		unused_bits:19;
 
 	cob_field		*last_key;		/* Last field used as 'key' for I/O */
 	unsigned char		last_operation;		/* Most recent I/O operation */
