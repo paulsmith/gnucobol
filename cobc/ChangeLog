@@ -1,7 +1,7 @@
 
 2020-02-05  Ron Norman <rjn@inglenet.com>
 
-	* cobc.c, codegen.c, typeck.c, sysdefines.h, warning.def:
+	* cobc.c, codegen.c, typeck.c, sysdefines.h, warning.def: FR #117
 	  report when the COBOL code is using a feature which GnuCOBOL was not
 	  configured to support;
 	  -Wunsupported  is set to 'error' by default but can be downgraded
