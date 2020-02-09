@@ -2538,6 +2538,7 @@ process_command_line (const int argc, char **argv)
 	int			error_all_warnings = 0;
 
 	cb_mf_ibm_comp = -1;
+	cb_warn_unsupported = COBC_WARN_AS_ERROR;
 
 #if defined (_WIN32) || defined (__DJGPP__)
 	/* Translate command line arguments from DOS/WIN to UNIX style */

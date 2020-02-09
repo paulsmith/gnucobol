@@ -100,6 +100,15 @@ static const char		*inspect_func;
 static cb_tree			inspect_data;
 struct cb_statement		*error_statement = NULL;
 
+#ifndef WITH_XML2
+static int			warn_xml_done = 0;
+#endif
+#ifndef WITH_JSON
+static int			warn_json_done = 0;
+#endif
+#ifndef COB_EXTENED_SCREENIO
+static int			warn_screen_done = 0;
+#endif
 static int			expr_op;		/* Last operator */
 static cb_tree			expr_lh;		/* Last left hand */
 static int			expr_dmax = -1;		/* Max scale for expression result */
@@ -6285,6 +6294,14 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 	cb_tree		size_is;	/* WITH SIZE IS */
 	cob_flags_t		disp_attrs;
 
+	if (current_program->flag_screen) {
+#ifndef COB_EXTENED_SCREENIO
+	if (!warn_screen_done) {
+		warn_screen_done = 1;
+		cb_warning (cb_warn_unsupported, _("compiler is not configured to support SCREEN SECTION"));
+	}
+#endif
+	}
 	if (cb_validate_one (var)) {
 		return;
 	}
@@ -6357,8 +6374,8 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 				cobc_xref_set_receiving (current_program->crt_status);
 			}
 		}
-		if ((CB_REF_OR_FIELD_P (var)) &&
-		     CB_FIELD_PTR (var)->storage == CB_STORAGE_SCREEN) {
+		if ((CB_REF_OR_FIELD_P (var)) 
+		 && CB_FIELD_PTR (var)->storage == CB_STORAGE_SCREEN) {
 			output_screen_from (CB_FIELD_PTR (var), 0);
 			gen_screen_ptr = 1;
 			if (pos) {
@@ -12712,7 +12729,10 @@ cb_emit_xml_generate (cb_tree out, cb_tree from, cb_tree count,
 	struct cb_ml_generate_tree	*tree;
 
 #ifndef WITH_XML2
-	cb_warning_x (COBC_WARN_FILLER, out, _("compiler is not configured to support XML"));
+	if (!warn_xml_done) {
+		warn_xml_done = 1;
+		cb_warning (cb_warn_unsupported, _("compiler is not configured to support XML"));
+	}
 #endif
 	if (syntax_check_ml_generate (out, from, count, encoding,
 				       namespace_and_prefix, name_list,
@@ -12751,7 +12771,10 @@ cb_emit_json_generate (cb_tree out, cb_tree from, cb_tree count,
 	struct cb_ml_generate_tree	*tree;
 
 #ifndef WITH_JSON
-	cb_warning_x (COBC_WARN_FILLER, out, _("compiler is not configured to support JSON"));
+	if (!warn_json_done) {
+		warn_json_done = 1;
+		cb_warning (cb_warn_unsupported, _("compiler is not configured to support JSON"));
+	}
 #endif
 	if (syntax_check_ml_generate (out, from, count, NULL,
 				      NULL, name_list, NULL,

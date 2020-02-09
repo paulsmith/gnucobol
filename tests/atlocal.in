@@ -40,7 +40,7 @@ TEMPLATE="${abs_srcdir}/testsuite.src"
 
 FLAGS="-debug -Wall ${COBOL_FLAGS}"
 COMPILE="${COBC} -x ${FLAGS}"
-COMPILE_ONLY="${COBC} -fsyntax-only ${FLAGS}"
+COMPILE_ONLY="${COBC} -fsyntax-only ${FLAGS} -Wno-unsupported"
 COMPILE_MODULE="${COBC} -m ${FLAGS}"
 
 # Helper script to unify listings (replace version, date, time)

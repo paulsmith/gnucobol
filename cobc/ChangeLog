@@ -1,5 +1,13 @@
 
 2020-02-05  Ron Norman <rjn@inglenet.com>
+	* cobc.c,codegen,c,typeck.c,warning.def: Updated to report
+		when the application code is using a feature for which the
+		GnuCOBOL compiler was not configured to support
+		-Wunsupported  is set to 'error' by default but can be downgraded
+		Warning/Error is given for unsupported use of
+			XML, JSON, file with ORGANIZATION INDEXED
+
+2020-02-05  Ron Norman <rjn@inglenet.com>
 	* codegen.c: Emit warning if ORANIZATION INDEXED used but not supported
 	* typeck.c: Emit warning if XML or JSON used but not supported
 

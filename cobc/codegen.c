@@ -8557,7 +8557,7 @@ output_file_initialization (struct cb_file *f)
 	/* INDEXED is supported */
 #else
 	if (f->organization == COB_ORG_INDEXED) {
-		cb_warning (warningopt, _("FD %s ORGANIZATION INDEXED is not configured"), f->name);
+		cb_warning (cb_warn_unsupported, _("FD %s ORGANIZATION INDEXED is not configured"), f->name);
 	}
 #endif
 

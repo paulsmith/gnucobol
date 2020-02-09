@@ -278,4 +278,14 @@ struct sql_date {
 #undef	COB_EBCDIC_MACHINE
 #endif
 
+#if defined (HAVE_NCURSESW_NCURSES_H) \
+	|| defined (HAVE_NCURSESW_CURSES_H) \
+	|| defined (HAVE_NCURSES_H) \
+	|| defined (HAVE_NCURSES_NCURSES_H) \
+	|| defined (HAVE_PDCURSES_H) \
+	|| defined (HAVE_CURSES_H)
+#define COB_EXTENED_SCREENIO
+#endif
+
+/* End of  COB_SYSDEFINE_H */
 #endif
