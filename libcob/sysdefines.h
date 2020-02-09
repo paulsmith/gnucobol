@@ -290,7 +290,7 @@ struct sql_date {
 #if defined(WITH_INDEX_EXTFH) || defined(WITH_CISAM) || defined(WITH_DISAM) \
 	|| defined(WITH_VBISAM) || defined(WITH_DB) || defined(WITH_LMDB) \
 	|| defined(WITH_ODBC) || defined(WITH_OCI)
-#define WITH_INDEXED
+#define HAS_WITH_INDEXED
 #endif
 
 /* End of  COB_SYSDEFINE_H */
