@@ -103,10 +103,10 @@ struct cb_statement		*error_statement = NULL;
 #ifndef WITH_XML2
 static int			warn_xml_done = 0;
 #endif
-#ifndef WITH_JSON
+#ifndef WITH_CJSON
 static int			warn_json_done = 0;
 #endif
-#ifndef COB_EXTENED_SCREENIO
+#ifndef WITH_EXTENDED_SCREENIO
 static int			warn_screen_done = 0;
 #endif
 static int			expr_op;		/* Last operator */
@@ -6295,10 +6295,11 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 	cob_flags_t		disp_attrs;
 
 	if (current_program->flag_screen) {
-#ifndef COB_EXTENED_SCREENIO
+#ifndef WITH_EXTENDED_SCREENIO
 	if (!warn_screen_done) {
 		warn_screen_done = 1;
-		cb_warning (cb_warn_unsupported, _("compiler is not configured to support SCREEN SECTION"));
+		cb_warning (cb_warn_unsupported,
+			_("compiler is not configured to support %s"), "SCREEN SECTION");
 	}
 #endif
 	}
@@ -12731,7 +12732,8 @@ cb_emit_xml_generate (cb_tree out, cb_tree from, cb_tree count,
 #ifndef WITH_XML2
 	if (!warn_xml_done) {
 		warn_xml_done = 1;
-		cb_warning (cb_warn_unsupported, _("compiler is not configured to support XML"));
+		cb_warning (cb_warn_unsupported,
+			_("compiler is not configured to support %s"), "XML");
 	}
 #endif
 	if (syntax_check_ml_generate (out, from, count, encoding,
@@ -12740,7 +12742,7 @@ cb_emit_xml_generate (cb_tree out, cb_tree from, cb_tree count,
 		return;
 	}
 
-        tree = CB_ML_TREE (cb_build_ml_tree (CB_FIELD (cb_ref (from)),
+	tree = CB_ML_TREE (cb_build_ml_tree (CB_FIELD (cb_ref (from)),
 					     with_attrs, 0, name_list,
 					     type_list, suppress_list));
 
@@ -12748,7 +12750,8 @@ cb_emit_xml_generate (cb_tree out, cb_tree from, cb_tree count,
 	current_program->ml_trees = tree;
 
 	if (with_attrs && !tree->attrs) {
-		cb_warning (warningopt, _("WITH ATTRIBUTES specified, but no attributes can be generated"));
+		cb_warning (warningopt,
+			_("WITH ATTRIBUTES specified, but no attributes can be generated"));
 	}
 
 	cb_emit (cb_build_ml_suppress_checks (tree));
@@ -12770,10 +12773,11 @@ cb_emit_json_generate (cb_tree out, cb_tree from, cb_tree count,
 {
 	struct cb_ml_generate_tree	*tree;
 
-#ifndef WITH_JSON
+#ifndef WITH_CJSON
 	if (!warn_json_done) {
 		warn_json_done = 1;
-		cb_warning (cb_warn_unsupported, _("compiler is not configured to support JSON"));
+		cb_warning (cb_warn_unsupported,
+			_("compiler is not configured to support %s"), "JSON");
 	}
 #endif
 	if (syntax_check_ml_generate (out, from, count, NULL,

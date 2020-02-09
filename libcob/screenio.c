@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -41,31 +41,27 @@
 #include <io.h>
 #endif
 
+#include "sysdefines.h"
+
 #if defined (HAVE_NCURSESW_NCURSES_H)
 #include <ncursesw/ncurses.h>
-#define COB_GEN_SCREENIO
 #elif defined (HAVE_NCURSESW_CURSES_H)
 #include <ncursesw/curses.h>
-#define COB_GEN_SCREENIO
 #elif defined (HAVE_NCURSES_H)
 #include <ncurses.h>
-#define COB_GEN_SCREENIO
 #elif defined (HAVE_NCURSES_NCURSES_H)
 #include <ncurses/ncurses.h>
-#define COB_GEN_SCREENIO
 #elif defined (HAVE_PDCURSES_H)
 /* will internally define NCURSES_MOUSE_VERSION with
    a recent version (for older version define manually): */
 #define PDC_NCMOUSE		/* use ncurses compatible mouse API */
 #include <pdcurses.h>
-#define COB_GEN_SCREENIO
 #elif defined (HAVE_CURSES_H)
 #define PDC_NCMOUSE	/* see comment above */
 #include <curses.h>
 #ifndef PDC_MOUSE_MOVED
 #undef PDC_NCMOUSE
 #endif
-#define COB_GEN_SCREENIO
 #endif
 
 /* Force symbol exports */
@@ -109,7 +105,7 @@ static cob_settings		*cobsetptr;
 
 /* Local variables when screenio activated */
 
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 static const cob_field_attr	const_alpha_attr =
 				{COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL};
 static struct cob_inp_struct	*cob_base_inp;
@@ -136,7 +132,7 @@ static int	curr_setting_mouse_flags = INT_MAX;
 
 /* Local function prototypes when screenio activated */
 
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 static void cob_screen_init	(void);
 #endif
 
@@ -159,14 +155,14 @@ init_cob_screen_if_needed (void)
 	if (!cobglobptr) {
 		cob_fatal_error (COB_FERROR_INITIALIZED);
 	}
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	if (!cobglobptr->cob_screen_initialized) {
 		cob_screen_init ();
 	}
 #endif
 }
 
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 
 static void
 cob_beep (void)
@@ -3250,7 +3246,7 @@ cob_exit_screen (void)
 	COB_ACCEPT_STATUS = 0;
 }
 
-#else	/* COB_GEN_SCREENIO */
+#else	/* WITH_EXTENDED_SCREENIO */
 
 void
 cob_exit_screen (void)
@@ -3324,13 +3320,13 @@ cob_sys_clear_screen (void)
 	return 0;
 }
 
-#endif	/* COB_GEN_SCREENIO */
+#endif	/* WITH_EXTENDED_SCREENIO */
 
 void
 cob_screen_line_col (cob_field *f, const int l_or_c)
 {
 	init_cob_screen_if_needed ();
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	if (!l_or_c) {
 		cob_set_int (f, (int)LINES);
 	} else {
@@ -3351,7 +3347,7 @@ cob_sys_sound_bell (void)
 	if (COB_BEEP_VALUE == 9) {
 		return 0;
 	}
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	if (!cobglobptr->cob_screen_initialized &&
 	    COB_BEEP_VALUE != 2) {
 		cob_screen_init ();
@@ -3373,7 +3369,7 @@ cob_accept_escape_key (cob_field *f)
 int
 cob_sys_get_csr_pos (unsigned char *fld)
 {
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	int	cline;
 	int	ccol;
 #endif
@@ -3381,7 +3377,7 @@ cob_sys_get_csr_pos (unsigned char *fld)
 	COB_CHK_PARMS (CBL_GET_CSR_POS, 1);
 	init_cob_screen_if_needed ();
 
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	getyx (stdscr, cline, ccol);
 	fld[0] = (unsigned char)cline;
 	fld[1] = (unsigned char)ccol;
@@ -3401,14 +3397,14 @@ cob_sys_get_csr_pos (unsigned char *fld)
 int
 cob_sys_get_char (unsigned char *fld)
 {
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	int ret;
 #endif
 
 	COB_CHK_PARMS (CBL_READ_KBD_CHAR, 1);
 	/* note: screen init done in called cob_get_char */
 
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	if (!got_sys_char) {
 		ret = cob_get_char ();
 		if (ret > 255) {
@@ -3439,7 +3435,7 @@ cob_sys_get_char (unsigned char *fld)
 int
 cob_sys_set_csr_pos (unsigned char *fld)
 {
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	int	cline;
 	int	ccol;
 #endif
@@ -3447,7 +3443,7 @@ cob_sys_set_csr_pos (unsigned char *fld)
 	COB_CHK_PARMS (CBL_SET_CSR_POS, 1);
 	init_cob_screen_if_needed ();
 
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	cline = fld[0];
 	ccol= fld[1];
 	return move (cline, ccol);
@@ -3464,7 +3460,7 @@ cob_sys_get_scr_size (unsigned char *line, unsigned char *col)
 	COB_CHK_PARMS (CBL_GET_SCR_SIZE, 2);
 	init_cob_screen_if_needed ();
 
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	*line = (unsigned char)LINES;
 	*col = (unsigned char)COLS;
 #else
@@ -3478,7 +3474,7 @@ int
 cob_get_scr_cols (void)
 {
 	init_cob_screen_if_needed();
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	return (int)COLS;
 #else
 	return 80;
@@ -3489,7 +3485,7 @@ int
 cob_get_scr_lines (void)
 {
 	init_cob_screen_if_needed();
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	return (int)LINES;
 #else
 	return 24;
@@ -3500,7 +3496,7 @@ cob_get_scr_lines (void)
 void
 cob_settings_screenio (void)
 {
-#ifdef	COB_GEN_SCREENIO
+#ifdef	WITH_EXTENDED_SCREENIO
 	if (!cobglobptr || !cobglobptr->cob_screen_initialized) {
 		return;
 	}

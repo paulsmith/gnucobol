@@ -193,6 +193,9 @@ static int			loop_counter = 0;
 static int			progid = 0;
 static int			last_line = 0;
 static cob_u32_t		field_iteration = 0;
+#ifndef WITH_INDEXED
+static int			warn_indexed_done = 0;
+#endif
 static int			screenptr = 0;
 static int			local_mem = 0;
 static int			working_mem = 0;
@@ -8551,13 +8554,12 @@ output_file_initialization (struct cb_file *f)
 	output_indent_level -= 17;
 	output_newline ();
 
-#if defined(WITH_INDEX_EXTFH) || defined(WITH_CISAM) || defined(WITH_DISAM) \
-	|| defined(WITH_VBISAM) || defined(WITH_DB) || defined(WITH_LMDB) \
-	|| defined(WITH_ODBC) || defined(WITH_OCI)
-	/* INDEXED is supported */
-#else
-	if (f->organization == COB_ORG_INDEXED) {
-		cb_warning (cb_warn_unsupported, _("FD %s ORGANIZATION INDEXED is not configured"), f->name);
+#ifndef WITH_INDEXED
+	if (f->organization == COB_ORG_INDEXED
+	 && !warn_indexed_done) {
+		warn_indexed_done = 1;
+		cb_warning (cb_warn_unsupported,
+			_("compiler is not configured to support %s"), "ORGANIZATION INDEXED");
 	}
 #endif
 

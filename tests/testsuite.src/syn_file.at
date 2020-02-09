@@ -2171,7 +2171,7 @@ AT_DATA([prog.cob], [
 ])
 
 # note: we actually want to check codegen -> C compilation here
-AT_CHECK([$COMPILE -std=cobol2002 prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -std=cobol2002 -Wno-unsupported prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -2870,7 +2870,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -fsqldb=mysql prog.cob], [0], [], [])
+# FIXME: currently the .ddl is always created, should be only upon request
+AT_CHECK([$COMPILE -Wno-unsupported -fsqldb=mysql prog.cob], [0], [], [])
 
 
 AT_CAPTURE_FILE(./tspfilex.ddl)

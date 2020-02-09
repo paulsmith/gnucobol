@@ -1,15 +1,17 @@
 
 2020-02-05  Ron Norman <rjn@inglenet.com>
-	* cobc.c,codegen,c,typeck.c,warning.def: Updated to report
-		when the application code is using a feature for which the
-		GnuCOBOL compiler was not configured to support
-		-Wunsupported  is set to 'error' by default but can be downgraded
-		Warning/Error is given for unsupported use of
-			XML, JSON, file with ORGANIZATION INDEXED
+
+	* cobc.c, codegen.c, typeck.c, sysdefines.h, warning.def:
+	  report when the COBOL code is using a feature which GnuCOBOL was not
+	  configured to support;
+	  -Wunsupported  is set to 'error' by default but can be downgraded
+	  warning/error is given for unsupported use of
+	    XML, JSON, file with ORGANIZATION INDEXED, extended screen-io
 
 2020-02-05  Ron Norman <rjn@inglenet.com>
-	* codegen.c: Emit warning if ORANIZATION INDEXED used but not supported
-	* typeck.c: Emit warning if XML or JSON used but not supported
+
+	* codegen.c: emit warning if ORANIZATION INDEXED used but not supported
+	* typeck.c: emit warning if XML or JSON used but not supported
 
 2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -20,15 +22,15 @@
 
 2020-01-28  Ron Norman <rjn@inglenet.com>
 
-	* sqlxfdgen.c, typeck.c : Update to avoid C compile warnings
-	* field.c, codegen.c : Update to avoid C compile warnings
+	* sqlxfdgen.c, typeck.c: update to avoid C compile warnings
+	* field.c, codegen.c: update to avoid C compile warnings
 
 2020-01-24  Ron Norman <rjn@inglenet.com>
 
-	* parser.y: Add SUPPRESS WHEN "string"
-	* tree.h: Removed CB_PREFIX_KEYS and added 'suppress' to cb_alt_key
-	* codegen.c: Changed to no longer reference field in cob_file
-			All setup for cob_file is now done with function calls
+	* parser.y: add SUPPRESS WHEN "string"
+	* tree.h: removed CB_PREFIX_KEYS and added 'suppress' to cb_alt_key
+	* codegen.c: changed to no longer reference field in cob_file;
+	  all setup for cob_file is now done with function calls
 
 2020-01-12  Simon Sobisch <simonsobisch@gnu.org>
 

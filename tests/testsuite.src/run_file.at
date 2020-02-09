@@ -1896,8 +1896,9 @@ AT_DATA([prog.cob], [
            CLOSE TSPFILE.
 ])
 
-# CHECKME do we need -std=mf?
-AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+# FIXME: the syntax check part should be in syn_file.at, allowing to
+#        skip this test early and remove -Wno-unsupported.
+AT_CHECK([$COMPILE -Wno-unsupported prog.cob], [0], [], [])
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 
@@ -8000,8 +8001,6 @@ AT_DATA([prog.cob], [
 AT_DATA([cmod.c], [[
 #include <stdio.h>
 #include <libcob.h>
-
-static char *txtOpCode(int opCode);
 
 /*********************************************************
  *  TSTFH - External File Handler entry point.

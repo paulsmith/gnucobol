@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
    Edward Hart
 
@@ -284,7 +284,13 @@ struct sql_date {
 	|| defined (HAVE_NCURSES_NCURSES_H) \
 	|| defined (HAVE_PDCURSES_H) \
 	|| defined (HAVE_CURSES_H)
-#define COB_EXTENED_SCREENIO
+#define WITH_EXTENDED_SCREENIO
+#endif
+
+#if defined(WITH_INDEX_EXTFH) || defined(WITH_CISAM) || defined(WITH_DISAM) \
+	|| defined(WITH_VBISAM) || defined(WITH_DB) || defined(WITH_LMDB) \
+	|| defined(WITH_ODBC) || defined(WITH_OCI)
+#define WITH_INDEXED
 #endif
 
 /* End of  COB_SYSDEFINE_H */
