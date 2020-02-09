@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -68,26 +68,26 @@ CB_FLAG_RQ (cb_max_errors, 1, "max-errors", 128, 7,
 	  "                        compilation is aborted\n"
 	  "                        * default: 128"))
 
-CB_FLAG_RQ (cb_def_dump, 1, "dump", -1, 8,
+/* Flags with required parameter and no associated variable */
+
+CB_FLAG_NQ (1, "intrinsics", 10,		/* added to cb_intrinsic_list */
+	_("  -fintrinsics=[ALL|intrinsic function name(,name,...)]\n"
+	  "                        intrinsics to be used without FUNCTION keyword"))
+
+CB_FLAG_NQ (1, "dump", 8,		/* ORed to cb_flag_dump */
 	_("  -fdump=<scope>        dump data fields on abort, <scope> may be\n"
 	  "                        a combination of: ALL, WS, LS, RD, FD, SC"))
 
-CB_FLAG_RQ (cb_def_callfh, 1, "callfh", -1, 9,
+CB_FLAG_NQ (1, "callfh", 9,		/* stored in cb_call_extfh */
 	_("  -fcallfh=<function>   use external provided EXTFH interface module\n"
 	  "                        <function> for I/O"))
 
-/* Flags with required parameter and no associated variable */
+CB_FLAG_NQ (1, "sqldb", 11,		/* stored in cb_sqldb_name */
+	_("  -fsqldb=<dbtype>      which Database is usedt, <dbtype> may be\n"
+	  "                        MySQL, MSSQL, Oracle10, Oracle11, Oracle12"))
 
-CB_FLAG_NQ (1, "intrinsics", 10,
-	_("  -fintrinsics=[ALL|intrinsic function name(,name,...)]\n"
-	  "                        intrinsics to be used without FUNCTION keyword\n"))
-
-CB_FLAG_RQ (cb_def_sqldb, 1, "sqldb", -1, 11,
-	_("  -fsqldb=<dbtype>      Which Database is used (MySQL, MSSQL, Oracle10,\n"
-	  "                        Oracle11, Oracle12)"))
-
-CB_FLAG_RQ (cb_def_sqlschema, 1, "sqlschema", -1, 12,
-	_("  -fsqlschema=<name>    Define database schema name"))
+CB_FLAG_NQ (1, "sqlschema", 12,		/* stored in cb_sqldb_schema */
+	_("  -fsqlschema=<name>    define database schema name"))
 
 /* Binary flags */
 
