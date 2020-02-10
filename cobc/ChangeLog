@@ -1,4 +1,9 @@
 
+2020-02-10  Ron Norman <rjn@inglenet.com>
+
+	* cobc.c, cobc.h, codegen.c, help.c, warning.def: 
+		Add new define CB_ERRWARNDEF
+
 2020-02-09  Simon Sobisch <simonsobisch@gnu.org>
 
 	* flag.def: adjusted some definitions CB_FLAG_RQ->CB_FLAG_NQ

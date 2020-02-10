@@ -27,6 +27,9 @@
 /* Do not include warning with -Wall */
 /* CB_NOWARNDEF (var, name, doc) */
 
+/* Always active, defaults to an ERROR but could be downgraded to warning */
+/* CB_ERRWARNDEF (var, name, doc) */
+
 CB_ONWARNDEF (cb_warn_unfinished, "unfinished",
 	_("  -Wno-unfinished       do not warn if unfinished features are used"))
 
@@ -99,5 +102,5 @@ CB_ONWARNDEF (cb_warn_dialect, "dialect",
 CB_ONWARNDEF (cb_warn_filler, "others",
 	_("  -Wothers              do not warn about different issues"))
 
-CB_WARNDEF (cb_warn_unsupported, "unsupported",
+CB_ERRWARNDEF (cb_warn_unsupported, "unsupported",
 	_("  -Wno-unsupported      do not warn if runtime does not support a feature used"))

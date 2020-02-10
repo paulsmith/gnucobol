@@ -8553,8 +8553,10 @@ output_file_initialization (struct cb_file *f)
 
 #ifndef HAS_WITH_INDEXED
 	if (f->organization == COB_ORG_INDEXED) {
+		char msg[80];
+		snprintf(msg,sizeof(msg),"ORGANIZATION INDEXED; FD %s",f->name);
 		cb_warning (cb_warn_unsupported, 
-				_("compiler is not configured to support ORGANIZATION INDEXED; FD %s"), f->name);
+				_("compiler is not configured to support %s"), msg);
 	}
 #endif
 

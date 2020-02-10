@@ -372,10 +372,12 @@ extern struct cb_exception	cb_exception_table[];
 #define	CB_WARNDEF(var,name,doc)	extern int var;
 #define	CB_ONWARNDEF(var,name,doc)	extern int var;
 #define	CB_NOWARNDEF(var,name,doc)	extern int var;
+#define	CB_ERRWARNDEF(var,name,doc)	extern int var;
 #include "warning.def"
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
+#undef	CB_ERRWARNDEF
 
 #define COBC_WARN_FILLER  cb_warn_filler
 #define COBC_WARN_DISABLED 0

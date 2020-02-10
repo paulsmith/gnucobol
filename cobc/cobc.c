@@ -234,13 +234,15 @@ struct cb_exception cb_exception_table[] = {
 #undef	CB_FLAG_NQ
 int cb_mf_ibm_comp = -1;
 
-#define	CB_WARNDEF(var,name,doc)	int var = 0;
-#define	CB_ONWARNDEF(var,name,doc)	int var = 1;
-#define	CB_NOWARNDEF(var,name,doc)	int var = 0;
+#define	CB_ERRWARNDEF(var,name,doc)	int var = COBC_WARN_AS_ERROR;
+#define	CB_NOWARNDEF(var,name,doc)	int var = COBC_WARN_DISABLED;
+#define	CB_ONWARNDEF(var,name,doc)	int var = COBC_WARN_ENABLED;
+#define	CB_WARNDEF(var,name,doc)	int var = COBC_WARN_DISABLED;
 #include "warning.def"
-#undef	CB_WARNDEF
-#undef	CB_ONWARNDEF
+#undef	CB_ERRWARNDEF
 #undef	CB_NOWARNDEF
+#undef	CB_ONWARNDEF
+#undef	CB_WARNDEF
 
 /* Local variables */
 
@@ -513,18 +515,22 @@ static const struct option long_options[] = {
 	{"fnot-register",	CB_RQ_ARG, NULL, '%'},
 
 #define	CB_WARNDEF(var,name,doc)			\
-	{"W" name,		CB_NO_ARG, &var, 1},	\
-	{"Wno-" name,		CB_NO_ARG, &var, 0},
+	{"W" name,		CB_NO_ARG, &var, COBC_WARN_ENABLED},	\
+	{"Wno-" name,		CB_NO_ARG, &var, COBC_WARN_DISABLED},
 #define	CB_ONWARNDEF(var,name,doc)			\
-	{"W" name,		CB_NO_ARG, &var, 1},	\
-	{"Wno-" name,		CB_NO_ARG, &var, 0},
+	{"W" name,		CB_NO_ARG, &var, COBC_WARN_ENABLED},	\
+	{"Wno-" name,		CB_NO_ARG, &var, COBC_WARN_DISABLED},
 #define	CB_NOWARNDEF(var,name,doc)			\
-	{"W" name,		CB_NO_ARG, &var, 1},	\
-	{"Wno-" name,		CB_NO_ARG, &var, 0},
+	{"W" name,		CB_NO_ARG, &var, COBC_WARN_ENABLED},	\
+	{"Wno-" name,		CB_NO_ARG, &var, COBC_WARN_DISABLED},
+#define	CB_ERRWARNDEF(var,name,doc)			\
+	{"W" name,		CB_NO_ARG, &var, COBC_WARN_ENABLED},	\
+	{"Wno-" name,		CB_NO_ARG, &var, COBC_WARN_DISABLED},
 #include "warning.def"
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
+#undef	CB_ERRWARNDEF
 	{"Wfatal-errors",	CB_NO_ARG, &fatal_errors_flag, 1},
 	{"Wno-fatal-errors",	CB_NO_ARG, &fatal_errors_flag, 0},
 
@@ -3261,25 +3267,29 @@ process_command_line (const int argc, char **argv)
 		case 'w':
 			/* -w : Turn off all warnings (disables -W/-Wall if passed later) */
 			warningopt = 0;
-#define	CB_WARNDEF(var,name,doc)	var = 0;
-#define	CB_ONWARNDEF(var,name,doc)	var = 0;
-#define	CB_NOWARNDEF(var,name,doc)	var = 0;
+#define	CB_WARNDEF(var,name,doc)	var = COBC_WARN_DISABLED;
+#define	CB_ONWARNDEF(var,name,doc)	var = COBC_WARN_DISABLED;
+#define	CB_NOWARNDEF(var,name,doc)	var = COBC_WARN_DISABLED;
+#define	CB_ERRWARNDEF(var,name,doc)	var = COBC_WARN_ENABLED;
 #include "warning.def"
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
+#undef	CB_ERRWARNDEF
 			break;
 
 		case 'W':
 			/* -Wall : Turn on most warnings */
 			warningopt = 1;
-#define	CB_WARNDEF(var,name,doc)	var = 1;
+#define	CB_WARNDEF(var,name,doc)	var = COBC_WARN_ENABLED;
 #define	CB_ONWARNDEF(var,name,doc)
 #define	CB_NOWARNDEF(var,name,doc)
+#define	CB_ERRWARNDEF(var,name,doc)	var = COBC_WARN_AS_ERROR;
 #include "warning.def"
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
+#undef	CB_ERRWARNDEF
 			break;
 
 		case 'Y':
@@ -3292,11 +3302,13 @@ process_command_line (const int argc, char **argv)
 #define	CB_WARNDEF(var,name,doc)	CB_CHECK_WARNING(var, name)
 #define	CB_ONWARNDEF(var,name,doc)	CB_CHECK_WARNING(var, name)
 #define	CB_NOWARNDEF(var,name,doc)	CB_CHECK_WARNING(var, name)
+#define	CB_ERRWARNDEF(var,name,doc)	CB_CHECK_WARNING(var, name)
 #include "warning.def"
 #undef	CB_CHECK_WARNING
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
+#undef	CB_ERRWARNDEF
 				/* note: ends block from last CB_CHECK_WARNING */
 				/* else */ if (verbose_output) {
 					cobc_err_msg (_("unknown warning option '%s'"),
@@ -3310,13 +3322,15 @@ process_command_line (const int argc, char **argv)
 		case 'Z':
 			/* -W : Turn on every warning */
 			warningopt = 2;
-#define	CB_WARNDEF(var,name,doc)	var = 1;
+#define	CB_WARNDEF(var,name,doc)	var = COBC_WARN_ENABLED;
 #define	CB_ONWARNDEF(var,name,doc)
-#define	CB_NOWARNDEF(var,name,doc)	var = 1;
+#define	CB_NOWARNDEF(var,name,doc)	var = COBC_WARN_ENABLED;
+#define	CB_ERRWARNDEF(var,name,doc)	var = COBC_WARN_AS_ERROR;
 #include "warning.def"
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
+#undef	CB_ERRWARNDEF
 			break;
 
 		/* LCOV_EXCL_START */
@@ -3408,11 +3422,13 @@ process_command_line (const int argc, char **argv)
 #define	CB_WARNDEF(var,name,doc)	CB_CHECK_WARNING(var)
 #define	CB_ONWARNDEF(var,name,doc)	CB_CHECK_WARNING(var)
 #define	CB_NOWARNDEF(var,name,doc)	CB_CHECK_WARNING(var)
+#define	CB_ERRWARNDEF(var,name,doc)	CB_CHECK_WARNING(var)
 #include "warning.def"
 #undef	CB_CHECK_WARNING
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
+#undef	CB_ERRWARNDEF
 	}
 
 	if (cb_flag_odoslide) {
