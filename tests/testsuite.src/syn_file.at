@@ -2139,7 +2139,7 @@ AT_CLEANUP
 
 
 AT_SETUP([GLOBAL FD nested progam])
-AT_KEYWORDS([GLOBAL-FD])
+AT_KEYWORDS([file])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -2170,14 +2170,14 @@ AT_DATA([prog.cob], [
        END PROGRAM prog.
 ])
 
-# note: we actually want to check codegen -> C compilation here
-AT_CHECK([$COMPILE -std=cobol2002 -Wno-unsupported prog.cob], [0], [], [])
+# note:  we actually want to check codegen -> C compilation here
+AT_CHECK([$COMPILE -Wno-unsupported prog.cob], [0], [], [])
 
 AT_CLEANUP
 
 
 AT_SETUP([XFD directive and creation])
-AT_KEYWORDS([cobc sql])
+AT_KEYWORDS([file cobc sql SUPPRESS WHEN])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
