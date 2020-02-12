@@ -876,13 +876,19 @@ odbc_create_table (
 {
 	int	k;
 	cob_load_ddl (db, fx);
-	if (odbcStmt (db, fx->create_table)) {
-		DEBUG_LOG ("db",("%s\n",fx->create_table));
+	if (fx->create_table == NULL) {
+		db->dbStatus = db->dbStsNoTable;
 		return;
 	}
-	for (k=0; k < fx->nkeys; k++) {
+	if (odbcStmt (db, fx->create_table)) {
+		DEBUG_LOG ("db",("%s\n",fx->create_table));
+		db->dbStatus = db->dbStsNoTable;
+		return;
+	}
+	for (k=0; k < fx->nkeys && fx->key[k]->create_index; k++) {
 		if (odbcStmt (db, fx->key[k]->create_index)) {
 			DEBUG_LOG ("db",("%s\n",fx->key[k]->create_index));
+			db->dbStatus = db->dbStsNoTable;
 			return;
 		}
 	}

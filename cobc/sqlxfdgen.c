@@ -40,7 +40,7 @@
 static int	hasxfd = 0;
 static char xfd[MAX_XFD][80];
 
-#define MAX_DATE 16
+#define MAX_DATE 24
 static int	ndate = 0;
 static char dateformat[MAX_DATE][40];
 
@@ -60,6 +60,10 @@ cb_save_xfd (char *str)
 	}
 	if (hasxfd >= MAX_XFD) {
 		cb_error (_("XFD table overflow at: %s"), str);
+		return;
+	}
+	if (strcasecmp(str,"ALL") == 0) {	/* ALL files are implied XFD */
+		cb_all_files_xfd = 1;
 		return;
 	}
 	strcpy(xfd[hasxfd],str);
@@ -528,7 +532,8 @@ get_col_name (struct cb_file *fl, struct cb_field *f, int sub, int idx[])
 		name[j] = 0;
 	}
 	j = strlen(name);
-	if (j > fl->max_sql_name_len)
+	if (j > fl->max_sql_name_len
+	 && fl->max_sql_name_len > 0)
 		name[j=fl->max_sql_name_len] = 0;
 	for(i=0; i < j; i++) {
 		if(isupper(name[i]))
@@ -561,10 +566,7 @@ get_col_type (struct cb_field *f)
 		sprintf(datatype,"CHAR(%d)",f->size);
 	} else
 	if (f->flag_sql_varchar) {
-		if (strncasecmp (cb_sqldb_name, "Oracle", 6) == 0)
-			sprintf(datatype,"VARCHAR2(%d)",f->size);
-		else
-			sprintf(datatype,"VARCHAR(%d)",f->size);
+		sprintf(datatype,"VARCHAR(%d)",f->size);
 	} else
 	if (f->flag_sql_group) {
 		sprintf(datatype,"CHAR(%d)",f->size);
@@ -600,11 +602,9 @@ get_col_type (struct cb_field *f)
 			}
 			return datatype;
 		case CB_USAGE_FLOAT:
-			return (char*)"FLOAT";
+			return (char*)"FLOAT(23)";
 		case CB_USAGE_DOUBLE:
-			if (strncasecmp (cb_sqldb_name, "Oracle", 6) == 0)
-				return (char*)"FLOAT";
-			return (char*)"DOUBLE";
+			return (char*)"FLOAT(53)";
 		case CB_USAGE_UNSIGNED_CHAR:
 		case CB_USAGE_SIGNED_CHAR:
 		case CB_USAGE_UNSIGNED_SHORT:
@@ -617,7 +617,7 @@ get_col_type (struct cb_field *f)
 		default:
 			cb_error (_("%s unexpected USAGE: %d"), __FILE__, f->usage);
 		}
-		sprintf(datatype,"Char(%d)",f->size);
+		sprintf(datatype,"CHAR(%d)",f->size);
 	}
 	return datatype;
 }
@@ -636,7 +636,7 @@ get_xfd_type (struct cb_field *f)
 		sqltype = COB_XFDT_PICX;
 	} else
 	if (f->flag_sql_varchar) {
-		sqltype = COB_XFDT_PICX;
+		sqltype = COB_XFDT_VARX;
 	} else
 	if (f->flag_sql_group) {
 		sqltype = COB_XFDT_PICX;
@@ -1220,6 +1220,12 @@ output_xfd_file (struct cb_file *fl)
 	struct sql_date sdf[1];
 	int		i,k,sub,idx[MAX_OCC_NEST];
 
+	if (!fl->flag_sql_xfd) {
+		fl->max_sql_name_len = 24;
+		fl->flag_sql_trim_prefix = 1;
+		fl->flag_sql_xfd = 1;
+		cb_parse_xfd (fl, fl->record);
+	}
 	f = fl->record;
 	if(f->level < 1)
 		f = f->sister;
@@ -1310,11 +1316,12 @@ output_xfd_file (struct cb_file *fl)
 		cb_warning (warningopt, _("Unable to open %s; '%s'"),outname,cb_get_strerror ());
 		return;
 	}
+	ndate = 0;
 	for (f=fl->record->sister; f; f = f->sister) {
 		save_date (f);
 	}
 	fprintf(fx,"# Generated on %s from %s\n",time_stamp,cb_source_file);
-	fprintf(fx,"H,1,%s,%d,',','.',0\n",tblname,ndate);
+	fprintf(fx,"H,1,%s,%d,',','.',0,%d\n",tblname,ndate,fl->organization);
 	for (k=0; k < ndate; k++) {
 		cb_date_str (sdf, dateformat[k]);
 		fprintf(fx,"D,%d,'%s'",k+1,dateformat[k]);
@@ -1340,7 +1347,7 @@ output_xfd_file (struct cb_file *fl)
 		write_field (fl, f, fs, fx, sub, idx);
 	}
 	if (fl->organization == COB_ORG_RELATIVE) {
-		fprintf(fs,"%srow_%s  IDENTITY",eol,tblname);
+		fprintf(fs,"%s   row_%-30s  IDENTITY",eol,tblname);
 	}
 	fprintf(fs,"\n);\n");
 	if (fl->organization == COB_ORG_INDEXED) {
@@ -1395,7 +1402,13 @@ output_xfd_file (struct cb_file *fl)
 			}
 			k++;
 		}
+	} else
+	if (fl->organization == COB_ORG_RELATIVE) {
+		fprintf(fs,"%s   row_%-30s  IDENTITY",eol,tblname);
+		fprintf(fs,"CREATE UNIQUE INDEX pk_%s ON %s (row_%s);\n",tblname,tblname,tblname);
+		fprintf(fx,"K,0,N,N,,row_%s\n",tblname);
 	}
 	fclose(fs);
 	fclose(fx);
+	ndate = 0;
 }

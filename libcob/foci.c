@@ -713,11 +713,19 @@ oci_create_table (
 {
 	int	k;
 	cob_load_ddl (db, fx);
-	if (ociStmt (db, fx->create_table))
+	if (fx->create_table == NULL) {
+		db->dbStatus = db->dbStsNoTable;
 		return;
-	for (k=0; k < fx->nkeys; k++) {
-		if (ociStmt (db, fx->key[k]->create_index))
+	}
+	if (ociStmt (db, fx->create_table)) {
+		db->dbStatus = db->dbStsNoTable;
+		return;
+	}
+	for (k=0; k < fx->nkeys && fx->key[k]->create_index; k++) {
+		if (ociStmt (db, fx->key[k]->create_index)) {
+			db->dbStatus = db->dbStsNoTable;
 			return;
+		}
 	}
 }
 

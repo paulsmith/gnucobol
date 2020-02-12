@@ -144,6 +144,7 @@ db_cmpkey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx, 
 /* Routines common to both ODBC and OCI interfaces */
 #if defined(WITH_ODBC) || defined(WITH_OCI)
 
+static int cb_auto_create_ddl = 0;	/* FIXME: Need an option to set this */
 #ifdef COB_DEBUG_LOG
 static char *
 hex_dump (unsigned char *in, int len, char *out)
@@ -412,6 +413,7 @@ bld_fields (struct map_xfd *mx, cob_file *fl)
 		break;
 	case COB_XFDT_PICA:
 	case COB_XFDT_PICX:
+	case COB_XFDT_VARX:
 		mx->recattr.type = COB_TYPE_ALNUM;
 		mx->sqlattr.type = COB_TYPE_ALNUM;
 		break;
@@ -1233,16 +1235,24 @@ cob_load_ddl (struct db_state  *db, struct file_xfd *fx)
 	int		j,k, idx, ctsz, cisz;
 	FILE	*fi;
 
+	if (fx->create_table)
+		cob_free (fx->create_table);
+	fx->create_table = NULL;
 	if ((sdir = getenv("COB_SCHEMA_DIR")) == NULL)
 		sdir = (char*)COB_SCHEMA_DIR;
 	k = sprintf (xfdbuf, "%s%s%s.ddl",sdir,SLASH_STR,fx->tablename);
 	fi = fopen (xfdbuf,"r");
+	if (fi == NULL
+	 && cb_auto_create_ddl) {
+		fi = fopen (xfdbuf,"w");
+		cob_xfd_to_ddl (db, fx, fi) ;
+		fclose(fi);
+		fi = fopen (xfdbuf,"r");
+	}
 	if (fi == NULL) {
 		cob_runtime_warning (_("Error '%s' opening '%s'"),cob_get_strerror (),xfdbuf);
 		return;
 	}
-	if (fx->create_table)
-		cob_free (fx->create_table);
 	cisz = 128;
 	ctsz = 128;
 	idx = -1;
@@ -2105,6 +2115,7 @@ cob_file_to_xfd (struct db_state *db, struct file_xfd *fx, cob_file *fl)
 							fx->map[k].sqlDecimals, fx->map[k].sqlColSize));
 				if (fx->map[k].type == COB_XFDT_PICA
 				 || fx->map[k].type == COB_XFDT_PICX
+				 || fx->map[k].type == COB_XFDT_VARX
 				 || fx->map[k].type == COB_XFDT_PIC9L
 				 || fx->map[k].type == COB_XFDT_PIC9LS
 				 || fx->map[k].type == COB_XFDT_PIC9T
@@ -2211,7 +2222,8 @@ cob_xfd_to_file (struct db_state *db, struct file_xfd *fx, cob_file *fl)
 							fx->map[k].colname,fx->map[k].type,
 							fx->map[k].sqlinlen));
 				if (fx->map[k].type == COB_XFDT_PICA
-				 || fx->map[k].type == COB_XFDT_PICX) {
+				 || fx->map[k].type == COB_XFDT_PICX
+				 || fx->map[k].type == COB_XFDT_VARX) {
 					DEBUG_LOG ("db",("   '%.*s'\n",(int)fx->map[k].recfld.size,
 										fx->map[k].recfld.data));
 				} else {
@@ -2240,6 +2252,77 @@ cob_xfd_to_file (struct db_state *db, struct file_xfd *fx, cob_file *fl)
 		} else {
 			k++;
 		}
+	}
+}
+
+/*
+ * Create DDL from XFD
+ */
+void 
+cob_xfd_to_ddl (struct db_state *db, struct file_xfd *fx, FILE *fo)
+{
+	int	k,nx,col;
+	char		comma[8],idxname[48];
+	COB_UNUSED(db);
+	fprintf(fo,"CREATE TABLE %s (",fx->tablename);
+	strcpy(comma,"\n");
+	for (k=0; k < fx->nmap; k++) {
+		if (fx->map[k].cmd == XC_DATA
+		 && fx->map[k].colname) {
+			fprintf(fo,"%s%s ",comma,fx->map[k].colname);
+			strcpy(comma,",\n");
+			if (fx->map[k].dtfrm) {
+				fprintf(fo,"DATE");
+			} else if (fx->map[k].type == COB_XFDT_FLOAT) {
+				if (fx->map[k].size > 4)
+					fprintf(fo,"FLOAT(53)");
+				else
+					fprintf(fo,"FLOAT(23)");
+			} else if ( fx->map[k].type == COB_XFDT_PIC9L
+					 || fx->map[k].type == COB_XFDT_PIC9LS
+					 || fx->map[k].type == COB_XFDT_PIC9T
+					 || fx->map[k].type == COB_XFDT_PIC9TS
+					 || fx->map[k].type == COB_XFDT_PIC9S
+					 || fx->map[k].type == COB_XFDT_COMP5S
+					 || fx->map[k].type == COB_XFDT_COMP5U
+					 || fx->map[k].type == COB_XFDT_COMPS
+					 || fx->map[k].type == COB_XFDT_COMPU
+					 || fx->map[k].type == COB_XFDT_COMPX
+					 || fx->map[k].type == COB_XFDT_PACKS
+					 || fx->map[k].type == COB_XFDT_PACKU
+					 || fx->map[k].type == COB_XFDT_PIC9U) {
+				if (fx->map[k].scale > 0)
+					fprintf(fo,"DECIMAL(%d,%d)",fx->map[k].digits,fx->map[k].scale);
+				else
+					fprintf(fo,"DECIMAL(%d)",fx->map[k].digits);
+			} else if (fx->map[k].type == COB_XFDT_BIN) {
+				fprintf(fo,"BINARY(%d)",fx->map[k].size);
+			} else if (fx->map[k].type == COB_XFDT_VARX) {
+				fprintf(fo,"VARCHAR(%d)",fx->map[k].size);
+			} else {
+				fprintf(fo,"CHAR(%d)",fx->map[k].size);
+			}
+			if (fx->map[k].notnull)
+				fprintf(fo," NOT NULL");
+		}
+	}
+	fprintf(fo,"\n);\n");
+
+	for (nx=0; nx < fx->nkeys && fx->key[nx]; nx++) {
+		if(nx == 0)
+			sprintf(idxname,"pk_%s",fx->tablename);
+		else
+			sprintf(idxname,"k%d_%s",nx,fx->tablename);
+		fprintf(fo,"CREATE %sINDEX %s ON %s (",
+					fx->key[nx]->dups || fx->key[nx]->sup ? "" : "UNIQUE ",
+					idxname,fx->tablename);
+		strcpy(comma,"");
+		for(k=0; k < fx->key[nx]->ncols; k++) {
+			col = fx->key[nx]->col[k];
+			fprintf(fo,"%s%s",comma,fx->map[col].colname);
+			strcpy(comma,",");
+		}
+		fprintf(fo,");\n");
 	}
 }
 #endif

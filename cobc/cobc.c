@@ -233,6 +233,7 @@ struct cb_exception cb_exception_table[] = {
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 int cb_mf_ibm_comp = -1;
+int cb_all_files_xfd = 0;
 
 #define	CB_ERRWARNDEF(var,name,doc)	int var = COBC_WARN_AS_ERROR;
 #define	CB_NOWARNDEF(var,name,doc)	int var = COBC_WARN_DISABLED;

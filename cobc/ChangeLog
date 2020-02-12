@@ -1,4 +1,11 @@
 
+2020-02-12  Ron Norman <rjn@inglenet.com>
+
+	* sqlxfdgen.c: Generate more database independent SQL column types
+	* codegen.c: Check for $XFD ALL being set which indicates that
+				all files are being defined for SQL use
+				Only emit filename.xd for INDEXED and RELATIVE files
+
 2020-02-10  Ron Norman <rjn@inglenet.com>
 
 	* cobc.c, cobc.h, codegen.c, help.c, warning.def: 

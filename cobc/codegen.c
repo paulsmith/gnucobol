@@ -8682,12 +8682,16 @@ output_file_initialization (struct cb_file *f)
 		output_newline ();
 	}
 
-	if (f->flag_sql_xfd
-	 && cb_sqldb_name) {
-		if (f->sql_name) {
-			output_line ("cob_file_xfdname (%s%s, \"%s\");", CB_PREFIX_FILE, f->cname, f->sql_name);
+	if (f->organization == COB_ORG_RELATIVE
+	 || f->organization == COB_ORG_INDEXED) {
+		if ((f->flag_sql_xfd || cb_all_files_xfd)
+		 && cb_sqldb_name) {
+			if (f->sql_name) {
+				output_line ("cob_file_xfdname (%s%s, \"%s\");", 
+								CB_PREFIX_FILE, f->cname, f->sql_name);
+			}
+			output_xfd_file (f);
 		}
-		output_xfd_file (f);
 	}
 	output_line ("cob_file_complete (%s);",file_name);
 	output_newline ();

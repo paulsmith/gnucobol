@@ -1,4 +1,9 @@
 
+2020-02-12  Ron Norman <rjn@inglenet.com>
+	* fsqlxfd.c: Adding cob_xfd_to_ddl routine
+	* common.h,fileio.h: Updates for cob_xfd_to_ddl
+	* foci.c, fodbc.c: Add checks for Table not defined
+
 2020-02-05  Ron Norman <rjn@inglenet.com>
 	* common.h: cob_file and cob_file_key updated
 	* fileio.c,fbdb.c: Corrections for using filedef.dd for BDB

@@ -886,6 +886,7 @@ enum xfd_data_type {
 	COB_XFDT_PICN,			/* PIC X National characters */
 	COB_XFDT_PICW,			/* PIC X Wide characters */
 	COB_XFDT_PICX,			/* PIC X */
+	COB_XFDT_VARX,			/* PIC X : VARCHAR */
 	COB_XFDT_MAX 			/* Max possible value for this enum */
 };
 
