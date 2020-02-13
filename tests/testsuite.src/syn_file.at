@@ -2895,8 +2895,8 @@ CREATE TABLE tspfilex (
    no_terminals                             DECIMAL(5),
    compx                                    DECIMAL(8),
    comp5                                    DECIMAL(7),
-   comp1                                    FLOAT,
-   comp2                                    DOUBLE,
+   comp1                                    FLOAT(23),
+   comp2                                    FLOAT(53),
    price                                    DECIMAL(5,2),
    prices                                   DECIMAL(7,2),
    date_x                                   DATE,
@@ -2920,7 +2920,7 @@ D,2,'YYMMDDCC',8,1,0,,0,0:2,2:2,4:2,0:0,0:0,0:0,6:2
 F,0000,0008,20,0009,0,0,,10,custnum
 F,0008,0001,20,0002,0,0,,10,status
 F,0009,0025,20,0026,0,0,,10,company
-F,0034,0075,20,0076,0,0,,10,custaddr
+F,0034,0075,21,0076,0,0,,10,custaddr
 F,0109,0010,16,0013,10,0,,10,telephone
 F,0119,0025,20,0026,0,0,,10,dp_mgr
 F,0144,0008,20,0009,0,0,,10,machine
