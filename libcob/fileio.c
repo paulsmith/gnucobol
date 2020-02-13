@@ -627,6 +627,8 @@ cob_key_def (cob_file *f, int keyn, char *p, int *ret, int keycheck)
 		return;
 	}
 
+	if (f->flag_redo_keydef)		/* Update all index definitions */
+		k = idx;
 	/* No match so add this index to table */
 	loc = cloc[0];
 	len = clen[0];
@@ -674,7 +676,11 @@ cob_write_dict (cob_file *f, char *filename)
 
 	if (file_setptr->cob_file_dict == COB_DICTIONARY_NO)
 		return 0;
-	sprintf(outdd,"%s.%s",filename,dict_ext);
+	if (file_setptr->cob_dictionary_path != NULL)
+		sprintf(outdd,"%s%c%s.%s",file_setptr->cob_dictionary_path,
+					SLASH_CHAR,filename,dict_ext);
+	else
+		sprintf(outdd,"%s.%s",filename,dict_ext);
 	fo = fopen(outdd,"w");
 	if(fo == NULL) {
 		return 1;
@@ -697,7 +703,11 @@ cob_read_dict (cob_file *f, char *filename, int updt, int *retsts)
 
 	if (file_setptr->cob_file_dict == COB_DICTIONARY_NO)
 		return 0;
-	sprintf(inpdd,"%s.%s",filename,dict_ext);
+	if (file_setptr->cob_dictionary_path != NULL)
+		sprintf(inpdd,"%s%c%s.%s",file_setptr->cob_dictionary_path,
+					SLASH_CHAR,filename,dict_ext);
+	else
+		sprintf(inpdd,"%s.%s",filename,dict_ext);
 	fi = fopen(inpdd,"r");
 	if (fi == NULL) {		/* Not present so nothing can be done */
 		return 0;
@@ -2837,7 +2847,8 @@ cob_file_open (cob_file_api *a, cob_file *f, char *filename, const int mode, con
 		f->flag_file_map = 1;
 	}
 
-	if (file_setptr->cob_file_dict == COB_DICTIONARY_ALL)
+	if (file_setptr->cob_file_dict == COB_DICTIONARY_ALL
+	 && mode == COB_OPEN_OUTPUT)
 		a->cob_write_dict(f, filename); 
 
 	if (f->organization != COB_ORG_LINE_SEQUENTIAL) {

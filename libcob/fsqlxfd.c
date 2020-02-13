@@ -144,7 +144,6 @@ db_cmpkey (cob_file *f, unsigned char *keyarea, unsigned char *record, int idx, 
 /* Routines common to both ODBC and OCI interfaces */
 #if defined(WITH_ODBC) || defined(WITH_OCI)
 
-static int cb_auto_create_ddl = 0;	/* FIXME: Need an option to set this */
 #ifdef COB_DEBUG_LOG
 static char *
 hex_dump (unsigned char *in, int len, char *out)
@@ -944,7 +943,8 @@ cob_load_xfd (cob_file *fl, char *alt_name, int indsize)
 	char	xfdbuf[COB_NORMAL_BUFF],*sdir,*fname,*p,*mp;
 	char	colname[80], tblname[80];
 	char	dups[4], sup[4], supchar[80];
-	char	opcode[16],tstval[48];
+	char	opcode[16],tstval[48], commachr[8], decchr[8];
+	int		signopt,fileorg;
 	int		i,j,k,lbl,keyn,xfdver;
 	int		ncols, lncols, lndata;
 	unsigned char	supch, qt;
@@ -1187,6 +1187,10 @@ cob_load_xfd (cob_file *fl, char *alt_name, int indsize)
 			p = getNum (&xfdbuf[2], &xfdver);
 			p = getPrm (p, tblname);
 			p = getNum (p, &fx->ndate);
+			p = getPrm (p, commachr);
+			p = getPrm (p, decchr);
+			p = getNum (p, &signopt);
+			p = getNum (p, &fileorg);
 			fx->date = cob_malloc (sizeof(void*) * (fx->ndate + 1));
 			continue;
 		}
@@ -1243,7 +1247,7 @@ cob_load_ddl (struct db_state  *db, struct file_xfd *fx)
 	k = sprintf (xfdbuf, "%s%s%s.ddl",sdir,SLASH_STR,fx->tablename);
 	fi = fopen (xfdbuf,"r");
 	if (fi == NULL
-	 && cb_auto_create_ddl) {
+	 && fx->gentable) {
 		fi = fopen (xfdbuf,"w");
 		cob_xfd_to_ddl (db, fx, fi) ;
 		fclose(fi);

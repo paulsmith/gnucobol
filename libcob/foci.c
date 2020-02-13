@@ -960,6 +960,7 @@ oci_file_delete (cob_file_api *a, cob_file *f, char *filename)
 		if (fx == NULL) {
 			return COB_STATUS_30_PERMANENT_ERROR;
 		}
+		fx->gentable = a->setptr->cob_create_table;
 		p = cob_malloc (sizeof (struct indexed_file));
 		f->file = p;
 		f->flag_file_lock = 0;	
@@ -1000,6 +1001,7 @@ oci_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const in
 	if (fx == NULL) {
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
+	fx->gentable = a->setptr->cob_create_table;
 	if (db_join) {			/* Join DataBase, on first OPEN of INDEXED file */
 		join_environment (a);
 		if (db_join < 0) {

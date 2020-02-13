@@ -1,4 +1,8 @@
 
+2020-02-13  Ron Norman <rjn@inglenet.com>
+
+	* general: added option create_table
+
 2020-01-22  Ron Norman <rjn@inglenet.com>
 
 	* general: added option bdb_byteorder

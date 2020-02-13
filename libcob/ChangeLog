@@ -1,4 +1,11 @@
 
+2020-02-13  Ron Norman <rjn@inglenet.com>
+	* fsqlxfd.c: Call cob_xfd_to_ddl if 'create_table' was 'true'
+				and table.ddl is not present
+	* common.c,fileio.h,coblocal.h: Updates for 'create_table'
+	* foci.c, fodbc.c: Pick up 'create_table' option
+	* fileio.c: Use cob_dictionary_path if defined
+
 2020-02-12  Ron Norman <rjn@inglenet.com>
 	* fsqlxfd.c: Adding cob_xfd_to_ddl routine
 	* common.h,fileio.h: Updates for cob_xfd_to_ddl

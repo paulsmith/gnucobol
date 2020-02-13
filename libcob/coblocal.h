@@ -277,6 +277,7 @@ typedef struct __cob_settings {
 	unsigned int	cob_keycheck;		/* Default KEYCHECK mode */
 	unsigned int	cob_file_dict;		/* When to use filename.dd (File definition) */
 	unsigned int	cob_bdb_byteorder;	/* Byte order to use for BDB files */
+	unsigned int	cob_create_table;	/* Generate CREATE TABLE at runtime if needed */
 	char		*cob_dictionary_path;	/* Place to write filename.dd stats */
 	char		*cob_stats_filename;	/* Place to write I/O stats */
 	char 		*cob_file_path;
