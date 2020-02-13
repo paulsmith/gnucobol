@@ -2914,7 +2914,7 @@ AT_CAPTURE_FILE(./tspfilex.xd)
 
 AT_DATA([reference],
 [# generation comment here
-H,1,tspfilex,2,',','.',0
+H,1,tspfilex,2,',','.',0,3
 D,1,'MMDDYYYY',8,1,0,,0,4:4,0:2,2:2,0:0,0:0,0:0,0:0
 D,2,'YYMMDDCC',8,1,0,,0,0:2,2:2,4:2,0:0,0:0,0:0,6:2
 F,0000,0008,20,0009,0,0,,10,custnum
