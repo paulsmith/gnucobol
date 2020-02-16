@@ -1356,7 +1356,12 @@ cob_load_ddl (struct db_state  *db, struct file_xfd *fx)
 			if (db->isoci) {
 				if ((p=strcasestr(xfdbuf," BIGINT ")) != NULL) {
 					memcpy(p," INT    ",8);
-					DEBUG_LOG("db",("New[%s]\n",xfdbuf));
+				}
+				if ((p=strcasestr(xfdbuf," BINARY(")) != NULL) {
+					memcpy(p,"    RAW(",8);
+				} else
+				if ((p=strcasestr(xfdbuf," BINARY ")) != NULL) {
+					memcpy(p,"    RAW ",8);
 				}
 			}
 			strcpy(&fx->create_table[fx->lncreate], xfdbuf);
@@ -2368,7 +2373,6 @@ cob_xfd_to_ddl (struct db_state *db, struct file_xfd *fx, FILE *fo)
 {
 	int	k,nx,col;
 	char		comma[8],idxname[48];
-	COB_UNUSED(db);
 	fprintf(fo,"CREATE TABLE %s (",fx->tablename);
 	strcpy(comma,"\n");
 	for (k=0; k < fx->nmap; k++) {
@@ -2402,7 +2406,10 @@ cob_xfd_to_ddl (struct db_state *db, struct file_xfd *fx, FILE *fo)
 				else
 					fprintf(fo,"DECIMAL(%d)",fx->map[k].digits);
 			} else if (fx->map[k].type == COB_XFDT_BIN) {
-				fprintf(fo,"BINARY(%d)",fx->map[k].size);
+				if (db->isoci)
+					fprintf(fo,"RAW(%d)",fx->map[k].size);
+				else
+					fprintf(fo,"BINARY(%d)",fx->map[k].size);
 			} else if (fx->map[k].type == COB_XFDT_VARX) {
 				fprintf(fo,"VARCHAR(%d)",fx->map[k].size);
 			} else {

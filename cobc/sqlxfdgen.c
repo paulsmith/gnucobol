@@ -576,6 +576,9 @@ get_col_type (struct cb_field *f)
 	if (f->flag_sql_group) {
 		sprintf(datatype,"CHAR(%d)",f->size);
 	} else
+	if (f->flag_sql_numeric) {
+		sprintf(datatype,"DECIMAL(%d)",f->size);
+	} else
 	if (f->flag_sql_date) {
 		sprintf(datatype,"DATE");
 	} else {
