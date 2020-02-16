@@ -201,6 +201,7 @@ static const struct cob_fileio_funcs ext_indexed_funcs = {
 	isam_dummy,
 	isam_sync,
 	isam_dummy,
+	isam_dummy,
 	isam_dummy
 };
 
