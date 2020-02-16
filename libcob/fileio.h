@@ -407,6 +407,7 @@ struct file_xfd {
 	int		maxcolnmln;		/* Length of longest column name */
 	int		lncols;			/* Length of all Column names */
 	int		gentable;		/* Generate CREATE TABLE if needed */
+	int		fileorg;		/* cob_file.organization */
 	int		*xlbl;			/* Label to map[subscript] table */
 	struct sql_date	**date;	/* Date formats used */
 	SQL_STMT	*start;		/* Active SELECT statement */
@@ -425,6 +426,7 @@ COB_HIDDEN void 	cob_xfd_to_file (struct db_state *db, struct file_xfd *fx, cob_
 COB_HIDDEN void 	cob_xfd_to_ddl (struct db_state *db, struct file_xfd *fx, FILE *fo);
 COB_HIDDEN void 	cob_file_to_xfd (struct db_state *db, struct file_xfd *fx, cob_file *fl);
 COB_HIDDEN void		cob_index_to_xfd (struct db_state *db, struct file_xfd *fx, cob_file *fl, int idx);
+COB_HIDDEN void		cob_index_clear (struct db_state *db, struct file_xfd *fx, cob_file *fl, int idx);
 COB_HIDDEN void		cob_drop_xfd (struct file_xfd *fx);
 COB_HIDDEN void 	cob_sql_dump_stmt (struct db_state  *db, char *stmt, int doall);
 COB_HIDDEN void 	cob_sql_dump_data (struct db_state *db, struct file_xfd *fx);

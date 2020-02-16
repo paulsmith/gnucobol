@@ -2675,6 +2675,7 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	int		fperms;
 	unsigned int	nonexistent;
 	int		ret;
+	struct stat	st;
 	COB_UNUSED(sharing);
 
 	/* Note filename points to file_open_name */
@@ -2814,12 +2815,22 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	&&  (mode == COB_OPEN_INPUT || mode == COB_OPEN_I_O || mode == COB_OPEN_EXTEND) ) {
 		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);
 	}
-	if (f->access_mode == COB_ACCESS_SEQUENTIAL
-	&&  f->organization == COB_ORG_RELATIVE
-	&&  f->keys[0].field) {
-		cob_set_int (f->keys[0].field, 0);
-	}
 	f->record_off = -1;
+
+	if (f->organization == COB_ORG_RELATIVE
+	 && f->access_mode == COB_ACCESS_SEQUENTIAL) {
+		if (f->keys[0].field) {
+			cob_set_int (f->keys[0].field, 0);
+		}
+		f->cur_rec_num = 0;
+		if (f->open_mode == COB_OPEN_OUTPUT) {
+			f->max_rec_num = 0;
+		} else if (fstat (f->fd, &st) == 0) {
+			f->max_rec_num = (st.st_size - f->file_header) / f->record_slot;
+		}
+		if (f->max_rec_num < 0)
+			f->max_rec_num = 0;
+	}
 
 	if ((ret=set_file_lock(f, filename, mode)) != 0)
 		return ret;
@@ -2976,8 +2987,8 @@ cob_file_open (cob_file_api *a, cob_file *f, char *filename, const int mode, con
 	if (f->flag_optional && nonexistent) {
 		return COB_STATUS_05_SUCCESS_OPTIONAL;
 	}
-	return 0;
 
+	return 0;
 }
 
 static int
@@ -3781,8 +3792,8 @@ relative_start (cob_file_api *a, cob_file *f, const int cond, cob_field *k)
 			lseek (f->fd, off, SEEK_SET);	/* Set file position to start of record */
 			if (f->access_mode == COB_ACCESS_SEQUENTIAL
 			&&  f->keys[0].field) {
-				kindex = (int)(((off - f->file_header) / f->record_slot) + 1);
-				cob_set_int (f->keys[0].field, kindex);
+				f->cur_rec_num = (((off - f->file_header) / f->record_slot) + 1);
+				cob_set_int (f->keys[0].field, (int)f->cur_rec_num);
 			}
 			return COB_STATUS_00_SUCCESS;
 		}
@@ -3811,7 +3822,7 @@ relative_read_off (cob_file *f, off_t off)
 {
 	unsigned char recmark[2];
 	size_t	relsize = 0;
-	int	relnum,isdeleted=0;
+	int	isdeleted=0;
 
 	relsize = relative_read_size(f, off, &isdeleted);
 	if(relsize < 0) {
@@ -3835,9 +3846,9 @@ relative_read_off (cob_file *f, off_t off)
 	f->record_off = off;
 
 	if (f->keys[0].field) {
-		relnum = (int)(((off - f->file_header) / f->record_slot) + 1);
+		f->cur_rec_num = (((off - f->file_header) / f->record_slot) + 1);
 		cob_set_int (f->keys[0].field, 0);
-		if (cob_add_int (f->keys[0].field, relnum, COB_STORE_KEEP_ON_OVERFLOW) != 0) {
+		if (cob_add_int (f->keys[0].field, (int)f->cur_rec_num, COB_STORE_KEEP_ON_OVERFLOW) != 0) {
 			lseek (f->fd, off, SEEK_SET);
 			return COB_STATUS_14_OUT_OF_KEY_RANGE;
 		}
@@ -4086,7 +4097,7 @@ relative_write (cob_file_api *a, cob_file *f, const int opt)
 {
 	off_t	off;
 	size_t	relsize;
-	int	i,isdeleted=0;
+	int	isdeleted=0;
 	int	kindex,rcsz;
 	struct stat	st;
 	COB_UNUSED (opt);
@@ -4156,8 +4167,8 @@ relative_write (cob_file_api *a, cob_file *f, const int opt)
 	/* Update RELATIVE KEY */
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
 		if (f->keys[0].field) {
-			i = (int)((off + f->record_slot - f->file_header) / f->record_slot);
-			cob_set_int (f->keys[0].field, i);
+			f->cur_rec_num = ((off + f->record_slot - f->file_header) / f->record_slot);
+			cob_set_int (f->keys[0].field, (int)f->cur_rec_num);
 		}
 	}
 
@@ -4760,6 +4771,8 @@ cob_pre_open (cob_file *f)
 	f->flag_operation = 0;
 	f->lock_mode &= ~COB_LOCK_OPEN_EXCLUSIVE;
 	f->record_off = 0;
+	f->max_rec_num = 0;
+	f->cur_rec_num = 0;
 
 	cob_set_file_defaults (f);
 
@@ -4815,6 +4828,8 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 
 	f->last_open_mode = (unsigned char)mode;
 	f->share_mode = (unsigned char)sharing;
+	if (mode == COB_OPEN_OUTPUT)
+		f->cur_rec_num = f->max_rec_num = 0;
 
 	if (f->fcd)
 		cob_fcd_file_sync (f, file_open_name);		/* Copy app's FCD to cob_file */
@@ -4994,6 +5009,17 @@ cob_read (cob_file *f, cob_field *key, cob_field *fnstatus, const int read_opts)
 		return;
 	}
 
+	if (f->organization == COB_ORG_RELATIVE) {
+		if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
+			if (f->cur_rec_num < 1)
+				f->cur_rec_num = 1;
+			else
+				f->cur_rec_num++;
+			cob_set_int (f->keys[0].field, (int)f->cur_rec_num);
+		} else {
+			f->cur_rec_num = cob_get_int (f->keys[0].field);
+		}
+	}
 	/* Sequential read at the end of file is an error */
 	if (key == NULL) {
 		f->last_operation = COB_LAST_READ_SEQ;
@@ -5104,6 +5130,23 @@ cob_read_next (cob_file *f, cob_field *fnstatus, const int read_opts)
 	}
 
 Again:
+	if (f->organization == COB_ORG_RELATIVE) {
+		if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
+			if (read_opts & COB_READ_PREVIOUS) {
+				if (f->cur_rec_num < 1)
+					f->cur_rec_num = 1;
+				f->cur_rec_num--;
+			} else {
+				if (f->cur_rec_num < 1)
+					f->cur_rec_num = 1;
+				else
+					f->cur_rec_num++;
+			}
+			cob_set_int (f->keys[0].field, (int)f->cur_rec_num);
+		} else {
+			f->cur_rec_num = cob_get_int (f->keys[0].field);
+		}
+	}
 	ret = fileio_funcs[get_io_ptr (f)]->read_next (&file_api, f, read_opts);
 
 	switch (ret) {
@@ -5160,12 +5203,19 @@ cob_write (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus,
 	f->last_key = NULL;
 	f->flag_read_done = 0;
 
+	if (f->open_mode == COB_OPEN_INPUT
+	 || f->open_mode == COB_OPEN_CLOSED) {
+		cob_file_save_status (f, fnstatus, COB_STATUS_49_I_O_DENIED);
+		return;
+	}
+
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
 		if (unlikely (f->open_mode != COB_OPEN_OUTPUT
 			       && f->open_mode != COB_OPEN_EXTEND)) {
 			cob_file_save_status (f, fnstatus, COB_STATUS_48_OUTPUT_DENIED);
 			return;
 		}
+		f->cur_rec_num++;
 	} else {
 		if (unlikely (f->open_mode != COB_OPEN_OUTPUT
 			       && f->open_mode != COB_OPEN_I_O)) {
@@ -5197,9 +5247,24 @@ cob_write (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus,
 		}
 	}
 
+	if (f->organization == COB_ORG_RELATIVE) {
+		if (f->access_mode == COB_ACCESS_SEQUENTIAL 
+		 && (f->open_mode == COB_OPEN_OUTPUT 
+		  || f->open_mode == COB_OPEN_EXTEND)) {
+			f->cur_rec_num = f->max_rec_num + 1;
+			if (f->cur_rec_num < 1)
+				f->cur_rec_num = 1;
+			cob_set_int (f->keys[0].field, (int)f->cur_rec_num);
+		} else {
+			f->cur_rec_num = cob_get_int (f->keys[0].field);
+		}
+	}
 	check_eop_status = check_eop;
 	cob_file_save_status (f, fnstatus,
 		     fileio_funcs[get_io_ptr (f)]->write (&file_api, f, opt));
+	if (f->cur_rec_num > f->max_rec_num
+	 && f->file_status[0] == '0')
+		f->max_rec_num = f->cur_rec_num;
 	f->flag_begin_of_file = 0;
 }
 

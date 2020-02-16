@@ -488,17 +488,22 @@ is_all_display (struct cb_field *f)
 static const char *sqlnames[] = {
 	"BIGINT",
 	"CHAR", 
+	"CONSTRAINT",
 	"CREATE",
 	"DATE",
 	"DATETIME",
 	"DECIMAL",
 	"DOUBLE",
 	"FLOAT",
+	"IDENTITY",
 	"INDEX",
 	"INTEGER",
+	"KEY",
 	"NOT",
 	"NULL",
 	"NUMBER",
+	"PRIMARY",
+	"SEQUENCE",
 	"SMALLINT",
 	"TABLE",
 	"TIME",
@@ -1218,8 +1223,12 @@ output_xfd_file (struct cb_file *fl)
 	struct cb_alt_key	*l;
 	struct cb_key_component *c;
 	struct sql_date sdf[1];
-	int		i,k,sub,idx[MAX_OCC_NEST];
+	int		i,j,k,sub,idx[MAX_OCC_NEST];
 
+	if (fl->record_min != fl->record_max) {
+		cb_warning (COBC_WARN_ENABLED, _("FD %s; SQL requires fixed size records"), f->name);
+		return;
+	}
 	if (!fl->flag_sql_xfd) {
 		fl->max_sql_name_len = 24;
 		fl->flag_sql_trim_prefix = 1;
@@ -1243,17 +1252,34 @@ output_xfd_file (struct cb_file *fl)
 	} else {
 		strcpy(time_stamp,"Time unknown");
 	}
-	if (fl->sql_name)
+	if (fl->sql_name) {
 		strcpy(tblname,fl->sql_name);
-	else
+	} else if(fl->assign
+		&& CB_LITERAL_P(fl->assign)) {
+		struct cb_literal   *lit = CB_LITERAL (fl->assign); 
+		char *	ps;
+		char *	p = (char*)lit->data;
+		int		ln = lit->size;
+		if (ln > sizeof(tblname)-1) {
+			p += ln - sizeof(tblname) + 1;
+			ln = sizeof(tblname)-1;
+		}
+		if ((ps = strrchr (p, SLASH_CHAR)) != NULL) {
+			ln -= p - (ps + 1);
+			p = ps + 1;
+		}
+		sprintf(tblname,"%.*s",ln,p);
+	} else {
 		strcpy(tblname,fl->cname);
-	k = strlen(tblname);
-	for(i=0; i < k; i++) {
-		if (tblname[i] == '-')
-			tblname[i] = '_';
-		else if(isupper(tblname[i]))
-			tblname[i] = (char)tolower(tblname[i]);
 	}
+	k = strlen(tblname);
+	for(i=j=0; i < k; i++) {
+		if (tblname[i] == '-')
+			tblname[j++] = '_';
+		else if(isalnum(tblname[i]))
+			tblname[j++] = (char)tolower(tblname[i]);
+	}
+	tblname[j] = 0;
 	strcpy(prefix,"");
 	prefixlen = 0;
 	if (fl->flag_sql_trim_prefix) {
@@ -1347,7 +1373,11 @@ output_xfd_file (struct cb_file *fl)
 		write_field (fl, f, fs, fx, sub, idx);
 	}
 	if (fl->organization == COB_ORG_RELATIVE) {
-		fprintf(fs,"%s   row_%-30s  IDENTITY",eol,tblname);
+		fprintf(fs,"%s   rid_%-30s       BIGINT PRIMARY KEY",eol,tblname);
+		fprintf(fx,"F,%04d,%04d,",(int)fl->record->size,4);
+		fprintf(fx,"%02d,0015,",COB_XFDT_COMP5U);
+		fprintf(fx,"12,0,,00,rid_%s\n",tblname);
+		fprintf(fx,"K,0,N,N,,rid_%s\n",tblname);
 	}
 	fprintf(fs,"\n);\n");
 	if (fl->organization == COB_ORG_INDEXED) {
@@ -1402,11 +1432,6 @@ output_xfd_file (struct cb_file *fl)
 			}
 			k++;
 		}
-	} else
-	if (fl->organization == COB_ORG_RELATIVE) {
-		fprintf(fs,"%s   row_%-30s  IDENTITY",eol,tblname);
-		fprintf(fs,"CREATE UNIQUE INDEX pk_%s ON %s (row_%s);\n",tblname,tblname,tblname);
-		fprintf(fx,"K,0,N,N,,row_%s\n",tblname);
 	}
 	fclose(fs);
 	fclose(fx);

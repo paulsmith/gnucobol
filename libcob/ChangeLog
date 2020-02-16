@@ -1,4 +1,14 @@
 
+2020-02-15  Ron Norman <rjn@inglenet.com>
+	* common.h, fileio.c, fileio.h, foci.c, fodbc.c, fsqlxfd.c:
+		Updates to support RELATIVE file for processing by
+		the OCI/ODBC I/O modules.
+		A 'RELATIVE" table has a column called 'rid_tablename'
+		which is PRIMARY KEY.
+		As much code as possible was moved into fileio.c to
+		manage the logical 'record number' so that foci.c & fodbc.c
+		do not need to duplicate that logic
+
 2020-02-13  Ron Norman <rjn@inglenet.com>
 	* fsqlxfd.c: Call cob_xfd_to_ddl if 'create_table' was 'true'
 				and table.ddl is not present

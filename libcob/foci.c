@@ -498,18 +498,25 @@ oci_any_nulls (
 	struct db_state	*db,
 	struct file_xfd *fx)
 {
-	int		k;
+	int		k,ln;
 	for (k=0; k < fx->nmap; k++) {
 		if (fx->map[k].cmd == XC_DATA
 		 && fx->map[k].ind) {
-			fx->map[k].sqlinlen = fx->map[k].sqlsize;
+			ln = fx->map[k].sqlinlen = fx->map[k].sqlsize;
+			if(fx->map[k].hostType == SQLT_STR) {
+				ln = (int)strlen((char*)fx->map[k].sdata);
+			}
 			if (*(short*)fx->map[k].ind == -1) {
 				fx->map[k].setnull = TRUE;
 			} else if(*(short*)fx->map[k].ind == 0) {
 				fx->map[k].setnull = FALSE;
+				if (fx->map[k].sqlinlen > ln)
+					fx->map[k].sqlinlen = ln;
 			} else {
 				fx->map[k].setnull = FALSE;
 				fx->map[k].sqlinlen = fx->map[k].nRlen2;
+				if (fx->map[k].sqlinlen > ln)
+					fx->map[k].sqlinlen = ln;
 			}
 		}
 	}
@@ -669,21 +676,23 @@ ociStmt(
 	}
 
 	len = strlen(stmt);
-	snprintf(msg,sizeof(msg),"Exec: %.50s",stmt);
+	if (len <= 0) {
+		return 0;
+	}
+	snprintf(msg,sizeof(msg),"Prep: %.50s",stmt);
 	db->dbStatus = 0;
-	if(chkSts(db,(char*)"Prep Stmt", 
+	if(chkSts(db,(char*)msg, 
 				OCIStmtPrepare(stmtHndl,db->dbErrH,
 								(text*)stmt,len,OCI_NTV_SYNTAX,OCI_DEFAULT))) {
-		DEBUG_LOG("db",("OCIStmtPrepare %s status %d; Failed!\n",stmt,db->dbStatus));
+		DEBUG_LOG("db",("OCIStmtPrepare status %d; Failed!\n",db->dbStatus));
 	} else {
+		snprintf(msg,sizeof(msg),"Exec: %.50s",stmt);
 		db->dbStatus = 0;
 		if (strncasecmp(stmt,"SELECT ",7) == 0) 
 			iters = 0;
-		if(chkSts(db,(char*)"Exec Stmt",
+		chkSts(db,(char*)msg,
 				OCIStmtExecute(db->dbSvcH,stmtHndl,db->dbErrH,
-										iters,0,NULL,NULL,OCI_DEFAULT))) {
-			DEBUG_LOG ("db",("Stmt: %s\n",stmt));
-		}
+										iters,0,NULL,NULL,OCI_DEFAULT));
 	}
 	rtn = db->dbStatus;
 	if (db->dbStatus == 0
@@ -721,8 +730,11 @@ oci_create_table (
 		db->dbStatus = db->dbStsNoTable;
 		return;
 	}
+	if (fx->fileorg == COB_ORG_RELATIVE) 
+		return;
 	for (k=0; k < fx->nkeys && fx->key[k]->create_index; k++) {
 		if (ociStmt (db, fx->key[k]->create_index)) {
+			DEBUG_LOG ("db",("k%d: %s\n",k,fx->key[k]->create_index)); 
 			db->dbStatus = db->dbStsNoTable;
 			return;
 		}
@@ -1002,6 +1014,16 @@ oci_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const in
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
 	fx->gentable = a->setptr->cob_create_table;
+#ifdef COB_DEBUG_LOG
+	if (mode == COB_OPEN_INPUT)
+		optyp = "INPUT";
+	else if (mode == COB_OPEN_I_O)
+		optyp = "IO";
+	else if (mode == COB_OPEN_OUTPUT)
+		optyp = "OUTPUT";
+	else
+		optyp = "EXTEND";
+#endif
 	if (db_join) {			/* Join DataBase, on first OPEN of INDEXED file */
 		join_environment (a);
 		if (db_join < 0) {
@@ -1027,9 +1049,6 @@ oci_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const in
 
 	switch (mode) {
 	case COB_OPEN_OUTPUT:
-#ifdef COB_DEBUG_LOG
-		optyp = "OUTPUT";
-#endif
 		snprintf(buff,sizeof(buff),"TRUNCATE TABLE %s",fx->tablename);
 		if (ociStmt(db,buff)
 		 && db->dbStatus == db->dbStsNoTable) {
@@ -1042,14 +1061,6 @@ oci_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const in
 	case COB_OPEN_I_O:
 	case COB_OPEN_EXTEND:
 	case COB_OPEN_INPUT:
-#ifdef COB_DEBUG_LOG
-		if (mode == COB_OPEN_INPUT)
-			optyp = "INPUT";
-		else if (mode == COB_OPEN_I_O)
-			optyp = "IO";
-		else
-			optyp = "EXTEND";
-#endif
 		snprintf(buff,sizeof(buff),"SELECT 1 FROM %s WHERE 1 = 0",fx->tablename);
 		if (ociStmt(db,buff)
 		 && db->dbStatus == db->dbStsNoTable) {
@@ -1060,6 +1071,13 @@ oci_open (cob_file_api *a, cob_file *f, char *filename, const int mode, const in
 				return COB_STATUS_30_PERMANENT_ERROR;
 		}
 		break;
+	}
+
+	snprintf(buff,sizeof(buff),"SELECT MAX(rid_%s) FROM %s",fx->tablename,fx->tablename);
+	strcpy(varFetch,"0");
+	if (mode != COB_OPEN_OUTPUT
+	 && !ociStmt(db,(char*)buff)) {
+		f->max_rec_num = atol (varFetch);
 	}
 
 	if ((f->share_mode & COB_SHARE_NO_OTHER)
@@ -1239,12 +1257,16 @@ oci_read (cob_file_api *a, cob_file *f, cob_field *key, const int read_opts)
 	int			ret = COB_STATUS_00_SUCCESS;
 	COB_UNUSED (a);
 
-	ky = cob_findkey (f, key, &klen, &partlen);
-	if (ky < 0) {
-		return COB_STATUS_30_PERMANENT_ERROR;
-	}
 	p = f->file;
 	fx = p->fx;
+	if (fx->fileorg == COB_ORG_RELATIVE) {
+		ky = 0;
+	} else {
+		ky = cob_findkey (f, key, &klen, &partlen);
+		if (ky < 0) {
+			return COB_STATUS_30_PERMANENT_ERROR;
+		}
+	}
 	f->curkey = ky;
 	p->startcond = -1;
 	if (fx->start)
@@ -1304,6 +1326,7 @@ oci_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	struct indexed_file	*p;
 	struct file_xfd	*fx;
 	int			ky;
+	int			opts = (int)read_opts & COB_READ_MASK;
 	int			ret = COB_STATUS_00_SUCCESS;
 	COB_UNUSED (a);
 
@@ -1311,10 +1334,14 @@ oci_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 		return COB_STATUS_49_I_O_DENIED;
 	p = f->file;
 	fx = p->fx;
-	if (f->curkey < 0)
+	if (f->curkey < 0) {
 		f->curkey = 0;
+		cob_index_clear (db, fx, f, 0);
+		opts =  COB_READ_FIRST;
+		cob_sql_dump_index (db, fx, 0);
+	}
 	ky = f->curkey;
-	switch (read_opts & COB_READ_MASK) {
+	switch (opts & COB_READ_MASK) {
 	default:
     case COB_READ_NEXT:                 
 		if (p->startcond != COB_GT) {
@@ -1381,7 +1408,7 @@ oci_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	case COB_READ_FIRST:
 		fx->start = cob_sql_select (db, fx, ky, COB_FI, read_opts, oci_free_stmt);
 		oci_close_stmt (fx->start);
-		oci_setup_stmt (db, fx, fx->start, SQL_BIND_NO, 0);
+		oci_setup_stmt (db, fx, fx->start, SQL_BIND_COLS, 0);
 		if (fx->start->status) {
 			fx->start = NULL;
 			cob_sql_dump_data (db, fx);
@@ -1410,7 +1437,7 @@ oci_read_next (cob_file_api *a, cob_file *f, const int read_opts)
 	case COB_READ_LAST:
 		fx->start = cob_sql_select (db, fx, ky, COB_LA, read_opts, oci_free_stmt);
 		oci_close_stmt (fx->start);
-		oci_setup_stmt (db, fx, fx->start, SQL_BIND_NO, 0);
+		oci_setup_stmt (db, fx, fx->start, SQL_BIND_COLS, 0);
 		if (fx->start->status) {
 			fx->start = NULL;
 			cob_sql_dump_data (db, fx);
@@ -1452,10 +1479,6 @@ oci_write (cob_file_api *a, cob_file *f, const int opt)
 	int			ret = COB_STATUS_00_SUCCESS;
 	COB_UNUSED (a);
 
-	if (f->open_mode == COB_OPEN_INPUT
-	 || f->open_mode == COB_OPEN_CLOSED)
-		return COB_STATUS_49_I_O_DENIED;
-
 	p = f->file;
 	fx = p->fx;
 	if (fx->insert.text == NULL) {
@@ -1482,7 +1505,13 @@ oci_write (cob_file_api *a, cob_file *f, const int opt)
 		return ret;
 	}
 	db->updatesDone++;
-	DEBUG_LOG("db",("WRITE: %.40s... status %d; Good!\n",fx->insert.text,db->dbStatus));
+	if (db->dbStatus != 0) {
+		DEBUG_LOG("db",("WRITE: %.40s... status %d; Not Good!\n",fx->insert.text,db->dbStatus));
+	} else if (fx->fileorg == COB_ORG_RELATIVE) {
+		DEBUG_LOG("db",("WRITE: %.40s... Rec# %d; Good!\n",fx->insert.text,(int)f->cur_rec_num));
+	} else {
+		DEBUG_LOG("db",("WRITE: %.40s...  Good!\n",fx->insert.text));
+	}
 	if (db->autocommit)
 		oci_commit (a,f);
 

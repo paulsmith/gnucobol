@@ -1476,14 +1476,16 @@ typedef struct __cob_file {
 	cob_linage		*linage;		/* LINAGE */
 	const unsigned char	*sort_collating;	/* SORT collating */
 	void			*extfh_ptr;		/* For EXTFH usage */
-	size_t			record_min;		/* Record min size */
-	size_t			record_max;		/* Record max size */
+	int				record_min;		/* Record min size */
+	int				record_max;		/* Record max size */
 	int				nkeys;			/* Number of keys */
-	cob_s64_t		record_off;		/* Starting position of last record read/written */
 	int			fd;			/* File descriptor */
 	int			record_slot;		/* Record size on disk including prefix/suffix */
 	int			record_prefix;		/* Size of record prefix */
 	int			file_header;		/* Size of file header record on disk */
+	cob_s64_t		record_off;		/* Starting position of last record read/written */
+	cob_s64_t		cur_rec_num;	/* Current record number (1 relative) */
+	cob_s64_t		max_rec_num;	/* Last record number (1 relative) in file */
 
 	unsigned char		lock_mode;		/* LOCK MODE */
 	unsigned char		open_mode;		/* OPEN MODE */
