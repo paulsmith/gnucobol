@@ -352,14 +352,15 @@ call ..\set_env_vs%platform_ext%.bat
 if not [%VCPKG_EXPORT_DIR%]==[] (
    echo using vcpgk binaries...
    set "PATH=%VCPKG_EXPORT_DIR%\installed\%2\bin;%PATH%"
+   set "extra_flags=-I VCPKG_EXPORT_DIR%\installed\%2\include"
 )
-cobc -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
+cobc -m -Wall -O2 %extra_flags% ..\extras\CBL_OC_DUMP.cob
 if %errorlevel% neq 0 (
    echo.
    echo cobc had unexpected return value %errorlevel%, running verbose again...
    call :pause_if_interactive
    where cobc.exe
-   cobc -vv -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
+   cobc -vv -m -Wall -O2 %extra_flags% ..\extras\CBL_OC_DUMP.cob
    set cb_errorlevel=!errorlevel!
 )
 popd
