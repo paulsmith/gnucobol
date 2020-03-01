@@ -1,7 +1,6 @@
 /*
-   Copyright (C) 2003-2020 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
-   Edward Hart
+   Copyright (C) 2019-2020 Free Software Foundation, Inc.
+   Written by Ron Norman, Simon Sobisch
 
    This file is part of GnuCOBOL.
 
@@ -72,10 +71,20 @@ cb_save_xfd (char *str)
 
 /* Local functions */
 
+static int
+find_date (struct cb_field *f)
+{
+	int		k;
+	for (k=0; k < ndate; k++) {
+		if (strcmp (dateformat[k], f->sql_date_format) == 0)
+			return k;
+	}
+	return -1;
+}
+
 static void
 save_date (struct cb_field *f)
 {
-	int		k;
 	do {
 		if (f->level < 1
 		 || f->level >= 66) {
@@ -87,31 +96,18 @@ save_date (struct cb_field *f)
 		if (f->children) {
 			save_date (f->children);
 		}
-		if (f->sql_date_format) {
-			for(k=0; k < ndate; k++) {
-				if (strcmp(dateformat[k],f->sql_date_format) == 0)
+		if (f->sql_date_format && ndate < MAX_DATE) {
+			int		k;
+			for (k=0; k < ndate; k++) {
+				if (strcmp (dateformat[k], f->sql_date_format) == 0)
 					break;
 			}
-			if(k == ndate
-			&& ndate < MAX_DATE) {
-				strcpy(dateformat[ndate++],f->sql_date_format);
+			if (k == ndate) {
+				strcpy (dateformat[ndate++], f->sql_date_format);
 			}
 		}
 		f = f->sister;
 	} while (f);
-}
-
-static int
-find_date (struct cb_field *f)
-{
-	int		k;
-	if (f->sql_date_format) {
-		for(k=0; k < ndate; k++) {
-			if (strcmp(dateformat[k],f->sql_date_format) == 0)
-				return k;
-		}
-	}
-	return -1;
 }
 
 /*
@@ -820,7 +816,7 @@ write_postfix(FILE *fx, int golbl, char *expr)
 		opcode[k] = 0;
 		memset(partexp[k],0,68);
 	}
-	for(p = expr; *p != 0 && nexp < MAX_NEST; ) {
+	for (p = expr; *p != 0 && nexp < MAX_NEST; ) {
 		if (*p == '(') {
 			p++;
 			opcode[nexp++] = '(';
@@ -1101,16 +1097,16 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 static void
 write_xfd (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int idx[])
 {
-	fprintf(fx,"F,%04d,%04d,",(int)f->offset,(int)f->size);
-	fprintf(fx,"%s,",get_xfd_type (f));
+	fprintf(fx, "F,%04d,%04d,", (int)f->offset, (int)f->size);
+	fprintf(fx, "%s,", get_xfd_type (f));
 	if (f->pic
 	 && f->pic->category == CB_CATEGORY_NUMERIC) {
-		fprintf(fx,"%d,%d,",(int)f->pic->digits,(int)f->pic->scale);
+		fprintf( fx, "%d,%d,", (int)f->pic->digits, (int)f->pic->scale);
 	} else {
-		fprintf(fx,"0,0,");
+		fprintf (fx, "0,0,");
 	}
 	if (f->sql_date_format) {
-		fprintf(fx,"%d",find_date (f) + 1);
+		fprintf (fx, "%d", find_date (f) + 1);
 	}
 	fprintf(fx,",%02d,%s\n",f->level,get_col_name(fl,f,sub,idx));
 }
@@ -1229,7 +1225,8 @@ output_xfd_file (struct cb_file *fl)
 	int		i,j,k,sub,idx[MAX_OCC_NEST];
 
 	if (fl->record_min != fl->record_max) {
-		cb_warning (COBC_WARN_ENABLED, _("FD %s; SQL requires fixed size records"), f->name);
+		cb_warning (COBC_WARN_ENABLED,
+			_("FD %s; SQL requires fixed size records"), fl->name);
 		return;
 	}
 	if (!fl->flag_sql_xfd) {

@@ -1,4 +1,8 @@
 
+2020-02-13  Simon Sobisch <simonsobisch@gnu.org>
+
+	* sqlxfdgen.c (output_xfd_file): fixed typo leading to broken reference
+
 2020-02-12  Ron Norman <rjn@inglenet.com>
 
 	* sqlxfdgen.c: Generate more database independent SQL column types
