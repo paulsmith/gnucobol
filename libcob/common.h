@@ -842,7 +842,13 @@ enum cob_exception_id {
 #define COB_ASCENDING		0
 #define COB_DESCENDING		1
 
+#ifdef _WIN32
+#define COB_FILE_MODE		_S_IREAD | _S_IWRITE
+#define COB_OPEN_TEMPORARY	_O_TEMPORARY
+#else
 #define COB_FILE_MODE		0666
+#define COB_OPEN_TEMPORARY	0
+#endif
 
 /* File: 'bdb_byteorder' for int/short/long as stored on disk */
 #define COB_BDB_IS_NATIVE	0	/* Default to what the system uses */

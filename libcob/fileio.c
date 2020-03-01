@@ -2739,31 +2739,19 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 		} else {
 			fdmode |= O_WRONLY;
 		}
-#ifdef	_WIN32
-		fperms = _S_IREAD | _S_IWRITE ;
-#else
 		fperms = COB_FILE_MODE;
-#endif
 		break;
 	case COB_OPEN_I_O:
 		if (nonexistent) {
 			fdmode |= O_CREAT | O_RDWR;
-#ifdef	_WIN32
-			fperms = _S_IREAD | _S_IWRITE ;
-#else
 			fperms = COB_FILE_MODE;
-#endif
 		} else {
 			fdmode |= O_RDWR;
 		}
 		break;
 	case COB_OPEN_EXTEND:
 		fdmode |= O_CREAT | O_RDWR | O_APPEND;
-#ifdef	_WIN32
-		fperms = _S_IREAD | _S_IWRITE ;
-#else
 		fperms = COB_FILE_MODE;
-#endif
 		break;
 	}
 
@@ -6231,13 +6219,9 @@ cob_srttmpfile (void)
 	filename = cob_malloc ((size_t)COB_FILE_BUFF);
 	cob_temp_name (filename, NULL);
 	cob_incr_temp_iteration ();
-#ifdef	_WIN32
 	fd = open (filename,
-		    _O_CREAT | _O_TRUNC | _O_RDWR | _O_BINARY | _O_TEMPORARY,
-		    _S_IREAD | _S_IWRITE);
-#else
-	fd = open (filename, O_CREAT | O_TRUNC | O_RDWR | O_BINARY, COB_FILE_MODE);
-#endif
+		    O_CREAT | O_TRUNC | O_RDWR | O_BINARY | COB_OPEN_TEMPORARY,
+		    COB_FILE_MODE);
 	if (fd < 0) {
 		cob_free (filename);
 		return NULL;
