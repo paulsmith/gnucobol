@@ -180,7 +180,7 @@ echo Compiling extras...
 echo.
 
 if "%have_32%"=="1" (
-   call :compile_extras "Win32" "x86-windows"
+   call :compile_extras "Win32" x86-windows
    if !cb_errorlevel! neq 0 (
       goto :abort
    )
@@ -189,7 +189,7 @@ if "%have_64%"=="1" (
    if "%have_32%"=="1" (
        echo.
    )
-   call :compile_extras "x64"  "x64-windows"
+   call :compile_extras "x64"   x64-windows
    if !cb_errorlevel! neq 0 (
       goto :abort
    )
@@ -351,7 +351,7 @@ pushd "%cob_dist_path%bin%platform_ext%"
 call ..\set_env_vs%platform_ext%.bat
 if not [%VCPKG_EXPORT_DIR%]==[] (
    echo using vcpgk binaries...
-   set "PATH=%VCPKG_EXPORT_DIR%\%2\bin;%PATH%"
+   set "PATH=%VCPKG_EXPORT_DIR%\installed\%2\bin;%PATH%"
 )
 cobc -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
 if %errorlevel% neq 0 (
