@@ -2,6 +2,7 @@
 2020-02-13  Simon Sobisch <simonsobisch@gnu.org>
 
 	* sqlxfdgen.c (output_xfd_file): fixed typo leading to broken reference
+	* codegen.c: cleanup for output_line_and_trace_info
 
 2020-02-12  Ron Norman <rjn@inglenet.com>
 

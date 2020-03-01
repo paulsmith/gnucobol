@@ -7404,31 +7404,22 @@ output_section_info (struct cb_label *lp)
 	}
 }
 
-
-static void
-output_trace_info (cb_tree x, const char *name)
-{
-	if (!cb_flag_source_location) return;
-	if (name) {
-		output_line ("cob_trace_stmt (%s%d);",
-				CB_PREFIX_STRING, lookup_string (name));
-	}
-}
-
 static void
 output_line_and_trace_info (cb_tree x, const char *name)
 {
 	if (cb_flag_c_line_directives && x->source_file) {
 		output_cobol_info (x);
-		if (cb_flag_source_location) {
-			output_trace_info (x, name);
+		if (cb_flag_source_location && name) {
+			output_line ("cob_trace_stmt (%s%d);",
+				CB_PREFIX_STRING, lookup_string (name));
 		} else {
 			output_line (";");
 		}
 		output_c_info ();
 	} else {
-		if (cb_flag_source_location) {
-			output_trace_info (x, name);
+		if (cb_flag_source_location && name) {
+			output_line ("cob_trace_stmt (%s%d);",
+				CB_PREFIX_STRING, lookup_string (name));
 		}
 	}
 }
