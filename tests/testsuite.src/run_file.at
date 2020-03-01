@@ -573,6 +573,71 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([error status RELATIVE file])
+AT_KEYWORDS([runfile REWRITE WRITE DECLARATIVES])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       "./TEST-FILE"
+                        ORGANIZATION IS RELATIVE
+                        ACCESS MODE  IS RANDOM
+                        RELATIVE KEY IS TEST-KEY
+                        FILE STATUS  IS FILE-STATUS.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X.
+       WORKING-STORAGE  SECTION.
+       01 TEST-KEY      PIC 9.
+       01 FILE-STATUS   PIC XX.
+       PROCEDURE        DIVISION.
+       
+       DECLARATIVES.
+       ERR-DISP SECTION.
+         USE AFTER ERROR PROCEDURE ON TEST-FILE.
+           DISPLAY FILE-STATUS WITH NO ADVANCING.
+       END DECLARATIVES.
+      *
+           OPEN OUTPUT TEST-FILE.
+           MOVE 1 TO TEST-KEY.
+           MOVE "A" TO TEST-REC.
+           WRITE TEST-REC
+           END-WRITE.
+           MOVE 2 TO TEST-KEY.
+           MOVE "B" TO TEST-REC.
+           WRITE TEST-REC
+           END-WRITE.
+           CLOSE TEST-FILE.
+      *
+           OPEN INPUT TEST-FILE.
+           MOVE 1 TO TEST-KEY.
+           READ TEST-FILE
+           END-READ.
+           MOVE 2 TO TEST-KEY.
+           MOVE "C" TO TEST-REC.
+           REWRITE TEST-REC
+           END-REWRITE.
+           CLOSE TEST-FILE.
+      *
+           OPEN INPUT TEST-FILE.
+           MOVE 3 TO TEST-KEY.
+           WRITE TEST-REC
+           END-WRITE.
+           CLOSE TEST-FILE.
+      *
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [4948], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([File SORT, SEQUENTIAL])
 AT_KEYWORDS([runfile using giving])
 

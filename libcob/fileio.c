@@ -2675,7 +2675,6 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	int		fperms;
 	unsigned int	nonexistent;
 	int		ret;
-	struct stat	st;
 	COB_UNUSED(sharing);
 
 	/* Note filename points to file_open_name */
@@ -2807,6 +2806,7 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 
 	if (f->organization == COB_ORG_RELATIVE
 	 && f->access_mode == COB_ACCESS_SEQUENTIAL) {
+		struct stat	st;
 		if (f->keys[0].field) {
 			cob_set_int (f->keys[0].field, 0);
 		}
@@ -5183,19 +5183,13 @@ Again:
 
 void
 cob_write (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus,
-	   					const unsigned int check_eop)
+						const unsigned int check_eop)
 {
 	int		ret;
 
 	f->last_operation = COB_LAST_WRITE;
 	f->last_key = NULL;
 	f->flag_read_done = 0;
-
-	if (f->open_mode == COB_OPEN_INPUT
-	 || f->open_mode == COB_OPEN_CLOSED) {
-		cob_file_save_status (f, fnstatus, COB_STATUS_49_I_O_DENIED);
-		return;
-	}
 
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
 		if (unlikely (f->open_mode != COB_OPEN_OUTPUT

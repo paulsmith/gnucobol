@@ -1,4 +1,11 @@
 
+2020-03-01  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c, common.h: define and use COB_FILE_MODE for _WIN32 and
+	  COB_OPEN_TEMPORARY for all other environments
+	* fileio.c (cob_write): removed io-status 49 as it only applies to
+	  REWRITE and DELETE
+
 2020-02-15  Ron Norman <rjn@inglenet.com>
 	* common.h, fileio.c, fileio.h, foci.c, fodbc.c, fsqlxfd.c:
 		Updates to support RELATIVE file for processing by
