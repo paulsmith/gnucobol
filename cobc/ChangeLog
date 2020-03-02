@@ -1,4 +1,9 @@
 
+2020-03-01  Brian Tiffin <btiffin@gnu.org>
+
+	* cobc.c: bug #618, fix -j mode with -o name that includes a directory
+				and when multiple inputs are involved in a compile pass
+
 2020-02-13  Simon Sobisch <simonsobisch@gnu.org>
 
 	* sqlxfdgen.c (output_xfd_file): fixed typo leading to broken reference
