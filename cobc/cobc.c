@@ -8253,7 +8253,6 @@ main (int argc, char **argv)
 		iparams++;
 		if (iparams == 1 && cobc_flag_run) {
 			run_name = fn->source;
-			//fprintf(stderr, "setting run_name :%s:, output_name :%s:, level %d\n", run_name, output_name, cb_compile_level);
 		}
 		if (iparams > 1 && cb_compile_level == CB_LEVEL_EXECUTABLE) {
 			/* only the first source has the compile_level and main flag set */
@@ -8284,7 +8283,6 @@ main (int argc, char **argv)
 	}
 
 	if ((cb_compile_level < CB_LEVEL_LIBRARY) && cobc_flag_run && run_name) {
-		//fprintf(stderr, "module run_name :%s:, output_name :%s:, level %d\n", run_name, output_name, cb_compile_level);
 		/* Run job after module with cobcrun */
 		if (status == 0) {
 			status = process_run (run_name);
@@ -8318,7 +8316,6 @@ main (int argc, char **argv)
 
 	/* Run job after compile? Use first (or only) filename */
 	if ((statuses == 0) && cobc_flag_run && run_name) {
-		//fprintf(stderr, "run_name :%s:, output_name :%s:, level %d\n", run_name, output_name, cb_compile_level);
 		status = process_run (file_basename(run_name, NULL));
 	}
 
