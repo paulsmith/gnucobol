@@ -6444,6 +6444,7 @@ prog.cob:152: error: SUPPRESS WHEN LOW-VALUE item must be USAGE DISPLAY or NATIO
 ])
 AT_CLEANUP
 
+
 AT_SETUP([IBM Data Division])
 AT_KEYWORDS([78 LENGTH])
 

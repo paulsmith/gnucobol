@@ -109,7 +109,8 @@ export COB_HAS_ISAM COB_HAS_XML2 COB_HAS_CJSON COB_HAS_CURSES COB_HAS_64_BIT_POI
 export COBC COBCRUN COBCRUN_DIRECT RUN_PROG_MANUAL
 export COB_OBJECT_EXT COB_EXE_EXT
 
-export COB_SCHEMA_DIR=.
+COB_SCHEMA_DIR=.
+export COB_SCHEMA_DIR
 
 # possible path conversion for running the testsuite in an environment
 # that doesn't match the one where the tested binaries were built

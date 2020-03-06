@@ -2173,8 +2173,7 @@ cob_module_global_enter (cob_module **module, cob_global **mglobal,
 					return 1;
 				}
 				cob_module_err = mod;
-				cob_fatal_error(COB_FERROR_RECURSIVE);
-				cob_stop_run (1);
+				cob_fatal_error (COB_FERROR_RECURSIVE);
 			}
 		}
 	}

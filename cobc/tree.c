@@ -773,13 +773,19 @@ static int
 valid_const_date_time_args (const cb_tree tree, const struct cb_intrinsic_table *intr,
 			    cb_tree args)
 {
-	cb_tree		arg = CB_VALUE (args);
 	const char	*data;
 	int		error_found = 0;
 
-	/* Precondition: iso_8601_func (intr->intr_enum) */
+	/* LCOV_EXCL_START */
+	/* TODO: check precondition: iso_8601_func (intr->intr_enum) */
+	if (!args) {
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"valid_const_date_time_args", "args");;
+		COBC_ABORT ();
+	}
+	/* LCOV_EXCL_STOP */
 
-	data = try_get_constant_data (arg);
+	data = try_get_constant_data (CB_VALUE (args));
 	if (data != NULL) {
 		if (!valid_format (intr->intr_enum, data)) {
 			cb_error_x (tree, _("FUNCTION '%s' has invalid date/time format"),
@@ -1898,16 +1904,14 @@ cb_list_reverse (cb_tree l)
 unsigned int
 cb_list_length (cb_tree l)
 {
-	unsigned int	n;
-
-	if (l == cb_error_node) {
-		return 0;
+	if (CB_VALID_TREE(l)) {
+		unsigned int	n = 0;
+		for (; l; l = CB_CHAIN (l)) {
+			n++;
+		}
+		return n;
 	}
-	n = 0;
-	for (; l; l = CB_CHAIN (l)) {
-		n++;
-	}
-	return n;
+	return 0;
 }
 
 int
