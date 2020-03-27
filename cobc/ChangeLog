@@ -1,4 +1,9 @@
 
+2020-03-27  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (check_preceding_tallying_phrases): allow consecutives
+	  CHARACTERS keywords (revival of bug #47).
+
 2020-03-27  Simon Sobisch <simonsobisch@gnu.org>
 
 	* config.def, typeck.c: switched "select-working" to support option,

@@ -937,6 +937,10 @@ AT_DATA([prog.cob], [
        01  x PIC 9(5).
 
        PROCEDURE DIVISION.
+           *> Ok
+           INSPECT "abcde" TALLYING x FOR CHARACTERS CHARACTERS
+       
+           *> Not ok
            INSPECT "abcde" TALLYING x FOR ALL LEADING
                TRAILING ALL ALL ALL TRAILING
            INSPECT "abcde" TALLYING x FOR x FOR LEADING "a"
@@ -944,14 +948,14 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:10: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob:11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob:11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob:11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob:11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob:11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob:12: error: TALLYING clause is incomplete
-prog.cob:12: error: missing CHARACTERS/ALL/LEADING/TRAILING phrase after FOR phrase
+[prog.cob:14: error: missing value between ALL/LEADING/TRAILING words
+prog.cob:15: error: missing value between ALL/LEADING/TRAILING words
+prog.cob:15: error: missing value between ALL/LEADING/TRAILING words
+prog.cob:15: error: missing value between ALL/LEADING/TRAILING words
+prog.cob:15: error: missing value between ALL/LEADING/TRAILING words
+prog.cob:15: error: missing value between ALL/LEADING/TRAILING words
+prog.cob:16: error: TALLYING clause is incomplete
+prog.cob:16: error: missing CHARACTERS/ALL/LEADING/TRAILING phrase after FOR phrase
 ])
 
 AT_CLEANUP

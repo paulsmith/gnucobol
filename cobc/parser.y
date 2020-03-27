@@ -1736,13 +1736,15 @@ check_preceding_tallying_phrases (const enum tallying_phrase phrase)
 		}
 		break;
 
-	case CHARACTERS_PHRASE:
 	case ALL_LEADING_TRAILING_PHRASES:
+		if (previous_tallying_phrase == CHARACTERS_PHRASE
+			   || previous_tallying_phrase == ALL_LEADING_TRAILING_PHRASES) {
+			cb_error (_("missing value between ALL/LEADING/TRAILING words"));
+		}
+		/* fall through */
+	case CHARACTERS_PHRASE:
 		if (previous_tallying_phrase == NO_PHRASE) {
 			cb_error (_("missing FOR phrase before CHARACTERS/ALL/LEADING/TRAILING phrase"));
-		} else if (previous_tallying_phrase == CHARACTERS_PHRASE
-			   || previous_tallying_phrase == ALL_LEADING_TRAILING_PHRASES) {
-			cb_error (_("missing value between CHARACTERS/ALL/LEADING/TRAILING words"));
 		}
 		break;
 
