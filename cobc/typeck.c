@@ -3128,14 +3128,15 @@ validate_relative_key_field (struct cb_file *file)
 			    key_field->name, file->name);
 	}
 
-	if (cb_select_working
-	    && key_field->storage != CB_STORAGE_WORKING
-	    && key_field->storage != CB_STORAGE_FILE
-	    && key_field->storage != CB_STORAGE_LOCAL) {
-		cb_error_x (file->key,
+#if 0 /* Simon: deemed to be not neccessary, see related bug #421 */
+	if (key_field->storage != CB_STORAGE_WORKING
+	 && key_field->storage != CB_STORAGE_FILE
+	 && key_field->storage != CB_STORAGE_LOCAL) {
+		cb_verify_x (file->key, cb_select_working,
 			    _("file %s: RELATIVE KEY %s declared outside WORKING-STORAGE"),
 			    file->name, key_field->name);
 	}
+#endif
 }
 
 static cb_tree
@@ -3473,6 +3474,7 @@ cb_validate_program_data (struct cb_program *prog)
 		    && cb_ref (file->key) != cb_error_node) {
 			validate_relative_key_field (file);
 		}
+#if 0 /* Simon: deemed to be not neccessary, see related bug #421 */
 		if (file->assign != NULL) {
 			if (CB_LITERAL_P (file->assign)) {
 				/* ASSIGN TO 'literal' */
@@ -3480,16 +3482,16 @@ cb_validate_program_data (struct cb_program *prog)
 				    && cb_ref (file->assign) != cb_error_node)
 				   || CB_FIELD_P (file->assign)) {
 				field = CB_FIELD_PTR (file->assign);
-				if (cb_select_working
-					&& field->storage != CB_STORAGE_WORKING
-					&& field->storage != CB_STORAGE_FILE
-					&& field->storage != CB_STORAGE_LOCAL) {
-					cb_error_x (file->assign,
+				if (field->storage != CB_STORAGE_WORKING
+					field->storage != CB_STORAGE_FILE
+					field->storage != CB_STORAGE_LOCAL) {
+					cb_verify_x(file->assign, cb_select_working,
 						_("file %s: ASSIGN %s declared outside WORKING-STORAGE"),
 						file->name, field->name);
 				}
 			}
 		}
+#endif
 	}
 
 	/* check alphabets */

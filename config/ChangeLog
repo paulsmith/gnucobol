@@ -1,4 +1,8 @@
 
+2020-03-27  Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: removed option "select-working" (see bug #421)
+
 2020-02-13  Ron Norman <rjn@inglenet.com>
 
 	* general: added option create_table
@@ -7,7 +11,7 @@
 
 	* general: added option bdb_byteorder
 
-2020-01-12 Simon Sobisch <simonsobisch@gnu.org>
+2020-01-12  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: bug #513 (partial) added sync-left-right
 
@@ -16,7 +20,7 @@
 	* general: added options assign-variable, assign-using-variable,
 	  assign-ext-dyn and assign-disk-from.
 
-2020-01-01 Simon Sobisch <simonsobisch@gnu.org>
+2020-01-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: FR #193 added same-as-clause
 
@@ -44,20 +48,20 @@
 
 	* general: added option report-column-plus
 
-2019-08-11 Simon Sobisch <simonsobisch@gnu.org>
+2019-08-11  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: added option hp-octal-literals
 
-2019-06-08 Simon Sobisch <simonsobisch@gnu.org>
+2019-06-08  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: removed options json-generate and xml-generate (support is
 	  now only depending on the reserved words)
 
-2019-06-02 Simon Sobisch <simonsobisch@gnu.org>
+2019-06-02  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: added option records-mismatch-record-clause
 
-2019-05-30 Simon Sobisch <simonsobisch@gnu.org>
+2019-05-30  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: FR #311 added options call-convention-mnemonic and
 	  call-convention-linkage
@@ -67,18 +71,18 @@
 	* default.conf, lax.conf-inc, mf-strict, rm-strict.conf:
 	  increased word-length to 63 per COBOL 202x
 
-2019-04-07 Simon Sobisch <simonsobisch@gnu.org>
+2019-04-07  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: FR #354 added continue-after option, set to ok
 	  for default/lax only as we won't have a dialect file for COBOL 202x
 	  until its final working draft and release date is available
 
-2019-03-18 Simon Sobisch <simonsobisch@gnu.org>
+2019-03-18  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: FR #352 added national-character-literals option, set to warning
 	  for default/lax only as we still don't have a dialect file for Fujitsu
 
-2019-01-29 Simon Sobisch <simonsobisch@gnu.org>
+2019-01-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* runtime.cfg: added COB_DISPLAY_PUNCH_FILE
 
@@ -187,8 +191,9 @@
 
 2017-09-18  Ron Norman <rjn@inglenet.com>
 
-	* general: Added option for disallowing SELECT ASSIGN and RELATIVE
-	  KEY fields to be in other than WORKING-STORAGE locations
+	* general: bug #421 added option "select-working" disallowing
+	  SELECT ASSIGN and RELATIVE KEY fields to be in other than
+	  WORKING-STORAGE locations
 
 2017-09-16  Edward Hart <edward.dan.hart@gmail.com>
 

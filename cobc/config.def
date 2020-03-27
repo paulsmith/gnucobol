@@ -109,9 +109,6 @@ CB_CONFIG_BOOLEAN (cb_relaxed_syntax_checks, "relax-syntax-checks",
 CB_CONFIG_BOOLEAN (cb_relax_level_hierarchy, "relax-level-hierarchy",
 	_("allow non-matching level numbers"))
 
-CB_CONFIG_BOOLEAN (cb_select_working, "select-working",
-	_("require ASSIGN USING items to be in WORKING-STORAGE"))
-
 CB_CONFIG_BOOLEAN (cb_sticky_linkage, "sticky-linkage",
 	_("LINKAGE-SECTION items remain allocated between invocations"))
 
@@ -185,6 +182,11 @@ CB_CONFIG_SUPPORT (cb_data_records_clause, "data-records-clause",
 
 CB_CONFIG_SUPPORT (cb_top_level_occurs_clause, "top-level-occurs-clause",
 	_("OCCURS clause on top-level"))
+
+#if 0 /* Simon: deemed to be not neccessary, see related bug #421 */
+CB_CONFIG_SUPPORT (cb_select_working, "select-working",
+	_("ASSIGN USING items outside of WORKING-STORAGE"))
+#endif
 
 CB_CONFIG_SUPPORT (cb_same_as_clause, "same-as-clause",
 	_("SAME AS clause"))

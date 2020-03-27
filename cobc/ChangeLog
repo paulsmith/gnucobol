@@ -1,4 +1,9 @@
 
+2020-03-27  Simon Sobisch <simonsobisch@gnu.org>
+
+	* config.def, typeck.c: switched "select-working" to support option,
+	  deactivated it (see bug #421)
+
 2020-03-01  Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.c: bug #618, fix -j mode with -o name that includes a directory
@@ -1962,13 +1967,8 @@
 
 2017-09-18  Ron Norman <rjn@inglenet.com>
 
-	* codegen.c:
-	  Emit Decimal Constants for all module types
-
-2017-09-18  Ron Norman <rjn@inglenet.com>
-
-	* config.def:
-	  Added select-working: yes/no
+	* codegen.c: eemit decimal constants for all module types
+	* config.def: added boolean select-working, see bug #421
 	  SELECT RELATIVE KEY and ASSIGN fields must be in WORKING-STORAGE
 	* typeck.c:
 	  Report 'declared outside WORKING-STORAGE' if 'select-working: yes'
