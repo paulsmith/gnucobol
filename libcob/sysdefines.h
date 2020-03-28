@@ -215,6 +215,12 @@
 	#define COB_NO_UNALIGNED_ATTRIBUTE
 #endif
 
+/* Max size of a single 'static char' allowed by C compiler */
+#if defined(__GNUC__)
+#define COB_MAX_CHAR_SIZE 2000000000
+#else
+#define COB_MAX_CHAR_SIZE 2000000
+#endif
 /* Define filename & path charcteristics */
 #if	defined(_MSC_VER) || defined(__ORANGEC__) || defined(__WATCOMC__) || \
     defined(__BORLANDC__) || defined(__MINGW32__) || defined (__DJGPP__)

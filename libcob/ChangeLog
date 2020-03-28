@@ -1,4 +1,9 @@
 
+2020-03-28  Ron Norman <rjn@inglenet.com>
+
+	* sysdefines.h: Add COB_MAX_CHAR_SIZE, Largest 'static char' 
+			supported by the C compiler
+
 2020-03-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* fileio.c, common.h: define and use COB_FILE_MODE for _WIN32 and

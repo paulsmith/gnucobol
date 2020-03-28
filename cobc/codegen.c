@@ -1921,20 +1921,42 @@ output_dynamic_field_function_id_pointers (void)
 
 /* Based data */
 
+static int ws_id = 0;
+static size_t ws_used = 0;
+static void
+output_local_ws_group (void)
+{
+	if (ws_used > 0
+	 && cb_ws_align_record) {
+#ifdef  HAVE_ATTRIBUTE_ALIGNED
+		output_local ("static cob_u8_t	%s%d[%d]%s;",
+				  CB_PREFIX_WS_GROUP, ws_id, ws_used, COB_ALIGN);
+#else
+#if defined(COB_ALIGN_PRAGMA_8)
+		output_local ("#pragma align 8 (%s%d)\n", CB_PREFIX_WS_GROUP, ws_id);
+#endif
+		output_local ("static %scob_u8_t%s	%s%d[%d];",
+				  COB_ALIGN_DECL_8, COB_ALIGN_ATTR_8, CB_PREFIX_WS_GROUP, ws_id, ws_used);
+#endif
+	}
+}
+
 static void
 output_local_base_cache (void)
 {
 	struct base_list	*blp;
+	size_t		fs;
 
 	if (!local_base_cache) {
 		return;
 	}
 
-	output_local ("\n/* Data storage */\n");
+	output_local ("\n/* Local Data storage */\n");
 
 	local_base_cache = list_cache_sort (local_base_cache, &base_cache_cmp);
+	ws_id++;
+	ws_used = 0;
 	for (blp = local_base_cache; blp; blp = blp->next) {
-		// if (!blp->f->count) continue;
 		if (blp->f->index_type == CB_INT_INDEX) {
 			output_local ("int		%s%d;",
 				      CB_PREFIX_BASE, blp->f->id);
@@ -1942,21 +1964,39 @@ output_local_base_cache (void)
 			output_local ("static int	%s%d;",
 				      CB_PREFIX_BASE, blp->f->id);
 		} else if( !(blp->f->report_flag & COB_REPORT_REF_EMITTED)) {
+			if (!cb_ws_align_record
+			 || blp->f->memory_size >= COB_MAX_CHAR_SIZE) {
 #ifdef  HAVE_ATTRIBUTE_ALIGNED
-			output_local ("static cob_u8_t	%s%d[%d]%s;",
-				      CB_PREFIX_BASE, blp->f->id,
-				      blp->f->memory_size, COB_ALIGN);
+				output_local ("static cob_u8_t	%s%d[%d]%s;",
+						  CB_PREFIX_BASE, blp->f->id,
+						  blp->f->memory_size, COB_ALIGN);
 #else
 #if defined(COB_ALIGN_PRAGMA_8)
-			output_local ("#pragma align 8 (%s%d)\n", CB_PREFIX_BASE, blp->f->id);
+				output_local ("#pragma align 8 (%s%d)\n", CB_PREFIX_BASE, blp->f->id);
 #endif
-			output_local ("static %scob_u8_t%s	%s%d[%d];",
-				      COB_ALIGN_DECL_8, COB_ALIGN_ATTR_8, CB_PREFIX_BASE,
-					  blp->f->id, blp->f->memory_size);
+				output_local ("static %scob_u8_t%s	%s%d[%d];",
+						  COB_ALIGN_DECL_8, COB_ALIGN_ATTR_8, CB_PREFIX_BASE,
+						  blp->f->id, blp->f->memory_size);
 #endif
+			} else {
+				fs = blp->f->memory_size;
+				fs = (fs + cb_ws_align_record - 1) / cb_ws_align_record;
+				fs = fs * cb_ws_align_record;
+				if (ws_used + fs > COB_MAX_CHAR_SIZE) {
+					output_local_ws_group ();
+					ws_id++;
+					ws_used = 0;
+				}
+
+				output_local ("#define %s%d\t(%s%d + %d)",
+							CB_PREFIX_BASE, blp->f->id, CB_PREFIX_WS_GROUP, ws_id, ws_used);
+				ws_used += fs;
+			}
 		}
 		output_local ("\t/* %s */\n", blp->f->name);
 	}
+
+	output_local_ws_group ();
 
 	output_local ("\n/* End of local data storage */\n\n");
 }

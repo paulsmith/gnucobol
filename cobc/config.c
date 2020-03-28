@@ -37,14 +37,16 @@ enum cb_config_type {
 	CB_INT,			/* integer */
 	CB_STRING,		/* "..." */
 	CB_BOOLEAN,		/* 'yes', 'no' */
-	CB_SUPPORT		/* 'ok', 'archaic', 'obsolete',
+	CB_SUPPORT,		/* 'ok', 'archaic', 'obsolete',
 				   'skip', 'ignore', 'unconformable' */
+	CB_SIZE			/* size so may have K M G appended */
 };
 
 /* Global variables */
 
 #define CB_CONFIG_ANY(type,var,name,doc)	type		var = (type)0;
 #define CB_CONFIG_INT(var,name,min,max,odoc,doc)	unsigned int		var = 0;
+#define CB_CONFIG_SIZE(var,name,min,max,odoc,doc)	unsigned long		var = 0;
 #define CB_CONFIG_STRING(var,name,doc)	const char	*var = NULL;
 #define CB_CONFIG_BOOLEAN(var,name,doc)	int		var = 0;
 #define CB_CONFIG_SUPPORT(var,name,doc)	enum cb_support	var = CB_OK;
@@ -53,6 +55,7 @@ enum cb_config_type {
 
 #undef	CB_CONFIG_ANY
 #undef	CB_CONFIG_INT
+#undef	CB_CONFIG_SIZE
 #undef	CB_CONFIG_STRING
 #undef	CB_CONFIG_BOOLEAN
 #undef	CB_CONFIG_SUPPORT
@@ -64,8 +67,10 @@ enum cb_config_type {
 #define CB_CONFIG_ANY(type,var,name,doc)	, {CB_ANY, name, (void *)&var}
 #if COBC_STORES_CONFIG_VALUES
 #define CB_CONFIG_INT(var,name,min,max,odoc,doc)	, {CB_INT, name, (void *)&var, NULL, min, max}
+#define CB_CONFIG_SIZE(var,name,min,max,odoc,doc)	, {CB_SIZE, name, (void *)&var, NULL, min, max}
 #else
 #define CB_CONFIG_INT(var,name,min,max,odoc,doc)	, {CB_INT, name, (void *)&var, 0, min, max}
+#define CB_CONFIG_SIZE(var,name,min,max,odoc,doc)	, {CB_SIZE, name, (void *)&var, 0, min, max}
 #endif
 #define CB_CONFIG_STRING(var,name,doc)	, {CB_STRING, name, (void *)&var}
 #define CB_CONFIG_BOOLEAN(var,name,doc)	, {CB_BOOLEAN, name, (void *)&var}
@@ -104,6 +109,7 @@ static struct config_struct {
 
 #undef	CB_CONFIG_ANY
 #undef	CB_CONFIG_INT
+#undef	CB_CONFIG_SIZE
 #undef	CB_CONFIG_STRING
 #undef	CB_CONFIG_BOOLEAN
 #undef	CB_CONFIG_SUPPORT
@@ -479,7 +485,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	char		*s;
 	const char	*name;
 	char		*e;
-	char		*val;
+	char		*val, valx[24];
 	void		*var;
 	enum cb_support	support_val;
 	size_t		i;
@@ -746,6 +752,36 @@ cb_config_entry (char *buff, const char *fname, const int line)
 
 	case CB_INT:
 		for (j = 0; val[j]; j++) {
+			if (val[j] < '0' || val[j] > '9') {
+				invalid_value (fname, line, name, val, NULL, 0, 0);
+				return -1;
+			}
+		}
+
+		if (check_valid_value (fname, line, name, val, var,
+			config_table[i].min_value, config_table[i].max_value)) {
+			break;
+		} else {
+			return -1;
+		}
+
+	case CB_SIZE:
+		for (j = 0; val[j]; j++) {
+			if (toupper(val[j]) == 'K') {
+				sprintf(valx,"%ld",atol(val)*1024);
+				val = valx;
+				break;
+			}
+			if (toupper(val[j]) == 'M') {
+				sprintf(valx,"%ld",atol(val)*1024*1024);
+				val = valx;
+				break;
+			}
+			if (toupper(val[j]) == 'G') {
+				sprintf(valx,"%ld",atol(val)*1024*1024*1024);
+				val = valx;
+				break;
+			}
 			if (val[j] < '0' || val[j] > '9') {
 				invalid_value (fname, line, name, val, NULL, 0, 0);
 				return -1;

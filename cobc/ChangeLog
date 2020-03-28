@@ -1,4 +1,13 @@
 
+2020-03-28  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: Based on 'ws-align-record' 01s & 77s will be grouped into
+				the same 'static cob_u8_t' and aligned on an address boundary
+				defined by 'ws-align-record'.
+				If 'ws-align-record' has a 0 value, then no grouping is done
+	* config.def, cob.c, config.c: Added support for new config type of
+				CB_CONFIG_SIZE which may end with K, M, G (eg. 250M)
+
 2020-03-27  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (check_preceding_tallying_phrases): allow consecutives

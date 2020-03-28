@@ -63,6 +63,7 @@
 #define CB_PREFIX_REPORT_CONTROL "rc_"	/* Report CONTROL (cob_report_control) */
 #define CB_PREFIX_REPORT_REF	"rr_"	/* Report CONTROL reference (cob_report_control_ref) */
 #define CB_PREFIX_REPORT_SUM_CTR "rsc_"	/* Report SUM COUNTER */
+#define CB_PREFIX_WS_GROUP	"ws_"	/* WORKING-SOTRAGE grouping char */
 
 #define CB_PROGRAM_TYPE		0
 #define CB_FUNCTION_TYPE	1
