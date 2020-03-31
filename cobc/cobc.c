@@ -3492,6 +3492,8 @@ process_command_line (const int argc, char **argv)
 	} else if (cb_mf_ibm_comp == 1) {	/* IBMCOMP */
 		cb_binary_size = CB_BINARY_SIZE_2_4_8;
 		cb_synchronized_clause = CB_OK;
+		cb_align_record = 8;
+		cb_align_opt = 1;
 	}
 
 	return cob_optind;

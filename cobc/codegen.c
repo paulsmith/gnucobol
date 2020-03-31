@@ -1927,7 +1927,7 @@ static void
 output_local_ws_group (void)
 {
 	if (ws_used > 0
-	 && cb_ws_align_record) {
+	 && cb_align_record) {
 #ifdef  HAVE_ATTRIBUTE_ALIGNED
 		output_local ("static cob_u8_t	%s%d[%d]%s;",
 				  CB_PREFIX_WS_GROUP, ws_id, ws_used, COB_ALIGN);
@@ -1946,12 +1946,13 @@ output_local_base_cache (void)
 {
 	struct base_list	*blp;
 	size_t		fs;
+	int			align_on;
 
 	if (!local_base_cache) {
 		return;
 	}
 
-	output_local ("\n/* Local Data storage */\n");
+	output_local ("\n/* WORKING-STORAGE Data */\n");
 
 	local_base_cache = list_cache_sort (local_base_cache, &base_cache_cmp);
 	ws_id++;
@@ -1964,7 +1965,7 @@ output_local_base_cache (void)
 			output_local ("static int	%s%d;",
 				      CB_PREFIX_BASE, blp->f->id);
 		} else if( !(blp->f->report_flag & COB_REPORT_REF_EMITTED)) {
-			if (!cb_ws_align_record
+			if (!cb_align_record
 			 || blp->f->memory_size >= COB_MAX_CHAR_SIZE) {
 #ifdef  HAVE_ATTRIBUTE_ALIGNED
 				output_local ("static cob_u8_t	%s%d[%d]%s;",
@@ -1980,8 +1981,26 @@ output_local_base_cache (void)
 #endif
 			} else {
 				fs = blp->f->memory_size;
-				fs = (fs + cb_ws_align_record - 1) / cb_ws_align_record;
-				fs = fs * cb_ws_align_record;
+				align_on = cb_align_record;
+				if (cb_align_opt) {
+					if (fs >= 16) {
+						align_on = 16;
+					} else if (fs >= 8) {
+						if (cb_align_record != 16)
+							align_on = 8;
+					} else if (fs >= 4) {
+						if (cb_align_record != 8
+						 && cb_align_record != 16)
+							align_on = 4;
+					} else if (fs >= 2) {
+						if (cb_align_record != 4
+						 && cb_align_record != 8
+						 && cb_align_record != 16)
+							align_on = 2;
+					}
+				}
+				fs = (fs + align_on - 1) / align_on;
+				fs = fs * align_on;
 				if (ws_used + fs > COB_MAX_CHAR_SIZE) {
 					output_local_ws_group ();
 					ws_id++;
@@ -1998,7 +2017,7 @@ output_local_base_cache (void)
 
 	output_local_ws_group ();
 
-	output_local ("\n/* End of local data storage */\n\n");
+	output_local ("\n/* End of WORKING-STORAGE data */\n\n");
 }
 
 static void
