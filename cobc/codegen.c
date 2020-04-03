@@ -1927,7 +1927,7 @@ static size_t ws_used = 0;
  * Compute memory size based on align-record and align-opt settings
  */
 static size_t
-compute_align_size (size_t fs)
+compute_align_size (size_t fs, int dflt)
 {
 	int			align_on;
 	align_on = cb_align_record;
@@ -1948,6 +1948,8 @@ compute_align_size (size_t fs)
 				align_on = 2;
 		}
 	}
+	if (align_on == 0)
+		align_on = dflt;
 	fs = (fs + align_on - 1) / align_on;
 	return fs * align_on;
 }
@@ -2015,7 +2017,7 @@ output_local_base_cache (void)
 						  blp->f->id, blp->f->memory_size);
 #endif
 			} else {
-				fs = compute_align_size (blp->f->memory_size);
+				fs = compute_align_size (blp->f->memory_size, 1);
 				if (ws_used + fs > COB_MAX_CHAR_SIZE) {
 					output_local_ws_group ();
 					ws_id++;
@@ -11012,9 +11014,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			f->flag_local_storage = 1;
 			f->flag_local_alloced = 1;
 			f->mem_offset = local_mem;
-			/* Round up to COB_MALLOC_ALIGN + 1 bytes */
-			/* Caters for current types */
-			local_mem += compute_align_size (f->memory_size);
+			local_mem += compute_align_size (f->memory_size, 16);
 		}
 	}
 
