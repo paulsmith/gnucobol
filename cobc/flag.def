@@ -83,7 +83,7 @@ CB_FLAG_NQ (1, "callfh", 9,		/* stored in cb_call_extfh */
 	  "                        <function> for I/O"))
 
 CB_FLAG_NQ (1, "sqldb", 11,		/* stored in cb_sqldb_name */
-	_("  -fsqldb=<dbtype>      which Database is usedt, <dbtype> may be\n"
+	_("  -fsqldb=<dbtype>      which Database is used, <dbtype> may be\n"
 	  "                        MySQL, MSSQL, Oracle10, Oracle11, Oracle12"))
 
 CB_FLAG_NQ (1, "sqlschema", 12,		/* stored in cb_sqldb_schema */
