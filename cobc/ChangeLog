@@ -1,4 +1,9 @@
 
+2020-04-03  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: Based on 'align-record' 01s & 77s in LOCAL-STORAGE 
+				will now also be aligned as defined
+
 2020-03-31  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c,config.def: Based on 'align-record' 01s & 77s will be grouped

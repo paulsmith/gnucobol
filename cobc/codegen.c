@@ -1923,6 +1923,38 @@ output_dynamic_field_function_id_pointers (void)
 
 static int ws_id = 0;
 static size_t ws_used = 0;
+/*
+ * Compute memory size based on align-record and align-opt settings
+ */
+static size_t
+compute_align_size (size_t fs)
+{
+	int			align_on;
+	align_on = cb_align_record;
+	if (cb_align_opt) {
+		if (fs >= 16) {
+			align_on = 16;
+		} else if (fs >= 8) {
+			if (cb_align_record != 16)
+				align_on = 8;
+		} else if (fs >= 4) {
+			if (cb_align_record != 8
+			 && cb_align_record != 16)
+				align_on = 4;
+		} else if (fs >= 2) {
+			if (cb_align_record != 4
+			 && cb_align_record != 8
+			 && cb_align_record != 16)
+				align_on = 2;
+		}
+	}
+	fs = (fs + align_on - 1) / align_on;
+	return fs * align_on;
+}
+
+/*
+ * Emit storage collector variable
+ */
 static void
 output_local_ws_group (void)
 {
@@ -1941,6 +1973,9 @@ output_local_ws_group (void)
 	}
 }
 
+/*
+ * Emit all WORKING-STORAGE records
+ */
 static void
 output_local_base_cache (void)
 {
@@ -1980,27 +2015,7 @@ output_local_base_cache (void)
 						  blp->f->id, blp->f->memory_size);
 #endif
 			} else {
-				fs = blp->f->memory_size;
-				align_on = cb_align_record;
-				if (cb_align_opt) {
-					if (fs >= 16) {
-						align_on = 16;
-					} else if (fs >= 8) {
-						if (cb_align_record != 16)
-							align_on = 8;
-					} else if (fs >= 4) {
-						if (cb_align_record != 8
-						 && cb_align_record != 16)
-							align_on = 4;
-					} else if (fs >= 2) {
-						if (cb_align_record != 4
-						 && cb_align_record != 8
-						 && cb_align_record != 16)
-							align_on = 2;
-					}
-				}
-				fs = (fs + align_on - 1) / align_on;
-				fs = fs * align_on;
+				fs = compute_align_size (blp->f->memory_size);
 				if (ws_used + fs > COB_MAX_CHAR_SIZE) {
 					output_local_ws_group ();
 					ws_id++;
@@ -10999,8 +11014,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			f->mem_offset = local_mem;
 			/* Round up to COB_MALLOC_ALIGN + 1 bytes */
 			/* Caters for current types */
-			local_mem += ((f->memory_size + COB_MALLOC_ALIGN) &
-					~COB_MALLOC_ALIGN);
+			local_mem += compute_align_size (f->memory_size);
 		}
 	}
 
