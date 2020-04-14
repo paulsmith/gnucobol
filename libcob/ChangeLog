@@ -1,4 +1,9 @@
 
+2020-04-14  Ron Norman <rjn@inglenet.com>
+
+	* common.h: Add fields for implementing LINE SEQUENTIAL pipes
+	* fileio.c: Add code for LINE SEQUENTIAL pipes
+
 2020-03-28  Ron Norman <rjn@inglenet.com>
 
 	* sysdefines.h: Add COB_MAX_CHAR_SIZE, Largest 'static char' 

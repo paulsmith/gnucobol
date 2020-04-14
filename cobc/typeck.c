@@ -10382,11 +10382,16 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 		cb_error_x (CB_TREE (current_statement),
 				_("%s not allowed on %s files"), "OPEN", "SORT");
 		return;
-	} else if (f->organization == COB_ORG_LINE_SEQUENTIAL &&
-		   open_mode == COB_OPEN_I_O) {
+#if 0
+		/* Ron Norman: April 14, 2020 */
+		/* Later add compile option for this */
+		/* To open a bi-directional pipe you must OPEN I-O */
+	} else if (f->organization == COB_ORG_LINE_SEQUENTIAL 
+			&& open_mode == COB_OPEN_I_O) {
 		cb_error_x (CB_TREE (current_statement),
 				_("%s not allowed on %s files"), "OPEN I-O", "LINE SEQUENTIAL");
 		return;
+#endif
 	}
 	if (sharing == NULL) {
 		if (f->sharing) {

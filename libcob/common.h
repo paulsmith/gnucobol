@@ -1533,7 +1533,8 @@ typedef struct __cob_file {
 	unsigned int		flag_ready:1;		/* cob_file has been built completely */
 	unsigned int		flag_write_chk_dups:1;/* Do precheck for DUPLICATES on WRITE */
 	unsigned int		flag_redo_keydef:1;	/* Keys are being redefined from dictionary */
-	unsigned int		unused_bits:19;
+	unsigned int		flag_is_pipe:1;		/* LINE SEQUENTIAL as 'pipe' */
+	unsigned int		unused_bits:18;
 
 	cob_field		*last_key;		/* Last field used as 'key' for I/O */
 	unsigned char		last_operation;		/* Most recent I/O operation */
@@ -1558,6 +1559,9 @@ typedef struct __cob_file {
 	struct __fcd3		*fcd;			/* FCD created via SET ... TO ADDRESS OF FH--FCD */
 	const char			*xfdname;		/* Name for SQL table */
 	const char			*xfdschema;		/* Override of COB_SCHEMA_DIR for this file */
+	long				file_pid;		/* Process id of other end of pipe */
+	void				*fileout;		/* output side of bi-directional pipe 'FILE*' */
+	int					fdout;			/* output side of bi-directional pipe 'fd' */
 } cob_file;
 
 
