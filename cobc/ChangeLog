@@ -3,6 +3,8 @@
 
 	* typeck.c: Remove ERROR for OPEN I-O of LINE SEQUENTIAL
 				OPEN I-O is required for bi-directional pipe
+	* typeck.c: Remove ERROR for REWRITE of LINE SEQUENTIAL
+	            This has been supported for a while
 
 2020-04-03  Ron Norman <rjn@inglenet.com>
 

@@ -1,6 +1,12 @@
 
 2020-04-14  Ron Norman <rjn@inglenet.com>
 
+	* fileio.c: Fixed to NOT mix I/O to FILE * via putc and 'int fd' via write
+	            'FILE *' is buffered and 'int fd' is NOT so the data
+				can end up in a very strange sequence in the file
+
+2020-04-14  Ron Norman <rjn@inglenet.com>
+
 	* common.h: Add fields for implementing LINE SEQUENTIAL pipes
 	* fileio.c: Add code for LINE SEQUENTIAL pipes
 

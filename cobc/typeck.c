@@ -10384,7 +10384,7 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 		return;
 #if 0
 		/* Ron Norman: April 14, 2020 */
-		/* Later add compile option for this */
+		/* OPEN I-O for LINE SEQUENTIAL was working since 2015! */
 		/* To open a bi-directional pipe you must OPEN I-O */
 	} else if (f->organization == COB_ORG_LINE_SEQUENTIAL 
 			&& open_mode == COB_OPEN_I_O) {
@@ -10746,10 +10746,14 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 		cb_error_x (CB_TREE (current_statement),
 				_("%s not allowed on %s files"), "REWRITE", "REPORT");
 		return;
+#if 0
+		/* Ron Norman: April 14, 2020 */
+		/* REWRITE for LINE SEQUENTIAL was working since 2015! */
 	} else if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
 		cb_error_x (CB_TREE (current_statement),
 				_("%s not allowed on %s files"), "REWRITE", "LINE SEQUENTIAL");
 		return;
+#endif
 	} else if (current_statement->handler_type == INVALID_KEY_HANDLER &&
 		  (f->organization != COB_ORG_RELATIVE &&
 		   f->organization != COB_ORG_INDEXED)) {

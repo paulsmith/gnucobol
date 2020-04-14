@@ -1624,6 +1624,7 @@ AT_CLEANUP
 
 AT_SETUP([WRITE / REWRITE on LINE SEQUENTIAL files])
 AT_KEYWORDS([file])
+AT_XFAIL_IF(true)
 
 # FIXME: this should be depending on a compilation flag,
 #        see reportwriter branch for this feature
