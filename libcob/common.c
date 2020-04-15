@@ -7168,7 +7168,7 @@ cob_fatal_error (const enum cob_fatal_error fatal_error)
 			msg = _("record overflow");
 			break;
 		case COB_STATUS_46_READ_ERROR:
-			msg = _("READ after unsucessful READ/START");
+			msg = _("READ after unsuccessful READ/START");
 			break;
 		case COB_STATUS_47_INPUT_DENIED:
 			msg = _("READ/START not allowed, file not open for input");
