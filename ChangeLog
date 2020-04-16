@@ -1,4 +1,8 @@
 
+2020-04-16  Edward Hart <edward.dan.hart@gmail.com>
+
+	* configure.ac: fixed cleaning of COB_CFLAGS again (see Patches #49).
+
 2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: version bump to 4.0 (lt-version 5.0.0)

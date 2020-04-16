@@ -1772,16 +1772,16 @@ if test "x$CPPFLAGS" != "x"; then
 fi
 if test "x$cob_temp_flags" != "x"; then
 	cob_temp_flags=`echo "$cob_temp_flags" \
-	| sed -e 's/-g3//' -e 's/-g //' -e 's/-g$//' -e 's/ $//' -e 's/^ //' \
-	      -e 's/@<:@+-@:>@O@<:@0-9s@:>@//' -e 's/ $//' -e 's/^ //' \
-	      -e 's/-O//' -e 's/ $//' -e 's/^ //'    \
-	      -e 's/-fmessage-length=0//'            \
-	      -e 's/@<:@^ @:>@*-D_FORTIFY_SOURCE=.//'      \
-	      -e 's/-fstack-protector-strong//'      \
-	      -e 's/-fstack-protector-all//'         \
-	      -e 's/-fstack-protector//'             \
-	      -e 's/-funwind-tables//'               \
-	      -e 's/-fasynchronous-unwind-tables//'  \
+	| sed -e 's/-g3//g' -e 's/-g //g' -e 's/-g$//' -e 's/ $//' -e 's/^ //' \
+	      -e 's/@<:@+-@:>@O@<:@0-9s@:>@//g' -e 's/ $//' -e 's/^ //' \
+	      -e 's/-O//g' -e 's/ $//' -e 's/^ //'    \
+	      -e 's/-fmessage-length=0//g'            \
+	      -e 's/@<:@^ @:>@*-D_FORTIFY_SOURCE=.//g'      \
+	      -e 's/-fstack-protector-strong//g'      \
+	      -e 's/-fstack-protector-all//g'         \
+	      -e 's/-fstack-protector//g'             \
+	      -e 's/-funwind-tables//g'               \
+	      -e 's/-fasynchronous-unwind-tables//g'  \
 	      -e 's/  */ /g' -e 's/ $//' -e 's/^ //'`
 fi
 
