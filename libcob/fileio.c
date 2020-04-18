@@ -51,6 +51,9 @@
 #ifdef	HAVE_SIGNAL_H
 #include <signal.h>
 #endif
+#ifdef	HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
 
 struct file_list {
 	struct file_list	*next;
@@ -2435,7 +2438,6 @@ cob_linage_write_opt (cob_file *f, const int opt)
 	FILE			*fp;
 	int			i;
 	int			n;
-	int			ret;
 
 	fp = (FILE *)f->file;
 	lingptr = f->linage;
@@ -2502,7 +2504,6 @@ static unsigned int
 cob_seq_write_opt (cob_file *f, const int opt)
 {
 	int	i;
-	size_t ret;
 
 	if (opt & COB_WRITE_LINES) {
 		i = opt & COB_WRITE_MASK;
@@ -2523,7 +2524,7 @@ cob_seq_write_opt (cob_file *f, const int opt)
 static int
 cob_file_write_opt (cob_file *f, const int opt)
 {
-	int	i, ret;
+	int	i;
 
 	if (f->flag_is_pipe) 
 		return COB_STATUS_00_SUCCESS;
@@ -3111,7 +3112,6 @@ cob_file_open (cob_file_api *a, cob_file *f, char *filename, const int mode, con
 static int
 cob_file_close (cob_file_api *a, cob_file *f, const int opt)
 {
-	int	ret;
 	COB_UNUSED (a);
 
 	switch (opt) {
@@ -3297,7 +3297,6 @@ sequential_read (cob_file_api *a, cob_file *f, const int read_opts)
 static int
 sequential_write (cob_file_api *a, cob_file *f, const int opt)
 {
-	size_t	ret;
 	union {
 		unsigned char	sbuff[4];
 		unsigned short	sshort[2];
@@ -3552,7 +3551,6 @@ lineseq_write (cob_file_api *a, cob_file *f, const int opt)
 	cob_linage		*lingptr;
 	size_t			size;
 	int			ret;
-	int			fd;
 	FILE		*fo;
 	COB_UNUSED (a);
 
@@ -3574,11 +3572,9 @@ lineseq_write (cob_file_api *a, cob_file *f, const int opt)
 	}
 
 	fo = (FILE*)f->file;
-	fd = f->fd;
 	if (f->flag_is_pipe) {
 		if (f->fdout >= 0) {
 			fo = (FILE*)f->fileout;
-			fd = f->fdout;
 		}
 	} else {
 		if (unlikely (f->flag_select_features & COB_SELECT_LINAGE)) {
@@ -5528,8 +5524,10 @@ cob_commit (void)
 
 	for (l = file_cache; l; l = l->next) {
 		if (l->file) {
+#if 0		/* This should not really call file_unlock */
 			l->file->last_operation = COB_LAST_COMMIT;
 			cob_file_unlock (l->file);
+#endif
 			l->file->last_operation = COB_LAST_COMMIT;
 			fileio_funcs[get_io_ptr (l->file)]->commit (&file_api, l->file);
 		}
@@ -5543,8 +5541,10 @@ cob_rollback (void)
 
 	for (l = file_cache; l; l = l->next) {
 		if (l->file) {
+#if 0		/* This should not really call file_unlock */
 			l->file->last_operation = COB_LAST_ROLLBACK;
 			cob_file_unlock (l->file);
+#endif
 			l->file->last_operation = COB_LAST_ROLLBACK;
 			fileio_funcs[get_io_ptr (l->file)]->rollback (&file_api, l->file);
 		}

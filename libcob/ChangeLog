@@ -1,4 +1,10 @@
 
+2020-04-17  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Fixed compile warnings
+	* fisam.c: Fixed sync/commit routine 
+	* fbdb.c: Fixed I/O routine pointers
+
 2020-04-14  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Fixed to NOT mix I/O to FILE * via putc and 'int fd' via write

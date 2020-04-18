@@ -199,9 +199,9 @@ static const struct cob_fileio_funcs ext_indexed_funcs = {
 	cob_isam_init_fileio,
 	cob_isam_exit_fileio,
 	isam_dummy,
-	isam_sync,
-	isam_dummy,
-	isam_dummy,
+	isam_sync,			/* sync */
+	isam_sync,			/* commit */
+	isam_dummy,			/* rollback */
 	isam_dummy
 };
 
@@ -395,9 +395,11 @@ isam_sync (cob_file_api *a, cob_file *f)
 	struct indexfile	*fh;
 
 	COB_UNUSED (a);
-	if (f->organization == COB_ORG_INDEXED) {
+	if (f->organization == COB_ORG_INDEXED
+	 && f->open_mode != COB_OPEN_CLOSED) {
 		fh = f->file;
-		if (fh) {
+		if (fh
+		 && fh->isfd > 0) {
 			isflush (fh->isfd);
 		}
 	}

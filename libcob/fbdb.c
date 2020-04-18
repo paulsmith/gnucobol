@@ -61,9 +61,9 @@ static const struct cob_fileio_funcs ext_indexed_funcs = {
 	ix_bdb_exit_fileio,
 	ix_bdb_fork,
 	ix_bdb_sync,
-	(void*)ix_bdb_dummy,
-	ix_bdb_file_unlock,
-	(void*)ix_bdb_dummy
+	(void*)ix_bdb_dummy,	/* commit */
+	(void*)ix_bdb_dummy,	/* rollback */
+	ix_bdb_file_unlock
 };
 
 static DB_ENV	*bdb_env = NULL;
