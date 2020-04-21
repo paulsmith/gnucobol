@@ -1832,9 +1832,8 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 AT_CLEANUP
 
 
-AT_SETUP([OPEN I-O with LINE SEQUENTIAL])
+AT_SETUP([DELETE with LINE SEQUENTIAL])
 AT_KEYWORDS([file])
-AT_XFAIL_IF([true])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -1849,14 +1848,42 @@ AT_DATA([prog.cob], [
        01  file1-rec PIC X.
        PROCEDURE DIVISION.
            OPEN I-O file1.
+           DELETE file1.
+           CLOSE  file1.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:13: error: OPEN I-O not allowed on LINE SEQUENTIAL files
+[prog.cob:14: error: DELETE not allowed on LINE SEQUENTIAL files
 ])
 
 AT_CLEANUP
 
+
+AT_SETUP([DELETE with SEQUENTIAL])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT file1 ASSIGN DISK ORGANIZATION SEQUENTIAL.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  file1.
+       01  file1-rec PIC X.
+       PROCEDURE DIVISION.
+           OPEN I-O file1.
+           DELETE file1.
+           CLOSE  file1.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:14: error: DELETE not allowed on SEQUENTIAL files
+])
+
+AT_CLEANUP
 
 AT_SETUP([ACCESS RANDOM with ORG SEQUENTIAL])
 AT_KEYWORDS([file])
