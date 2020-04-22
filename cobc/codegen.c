@@ -4194,6 +4194,22 @@ output_funcall_typed (struct cb_funcall *p, const char type)
 		output(");");
 		break;
 
+    case ':':
+		output_integer (p->argv[0]);
+		switch ((int)(p->argv[1])) {
+		case '=':	output(" == "); break;
+		case '<':	output(" < "); break;
+		case '[':	output(" <= "); break;
+		case '>':	output(" > "); break;
+		case ']':	output(" >= "); break;
+		case '~':	output(" != "); break;
+		default:
+			cobc_err_msg (_("unexpected compare operator: %c"), (int)p->argv[1]);
+			COBC_ABORT ();
+		}
+		output_integer (p->argv[2]);
+		break;
+
 	/* LCOV_EXCL_START */
 	default:
 		cobc_err_msg (_("unexpected function: %s"), p->name);

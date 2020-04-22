@@ -1,4 +1,13 @@
 
+2020-04-22  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: New internal function $: for emitting
+			    a compare of interger values
+
+	* typeck.c: Check for field that is native short/int/long
+			   and emit direct C operators for add/subtract
+			   instead of an inline function call
+
 2020-04-14  Ron Norman <rjn@inglenet.com>
 
 	* typeck.c: Remove ERROR for OPEN I-O of LINE SEQUENTIAL
