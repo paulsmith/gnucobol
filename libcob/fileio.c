@@ -3136,7 +3136,8 @@ cob_file_close (cob_file_api *a, cob_file *f, const int opt)
 		}
 #ifdef	HAVE_FCNTL
 		/* Unlock the file */
-		if (f->fd >= 0) {
+		if (f->fd >= 0
+		 && !f->flag_is_pipe) {
 			struct flock lock;
 			memset ((void *)&lock, 0, sizeof (struct flock));
 			lock.l_type = F_UNLCK;
@@ -4524,7 +4525,8 @@ relative_delete (cob_file_api *a, cob_file *f)
 static void
 cob_file_unlock (cob_file *f)
 {
-	if (COB_FILE_SPECIAL(f)) {
+	if (COB_FILE_SPECIAL(f)
+	 || f->flag_is_pipe) {
 		return;
 	}
 
