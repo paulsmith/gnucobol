@@ -1,4 +1,10 @@
 
+2020-04-26  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: For LINE SEQUENTIAL and OPEN I-O some platforms
+				(SUNOS for one) require that a fflush be done
+				between each read/write of the file
+
 2020-04-17  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Fixed compile warnings

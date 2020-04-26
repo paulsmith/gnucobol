@@ -3540,6 +3540,8 @@ lineseq_read (cob_file_api *a, cob_file *f, const int read_opts)
 			f->record_max - i);
 	}
 	f->record->size = i;
+	if (f->open_mode == COB_OPEN_I_O)	/* Required on some systems */
+		fflush((FILE*)f->file); 
 	return COB_STATUS_00_SUCCESS;
 }
 
@@ -3677,6 +3679,8 @@ lineseq_write (cob_file_api *a, cob_file *f, const int opt)
 		}
 		f->flag_needs_nl = 0;
 	}
+	if (f->open_mode == COB_OPEN_I_O)	/* Required on some systems */
+		fflush((FILE*)f->file); 
 
 	return COB_STATUS_00_SUCCESS;
 }
@@ -3791,6 +3795,8 @@ lineseq_rewrite (cob_file_api *a, cob_file *f, const int opt)
 		}
 		f->flag_needs_nl = 0;
 	}
+	if (f->open_mode == COB_OPEN_I_O)	/* Required on some systems */
+		fflush((FILE*)f->file); 
 
 	return COB_STATUS_00_SUCCESS;
 }
