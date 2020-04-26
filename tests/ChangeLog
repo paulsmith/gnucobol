@@ -1,4 +1,9 @@
 
+2020-04-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* run_prog_manual.sh.in, testsuite.src/run_manual_screen.at:
+	  pass program to run to the script instead of hard-wire of "./prog"
+
 2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in: always set COB_SCHEMA_DIR to not access anything outside
@@ -422,17 +427,17 @@
 
 2016-08-02  Dave Pitts <dpitts@cozx.com>
 
-	* testsuite.src/listings.at - Added tests for non-existent file and
+	* testsuite.src/listings.at: Added tests for non-existent file and
 	  copybook messages in the listing file.
 
 2016-07-24  Dave Pitts <dpitts@cozx.com>
 
-	* testsuite.src/listings.at - Fixed test for 32/64 bit pointers and
+	* testsuite.src/listings.at: Fixed test for 32/64 bit pointers and
 	  additional picture information.
 
 2016-07-18  Dave Pitts <dpitts@cozx.com>
 
-	* testsuite.src/listings.at - Added SCREEN and LINKAGE section tests.
+	* testsuite.src/listings.at: Added SCREEN and LINKAGE section tests.
 
 2016-07-17  Brian Tiffin <btiffin@gnu.org>
 
@@ -453,17 +458,16 @@
 
 2016-06-28  Dave Pitts <dpitts@cozx.com>
 
-	* testsuite.src/listings.at - Added Files with FILLER.
+	* testsuite.src/listings.at: Added Files with FILLER.
 
 2016-06-26  Dave Pitts <dpitts@cozx.com>
 
-	* testsuite.src/listings.at - Added LISTING ON/OFF test.
+	* testsuite.src/listings.at: Added LISTING ON/OFF test.
 
 2016-06-20  Dave Pitts <dpitts@cozx.com>
 
-	* testsuite.src/listings.at - Added new tests for compiler listings.
-	* Makefile.in, Makefile.am - Added testsuite/listings.at.
-	* testsuite.at - Added testsuite/listings.at
+	* testsuite.src/listings.at: new file, tests for compiler listings
+	* testsuite.at, Makefile.am: added testsuite.src/listings.at
 
 2016-06-15  Brian Tiffin <btiffin@gnu.org>
 

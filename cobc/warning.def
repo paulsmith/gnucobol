@@ -30,6 +30,9 @@
 /* Always active, defaults to an ERROR but could be downgraded to warning */
 /* CB_ERRWARNDEF (var, name, doc) */
 
+CB_WARNDEF (cb_warn_extra, "extra",
+	_("  -Wextra               additional warnings only raised with -W or -Wall"))
+
 CB_ONWARNDEF (cb_warn_unfinished, "unfinished",
 	_("  -Wno-unfinished       do not warn if unfinished features are used"))
 

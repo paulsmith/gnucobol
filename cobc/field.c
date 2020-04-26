@@ -946,7 +946,7 @@ create_implicit_picture (struct cb_field *f)
 	
 	/* Checkme: should we raise an error for !cb_relaxed_syntax_checks? */
 	if (!ret) {
-		cb_warning_x (warningopt, x, _("defining implicit picture size %d for '%s'"),
+		cb_warning_x (cb_warn_extra, x, _("defining implicit picture size %d for '%s'"),
 			    size_implied, cb_name (x));
 	}
 	if (is_numeric) {
@@ -1467,7 +1467,7 @@ warn_full_on_numeric_items_is_useless (const struct cb_field * const f)
 {
 	if ((f->screen_flag & COB_SCREEN_FULL)
 	    && f->pic && f->pic->category == CB_CATEGORY_NUMERIC) {
-		cb_warning_x (warningopt, CB_TREE (f),
+		cb_warning_x (cb_warn_extra, CB_TREE (f),
 			      _("FULL has no effect on numeric items; you may want REQUIRED or PIC Z"));
 	}
 }
@@ -1515,7 +1515,7 @@ warn_from_to_using_without_pic (const struct cb_field * const f)
 
 	if ((f->screen_from || f->screen_to) && !f->pic) {
 		/* TO-DO: Change to dialect option */
-		cb_warning_x (warningopt, x,
+		cb_warning_x (cb_warn_extra, x,
 			      _("'%s' has FROM, TO or USING without PIC; PIC will be implied"),
 			      cb_name (x));
 		/* TO-DO: Add setting of PIC below here or move warnings to the code which sets the PIC */
@@ -1529,7 +1529,7 @@ static int
 warn_pic_for_numeric_value_implied (const struct cb_field * const f)
 {
 	if (f->values && CB_NUMERIC_LITERAL_P (CB_VALUE (f->values))) {
-		cb_warning_x (warningopt, CB_TREE (f),
+		cb_warning_x (cb_warn_extra, CB_TREE (f),
 			      _("'%s' has numeric VALUE without PIC; PIC will be implied"),
 			      cb_name (CB_TREE (f)));
 		return 1;
@@ -2448,10 +2448,8 @@ compute_size (struct cb_field *f)
 			if ((c->report_flag & COB_REPORT_LINE)
 			 && !(c->report_flag & COB_REPORT_LINE_PLUS)
 			 && c->report_line == f->report_line) {
-				if (warningopt) {
-					cb_warning_x (COBC_WARN_FILLER, CB_TREE (f),
-						      _("duplicate LINE %d ignored"), f->report_line);
-				}
+				cb_warning_x (cb_warn_extra, CB_TREE (f),
+						_("duplicate LINE %d ignored"), f->report_line);
 				f->report_line = 0;
 				f->report_flag &= ~COB_REPORT_LINE;
 			}
@@ -2465,12 +2463,11 @@ compute_size (struct cb_field *f)
 		}
 
 		/* Groups */
-		if (f->flag_synchronized 
-		 && warningopt) {
+		if (f->flag_synchronized) {
 			/* TODO: handle this "per dialect", some disallow this (per ANSI85) or ignore it */
-			cb_warning_x (COBC_WARN_FILLER, CB_TREE (f),
-				    _("ignoring SYNCHRONIZED for group item '%s'"),
-				    cb_name (CB_TREE (f)));
+			cb_warning_x (cb_warn_extra, CB_TREE (f),
+				_("ignoring SYNCHRONIZED for group item '%s'"),
+				cb_name (CB_TREE (f)));
 		}
 unbounded_again:
 		size_check = 0;
@@ -2484,11 +2481,9 @@ unbounded_again:
 				    c->size * c->occurs_max >
 				    c->redefines->size * c->redefines->occurs_max) {
 					if (cb_larger_redefines_ok) {
-						if (warningopt) {
-							cb_warning_x (COBC_WARN_FILLER, CB_TREE (c),
-									  _("size of '%s' larger than size of '%s'"),
-									  c->name, c->redefines->name);
-						}
+						cb_warning_x (cb_warn_extra, CB_TREE (c),
+							_("size of '%s' larger than size of '%s'"),
+							c->name, c->redefines->name);
 						maxsz = c->redefines->size * c->redefines->occurs_max;
 						for (c0 = c->redefines->sister; c0 != c; c0 = c0->sister) {
 							if (c0->size * c0->occurs_max > maxsz) {
@@ -2779,11 +2774,9 @@ unbounded_again:
 	if (f->redefines && f->redefines->flag_external &&
 	    (f->size * f->occurs_max > f->redefines->size * f->redefines->occurs_max)) {
 		if (cb_larger_redefines_ok) {
-			if (warningopt) {
-				cb_warning_x (COBC_WARN_FILLER, CB_TREE (f),
-					_("size of '%s' larger than size of '%s'"),
-					f->name, f->redefines->name);
-			}
+			cb_warning_x (cb_warn_extra, CB_TREE (f),
+				_("size of '%s' larger than size of '%s'"),
+				f->name, f->redefines->name);
 		} else {
 			cb_error_x (CB_TREE (f), _("size of '%s' larger than size of '%s'"),
 				f->name, f->redefines->name);
@@ -2900,9 +2893,7 @@ cb_validate_78_item (struct cb_field *f, const cob_u32_t no78add)
 	} else if (f->flag_constant) {		/* 01 CONSTANT is verified in parser.y */
 		prec = 1;
 	} else {
-		if (!cb_verify (cb_constant_78, "78 VALUE")) {
-			return last_real_field;
-		}
+		cb_verify (cb_constant_78, "78 VALUE");
 		prec = 0;
 	}
 
@@ -2973,16 +2964,18 @@ error_if_rename_thru_is_before_redefines (const struct cb_field * const item)
 	return 0;
 }
 
-static void
+static int
 error_if_is_or_in_occurs (const struct cb_field * const field,
 			  const struct cb_field * const referring_field)
 {
 	struct cb_field *parent;
+	int	ret = 0;
 
 	if (field->flag_occurs) {
 		cb_error_x (CB_TREE (referring_field),
 			    _("RENAMES cannot start/end at the OCCURS item '%s'"),
 			    cb_name (CB_TREE (field)));
+		ret = 1;
 	}
 
 	for (parent = field->parent; parent; parent = parent->parent) {
@@ -2990,16 +2983,20 @@ error_if_is_or_in_occurs (const struct cb_field * const field,
 			cb_error_x (CB_TREE (referring_field),
 				    _("cannot use RENAMES on part of the table '%s'"),
 				    cb_name (CB_TREE (parent)));
+			ret = 1;
 		}
 	}
+
+	return ret;
 }
 
-static void
+static int
 error_if_invalid_type_in_renames_range (const struct cb_field * const item)
 {
 	const struct cb_field	*end;
 	const struct cb_field	*f = item->redefines;
 	enum cb_category	category;
+	int ret = 0;
 
 	/* Find last item in RENAMES range */
 	if (item->rename_thru) {
@@ -3024,11 +3021,12 @@ error_if_invalid_type_in_renames_range (const struct cb_field * const item)
 			cb_error_x (CB_TREE (item),
 				    _("RENAMES may not contain '%s' as it is a pointer or object reference"),
 				    cb_name (CB_TREE (f)));
+			ret = 1;
 		} else if (f->depending) {
 			cb_error_x (CB_TREE (item),
 				    _("RENAMES may not contain '%s' as it is an OCCURS DEPENDING table"),
 				    cb_name (CB_TREE (f)));
-
+			ret = 1;
 		}
 
 		if (f == end) {
@@ -3037,16 +3035,39 @@ error_if_invalid_type_in_renames_range (const struct cb_field * const item)
 			f = get_next_record_field (f);
 		}
 	}
+	return ret;
 }
 
-void
-cb_validate_renames_item (struct cb_field *item)
+static int
+error_if_invalid_level_for_renames (struct cb_field const *field, cb_tree ref)
+{
+	int	level = field->level;
+
+	if (level == 1 || level == 66 || level == 77) {
+		/* don't pass error here as this should not invalidate the field */
+		cb_verify_x (ref, cb_renames_uncommon_levels,
+			_("RENAMES of 01-, 66- and 77-level items"));
+	} else if (level == 88) {
+		cb_error_x (ref, _("RENAMES may not reference a level 88"));
+		return 1;
+	}
+	return 0;
+}
+
+int
+cb_validate_renames_item (struct cb_field *item,
+	cb_tree ref_renames, cb_tree ref_thru)
 {
 	const cb_tree	item_tree = CB_TREE (item);
 	const char	*redefines_name = cb_name (CB_TREE (item->redefines));
 	const char	*rename_thru_name = cb_name (CB_TREE (item->rename_thru));
 	struct cb_field *founder;
 	struct cb_field *f;
+	int ret = 0;
+
+	if (error_if_invalid_level_for_renames (item->redefines, ref_renames)) {
+		return 1;
+	}
 
 	founder = cb_field_founder (item->redefines);
 	if (item->parent != founder) {
@@ -3054,36 +3075,42 @@ cb_validate_renames_item (struct cb_field *item)
 			    _("'%s' must immediately follow the record '%s'"),
 			    cb_name (item_tree),
 			    cb_name (CB_TREE (founder)));
-	}
-
-	if (item->rename_thru
-	    && founder != cb_field_founder (item->rename_thru)) {
-		cb_error_x (item_tree,
-			    _("'%s' and '%s' must be in the same record"),
-			    redefines_name, rename_thru_name);
+		ret = 1;
 	}
 
 	if (item->redefines == item->rename_thru) {
 		cb_error_x (item_tree,
 			    _("THRU item must be different to '%s'"),
 			    redefines_name);
-	} else if (!error_if_rename_thru_is_before_redefines (item)) {
-		error_if_invalid_type_in_renames_range (item);
-	}
-
-	for (f = item->rename_thru; f; f = f->parent) {
-		if (f->parent == item->redefines) {
+		ret = 1;
+	} else if (item->rename_thru) {
+		if (founder != cb_field_founder (item->rename_thru)) {
 			cb_error_x (item_tree,
-				    _("THRU item '%s' may not be subordinate to '%s'"),
-				    rename_thru_name, redefines_name);
-			break;
+					_("'%s' and '%s' must be in the same record"),
+					redefines_name, rename_thru_name);
+			return 1;
+		}
+		if (error_if_rename_thru_is_before_redefines (item)
+		 || error_if_invalid_level_for_renames (item->rename_thru, ref_thru)) {
+			return 1;
+		}
+		for (f = item->rename_thru; f; f = f->parent) {
+			if (f->parent == item->redefines) {
+				cb_error_x (item_tree,
+						_("THRU item '%s' may not be subordinate to '%s'"),
+						rename_thru_name, redefines_name);
+				return 1;
+			}
 		}
 	}
+	ret |= error_if_invalid_type_in_renames_range (item);
 
-	error_if_is_or_in_occurs (item->redefines, item);
-	if (item->rename_thru) {
-		error_if_is_or_in_occurs (item->rename_thru, item);
+	if (!error_if_is_or_in_occurs (item->redefines, item)
+	 && item->rename_thru) {
+		ret |= error_if_is_or_in_occurs (item->rename_thru, item);
 	}
+
+	return ret;
 }
 
 void

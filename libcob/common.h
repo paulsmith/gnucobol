@@ -434,7 +434,9 @@ only usable with COB_USE_VC2013_OR_GREATER */
 
 /* Also OK for icc which defines __GNUC__ */
 
-#if	defined(__GNUC__) || (defined(__xlc__) && __IBMC__ >= 700)
+#if	 defined(__GNUC__) || \
+	(defined(__xlc__) && __IBMC__ >= 700  ) || \
+	(defined(__HP_cc) && __HP_cc  >= 61000)
 #define	COB_A_NORETURN	__attribute__((noreturn))
 #define	COB_A_FORMAT12	__attribute__((format(printf, 1, 2)))
 #define	COB_A_FORMAT23	__attribute__((format(printf, 2, 3)))
@@ -2167,7 +2169,7 @@ COB_EXPIMP void		cob_screen_accept	(cob_screen *, cob_field *,
 COB_EXPIMP void		cob_field_display	(cob_field *, cob_field *, cob_field *,
 					 cob_field *, cob_field *, cob_field *,
 					 cob_field *, const cob_flags_t);
-COB_EXPIMP void cob_field_accept	(cob_field *, cob_field *, cob_field *,
+COB_EXPIMP void		cob_field_accept	(cob_field *, cob_field *, cob_field *,
 					 cob_field *, cob_field *, cob_field *,
 					 cob_field *, cob_field *, cob_field *,
 					 const cob_flags_t);

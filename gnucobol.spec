@@ -16,20 +16,11 @@ Source:		https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.gz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:	gcc
-BuildRequires:	glibc-devel
-BuildRequires:	glibc
-BuildRequires:  gmp-devel >= 4.1.4
-BuildRequires:	gmp >= 4.1.4
 BuildRequires:	db-devel >= 4.1.24
-BuildRequires:	db >= 4.1.24
 BuildRequires:	ncurses-devel >= 5.4
-BuildRequires:	ncurses >= 5.4
 
 Requires:		gcc
-Requires:		glibc
 Requires:		glibc-devel
-Requires:		gmp >= 4.1.4
 Requires:		gmp-devel >= 4.1.4
 Requires:		db >= 4.1.24
 Requires:		ncurses >= 5.4
@@ -60,8 +51,10 @@ rm -rf $RPM_BUILD_ROOT/%{_infodir}/dir
 make check
 
 %files -f %{name}.lang
+%license COPYING
+%license COPYING.DOC
 %defattr (-,root,root,-)
-%doc AUTHORS COPYING COPYING.LESSER COPYING.DOC ChangeLog
+%doc AUTHORS ChangeLog
 %doc NEWS README THANKS
 %{_bindir}/cobc
 %{_bindir}/cobcrun
@@ -69,9 +62,15 @@ make check
 %{_includedir}/*
 %{_datadir}/gnucobol
 %{_infodir}/gnucobol.info*
+%{_mandir}/man1/cobc.1.*
+%{_mandir}/man1/cobcrun.1.*
+
+%files -n libcob
+%license COPYING.LESSER
 %{_libdir}/libcob.so*
 %{_libdir}/libcob.a
 %{_libdir}/libcob.la
+%{_libdir}/gnucobol/CBL_OC_DUMP.so
 
 %clean
 rm -rf $RPM_BUILD_ROOT

@@ -277,7 +277,7 @@ cb_use_name (struct cb_field *f, char *n)
 	if(*n > ' ') {
 		if (f->sql_name) {
 			cb_source_line--;
-			cb_warning (warningopt, _("XFD replaced %s with %s for %s"), 
+			cb_warning (cb_warn_extra, _("XFD replaced %s with %s for %s"), 
 								f->sql_name, n, f->name);
 			cb_source_line++;
 		}
@@ -434,7 +434,7 @@ cb_parse_xfd (struct cb_file *fn, struct cb_field *f)
 			f->sql_when = cobc_parse_strdup (expr);
 		} else {
 			cb_source_line--;
-			cb_warning (warningopt, _("XFD unknown %s %s"), p1, p2);
+			cb_warning (cb_warn_extra, _("XFD unknown %s %s"), p1, p2);
 			cb_source_line++;
 		}
 	}
@@ -851,7 +851,7 @@ write_postfix(FILE *fx, int golbl, char *expr)
 			} else if(*p == 0) {
 				break;
 			} else {
-				cb_warning (warningopt, _("Incorrect XFD expression: %s"),expr);
+				cb_warning (cb_warn_extra, _("Incorrect XFD expression: %s"),expr);
 				break;
 			}
 		} else if (strncasecmp(p," AND ",5) == 0) {
@@ -1001,11 +1001,11 @@ check_redefines (FILE *fx, struct cb_file *fl, struct cb_field *f, int sub, int 
 		if ((numwhen+numother) != numrdf) {
 			if (!f->flag_sql_binary) {
 				if ((numwhen + numother) > 0)
-					cb_warning (warningopt, _("%s has incomplete WHEN rules"),f->name);
+					cb_warning (cb_warn_extra, _("%s has incomplete WHEN rules"),f->name);
 				f->flag_sql_binary = 1;
 				f->flag_sql_group = 1;
 				dowhen = 0;
-				cb_warning (warningopt, _("Process %s as BINARY data"),f->name);
+				cb_warning (cb_warn_extra, _("Process %s as BINARY data"),f->name);
 			}
 		}
 		/* Emit When Conditions */
@@ -1329,7 +1329,7 @@ output_xfd_file (struct cb_file *fl)
 		fx = fopen (outname, "w");
 	}
 	if (fx == NULL) {
-		cb_warning (warningopt, _("Unable to open %s; '%s'"),outname,cb_get_strerror ());
+		cb_warning (cb_warn_extra, _("Unable to open %s; '%s'"),outname,cb_get_strerror ());
 		return;
 	}
 	sprintf(outname,"%s%s%s.ddl",cob_schema_dir,SLASH_STR,tblname);
@@ -1339,7 +1339,7 @@ output_xfd_file (struct cb_file *fl)
 		fs = fopen (outname, "w");
 	}
 	if (fs == NULL) {
-		cb_warning (warningopt, _("Unable to open %s; '%s'"),outname,cb_get_strerror ());
+		cb_warning (cb_warn_extra, _("Unable to open %s; '%s'"),outname,cb_get_strerror ());
 		return;
 	}
 	ndate = 0;

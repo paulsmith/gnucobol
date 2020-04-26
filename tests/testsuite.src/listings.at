@@ -1,4 +1,4 @@
-## Copyright (C) 2015-2019 Free Software Foundation, Inc.
+## Copyright (C) 2015-2020 Free Software Foundation, Inc.
 ## Written by Dave Pitts, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -1021,23 +1021,32 @@ AT_KEYWORDS([listing error warning symbols])
 AT_CAPTURE_FILE([prog.lst])
 
 AT_DATA([copy.inc], [
-       01 TEST-VAR PIC X(2) VULUE "OK".
+       ENVIRONMENT    DIVISION.
+       INPUT-OUTPUT   SECTION.
+       FILE-CONTROL.
+           SELECT testfile
+               ASSIGN TO filename
+               ORGANIZATION RELATIVE
+               ACCESS IS sequentia
+               STATUS IS stat.
 ])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
+       COPY "copy.inc".
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       COPY "copy.inc".
        PROCEDURE        DIVISION.
            DISPLAY FIRST-MATCH NO ADVANCING
            END-DISPLAY.
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -t prog.lst -tsymbols prog.cob], [1], [],
-[copy.inc:2: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
+[copy.inc:8: error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
+copy.inc:5: error: missing file description for FILE testfile
+prog.cob:7: warning: variable 'filename' will be implicitly defined
 prog.cob:8: error: 'FIRST-MATCH' is not defined
 ])
 
@@ -1049,89 +1058,92 @@ LINE    PG/LN  A...B............................................................
 000001
 000002         IDENTIFICATION   DIVISION.
 000003         PROGRAM-ID.      prog.
-000004         DATA             DIVISION.
-000005         WORKING-STORAGE  SECTION.
-000006         COPY "copy.inc".
+000004         COPY "copy.inc".
 000001C
-000002C        01 TEST-VAR PIC X(2) VULUE "OK".
-error: syntax error, unexpected Identifier, expecting EXTERNAL or
-     + EXTERNAL-FORM or GLOBAL or IDENTIFIED
+000002C        ENVIRONMENT    DIVISION.
+000003C        INPUT-OUTPUT   SECTION.
+000004C        FILE-CONTROL.
+000005C            SELECT testfile
+error: missing file description for FILE testfile
+000006C                ASSIGN TO filename
+000007C                ORGANIZATION RELATIVE
+000008C                ACCESS IS sequentia
+error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or
+     + SEQUENTIAL
+000009C                STATUS IS stat.
+000005         DATA             DIVISION.
+000006         WORKING-STORAGE  SECTION.
 000007         PROCEDURE        DIVISION.
+warning: variable 'filename' will be implicitly defined
 000008             DISPLAY FIRST-MATCH NO ADVANCING
 error: 'FIRST-MATCH' is not defined
 000009             END-DISPLAY.
 000010             STOP RUN.
+
+
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-SIZE  TYPE           LVL  NAME                           PICTURE
-
-      No fields defined.
-
-
-GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 Error/Warning summary:
 
-copy.inc:2: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+copy.inc:8: error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
+copy.inc:5: error: missing file description for FILE testfile
+prog.cob:7: warning: variable 'filename' will be implicitly defined
 prog.cob:8: error: 'FIRST-MATCH' is not defined
 
-0 warnings in compilation group
-2 errors in compilation group
+1 warning in compilation group
+3 errors in compilation group
 ])
 
 AT_CHECK([gcdiff -IGnuCOBOL prog12.lst prog.lst], [0], [], [])
 
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-       01 TEST-VAR PIC X(2) VULUE "OK".
-       PROCEDURE        DIVISION.
-           DISPLAY FIRST-MATCH NO ADVANCING
-           END-DISPLAY.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY -t prog.lst -tsymbols prog.cob], [1], [],
-[prog.cob:6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+AT_CHECK([$COMPILE_ONLY -T prog.lst prog.cob], [1], [],
+[copy.inc:8: error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
+copy.inc:5: error: missing file description for FILE testfile
+prog.cob:7: warning: variable 'filename' will be implicitly defined
 prog.cob:8: error: 'FIRST-MATCH' is not defined
 ])
 
 AT_DATA([prog13.lst],
-[GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P          prog.cob                                                      DDD MMM dd HH:MM:SS YYYY  Page 0001
 
-LINE    PG/LN  A...B............................................................
+LINE    PG/LN  A...B............................................................SEQUENCE
 
 000001
 000002         IDENTIFICATION   DIVISION.
 000003         PROGRAM-ID.      prog.
-000004         DATA             DIVISION.
-000005         WORKING-STORAGE  SECTION.
-000006         01 TEST-VAR PIC X(2) VULUE "OK".
-error: syntax error, unexpected Identifier, expecting EXTERNAL or
-     + EXTERNAL-FORM or GLOBAL or IDENTIFIED
+000004         COPY "copy.inc".
+000001C
+000002C        ENVIRONMENT    DIVISION.
+000003C        INPUT-OUTPUT   SECTION.
+000004C        FILE-CONTROL.
+000005C            SELECT testfile
+error: missing file description for FILE testfile
+000006C                ASSIGN TO filename
+000007C                ORGANIZATION RELATIVE
+000008C                ACCESS IS sequentia
+error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
+000009C                STATUS IS stat.
+000005         DATA             DIVISION.
+000006         WORKING-STORAGE  SECTION.
 000007         PROCEDURE        DIVISION.
+warning: variable 'filename' will be implicitly defined
 000008             DISPLAY FIRST-MATCH NO ADVANCING
 error: 'FIRST-MATCH' is not defined
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-SIZE  TYPE           LVL  NAME                           PICTURE
-
-      No fields defined.
 
 
-GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P          prog.cob                                                      DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 Error/Warning summary:
 
-prog.cob:6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+copy.inc:8: error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
+copy.inc:5: error: missing file description for FILE testfile
+prog.cob:7: warning: variable 'filename' will be implicitly defined
 prog.cob:8: error: 'FIRST-MATCH' is not defined
 
-0 warnings in compilation group
-2 errors in compilation group
+1 warning in compilation group
+3 errors in compilation group
 ])
 
 AT_CHECK([gcdiff -IGnuCOBOL prog13.lst prog.lst], [0], [], [])

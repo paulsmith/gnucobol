@@ -7,6 +7,10 @@
 
 	* general: removed option "select-working" (see bug #421)
 
+2020-03-31  Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: added option special-names-clause
+
 2020-02-13  Ron Norman <rjn@inglenet.com>
 
 	* general: added option create_table

@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/libcob
 #
-# Copyright (C) 2003-2012, 2014, 2017-2019 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014, 2017-2020 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -53,7 +53,7 @@ endif
 
 #ToDo Man Page
 #dist_man_MANS = libcob.3
-#COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)
+#COBCRUN = cobcrun$(EXEEXT)
 
 AM_CPPFLAGS = -I$(top_srcdir) $(LIBCOB_CPPFLAGS)
 AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)
@@ -70,8 +70,15 @@ pkginclude_HEADERS = common.h cobgetopt.h exception.def
 CODE_COVERAGE_BRANCH_COVERAGE=1
 CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 
-#libcob.3: $(top_srcdir)/bin/cobcrun.c $(top_srcdir)/configure.ac | cobcrun$(EXEEXT)
-#	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBCRUN) -specialflag
+#HELPSOURCES = $(top_srcdir)/bin/cobcrun.c $(top_srcdir)/configure.ac
+#HELP2MAN_OPTS = --info-page=$(PACKAGE) -specialflag
+#if MAKE_HAS_PREREQ_ONLY
+#libcob.3: $(HELPSOURCES) | $(COBCRUN)
+#	"$(top_builddir)/pre-inst-env" $(HELP2MAN) --output=$@ $(HELP2MAN_OPTS) $(COBCRUN)
+#else
+#libcob.3: $(HELPSOURCES)
+#	"$(top_builddir)/pre-inst-env" $(HELP2MAN) --output=$@ $(HELP2MAN_OPTS) $(COBCRUN)
+#endif
 
 install-data-hook:
 	rm -f $(DESTDIR)$(includedir)/libcob/byteswap.h

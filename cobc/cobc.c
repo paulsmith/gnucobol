@@ -119,6 +119,7 @@ struct strcache {
 #define	CB_TEXT_LIST_ADD(y,z)	y = cb_text_list_add (y, z)
 #define	CB_TEXT_LIST_CHK(y,z)	y = cb_text_list_chk (y, z)
 
+
 /* Global variables */
 
 const char		*cb_source_file = NULL;
@@ -205,7 +206,6 @@ int			cb_unix_lf = 0;
 int 		fatal_startup_error = 0;
 int			errorcount = 0;
 int			warningcount = 0;
-int			warningopt = 0;
 int			fatal_errors_flag = 0;
 int			no_physical_cancel = 0;
 int			cb_source_line = 0;
@@ -466,8 +466,8 @@ static const struct option long_options[] = {
 	{"Xref",		CB_NO_ARG, NULL, 'X'},
 	{"use-extfh",		CB_RQ_ARG, NULL, 9},	/* This is used by COBOL-IT; Same is -fcallfh= */
 	{"Wall",		CB_NO_ARG, NULL, 'W'},
-	{"Werror",		CB_OP_ARG, NULL, 'Y'},
-	{"W",			CB_NO_ARG, NULL, 'Z'},
+	{"W",			CB_NO_ARG, NULL, 'Y'},
+	{"Werror",		CB_OP_ARG, NULL, 'Z'},
 	{"tlines",		CB_RQ_ARG, NULL, '*'},
 	{"tsymbols",		CB_NO_ARG, &cb_listing_symbols, 1},		/* kept for backwards-compatibility */
 
@@ -3270,7 +3270,6 @@ process_command_line (const int argc, char **argv)
 
 		case 'w':
 			/* -w : Turn off all warnings (disables -W/-Wall if passed later) */
-			warningopt = 0;
 #define	CB_WARNDEF(var,name,doc)	var = COBC_WARN_DISABLED;
 #define	CB_ONWARNDEF(var,name,doc)	var = COBC_WARN_DISABLED;
 #define	CB_NOWARNDEF(var,name,doc)	var = COBC_WARN_DISABLED;
@@ -3284,7 +3283,6 @@ process_command_line (const int argc, char **argv)
 
 		case 'W':
 			/* -Wall : Turn on most warnings */
-			warningopt = 1;
 #define	CB_WARNDEF(var,name,doc)	var = COBC_WARN_ENABLED;
 #define	CB_ONWARNDEF(var,name,doc)
 #define	CB_NOWARNDEF(var,name,doc)
@@ -3297,6 +3295,19 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case 'Y':
+			/* -W : Turn on every warning */
+#define	CB_WARNDEF(var,name,doc)	var = COBC_WARN_ENABLED;
+#define	CB_ONWARNDEF(var,name,doc)
+#define	CB_NOWARNDEF(var,name,doc)	var = COBC_WARN_ENABLED;
+#define	CB_ERRWARNDEF(var,name,doc)	var = COBC_WARN_AS_ERROR;
+#include "warning.def"
+#undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
+#undef	CB_NOWARNDEF
+#undef	CB_ERRWARNDEF
+			break;
+
+		case 'Z':
 			/* -Werror[=warning] : Treat all/single warnings as errors */
 			if (cob_optarg) {
 #define CB_CHECK_WARNING(var,name)  \
@@ -3321,20 +3332,6 @@ process_command_line (const int argc, char **argv)
 			} else {
 				error_all_warnings = 1;
 			}
-			break;
-
-		case 'Z':
-			/* -W : Turn on every warning */
-			warningopt = 2;
-#define	CB_WARNDEF(var,name,doc)	var = COBC_WARN_ENABLED;
-#define	CB_ONWARNDEF(var,name,doc)
-#define	CB_NOWARNDEF(var,name,doc)	var = COBC_WARN_ENABLED;
-#define	CB_ERRWARNDEF(var,name,doc)	var = COBC_WARN_AS_ERROR;
-#include "warning.def"
-#undef	CB_WARNDEF
-#undef	CB_ONWARNDEF
-#undef	CB_NOWARNDEF
-#undef	CB_ERRWARNDEF
 			break;
 
 		/* LCOV_EXCL_START */

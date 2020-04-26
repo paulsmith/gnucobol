@@ -1,4 +1,8 @@
 
+2020-04-23  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: added ACCEPT with CURSOR parsing
+
 2020-04-22  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c: New internal function $: for emitting
@@ -19,6 +23,35 @@
 
 	* codegen.c: Based on 'align-record' 01s & 77s in LOCAL-STORAGE 
 				will now also be aligned as defined
+
+2020-04-01  Simon Sobisch <simonsobisch@gnu.org>
+
+	* warning.def, cobc.h, cobc.c, error.c, field.c, typeck.c, parser.y:
+	  new warning option -Wextra, replacing previous warningopt, allowing to
+	  disable them or have them as error and fixing the previous behaviour
+	  where -W effectively set them to be handled as error
+	* parser.y: removed some duplicate warnings and always raise PENDING,
+	  not only in case of -W/-Wall
+	* tree.h, tree.c, error.c (cb_warning_dialect_x): new function,
+	  possibly to be replaced later
+	* reerved.c: added COBOL 202x FUNCTION CONCAT
+	* tree.c (get_category_from_arguments): new function;
+	  added missing implementation of "type of function depends on arguments"
+	  and "check that arguments are of a matching type"
+	* tree.c, parser.y: changed "FUNCTION parameter" to "FUNCTION argument"
+	* typeck.c: FR #222 numeric checks for CRT STATUS (may be >= 4 digits)
+
+2020-03-31  Simon Sobisch <simonsobisch@gnu.org>
+
+	* field.c.y (cb_validate_78_item): full validation and resolving
+	  of level 78 value, even when not supported
+	* typeck.c (cb_validate_program_data): skip lvl 66 entries in odo-check
+	* parser.y, field.c: moved function (error_if_invalid_level_for_renames)
+	  to field.c
+	* field.c (cb_validate_renames_item): reordered checks
+	* field.c (cb_validate_renames_item), tree.h: cb_validate_program_data
+	* typeck.c (cb_build_length): workaround for bug #623 RENAMES with length 0
+	* parser.y (renames_entry): extended syntax checks for RENAMES
 
 2020-03-31  Ron Norman <rjn@inglenet.com>
 
@@ -43,6 +76,18 @@
 
 	* config.def, typeck.c: switched "select-working" to support option,
 	  deactivated it (see bug #421)
+
+2020-03-22  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (call_body): warn ON EXCEPTION for CALL STATIC and ignore
+	  it instead of having them mutually exclusive
+	* codegen.c (increase_output_line): fixed declaration of inline
+
+2020-03-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: honor new conditional MAKE_HAS_PREREQ_ONLY
+	* Makefile.am: adjusted invocation of help2man, using new defines
+	  HELPSOURCES and HELP2MAN_OPTS
 
 2020-03-01  Brian Tiffin <btiffin@gnu.org>
 
@@ -185,6 +230,11 @@
 	* config.c: added options external (= ibm) and dynamic (= mf) to
 	  assign-clause.
 	* typeck.c (cb_build_assignment_name): refactored.
+
+2019-12-23  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (sort_body): fixed class cast errors,
+	  actually use the specified order if no data-name was specified
 
 2019-12-16  Ron Norman <rjn@inglenet.com>
 
@@ -1938,7 +1988,7 @@
 
 2017-10-18  Ron Norman <rjn@inglenet.com>
 
-	* codegen.c(output_internal_function): Fixed problem with braces in
+	* codegen.c (output_internal_function): Fixed problem with braces in
 	  variable dump code
 
 2017-10-17  Ron Norman <rjn@inglenet.com>
@@ -2813,7 +2863,7 @@
 2017-02-06  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c:
-	  Emit routines cob_file_external_addr,cob_file_malloc,cob_file_free
+	  Emit routines cob_file_external_addr, cob_file_malloc, cob_file_free
 	  so that 'cob_file' is allocated within libcob
 	  This will allow the structure have fields added to the end
 	  without forcing a recompile. COB_FILE_VERSION is unchanged

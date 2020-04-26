@@ -338,7 +338,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 prog.cob:6: warning: 'X' previously defined here
 ])
 
-AT_CHECK([$COMPILE_ONLY -Wno-other prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -Wno-extra prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -573,7 +573,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:8: warning: no definition/prototype seen for function 'func'
+[prog.cob:8: warning: no definition/prototype seen for FUNCTION 'func'
 prog.cob:12: error: syntax error, unexpected user function name
 ])
 AT_CLEANUP
@@ -1862,8 +1862,14 @@ AT_DATA([prog.cob], [
        66  invalid-5   RENAMES h.
        66  invalid-6   RENAMES k THRU l.
        66  invalid-7   RENAMES j.
-       66  invalid-8   RENAMES k THRU o.
+       66  invalid-8   RENAMES m THRU o.
        66  invalid-9   RENAMES b THRU m.
+       
+       78  my-ext-const VALUE "123".
+       66  invalid-ec   RENAMES my-ext-const.
+       
+       01  my-std-const CONSTANT AS "123".
+       66  invalid-sc   RENAMES my-std-const.
 
        PROCEDURE       DIVISION.
            DISPLAY valid-2 OF a
@@ -1880,13 +1886,14 @@ prog.cob:17: error: THRU item 'd' may not come before 'e'
 prog.cob:18: error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
 prog.cob:33: error: RENAMES may not reference a level 88
 prog.cob:34: error: cannot use RENAMES on part of the table 'j'
-prog.cob:34: error: cannot use RENAMES on part of the table 'j'
 prog.cob:35: error: RENAMES cannot start/end at the OCCURS item 'j'
 prog.cob:36: error: RENAMES may not contain 'n' as it is a pointer or object reference
 prog.cob:36: error: RENAMES may not contain 'p' as it is an OCCURS DEPENDING table
-prog.cob:36: error: cannot use RENAMES on part of the table 'j'
 prog.cob:37: error: 'invalid-9' must immediately follow the record 'a'
 prog.cob:37: error: 'b' and 'm' must be in the same record
+prog.cob:39: error: 78 VALUE does not conform to COBOL 2014
+prog.cob:40: error: a constant may not be used here - 'my-ext-const'
+prog.cob:43: error: a constant may not be used here - 'my-std-const'
 ])
 AT_CLEANUP
 

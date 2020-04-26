@@ -2352,11 +2352,11 @@ cob_check_version (const char *prog, const char *packver_prog, const int patchle
 }
 
 void
-cob_parameter_check (const char *funcname, const int numparms)
+cob_parameter_check (const char *func_name, const int num_arguments)
 {
-	if (cobglobptr->cob_call_params < numparms) {
-		cob_runtime_error (_("CALL to %s requires %d parameters"),
-				   funcname, numparms);
+	if (cobglobptr->cob_call_params < num_arguments) {
+		cob_runtime_error (_("CALL to %s requires %d arguments"),
+				   func_name, num_arguments);
 		cob_stop_run (1);
 	}
 }
@@ -5299,10 +5299,10 @@ cob_sys_waitpid (const void *p_id)
 #endif
 }
 
-/* set the number of parameters passed to the current program;
+/* set the number of arguments passed to the current program;
    works both for main programs and called sub programs
-   Implemented according to ACUCOBOL-GT -> returns the number of parameters that were passed,
-   not like in MF implementation the number of parameters that were received */
+   Implemented according to ACUCOBOL-GT -> returns the number of arguments that were passed,
+   not like in MF implementation the number of arguments that were received */
 int
 cob_sys_return_args (void *data)
 {

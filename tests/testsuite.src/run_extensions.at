@@ -354,7 +354,7 @@ AT_CLEANUP
 
 
 AT_SETUP([LENGTH OF])
-AT_KEYWORDS([extensions VALUE])
+AT_KEYWORDS([extensions VALUE RENAMES])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -364,6 +364,16 @@ AT_DATA([prog.cob], [
        01 X             PIC X(2).
        01 G.
          02 Y           PIC X(2) OCCURS 10.
+         02 G-GROUP.
+         03 G-SGROUP.
+         04 G1          PIC X(05).
+         04 G2          PIC X(06).
+         04 G3          PIC X(22).
+         03 FILLER      PIC XX OCCURS 5.
+       66 RENAME-STD-G  RENAMES G-GROUP.
+       66 RENAME-STD-SG RENAMES G-SGROUP.
+       66 RENAME-STD    RENAMES G1 THROUGH G3.
+       66 RENAME-G      RENAMES G.
        01 L             PIC s9(4)v99.
        01 I             PIC 9(2) VALUE 10.
        78 I-LEN         VALUE LENGTH OF I.
@@ -470,6 +480,26 @@ AT_DATA([prog.cob], [
            IF ((L NOT = 3) OR
                (I NOT = 8)    )
               DISPLAY "Length 7a " L " - " I
+              END-DISPLAY
+           END-IF
+           MOVE LENGTH OF RENAME-STD-SG  TO L
+           IF L NOT = 33
+              DISPLAY "Length 8a " L
+              END-DISPLAY
+           END-IF
+           MOVE LENGTH OF RENAME-STD-G  TO L
+           IF L NOT = 43
+              DISPLAY "Length 8b " L
+              END-DISPLAY
+           END-IF
+           MOVE LENGTH OF RENAME-STD  TO L
+           IF L NOT = 33
+              DISPLAY "Length 8c " L
+              END-DISPLAY
+           END-IF
+           MOVE LENGTH OF RENAME-G  TO L
+           IF L NOT = 63
+              DISPLAY "Length 8d " L
               END-DISPLAY
            END-IF
            *> one display test

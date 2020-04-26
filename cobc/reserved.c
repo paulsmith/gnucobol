@@ -3172,18 +3172,28 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_FEATURE_ACTIVE,	2, 2,
 					CB_CATEGORY_NUMERIC, 0
   },
+  /* COBOL 202x */
+  { "CONCAT",			"cob_intr_concatenate",
+					CB_INTR_CONCATENATE, CONCATENATE_FUNC,
+					CB_FEATURE_ACTIVE,	-1, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to alphabetic/national
+					   depending on the content, see cb_build_intrinsic */
+  },
+  /* OpenCOBOL */
   { "CONCATENATE",			"cob_intr_concatenate",
 					CB_INTR_CONCATENATE, CONCATENATE_FUNC,
 					CB_FEATURE_ACTIVE,	-1, 1,
 					CB_CATEGORY_ALPHANUMERIC, 1
-					/* Note: category changed to national depending on the content,
-					   see cb_build_intrinsic */
+					/* Note: category changed to alphabetic/national
+					   depending on the content, see cb_build_intrinsic */
   },
   { "CONTENT-LENGTH",			"cob_intr_content_length",
 					CB_INTR_CONTENT_LENGTH, CONTENT_LENGTH_FUNC,
 					CB_FEATURE_ACTIVE,	1, 1,
 					CB_CATEGORY_NUMERIC, 0
   },
+  /* GnuCOBOL */
   { "CONTENT-OF",			"cob_intr_content_of",
 					CB_INTR_CONTENT_OF, CONTENT_OF_FUNC,
 					CB_FEATURE_ACTIVE,	2, 1,
@@ -3597,6 +3607,7 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_FEATURE_ACTIVE,	1, 1,
 					CB_CATEGORY_NUMERIC, 0
   },
+  /* GnuCOBOL (added incompatible to COBOL 202x CCP 1.3) */
   { "SUBSTITUTE",			"cob_intr_substitute",
 					CB_INTR_SUBSTITUTE, SUBSTITUTE_FUNC,
 					CB_FEATURE_ACTIVE,	-1, 3,
@@ -3604,6 +3615,7 @@ static struct cb_intrinsic_table function_list[] = {
 					/* Note: category changed to alphabetic/national depending on the content,
 					   see cb_build_intrinsic */
   },
+  /* GnuCOBOL */
   { "SUBSTITUTE-CASE",			"cob_intr_substitute_case",
 					CB_INTR_SUBSTITUTE_CASE, SUBSTITUTE_CASE_FUNC,
 					CB_FEATURE_ACTIVE,	-1, 3,

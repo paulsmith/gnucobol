@@ -1127,6 +1127,95 @@ AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([SPECIAL-NAMES clause])
+AT_KEYWORDS([misc extensions CURSOR CRT STATUS])
+
+# FIXME: actually this is the only place for some CRT STATUS checks...
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           CRT STATUS IS MY-CRT-STATUS.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  CURSOR-POSITION IS SPECIAL-NAMES CURSOR.
+           03  CURSOR-ROW         PIC 999.
+           03  CURSOR-COL         PIC 999.
+       77  MY-CRT-STATUS PIC 9(04).
+       77  CRT-STATUS IS SPECIAL-NAMES CRT STATUS PIC 9(5).
+       PROCEDURE        DIVISION.
+           ACCEPT OMITTED END-ACCEPT.
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77  CRT-STATUS IS SPECIAL-NAMES CRT STATUS PIC X(5).
+       PROCEDURE        DIVISION.
+           ACCEPT OMITTED END-ACCEPT.
+           STOP RUN.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  CURSOR-POSITION IS SPECIAL-NAMES CURSOR.
+           03  CURSOR-ROW   PIC 999.
+           03  CURSOR-COL   PIC 999.
+       77  CRT-STATUS       PIC X(4) IS SPECIAL-NAMES CRT STATUS.
+       PROCEDURE        DIVISION.
+           ACCEPT OMITTED END-ACCEPT.
+           STOP RUN.
+])
+
+AT_DATA([prog4.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  CURSOR-POSITION IS SPECIAL-NAMES CURSOR.
+           03  CURSOR-ROW   PIC 999.
+           03  CURSOR-COL   PIC 999.
+       77  CRT-STATUS       PIC 9(5) IS SPECIAL-NAMES CRT STATUS.
+       PROCEDURE        DIVISION.
+           ACCEPT OMITTED END-ACCEPT.
+           STOP RUN.
+])
+
+AT_DATA([prog5.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77  CRT-STATUS   PIC 9(3) IS SPECIAL-NAMES CRT STATUS.
+       PROCEDURE        DIVISION.
+           ACCEPT OMITTED END-ACCEPT.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:14: error: duplicate CRT STATUS clause
+])
+AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
+[prog2.cob:6: error: 'CRT-STATUS' CRT STATUS must be 4 characters long
+])
+AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog4.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog5.cob], [1], [],
+[prog5.cob:6: error: 'CRT-STATUS' CRT STATUS must have at least 4 digits
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([CURRENCY SIGN])
 AT_KEYWORDS([SPECIAL-NAMES misc])
 
@@ -3622,7 +3711,7 @@ prog.cob:56: error: HANDLE item not allowed here: 'mydir'
 AT_CHECK([$COMPILE_ONLY -std=rm-strict prog.cob], [1], [],
 [prog.cob:12: error: 'handle' is not defined, but is a reserved word in another dialect
 prog.cob:14: error: 'handle' is not defined, but is a reserved word in another dialect
-prog.cob:15: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob:15: error: syntax error, unexpected Identifier
 prog.cob:17: error: 'handle' is not defined, but is a reserved word in another dialect
 prog.cob:19: error: 'handle' is not defined, but is a reserved word in another dialect
 prog.cob:20: error: 'handle' is not defined, but is a reserved word in another dialect
@@ -4194,8 +4283,8 @@ AT_DATA([prog3.cob], [
            GOBACK.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:5: error: STATIC CALL and ON EXCEPTION are mutually exclusive
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:5: warning: ON EXCEPTION ignored because of STATIC CALL
 ])
 AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -fstatic-call prog2.cob], [0], [], [])
@@ -4547,7 +4636,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY -fprogram-prototypes=warning prog.cob], [0], [],
 [prog.cob:9: warning: PROGRAM phrase used
-prog.cob:8: warning: no definition/prototype seen for program 'test-prog'
+prog.cob:8: warning: no definition/prototype seen for PROGRAM 'test-prog'
 prog.cob:11: warning: CALL/CANCEL with program-prototype-name used
 prog.cob:12: warning: CALL/CANCEL with program-prototype-name used
 ])
@@ -5154,11 +5243,11 @@ prog.cob:9: error: '/' operator misplaced
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [1], [],
-[prog.cob:6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob:7: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob:8: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob:9: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob:10: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+[prog.cob:6: error: syntax error, unexpected Identifier
+prog.cob:7: error: syntax error, unexpected Identifier
+prog.cob:8: error: syntax error, unexpected Identifier
+prog.cob:9: error: syntax error, unexpected Identifier
+prog.cob:10: error: syntax error, unexpected Identifier
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=mf-strict -freserved=CONSTANT prog.cob], [1], [],
@@ -5206,7 +5295,12 @@ AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob ], [1], [],
 [prog.cob:6: error: 78 VALUE does not conform to IBM COBOL
 prog.cob:7: error: 78 VALUE does not conform to IBM COBOL
 prog.cob:8: error: 78 VALUE does not conform to IBM COBOL
-prog.cob:8: error: syntax error, unexpected Identifier, expecting .
+prog.cob:8: error: missing right parenthesis
+prog.cob:9: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:9: error: missing left parenthesis
+prog.cob:10: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:10: error: '/' operator misplaced
+prog.cob:11: error: 78 VALUE does not conform to IBM COBOL
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [1], [],
@@ -6514,8 +6608,10 @@ prog.cob:30: warning: subscript missing for 'MY-ELEMENT-1' - defaulting to 1
 AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob], [1], [],
 [prog.cob:14: error: LENGTH OF 'MY-DATA' not allowed outside of Procedure Division
 prog.cob:14: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:14: error: constant item 'MY-LEN' requires a VALUE clause
 prog.cob:21: error: LENGTH OF 'ODO-DATA' not allowed outside of Procedure Division
 prog.cob:21: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:21: error: constant item 'ODO-LEN' requires a VALUE clause
 prog.cob:30: error: 'MY-ELEMENT-1' requires one subscript
 ])
 
@@ -6687,6 +6783,61 @@ prog.cob:22: error: syntax error, unexpected =
 prog.cob:25: error: syntax error, unexpected PROCEDURE
 ])
 AT_CLEANUP
+
+
+AT_SETUP([SORT syntax])
+AT_KEYWORDS([misc fundamental KEY])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT SRTFIL ASSIGN TO "SRTFIL"
+           ORGANIZATION LINE SEQUENTIAL.
+           SELECT STFILE ASSIGN TO "STFILE"
+           ORGANIZATION LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD SRTFIL.
+       01 SRTREC               PIC X(256).
+       SD STFILE.
+       01 STFREC               PIC X(256).
+
+       WORKING-STORAGE SECTION.
+       01 G             VALUE "d4b2e1a3c5".
+         02 TBL         OCCURS 5.
+           03 X         PIC X.
+           03 Y         PIC 9.
+         02 TBL-ORD     OCCURS 5 ASCENDING YO.
+           03 XO        PIC X.
+           03 YO        PIC 9.
+
+       PROCEDURE DIVISION.
+           SORT TBL ASCENDING KEY X.
+           SORT TBL DESCENDING.
+           SORT TBL.
+           SORT TBL-ORD ASCENDING.
+           SORT TBL-ORD.
+           SORT STFILE DESCENDING KEY SRTREC.
+           SORT STFILE DESCENDING KEY SRTREC USING SRTFIL GIVING SRTFIL.
+           SORT STFILE ASCENDING.
+           SORT STFILE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:32: error: table SORT requires KEY phrase
+prog.cob:35: error: file sort requires USING or INPUT PROCEDURE
+prog.cob:35: error: file sort requires GIVING or OUTPUT PROCEDURE
+prog.cob:37: error: file sort requires KEY phrase
+prog.cob:38: error: file sort requires KEY phrase
+])
+AT_CLEANUP
+
 
 AT_SETUP([Group Usage Error])
 AT_KEYWORDS([numeric])

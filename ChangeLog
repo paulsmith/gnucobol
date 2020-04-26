@@ -1,7 +1,16 @@
 
+2020-04-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* gnucobol.spec: minor cleanup
+
 2020-04-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* configure.ac: fixed cleaning of COB_CFLAGS again (see Patches #49).
+
+2020-03-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: new check for MAKE supporting order-only prerequisites
+	  resulting in new conditional MAKE_HAS_PREREQ_ONLY
 
 2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -59,7 +68,7 @@
 
 2019-05-30  Simon Sobisch <simonsobisch@gnu.org>
 
-	* configure.ac: fix bug #599 avoid useless dependencies (all but libm,
+	* configure.ac: fix bug #559 avoid useless dependencies (all but libm,
 	  needs to be inspected later) by not copying LIBCOB_LIBS to COB_LIBS
 	  and resetting LIBS after XML2/CJSON check;
 	  now substituting LIBCOB_CPPFLAGS

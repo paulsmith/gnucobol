@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2020 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 ##
 ## This file is part of GnuCOBOL.
@@ -272,9 +272,11 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([FUNCTION CONCATENATE])
+AT_SETUP([FUNCTION CONCAT / CONCATENATE])
 AT_KEYWORDS([functions])
 
+# note: CONCAT was added in COBOL 202x with GnuCOBOL's CONCATENATE
+#       as blueprint
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -295,6 +297,12 @@ AT_DATA([prog.cob], [
            EVALUATE TRUE
               WHEN NOT VALID-UNSET
                  DISPLAY "FUNCTION result too long"
+                 END-DISPLAY
+              WHEN TEST-DATA
+                <> FUNCTION CONCAT ( Y "abc" "zz" "55" "666" )
+                 DISPLAY "CONCAT issue, '" TEST-DATA
+                     "' vs. '"
+                     FUNCTION CONCAT ( Y "abc" "zz" "55" "666" ) "'"
                  END-DISPLAY
               WHEN VALID-DATA
                  CONTINUE
@@ -3953,7 +3961,8 @@ AT_CLEANUP
 
 
 AT_SETUP([Formatted funcs w/ invalid variable format])
-AT_KEYWORDS([functions])
+AT_KEYWORDS([functions FORMATTED-CURRENT-DATE FORMATTED-DATE
+FORMATTED-TIME FORMATTED-DATETIME])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

@@ -472,7 +472,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:7: warning: no definition/prototype seen for program 'repo-prog'
+[prog.cob:7: warning: no definition/prototype seen for PROGRAM 'repo-prog'
 prog.cob: in paragraph 'MAIN':
 prog.cob:13: error: 'MAIN' is not a field
 prog.cob:14: error: 'repo-prog' is not a field
@@ -506,7 +506,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:7: warning: no definition/prototype seen for program 'repo-prog'
+[prog.cob:7: warning: no definition/prototype seen for PROGRAM 'repo-prog'
 prog.cob: in paragraph 'MAIN':
 prog.cob:15: error: invalid MOVE target: MAIN
 prog.cob:16: error: invalid MOVE target: repo-prog

@@ -617,7 +617,8 @@ cb_name_1 (char *s, cb_tree x, const int size)
 }
 
 static cb_tree
-make_intrinsic (cb_tree name, const struct cb_intrinsic_table *cbp, cb_tree args,
+make_intrinsic_typed (cb_tree name, const struct cb_intrinsic_table *cbp,
+		const enum cb_category cat, cb_tree args,
 		cb_tree field, cb_tree refmod, const int isuser)
 {
 	struct cb_intrinsic *x;
@@ -635,15 +636,14 @@ make_intrinsic (cb_tree name, const struct cb_intrinsic_table *cbp, cb_tree args
 		case CB_TAG_INTRINSIC:
 			break;
 		default:
-			cb_error (_("FUNCTION %s has invalid/not supported arguments - Tag %d"),
+			cb_error (_("FUNCTION %s has invalid/not supported arguments - tag %d"),
 				cbp->name, CB_TREE_TAG(l));
 			return cb_error_node;
-
 		}
 	}
 #endif
 
-	x = make_tree (CB_TAG_INTRINSIC, cbp->category, sizeof (struct cb_intrinsic));
+	x = make_tree (CB_TAG_INTRINSIC, cat, sizeof (struct cb_intrinsic));
 	x->name = name;
 	x->args = args;
 	x->intr_tab = cbp;
@@ -654,6 +654,14 @@ make_intrinsic (cb_tree name, const struct cb_intrinsic_table *cbp, cb_tree args
 		x->length = CB_PAIR_Y (refmod);
 	}
 	return CB_TREE (x);
+}
+
+
+static cb_tree
+make_intrinsic (cb_tree name, const struct cb_intrinsic_table *cbp,
+		cb_tree args, cb_tree field, cb_tree refmod, const int isuser)
+{
+	return make_intrinsic_typed (name, cbp, cbp->category, args, field, refmod, isuser);
 }
 
 static cb_tree
@@ -774,7 +782,6 @@ valid_const_date_time_args (const cb_tree tree, const struct cb_intrinsic_table 
 			    cb_tree args)
 {
 	const char	*data;
-	int		error_found = 0;
 
 	/* LCOV_EXCL_START */
 	/* TODO: check precondition: iso_8601_func (intr->intr_enum) */
@@ -789,15 +796,14 @@ valid_const_date_time_args (const cb_tree tree, const struct cb_intrinsic_table 
 	if (data != NULL) {
 		if (!valid_format (intr->intr_enum, data)) {
 			cb_error_x (tree, _("FUNCTION '%s' has invalid date/time format"),
-				    intr->name);
-			error_found = 1;
+				intr->name);
+			return 0;
 		}
-	} else if (warningopt) {
-		cb_warning_x (COBC_WARN_FILLER, tree, _("FUNCTION '%s' has format in variable"),
-			      intr->name);
+		return 1;
 	}
-
-	return !error_found;
+	cb_warning_x (cb_warn_extra, tree,
+		_("FUNCTION '%s' has format in variable"), intr->name);
+	return 1;
 }
 
 static cb_tree
@@ -4318,17 +4324,11 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	for (p = records; p; p = p->sister) {
 		if (f->record_min > 0) {
 			if (p->size < f->record_min) {
-				if (cb_records_mismatch_record_clause == CB_OK && warningopt < 2) {
-					// nothing to do
-				} else if (cb_records_mismatch_record_clause < CB_ERROR) {
-					cb_warning_x (COBC_WARN_FILLER, CB_TREE (p),
-						_("size of record '%s' (%d) smaller than minimum of file '%s' (%d)"),
-						  p->name, p->size, f->name, f->record_min);
+				cb_warning_dialect_x (cb_records_mismatch_record_clause, CB_TREE (p),
+					_("size of record '%s' (%d) smaller than minimum of file '%s' (%d)"),
+					  p->name, p->size, f->name, f->record_min);
+				if (cb_records_mismatch_record_clause < CB_ERROR) {
 					cb_warning_x (COBC_WARN_FILLER, CB_TREE (p), _("file size adjusted"));
-				} else {
-					cb_error_x (CB_TREE (p),
-						_("size of record '%s' (%d) smaller than minimum of file '%s' (%d)"),
-						  p->name, p->size, f->name, f->record_min);
 				}
 				f->record_min = p->size;
 			}
@@ -4339,19 +4339,13 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 			   the length specified in the RECORD clause,
 			   the maximum will be used. */
 			if (p->size > f->record_max) {
-				if (cb_records_mismatch_record_clause == CB_OK && warningopt < 2) {
-					// nothing to do
-				} else if (cb_records_mismatch_record_clause < CB_ERROR) {
-					cb_warning_x (COBC_WARN_FILLER, CB_TREE (p),
-						_("size of record '%s' (%d) larger than maximum of file '%s' (%d)"),
-					 	  p->name, p->size, f->name, f->record_max);
-					if (cb_records_mismatch_record_clause > CB_OK || warningopt >= 2) {
-						cb_warning_x (COBC_WARN_FILLER, CB_TREE (p), _("file size adjusted"));
-					}
-				} else {
-					cb_error_x (CB_TREE (p),
-						_("size of record '%s' (%d) larger than maximum of file '%s' (%d)"),
-					 	  p->name, p->size, f->name, f->record_max);
+				cb_warning_dialect_x (cb_records_mismatch_record_clause, CB_TREE (p),
+					_("size of record '%s' (%d) larger than maximum of file '%s' (%d)"),
+				 	  p->name, p->size, f->name, f->record_max);
+				if (cb_warn_extra
+				 && cb_records_mismatch_record_clause != CB_ERROR
+				 && cb_records_mismatch_record_clause != CB_OK) {
+					cb_warning_x (COBC_WARN_FILLER, CB_TREE (p), _("file size adjusted"));
 				}
 				if (f->organization == COB_ORG_INDEXED
 				 && p->size > MAX_FD_RECORD_IDX) {
@@ -6016,18 +6010,16 @@ cb_build_perform_varying (cb_tree name, cb_tree from, cb_tree by, cb_tree until)
 	p->name = name;
 	p->from = from;
 	p->until = until;
-	if (warningopt) {
-		if (until == cb_false) {
-			cb_warning_x (COBC_WARN_FILLER, until,
-				_("PERFORM FOREVER since UNTIL is always FALSE"));
-		} else if (until == cb_true) {
-			if (after_until) {
-				cb_warning_x (COBC_WARN_FILLER, until,
-				_("PERFORM ONCE since UNTIL is always TRUE"));
-			} else {
-				cb_warning_x (COBC_WARN_FILLER, until,
-				_("PERFORM NEVER since UNTIL is always TRUE"));
-			}
+	if (until == cb_false) {
+		cb_warning_x (cb_warn_extra, until,
+			_("PERFORM FOREVER since UNTIL is always FALSE"));
+	} else if (until == cb_true) {
+		if (after_until) {
+			cb_warning_x (cb_warn_extra, until,
+			_("PERFORM ONCE since UNTIL is always TRUE"));
+		} else {
+			cb_warning_x (cb_warn_extra, until,
+			_("PERFORM NEVER since UNTIL is always TRUE"));
 		}
 	}
 
@@ -6128,9 +6120,9 @@ warn_if_no_definition_seen_for_prototype (const struct cb_prototype *proto)
 			  name.
 			*/
 			if (proto->type == COB_MODULE_TYPE_FUNCTION) {
-				error_msg = _("no definition/prototype seen for function '%s'");
+				error_msg = _("no definition/prototype seen for FUNCTION '%s'");
 			} else { /* PROGRAM_TYPE */
-				error_msg = _("no definition/prototype seen for program '%s'");
+				error_msg = _("no definition/prototype seen for PROGRAM '%s'");
 			}
 			cb_warning_x (cb_warn_prototypes, CB_TREE (proto), error_msg, proto->name);
 		} else {
@@ -6139,9 +6131,9 @@ warn_if_no_definition_seen_for_prototype (const struct cb_prototype *proto)
 			  external-name.
 			*/
 			if (proto->type == COB_MODULE_TYPE_FUNCTION) {
-				error_msg = _("no definition/prototype seen for function with external name '%s'");
+				error_msg = _("no definition/prototype seen for FUNCTION with external name '%s'");
 			} else { /* PROGRAM_TYPE */
-				error_msg = _("no definition/prototype seen for program with external name '%s'");
+				error_msg = _("no definition/prototype seen for PROGRAM with external name '%s'");
 			}
 			cb_warning_x (cb_warn_prototypes, CB_TREE (proto), error_msg, proto->ext_name);
 		}
@@ -6194,6 +6186,56 @@ cb_build_any_intrinsic (cb_tree args)
 
 	cbp = lookup_intrinsic ("BYTE-LENGTH", 1);
 	return make_intrinsic (NULL, cbp, args, NULL, NULL, 0);
+}
+
+static enum cb_category
+get_category_from_arguments (const struct cb_intrinsic_table *cbp, cb_tree args,
+							 const int check_from, const int check_to,
+							 const int with_alphabetic)
+{
+	enum cb_category result = cbp->category;
+	enum cb_category arg_cat;
+	cb_tree			l;
+	cb_tree			arg;
+	int argnum = 0;
+
+	for (l = args; l; l = CB_CHAIN(l)) {
+		
+		argnum++;
+		if (argnum < check_from) continue;
+		if (check_to && argnum > check_to) break;
+		
+		arg = CB_VALUE(l);
+		arg_cat = cb_tree_category (arg);
+
+		if (arg_cat == CB_CATEGORY_NATIONAL_EDITED) {
+			arg_cat = CB_CATEGORY_NATIONAL;
+		} else if (arg_cat == CB_CATEGORY_ALPHABETIC && with_alphabetic) {
+			/* unchanged */
+		} else {
+			arg_cat = CB_CATEGORY_ALPHANUMERIC;
+		}
+
+		/* first argument specifies the type */
+		if (argnum == check_from) {
+			result = arg_cat;
+			continue;
+		}
+
+		/* check for national match */
+		if (arg_cat == CB_CATEGORY_NATIONAL) {
+			if (result != CB_CATEGORY_NATIONAL) {
+				cb_error (_("FUNCTION %s has invalid argument"),
+					cbp->name);
+				cb_error (_("either all arguments or none should be if type %s"), "NATIONAL");
+				return cbp->category;
+			}
+		} else if (result != CB_CATEGORY_ALPHANUMERIC) {
+			result = CB_CATEGORY_ALPHANUMERIC;
+		}
+	}
+
+	return result;
 }
 
 cb_tree
@@ -6492,7 +6534,7 @@ cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 			return cb_intr_whencomp;
 		}
 
-	/* single, numeric only parameter */
+	/* single, numeric only argument */
 	case CB_INTR_ABS:
 	case CB_INTR_ACOS:
 	case CB_INTR_ASIN:
@@ -6518,7 +6560,7 @@ cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 	case CB_INTR_TEST_DAY_YYYYDDD:
 		x = CB_VALUE (args);
 		if (cb_tree_category (x) != CB_CATEGORY_NUMERIC) {
-			cb_error_x (func, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid argument"), cbp->name);
 			return cb_error_node;
 		}
 		return make_intrinsic (func, cbp, args, NULL, refmod, 0);
@@ -6542,7 +6584,6 @@ cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 	case CB_INTR_LOCALE_DATE:
 	case CB_INTR_LOCALE_TIME:
 	case CB_INTR_LOCALE_TIME_FROM_SECS:
-	case CB_INTR_LOWER_CASE:
 	case CB_INTR_MOD:
 	case CB_INTR_MODULE_CALLER_ID:
 	case CB_INTR_MODULE_DATE:
@@ -6570,28 +6611,36 @@ cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 	case CB_INTR_TEST_NUMVAL_F:
 		return make_intrinsic (func, cbp, args, NULL, refmod, 0);
 
-	/* category has to be adjusted depending on parameters */
+	/* category has to be adjusted depending on arguments */
 	case CB_INTR_FORMATTED_CURRENT_DATE:
-	case CB_INTR_FORMATTED_DATE:
+	case CB_INTR_FORMATTED_DATE: {
+		enum cb_category cat = get_category_from_arguments (cbp, args, 1, 1, 0);
+		return make_intrinsic_typed (func, cbp, cat, args, NULL, refmod, 0);
+		}
 	case CB_INTR_REVERSE:
 	case CB_INTR_TRIM:
-	case CB_INTR_UPPER_CASE:
-		return make_intrinsic (func, cbp, args, NULL, refmod, 0);
+	case CB_INTR_LOWER_CASE:
+	case CB_INTR_UPPER_CASE: {
+		enum cb_category cat = get_category_from_arguments (cbp, args, 1, 1, 1);
+		return make_intrinsic_typed (func, cbp, cat, args, NULL, refmod, 0);
+		}
 	case CB_INTR_FORMATTED_TIME:
-	case CB_INTR_FORMATTED_DATETIME:
-		return make_intrinsic (func, cbp, args, cb_int1, refmod, 0);
+	case CB_INTR_FORMATTED_DATETIME: {
+		enum cb_category cat = get_category_from_arguments (cbp, args, 1, 1, 0);
+		return make_intrinsic_typed (func, cbp, cat, args, cb_int1, refmod, 0);
+		}
 
 	case CB_INTR_HIGHEST_ALGEBRAIC:
 	case CB_INTR_LOWEST_ALGEBRAIC:
 		x = CB_VALUE (args);
 		if (!CB_REF_OR_FIELD_P (x)) {
-			cb_error_x (func, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid argument"), cbp->name);
 			return cb_error_node;
 		}
 		catg = cb_tree_category (x);
 		if (catg != CB_CATEGORY_NUMERIC &&
 		    catg != CB_CATEGORY_NUMERIC_EDITED) {
-			cb_error_x (func, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid argument"), cbp->name);
 			return cb_error_node;
 		}
 		return make_intrinsic (func, cbp, args, NULL, refmod, 0);
@@ -6599,7 +6648,7 @@ cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 	case CB_INTR_CONTENT_LENGTH:
 		x = CB_VALUE (args);
 		if (cb_tree_category (x) != CB_CATEGORY_DATA_POINTER) {
-			cb_error_x (func, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid argument"), cbp->name);
 			return cb_error_node;
 		}
 		return make_intrinsic (func, cbp, args, NULL, NULL, 0);
@@ -6607,12 +6656,16 @@ cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 	case CB_INTR_CONTENT_OF:
 		x = CB_VALUE (args);
 		if (cb_tree_category (x) != CB_CATEGORY_DATA_POINTER) {
-			cb_error_x (func, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid argument"), cbp->name);
 			return cb_error_node;
 		}
 		return make_intrinsic (func, cbp, args, cb_int1, refmod, 0);
 
-	case CB_INTR_CONCATENATE:
+	case CB_INTR_CONCATENATE:{
+		enum cb_category cat = get_category_from_arguments (cbp, args, 1, 0, 1);
+		return make_intrinsic_typed (func, cbp, cat, args, cb_int1, refmod, 0);
+		}
+
 	case CB_INTR_DISPLAY_OF:
 	case CB_INTR_NATIONAL_OF:
 		return make_intrinsic (func, cbp, args, cb_int1, refmod, 0);
@@ -6645,21 +6698,24 @@ cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 		return make_intrinsic (func, cbp, args, cb_int1, NULL, 0);
 
 	/* currently GnuCOBOL only extension (submitted to COBOL 202x),
-	   category adjusted depending on parameters */
+	   category adjusted depending on argument */
 	case CB_INTR_SUBSTITUTE:
 	case CB_INTR_SUBSTITUTE_CASE:
 		if ((numargs % 2) == 0) {
 			cb_error_x (func, _("FUNCTION '%s' has wrong number of arguments"), cbp->name);
 			return cb_error_node;
 		}
-#if	0	/* RXWRXW - Substitute param 1 */
+#if	0	/* RXWRXW - Substitute arg 1 */
 		x = CB_VALUE (args);
 		if (!CB_REF_OR_FIELD_P (x)) {
-			cb_error_x (func, _("FUNCTION '%s' has invalid first parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid first argument"), cbp->name);
 			return cb_error_node;
 		}
 #endif
-		return make_intrinsic (func, cbp, args, cb_int1, refmod, 0);
+		{
+		enum cb_category cat = get_category_from_arguments (cbp, args, 1, 0, 1);
+		return make_intrinsic_typed (func, cbp, cat, args, cb_int1, refmod, 0);
+		}
 
 	default:
 		cb_error_x (func, _("FUNCTION '%s' unknown"), CB_NAME (func));

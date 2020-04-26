@@ -2,7 +2,7 @@
 #
 # run_prog_manual.sh gnucobol/tests
 #
-# Copyright (C) 2014-2019 Free Software Foundation, Inc.
+# Copyright (C) 2014-2020 Free Software Foundation, Inc.
 # Written by Edward Hart, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -37,7 +37,7 @@ SLEEP_SCALE=0.1   # needs a "modern" sleep implementation
 _test_with_xterm () {
    xterm -T 'GnuCOBOL Manual Test Run' \
         -fa 'Liberation Mono' -fs 14 \
-        -e "bash -c '($COBCRUN_DIRECT ./prog 2>./syserr.log && echo $? > ./result) || echo 1 > ./result'"
+        -e "bash -c \"(\$COBCRUN_DIRECT $1 2>./syserr.log && echo \$? > ./result) || echo 1 > ./result\""
 }
 
 
@@ -54,7 +54,7 @@ _test_with_screen () {
      sleep 5
   fi
   # run actual test in screen session
-  screen -S "GCTESTS" -X exec ... bash -c "cd \"$PWD\" && ($COBCRUN_DIRECT ./prog 2>./syserr.log && echo $? > ./result) || echo 1 > ./result"
+  screen -S "GCTESTS" -X exec ... bash -c "cd \"$PWD\" && ($COBCRUN_DIRECT $1 2>./syserr.log && echo $? > ./result) || echo 1 > ./result"
 }
 
 # wait TIMEOUT seconds for the result file to be available
@@ -75,9 +75,9 @@ _wait_result () {
 
 rm -f ./result ./syserr.log
 if test ! -z "$DISPLAY"; then
-  _test_with_xterm  || echo $? > ./result
+  _test_with_xterm  $1 || echo $? > ./result
 else
-  _test_with_screen || echo $? > ./result
+  _test_with_screen $1 || echo $? > ./result
 fi
 
 _wait_result || {

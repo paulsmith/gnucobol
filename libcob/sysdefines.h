@@ -119,7 +119,7 @@
 #define	CB_COPT_1	" +O1"
 #define	CB_COPT_2	" +O2"
 #define	CB_COPT_3	" +O3"
-#define	CB_COPT_S	" +Os"
+#define	CB_COPT_S	" +Osize" /* CHECKME: may not available on old versions */
 
 #elif   defined(__WATCOMC__)
 #define	CB_COPT_0	" -od"
@@ -136,10 +136,10 @@
 #define	CB_COPT_S	""
 
 #elif   defined(__SUNPRO_C)
-#define	CB_COPT_0	" -xO1"	/* -xO0 not available */
+#define	CB_COPT_0	" -xO1"	/* CHECKME: is -xO0 available? */
 #define	CB_COPT_1	" -xO1"
 #define	CB_COPT_2	" -xO2"
-#define	CB_COPT_3	" -xO3"	
+#define	CB_COPT_3	" -xO2"	/* CHECKME: Oracle docs are confusing, is -xO3 working? */
 #define	CB_COPT_S	" -xO1 -xspace"
 
 #elif	defined(__xlc__)

@@ -210,7 +210,7 @@ if test -z "$MAKE"; then
   if test -z "$configured_make"; then
 	AC_MSG_ERROR([make not found])
   else
-   MAKE=$configured_make
+	MAKE=$configured_make
 	AC_SUBST(MAKE)
   fi
 else
@@ -220,6 +220,29 @@ else
   fi
 fi
 
+AC_MSG_CHECKING([whether ${MAKE} supports order-only prerequisites])
+rm -f confinc.* confprereq
+cat > confmf.mk << 'END'
+PREREQ := confprereq
+am__doit:  am__prereq | $(PREREQ) 
+	@echo target am__doit. >>confinc.out
+am__prereq:
+	@echo target am__prereq. >>confinc.out
+$(PREREQ):
+	@touch $(PREREQ)
+	@echo target $(PREREQ). >>confinc.out
+.PHONY: am__doit am__prereq
+END
+_am_result=no
+  AM_RUN_LOG([${MAKE} -f confmf.mk && ${MAKE-make} -f confmf.mk && cat confinc.out])
+  ## redirecting via echo to remove special chars
+  __am_checkme=$(echo `cat confinc.out 2>/dev/null`)
+  AS_CASE([$?:${__am_checkme}],
+      ['0:target am__prereq. target confprereq. target am__doit. target am__prereq. target am__doit.'],
+      [_am_result="yes"])
+rm -f confinc.* confmf.mk confprereq
+AC_MSG_RESULT([${_am_result}])
+AM_CONDITIONAL([MAKE_HAS_PREREQ_ONLY], [test "${_am_result}" = "yes"])
 
 save_libs="$LIBS"
 
@@ -846,7 +869,7 @@ AC_ARG_WITH([curses],
     ncursesw | ncurses | pdcurses | curses | check | no)
 		USE_CURSES="$with_curses"
 		;;
-	"yes")
+	yes)
 		USE_CURSES="check"
 		;;
     *)

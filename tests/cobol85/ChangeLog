@@ -1,4 +1,15 @@
 
+2020-03-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (unpack-Z): improved portability
+
+2019-12-10  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: allow to override URL_NEWCOB_Z and URL_NEWCOB_TAR_GZ
+	* Makefile.am: improved portability to non-gmake - passing absolute name
+	  for NEWCOB_VAL from either build or srcdir, removing the need to copy
+	  newcob.val from srcdir (only the archives are copied from there)
+
 2019-06-11  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: added some additional output to show current status
@@ -287,7 +298,7 @@
 	* SQ.txt, summary.txt : We now pass the LINAGE tests
 
 
-Copyright 2005-2010,2015-2019 Free Software Foundation, Inc.
+Copyright 2005-2010,2015-2020 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

@@ -1,4 +1,10 @@
 
+2020-03-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: honor new conditional MAKE_HAS_PREREQ_ONLY
+	* Makefile.am: adjusted invocation of help2man, using new defines
+	  HELPSOURCES and HELP2MAN_OPTS
+
 2019-06-05  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: gcdiff - removed extra link and compiler flags fixing
@@ -151,7 +157,7 @@
 	* cobcrun.c : Changed output of --help for help2man
 	* Makefile.am : Added manpage generation + install
 
-2014-05-06  Philipp Böhme <phi.boehme@googlemail.com>
+2014-05-06  Philipp BÃ¶hme <phi.boehme@googlemail.com>
 
 	* cobcrun.c : Added --runtime-env for displaying current runtime variables.;
 	  --version shows both version numbers of cobcrun (new) and libcob.;
@@ -224,7 +230,7 @@
 	  then you can switch easily.
 
 
-Copyright 2004-2008,2010,2012,2014-2019 Free Software Foundation, Inc.
+Copyright 2004-2008,2010,2012,2014-2020 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

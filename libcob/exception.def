@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2015, 2018-2019 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2015, 2018-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -484,7 +484,7 @@ COB_EXCEPTION  (0A03, COB_EC_OVERFLOW_UNSTRING,
 COB_EXCEPTION  (0B00, COB_EC_PROGRAM,
 		"EC-PROGRAM", 0)
 
-/* Parameter mismatch */
+/* Argument mismatch */
 COB_EXCEPTION  (0B01, COB_EC_PROGRAM_ARG_MISMATCH,
 		"EC-PROGRAM-ARG-MISMATCH", 1)
 

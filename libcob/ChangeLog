@@ -22,10 +22,22 @@
 	* common.h: Add fields for implementing LINE SEQUENTIAL pipes
 	* fileio.c: Add code for LINE SEQUENTIAL pipes
 
+2020-04-01  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c: changed "FUNCTION/USING parameter" to "FUNCTION/USING argument"
+	* screenio.c: moved screen initialization from internal to external
+	  called function
+
 2020-03-28  Ron Norman <rjn@inglenet.com>
 
 	* sysdefines.h: Add COB_MAX_CHAR_SIZE, Largest 'static char' 
 			supported by the C compiler
+
+2020-03-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: adjusted invocation of help2man, using new defines
+	  HELPSOURCES and HELP2MAN_OPTS
+	* Makefile.am: honor new conditional MAKE_HAS_PREREQ_ONLY
 
 2020-03-01  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -33,6 +45,10 @@
 	  COB_OPEN_TEMPORARY for all other environments
 	* fileio.c (cob_write): removed io-status 49 as it only applies to
 	  REWRITE and DELETE
+
+2020-02-27  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.h: definition of COB_A_NORETURN for newer HPUX (__HP_cc)
 
 2020-02-15  Ron Norman <rjn@inglenet.com>
 	* common.h, fileio.c, fileio.h, foci.c, fodbc.c, fsqlxfd.c:
@@ -2343,7 +2359,7 @@
 	* screenio.c (cob_exit_screen): check cobglobptr for early errors,
 	  especially in case of runtime error "cob_init() has not been called"
 
-2014-11-17  Philipp Böhme  <phi.boehme@googlemail.com>
+2014-11-17  Philipp BÃ¶hme  <phi.boehme@googlemail.com>
 
 	* call.c (do_cancel_module): bugfix for cancel,
 	  The bug was a crash in some situations, if the same module
@@ -2365,7 +2381,7 @@
 
 	* numeric.c, intrinsic.c, common.h: use cob_gmp_free in intrinsics, too
 
-2014-09-09  Philipp Böhme  <phi.boehme@googlemail.com>
+2014-09-09  Philipp BÃ¶hme  <phi.boehme@googlemail.com>
 
 	* numeric.c: new static function cob_gmp_free
 	* numeric.c (cob_decimal_set_double, cob_decimal_get_packed,
@@ -2382,7 +2398,7 @@
 	* common.c (cob_sys_getopt_long_long): make params lo_size(1), so_size(0)
 	  and opt_val_size(5) optional (can be OMITTED in CALL 'CBL_OC_GETOPT')
 
-2014-09-03  Philipp Böhme <phi.boehme@googlemail.com>
+2014-09-03  Philipp BÃ¶hme <phi.boehme@googlemail.com>
 
 	* common.c, common.h: added cob_free() function (as suggested by
 	  Sergey Kashyrin)
@@ -2394,7 +2410,7 @@
 
 	* screenio.c: compilation fails if configured without curses (bug #90)
 
-2014-07-09  Philipp Böhme <phi.boehme@googlemail.com>
+2014-07-09  Philipp BÃ¶hme <phi.boehme@googlemail.com>
 
 	* fileio.c (cob_file_sort_giving): initialize record buffer size before
 	  cob_copy_check, solving bug #66
@@ -2421,7 +2437,7 @@
 
 	* parser.y: Fixes for LINE|COL 0 to get error message
 
-2014-05-20  Philipp Böhme <phi.boehme@googlemail.com>
+2014-05-20  Philipp BÃ¶hme <phi.boehme@googlemail.com>
 
 	* call.c: inverted preload list for WIN32 builds
 	* common.c, move.c, screenio.c, fileio.c: Set runtime switch
@@ -2435,7 +2451,7 @@
 
 	* move.c: replaced memcpy by memmove
 
-2014-05-06  Philipp Böhme <phi.boehme@googlemail.com>
+2014-05-06  Philipp BÃ¶hme <phi.boehme@googlemail.com>
 
 	* common.c, common.h: Added print_runtime_env showing all environment values
 	  along with resolved variables used in libcob
@@ -2448,7 +2464,7 @@
 	* move.c: fixed bug in cob_move_fp_to_fp()
 	* numeric.c: Fixed errors in cob_add_int() when computing with floats.
 
-2014-04-14  Philipp Böhme <phi.boehme@googlemail.com>
+2014-04-14  Philipp BÃ¶hme <phi.boehme@googlemail.com>
 
 	* common.c, common.h, system.def: Added cob_sys_getopt_long_long
 	* makefile.am: Added cobgetopt.c, cobgetopt.h
