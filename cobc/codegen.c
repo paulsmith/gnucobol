@@ -1963,13 +1963,13 @@ output_local_ws_group (void)
 	if (ws_used > 0
 	 && cb_align_record) {
 #ifdef  HAVE_ATTRIBUTE_ALIGNED
-		output_local ("static cob_u8_t	%s%d[%d]%s;",
+		output_local ("static cob_u8_t	%s%d[%ld]%s;",
 				  CB_PREFIX_WS_GROUP, ws_id, ws_used, COB_ALIGN);
 #else
 #if defined(COB_ALIGN_PRAGMA_8)
 		output_local ("#pragma align 8 (%s%d)\n", CB_PREFIX_WS_GROUP, ws_id);
 #endif
-		output_local ("static %scob_u8_t%s	%s%d[%d];",
+		output_local ("static %scob_u8_t%s	%s%d[%ld];",
 				  COB_ALIGN_DECL_8, COB_ALIGN_ATTR_8, CB_PREFIX_WS_GROUP, ws_id, ws_used);
 #endif
 	}
@@ -1983,7 +1983,6 @@ output_local_base_cache (void)
 {
 	struct base_list	*blp;
 	size_t		fs;
-	int			align_on;
 
 	if (!local_base_cache) {
 		return;
@@ -2024,7 +2023,7 @@ output_local_base_cache (void)
 					ws_used = 0;
 				}
 
-				output_local ("#define %s%d\t(%s%d + %d)",
+				output_local ("#define %s%d\t(%s%d + %ld)",
 							CB_PREFIX_BASE, blp->f->id, CB_PREFIX_WS_GROUP, ws_id, ws_used);
 				ws_used += fs;
 			}
@@ -3006,14 +3005,37 @@ output_integer (cb_tree x)
 
 		case CB_USAGE_DISPLAY:
 			if (f->pic
+			 && f->pic->scale == 0
+			 && f->size > 8
+			 && f->size < 16
+			 && !f->flag_sign_clause
+			 && !f->flag_any_numeric /* ANY NUMERIC format & usage could change */
+			 && !cb_ebcdic_sign) {
+				if (f->pic->have_sign) {
+					optimize_defs[COB_GET_NUMDISPS64] = 1;
+					output ("cob_get_numdisps64 (");
+				} else {
+					optimize_defs[COB_GET_NUMDISP64] = 1;
+					output ("cob_get_numdisp64 (");
+				}
+				output_data (x);
+				output (", %d)", f->size - f->pic->scale);
+				return;
+			}
+			if (f->pic
 			 && f->pic->scale >= 0
 			 && f->size - f->pic->scale > 0
 			 && f->size - f->pic->scale <= 9
-			 && f->pic->have_sign == 0
+			 && !f->flag_sign_clause
 			 && !f->flag_any_numeric /* ANY NUMERIC format & usage could change */
 			 && !cb_ebcdic_sign) {
-				optimize_defs[COB_GET_NUMDISP] = 1;
-				output ("cob_get_numdisp (");
+				if (f->pic->have_sign) {
+					optimize_defs[COB_GET_NUMDISPS] = 1;
+					output ("cob_get_numdisps (");
+				} else {
+					optimize_defs[COB_GET_NUMDISP] = 1;
+					output ("cob_get_numdisp (");
+				}
 				output_data (x);
 				output (", %d)", f->size - f->pic->scale);
 				return;
@@ -4195,19 +4217,25 @@ output_funcall_typed (struct cb_funcall *p, const char type)
 		break;
 
     case ':':
+		output (" (");
 		output_integer (p->argv[0]);
-		switch ((int)(p->argv[1])) {
+		switch ((int)(long)(p->argv[1])) {
 		case '=':	output(" == "); break;
 		case '<':	output(" < "); break;
 		case '[':	output(" <= "); break;
 		case '>':	output(" > "); break;
 		case ']':	output(" >= "); break;
 		case '~':	output(" != "); break;
+		case '*':	output(" * "); break;
+		case '-':	output(" - "); break;
+		case '+':	output(" + "); break;
+		case '/':	output(" / "); break;
 		default:
-			cobc_err_msg (_("unexpected compare operator: %c"), (int)p->argv[1]);
+			cobc_err_msg (_("unexpected operator: %c"), (int)(long)p->argv[1]);
 			COBC_ABORT ();
 		}
 		output_integer (p->argv[2]);
+		output (") ");
 		break;
 
 	/* LCOV_EXCL_START */
@@ -7980,10 +8008,23 @@ output_stmt (cb_tree x)
 		break;
 	case CB_TAG_ASSIGN:
 		ap = CB_ASSIGN (x);
+		if (CB_TREE_CLASS (ap->var) == CB_CLASS_NUMERIC) {
+			f1 = cb_code_field(ap->var);
+			if (f1->usage == CB_USAGE_DISPLAY
+			 || f1->usage == CB_USAGE_BINARY) {
+				output_prefix ();
+				output ("cob_set_llint (");
+				output_param (ap->var, 0);
+				output (", (cob_s64_t)");
+				output_integer (ap->val);
+				output (");\n");
+				break;
+			}
+		}
 #ifdef	COB_NON_ALIGNED
 		/* Nonaligned */
-		if (CB_TREE_CLASS (ap->var) == CB_CLASS_POINTER ||
-		    CB_TREE_CLASS (ap->val) == CB_CLASS_POINTER) {
+		if (CB_TREE_CLASS (ap->var) == CB_CLASS_POINTER 
+		 || CB_TREE_CLASS (ap->val) == CB_CLASS_POINTER) {
 			/* Pointer assignment */
 			output_block_open ();
 			output_line ("void *temp_ptr;");

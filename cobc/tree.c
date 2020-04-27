@@ -1675,7 +1675,7 @@ cb_get_int (const cb_tree x)
 			s = "9223372036854775807";
 		}
 		if (size > 19U || memcmp (&l->data[i], s, (size_t)19) > 0) {
-			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			cb_error_x (x,_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
 			return INT_MAX;
 		}
 	}
@@ -1687,7 +1687,7 @@ cb_get_int (const cb_tree x)
 			s = "2147483647";
 		}
 		if (size > 10U || memcmp (&l->data[i], s, (size_t)10) > 0) {
-			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			cb_error_x (x,_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
 			return INT_MAX;
 		}
 	}
@@ -1749,7 +1749,7 @@ cb_get_long_long (const cb_tree x)
 			s = "9223372036854775807";
 		}
 		if (size > 19U || memcmp (&(l->data[i]), s, (size_t)19) > 0) {
-			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			cb_error_x (x,_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
 			return LLONG_MAX;
 		}
 	}
@@ -1799,7 +1799,7 @@ cb_get_u_long_long (const cb_tree x)
 	if (unlikely(size >= 20U)) {
 		s = "18446744073709551615";
 		if (size > 20U || memcmp (&(l->data[i]), s, (size_t)20) > 0) {
-			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			cb_error_x (x,_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
 			return ULLONG_MAX;
 		}
 	}

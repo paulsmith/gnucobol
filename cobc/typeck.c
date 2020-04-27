@@ -486,20 +486,106 @@ static cb_tree cb_build_length_1 (cb_tree x);
 static int
 cb_is_aligned_bin (struct cb_field *f)
 {
+	if (!cb_flag_fast_math)
+		return 0;
+	if (f->flag_sign_clause
+	 || f->flag_blank_zero
+	 || f->flag_any_numeric
+	 || f->indexes != 0
+	 || !f->pic
+	 || f->pic->scale != 0)
+		return 0;
+	if (f->usage == CB_USAGE_DISPLAY
+	 && f->size < 16)
+		return 1;
+	if (f->usage != CB_USAGE_COMP_X
+	 || f->size != 1) {
 #ifdef WORDS_BIGENDIAN
+	if (f->usage == CB_USAGE_BINARY 
+	 && cb_binary_truncate)
+		return 0;
 	if (f->usage != CB_USAGE_COMP_5
+	 && f->usage != CB_USAGE_DISPLAY
 	 && f->usage != CB_USAGE_BINARY)
 		return 0;
 #else
-	if (f->usage != CB_USAGE_COMP_5)
+	if (f->usage != CB_USAGE_COMP_5
+	 && f->usage != CB_USAGE_DISPLAY)
 		return 0;
 #endif
+	}
 	if (f->storage == CB_STORAGE_WORKING
-	 && f->indexes == 0
-	 && !f->pic->scale 
-	 && (f->size == 2 || f->size == 4 || f->size == 8)
-	 && (f->offset % f->size) == 0) {
+#ifdef	COB_SHORT_BORK
+	 && (f->size == 4 || f->size == 8 || f->size == 1)
+#else
+	 && (f->size == 2 || f->size == 4 || f->size == 8 || f->size == 1)
+#endif
+#if !defined(COB_ALLOW_UNALIGNED) 
+	 && (f->offset % f->size) == 0
+#endif
+	 ) {
 		return 1;
+	}
+	return 0;
+}
+
+/*
+ * Is this an 'integer' value or expression
+ */
+static int
+cb_is_integer_expr (cb_tree x)
+{
+	struct cb_binary_op	*p;
+	cb_tree	y;
+	if (!cb_flag_fast_math)
+		return 0;
+	if (current_statement
+	 && (current_statement->ex_handler
+	  || current_statement->handler_type != NO_HANDLER))
+		return 0;
+	if (CB_REFERENCE_P (x)) {
+		y = cb_ref (x);
+		if (y == cb_error_node) {
+			return 0;
+		}
+		if (CB_FIELD_P (y)) 
+			return cb_is_aligned_bin (CB_FIELD_PTR (y));
+		return 0;
+	}
+	if (CB_FIELD_P (x)) {
+		return cb_is_aligned_bin (CB_FIELD_PTR (x));
+	}
+	if (CB_NUMERIC_LITERAL_P (x)) {
+	 	if (CB_LITERAL (x)->scale == 0
+		 && cb_fits_int (x))
+			return 1;
+		return 0;
+	}
+	if (CB_BINARY_OP_P (x)) {
+		p = CB_BINARY_OP (x);
+		if (p->op == '+'
+		 || p->op == '-'
+		 || p->op == '*') {
+			if (cb_is_integer_expr (p->x)
+			 && cb_is_integer_expr (p->y)) 
+				return 1;
+		}
+		if (p->op == '='
+		 || p->op == '>'
+		 || p->op == '<'
+		 || p->op == ']'
+		 || p->op == '['
+		 || p->op == '~') {
+			if (CB_NUMERIC_LITERAL_P (p->x)
+			 && (CB_NUMERIC_LITERAL_P (p->y) || CB_BINARY_OP_P (p->y)))
+				return 0;
+			if (CB_NUMERIC_LITERAL_P (p->y)
+			 && (CB_NUMERIC_LITERAL_P (p->x) || CB_BINARY_OP_P (p->x)))
+				return 0;
+			if (cb_is_integer_expr (p->x)
+			 && cb_is_integer_expr (p->y)) 
+				return 1;
+		}
 	}
 	return 0;
 }
@@ -513,17 +599,15 @@ cb_is_aligned_bin_and_int (struct cb_field *f, cb_tree n)
 {
 	if (!cb_is_aligned_bin (f))
 		return 0;
-	if (CB_LITERAL_P (n)) {
+	if (CB_NUMERIC_LITERAL_P (n)) {
 	 	if (CB_LITERAL (n)->scale == 0
 		 && CB_LITERAL (n)->sign
+		 && cb_fits_int (n)
 		 && f->pic->have_sign == 0)
 			return 0;
 		return 1;
-	} else
-	if (CB_REF_OR_FIELD_P (n)) {
-		return cb_is_aligned_bin (CB_FIELD_PTR (n));
 	}
-	return 0;
+	return cb_is_integer_expr (n);
 }
 
 static cb_tree
@@ -1545,7 +1629,7 @@ cb_trim_program_id (cb_tree id_literal)
 	}
 	if (s[len - 1] == ' ') {
 		cb_warning_x (cb_warn_extra, id_literal,
-			_("'%s' literal includes trailing spaces which are omitted"), s);
+				_("'%s' literal includes trailing spaces which are omitted"), s);
 	}
 	while (*s == ' ') {
 		memmove (s, s + 1, len--);
@@ -3227,7 +3311,7 @@ cb_validate_crt_status (cb_tree ref, cb_tree field_tree) {
 				field->name);
 			return NULL;
 		}
-	}
+	} 
 	else if (field->size != 4) {
 		cb_error_x (ref, _("'%s' CRT STATUS must be 4 characters long"),
 			field->name);
@@ -4941,13 +5025,19 @@ cb_build_mul (cb_tree v, cb_tree n, cb_tree round_opt)
 		return cb_build_move (cb_build_binary_op (v, '*', n), v);
 	}
 
-	if (CB_REF_OR_FIELD_P (v)) {
-		f = CB_FIELD_PTR (v);
-		f->count++;
-	}
 	if (CB_REF_OR_FIELD_P (n)) {
 		f = CB_FIELD_PTR (n);
 		f->count++;
+	}
+	if (CB_REF_OR_FIELD_P (v)) {
+		f = CB_FIELD_PTR (v);
+		f->count++;
+		if (round_opt == cb_int0 
+		 && cb_fits_long_long (n)
+		 && cb_is_aligned_bin(f) 
+		 && cb_is_integer_expr (n)) { 
+			return cb_build_assign (v, cb_build_binary_op (v, '*', n));
+		}
 	}
 	opt = build_store_option (v, round_opt);
 	return CB_BUILD_FUNCALL_3 ("cob_mul", v, n, opt);
@@ -4963,15 +5053,15 @@ cb_build_div (cb_tree v, cb_tree n, cb_tree round_opt)
 		return cb_build_move (cb_build_binary_op (v, '/', n), v);
 	}
 
-	if (CB_REF_OR_FIELD_P (v)) {
-		f = CB_FIELD_PTR (v);
-		f->count++;
-	}
 	if (CB_REF_OR_FIELD_P (n)) {
 		f = CB_FIELD_PTR (n);
 		f->count++;
 	}
 	opt = build_store_option (v, round_opt);
+	if (CB_REF_OR_FIELD_P (v)) {
+		f = CB_FIELD_PTR (v);
+		f->count++;
+	}
 	return CB_BUILD_FUNCALL_3 ("cob_div", v, n, opt);
 }
 
@@ -5491,6 +5581,7 @@ cb_build_cond (cb_tree x)
 			if (!p->y || p->y == cb_error_node) {
 				return cb_error_node;
 			}
+			f = NULL;
 			if (CB_REF_OR_FIELD_P (p->x)) {
 				f = CB_FIELD_PTR (p->x);
 				if(f->flag_any_length)
@@ -5504,6 +5595,10 @@ cb_build_cond (cb_tree x)
 				ret = cb_build_binary_op (p->x, '-', p->y);
 			} else if (CB_BINARY_OP_P (p->x)
 				|| CB_BINARY_OP_P (p->y)) {
+				if (cb_is_integer_expr (x)) {
+					ret = cb_build_optim_cond (p);
+					break;
+				}
 				/* Decimal comparison */
 				d1 = decimal_alloc ();
 				d2 = decimal_alloc ();
@@ -5534,9 +5629,10 @@ cb_build_cond (cb_tree x)
 				 && cb_fits_long_long (p->y)) {
 					if (CB_REF_OR_FIELD_P (p->x)) {
 						f = CB_FIELD_PTR (p->x);
-						if (cb_is_aligned_bin_and_int (f, p->y)) {
+						if (cb_is_aligned_bin_and_int (f, p->y)
+						 && cb_fits_int (p->y)) {
 							/* 'native' (short/int/long) on SYNC boundary */
-							return CB_BUILD_FUNCALL_3 ("$:", p->x, p->op, p->y);
+							return CB_BUILD_FUNCALL_3 ("$:", p->x, (cb_tree)(long)p->op, p->y);
 						}
 					}
 					ret = cb_build_optim_cond (p);
@@ -5697,6 +5793,10 @@ cb_build_optim_add (cb_tree v, cb_tree n)
 
 	if (CB_REF_OR_FIELD_P (v)) {
 		f = CB_FIELD_PTR (v);
+		if (cb_is_aligned_bin(f) 
+		 && cb_is_integer_expr (n)) { 
+			return cb_build_assign (v, cb_build_binary_op (v, '+', n));
+		}
 		if (!f->pic) {
 			return CB_BUILD_FUNCALL_3 ("cob_add_int", v,
 						   cb_build_cast_int (n),
@@ -5707,10 +5807,6 @@ cb_build_optim_add (cb_tree v, cb_tree n)
 		  || f->usage == CB_USAGE_COMP_5
 		  || f->usage == CB_USAGE_COMP_X
 		  || f->usage == CB_USAGE_COMP_N)) {
-			if (cb_is_aligned_bin_and_int (f, n)) {
-				/* 'native' (short/int/long) on SYNC boundary */
-				return cb_build_assign (v, cb_build_binary_op (v, '+', n));
-			}
 			z = ((size_t)f->size - 1)
 			  + (8 * (f->pic->have_sign ? 1 : 0))
 			  + (16 * (f->flag_binary_swap ? 1 : 0));
@@ -5781,15 +5877,15 @@ cb_build_optim_sub (cb_tree v, cb_tree n)
 
 	if (CB_REF_OR_FIELD_P (v)) {
 		f = CB_FIELD_PTR (v);
+		if (cb_is_aligned_bin(f) 
+		 && cb_is_integer_expr (n)) { 
+			return cb_build_assign (v, cb_build_binary_op (v, '-', n));
+		}
 		if ( !f->pic->scale
 		 && (f->usage == CB_USAGE_BINARY
 		  || f->usage == CB_USAGE_COMP_5
 		  || f->usage == CB_USAGE_COMP_X
 		  || f->usage == CB_USAGE_COMP_N)) {
-			if (cb_is_aligned_bin_and_int (f, n)) {
-				/* 'native' (short/int/long) on SYNC boundary */
-				return cb_build_assign (v, cb_build_binary_op (v, '-', n));
-			}
 			z = ((size_t)f->size - 1)
 			  + (8 * (f->pic->have_sign ? 1 : 0))
 			  +	(16 * (f->flag_binary_swap ? 1 : 0));
@@ -9044,7 +9140,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 					goto invalid;
 				}
 				cb_warning_x (cb_warn_extra, loc,
-					_("numeric move to ALPHABETIC"));
+						_("numeric move to ALPHABETIC"));
 				break;
 			default:
 				if (is_value) {

@@ -1,4 +1,13 @@
 
+2020-04-26  Ron Norman <rjn@inglenet.com>
+	* codeoptim.def,codeoptim.c: New routines to convert DISPLAY into
+				binary values
+	* codegen.c: Use new get_numdisps/64/s64 routines
+	* typeck.c: Check for integer expression and emit faster arithmetic
+			code by using the C language to do the arithmetic
+	* flag.def: New flag -fno-fast-math to disable these changes
+				for additional testing
+
 2020-04-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: added ACCEPT with CURSOR parsing
@@ -6,7 +15,7 @@
 2020-04-22  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c: New internal function $: for emitting
-			    a compare of interger values
+			    a compare of integer values
 
 	* typeck.c: Check for field that is native short/int/long
 			   and emit direct C operators for add/subtract

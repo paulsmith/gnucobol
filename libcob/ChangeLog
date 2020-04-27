@@ -1,5 +1,8 @@
 
 2020-04-26  Ron Norman <rjn@inglenet.com>
+	* common.h,move.c,sysdefines.h: Updates for speeding up arithmetic
+
+2020-04-26  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: For LINE SEQUENTIAL and OPEN I-O some platforms
 				(SUNOS for one) require that a fflush be done

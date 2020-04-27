@@ -1807,6 +1807,18 @@ cob_get_llint (cob_field *f)
 	}
 }
 
+cob_s64_t
+cob_set_llint (cob_field *f, cob_s64_t n)
+{
+	cob_field	temp;
+
+	temp.size = 8;
+	temp.data = (unsigned char *)&n;
+	temp.attr = &const_binll_attr;
+	cob_move (&temp, f);
+	return n;
+}
+
 void
 cob_init_move (cob_global *lptr, cob_settings *sptr)
 {

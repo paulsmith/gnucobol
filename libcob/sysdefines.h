@@ -197,7 +197,7 @@
 	#endif
 	#define COB_NO_UNALIGNED_ATTRIBUTE
 
-#elif !defined(__i386__) && !defined(__x86_64__) && !defined(__powerpc__) && !defined(__powerpc64__) && !defined(__ppc__) && !defined(__amd64__)
+#elif !defined(__i386__) && !defined(__x86_64__) && !defined(__powerpc__) && !defined(__powerpc64__) && !defined(__ppc__) && !defined(__amd64__) && !defined(__s390__)
 	#define	COB_NON_ALIGNED
 	/* Some DEC Alphas can only load shorts at 4-byte aligned addresses */
 	#ifdef	__alpha
@@ -205,14 +205,17 @@
 	#endif
 	#if defined(_MSC_VER)
 		#define COB_ALLOW_UNALIGNED
-	#else
 		#define COB_NO_UNALIGNED_ATTRIBUTE
 	#endif
 #else
-	#if !defined(__hpux) && !defined(_HPUX_SOURCE) && !defined(__LP64__)
+	#if defined(__i386__) || defined(__x86_64__) || defined(__powerpc__)
+		#define COB_ALLOW_UNALIGNED
+	#elif !defined(__hpux) && !defined(_HPUX_SOURCE) && !defined(__SUNPRO_C) && !defined(__s390__)
 		#define COB_ALLOW_UNALIGNED
 	#endif
+	#if !defined(__powerpc__)
 	#define COB_NO_UNALIGNED_ATTRIBUTE
+	#endif
 #endif
 
 /* Max size of a single 'static char' allowed by C compiler */
