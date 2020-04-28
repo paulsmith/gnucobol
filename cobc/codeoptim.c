@@ -130,7 +130,7 @@ cob_gen_optim (const enum cb_optim val)
 		return;
 
 	case COB_GET_NUMDISP:
-		output_storage ("static int COB_INLINE COB_NOINLINE");
+		output_storage ("static int COB_INLINE COB_A_INLINE");
 		output_storage ("cob_get_numdisp (const void *data, const int size)");
 		output_storage ("{");
 		output_storage ("	register const unsigned char	*p;");
@@ -150,7 +150,7 @@ cob_gen_optim (const enum cb_optim val)
 		return;
 
 	case COB_GET_NUMDISPS:
-		output_storage ("static int COB_INLINE COB_NOINLINE");
+		output_storage ("static int COB_INLINE COB_A_INLINE");
 		output_storage ("cob_get_numdisps (const void *data, const int size)");
 		output_storage ("{");
 		output_storage ("	register const unsigned char	*p;");
@@ -175,7 +175,7 @@ cob_gen_optim (const enum cb_optim val)
 		return;
 
 	case COB_GET_NUMDISP64:
-		output_storage ("static cob_s64_t COB_INLINE COB_NOINLINE");
+		output_storage ("static cob_s64_t COB_INLINE COB_A_INLINE");
 		output_storage ("cob_get_numdisp64 (const void *data, const int size)");
 		output_storage ("{");
 		output_storage ("	register const unsigned char	*p;");
@@ -195,7 +195,7 @@ cob_gen_optim (const enum cb_optim val)
 		return;
 
 	case COB_GET_NUMDISPS64:
-		output_storage ("static cob_s64_t COB_INLINE COB_NOINLINE");
+		output_storage ("static cob_s64_t COB_INLINE COB_A_INLINE");
 		output_storage ("cob_get_numdisps64 (const void *data, const int size)");
 		output_storage ("{");
 		output_storage ("	register const unsigned char	*p;");
