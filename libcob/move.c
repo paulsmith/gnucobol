@@ -1833,7 +1833,6 @@ void
 cob_set_llcon (cob_field *f, cob_s64_t n)
 {
 	cob_field	temp;
-	cob_s64_t	v;
 	temp.size = 8;
 	temp.attr = &const_binll_attr;
 	temp.data = (unsigned char *)&n;

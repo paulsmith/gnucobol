@@ -5166,7 +5166,6 @@ cb_emit_arithmetic (cb_tree vars, const int op, cb_tree val)
 {
 	cb_tree		l;
 	cb_tree		x;
-	struct cb_field	*f;
 
 	x = cb_check_numeric_value (val);
 
