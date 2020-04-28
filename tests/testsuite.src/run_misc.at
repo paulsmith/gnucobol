@@ -7447,6 +7447,9 @@ AT_DATA([prog.cob], [
        01 RSLT    PIC 9(3).
        01 RSLTV1  PIC 9(3).9.
        01 RSLTV2  PIC 9(3).99.
+       01  SGN-INT USAGE SIGNED-INT VALUE 0.
+           88 A-ONE VALUE 1.
+	       88 A-TWO VALUE 2.
       *
        PROCEDURE DIVISION.
        MAIN.
@@ -7505,6 +7508,11 @@ AT_DATA([prog.cob], [
            ELSE
               DISPLAY "Using ARITHMETIC-OSVS"
            END-IF.
+           IF NOT A-ONE AND NOT A-TWO
+                DISPLAY '88 test SUCCESS'
+           ELSE
+                DISPLAY '88 test FAILED'
+           END-IF.
            STOP RUN.
 ])
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
@@ -7530,6 +7538,7 @@ Simple   RSLT    IS 188 RSLTv9  IS 188.0
 Complex  RSLT    IS 188 RSLTv9  IS 188.0
 Reduced  RSLT    IS 188 RSLTv9  IS 188.0
 Not Using ARITHMETIC-OSVS
+88 test SUCCESS
 ], [])
 
 AT_CLEANUP

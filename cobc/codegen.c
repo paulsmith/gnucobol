@@ -212,6 +212,27 @@ static unsigned int		inside_check = 0;
 static unsigned int		inside_stack[COB_INSIDE_SIZE];
 
 static unsigned int		i_counters[COB_MAX_SUBSCRIPTS];
+static const cob_s64_t	cob_exp10_ll[19] = {
+	COB_S64_C(1),
+	COB_S64_C(10),
+	COB_S64_C(100),
+	COB_S64_C(1000),
+	COB_S64_C(10000),
+	COB_S64_C(100000),
+	COB_S64_C(1000000),
+	COB_S64_C(10000000),
+	COB_S64_C(100000000),
+	COB_S64_C(1000000000),
+	COB_S64_C(10000000000),
+	COB_S64_C(100000000000),
+	COB_S64_C(1000000000000),
+	COB_S64_C(10000000000000),
+	COB_S64_C(100000000000000),
+	COB_S64_C(1000000000000000),
+	COB_S64_C(10000000000000000),
+	COB_S64_C(100000000000000000),
+	COB_S64_C(1000000000000000000)
+};
 
 #undef	COB_SYSTEM_GEN
 #define	COB_SYSTEM_GEN(cob_name, pmin, pmax, c_name)	{ cob_name, #c_name, pmax },
@@ -961,8 +982,8 @@ output_base (struct cb_field *f, const cob_u32_t no_output)
 				bl = cobc_parse_malloc (sizeof (struct base_list));
 				bl->f = f01;
 				bl->curr_prog = excp_current_program_id;
-				if (f01->flag_is_global ||
-				    current_prog->flag_file_global) {
+				if (f01->flag_is_global 
+				 || current_prog->flag_file_global) {
 					bl->next = base_cache;
 					base_cache = bl;
 				} else {
@@ -1530,9 +1551,9 @@ output_attr (const cb_tree x)
 				if (f->flag_is_pointer) {
 					flags |= COB_FLAG_IS_POINTER;
 				}
-				if (cb_binary_truncate &&
-				    f->usage == CB_USAGE_BINARY &&
-				    !f->flag_real_binary) {
+				if (cb_binary_truncate 
+				 && f->usage == CB_USAGE_BINARY 
+				 && !f->flag_real_binary) {
 					flags |= COB_FLAG_BINARY_TRUNC;
 				}
 
@@ -3214,8 +3235,8 @@ output_long_integer (cb_tree x)
 	case CB_TAG_BINARY_OP:
 		p = CB_BINARY_OP (x);
 		if (p->flag) {
-			if (!cb_fits_long_long (p->x) ||
-			    !cb_fits_long_long (p->y)) {
+			if (!cb_fits_long_long (p->x) 
+			 || !cb_fits_long_long (p->y)) {
 				output ("cob_get_llint (");
 				output_param (x, -1);
 				output (")");
@@ -4810,8 +4831,8 @@ output_initialize_one (struct cb_initialize *p, cb_tree x)
 			output_initialize_literal (x, f,
 						   CB_LITERAL (value), init_occurs);
 			return;
-		} else if (CB_CONST_P (value) ||
-			   CB_TREE_CLASS (value) == CB_CLASS_NUMERIC) {
+		} else if (CB_CONST_P (value) 
+				|| CB_TREE_CLASS (value) == CB_CLASS_NUMERIC) {
 			/* Figurative literal, numeric literal */
 			/* Check for non-standard 01 OCCURS */
 			if (init_occurs) {
@@ -5446,9 +5467,9 @@ output_call_protocast (cb_tree x, cb_tree l)
 				if (f->pic->have_sign) {
 					sign = 1;
 				}
-				if (f->usage == CB_USAGE_PACKED ||
-				    f->usage == CB_USAGE_DISPLAY ||
-				    f->usage == CB_USAGE_COMP_6) {
+				if (f->usage == CB_USAGE_PACKED 
+				 || f->usage == CB_USAGE_DISPLAY 
+				 || f->usage == CB_USAGE_COMP_6) {
 					sizes = f->pic->digits - f->pic->scale;
 				} else {
 					sizes = f->size;
@@ -8008,13 +8029,24 @@ output_stmt (cb_tree x)
 		break;
 	case CB_TAG_ASSIGN:
 		ap = CB_ASSIGN (x);
-		if (CB_TREE_CLASS (ap->var) == CB_CLASS_NUMERIC) {
+		if (CB_TREE_CLASS (ap->var) == CB_CLASS_NUMERIC
+		 || CB_TREE_CLASS (ap->var) == CB_CLASS_ALPHANUMERIC
+		 || CB_TREE_CLASS (ap->var) == CB_CLASS_ALPHABETIC) {
 			f1 = cb_code_field(ap->var);
-			if (f1->usage == CB_USAGE_DISPLAY
-			 || f1->usage == CB_USAGE_BINARY) {
+			if (!f1->flag_real_binary
+			 && f1->pic) {
 				output_prefix ();
-				output ("cob_set_llint (");
-				output_param (ap->var, 0);
+				if (CB_NUMERIC_LITERAL_P (ap->val)
+				 && CB_LITERAL (ap->val)->scale == 0
+				 && cb_get_long_long (ap->val) < cob_exp10_ll[f1->pic->digits]) {
+					output ("cob_set_llcon (");
+					output_param (ap->var, 0);
+				} else {
+					output ("cob_set_llint (");
+					output_param (ap->var, 0);
+					output (", ");
+					output (CB_FMT_LLD_F, cob_exp10_ll[f1->pic->digits]);
+				}
 				output (", (cob_s64_t)");
 				output_integer (ap->val);
 				output (");\n");
@@ -8266,9 +8298,9 @@ output_stmt (cb_tree x)
 		code = 0;
 		output_prefix ();
 		/* Really PRESENT WHEN for Report field */
-		if (ip->is_if == 2    &&
-		    ip->stmt1 == NULL &&
-		    ip->stmt2 != NULL) {
+		if (ip->is_if == 2    
+		 && ip->stmt1 == NULL 
+		 && ip->stmt2 != NULL) {
 			struct cb_field *p2 = (struct cb_field *)ip->stmt2;
 			if((p2->report_flag & COB_REPORT_LINE)) {
 				px = (char*)CB_PREFIX_REPORT_LINE;
@@ -8293,9 +8325,9 @@ output_stmt (cb_tree x)
 			break;
 		}
 		/* Really PRESENT WHEN for Report line */
-		if (ip->is_if == 3    &&
-		    ip->stmt1 == NULL &&
-		    ip->stmt2 != NULL) {
+		if (ip->is_if == 3    
+		 && ip->stmt1 == NULL 
+		 && ip->stmt2 != NULL) {
 			struct cb_field *p2 = (struct cb_field *)ip->stmt2;
 			if((p2->report_flag & COB_REPORT_LINE)) {
 				px = (char*)CB_PREFIX_REPORT_LINE;
@@ -12199,8 +12231,8 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	for (l2 = using_list; l2; l2 = CB_CHAIN (l2)) {
 		f2 = cb_code_field (CB_VALUE (l2));
 		if (CB_PURPOSE_INT (l2) == CB_CALL_BY_VALUE &&
-		    (f2->usage == CB_USAGE_POINTER ||
-		     f2->usage == CB_USAGE_PROGRAM_POINTER)) {
+		    (f2->usage == CB_USAGE_POINTER 
+			|| f2->usage == CB_USAGE_PROGRAM_POINTER)) {
 			output_line ("unsigned char\t\t*ptr_%d;", f2->id);
 		}
 	}
@@ -12327,8 +12359,8 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 				if (strcasecmp (f1->name, f2->name) == 0) {
 					switch (CB_PURPOSE_INT (l2)) {
 					case CB_CALL_BY_VALUE:
-						if (f2->usage == CB_USAGE_POINTER ||
-						    f2->usage == CB_USAGE_PROGRAM_POINTER) {
+						if (f2->usage == CB_USAGE_POINTER 
+						 || f2->usage == CB_USAGE_PROGRAM_POINTER) {
 							output (", (cob_u8_ptr)&ptr_%d", f2->id);
 							break;
 						}

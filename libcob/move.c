@@ -1807,16 +1807,38 @@ cob_get_llint (cob_field *f)
 	}
 }
 
-cob_s64_t
-cob_set_llint (cob_field *f, cob_s64_t n)
+void
+cob_set_llint (cob_field *f, cob_s64_t max, cob_s64_t n)
 {
 	cob_field	temp;
-
+	cob_s64_t	v;
 	temp.size = 8;
-	temp.data = (unsigned char *)&n;
 	temp.attr = &const_binll_attr;
+	temp.data = (unsigned char *)&n;
+	if (n >= max
+	 || n <= -max) {
+		cob_set_exception (COB_EC_SIZE_OVERFLOW);
+		if (COB_MODULE_PTR->flag_binary_truncate
+		 && f->attr->type == COB_TYPE_NUMERIC_BINARY
+		 && !COB_FIELD_REAL_BINARY (f)) {
+			v = n % max;
+			temp.data = (unsigned char *)&v;
+		}
+	}
 	cob_move (&temp, f);
-	return n;
+	return;
+}
+
+void
+cob_set_llcon (cob_field *f, cob_s64_t n)
+{
+	cob_field	temp;
+	cob_s64_t	v;
+	temp.size = 8;
+	temp.attr = &const_binll_attr;
+	temp.data = (unsigned char *)&n;
+	cob_move (&temp, f);
+	return;
 }
 
 void

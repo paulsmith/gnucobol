@@ -1,4 +1,11 @@
 
+2020-04-27  Ron Norman <rjn@inglenet.com>
+	* codeoptim.def,codeoptim.c: Add COB_A_INLINE to new routines 
+				to convert DISPLAY into binary values
+	* codegen.c,typeck.c: Additional refinements to computing 
+				integer expressions faster. Now includes BINARY data
+				fields even on little endian systems.
+
 2020-04-26  Ron Norman <rjn@inglenet.com>
 	* codeoptim.def,codeoptim.c: New routines to convert DISPLAY into
 				binary values

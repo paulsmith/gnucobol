@@ -484,7 +484,7 @@ static cb_tree cb_build_length_1 (cb_tree x);
  * and aligned on memory address suitable for direct use
  */
 static int
-cb_is_aligned_bin (struct cb_field *f)
+cb_is_integer_field (struct cb_field *f)
 {
 	if (!cb_flag_fast_math)
 		return 0;
@@ -498,22 +498,24 @@ cb_is_aligned_bin (struct cb_field *f)
 	if (f->usage == CB_USAGE_DISPLAY
 	 && f->size < 16)
 		return 1;
-	if (f->usage != CB_USAGE_COMP_X
-	 || f->size != 1) {
-#ifdef WORDS_BIGENDIAN
+	if (f->usage == CB_USAGE_COMP_X
+	 && f->size == 1) 
+		return 1;
 	if (f->usage == CB_USAGE_BINARY 
 	 && cb_binary_truncate)
 		return 0;
+#ifdef WORDS_BIGENDIAN
 	if (f->usage != CB_USAGE_COMP_5
 	 && f->usage != CB_USAGE_DISPLAY
-	 && f->usage != CB_USAGE_BINARY)
+	 && f->usage != CB_USAGE_BINARY
+	 && f->usage != CB_USAGE_COMP_X)
 		return 0;
 #else
 	if (f->usage != CB_USAGE_COMP_5
+	 && f->usage != CB_USAGE_BINARY
 	 && f->usage != CB_USAGE_DISPLAY)
 		return 0;
 #endif
-	}
 	if (f->storage == CB_STORAGE_WORKING
 #ifdef	COB_SHORT_BORK
 	 && (f->size == 4 || f->size == 8 || f->size == 1)
@@ -541,6 +543,7 @@ cb_is_integer_expr (cb_tree x)
 		return 0;
 	if (current_statement
 	 && (current_statement->ex_handler
+	  || current_statement->not_ex_handler
 	  || current_statement->handler_type != NO_HANDLER))
 		return 0;
 	if (CB_REFERENCE_P (x)) {
@@ -549,11 +552,11 @@ cb_is_integer_expr (cb_tree x)
 			return 0;
 		}
 		if (CB_FIELD_P (y)) 
-			return cb_is_aligned_bin (CB_FIELD_PTR (y));
+			return cb_is_integer_field (CB_FIELD_PTR (y));
 		return 0;
 	}
 	if (CB_FIELD_P (x)) {
-		return cb_is_aligned_bin (CB_FIELD_PTR (x));
+		return cb_is_integer_field (CB_FIELD_PTR (x));
 	}
 	if (CB_NUMERIC_LITERAL_P (x)) {
 	 	if (CB_LITERAL (x)->scale == 0
@@ -575,16 +578,23 @@ cb_is_integer_expr (cb_tree x)
 		 || p->op == '<'
 		 || p->op == ']'
 		 || p->op == '['
-		 || p->op == '~') {
+		 || p->op == '~'
+		 || p->op == '('
+		 || p->op == ')'
+		 || p->op == '@') {
 			if (CB_NUMERIC_LITERAL_P (p->x)
 			 && (CB_NUMERIC_LITERAL_P (p->y) || CB_BINARY_OP_P (p->y)))
 				return 0;
 			if (CB_NUMERIC_LITERAL_P (p->y)
 			 && (CB_NUMERIC_LITERAL_P (p->x) || CB_BINARY_OP_P (p->x)))
 				return 0;
-			if (cb_is_integer_expr (p->x)
-			 && cb_is_integer_expr (p->y)) 
-				return 1;
+			if (p->x
+			 && !cb_is_integer_expr (p->x))
+				return 0;
+			if (p->y
+			 && !cb_is_integer_expr (p->y))
+				return 0;
+			return 1;
 		}
 	}
 	return 0;
@@ -595,9 +605,9 @@ cb_is_integer_expr (cb_tree x)
  * or another aligned binary field
  */
 static int
-cb_is_aligned_bin_and_int (struct cb_field *f, cb_tree n)
+cb_is_integer_field_and_int (struct cb_field *f, cb_tree n)
 {
-	if (!cb_is_aligned_bin (f))
+	if (!cb_is_integer_field (f))
 		return 0;
 	if (CB_NUMERIC_LITERAL_P (n)) {
 	 	if (CB_LITERAL (n)->scale == 0
@@ -5034,7 +5044,7 @@ cb_build_mul (cb_tree v, cb_tree n, cb_tree round_opt)
 		f->count++;
 		if (round_opt == cb_int0 
 		 && cb_fits_long_long (n)
-		 && cb_is_aligned_bin(f) 
+		 && cb_is_integer_field(f) 
 		 && cb_is_integer_expr (n)) { 
 			return cb_build_assign (v, cb_build_binary_op (v, '*', n));
 		}
@@ -5156,6 +5166,7 @@ cb_emit_arithmetic (cb_tree vars, const int op, cb_tree val)
 {
 	cb_tree		l;
 	cb_tree		x;
+	struct cb_field	*f;
 
 	x = cb_check_numeric_value (val);
 
@@ -5203,6 +5214,16 @@ cb_emit_arithmetic (cb_tree vars, const int op, cb_tree val)
 		return;
 	}
 
+	if (op == 0
+	 && vars 
+	 && CB_CHAIN(vars) == NULL
+	 && (CB_PURPOSE (vars) == NULL || CB_PURPOSE (vars) == cb_int0)
+	 && cb_is_integer_expr (val)
+	 && CB_VALUE (vars)
+ 	 && cb_is_integer_expr (CB_VALUE(vars))) {
+		cb_emit (cb_build_assign (CB_VALUE (vars), val));
+		return;
+	}
 	cb_emit_list (build_decimal_assign (vars, op, x));
 }
 
@@ -5629,7 +5650,7 @@ cb_build_cond (cb_tree x)
 				 && cb_fits_long_long (p->y)) {
 					if (CB_REF_OR_FIELD_P (p->x)) {
 						f = CB_FIELD_PTR (p->x);
-						if (cb_is_aligned_bin_and_int (f, p->y)
+						if (cb_is_integer_field_and_int (f, p->y)
 						 && cb_fits_int (p->y)) {
 							/* 'native' (short/int/long) on SYNC boundary */
 							return CB_BUILD_FUNCALL_3 ("$:", p->x, (cb_tree)(long)p->op, p->y);
@@ -5793,8 +5814,9 @@ cb_build_optim_add (cb_tree v, cb_tree n)
 
 	if (CB_REF_OR_FIELD_P (v)) {
 		f = CB_FIELD_PTR (v);
-		if (cb_is_aligned_bin(f) 
-		 && cb_is_integer_expr (n)) { 
+		if (cb_is_integer_field(f) 
+		 && cb_is_integer_expr (n)
+		 && cb_binary_truncate) { 
 			return cb_build_assign (v, cb_build_binary_op (v, '+', n));
 		}
 		if (!f->pic) {
@@ -5857,11 +5879,16 @@ cb_build_optim_add (cb_tree v, cb_tree n)
 					CB_BUILD_CAST_ADDRESS (v),
 					cb_build_cast_int (n));
 			}
-		} else if (!f->pic->scale && f->usage == CB_USAGE_PACKED &&
-			   f->pic->digits < 10) {
+		} else if (!f->pic->scale 
+				&& f->usage == CB_USAGE_PACKED 
+				&& f->pic->digits < 10) {
 			optimize_defs[COB_ADD_PACKED_INT] = 1;
 			return CB_BUILD_FUNCALL_2 ("cob_add_packed_int",
-				v, cb_build_cast_int (n));
+					v, cb_build_cast_int (n));
+		}
+		if (cb_is_integer_field(f) 
+		 && cb_is_integer_expr (n)) { 
+			return cb_build_assign (v, cb_build_binary_op (v, '+', n));
 		}
 	}
 	return CB_BUILD_FUNCALL_3 ("cob_add_int", v,
@@ -5877,8 +5904,9 @@ cb_build_optim_sub (cb_tree v, cb_tree n)
 
 	if (CB_REF_OR_FIELD_P (v)) {
 		f = CB_FIELD_PTR (v);
-		if (cb_is_aligned_bin(f) 
-		 && cb_is_integer_expr (n)) { 
+		if (cb_is_integer_field(f) 
+		 && cb_is_integer_expr (n)
+		 && cb_binary_truncate) { 
 			return cb_build_assign (v, cb_build_binary_op (v, '-', n));
 		}
 		if ( !f->pic->scale
@@ -5936,6 +5964,10 @@ cb_build_optim_sub (cb_tree v, cb_tree n)
 					cb_build_cast_int (n));
 			}
 		}
+		if (cb_is_integer_field(f) 
+		 && cb_is_integer_expr (n)) { 
+			return cb_build_assign (v, cb_build_binary_op (v, '-', n));
+		}
 	}
 	return CB_BUILD_FUNCALL_3 ("cob_sub_int", v,
 				   cb_build_cast_int (n), cb_int0);
@@ -5978,7 +6010,8 @@ cb_build_add (cb_tree v, cb_tree n, cb_tree round_opt)
 		}
 	}
 	opt = build_store_option (v, round_opt);
-	if (opt == cb_int0 && cb_fits_int (n)) {
+	if (opt == cb_int0 
+	 && cb_fits_int (n)) {
 		return cb_build_optim_add (v, n);
 	}
 	return CB_BUILD_FUNCALL_3 ("cob_add", v, n, opt);
@@ -6013,7 +6046,8 @@ cb_build_sub (cb_tree v, cb_tree n, cb_tree round_opt)
 		f->count++;
 	}
 	opt = build_store_option (v, round_opt);
-	if (opt == cb_int0 && cb_fits_int (n)) {
+	if (opt == cb_int0 
+	 && cb_fits_int (n)) {
 		return cb_build_optim_sub (v, n);
 	}
 	return CB_BUILD_FUNCALL_3 ("cob_sub", v, n, opt);
