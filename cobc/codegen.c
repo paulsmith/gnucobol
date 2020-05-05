@@ -199,9 +199,6 @@ static int			working_mem = 0;
 static int			local_working_mem = 0;
 static int			output_indent_level = 0;
 static int			last_segment = 0;
-#ifdef COBC_HAS_CUTOFF_FLAG	/* CHECKME: likely will be removed completely in 3.1 */
-static int			gen_if_level = 0;
-#endif
 static int			gen_init_working = 0;
 static int			need_plus_sign = 0;
 static int			odo_stop_now = 0;
@@ -7816,8 +7813,6 @@ output_stmt (cb_tree x)
 					output_line ("module->module_stmt = 0x%08X;",
 						COB_SET_LINE_FILE(x->source_line, lookup_source(x->source_file)));
 				}
-			} else {
-				lookup_source(x->source_file);
 			}
 			/* Output source location as code */
 			output_line_and_trace_info (x, p->name);
@@ -8269,10 +8264,6 @@ output_stmt (cb_tree x)
 							output_line ("module->module_stmt = 0x%08X;",
 								COB_SET_LINE_FILE(w->source_line, lookup_source(w->source_file)));
 						}
-#if 0 /* CHECKME: Do we need this? If yes: move */
-					} else {
-						lookup_source(w->source_file);
-#endif
 					}
 					if (last_line != w->source_line) {
 						/* Output source location as code */
@@ -8292,9 +8283,6 @@ output_stmt (cb_tree x)
 			}
 			output_newline ();
 		}
-#ifdef COBC_HAS_CUTOFF_FLAG	/* CHECKME: likely will be removed completely in 3.1 */
-		gen_if_level++;
-#endif
 		code = 0;
 		output_prefix ();
 		/* Really PRESENT WHEN for Report field */
@@ -8319,9 +8307,6 @@ output_stmt (cb_tree x)
 			output_line ("} else {");
 			output_line ("\t%s%d.suppress = 1;", px, p2->id);
 			output_line ("}");
-#ifdef COBC_HAS_CUTOFF_FLAG	/* CHECKME: likely will be removed completely in 3.1 */
-			gen_if_level--;
-#endif
 			break;
 		}
 		/* Really PRESENT WHEN for Report line */
@@ -8346,9 +8331,6 @@ output_stmt (cb_tree x)
 			output_line ("} else {");
 			output_line ("\t%s%d.suppress = 1;", px, p2->id);
 			output_line ("}");
-#ifdef COBC_HAS_CUTOFF_FLAG	/* CHECKME: likely will be removed completely in 3.1 */
-			gen_if_level--;
-#endif
 			break;
 		}
 		if (ip->test == cb_false
@@ -8368,40 +8350,8 @@ output_stmt (cb_tree x)
 			} else {
 				output_line ("; /* Nothing */");
 			}
-#ifdef COBC_HAS_CUTOFF_FLAG	/* CHECKME: likely will be removed completely in 3.2 */
-			if (gen_if_level > cb_if_cutoff) {
-				if (ip->stmt2) {
-					code = cb_id++;
-					output_line ("goto %s%d;", CB_PREFIX_LABEL, code);
-				}
-			}
-#endif
 			output_block_close ();
 		}
-#ifdef COBC_HAS_CUTOFF_FLAG	/* CHECKME: likely will be removed completely in 3.2 */
-		if (ip->stmt2) {
-			if (gen_if_level <= cb_if_cutoff) {
-				if (!skip_else) {
-					output_line ("else");
-				}
-				output_line ("{");
-				output_indent_level += 2;
-			}
-			if (ip->is_if) {
-				output_line ("/* ELSE */");
-			} else {
-				output_line ("/* WHEN */");
-			}
-			output_stmt (ip->stmt2);
-			if (gen_if_level <= cb_if_cutoff) {
-				output_indent_level -= 2;
-				output_line ("}");
-			} else {
-				output_line ("l_%d:;", CB_PREFIX_LABEL, code);
-			}
-		}
-		gen_if_level--;
-#else /* ifdef COBC_HAS_CUTOFF_FLAG */
 		if (ip->stmt2) {
 			if (!skip_else) {
 				output_line ("else");
@@ -8417,7 +8367,6 @@ output_stmt (cb_tree x)
 			output_indent_level -= 2;
 			output_line ("}");
 		}
-#endif
 		break;
 	case CB_TAG_PERFORM:
 		output_perform (CB_PERFORM (x));
@@ -12607,9 +12556,6 @@ codegen (struct cb_program *prog, const char *translate_name, const int subseque
 	gen_custom = 0;
 	gen_nested_tab = 0;
 	gen_dynamic = 0;
-#ifdef COBC_HAS_CUTOFF_FLAG	/* CHECKME: likely will be removed completely in 3.1 */
-	gen_if_level = 0;
-#endif
 	local_mem = 0;
 	local_working_mem = 0;
 	need_save_exception = 0;
