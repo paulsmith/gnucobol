@@ -1,4 +1,11 @@
 
+2020-05-06  Ron Norman <rjn@inglenet.com>
+	* cobc.c: Added -G to experiment with 'gdb' and COBOL source
+			This is experimental and not for production.
+	* codegen.c: Added code to emit #line with reference only to
+			the COBOL source code. 
+			'gdb' sort of works but not good enough yet
+
 2020-05-05  Ron Norman <rjn@inglenet.com>
 	* flag.def, cobc.c, codegen.c: removed -fif-cutoff completely
 

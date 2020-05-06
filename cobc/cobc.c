@@ -233,6 +233,7 @@ struct cb_exception cb_exception_table[] = {
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 int cb_mf_ibm_comp = -1;
+int cb_cob_line_num = 0;
 int cb_all_files_xfd = 0;
 
 #define	CB_ERRWARNDEF(var,name,doc)	int var = COBC_WARN_AS_ERROR;
@@ -427,7 +428,7 @@ static const char	*const cob_csyns[] = {
 
 #define COB_NUM_CSYNS	sizeof(cob_csyns) / sizeof(cob_csyns[0])
 
-static const char short_options[] = "hVivqECScbmxjdFROPgwo:t:T:I:L:l:D:K:k:";
+static const char short_options[] = "hVivqECScbmxjdFROPgGwo:t:T:I:L:l:D:K:k:";
 
 #define	CB_NO_ARG	no_argument
 #define	CB_RQ_ARG	required_argument
@@ -2919,18 +2920,14 @@ process_command_line (const int argc, char **argv)
 			gflag_set = 1;
 			cb_flag_stack_check = 1;
 			cb_flag_source_location = 1;
-#if 0	/* possibly auto-include: */
-			cb_flag_c_line_directives = 1;
-			cb_flag_c_labels = 1;
-#endif
 			cb_flag_remove_unreachable = 0;
-#ifndef	_MSC_VER
-#ifndef __ORANGEC__
-			COBC_ADD_STR (cobc_cflags, " -g", NULL, NULL);
-#else
-			COBC_ADD_STR (cobc_cflags, " +v", NULL, NULL);
-#endif
-#endif
+			break;
+
+		case 'G':
+			/* -G : Generate C debug code for use with gdb on COBOL source */
+			gflag_set = 1;
+			cb_cob_line_num = 1;
+			cb_flag_remove_unreachable = 0;
 			break;
 
 		case '$':
@@ -3447,6 +3444,18 @@ process_command_line (const int argc, char **argv)
 		cb_flag_trace = 1;
 		cb_flag_source_location = 1;
 	}
+	if (cb_flag_c_line_directives) {
+		save_all_src = 1;
+	}
+#ifndef	_MSC_VER
+	if (gflag_set) {
+#ifndef __ORANGEC__
+		COBC_ADD_STR (cobc_cflags, " -g", NULL, NULL);
+#else
+		COBC_ADD_STR (cobc_cflags, " +v", NULL, NULL);
+#endif
+	}
+#endif
 
 	/* debug: Turn on all exception conditions */
 	if (cobc_wants_debug) {

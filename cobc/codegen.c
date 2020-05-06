@@ -179,6 +179,8 @@ static unsigned int		gen_native = 0;
 static unsigned int		gen_custom = 0;
 static unsigned int		gen_figurative = 0;
 static unsigned int		gen_dynamic = 0;
+static char			last_line_num[80] = "";
+static int			skip_line_num = 0;
 static int			report_field_id = 0;
 static int			generate_id = 0;
 static int			generate_bgn_lbl = -1;
@@ -513,11 +515,17 @@ cb_init_codegen (void)
 
 /* Output routines */
 
-static COB_INLINE COB_A_INLINE void
+static void
 increase_output_line ()
 {
 	if (output_target == yyout) {
 		output_line_number++;
+		if (skip_line_num > 0)
+			skip_line_num--;
+		else
+		if (last_line_num[0] > ' '
+		 && cb_cob_line_num) 
+			fprintf (output_target, "%s\n", last_line_num);
 	}
 }
 
@@ -527,11 +535,14 @@ static void
 output (const char *fmt, ...)
 {
 	va_list		ap;
+	int			ln = strlen(fmt);
 
 	if (output_target) {
 		va_start (ap, fmt);
 		vfprintf (output_target, fmt, ap);
 		va_end (ap);
+		if (fmt[ln-1] == '\n')
+			increase_output_line ();
 	}
 }
 
@@ -587,6 +598,7 @@ output_block_open (void)
 		output_prefix ();
 		fputc ('{', output_target);
 		fputc ('\n', output_target);
+		skip_line_num++;
 		increase_output_line ();
 	}
 	output_indent_level += indent_adjust_level;
@@ -5219,6 +5231,7 @@ output_search_whens (cb_tree table, struct cb_field *p, cb_tree stmt,
 	}
 
 	/* Start loop */
+	skip_line_num++;
 	output_line ("for (;;) {");
 	output_indent_level += 2;
 
@@ -6719,6 +6732,7 @@ output_perform_call (struct cb_label *lb, struct cb_label *le)
 	struct cb_para_label	*p;
 	struct label_list	*l;
 
+	skip_line_num = 0;
 	if (lb == current_prog->all_procedure || lb->flag_is_debug_sect) {
 		output_line ("/* DEBUGGING Callback PERFORM %s */",
 			     (const char *)lb->name);
@@ -6767,6 +6781,7 @@ output_perform_call (struct cb_label *lb, struct cb_label *le)
 					     (const char *)lb->name, NULL));
 	}
 
+	skip_line_num = 0;
 	output_line ("frame_ptr++;");
 	if (cb_flag_stack_check) {
 		output_line ("if (unlikely(frame_ptr == frame_overflow))");
@@ -6842,6 +6857,7 @@ output_perform_exit (struct cb_label *l)
 		output_line ("}");
 	}
 	output_newline ();
+	memset(last_line_num, ' ', 30);
 
 	if (l->flag_declarative_exit) {
 		output_line ("/* Implicit DECLARATIVE return */");
@@ -7027,6 +7043,7 @@ output_perform_until (struct cb_perform *p, cb_tree l)
 	v = CB_PERFORM_VARYING (CB_VALUE (l));
 	next = CB_CHAIN (l);
 
+	skip_line_num++;
 	output_line ("for (;;)");
 	output_block_open ();
 
@@ -7490,14 +7507,23 @@ output_ferror_stmt (struct cb_statement *stmt)
 static void
 output_c_info (void)
 {
-	output ("#line %d \"%s\"", output_line_number + 1, output_name);
-	output_newline ();
+	if (cb_flag_c_line_directives) {
+		output ("#line %d \"%s\"", output_line_number + 1, output_name);
+		output_newline ();
+	}
 }
 
 static void
 output_cobol_info (cb_tree x)
 {
+	if (!cb_cob_line_num) {
+		skip_line_num = 0;
+		return;
+	}
+	if (!cb_flag_c_line_directives)
+		sprintf (last_line_num, "#line %d \"%s\"", x->source_line, x->source_file);
 	output ("#line %d \"%s\"", x->source_line, x->source_file);
+	skip_line_num++;
 	output_newline ();
 }
 
@@ -7545,17 +7571,22 @@ output_section_info (struct cb_label *lp)
 static void
 output_line_and_trace_info (cb_tree x, const char *name)
 {
-	if (cb_flag_c_line_directives && x->source_file) {
+	if (  (cb_flag_c_line_directives 
+		|| cb_flag_source_location 
+		|| cb_cob_line_num)
+	 && x->source_file) {
 		output_cobol_info (x);
-		if (cb_flag_source_location && name) {
+		if (cb_flag_source_location 
+		 && name) {
 			output_line ("cob_trace_stmt (%s%d);",
 				CB_PREFIX_STRING, lookup_string (name));
-		} else {
+		} else if (cb_flag_c_line_directives) {
 			output_line (";");
+			output_c_info ();
 		}
-		output_c_info ();
 	} else {
-		if (cb_flag_source_location && name) {
+		if (cb_flag_source_location 
+		 && name) {
 			output_line ("cob_trace_stmt (%s%d);",
 				CB_PREFIX_STRING, lookup_string (name));
 		}
@@ -7602,6 +7633,7 @@ output_label_info (cb_tree x, struct cb_label *lp)
 	} else {
 		output ("*/");
 	}
+	skip_line_num = 2;
 	output_newline ();
 }
 
@@ -7803,7 +7835,7 @@ output_stmt (cb_tree x)
 		/* Output source location, but only if it isn't an implicit statement */
 		if (!p->flag_implicit) {
 			/* Output source location as a comment */
-			output_newline ();
+			skip_line_num = 4;
 			output_line ("/* Line: %-10d: %-19.19s: %s */",
 				     x->source_line, p->name, x->source_file);
 			/* Output source location as code */
@@ -7829,6 +7861,7 @@ output_stmt (cb_tree x)
 				output_newline ();
 			}
 			last_line = x->source_line;
+			skip_line_num = 0;
 		}
 
 		if (!p->file) {
@@ -10187,7 +10220,9 @@ output_error_handler (struct cb_program *prog)
 			break;
 		}
 	}
+	skip_line_num = 0;
 	output_stmt (cb_standard_error_handler);
+	skip_line_num = 1;
 	output_newline ();
 	if (seen) {
 		output_line ("switch (cob_glob_ptr->cob_error_file->last_open_mode)");
