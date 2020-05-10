@@ -2141,17 +2141,16 @@ cb_build_identifier (cb_tree x, const int subchk)
 	}
 
 	/* Reference modification check */
-	if (f->usage == CB_USAGE_NATIONAL ) {
-		pseudosize = f->size / 2;
-	} else {
-		pseudosize = f->size;
-	}
+	pseudosize = f->size;
 	if (cb_reference_bounds_check == CB_WARNING
 	 || cb_reference_bounds_check == CB_OK) {
 		p = cb_field_founder (f); 
 		if (p != f) {
 			pseudosize = p->size - f->offset;	/* Remaining size of group item */
 		}
+	}
+	if (f->usage == CB_USAGE_NATIONAL ) {
+		pseudosize = pseudosize / 2;
 	}
 	if (r->offset) {
 		/* Compile-time check */
@@ -10366,7 +10365,7 @@ cb_tree
 cb_build_move (cb_tree src, cb_tree dst)
 {
 	struct cb_reference	*src_ref, *dst_ref, *x;
-	int	move_zero, k;
+	int	move_zero;
 
 	if (CB_INVALID_TREE(src)
 	 || CB_INVALID_TREE(dst)) {
@@ -10384,12 +10383,15 @@ cb_build_move (cb_tree src, cb_tree dst)
 #endif
 	if (move_zero) {
 		src = cb_zero;
-	} else if (CB_LITERAL_P (src)
-			&& CB_LITERAL (src)->data[0] == ' ') {
-		for (k=0; k < (int)CB_LITERAL (src)->size
-				&& CB_LITERAL (src)->data[k] == ' '; k++);
-		if (k == (int)CB_LITERAL (src)->size)
-			src = cb_space;
+	} else if (CB_LITERAL_P (src)) {
+		/* FIXME: don't do this for a DYNAMIC LENGTH target */
+		const struct cb_literal* lit = CB_LITERAL (src);
+		char* p = (char*)lit->data;
+		char* end = p + lit->size - 1;
+		if (*end == ' ') {
+			while (p < end && *p == ' ') p++;
+			if (p == end) src = cb_space;
+		}
 	}
 
 	if (current_program->flag_report) {
@@ -10595,6 +10597,9 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 			sharing = cb_int0;
 		}
 	}
+
+	/* TODO: replace mode and sharing with tree containing a string constant
+	         (defines in common.h like COB_OPEN_I_O) */
 
 	if (f->extfh) {
 		cb_emit (CB_BUILD_FUNCALL_5 ("cob_extfh_open", f->extfh, file, mode,
