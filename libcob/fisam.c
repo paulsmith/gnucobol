@@ -149,8 +149,8 @@ struct indexfile {
 	char	*recwrk;	/* Record work/save area */
 	int		nkeys;		/* Actual keys in file */
 	int		isfd;		/* ISAM file number */
-	int		recnum;		/* Last record number read */
-	int		saverecnum;	/* isrecnum of next record to process */
+	long	recnum;		/* Last record number read */
+	long	saverecnum;	/* isrecnum of next record to process */
 	int		saveerrno;	/* savefileposition errno */
 	int		lmode;		/* File lock mode for 'isread' */
 	int		startcond;	/* Previous 'start' condition value */
@@ -490,12 +490,13 @@ restorefileposition (cob_file *f)
 		isstart (fh->isfd, &k0, 0, (void *)fh->recwrk, ISEQUAL);
 		/* Read by record number */
 		isread (fh->isfd, (void *)fh->recwrk, ISEQUAL);
+		/* Read by current key value */
 		isstart (fh->isfd, &fh->key[f->curkey], 0,
-			 (void *)fh->recwrk, ISEQUAL);
-		isread (fh->isfd, (void *)fh->recwrk, ISEQUAL);
+			 (void *)fh->recwrk, ISGTEQ);
+		isread (fh->isfd, (void *)fh->recwrk, ISGTEQ);
 		while (ISRECNUM != fh->saverecnum) {
 			/* Read back into position */
-			if (isread (fh->isfd, (void *)fh->recwrk, fh->readdir)) {
+			if (isread (fh->isfd, (void *)fh->recwrk, ISNEXT)) {
 				break;
 			}
 		}

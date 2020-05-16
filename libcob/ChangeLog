@@ -1,4 +1,9 @@
 
+2020-05-16  Ron Norman <rjn@inglenet.com>
+
+	* fisam.c: Fixed problem with READ PREVIOUS/DELETE/READ PREVIOUS
+				when reading thru a group of duplicate keys
+
 2020-04-28  Ron Norman <rjn@inglenet.com>
 	* common.h,move.c: cob_set_llint is now passed a value to do size
 				checking. It also now checks module->flag_binary_truncate
