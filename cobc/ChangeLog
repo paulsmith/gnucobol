@@ -1,4 +1,8 @@
 
+2020-05-26  Ron Norman <rjn@inglenet.com>
+	* codegen.c: In output_local_field_cache if REPORT field
+			then use output_emit_field 
+
 2020-05-06  Ron Norman <rjn@inglenet.com>
 	* cobc.c: Added -G to experiment with 'gdb' and COBOL source
 			This is experimental and not for production.

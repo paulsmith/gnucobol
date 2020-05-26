@@ -2282,6 +2282,7 @@ output_local_field_cache (struct cb_program *prog)
 	struct field_list	*field;
 	struct cb_field		*f;
 	struct cb_report *rep;
+	int			i;
 
 	if (!local_field_cache) {
 		return;
@@ -2299,19 +2300,25 @@ output_local_field_cache (struct cb_program *prog)
 					     &field_cache_cmp);
 	for (field = local_field_cache; field; field = field->next) {
 
-		if (!field->f->flag_local
-		 && !field->f->flag_external) {
+		f = field->f;
+		if (!f->flag_local
+		 && !f->flag_external) {
 			if (prog->flag_recursive
-			&& !field->f->flag_filler) {
-				output ("/* %s is not local */", field->f->name);
+			&& !f->flag_filler) {
+				output ("/* %s is not local */", f->name);
 				output_newline ();
 			}
-			output ("static cob_field %s%d\t= ",
-				CB_PREFIX_FIELD, field->f->id);
-			output_field (field->x);
+			if (f->storage ==  CB_STORAGE_REPORT
+			 && f->flag_occurs 
+			 && f->occurs_max > 1) {
+				output_emit_field (cb_build_field_reference (f, NULL), NULL);
+			} else {
+				output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD, f->id);
+				output_field (field->x);
+			}
 		} else {
 			output ("%scob_field %s%d\t= ", prog->flag_recursive ? "\t" : "static ",
-						CB_PREFIX_FIELD, field->f->id);
+						CB_PREFIX_FIELD, f->id);
 			output ("{");
 			output_size (field->x);
 			output (", NULL, ");
