@@ -4895,7 +4895,8 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 
 	/* Save for later decimal_align */
 	if (cb_arithmetic_osvs) {
-		expr_dec_align = decp;
+		if (decp > expr_dec_align)
+			expr_dec_align = decp;
 	} else {
 		expr_dec_align = -1;
 	}

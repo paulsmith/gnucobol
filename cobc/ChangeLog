@@ -1,4 +1,10 @@
 
+2030-06-03  Ron Norman <rjn@inglenet.com>
+
+	* tree.c, typeck.c: fixed code for 'arithmetic-osvs' option
+	  which computes intermediate results similar to IBM OSVS & MVS
+	  It should take the largest decimal position usage in expression
+
 2020-05-26  Ron Norman <rjn@inglenet.com>
 	* codegen.c: In output_local_field_cache if REPORT field
 			then use output_emit_field 

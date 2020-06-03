@@ -5284,20 +5284,28 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		&&  CB_NUMERIC_LITERAL_P(y)) {
 			xl = CB_LITERAL(x);
 			yl = CB_LITERAL(y);
+			xscale = xl->scale;
+			yscale = yl->scale;
 
-			if(xl->llit == 0
-			   && xl->size >= (unsigned int)xl->scale
-			   && yl->llit == 0
-			   && yl->size >= (unsigned int)yl->scale
-			   && xl->all == 0
-			   && yl->all == 0) {
+			if (cb_arithmetic_osvs 
+			 && (xl->scale != 0 || yl->scale == 0)) {
+				/* Do not fold with decimals for OSVS */
+				cb_set_dmax (xscale);
+				cb_set_dmax (yscale);
+				if (op == '*') 
+					cb_set_dmax (xscale + yscale);
+			} else
+			if (xl->llit == 0
+			 && xl->size >= (unsigned int)xl->scale
+			 && yl->llit == 0
+			 && yl->size >= (unsigned int)yl->scale
+			 && xl->all == 0
+			 && yl->all == 0) {
 				xval = atoll((const char*)xl->data);
 				if(xl->sign == -1) xval = -xval;
 				yval = atoll((const char*)yl->data);
 				if(yl->sign == -1) yval = -yval;
-				xscale = xl->scale;
 				cb_set_dmax (xscale);
-				yscale = yl->scale;
 				cb_set_dmax (yscale);
 				rscale = 0;
 				rslt = 0;
@@ -5328,6 +5336,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 						rslt = xval / yval;
 					}
 				}
+				cb_set_dmax (rscale);
 				while (rscale > 0
 				    && rslt != 0
 				    && (rslt % 10) == 0) {
