@@ -10220,6 +10220,103 @@ ANY NUMERIC is   4510.66CR Length 0000000011
 
 AT_CLEANUP
 
+AT_SETUP([Test COBOL-C interface (2)])
+AT_KEYWORDS([CALL])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. routine1.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 PDUMP POINTER.
+        01 PNUM REDEFINES PDUMP BINARY-LONG.
+        01 DUMMY PICTURE X(1).
+        01 PN    PICTURE 9(1).
+        LINKAGE SECTION.
+        01 P1    PICTURE X(1).
+        01 P2    PICTURE X(1).
+        PROCEDURE DIVISION USING P1 P2.
+            MOVE NUMBER-OF-CALL-PARAMETERS TO PN.
+            DISPLAY "Now in routine1 with " PN " params"
+            SET PDUMP TO ADDRESS OF P1.
+            MOVE PNUM TO PN.
+            DISPLAY "Expect '1' and got " PN.
+            SET PDUMP TO ADDRESS OF P2.
+            MOVE PNUM TO PN.
+            DISPLAY "Expect '2' and got " PN.
+            call "one_parameter" USING DUMMY.
+            GOBACK.
+    
+            DISPLAY "Call routine2 with P2"
+            call "routine2" USING P2.
+            DISPLAY "Call routine2 with nothing"
+            call "routine2".
+            DISPLAY "Call routine2 with P2, P1"
+            call "routine2" USING P2, P1.
+            DISPLAY "Leaving routine1".
+            GOBACK.
+           END PROGRAM routine1.
+
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. routine2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 PDUMP POINTER.
+        01 PNUM REDEFINES PDUMP BINARY-LONG.
+        01 DUMMY PICTURE X(1).
+        01 PN    PICTURE 9(1).
+        LINKAGE SECTION.
+        01 P1    PICTURE X(1).
+        01 P2    PICTURE X(1).
+        PROCEDURE DIVISION USING P1 P2.
+            MOVE NUMBER-OF-CALL-PARAMETERS TO PN.
+            DISPLAY "Now in routine2 with " PN " params"
+            SET PDUMP TO ADDRESS OF P1.
+            MOVE PNUM TO PN.
+            DISPLAY "Expect '3' and got " PN.
+            SET PDUMP TO ADDRESS OF P2.
+            MOVE PNUM TO PN.
+            DISPLAY "Expect '4' and got " PN.
+            DISPLAY "Leaving routine2".
+            GOBACK.
+        END PROGRAM routine2.
+])
+
+AT_DATA([cmod.c], [[
+#include <stdio.h>
+#include <libcob.h>
+
+extern int routine1(void *, void *);
+extern int routine2(void *, void *);
+
+int main()
+{
+    cob_init(0,NULL);
+    routine1((void *)(0x1),(void *)(0x2));
+    return 0;
+}
+ 
+void one_parameter(void *dummy)
+{
+   printf("Now in one_parameter\n");
+    routine2((void *)(0x3),(void *)(0x4));
+}
+]])
+
+AT_CHECK([$COMPILE -std=ibm -o prog cmod.c prog.cob], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [Now in routine1 with 2 params
+Expect '1' and got 1
+Expect '2' and got 2
+Now in one_parameter
+Now in routine2 with 2 params
+Expect '3' and got 3
+Expect '4' and got 4
+Leaving routine2
+], [])
+
+AT_CLEANUP
+
 AT_SETUP([COBOL2002 SYNC])
 AT_KEYWORDS([Numeric])
 

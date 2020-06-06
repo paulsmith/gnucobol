@@ -1,5 +1,9 @@
 
-2030-06-03  Ron Norman <rjn@inglenet.com>
+2020-06-06  Ron Norman <rjn@inglenet.com>
+	* codegen.c: Changes to module entry to better handle
+			C mod calls COBOL mod calls C mod calls COBOL mod
+
+2020-06-03  Ron Norman <rjn@inglenet.com>
 
 	* tree.c, typeck.c: fixed code for 'arithmetic-osvs' option
 	  which computes intermediate results similar to IBM OSVS & MVS

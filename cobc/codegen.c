@@ -10624,7 +10624,7 @@ pickup_any_length (cb_tree l, int i)
 
 /* Pickup parameter knowing the caller is C */
 static void
-pickup_c_param (cb_tree l, int i)
+pickup_c_param (cb_tree l, int i, int is_enter)
 {
 	char	wrk[64];
 	cb_tree	x;
@@ -10679,21 +10679,25 @@ pickup_c_param (cb_tree l, int i)
 							CB_PREFIX_FIELD, f->id);
 		}
 	} else {
-		if(i == 0) {
-			output_line ("if (cob_glob_ptr->cob_call_params >= 0)");
-			output_indent_level += 2;
-		} else if(i > 0) {
-			output_line ("if (cob_glob_ptr->cob_call_params == 0");
-			output_line ("||  cob_glob_ptr->cob_call_params > %d)", i);
-			output_indent_level += 2;
+		if (is_enter) {
+			if(i == 0) {
+				output_line ("if (cob_glob_ptr->cob_call_params >= 0)");
+				output_indent_level += 2;
+			} else if(i > 0) {
+				output_line ("if (cob_glob_ptr->cob_call_params == 0");
+				output_line ("||  cob_glob_ptr->cob_call_params > %d)", i);
+				output_indent_level += 2;
+			}
 		}
 		output_prefix ();
 		output ("%s%d.data = (cob_u8_t*)", CB_PREFIX_FIELD, f->id);
 		output_data (x);
 		output ("; /* %s */", f->name);
 		output_newline ();
-		if(i >= 0)
-			output_indent_level -= 2;
+		if (is_enter) {
+			if(i >= 0)
+				output_indent_level -= 2;
+		}
 	}
 	f->flag_data_set = 1;
 }
@@ -10711,7 +10715,7 @@ pickup_param (cb_tree l, int i)
 	 || f->flag_any_length) {
 		output_line ("if (cob_glob_ptr->cob_call_from_c) {");
 		output_indent_level += 2;
-		pickup_c_param (l, i);
+		pickup_c_param (l, i, 1);
 		output_indent_level -= 2;
 		output_line ("} else {");
 		output_indent_level += 2;
@@ -11200,20 +11204,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		}
 	}
 
-	/* Call parameters */
-	if (prog->cb_call_params && cb_code_field (prog->cb_call_params)->count) {
-		output_line ("/* Set NUMBER-OF-CALL-PARAMETERS (independent from LINKAGE) */");
-		output_prefix ();
-		output_integer (prog->cb_call_params);
-		output (" = cob_glob_ptr->cob_call_params;");
-		output_newline ();
-		output_newline ();
-	}
-
-	output_line ("/* Save number of call params */");
-	output_line ("module->module_num_params = cob_glob_ptr->cob_call_params;");
-	output_newline ();
-
 	if (!cb_sticky_linkage
 	 && !prog->flag_chained
 	 && prog->prog_type != COB_MODULE_TYPE_FUNCTION
@@ -11235,24 +11225,44 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			if (f->flag_any_length) {
 				if (!anyseen) {
 					anyseen = 1;
+					name_hash = cob_get_name_hash (prog->orig_program_id);
+					output_line ("if (cob_glob_ptr->cob_call_name_hash == 0x%X) {", name_hash);
+					output_indent_level += 2;
 					output_line ("/* Initialize ANY LENGTH parameters */");
+					output_line ("module->module_num_params = cob_glob_ptr->cob_call_params;");
 				}
 				pickup_any_length (l, i);
 			}
 		}
 		if (anyseen) {
+			output_indent_level -= 2;
+			output_line ("}");
 			output_newline ();
 		}
 
 		if (cb_list_length (parameter_list) > 0
 		 && prog->prog_type != COB_MODULE_TYPE_FUNCTION) {
+			int	basic_param = 1;
+			for (l = parameter_list; l && basic_param; l = CB_CHAIN (l)) {
+				struct cb_field *f;
+				int	is_value_parm, is_any_numeric;
+
+				f = setup_param (l, &is_value_parm, &is_any_numeric);
+				if (is_value_parm
+				|| is_any_numeric
+				|| f->flag_any_length) {
+					basic_param = 0;
+					break;
+				}
+			}
 			name_hash = cob_get_name_hash (prog->orig_program_id);
 			output_line ("if (cob_glob_ptr->cob_call_name_hash != 0x%X) {", name_hash);
 			output_indent_level += 2;
 			output_line ("cob_glob_ptr->cob_call_from_c = 1; /* Called by C */");
 			for (i = 0, l = parameter_list; l; l = CB_CHAIN (l), i++) {
-				pickup_c_param (l, i);
+				pickup_c_param (l, i, !basic_param);
 			}
+			output_line ("cob_glob_ptr->cob_call_params = %u;", i);
 			output_indent_level -= 2;
 			output_line ("} else {");
 			output_indent_level += 2;
@@ -11262,8 +11272,23 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			}
 			output_indent_level -= 2;
 			output_line ("}");
+			output_line ("cob_glob_ptr->cob_call_name_hash = %u;", 0);
 		}
 	}
+
+	/* Call parameters */
+	if (prog->cb_call_params && cb_code_field (prog->cb_call_params)->count) {
+		output_line ("/* Set NUMBER-OF-CALL-PARAMETERS (independent from LINKAGE) */");
+		output_prefix ();
+		output_integer (prog->cb_call_params);
+		output (" = cob_glob_ptr->cob_call_params;");
+		output_newline ();
+		output_newline ();
+	}
+
+	output_line ("/* Save number of call params */");
+	output_line ("module->module_num_params = cob_glob_ptr->cob_call_params;");
+	output_newline ();
 
 	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION
 	 && CB_FIELD_PTR(prog->returning)->storage == CB_STORAGE_LINKAGE) {
@@ -11327,6 +11352,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 				output_line ("module->module_name = \"%s\";", CB_LABEL (CB_PURPOSE (l))->name);
 				output_indent_level -= 4;
 			}
+			output_line ("cob_glob_ptr->cob_call_params = %u;", 0);
 			output_line ("  goto %s%d;", CB_PREFIX_LABEL,
 				     CB_LABEL (CB_PURPOSE (l))->id);
 		}
@@ -11339,6 +11365,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("goto %s%d;", CB_PREFIX_LABEL,
 			     CB_LABEL (CB_PURPOSE (l))->id);
 	}
+	output_line ("cob_glob_ptr->cob_call_params = %u;", 0);
 	output_newline ();
 
 	/* PROCEDURE DIVISION */
@@ -12265,9 +12292,13 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	/* Sticky linkage set up */
 	if (cb_sticky_linkage && using_list) {
 		if ((parmnum = cb_list_length(using_list)) > 1) {
+			output_line (" cob_global *cob_glob_ptr = cob_get_global_ptr();");
 			parmnum = 0;
+			output_line ("if (cob_glob_ptr->cob_call_name_hash != 0x%X)",
+									cob_get_name_hash (prog->orig_program_id));
+			output_line ("    cob_glob_ptr->cob_call_params = %u;", cb_list_length(using_list));
 			output_line ("/* Set the parameter list */");
-			output_line ("switch (cob_get_global_ptr()->cob_call_params) {");
+			output_line ("switch (cob_glob_ptr->cob_call_params) {");
 			for (l = using_list; l; l = CB_CHAIN (l), parmnum++) {
 				if (parmnum == 0) {
 					continue;
