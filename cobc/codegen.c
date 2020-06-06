@@ -2282,7 +2282,6 @@ output_local_field_cache (struct cb_program *prog)
 	struct field_list	*field;
 	struct cb_field		*f;
 	struct cb_report *rep;
-	int			i;
 
 	if (!local_field_cache) {
 		return;
