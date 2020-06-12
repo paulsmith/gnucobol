@@ -630,8 +630,11 @@ cob_key_def (cob_file *f, int keyn, char *p, int *ret, int keycheck)
 		return;
 	}
 
-	if (f->flag_redo_keydef)		/* Update all index definitions */
-		k = idx;
+	if (f->flag_redo_keydef) {		/* Update index definitions */
+		for (k=0; k < (int)f->nkeys && f->keys[k].field != NULL; k++);
+		if (k >= (int)f->nkeys)
+			return;
+	}
 	/* No match so add this index to table */
 	loc = cloc[0];
 	len = clen[0];

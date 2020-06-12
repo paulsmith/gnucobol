@@ -1,4 +1,9 @@
 
+2020-06-12  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Fixed problem with updating key definitions
+				from BDB data dictionary file
+				
 2020-05-16  Ron Norman <rjn@inglenet.com>
 
 	* fisam.c: Fixed problem with READ PREVIOUS/DELETE/READ PREVIOUS
