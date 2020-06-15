@@ -498,7 +498,7 @@ bld_fields (struct map_xfd *mx, cob_file *fl)
  * Evaluate the expression and return the next position in table
  */
 #define MAXVAL 16
-static const char vop[10][5] = {".",">=",">","<=","<","=","!=","&&","||","!"}; 
+/*static const char vop[10][5] = {".",">=",">","<=","<","=","!=","&&","||","!"}; */
 static int
 eval_expr (struct file_xfd *fx, int  pos)
 {
