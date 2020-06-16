@@ -1,4 +1,8 @@
 
+2020-06-16  Ron Norman <rjn@inglenet.com>
+	* call.c: added cob_get_dbl_param & cob_put_dbl_param
+	* common.h: added cob_get_dbl_param & cob_put_dbl_param
+
 2020-06-12  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Fixed problem with updating key definitions

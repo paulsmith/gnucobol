@@ -176,6 +176,8 @@ static lt_dlhandle		mainhandle;
 static size_t			call_lastsize;
 static size_t			resolve_size = 0;
 static unsigned int		cob_jmp_primed;
+static cob_field_attr	const_float_attr =
+			{COB_TYPE_NUMERIC_DOUBLE, 8, 0, COB_FLAG_HAVE_SIGN, NULL};
 static cob_field_attr	const_binll_attr =
 			{COB_TYPE_NUMERIC_BINARY, 18, 0, COB_FLAG_HAVE_SIGN, NULL};
 static cob_field_attr	const_binull_attr =
@@ -1730,6 +1732,67 @@ cob_get_param_data (int n)
 		return NULL;
 	}
 	return (void*)f->data;
+}
+
+double
+cob_get_dbl_param (int n)
+{
+	void		*cbl_data;
+	double		val;
+	cob_field	temp;
+	cob_field_attr   float_attr;
+	cob_field	*f = cob_get_param_field (n, "cob_get_dbl_param");
+
+	if (f == NULL) {
+		return (double)-1;
+	}
+	cbl_data = f->data;
+
+	switch (f->attr->type) {
+	case COB_TYPE_NUMERIC_FLOAT:
+		return (double)cob_get_comp1 (cbl_data);
+	case COB_TYPE_NUMERIC_DOUBLE:
+		return (double)cob_get_comp2 (cbl_data);
+	default:
+		memcpy(&float_attr, &const_float_attr, sizeof(cob_field_attr));
+		float_attr.scale = f->attr->scale;
+		temp.size = 8;
+		temp.data = (unsigned char *)&val;
+		temp.attr = &float_attr;
+		cob_move (f, &temp);
+		return (double)val;
+	}
+}
+
+void
+cob_put_dbl_param (int n, double val)
+{
+	void		*cbl_data;
+	cob_field	temp;
+	cob_field_attr   float_attr;
+	cob_field	*f = cob_get_param_field (n, "cob_get_dbl_param");
+
+	if (f == NULL) {
+		return;
+	}
+	cbl_data = f->data;
+
+	switch (f->attr->type) {
+	case COB_TYPE_NUMERIC_FLOAT:
+		cob_put_comp1 ((float)val, cbl_data);
+		return;
+	case COB_TYPE_NUMERIC_DOUBLE:
+		cob_put_comp2 (val, cbl_data);
+		return;
+	default:
+		memcpy(&float_attr, &const_float_attr, sizeof(cob_field_attr));
+		float_attr.scale = f->attr->scale;
+		temp.size = 8;
+		temp.data = (unsigned char *)&val;
+		temp.attr = &float_attr;
+		cob_move (&temp, f);
+		return;
+	}
 }
 
 cob_s64_t
