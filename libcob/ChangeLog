@@ -1,4 +1,9 @@
 
+2020-06-18  Ron Norman <rjn@inglenet.com>
+	* coblocal.h,common.h: add flags for LS_INSTAB (Like MF INSERTTAB)
+	* common.c: Accept COB_MF_LS_INSTAB/mf_ls_instab in runtime.cfg
+	* fileio.c: Handle "ls_instab" option similar to MF INSERTTAB
+
 2020-06-16  Ron Norman <rjn@inglenet.com>
 	* call.c: added cob_get_dbl_param & cob_put_dbl_param
 	* common.h: added cob_get_dbl_param & cob_put_dbl_param

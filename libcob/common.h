@@ -1536,7 +1536,8 @@ typedef struct __cob_file {
 	unsigned int		flag_write_chk_dups:1;/* Do precheck for DUPLICATES on WRITE */
 	unsigned int		flag_redo_keydef:1;	/* Keys are being redefined from dictionary */
 	unsigned int		flag_is_pipe:1;		/* LINE SEQUENTIAL as 'pipe' */
-	unsigned int		unused_bits:18;
+	unsigned int		flag_ls_instab:1;	/* LINE SEQUENTIAL replace spaces by TAB (INSERTTAB) */
+	unsigned int		unused_bits:17;
 
 	cob_field		*last_key;		/* Last field used as 'key' for I/O */
 	unsigned char		last_operation;		/* Most recent I/O operation */

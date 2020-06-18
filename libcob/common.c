@@ -406,6 +406,7 @@ static struct config_tbl gc_conf[] = {
 	{"COB_LS_VALIDATE","ls_validate",		"true",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_validate)},
 	{"COB_MF_LS_NULLS","mf_ls_nulls",		"true",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_ls_nulls)},
 	{"COB_MF_LS_SPLIT","mf_ls_split",		"true",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_ls_split)},
+	{"COB_MF_LS_INSTAB","mf_ls_instab",		"false",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_ls_instab)},
 	{"COB_MF_LS_VALIDATE","mf_ls_validate",	"false",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_ls_validate)},
 	{"COB_GC_FILES","gc_files",				"false",NULL,GRP_HIDE,ENV_BOOL,SETPOS(cob_gc_files)},
 	{"COB_SHARE_MODE","share_mode",			"none",shareopts,GRP_FILE,ENV_UINT|ENV_ENUM,SETPOS(cob_share_mode)},

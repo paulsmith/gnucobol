@@ -17783,6 +17783,131 @@ Read Status: 10
 
 AT_CLEANUP
 
+AT_SETUP([LINE SEQUENTIAL INSERTTAB])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT INFILE     ASSIGN TO "lsfile.txt"
+                ORGANIZATION IS LINE SEQUENTIAL
+                FILE STATUS  IS INPUT-STATUS .
+      
+       DATA DIVISION.
+       FILE SECTION.
+       FD INFILE
+             RECORD IS VARYING IN SIZE FROM 18 TO 60 CHARACTERS
+             DEPENDING ON INPUT-LEN
+            .
+       01  INPUT-REC           PIC X(50).
+      
+       WORKING-STORAGE SECTION.
+      
+       01  REC-NUM             PIC 99.
+       01  INPUT-STATUS        PIC XX  VALUE "  ".
+       01  INPUT-LEN           PIC 999 VALUE 18 .
+      
+       PROCEDURE DIVISION.
+       MAIN-LINE.
+           PERFORM TEST-FILE.
+           PERFORM LIST-FILE.
+           STOP RUN.
+
+       LIST-FILE.
+           MOVE ZERO TO REC-NUM
+           OPEN I-O INFILE.
+           PERFORM UNTIL INPUT-STATUS NOT = '00'
+              READ INFILE
+              IF INPUT-STATUS NOT = '10'
+                 INSPECT INPUT-REC REPLACING ALL X"09" BY "t"
+                 ADD 1 TO REC-NUM
+                 DISPLAY " Read " REC-NUM
+                         ": STATUS IS " INPUT-STATUS 
+                         " LENGTH IS " INPUT-LEN
+                 DISPLAY "        :" INPUT-REC ":" 
+                 IF REC-NUM = 3
+                    MOVE 40 TO INPUT-LEN
+                    MOVE "NOP                XYZ" TO INPUT-REC
+                    MOVE X"09"                    TO INPUT-REC (27:1)
+                    REWRITE INPUT-REC
+                    INSPECT INPUT-REC REPLACING ALL X"09" BY "t"
+                    DISPLAY "Rewrite : STATUS IS " INPUT-STATUS 
+                            " LENGTH IS " INPUT-LEN
+                    DISPLAY "        :" INPUT-REC ":" 
+                 END-IF
+              END-IF
+           END-PERFORM.
+           CLOSE INFILE.
+           MOVE ZERO TO REC-NUM
+           OPEN INPUT INFILE.
+           PERFORM UNTIL INPUT-STATUS NOT = '00'
+              READ INFILE
+              IF INPUT-STATUS NOT = '10'
+                 INSPECT INPUT-REC REPLACING ALL X"09" BY "t"
+                 ADD 1 TO REC-NUM
+                 DISPLAY " Read " REC-NUM
+                         ": STATUS IS " INPUT-STATUS 
+                         " LENGTH IS " INPUT-LEN
+                 DISPLAY "        :" INPUT-REC ":" 
+              END-IF
+           END-PERFORM.
+           CLOSE INFILE.
+
+       TEST-FILE.
+           OPEN OUTPUT INFILE
+           MOVE 40 TO INPUT-LEN
+           MOVE ".........1.........2.........3" TO INPUT-REC
+           WRITE INPUT-REC
+           MOVE "123456789012345678901234567890" TO INPUT-REC
+           WRITE INPUT-REC
+           MOVE "ABC                DEF" TO INPUT-REC
+           MOVE X"09"                    TO INPUT-REC (27:1)
+           MOVE "X"                      TO INPUT-REC (32:1)
+           WRITE INPUT-REC
+           CLOSE INFILE.
+
+       WRITE-FILE.
+           OPEN OUTPUT INFILE
+           MOVE 9 TO INPUT-LEN
+           MOVE "Record 1............." TO INPUT-REC
+           WRITE INPUT-REC
+           DISPLAY "Write 1: STATUS IS " INPUT-STATUS 
+                   " LENGTH IS " INPUT-LEN
+                             UPON CONSOLE
+           MOVE 64 TO INPUT-LEN
+           MOVE ALL '.' TO INPUT-REC
+           MOVE "Record 2" TO INPUT-REC (1:8)
+           WRITE INPUT-REC
+           DISPLAY "Write 2: STATUS IS " INPUT-STATUS 
+                   " LENGTH IS " INPUT-LEN
+                             UPON CONSOLE
+           CLOSE INFILE.
+])
+
+AT_CHECK([$COBC -x -std=mf -w prog.cob ], [0], [], [])
+
+AT_CHECK([export COB_MF_LS_INSTAB=true
+$COBCRUN_DIRECT ./prog], [0], [ Read 01: STATUS IS 00 LENGTH IS 030
+        :.........1.........2.........3                    :
+ Read 02: STATUS IS 00 LENGTH IS 030
+        :123456789012345678901234567890                    :
+ Read 03: STATUS IS 00 LENGTH IS 032
+        :ABC                DEF    t    X                  :
+Rewrite : STATUS IS 00 LENGTH IS 040
+        :NOP                XYZ    t                       :
+ Read 01: STATUS IS 00 LENGTH IS 030
+        :.........1.........2.........3                    :
+ Read 02: STATUS IS 00 LENGTH IS 030
+        :123456789012345678901234567890                    :
+ Read 03: STATUS IS 00 LENGTH IS 032
+        :NOP                XYZ    t                       :
+], [])
+
+AT_CLEANUP
+
 AT_SETUP([INDEXED File READ/DELETE/READ])
 AT_KEYWORDS([FileIo])
 
