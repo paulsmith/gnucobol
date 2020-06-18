@@ -3770,7 +3770,7 @@ lineseq_rewrite (cob_file_api *a, cob_file *f, const int opt)
 	psize = size;
 	slotlen = curroff - f->record_off - 1;
 	if ((f->file_features & COB_FILE_LS_NULLS)) {
-		size_t i, j, k, t;
+		size_t j;
 		for (j = 0; j < size; j++) {
 			if (p[j] < ' ') {
 				psize++;
