@@ -4,6 +4,7 @@
 	* codegen.c (output_local_fields): fixed bug #648, where variable length
 	  parameters' were not cached when the unrelated local_field_cache was
 	  empty.
+	* codegen.c: minor refactoring of duplicated code.
 
 2020-06-06  Ron Norman <rjn@inglenet.com>
 	* codegen.c: Changes to module entry to better handle

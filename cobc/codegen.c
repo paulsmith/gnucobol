@@ -2336,7 +2336,7 @@ output_local_fields (struct cb_program *prog)
 	if (prog->flag_recursive) {
 		output_local ("\n/* Fields for recursive routine */\n");
 	} else {
-		output_local ("\n/* Local Fields */\n");
+		output_local ("\n/* Local fields */\n");
 	}
 
 	output_local_field_cache (prog);
@@ -2746,6 +2746,24 @@ output_collating_tables (void)
 /* Strings */
 
 static void
+output_storage_clean (const char *text)
+{
+	char	text_cleaned[FILENAME_MAX];
+	int	pos = 0;
+	const char *c;
+
+	for (c = text; *c; ++c) {
+		if (*c == '\\' || *c == '"') {
+			text_cleaned[pos++] = '\\';
+		}
+		text_cleaned[pos++] = *c;
+	}
+	text_cleaned[pos] = 0;
+
+	output_storage ("%s", text_cleaned);
+}
+
+static void
 output_string_cache (void)
 {
 	struct string_list	*stp;
@@ -2758,25 +2776,15 @@ output_string_cache (void)
 
 	string_cache = string_list_reverse (string_cache);
 	for (stp = string_cache; stp; stp = stp->next) {
+		output_storage ("static const char %s%d[]\t= \"",
+				CB_PREFIX_STRING, stp->id);
 		if (!strrchr (stp->text, '\\')
 		 && !strrchr (stp->text, '"')) {
-			output_storage ("static const char %s%d[]\t= \"%s\";\n",
-				CB_PREFIX_STRING, stp->id, stp->text);
+			output_storage ("%s", stp->text);
 		} else {
-			char	text_cleaned[FILENAME_MAX];
-			int		pos = 0;
-			const char *c;
-
-			for (c = stp->text; *c; ++c) {
-				if (*c == '\\' || *c == '"') {
-					text_cleaned[pos++] = '\\';
-				}
-				text_cleaned[pos++] = *c;
-			}
-			text_cleaned[pos] = 0;
-			output_storage ("static const char %s%d[]\t= \"%s\";\n",
-				CB_PREFIX_STRING, stp->id, text_cleaned);
+			output_storage_clean (stp->text);
 		}
+		output_storage ("\";\n");
 	}
 
 	output_storage ("\n");
@@ -2798,23 +2806,16 @@ output_source_cache (void)
 	output_storage ("static const char *%ssource_files[]\t= { \"\" ", CB_PREFIX_STRING);
 	if (source_cache) {
 		for (stp = source_cache; stp; stp = stp->next) {
+			output_storage ("\n\t\t,\"");
+			
 			if (!strrchr (stp->text, '\\')
 			 && !strrchr (stp->text, '"')) {
-				output_storage ("\n\t\t,\"%s\"", stp->text);
+				output_storage ("%s", stp->text);
 			} else {
-				char	text_cleaned[FILENAME_MAX];
-				int		pos = 0;
-				const char *c;
-
-				for (c = stp->text; *c; ++c) {
-					if (*c == '\\' || *c == '"') {
-						text_cleaned[pos++] = '\\';
-					}
-					text_cleaned[pos++] = *c;
-				}
-				text_cleaned[pos] = 0;
-				output_storage ("\n\t\t,\"%s\"", text_cleaned);
+				output_storage_clean (stp->text);
 			}
+			
+			output_storage ("\"");
 		}
 	}
 	output_storage ("};\n");
@@ -7803,6 +7804,16 @@ output_file_variable (cb_tree x, struct cb_file *fl,
 }
 
 static void
+force_cache (struct cb_field * const f)
+{
+	FILE	*savetarget = output_target;
+
+	output_target = NULL;
+	output_param (cb_build_field_reference (f, NULL), 0);
+	output_target = savetarget;
+}
+
+static void
 output_stmt (cb_tree x)
 {
 	struct cb_binary_op	*bop;
@@ -7814,7 +7825,6 @@ output_stmt (cb_tree x)
 	struct cb_para_label	*pal;
 	struct cb_set_attr	*sap;
 	struct cb_field		*f1, *f2;
-	FILE			*savetarget;
 	char	*px;
 #ifdef	COB_NON_ALIGNED
 	struct cb_cast		*cp;
@@ -8183,18 +8193,12 @@ output_stmt (cb_tree x)
 				 && CB_CAST (ap->val)->cast_type == CB_CAST_ADDRESS) {
 					f1 = cb_code_field (CB_CAST(ap->var)->val);
 					if (!f1->flag_field) {
-						savetarget = output_target;
-						output_target = NULL;
-						output_param (cb_build_field_reference (f1, NULL), 0);
-						output_target = savetarget;
+						force_cache (f1);
 					}
 					if (f1->flag_any_length) {
 						f2 = cb_code_field (CB_CAST(ap->val)->val);
 						if (!f2->flag_field) {
-							savetarget = output_target;
-							output_target = NULL;
-							output_param (cb_build_field_reference (f2, NULL), 0);
-							output_target = savetarget;
+							force_cache (f2);
 						}
 						output_line ("%s%d.size = %s%d.size;",
 								CB_PREFIX_FIELD, f1->id,
@@ -8222,10 +8226,7 @@ output_stmt (cb_tree x)
 				if (f1->flag_any_length) {
 					f2 = cb_code_field (CB_CAST(ap->val)->val);
 					if (!f2->flag_field) {
-						savetarget = output_target;
-						output_target = NULL;
-						output_param (cb_build_field_reference (f2, NULL), 0);
-						output_target = savetarget;
+						force_cache (f2);
 					}
 					output_line ("%s%d.size = %s%d.size;",
 							CB_PREFIX_FIELD, f1->id,
@@ -10485,7 +10486,6 @@ output_module_init (struct cb_program *prog)
 static struct cb_field *
 setup_param (cb_tree l, int *is_value_parm, int *is_any_numeric)
 {
-	FILE	*savetarget;
 	struct cb_field *f;
 
 	f = cb_code_field (CB_VALUE (l));
@@ -10505,17 +10505,15 @@ setup_param (cb_tree l, int *is_value_parm, int *is_any_numeric)
 
 	/* Force PROCEDURE/ENTRY USING fields to cache */
 	if (!f->flag_field) {
-		savetarget = output_target;
-		output_target = NULL;
-		output_param (CB_VALUE (l), 0);
-		output_target = savetarget;
+		force_cache (f);
 	}
+	
 	return f;
 }
 
 /* Set given parameter address to NULL */
 static void
-setnull_param (cb_tree l)
+set_param_to_null (cb_tree l)
 {
 	struct cb_field *f;
 	f = cb_code_field (CB_VALUE (l));
@@ -11218,14 +11216,14 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	 && cb_list_length(parameter_list) > 0) {
 		output_line ("/* No sticky-linkage so NULL LINKAGE addresses */");
 		for (l2 = parameter_list; l2; l2 = CB_CHAIN (l2)) {
-			setnull_param (l2);
+			set_param_to_null (l2);
 		}
+		output_newline ();
 	}
 
 	/* Set up ANY length items */
 	if (cb_list_length (prog->entry_list) <= 1
 	 && !prog->flag_chained) {
-
 		i = 0;
 		anyseen = 0;
 		for (l = parameter_list; l; l = CB_CHAIN (l), i++) {
@@ -11282,6 +11280,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			output_line ("}");
 			output_line ("cob_glob_ptr->cob_call_name_hash = %u;", 0);
 		}
+		output_newline ();
 	}
 
 	/* Call parameters */
