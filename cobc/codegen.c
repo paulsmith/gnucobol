@@ -2278,38 +2278,27 @@ output_emit_field (cb_tree x, const char *cmt)
 static void
 output_local_field_cache (struct cb_program *prog)
 {
-	cb_tree			l;
 	struct field_list	*field;
 	struct cb_field		*f;
-	struct cb_report *rep;
 
 	if (!local_field_cache) {
 		return;
 	}
 
-	/* Switch to local storage file */
-	output_target = current_prog->local_include->local_fp;
-	if (prog->flag_recursive) {
-		output_local ("\n/* Fields for recursive routine */\n");
-	} else {
-		output_local ("\n/* Local Fields */\n");
-	}
-
 	local_field_cache = list_cache_sort (local_field_cache,
 					     &field_cache_cmp);
 	for (field = local_field_cache; field; field = field->next) {
-
 		f = field->f;
 		if (!f->flag_local
-		 && !f->flag_external) {
+		    && !f->flag_external) {
 			if (prog->flag_recursive
-			&& !f->flag_filler) {
+			    && !f->flag_filler) {
 				output ("/* %s is not local */", f->name);
 				output_newline ();
 			}
 			if (f->storage ==  CB_STORAGE_REPORT
-			 && f->flag_occurs 
-			 && f->occurs_max > 1) {
+			    && f->flag_occurs 
+			    && f->occurs_max > 1) {
 				output_emit_field (cb_build_field_reference (f, NULL), NULL);
 			} else {
 				output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD, f->id);
@@ -2317,7 +2306,7 @@ output_local_field_cache (struct cb_program *prog)
 			}
 		} else {
 			output ("%scob_field %s%d\t= ", prog->flag_recursive ? "\t" : "static ",
-						CB_PREFIX_FIELD, f->id);
+				CB_PREFIX_FIELD, f->id);
 			output ("{");
 			output_size (field->x);
 			output (", NULL, ");
@@ -2333,8 +2322,27 @@ output_local_field_cache (struct cb_program *prog)
 		output_newline ();
 		field->f->report_flag |= COB_REPORT_REF_EMITTED;
 	}
+}
+
+static void
+output_local_fields (struct cb_program *prog)
+{
+	cb_tree			l;
+	struct cb_field		*f;
+	struct cb_report *rep;
+
+	/* Switch to local storage file */
+	output_target = current_prog->local_include->local_fp;
+	if (prog->flag_recursive) {
+		output_local ("\n/* Fields for recursive routine */\n");
+	} else {
+		output_local ("\n/* Local Fields */\n");
+	}
+
+	output_local_field_cache (prog);
+	
+	/* Output variable size/location parameters */
 	for (l = prog->parameter_list; l; l = CB_CHAIN (l)) {
-		/* Force field cache */
 		f = cb_code_field (CB_VALUE (l));
 		if (!f->flag_field
 		 && (chk_field_variable_size (f)
@@ -2348,7 +2356,8 @@ output_local_field_cache (struct cb_program *prog)
 		}
 
 	}
-	/* Report special fields */
+	
+	/* Output report writer special fields */
 	if (prog->report_storage) {
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
 			rep = CB_REPORT(CB_VALUE(l));
@@ -12802,7 +12811,7 @@ codegen (struct cb_program *prog, const char *translate_name, const int subseque
 	}
 
 	output_local_base_cache ();
-	output_local_field_cache (prog);
+	output_local_fields (prog);
 
 	/* Report data fields */
 	if (prog->report_storage) {
