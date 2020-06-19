@@ -2709,7 +2709,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ASSIGN with data item in LINKAGE])
-AT_KEYWORDS([runfile-CONTROL file status])
+AT_KEYWORDS([runfile FILE-CONTROL file status])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -16117,405 +16117,6 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 AT_CLEANUP
 
 
-AT_SETUP([SELECT with ASSIGN in LINKAGE])
-AT_KEYWORDS([runfile FILE-CONTROL])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. prog.
-       
-       ENVIRONMENT DIVISION.
-       DATA DIVISION.
-       WORKING-STORAGE SECTION.
-       01  f-path     PIC X(80) VALUE "fooasg.txt".
-       01  x-path     PIC X(80) VALUE "foxasg.txt".
-       01  y-path     PIC X(80) VALUE "foyasg.txt".
-       01  REC1       PIC 9(4) VALUE 1.
-       01  REC2       PIC 9(4) VALUE 2.
-       01  CUST-STAT  PIC X(2) VALUE "XX".
-       
-       PROCEDURE DIVISION.
-           CALL "TSTOPN"  USING OMITTED.
-           CALL "TSTOPN"  USING y-path.
-           CALL "TSTOPEN" USING f-path  REC1 CUST-STAT.
-           CALL "TSTOPEN" USING x-path  REC1 CUST-STAT.
-           CALL "TSTOPEN" USING OMITTED REC1 CUST-STAT.
-           CALL "TSTOPEN" USING f-path  REC2 CUST-STAT.
-           CALL "TSTOPEN" USING x-path  REC2 CUST-STAT.
-           STOP RUN.
-           END PROGRAM prog.
-
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. TSTOPEN.
-       
-       ENVIRONMENT DIVISION.
-       INPUT-OUTPUT SECTION.
-       FILE-CONTROL.
-           SELECT f ASSIGN s-path
-           ORGANIZATION RELATIVE
-           ACCESS IS RANDOM 
-           RELATIVE KEY IS REC-NUM
-           FILE STATUS IS CUST-STAT.
-       
-       DATA DIVISION.
-       FILE SECTION.
-       FD  f.
-       01  f-line PIC X(79).
-       
-       WORKING-STORAGE SECTION.
-       01  z-path   PIC X(80) VALUE "foozzz.txt".
-
-       LINKAGE SECTION.
-       01  s-path     PIC X(80).
-       01  REC-NUM    PIC 9(4).
-       01  CUST-STAT  PIC X(2).
-       
-       PROCEDURE DIVISION USING s-path, REC-NUM, CUST-STAT.
-           IF ADDRESS OF s-path = NULL 
-              SET ADDRESS OF s-path TO ADDRESS OF z-path
-           END-IF.
-           IF REC-NUM > 1
-              OPEN I-O f 
-              DISPLAY "Extend file: " s-path(1:10) 
-                   " - " CUST-STAT " #" REC-NUM "."
-           ELSE
-              OPEN OUTPUT f 
-              DISPLAY "Output file: " s-path(1:10) 
-                   " - " CUST-STAT " #" REC-NUM "."
-           END-IF.
-           IF CUST-STAT NOT = "00"
-               DISPLAY "Opened error: " CUST-STAT "."
-               GOBACK
-           END-IF.
-           MOVE "Hello World" TO f-line.
-           MOVE REC-NUM       TO f-line (20:4).
-           WRITE f-line.
-           IF CUST-STAT NOT = "00"
-               DISPLAY "WRITE error: " CUST-STAT "."
-           END-IF.
-           CLOSE f.
-           GOBACK.
-       END PROGRAM TSTOPEN.
-
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. TSTOPN.
-       
-       ENVIRONMENT DIVISION.
-       INPUT-OUTPUT SECTION.
-       FILE-CONTROL.
-           SELECT f ASSIGN b-path
-           ORGANIZATION LINE SEQUENTIAL
-           FILE STATUS IS IO-STS.
-       
-       DATA DIVISION.
-       FILE SECTION.
-       FD  f.
-       01  f-line PIC X(80).
-       
-       WORKING-STORAGE SECTION.
-       01  IO-STS   PIC X(2) VALUE "00".
-       01  b-path   PIC X(80) BASED.
-
-       LINKAGE SECTION.
-       01  s-path   PIC X(80).
-       
-       PROCEDURE DIVISION USING s-path.
-           SET ADDRESS OF b-path TO ADDRESS OF s-path
-           OPEN OUTPUT f 
-           IF IO-STS NOT = "00"
-               DISPLAY "Opened error: " IO-STS "."
-               GOBACK
-           END-IF.
-           DISPLAY "Opened file: " s-path(1:10) ".".
-           MOVE "Hello World" TO f-line.
-           WRITE f-line.
-           CLOSE f.
-           GOBACK.
-       END PROGRAM TSTOPN.
-])
-
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
-
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[Opened error: 31.
-Opened file: foyasg.txt.
-Output file: fooasg.txt - 00 #0001.
-Output file: foxasg.txt - 00 #0001.
-Output file: foozzz.txt - 00 #0001.
-Extend file: fooasg.txt - 00 #0002.
-Extend file: foxasg.txt - 00 #0002.
-], [])
-
-AT_CLEANUP
-
-
-AT_SETUP([INDEXED File Variable len record])
-AT_KEYWORDS([runfile])
-
-AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
-
-AT_DATA([prog.cob], [
-       Identification division.
-       Program-id.  tb is initial program.
-      *
-       Environment division.
-       Configuration section.
-      *
-       Source-computer.  GNU-Cobol.
-       Object-computer.  GNU-Cobol.
-
-       Special-names.
-      *
-      * Display x upon std-out, to get 1>file1.txt.
-           console is std-out
-      * Display x upon std-err, to get 2>file2.txt
-           syserr  is std-err
-           .
-
-       Input-output section.
-       File-control.
-      *
-           Select optional tbw
-               assign to path-tbw
-               organization is indexed
-               access mode is dynamic
-               record key is tbw-key
-               alternate record key is tbw-alt
-                   suppress when space
-               sharing with no other
-               file status is fs-file-status.
-      *
-       I-o-control.
-      *
-       Data division.
-       File section.
-      *
-       FD  tbw
-           record is varying in size
-               from 107 to 362 characters
-               depending on end-tbw-record
-           .
-       01  tbw-record.
-           02 tbw-key                        pic x(100).
-           02 tbw-alt.
-               03 tbw-alt-1                  pic 9(02).
-               03 tbw-alt-2                  pic 9(04).
-           02 tbw-f1                         pic x(01).
-           02 tbw-f2                         pic x(255).
-      *
-       Working-storage section.
-
-       01  fs-file-status                 pic x(02).
-
-       01  end-tbw-record                 pic 9(09) binary.
-
-       01  flag-tbw                       pic x(01) value low-value.
-           88 flag-tbw-open   value high-value.
-           88 flag-tbw-closed value low-value.
-
-       01  path-tbw                       pic x(255) value space.
-
-       Procedure division.
-
-      * Prepare.
-           Move "tbw" to path-tbw.
-
-      * First test.
-           Perform tbw-delete-file thru tbw-exit.
-
-           Perform tbw-open-i-o    thru tbw-exit.
-
-           Move low-values to tbw-key.
-           Perform tbw-start-primary-greater thru tbw-exit.
-
-           Perform tbw-read-next thru tbw-exit.
-
-           Move 122 to end-tbw-record.
-           Move "aaaaa" to tbw-key.
-           Move spaces to tbw-alt
-                          tbw-f1
-                          tbw-f2.
-           Perform tbw-write thru tbw-exit.
-
-           Move low-values to tbw-alt.
-           Perform tbw-start-alternate thru tbw-exit.
-
-           Move low-values to tbw-key.
-           Perform tbw-start-primary-greater thru tbw-exit.
-
-           Perform tbw-read-next thru tbw-exit.
-
-           Perform tbw-read-next thru tbw-exit.
-
-      * Second test.
-           Perform tbw-close thru tbw-exit.
-
-           Perform tbw-delete-file thru tbw-exit.
-
-           Perform tbw-open-i-o thru tbw-exit.
-
-           Move low-values to tbw-key.
-           Perform tbw-start-primary-greater thru tbw-exit.
-
-           Perform tbw-read-next thru tbw-exit.
-
-           Move 163 to end-tbw-record.
-           Move "aaaaa" to tbw-key.
-           Move 1 to tbw-alt-1
-                     tbw-alt-2.
-           Move spaces to tbw-f1
-                          tbw-f2.
-           Perform tbw-write thru tbw-exit.
-
-           Move 122 to end-tbw-record.
-           Move "aaaab" to tbw-key.
-           Move spaces to tbw-alt
-                          tbw-f1
-                          tbw-f2.
-           Perform tbw-write thru tbw-exit.
-
-           Move low-values to tbw-alt.
-           Perform tbw-start-alternate thru tbw-exit.
-
-           Perform tbw-read-next thru tbw-exit.
-
-           Move spaces to tbw-alt.
-           Perform tbw-rewrite thru tbw-exit.
-
-      * Finish.
-           Perform tbw-close thru tbw-exit.
-           Display "Test completed".
-           Stop run.
-
-      * I/O.
-       tbw-Open-I-O.
-           If flag-tbw-open
-               Perform tbw-Close thru tbw-Close-exit
-           end-if.
-           Display "open".
-           Open i-o tbw.
-           Display "open".
-           If fs-file-status is less than "10"
-               Set flag-tbw-open to true
-           end-if.
-           Go to tbw-exit.
-      *
-       tbw-Start-Primary-Greater.
-           Display "start > tbw-key".
-           Start tbw
-               key is greater than tbw-key
-               invalid key Continue
-           end-start.
-           Display "start > tbw-key".
-           Go to tbw-exit.
-      *
-       tbw-Start-Alternate.
-           Display "start >= tbw-alt".
-           Start tbw
-               key is not less than tbw-alt
-               invalid key Continue
-           end-start.
-           Display "start >= tbw-alt".
-           Go to tbw-exit.
-      *
-       tbw-Read-Next.
-           Display "read next".
-           Read tbw
-               next record
-               at end Continue
-           end-read.
-           Display "read next done".
-           Go to tbw-exit.
-      *
-       tbw-Write.
-           Display "write".
-           Write tbw-record
-               invalid key Continue
-           end-write.
-           Display "write".
-           Go to tbw-exit.
-      *
-       tbw-Rewrite.
-           Display "rewrite".
-           Rewrite tbw-record
-               invalid key Continue
-           end-rewrite.
-           Display "rewrite " fs-file-status.
-           Go to tbw-exit.
-      *
-       tbw-Delete-File.
-           If flag-tbw-open
-               Perform tbw-Close thru tbw-Close-exit
-           end-if.
-           Move "xx" to fs-file-status.
-           Display "delete file".
-           Delete file tbw
-           end-delete.
-           Display "delete file".
-           Go to tbw-exit.
-      *
-       tbw-Close.
-           If flag-tbw-open
-               Display "close"
-               Close tbw
-               Display "close"
-               Set flag-tbw-closed to true
-           end-if.
-       tbw-Close-exit.
-           Exit.
-       tbw-exit.
-           Exit.
-])
-
-# CHECKME: do we need -std=mf here?
-AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
-
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [delete file
-delete file
-open
-open
-start > tbw-key
-start > tbw-key
-read next
-read next done
-write
-write
-start >= tbw-alt
-start >= tbw-alt
-start > tbw-key
-start > tbw-key
-read next
-read next done
-read next
-read next done
-close
-close
-delete file
-delete file
-open
-open
-start > tbw-key
-start > tbw-key
-read next
-read next done
-write
-write
-write
-write
-start >= tbw-alt
-start >= tbw-alt
-read next
-read next done
-rewrite
-rewrite 00
-close
-close
-Test completed
-], [])
-
-AT_CLEANUP
-
-
 AT_SETUP([GC LINE SEQUENTIAL Long-Record])
 AT_KEYWORDS([runfile])
 
@@ -17550,6 +17151,7 @@ Bad Read status:10
 
 AT_CLEANUP
 
+
 AT_SETUP([LINE SEQUENTIAL one Record])
 AT_KEYWORDS([runfile])
 
@@ -17783,6 +17385,7 @@ Read Status: 10
 
 AT_CLEANUP
 
+
 AT_SETUP([LINE SEQUENTIAL INSERTTAB])
 AT_KEYWORDS([runfile])
 
@@ -17909,7 +17512,7 @@ Rewrite : STATUS IS 00 LENGTH IS 040
 AT_CLEANUP
 
 AT_SETUP([INDEXED File READ/DELETE/READ])
-AT_KEYWORDS([FileIo])
+AT_KEYWORDS([runfile READ DELETE])
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 
@@ -17934,7 +17537,6 @@ AT_DATA([prog.cob], [
            ALTERNATE RECORD KEY IS SPLIT-KEY3
            SOURCE IS CM-DISK,CM-TAPE WITH DUPLICATES
       *         SUPPRESS WHEN ALL "*"
-                SUPPRESS WHEN "8417"
            FILE STATUS IS CUST-STAT
            .
 
