@@ -1457,6 +1457,12 @@ isam_write (cob_file_api *a, cob_file *f, const int opt)
 		}
 	} else {
 		if (unlikely(iswrite (fh->isfd, (void *)f->record->data))) {
+			if (f->access_mode == COB_ACCESS_SEQUENTIAL
+			 && f->open_mode == COB_OPEN_OUTPUT
+			 && f->flag_set_isam
+			 && ISERRNO == EDUPL) {
+				return COB_STATUS_21_KEY_INVALID;
+			}
 			return fisretsts (COB_STATUS_49_I_O_DENIED);
 		}
 		ret = COB_CHECK_DUP (ret);

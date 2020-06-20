@@ -1,4 +1,7 @@
 
+2020-06-20  Ron Norman <rjn@inglenet.com>
+	* fisam.c,fbdb.c: Fix to return status 21 instead of 22 when OPEN OUTPUT
+
 2020-06-18  Ron Norman <rjn@inglenet.com>
 	* coblocal.h,common.h: add flags for LS_INSTAB (Like MF INSERTTAB)
 	* common.c: Accept COB_MF_LS_INSTAB/mf_ls_instab in runtime.cfg

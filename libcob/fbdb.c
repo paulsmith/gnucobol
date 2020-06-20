@@ -1833,6 +1833,12 @@ ix_bdb_write (cob_file_api *a, cob_file *f, const int opt)
 
 	ret =  ix_bdb_write_internal (f, 0, opt);
 	bdb_close_cursor (f);
+	if (f->access_mode == COB_ACCESS_SEQUENTIAL
+	 && f->open_mode == COB_OPEN_OUTPUT
+	 && f->flag_set_isam
+	 && ret == COB_STATUS_22_KEY_EXISTS) {
+		return COB_STATUS_21_KEY_INVALID;
+	}
 	return ret;
 }
 
