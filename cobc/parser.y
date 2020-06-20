@@ -371,6 +371,88 @@ void set_pos_from_backup (cb_tree x)
 #endif
 
 static void
+validate_main_using_param (cb_tree using_list)
+{
+	cb_tree		x;
+	struct cb_field	*f;
+	struct cb_field *size_field;
+	struct cb_field *string_field;
+	
+	if (current_program->num_proc_params == 0) {
+		return;
+	} else if (current_program->num_proc_params > 1) {
+		cb_error (_("at most one USING parameter allowed in main programs"));
+		return;
+	}
+
+	/* De-reference the parameter */
+	x = CB_VALUE (using_list);
+	if (!CB_VALID_TREE (x) || cb_ref (x) == cb_error_node) {
+		return;
+	}
+	f = CB_FIELD (cb_ref (x));
+
+	/* Verify is group item */
+	if (!f->children) {
+		cb_error_x (CB_TREE (f), _("parameter '%s' is not a group item"),
+			    f->name);
+	}
+	/* Containing a signed 16-bit integer */
+	size_field = f->children;
+	if (!(size_field->size == 2
+	      && size_field->pic->have_sign
+	      && size_field->usage == CB_USAGE_BINARY)) {
+		cb_error_x (CB_TREE (size_field), _("item '%s' is not a signed 16-bit COMP integer"),
+			    size_field->name);
+	}
+
+	/* And a USAGE DISPLAY string (usually ODO). */
+	string_field = f->children->sister;
+	if (!string_field) {
+		cb_error_x (CB_TREE (f), _("group item '%s' has no record for parameter string"),
+			    f->name);
+	} else if (string_field->usage != CB_USAGE_DISPLAY) {
+		cb_error_x (CB_TREE (string_field), _("item '%s' must be USAGE DISPLAY"),
+			    string_field->name);
+	}
+
+	CB_PENDING (_("parameter for main program"));
+}
+
+static void
+validate_using (cb_tree using_list)
+{
+	cb_tree		l;
+	cb_tree		x;
+	struct cb_field	*f;
+
+	for (l = using_list; l; l = CB_CHAIN (l)) {
+		x = CB_VALUE (l);
+		if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
+			f = CB_FIELD (cb_ref (x));
+			if (!current_program->flag_chained) {
+				if (f->storage != CB_STORAGE_LINKAGE) {
+					cb_error_x (x, _("'%s' is not in LINKAGE SECTION"), f->name);
+				}
+				if (f->flag_item_based || f->flag_external) {
+					cb_error_x (x, _("'%s' cannot be BASED/EXTERNAL"), f->name);
+				}
+			} else {
+				if (f->storage != CB_STORAGE_WORKING) {
+					cb_error_x (x, _("'%s' is not in WORKING-STORAGE SECTION"), f->name);
+				}
+			}
+			if (f->level != 01 && f->level != 77) {
+				cb_error_x (x, _("'%s' not level 01 or 77"), f->name);
+			}
+			if (f->redefines) {
+				cb_error_x (x, _("'%s' REDEFINES field not allowed here"), f->name);
+			}
+		}
+	}
+}
+
+static void
 emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree convention)
 {
 	cb_tree		l;
@@ -400,32 +482,25 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 						"START PROGRAM", NULL));
 	}
 
+	validate_using (using_list);
+	if (current_program->flag_main
+	    && !current_program->flag_chained) {
+		validate_main_using_param (using_list);
+	}
+
+	
+	/* Mark USING fields as parameters */
 	param_num = 1;
 	for (l = using_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
 		if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
 			f = CB_FIELD (cb_ref (x));
 			if (!current_program->flag_chained) {
-				if (f->storage != CB_STORAGE_LINKAGE) {
-					cb_error_x (x, _("'%s' is not in LINKAGE SECTION"), f->name);
-				}
-				if (f->flag_item_based || f->flag_external) {
-					cb_error_x (x, _("'%s' cannot be BASED/EXTERNAL"), f->name);
-				}
 				f->flag_is_pdiv_parm = 1;
 			} else {
-				if (f->storage != CB_STORAGE_WORKING) {
-					cb_error_x (x, _("'%s' is not in WORKING-STORAGE SECTION"), f->name);
-				}
 				f->flag_chained = 1;
 				f->param_num = param_num;
 				param_num++;
-			}
-			if (f->level != 01 && f->level != 77) {
-				cb_error_x (x, _("'%s' not level 01 or 77"), f->name);
-			}
-			if (f->redefines) {
-				cb_error_x (x, _("'%s' REDEFINES field not allowed here"), f->name);
 			}
 			/* add a "receiving" entry for the USING parameter */
 			if (cb_listing_xref) {
@@ -434,7 +509,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 		}
 	}
 
-
+	/* Validate RETURNING */
 	if (current_program->returning &&
 		cb_ref (current_program->returning) != cb_error_node) {
 		ret_f = CB_FIELD (cb_ref (current_program->returning));
@@ -446,7 +521,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 		ret_f = NULL;
 	}
 
-	/* Check returning item against using items when FUNCTION */
+	/* Check a FUNCTION's RETURNING item is not a USING item */
 	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION && ret_f) {
 		for (l = using_list; l; l = CB_CHAIN (l)) {
 			x = CB_VALUE (l);
@@ -459,6 +534,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 		}
 	}
 
+	/* Check if duplicate ENTRY name */
 	for (l = current_program->entry_list; l; l = CB_CHAIN (l)) {
 		struct cb_label *check = CB_LABEL (CB_PURPOSE (l));
 		if (strcmp (name, check->name) == 0) {
@@ -9561,13 +9637,9 @@ procedure_division:
   }
   _procedure_declaratives
   {
-	if (current_program->flag_main
-	 && !current_program->flag_chained && $6) {
-		cb_error (_("executable program requested but PROCEDURE/ENTRY has USING clause"));
-	}
 	/* Main entry point */
-	emit_entry (current_program->program_id, 0, $6, NULL);
 	current_program->num_proc_params = cb_list_length ($6);
+	emit_entry (current_program->program_id, 0, $6, NULL);
 	if (current_program->source_name) {
 		emit_entry (current_program->source_name, 1, $6, NULL);
 	}

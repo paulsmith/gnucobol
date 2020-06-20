@@ -1,4 +1,9 @@
 
+2020-06-20  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (emit_entry): added parameter for main program as pending
+	  (FR #357).
+
 2020-06-18  Edward Hart <edward.dan.hart@gmail.com>
 
 	* codegen.c (output_local_fields): fixed bug #648, where variable length

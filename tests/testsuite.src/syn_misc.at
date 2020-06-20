@@ -7034,3 +7034,50 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 prog.cob:76: error: syntax error, unexpected end of file
 ])
 AT_CLEANUP
+
+
+AT_SETUP([Parameter for main program])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  parm.
+       >>IF WRONG1 DEFINED
+           03  parm-size PIC 999.
+       >>ELIF WRONG2 DEFINED
+           03  parm-size SIGNED-SHORT.
+       >>ELSE
+           03  parm-size PIC S999 COMP.
+       >>END-IF
+       >>IF WRONG1 DEFINED
+           03  parm-str POINTER.
+       >>ELSE
+           03  parm-str.
+               05  parm-char PIC X OCCURS 0 TO 100 TIMES
+                        DEPENDING ON parm-size.
+       >>END-IF
+       
+       PROCEDURE DIVISION USING parm.
+           DISPLAY "hi"
+           .
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE -DWRONG1 prog.cob], [1], [],
+[prog.cob:9: error: item 'parm-size' is not a signed 16-bit COMP integer
+prog.cob:16: error: item 'parm-str' must be USAGE DISPLAY
+prog.cob:24: warning: parameter for main program is not implemented
+])
+AT_CHECK([$COMPILE -DWRONG2 prog.cob], [1], [],
+[prog.cob:11: error: item 'parm-size' is not a signed 16-bit COMP integer
+prog.cob:24: warning: parameter for main program is not implemented
+])
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob:24: warning: parameter for main program is not implemented
+])
+
+AT_CLEANUP
