@@ -293,12 +293,15 @@ indexed_keydesc (cob_file *f, struct keydesc *kd, cob_file_key *key)
 		kd->k_start = key->offset;
 		kd->k_leng = key->field->size;
 		kd->k_type = CHARTYPE;
-#ifdef NULLKEY
 		if (key->tf_suppress) {
+#ifdef NULLKEY
 			kd->k_flags |= NULLKEY;
 			kd->k_type = CHARTYPE | (key->char_suppress << 8);
-		}
+#else
+			f->flag_write_chk_dups = 1;
+			kd->k_flags = ISDUPS;
 #endif
+		}
 		keylen = kd->k_leng;
 	} else {
 		keylen = 0;
@@ -307,12 +310,15 @@ indexed_keydesc (cob_file *f, struct keydesc *kd, cob_file_key *key)
 			kd->k_part[part].kp_leng = key->component[part]->size;
 			keylen += kd->k_part[part].kp_leng;
 			kd->k_part[part].kp_type = CHARTYPE;
-#ifdef NULLKEY
 			if (key->tf_suppress) {
+#ifdef NULLKEY
 				kd->k_flags |= NULLKEY;
 				kd->k_part[part].kp_type = CHARTYPE | (key->char_suppress << 8);
-			}
+#else
+				f->flag_write_chk_dups = 1;
+				kd->k_flags = ISDUPS;
 #endif
+			}
 		}
 		kd->k_nparts = part;
 	}
@@ -364,6 +370,7 @@ indexed_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 			f->last_key = f->keys[k].field;
 			*fullkeylen = f->keys[k].field->size;
 			*partlen = kf->size;
+			f->mapkey = k;
 			return fh->idxmap[k];
 		}
 	}
@@ -382,6 +389,7 @@ indexed_findkey (cob_file *f, cob_field *kf, int *fullkeylen, int *partlen)
 				} else {
 					*partlen = *fullkeylen;
 				}
+				f->mapkey = k;
 				return fh->idxmap[k];
 			}
 		}
@@ -1005,6 +1013,7 @@ isam_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 	}
 	k = indexed_findkey(f, key, &fullkeylen, &partlen);
 	if(k < 0) {
+		f->mapkey = -1;
 		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
 	/* Use size of data field; This may indicate a partial key */
@@ -1052,6 +1061,7 @@ isam_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 		if (cond == COB_LE || cond == COB_LT) {
 			if (isstart (fh->isfd, &fh->key[k], klen, (void *)f->record->data, ISLAST)) {
 				f->curkey = -1;
+				f->mapkey = -1;
 				fh->startcond = -1;
 				fh->readdir = -1;
 				fh->startiscur = 0;
@@ -1061,6 +1071,7 @@ isam_start (cob_file_api *a, cob_file *f, const int cond, cob_field *key)
 			}
 		} else {
 			f->curkey = -1;
+			f->mapkey = -1;
 			fh->startcond = -1;
 			fh->readdir = -1;
 			fh->startiscur = 0;

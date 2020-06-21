@@ -1,5 +1,10 @@
 
 2020-06-20  Ron Norman <rjn@inglenet.com>
+	* common.h: add mapkey to cob_file
+	* fileio.c,fisam.c: Fix to handle old VBISAM that does not support 
+	            sparse indexes
+
+2020-06-20  Ron Norman <rjn@inglenet.com>
 	* fisam.c,fbdb.c: Fix to return status 21 instead of 22 when OPEN OUTPUT
 
 2020-06-18  Ron Norman <rjn@inglenet.com>

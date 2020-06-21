@@ -1565,6 +1565,7 @@ typedef struct __cob_file {
 	long				file_pid;		/* Process id of other end of pipe */
 	void				*fileout;		/* output side of bi-directional pipe 'FILE*' */
 	int					fdout;			/* output side of bi-directional pipe 'fd' */
+	short 				mapkey;			/* Remapped index number, when FD does note match file */
 } cob_file;
 
 

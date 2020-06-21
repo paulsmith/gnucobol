@@ -5066,6 +5066,7 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 	f->last_operation = COB_LAST_OPEN;
 	f->flag_read_done = 0;
 	f->curkey = -1;
+	f->mapkey = -1;
 
 	/* File was previously closed with lock */
 	if (f->open_mode == COB_OPEN_LOCKED) {
@@ -5413,23 +5414,28 @@ Again:
 	case COB_STATUS_02_SUCCESS_DUPLICATE:
 		/* If record has suppressed key, skip it */
 		/* This is to catch old VBISAM, ODBC & OCI */
-		idx = f->curkey;
-		if ((idx >= 0 && idx < (int)f->nkeys) 
-		&& f->keys[idx].len_suppress > 0) {
-			pos = cob_savekey (f, idx, f->keys[idx].field->data);
-			if (memcmp(f->keys[idx].field->data, f->keys[idx].str_suppress,
-						f->keys[idx].len_suppress) == 0) {
-				goto Again;
+		if (f->organization == COB_ORG_INDEXED) {
+			idx = f->curkey;
+			if (f->mapkey >= 0) {	/* FD has Indexes in alternate appearance */
+				idx = f->mapkey;
 			}
-		} else
-		if ((idx >= 0 && idx < (int)f->nkeys) 
-		 && f->keys[idx].tf_suppress) {	
-			pos = cob_savekey (f, idx, f->keys[idx].field->data);
-			for (pos = 0; pos < (int)f->keys[idx].field->size 
-				&& f->keys[idx].field->data[pos] == (unsigned char)f->keys[idx].char_suppress;
-				pos++);
-			if (pos == f->keys[idx].field->size) 	/* All SUPPRESS char so skip */
-				goto Again;
+			if ((idx >= 0 && idx < (int)f->nkeys) 
+			&& f->keys[idx].len_suppress > 0) {
+				pos = cob_savekey (f, idx, f->keys[idx].field->data);
+				if (memcmp(f->keys[idx].field->data, f->keys[idx].str_suppress,
+							f->keys[idx].len_suppress) == 0) {
+					goto Again;
+				}
+			} else
+			if ((idx >= 0 && idx < (int)f->nkeys) 
+			 && f->keys[idx].tf_suppress) {	
+				pos = cob_savekey (f, idx, f->keys[idx].field->data);
+				for (pos = 0; pos < (int)f->keys[idx].field->size 
+					&& f->keys[idx].field->data[pos] == (unsigned char)f->keys[idx].char_suppress;
+					pos++);
+				if (pos == f->keys[idx].field->size) 	/* All SUPPRESS char so skip */
+					goto Again;
+			}
 		}
 
 		f->flag_first_read = 0;
