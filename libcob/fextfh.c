@@ -1323,7 +1323,7 @@ org_handling:
 		break;
 
 	case OP_DELETE_FILE:
-		cob_delete_file(f, fs);
+		cob_delete_file(f, fs, 0);
 		memcpy(fcd->fileStatus, fnstatus, 2);
 		break;
 

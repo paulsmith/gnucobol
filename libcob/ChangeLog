@@ -1,4 +1,9 @@
 
+2020-06-23  Ron Norman <rjn@inglenet.com>
+	* exception.def: Added COB_EC_DELETE_FILE
+	* fileio.c: Set COB_EC_DELETE_FILE as required
+	* fextfh.c: Prepare for cob_delete_file given 'override' option
+
 2020-06-20  Ron Norman <rjn@inglenet.com>
 	* common.h: add mapkey to cob_file
 	* fileio.c,fisam.c: Fix to handle old VBISAM that does not support 

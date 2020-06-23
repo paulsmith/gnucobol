@@ -1,4 +1,11 @@
 
+2020-06-23  Ron Norman <rjn@inglenet.com>
+	* parser.y: Changed to use common parsing for [NOT] EXCEPTION
+			Added [NOT] EXCEPTION to DELETE FILE
+	* codegen.c: Changes for EXCEPTION handling for DELETE FILE
+	* typeck.c: Changes for EXCEPTION handling for DELETE FILE
+			and some code tidy up
+
 2020-06-20  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (emit_entry): added parameter for main program as pending

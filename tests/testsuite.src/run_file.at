@@ -18221,3 +18221,146 @@ Hit End of File
 
 AT_CLEANUP
 
+AT_SETUP([DELETE FILE MF])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT INFILE     ASSIGN TO "lsfile.txt"
+                ORGANIZATION IS LINE SEQUENTIAL
+                FILE STATUS  IS INPUT-STATUS .
+      
+       DATA DIVISION.
+       FILE SECTION.
+       FD INFILE.
+       01  INPUT-REC           PIC X(50).
+      
+       WORKING-STORAGE SECTION.
+      
+       01  REC-NUM             PIC 99.
+       01  INPUT-STATUS        PIC XX  VALUE "00".
+       01  STAT-RDF REDEFINES INPUT-STATUS.
+           05  STAT-1          PIC X.
+           05  STAT-2          PIC X COMP-X.
+       01  INPUT-LEN           PIC 999 VALUE 18 .
+      
+       PROCEDURE DIVISION.
+       MAIN-LINE.
+           OPEN OUTPUT INFILE
+           CLOSE INFILE.
+           DELETE FILE INFILE
+           ON EXCEPTION 
+            DISPLAY "1)  Delete File Status: " NO ADVANCING
+            PERFORM DISP-STAT
+           NOT ON EXCEPTION
+            DISPLAY "1)  Good Delete File"
+            END-DISPLAY
+           END-DELETE.
+           DISPLAY "1a) Delete File Status: '" INPUT-STATUS "'".
+
+           DELETE FILE INFILE
+           ON EXCEPTION 
+            DISPLAY "2)  Delete File Status: " NO ADVANCING
+            PERFORM DISP-STAT
+           NOT ON EXCEPTION
+            DISPLAY "2)  Good Delete File. Unexpected!"
+           END-DELETE.
+           DISPLAY "2a) Delete File Status: " NO ADVANCING
+           PERFORM DISP-STAT
+           STOP RUN.
+
+       DISP-STAT.
+           IF STAT-1 = '9'
+               DISPLAY "'" STAT-1 "'/" STAT-2
+           ELSE
+               DISPLAY "'" INPUT-STATUS "'"
+           END-IF.
+
+])
+
+AT_CHECK([$COBC -x -std=mf -w -fmf-files prog.cob ], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [1)  Good Delete File
+1a) Delete File Status: '00'
+2)  Delete File Status: '9'/013
+2a) Delete File Status: '9'/013
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([DELETE FILE Not MF])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT INFILE     ASSIGN TO "lsfile.txt"
+                ORGANIZATION IS LINE SEQUENTIAL
+                FILE STATUS  IS INPUT-STATUS .
+      
+       DATA DIVISION.
+       FILE SECTION.
+       FD INFILE.
+       01  INPUT-REC           PIC X(50).
+      
+       WORKING-STORAGE SECTION.
+      
+       01  REC-NUM             PIC 99.
+       01  INPUT-STATUS        PIC XX  VALUE "00".
+       01  STAT-RDF REDEFINES INPUT-STATUS.
+           05  STAT-1          PIC X.
+           05  STAT-2          PIC X COMP-X.
+       01  INPUT-LEN           PIC 999 VALUE 18 .
+      
+       PROCEDURE DIVISION.
+       MAIN-LINE.
+           OPEN OUTPUT INFILE
+           CLOSE INFILE.
+           DELETE FILE INFILE
+           ON EXCEPTION 
+            DISPLAY "1)  Delete File Status: " NO ADVANCING
+            PERFORM DISP-STAT
+           NOT ON EXCEPTION
+            DISPLAY "1)  Good Delete File"
+            END-DISPLAY
+           END-DELETE.
+           DISPLAY "1a) Delete File Status: '" INPUT-STATUS "'".
+
+           DELETE FILE INFILE
+           ON EXCEPTION 
+            DISPLAY "2)  Delete File Status: " NO ADVANCING
+            PERFORM DISP-STAT
+           NOT ON EXCEPTION
+            DISPLAY "2)  Good Delete File. Unexpected!"
+           END-DELETE.
+           DISPLAY "2a) Delete File Status: " NO ADVANCING
+           PERFORM DISP-STAT
+           STOP RUN.
+
+       DISP-STAT.
+           IF STAT-1 = '9'
+               DISPLAY "'" STAT-1 "'/" STAT-2
+           ELSE
+               DISPLAY "'" INPUT-STATUS "'"
+           END-IF.
+
+])
+
+AT_CHECK([$COBC -x -std=default -w prog.cob ], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [1)  Good Delete File
+1a) Delete File Status: '00'
+2)  Delete File Status: '05'
+2a) Delete File Status: '05'
+], [])
+
+AT_CLEANUP
+

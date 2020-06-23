@@ -2580,7 +2580,7 @@ COB_EXPIMP void cob_start	(cob_file *, const int, cob_field *,
 COB_EXPIMP void cob_write	(cob_file *, cob_field *, const int,
 				 cob_field *, const unsigned int);
 
-COB_EXPIMP void cob_delete_file	(cob_file *, cob_field *);
+COB_EXPIMP void cob_delete_file	(cob_file *, cob_field *, const int);
 COB_EXPIMP void cob_unlock_file	(cob_file *, cob_field *);
 
 /***************************************************************/

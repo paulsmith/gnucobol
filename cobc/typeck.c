@@ -7309,9 +7309,9 @@ cb_emit_close (cb_tree file, cb_tree opt)
 	}
 
 	/* Check for file debugging */
-	if (current_program->flag_debugging &&
-	    !current_statement->flag_in_debug &&
-	    CB_FILE(file)->flag_fl_debug) {
+	if (current_program->flag_debugging 
+	 && !current_statement->flag_in_debug 
+	 && CB_FILE(file)->flag_fl_debug) {
 		cb_emit (cb_build_debug (cb_debug_name, f->name, NULL));
 		cb_emit (cb_build_move (cb_space, cb_debug_contents));
 		cb_emit (cb_build_debug_call (f->debug_section));
@@ -7384,9 +7384,9 @@ cb_emit_delete (cb_tree file)
 	}
 
 	/* Check for file debugging */
-	if (current_program->flag_debugging &&
-	    !current_statement->flag_in_debug &&
-	    f->flag_fl_debug) {
+	if (current_program->flag_debugging 
+	 && !current_statement->flag_in_debug 
+	 && f->flag_fl_debug) {
 		/* Gen callback after delete but before exception test */
 		current_statement->flag_callback = 1;
 	}
@@ -7412,17 +7412,20 @@ cb_emit_delete_file (cb_tree file)
 				_("%s not allowed on %s files"), "DELETE FILE", "SORT");
 		return;
 	}
+	if (current_statement->ex_handler == NULL
+	 && current_statement->not_ex_handler == NULL)
+	  	current_statement->handler_type = NO_HANDLER;
 
 	/* Check for file debugging */
-	if (current_program->flag_debugging &&
-	    !current_statement->flag_in_debug &&
-	    CB_FILE(file)->flag_fl_debug) {
+	if (current_program->flag_debugging 
+	 && !current_statement->flag_in_debug 
+	 && CB_FILE(file)->flag_fl_debug) {
 		/* Gen callback after delete but before exception test */
 		current_statement->flag_callback = 1;
 	}
 
-	cb_emit (CB_BUILD_FUNCALL_2 ("cob_delete_file", file,
-				     CB_FILE(file)->file_status));
+	cb_emit (CB_BUILD_FUNCALL_3 ("cob_delete_file", file,
+				     CB_FILE(file)->file_status, cb_int0));
 }
 
 
@@ -7885,6 +7888,9 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 			return;
 		}
 	}
+	if (current_statement->ex_handler == NULL
+	 && current_statement->not_ex_handler == NULL)
+	  	current_statement->handler_type = NO_HANDLER;
 
 	/* Validate line_column and the attributes */
 	initialize_attrs (attr_ptr, &fgc, &bgc, &scroll, &size_is, &disp_attrs);
@@ -10611,9 +10617,9 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 	}
 
 	/* Check for file debugging */
-	if (current_program->flag_debugging &&
-	    !current_statement->flag_in_debug &&
-	    f->flag_fl_debug) {
+	if (current_program->flag_debugging 
+	 && !current_statement->flag_in_debug 
+	 && f->flag_fl_debug) {
 		cb_emit (cb_build_debug (cb_debug_name, f->name, NULL));
 		cb_emit (cb_build_move (cb_space, cb_debug_contents));
 		cb_emit (cb_build_debug_call (f->debug_section));
@@ -10820,9 +10826,9 @@ cb_emit_read (cb_tree ref, cb_tree next, cb_tree into,
 	}
 
 	/* Check for file debugging */
-	if (current_program->flag_debugging &&
-	    !current_statement->flag_in_debug &&
-	    f->flag_fl_debug) {
+	if (current_program->flag_debugging 
+	 && !current_statement->flag_in_debug 
+	 && f->flag_fl_debug) {
 		if (into) {
 			current_statement->handler3 =
 				CB_LIST_INIT (current_statement->handler3);
@@ -11870,9 +11876,9 @@ cb_emit_start (cb_tree file, cb_tree op, cb_tree key, cb_tree keylen)
 	}
 
 	/* Check for file debugging */
-	if (current_program->flag_debugging &&
-	    !current_statement->flag_in_debug &&
-	    f->flag_fl_debug) {
+	if (current_program->flag_debugging 
+	 && !current_statement->flag_in_debug 
+	 && f->flag_fl_debug) {
 		/* Gen callback after start but before exception test */
 		current_statement->flag_callback = 1;
 	}
@@ -12933,6 +12939,9 @@ cb_emit_xml_generate (cb_tree out, cb_tree from, cb_tree count,
 {
 	struct cb_ml_generate_tree	*tree;
 
+	if (current_statement->ex_handler == NULL
+	 && current_statement->not_ex_handler == NULL)
+	  	current_statement->handler_type = NO_HANDLER;
 #ifndef WITH_XML2
 	if (!warn_xml_done) {
 		warn_xml_done = 1;
@@ -12977,6 +12986,9 @@ cb_emit_json_generate (cb_tree out, cb_tree from, cb_tree count,
 {
 	struct cb_ml_generate_tree	*tree;
 
+	if (current_statement->ex_handler == NULL
+	 && current_statement->not_ex_handler == NULL)
+	  	current_statement->handler_type = NO_HANDLER;
 #ifndef WITH_CJSON
 	if (!warn_json_done) {
 		warn_json_done = 1;

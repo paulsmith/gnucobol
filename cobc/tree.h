@@ -1409,7 +1409,8 @@ enum cb_handler_type {
 	EOP_HANDLER,
 	INVALID_KEY_HANDLER,
 	XML_HANDLER,
-	JSON_HANDLER
+	JSON_HANDLER,
+	DELETE_FILE_HANDLER
 };
 
 /* Statement */

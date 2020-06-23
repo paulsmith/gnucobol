@@ -251,6 +251,9 @@ static cb_tree			eval_check[EVAL_DEPTH][EVAL_DEPTH];
 
 static const char		*backup_source_file = NULL;
 static int			backup_source_line = 0;
+#define EXCEPT_MAX	32
+static int			except_idx = 0;
+static enum cb_handler_type except_type[EXCEPT_MAX];
 
 /* Defines for header presence */
 
@@ -9596,6 +9599,9 @@ _procedure_division:
 	current_paragraph = NULL;
 	check_pic_duplicate = 0;
 	check_duplicate = 0;
+	for (except_idx=0; except_idx < EXCEPT_MAX; except_idx++)
+		except_type [except_idx] = NO_HANDLER;
+	except_idx = 0;
 	if (!current_program->entry_convention) {
 		current_program->entry_convention = cb_int (CB_CONV_COBOL);
 	}
@@ -9976,6 +9982,7 @@ procedure:
 | TOK_DOT
   {
 	/* check_unreached = 0; */
+	except_idx = 0;
 	cb_end_statement();
   }
 ;
@@ -11674,7 +11681,7 @@ delete_body:
   {
 	cb_emit_delete ($1);
   }
-| TOK_FILE delete_file_list
+| TOK_FILE delete_file_list _delete_exception_phrases
 ;
 
 delete_file_list:
@@ -16088,11 +16095,47 @@ not_escape_or_not_exception:
 | NOT_EXCEPTION
 ;
 
-
 _display_exception_phrases:
+  {
+	except_type [except_idx++] = DISPLAY_HANDLER;
+  }
+  _exception_phrases
+  {
+	  except_idx--;
+  };
+
+_delete_exception_phrases:
+  {
+	except_type [except_idx++] = DELETE_FILE_HANDLER;
+  }
+  _exception_phrases
+  {
+	  except_idx--;
+  };
+
+_xml_exception_phrases:
+  {
+	except_type [except_idx++] = XML_HANDLER;
+  }
+  _exception_phrases
+  {
+	  except_idx--;
+  };
+
+_json_exception_phrases:
+  {
+	except_type [except_idx++] = JSON_HANDLER;
+  }
+  _exception_phrases
+  {
+	  except_idx--;
+  };
+
+/* Generic [NOT] ON EXCEPTION */
+_exception_phrases:
   %prec SHIFT_PREFER
-| disp_on_exception _disp_not_on_exception
-| disp_not_on_exception _disp_on_exception
+| except_on_exception _except_not_on_exception
+| except_not_on_exception _except_on_exception
   {
 	if ($2) {
 		cb_verify (cb_not_exception_before_exception,
@@ -16101,122 +16144,34 @@ _display_exception_phrases:
   }
 ;
 
-_disp_on_exception:
+_except_on_exception:
   %prec SHIFT_PREFER
   {
 	$$ = NULL;
   }
-| disp_on_exception
+| except_on_exception
   {
 	$$ = cb_int1;
   }
 ;
 
-disp_on_exception:
+except_on_exception:
   EXCEPTION statement_list
   {
-	current_statement->handler_type = DISPLAY_HANDLER;
+	current_statement->handler_type = except_type [except_idx-1];
 	current_statement->ex_handler = $2;
   }
 ;
 
-_disp_not_on_exception:
+_except_not_on_exception:
   %prec SHIFT_PREFER
-| disp_not_on_exception
+| except_not_on_exception
 ;
 
-disp_not_on_exception:
+except_not_on_exception:
   NOT_EXCEPTION statement_list
   {
-	current_statement->handler_type = DISPLAY_HANDLER;
-	current_statement->not_ex_handler = $2;
-  }
-;
-
-_xml_exception_phrases:
-  %prec SHIFT_PREFER
-| xml_on_exception _xml_not_on_exception
-| xml_not_on_exception _xml_on_exception
-  {
-	if ($2) {
-		cb_verify (cb_not_exception_before_exception,
-			   _("NOT EXCEPTION before EXCEPTION"));
-	}
-  }
-;
-
-_xml_on_exception:
-  %prec SHIFT_PREFER
-  {
-	$$ = NULL;
-  }
-| xml_on_exception
-  {
-	$$ = cb_int1;
-  }
-;
-
-xml_on_exception:
-  EXCEPTION statement_list
-  {
-	current_statement->handler_type = XML_HANDLER;
-	current_statement->ex_handler = $2;
-  }
-;
-
-_xml_not_on_exception:
-  %prec SHIFT_PREFER
-| xml_not_on_exception
-;
-
-xml_not_on_exception:
-  NOT_EXCEPTION statement_list
-  {
-	current_statement->handler_type = XML_HANDLER;
-	current_statement->not_ex_handler = $2;
-  }
-;
-
-_json_exception_phrases:
-  %prec SHIFT_PREFER
-| json_on_exception _json_not_on_exception
-| json_not_on_exception _json_on_exception
-  {
-	if ($2) {
-		cb_verify (cb_not_exception_before_exception,
-			   _("NOT EXCEPTION before EXCEPTION"));
-	}
-  }
-;
-
-_json_on_exception:
-  %prec SHIFT_PREFER
-  {
-	$$ = NULL;
-  }
-| json_on_exception
-  {
-	$$ = cb_int1;
-  }
-;
-
-json_on_exception:
-  EXCEPTION statement_list
-  {
-	current_statement->handler_type = JSON_HANDLER;
-	current_statement->ex_handler = $2;
-  }
-;
-
-_json_not_on_exception:
-  %prec SHIFT_PREFER
-| json_not_on_exception
-;
-
-json_not_on_exception:
-  NOT_EXCEPTION statement_list
-  {
-	current_statement->handler_type = JSON_HANDLER;
+	current_statement->handler_type = except_type [except_idx-1];
 	current_statement->not_ex_handler = $2;
   }
 ;

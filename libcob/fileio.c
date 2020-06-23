@@ -129,6 +129,7 @@ struct cobsort {
 cob_global	*file_globptr = NULL;
 cob_settings	*file_setptr = NULL;
 
+static unsigned int	delete_file_status = 0;
 static unsigned int	eop_status = 0;
 static unsigned int	check_eop_status = 0;
 
@@ -2150,7 +2151,12 @@ cob_file_save_status (cob_file *f, cob_field *fnstatus, const int status)
 			cob_file_sync (f);
 		}
 	} else {
-		cob_set_exception (status_exception[status / 10]);
+		if (delete_file_status) {
+			delete_file_status = 0;
+			cob_set_exception (COB_EC_DELETE_FILE);
+		} else {
+			cob_set_exception (status_exception[status / 10]);
+		}
 		f->file_status[0] = (unsigned char)COB_I2D (status / 10);
 		f->file_status[1] = (unsigned char)COB_I2D (status % 10);
 		if (fnstatus) {
@@ -5648,8 +5654,9 @@ cob_rollback (void)
 }
 
 void
-cob_delete_file (cob_file *f, cob_field *fnstatus)
+cob_delete_file (cob_file *f, cob_field *fnstatus, const int override)
 {
+	COB_UNUSED (override);
 	f->last_operation = COB_LAST_DELETE_FILE;
 	if (f->organization == COB_ORG_SORT) {
 		cob_file_save_status (f, fnstatus, COB_STATUS_30_PERMANENT_ERROR);
@@ -5677,14 +5684,30 @@ cob_delete_file (cob_file *f, cob_field *fnstatus)
 	cob_field_to_string (f->assign, file_open_name, (size_t)COB_FILE_MAX);
 	cob_chk_file_mapping (f);
 
+	errno = 0;
+	delete_file_status = 1;
 	if (f->organization != COB_ORG_INDEXED) {
 		unlink (file_open_name);
 	} else {
 		cob_file_save_status (f, fnstatus,
 			fileio_funcs[get_io_ptr (f)]->fildelete (&file_api, f, file_open_name));
+		delete_file_status = 0;
 		return;
 	}
-	cob_file_save_status (f, fnstatus, errno_cob_sts(COB_STATUS_00_SUCCESS));
+	if (errno == ENOENT) {
+		cob_file_save_status (f, fnstatus, 5);
+		if (file_setptr->cob_mf_files
+		 || f->file_format == COB_FILE_IS_MF) {
+			f->file_status[0] = '9';
+			f->file_status[1] = 13;
+			if (fnstatus) {
+				memcpy (fnstatus->data, f->file_status, (size_t)2);
+			}
+		}
+	} else {
+		cob_file_save_status (f, fnstatus, errno_cob_sts(COB_STATUS_00_SUCCESS));
+	}
+	delete_file_status = 0;
 }
 
 /* Return index number for given key */
