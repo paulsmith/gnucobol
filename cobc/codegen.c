@@ -1687,7 +1687,13 @@ output_standard_includes (struct cb_program *prog)
 		output_line ("#include <windows.h>");
 	}
 	if (prog->decimal_index_max || prog->flag_decimal_comp) {
+		#if defined (HAVE_GMP_H)
 		output_line ("#include <gmp.h>");
+		#elif defined (HAVE_MPIR_H)
+		output_line ("#include <mpir.h>");
+		#else
+		#error either HAVE_GMP_H or HAVE_MPIR_H needs to be defined
+		#endif
 	}
 	output_line ("#include <libcob.h>");
 	output_newline ();

@@ -18,6 +18,20 @@
 	  empty.
 	* codegen.c: minor refactoring of duplicated code.
 
+2020-06-14  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (process_run): use of new COBC_NAME + COBCRUN_NAME now defined in
+	  defaults.h, if available use the fullname of the current process instead
+	  of fixed "cobc" to get the path for cobcrun, extract some code to
+	  resolve_name_from_cobc
+	* cobc.c (main, process_run): fix compile from stdin with job-run
+	* field.c (validate_any_length_item): allow ANY LENGTH for PIC 1
+
+2020-06-09  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: don't do pointer arithemetic on string constant (fixing Bug #644
+	  warning on MacOS)
+
 2020-06-06  Ron Norman <rjn@inglenet.com>
 	* codegen.c: Changes to module entry to better handle
 			C mod calls COBOL mod calls C mod calls COBOL mod
@@ -187,6 +201,10 @@
 
 	* codegen.c: emit warning if ORANIZATION INDEXED used but not supported
 	* typeck.c: emit warning if XML or JSON used but not supported
+
+2020-03-09  Simon Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c: FR #372 honor HAVE_GMP_H and HAVE_MPIR_H
 
 2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
 

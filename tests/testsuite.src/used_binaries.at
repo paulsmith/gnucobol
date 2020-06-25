@@ -567,29 +567,8 @@ AT_CHECK([$COBCRUN -q -M], [1], [],
 AT_CLEANUP
 
 
-AT_SETUP([Compile from stdin])
-AT_KEYWORDS([runmisc stdin])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      a.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-       PROCEDURE        DIVISION.
-           STOP RUN WITH NORMAL STATUS.
-])
-
-AT_CHECK([cat prog.cob | $COMPILE -], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./a.out], [0], [], [])
-
-AT_CHECK([cat prog.cob | $COMPILE_MODULE -], [0], [], [])
-AT_CHECK([$COBCRUN a], [0], [], [])
-
-AT_CLEANUP
-
-
 AT_SETUP([Run job after compilation])
-AT_KEYWORDS([runmisc job])
+AT_KEYWORDS([runmisc cobcrun])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -608,7 +587,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Run job after compilation (path specified)])
-AT_KEYWORDS([runmisc job])
+AT_KEYWORDS([runmisc cobcrun])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -628,7 +607,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Run job with optional arguments])
-AT_KEYWORDS([runmisc job])
+AT_KEYWORDS([runmisc cobcrun])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -645,5 +624,45 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE -j="job 123" prog.cob], [0], [job 123 ], [])
 AT_CHECK([$COMPILE -jdg prog.cob], [0], [        ], [])
 AT_CHECK([$COMPILE_MODULE --job=job123 prog.cob], [0], [job123  ], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Compile from stdin])
+AT_KEYWORDS([runmisc cobcrun])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      a.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN WITH NORMAL STATUS.
+])
+
+AT_CHECK([cat prog.cob | $COMPILE -], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./a.out], [0], [], [])
+
+AT_CHECK([cat prog.cob | $COMPILE_MODULE -], [0], [], [])
+AT_CHECK([$COBCRUN a], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Run job after compilation from stdin])
+AT_KEYWORDS([runmisc cobcrun])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      a.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY "job" WITH NO ADVANCING END-DISPLAY
+           STOP RUN WITH NORMAL STATUS.
+])
+
+AT_CHECK([cat prog.cob | $COMPILE -j -], [0], [job], [])
+AT_CHECK([cat prog.cob | $COMPILE_MODULE -j -], [0], [job], [])
 
 AT_CLEANUP

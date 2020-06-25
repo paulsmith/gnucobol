@@ -1,4 +1,13 @@
 
+2020-06-15  Simon Sobisch <simonsobisch@gnu.org>
+
+	* config.h.in, defaults.h.in: updated
+	* set_env_vs.bat: added vs2019
+
+2020-04-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* config.h.in: FR #372 allow use of "pure" MPIR (without gmp-compat)
+
 2020-02-03  Simon Sobisch <simonsobisch@gnu.org>
 
 	* makedist.cmd: renamed from makedist.bat
@@ -211,7 +220,7 @@
 
 	* update for subfolder vc10
 
-2014-07-07  Philipp Böhme <phi.boehme@googlemail.com>
+2014-07-07  Philipp Bï¿½hme <phi.boehme@googlemail.com>
 
 	* minor bugfix (tpyos) for subfolder vc12
 
@@ -222,7 +231,7 @@
 	* updated all project files
 	* added subfolder vc11
 
-2014-06-20  Philipp Böhme <phi.boehme@googlemail.com>
+2014-06-20  Philipp Bï¿½hme <phi.boehme@googlemail.com>
 
 	* added project files - subfolders: vc7, vc8, vc9, vc10, vc12 
 	  (original project files and ressource files version_cobc.rc,

@@ -1,4 +1,4 @@
-:: Copyright (C) 2014-2019 Free Software Foundation, Inc.
+:: Copyright (C) 2014-2020 Free Software Foundation, Inc.
 :: Written by Simon Sobisch
 ::
 :: This file is part of GnuCOBOL.
@@ -49,7 +49,7 @@ if "%errorlevel%" == "0" (
    echo cl.exe already in PATH
    echo no further initialization is done for the C compiler
    echo.
-   goto :gc
+   goto :setup_gc
 )
 
 :vsvars
@@ -57,56 +57,48 @@ if "%errorlevel%" == "0" (
 :: Check for valid MSC Environment and let it do it's work.
 :: If not found try Windows SDKs in standard installation folders
 
-:: Visual Studio 2017: no VS150COMNTOOLS globally or vsvars any more...
-if exist "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat" (
-   call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat" -arch=%arch_full%
-   goto :gc
+@echo on
+
+:: Visual Studio 2017 and newer: no VS150COMNTOOLS globally or vsvars any more...
+:: check if available, otherwise check on
+set "found="
+for %%v in (2019 2017) do (
+   if not [%found%] == []  goto :eof
+   call :vsvars_current %%v
 )
-if exist "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Professional\Common7\Tools\VsDevCmd.bat" (
-   call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Professional\Common7\Tools\VsDevCmd.bat" -arch=%arch_full%
-   goto :gc
-)
-if exist "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" (
-   call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=%arch_full%
-   goto :gc
-)
-if exist "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat" (
-   call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat" -arch=%arch_full%
-   goto :gc
+if not [%found%] == [] (
+   call "%found%" -arch=%arch_full%
+   goto :setup_gc
 )
 
-:: Visual Studio 2015
-if exist "%VS140COMNTOOLS%vsvars32.bat" (
-   call "%VS140COMNTOOLS%vsvars32.bat"
-   goto :gc
+:: Visual Studio 2015, 2013, 2012, 2010, 2008, 2005
+for %%v in ("%VS140COMNTOOLS%" "%VS120COMNTOOLS%" "%VS110COMNTOOLS%" "%VS100COMNTOOLS%" "%VS90COMNTOOLS%" "%VS80COMNTOOLS%") do (
+   if not [%found%] == []  goto :eof
+   call :vsvars_old %%v
 )
-:: Visual Studio 2013
-if exist "%VS120COMNTOOLS%vsvars32.bat" (
-   call "%VS120COMNTOOLS%vsvars32.bat"
-   goto :gc
-)
-:: Visual Studio 2012
-if exist "%VS110COMNTOOLS%vsvars32.bat" (
-   call "%VS110COMNTOOLS%vsvars32.bat"
-   goto :gc
-)
-:: Visual Studio 2010
-if exist "%VS100COMNTOOLS%vsvars32.bat" (
-   call "%VS100COMNTOOLS%vsvars32.bat"
-   goto :gc
-)
-:: Visual Studio 2008
-if exist "%VS90COMNTOOLS%vsvars32.bat" (
-   call "%VS90COMNTOOLS%vsvars32.bat"
-   goto :gc
-)
-:: Visual Studio 2005
-if exist "%VS80COMNTOOLS%vsvars32.bat" (
-   call "%VS80COMNTOOLS%vsvars32.bat"
-   goto :gc
+if not [%found%] == [] (
+   call %found%vsvars32.bat
+   goto :setup_gc
 )
 
+goto :sdk_setup
+
+:vsvars_current
+for %%v in (BuildTools Community Professional Enterprise) do (
+  if not [%found%] == []  goto :eof
+  if exist "%ProgramFiles(x86)%\Microsoft Visual Studio\%1\%%v\Common7\Tools\VsDevCmd.bat" (
+     set "found=%ProgramFiles(x86)%\Microsoft Visual Studio\%1\%%v\Common7\Tools\VsDevCmd.bat"
+  )
+)
+goto :eof
+
+:vsvars_old
+if exist %%1%vsvars32.bat  set "found=%1"
+goto :eof
+
+:sdk_setup
 echo Warning: Not possible to set %arch_full% environment for Microsoft Visual Studio!
+
 :: Windows SDK 10 (Windows 10 / VS 2015 compiler) - untested
 if exist "%ProgramFiles(x86)%\Microsoft SDKs\Windows\v10\Bin\SetEnv.Cmd" (
    call "%ProgramFiles(x86)%\Microsoft SDKs\Windows\v10\Bin\SetEnv.Cmd" /%arch% /release
@@ -168,12 +160,13 @@ echo Warning: Not possible to set %arch_full% environment for Microsoft Windows 
 :gcc
 color 07
 
-:gc
+:setup_gc
 
 :: check if cl.exe is already in path
+echo cl.exe now in PATH:
 where cl.exe 2>nul
 if "%errorlevel%" == "0" (
-   echo cl.exe now in PATH:
+   echo.
    cl.exe 1>nul
 ) else (
    echo ERROR: cl.exe not found!
@@ -185,7 +178,7 @@ echo.
 echo Setting environment for GnuCOBOL.
 
 :: Get the main dir from the batch's position
-set "COB_MAIN_DIR=%~dp0"
+set "COB_MAIN_DIR=%~dp0../"
 
 :: Set the necessary folders for cobc
 set "COB_CONFIG_DIR=%COB_MAIN_DIR%config"

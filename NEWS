@@ -21,10 +21,12 @@ NEWS - user visible changes				-*- outline -*-
 *     and --with-index-extfh is obsolete and will be removed in the
 *     next major release
 
-* many internal changes, possibly changing some defaults
+* many internal changes, changing some defaults (TODO: list in detail)
 
 
- GnuCOBOL 3.1-rc1/final to be released (in June 2019)
+ GnuCOBOL 3.1-final to be released (in Aug-Sept 2020)
+ 
+ GnuCOBOL 3.1-rc1 to be released (in June 2020)
 
 * New GnuCOBOL features
 
@@ -38,9 +40,12 @@ NEWS - user visible changes				-*- outline -*-
    
 ** CONTINUE AFTER statement (COBOL 202x) implemented, also handle fractions
    of seconds in C$SLEEP now
+   
+** TYPEDEF and SAME AS (COBOL 2002) implemented, including the MicroFocus
+   and RM/COBOL variants
 
 ** Improved support for different compiler extensions (ACUCOBOL, IBM,
-   Fujitsu, MicroFocus COBOL, Microsoft COBOL, RM/COBOL and more)
+   Fujitsu, MicroFocus COBOL, Microsoft COBOL, RM/COBOL, CA Realia and more)
 
 ** file handling: include support for a callable EXTFH interface also provided
    by several compilers including Micro Focus
@@ -51,7 +56,7 @@ NEWS - user visible changes				-*- outline -*-
    In turn `yourfh()` may call `EXTFH()` to use I/O functions from GnuCOBOL.
    The external file handler can also be directly invoked from COBOL, too,
    using `CALL "EXTFH"`.
-   ** Note: Not all flags contained in the FCD3 are handled already **
+   ** Note: Not each flag contained in the FCD3 is handled already **
    
 ** screen i/o: initial mouse support (for details see runtime.cfg),
    use of CURSOR clause in SPECIAL-NAMES for positioning on ACCEPT
@@ -65,9 +70,21 @@ NEWS - user visible changes				-*- outline -*-
    if used replace by standard "LINE / COL +/- integer"
 
 
-* Changed cobc options:
+* Changes to the COBOL compiler (cobc) options:
 
+<<<<<<< .working
   CHECKME
+||||||| .merge-left.r3609
+  CHECKME - are there any?
+=======
+** adjustments to warning options:
+   -Wextra "new" option to enable every possible warning that is not dialect
+       specific (this option used to be called -W)
+   -Wadditional  new warning group for all warnings that don't have a group
+       on their own
+   -Wno-error and -Wno-error=<warning> to treat (specific <warning>s) not as error
+>>>>>>> .merge-right.r3612
+
 
 * Changes in the COBOL runtime (libcob)
 
@@ -105,6 +122,16 @@ NEWS - user visible changes				-*- outline -*-
    Note: As a special case you may built-in cJSON by putting its source in
    a sub-directory cJSON. If there is no working cJSON in the system or explicit
    specified by --with-cjson=local this version will be compiled into libcob.
+
+** To adjust the build system for GMP/MPIR you may use the new variables
+   GMP_CFLAGS / MPIR_CFLAGS and GMP_LIBS / MPIR_LIBS.
+   If unset configure will try pkg-config.
+
+** To adjust configure to use libxml2 you may use the new variables XML2_CFLAGS
+   and XML2_LIBS. If unset configure will use pkg-config / xml2-config.
+
+** To adjust configure to use libcjson you may use the new variables CJSON_CFLAGS
+   and CJSON_LIBS. If unset configure will use pkg-config.
 
 ** Any time after `make` you can call `pre-inst-env` script to use the still-
    uninstalled binaries. Samples:

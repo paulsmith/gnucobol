@@ -147,10 +147,17 @@
 #endif  /* __ORANGEC__ */
 // */
 
+#ifndef DATAROOTDIR
+#define DATAROOTDIR      COB_MAIN_DIR
+#endif
+
 #ifndef LOCALEDIR
 #ifdef MAKE_DIST
-#define LOCALEDIR        COB_MAIN_DIR "\\locale\""
+#define LOCALEDIR        COB_MAIN_DIR "\\locale"
 #else
 #define LOCALEDIR        "C:\\locale"
 #endif
 #endif
+
+#define COBC_NAME        "cobc"
+#define COBCRUN_NAME     "cobcrun"

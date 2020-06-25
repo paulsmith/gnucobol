@@ -1075,7 +1075,7 @@ AT_CLEANUP
 
 
 AT_SETUP([CALL BY VALUE alphanumeric item (extension)])
-AT_KEYWORDS([definition])
+AT_KEYWORDS([definition CONTENT])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1097,7 +1097,7 @@ AT_CLEANUP
 
 
 AT_SETUP([CALL BY VALUE national item (extension)])
-AT_KEYWORDS([definition])
+AT_KEYWORDS([definition CONTENT])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

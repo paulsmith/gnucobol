@@ -1,5 +1,6 @@
 
 2020-06-23  Ron Norman <rjn@inglenet.com>
+
 	* exception.def: Added COB_EC_DELETE_FILE
 	* fileio.c: Set COB_EC_DELETE_FILE as required
 	* fextfh.c: Prepare for cob_delete_file given 'override' option
@@ -26,6 +27,16 @@
 	* fileio.c: Fixed problem with updating key definitions
 				from BDB data dictionary file
 				
+2020-06-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* move.c (cob_move_display_to_binary, cob_move_binary_to_display): approach
+	  to fix runtime error (overflow in assignment) recognized with bug #384
+
+2020-06-10  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c->fileio.h: define fdatasync if missing
+	  (fixing Bug #644 warning on MacOS)
+
 2020-05-16  Ron Norman <rjn@inglenet.com>
 
 	* fisam.c: Fixed problem with READ PREVIOUS/DELETE/READ PREVIOUS
@@ -62,6 +73,11 @@
 	* common.h: Add fields for implementing LINE SEQUENTIAL pipes
 	* fileio.c: Add code for LINE SEQUENTIAL pipes
 
+2020-04-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (print_info) [mpir_version]: fixed string overflow warnings
+	* numeric.c (cob_decimal_print): use of mpz_get_str in favor of gmp_sprintf
+
 2020-04-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c: changed "FUNCTION/USING parameter" to "FUNCTION/USING argument"
@@ -78,6 +94,10 @@
 	* Makefile.am: adjusted invocation of help2man, using new defines
 	  HELPSOURCES and HELP2MAN_OPTS
 	* Makefile.am: honor new conditional MAKE_HAS_PREREQ_ONLY
+
+2020-03-09  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c, intrinsic.c, numeric.c: FR #372 honor HAVE_GMP_H and HAVE_MPIR_H
 
 2020-03-01  Simon Sobisch <simonsobisch@gnu.org>
 

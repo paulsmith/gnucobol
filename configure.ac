@@ -75,6 +75,7 @@ AH_TEMPLATE([COB_TREE_DEBUG], [Enable extra checks within the compiler (Develope
 AH_TEMPLATE([COB_PARAM_CHECK], [Enable minimum parameter check for system libraries])
 AH_TEMPLATE([PATCH_LEVEL], [Define a patch level (numeric, max. 8 digits)])
 AH_TEMPLATE([MAX_CALL_FIELD_PARAMS], [Define maximum parameters for CALL])
+AH_TEMPLATE([WITH_MATH], [Math multiple precision library])
 AH_TEMPLATE([WITH_INDEX_EXTFH], [Compile with obsolete external INDEXED handler])
 AH_TEMPLATE([WITH_INDEXED], [Default INDEXED file handler])
 AH_TEMPLATE([WITH_IXDFLT], [Default INDEXED file handler])
@@ -119,10 +120,13 @@ AH_TEMPLATE([HAVE_DESIGNATED_INITS], [Has designated initializers])
 AH_TEMPLATE([HAVE_NANO_SLEEP], [Has nanosleep function])
 AH_TEMPLATE([HAVE_CLOCK_GETTIME], [Has clock_gettime function and CLOCK_REALTIME])
 AH_TEMPLATE([HAVE_ISFINITE], [Has isfinite function])
-AH_TEMPLATE([HAVE_MP_GET_MEMORY_FUNCTIONS], [Do we have mp_get_memory_functions in gmp])
+AH_TEMPLATE([HAVE_MP_GET_MEMORY_FUNCTIONS], [Do we have mp_get_memory_functions in GMP/MPIR])
 #AH_TEMPLATE([HAVE_RAISE], [Has raise function])
 AH_TEMPLATE([HAVE_FINITE_IEEEFP_H],
 	[Declaration of finite function in ieeefp.h instead of math.h])
+
+# preparation for cross-compilation
+AC_ARG_PROGRAM
 
 # Configure options part I (not needing any compilation)
 
@@ -264,7 +268,6 @@ AC_PROG_CC_STDC
 AC_PROG_CPP
 
 AC_USE_SYSTEM_EXTENSIONS
-
 
 # general flags for compiler and linker and tests for those
 AC_ARG_VAR([LIBCOB_CPPFLAGS], [see CPPFLAGS, but only applied during generation of libcob])
@@ -415,7 +418,7 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([memmove memset setlocale fcntl strerror strcasecmp \
 	strchr strrchr strdup strstr atol strtol atoll strtoll gettimeofday localeconv \
 	getexecname canonicalize_file_name popen raise readlink realpath \
-	setenv strcoll])
+	setenv strcoll flockfile])
 
 # Check for timezone
 AC_MSG_CHECKING([for timezone variable access])
@@ -513,6 +516,176 @@ fi
 
 # set PKG_CONFIG to use (cross-compile aware)
 PKG_PROG_PKG_CONFIG
+
+
+# Checks for gmp.
+AC_MSG_NOTICE([Checks for GMP/MPIR ...])
+
+AC_ARG_WITH([math],
+  [AS_HELP_STRING([[--with-math[=ARG]]],
+    [(GnuCOBOL) Use math multiple precision library, where ARG may be:
+     check (default), gmp, mpir])],
+  [case "$with_math" in
+    gmp | mpir | check)
+		USE_MATH="$with_math"
+		;;
+	yes)
+		USE_MATH="check"
+		;;
+	no)
+		AC_MSG_ERROR([Cannot build GnuCOBOL without math multiple precision library)])
+		;;
+    *)
+		AC_MSG_ERROR([invalid value "$with_math" for --with-math,
+  must be one of the following:
+  gmp, mpir (use only the specified library)
+  check  (use whatever library is usable)])
+		;;
+  esac],
+  [USE_MATH="check"])
+
+MYOLDLIBS=$LIBS
+MYOLDCPPFLAGS=$CPPFLAGS
+
+AS_IF([test "$USE_MATH" = "gmp" -o "$USE_MATH" = "check"], [
+	curr_libs="$LIBS"; curr_cppflags="$CPPFLAGS"
+	PKG_CHECK_MODULES([GMP], [gmp], [], [#])
+	if test -n "$GMP_CFLAGS"; then
+	  CPPFLAGS="$CPPFLAGS $GMP_CFLAGS"
+	fi
+	if test -z "$GMP_LIBS"; then
+	  GMP_LIBS="-lgmp"
+	fi
+	LIBS="$LIBS $GMP_LIBS"
+	AC_CHECK_HEADERS([gmp.h],
+		[AC_CHECK_HEADERS([gmp.h], [
+		AC_MSG_CHECKING([if linking against libgmp with "$GMP_LIBS" works])
+		AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <gmp.h>]],
+		  [[mpz_t integ; mpz_init (integ);]])],
+		  [AC_MSG_RESULT([yes])
+		   LIBCOB_CPPFLAGS="$LIBCOB_CPPFLAGS $GMP_CFLAGS"
+		   LIBCOB_LIBS="$LIBCOB_LIBS $GMP_LIBS"
+		   USE_MATH=gmp],
+		  [AC_MSG_RESULT([no])
+		   if test "$USE_MATH" = "gmp"; then 
+		     AC_MSG_ERROR([[GMP is required for --with-math=gmp, you may adjust GMP_LIBS]])
+		   fi
+		   LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"])
+		],
+		[if test "$USE_MATH" = "gmp"; then 
+		    AC_MSG_ERROR([gmp.h is required for --with-math=gmp, you may adjust GMP_CFLAGS])
+		 fi
+		 LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"]
+	)])
+])
+
+AS_IF([test "$USE_MATH" = "mpir" -o "$USE_MATH" = "check"], [
+	# note: currently MPIR does not ship a .pc file, but is expected to follow GMP
+	curr_libs="$LIBS"; curr_cppflags="$CPPFLAGS"
+	PKG_CHECK_MODULES([MPIR], [mpir], [], [#])
+	if test -n "$MPIR_CFLAGS"; then
+	  CPPFLAGS="$CPPFLAGS $MPIR_CFLAGS"
+	fi
+	if test -z "$MPIR_LIBS"; then
+	  GMP_LIBS="-lmpir"
+	fi
+	LIBS="$LIBS $MPIR_LIBS"
+	AC_CHECK_HEADERS([mpir.h],
+		[AC_CHECK_HEADERS([mpir.h], [
+		AC_MSG_CHECKING([if linking against libmpir with "$MPIR_LIBS" works])
+		AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <mpir.h>]],
+		  [[mpz_t integ; mpz_init (integ);]])],
+		  [AC_MSG_RESULT([yes])
+		   LIBCOB_CPPFLAGS="$LIBCOB_CPPFLAGS $MPIR_CFLAGS"
+		   LIBCOB_LIBS="$LIBCOB_LIBS $MPIR_LIBS"
+		   USE_MATH=mpir],
+		  [AC_MSG_RESULT([no])
+		   if test "$USE_MATH" = "mpir"; then 
+		     AC_MSG_ERROR([[MPIR is required for --with-math=mpir, you may adjust GMP_LIBS]])
+		   fi
+		   LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"])
+		],
+		[if test "$USE_MATH" = "mpir"; then 
+		    AC_MSG_ERROR([mpir.h is required for --with-math=mpir, you may adjust GMP_CFLAGS])
+		 fi
+		 LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"]
+	)])
+])
+
+if test "$USE_MATH" = "check"; then
+	AC_MSG_ERROR([neither GMP nor MPIR library are found, but one of those is mandatory])
+fi
+
+AC_MSG_CHECKING([matching GMP version])
+# Check just major/minor levels between header and library
+# get GMP version from lib
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+	#include <stdio.h>
+	#ifdef _WIN32
+	#ifndef __GMP_LIBGMP_DLL
+	#define __GMP_LIBGMP_DLL 1
+	#endif
+	#endif
+	#if defined HAVE_GMP_H
+	#include <gmp.h>
+	#elif defined HAVE_MPIR_H
+	#include <mpir.h>
+	#endif
+	int main (int argc, char **argv)
+	{
+		(void)argv;
+		if (argc > 1)
+			printf ("%s", gmp_version);
+		return 0;
+	}
+	]])],
+	[COB_GMP_LIB=`./conftest$ac_exeext x`],
+	[AC_MSG_ERROR([Unable to extract GMP version information from gmp_version])],
+	[AC_MSG_WARN([matching GMP version assumed])]
+	 COB_GMP_LIB="cross")
+if test "x$COB_GMP_LIB" = "x"; then
+	AC_MSG_ERROR([Unable to extract GMP version information (library)])
+fi
+
+# get GMP version from header
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+	#include <stdio.h>
+	#if defined HAVE_GMP_H
+	#include <gmp.h>
+	#elif defined HAVE_MPIR_H
+	#include <mpir.h>
+	#endif
+	int main (int argc, char **argv)
+	{
+		(void)argv;
+		if (argc > 1)
+			printf ("%d.%d", __GNU_MP_VERSION, __GNU_MP_VERSION_MINOR);
+		return 0;
+	}
+	]])],
+	[COB_GMP_HEADER=`./conftest$ac_exeext x`],
+	[AC_MSG_ERROR([Unable to extract GMP version information from header])],
+	[AC_MSG_WARN([cannot run test program while cross-compiling])
+	 COB_GMP_HEADER="cross-compilation - assumed"])
+if test "x$COB_GMP_HEADER" = "x"; then
+	AC_MSG_ERROR([Unable to extract GMP version information (header)])
+fi
+
+COB_GMP_LIB_MAJOR=$(echo "$COB_GMP_LIB" | cut -d. -f1)
+COB_GMP_LIB_MINOR=$(echo "$COB_GMP_LIB" | cut -d. -f2)
+
+if test "$COB_GMP_HEADER" = "$COB_GMP_LIB_MAJOR.$COB_GMP_LIB_MINOR" -o "$COB_GMP_LIB" = "cross"; then
+	AC_MSG_RESULT([yes ($COB_GMP_HEADER)])
+else
+	AC_MSG_RESULT([no (header: $COB_GMP_HEADER / library: $COB_GMP_LIB)])
+	AC_MSG_ERROR([Unable to use GMP - Please check config.log])
+fi
+
+LIBS="$MYOLDLIBS"
+CPPFLAGS="$MYOLDCPPFLAGS"
+
+AC_CHECK_LIB([$USE_MATH], [__gmp_get_memory_functions],
+ [AC_DEFINE([HAVE_MP_GET_MEMORY_FUNCTIONS], [1])], [], [])
 
 
 # Configure options part II (needing compilation)
@@ -613,7 +786,7 @@ AS_IF([test "$with_cjson" = "yes" -o "$with_cjson" = "local" -o "$with_cjson" = 
 	  )
 	fi
 	CPPFLAGS="$curr_cppflags"
-	if test "$with_cjson_local" = "no"; then
+	AS_IF([test "$with_cjson_local" = "no"], [
 		AC_MSG_NOTICE([using local cJSON: no])
 		if test "$with_cjson" = "local"; then 
 		  AC_MSG_ERROR([[cJSON source is required in directory "libcob" for --with-cjson=local]])
@@ -656,12 +829,12 @@ AS_IF([test "$with_cjson" = "yes" -o "$with_cjson" = "local" -o "$with_cjson" = 
 		     with_cjson=no
 		   fi])
 		fi
-	else
+	], [
 		AC_MSG_NOTICE([using local cJSON: $with_cjson_local])
 		with_cjson="local"
 		AC_DEFINE([WITH_CJSON], [1])
 		AC_DEFINE([HAVE_CJSON_H], [1])
-	fi
+	])
 	LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
 ])
 
@@ -697,98 +870,19 @@ AC_ARG_WITH([varseq],
 AC_DEFINE_UNQUOTED([WITH_VARSEQ], [$with_varseq])
 
 
-# Checks for gmp.
-AC_MSG_NOTICE([Checks for GMP ...])
-AC_CHECK_HEADERS([gmp.h], [], AC_MSG_ERROR([gmp.h (GMP) is required]), [])
-
-AC_CHECK_LIB([gmp], [__gmpz_init],
-	[LIBCOB_LIBS="$LIBCOB_LIBS -lgmp"],
-	AC_MSG_ERROR([GMP library is required]), [])
-
-# Check just major/minor levels between header and library
-# get GMP version from header
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-	#include <stdio.h>
-	#include <gmp.h>
-	int main (int argc, char **argv)
-	{
-		(void)argv;
-		if (argc > 1)
-			printf ("%d.%d", __GNU_MP_VERSION, __GNU_MP_VERSION_MINOR);
-		return 0;
-	}
-	]])],
-	[COB_GMP_HEADER=`./conftest$ac_exeext x`],
-	[AC_MSG_ERROR([Unable to extract GMP version information from gmp.h])],
-	[AC_MSG_WARN([cannot run test program while cross-compiling])
-	 COB_GMP_HEADER="cross-compilation - assumed"])
-if test "x$COB_GMP_HEADER" = "x"; then
-	AC_MSG_ERROR([Unable to extract GMP version information (header)])
-fi
-
-MYOLDLIBS=$LIBS
-LIBS="$MYOLDLIBS -lgmp"
-# get GMP version from lib
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-	#include <stdio.h>
-	#ifdef _WIN32
-	#ifndef __GMP_LIBGMP_DLL
-	#define __GMP_LIBGMP_DLL 1
-	#endif
-	#endif
-	#include <gmp.h>
-	int main (int argc, char **argv)
-	{
-		(void)argv;
-		if (argc > 1)
-			printf ("%s", gmp_version);
-		return 0;
-	}
-	]])],
-	[COB_GMP_LIB=`./conftest$ac_exeext x`],
-	[AC_MSG_ERROR([Unable to extract GMP version information from gmp_version])],
-	[AC_MSG_WARN([matching GMP version assumed])]
-	 COB_GMP_LIB="cross")
-if test "x$COB_GMP_LIB" = "x"; then
-	AC_MSG_ERROR([Unable to extract GMP version information (library)])
-fi
-
-AC_MSG_CHECKING([matching GMP version])
-COB_GMP_LIB_MAJOR=$(echo "$COB_GMP_LIB" | cut -d. -f1)
-COB_GMP_LIB_MINOR=$(echo "$COB_GMP_LIB" | cut -d. -f2)
-
-if test "$COB_GMP_HEADER" = "$COB_GMP_LIB_MAJOR.$COB_GMP_LIB_MINOR" -o "$COB_GMP_LIB" = "cross"; then
-	AC_MSG_RESULT([yes ($COB_GMP_HEADER)])
-else
-	AC_MSG_RESULT([no (header: $COB_GMP_HEADER / library: $COB_GMP_LIB)])
-	AC_MSG_ERROR([Unable to use GMP - Please check config.log])
-fi
-LIBS=$MYOLDLIBS
-
-
-# Works fine as an alternative if necessary
-# AC_SEARCH_LIBS([__gmp_get_memory_functions], [gmp], [AC_DEFINE([HAVE_MP_GET_MEMORY_FUNCTIONS], [1])], [], [])
-AC_CHECK_LIB([gmp], [__gmp_get_memory_functions], [AC_DEFINE([HAVE_MP_GET_MEMORY_FUNCTIONS], [1])], [], [])
-
-
 # Solaris has nanosleep in other libraries
-AC_MSG_CHECKING([for nanosleep])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]],
   [[nanosleep (NULL, NULL);]])],
-  [AC_DEFINE([HAVE_NANO_SLEEP], [1]) AC_MSG_RESULT([yes])],
+  [AC_DEFINE([HAVE_NANO_SLEEP], [1])],
   [AC_CHECK_LIB([rt], [nanosleep], [], [], [])
    if test "x$ac_cv_lib_rt_nanosleep" = "xyes"; then
      AC_DEFINE([HAVE_NANO_SLEEP], [1])
-     AC_MSG_RESULT([yes])
      LIBCOB_LIBS="$LIBCOB_LIBS -lrt"
    else
      AC_CHECK_LIB([posix4], [nanosleep], [], [], [])
      if test "x$ac_cv_lib_posix4_nanosleep" = "xyes"; then
        AC_DEFINE([HAVE_NANO_SLEEP], [1])
-       AC_MSG_RESULT([yes])
        LIBCOB_LIBS="$LIBCOB_LIBS -lposix4"
-     else
-       AC_MSG_RESULT([no])
      fi
    fi])
 
@@ -824,6 +918,7 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <math.h>]],
 #  [])
 
 AC_CHECK_FUNCS([fdatasync sigaction])
+AC_CHECK_DECLS([fdatasync])	# also check for declaration, missing on MacOS...
 
 # Checks for gettext.
 
@@ -1206,6 +1301,7 @@ cob_gen_cisam=no
     fi ],
   [])
 
+AS_IF([test "$with_cisam" != "yes"], [
   AC_ARG_WITH([disam],
   [AS_HELP_STRING([--with-disam],
     [(GnuCOBOL) Use DISAM for ISAM I/O])],
@@ -1251,6 +1347,7 @@ cob_gen_cisam=no
 		AC_MSG_ERROR([libifisam is required for CISAM]), [-lifisamx])
     fi ],
   [])
+])
 
 if test "$cob_multi_isam" = "no"; then
 	LIBCOB_LIBS="$LIBCOB_LIBS $LIBCOB_ISAM"
@@ -2088,6 +2185,7 @@ else
 fi
 AC_MSG_NOTICE([ Use gettext for international messages:      ${USE_NLS}])
 AC_MSG_NOTICE([ Use fcntl for file locking:                  ${ac_cv_func_fcntl}])
+AC_MSG_NOTICE([ Use math multiple precision library:         ${USE_MATH}])
 case "$USE_CURSES" in
   not_found)
     AC_MSG_NOTICE([ screen I/O (no curses found):                NO])

@@ -24,7 +24,7 @@
 
 /* Only define cob_decimal if we have the necessary mpz_t from gmp.h/mpir.h
    (or can self-define it from mp.h) */
-#ifndef __GMP_H__
+#if !defined (__GMP_H__)
 #ifndef __GNU_MP__
 #define COB_WITHOUT_DECIMAL
 #else
