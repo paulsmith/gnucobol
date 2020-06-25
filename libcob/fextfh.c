@@ -60,12 +60,9 @@ free_extfh_fcd (void)
 static void
 update_file_to_fcd (cob_file *f, FCD3 *fcd, unsigned char *fnstatus)
 {
-	if (f->file_status)
-		memcpy (fcd->fileStatus,f->file_status,2);
-	else if (fnstatus)
+	memcpy (fcd->fileStatus,f->file_status,2);
+	if (fnstatus)
 		memcpy (fcd->fileStatus, fnstatus, 2);
-	else
-		memcpy (fcd->fileStatus,"00",2);
 	if (f->open_mode == COB_OPEN_CLOSED)
 		fcd->openMode = OPEN_NOT_OPEN;
 	else if( f->open_mode == COB_OPEN_INPUT)
@@ -273,9 +270,7 @@ update_fcd_to_file (FCD3* fcd, cob_file *f, cob_field *fnstatus, int wasOpen)
 		} else {
 			cobglobptr->cob_exception_code = 0;
 		}
-		if (f->file_status) {
-			memcpy(f->file_status, fcd->fileStatus, 2);
-		}
+		memcpy(f->file_status, fcd->fileStatus, 2);
 		if (fnstatus) {
 			memcpy(fnstatus->data, fcd->fileStatus, 2);
 		}
@@ -455,11 +450,6 @@ copy_fcd_to_file (FCD3* fcd, cob_file *f)
 		f->record_min = LDCOMPX4(fcd->minRecLen);
 		f->record_max = LDCOMPX4(fcd->maxRecLen);
 	}
-#if 0
-	if (f->file_status == NULL) {
-		f->file_status = cob_cache_malloc( 6 );
-	}
-#endif
 	if (f->assign == NULL
 	|| (f->fcd && fcd->fnamePtr)) {
 		f->assign = cob_cache_malloc(sizeof(cob_field));
@@ -599,12 +589,8 @@ cob_extfh_open (
 
 	/* Keep table of 'fcd' created */
 	sts = callfh (opcode, fcd);
-	if (f->file_status) {
-		if (memcmp(f->file_status,"00",2) == 0
-		 || memcmp(f->file_status,"05",2) == 0) {
-			fcd->openMode &= ~OPEN_NOT_OPEN;
-		}
-	} else {
+	if (memcmp(f->file_status,"00",2) == 0
+	 || memcmp(f->file_status,"05",2) == 0) {
 		fcd->openMode &= ~OPEN_NOT_OPEN;
 	}
 	update_fcd_to_file (fcd, f, fnstatus, 1);
