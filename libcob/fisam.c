@@ -286,46 +286,42 @@ static int
 indexed_keydesc (cob_file *f, struct keydesc *kd, cob_file_key *key)
 {
 	int	keylen,part;
-	/* LCOV_EXCL_START */
-	if (key->count_components < 1) {
-		/* Should not happen as this was generated pre GC 3.0 */
-		cob_runtime_error ("file i/o version mismatch");
-		cob_stop_run (1);
-	}
-	/* LCOV_EXCL_STOP */
-
 	memset (kd,0,sizeof (struct keydesc));
 	kd->k_flags = key->tf_duplicates ? ISDUPS : ISNODUPS;
-
-	/* multi- and single field key as component */
-	/* LCOV_EXCL_START */
-	if (key->count_components > COB_MAX_KEYCOMP) {
-		/* not translated as this is safety guard unlikely to be ever triggered */
-		cob_runtime_warning ("module specifies %d key components, "
-			"this runtime ignores all parts greater than %d",
-			key->count_components, COB_MAX_KEYCOMP);
-		key->count_components = COB_MAX_KEYCOMP;
-	}
-	/* LCOV_EXCL_STOP */
-
-	keylen = 0;
-	for (part=0; part < key->count_components && part < COB_MAX_KEYCOMP; part++) {
-		kd->k_part[part].kp_start = key->component[part]->data - f->record->data;
-		kd->k_part[part].kp_leng = key->component[part]->size;
-		keylen += kd->k_part[part].kp_leng;
-		kd->k_part[part].kp_type = CHARTYPE;
+	if (key->count_components <= 1) {
+		kd->k_nparts = 1;		/* Single field key */
+		kd->k_start = key->offset;
+		kd->k_leng = key->field->size;
+		kd->k_type = CHARTYPE;
 		if (key->tf_suppress) {
 #ifdef NULLKEY
 			kd->k_flags |= NULLKEY;
-			kd->k_part[part].kp_type = CHARTYPE | (key->char_suppress << 8);
+			kd->k_type = CHARTYPE | (key->char_suppress << 8);
 #else
 			f->flag_write_chk_dups = 1;
 			kd->k_flags = ISDUPS;
 #endif
 		}
+		keylen = kd->k_leng;
+	} else {
+		keylen = 0;
+		for (part=0; part < key->count_components && part < COB_MAX_KEYCOMP; part++) {
+			kd->k_part[part].kp_start = key->component[part]->data - f->record->data;
+			kd->k_part[part].kp_leng = key->component[part]->size;
+			keylen += kd->k_part[part].kp_leng;
+			kd->k_part[part].kp_type = CHARTYPE;
+			if (key->tf_suppress) {
+#ifdef NULLKEY
+				kd->k_flags |= NULLKEY;
+				kd->k_part[part].kp_type = CHARTYPE | (key->char_suppress << 8);
+#else
+				f->flag_write_chk_dups = 1;
+				kd->k_flags = ISDUPS;
+#endif
+			}
+		}
+		kd->k_nparts = part;
 	}
-	kd->k_nparts = part;
-
 #if defined(WITH_DISAM) || defined(WITH_VBISAM)
 	kd->k_len = keylen;		/* Total length of this key */
 #endif

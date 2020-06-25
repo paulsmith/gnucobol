@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2005-2012, 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2005-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Roger While, Simon Sobisch, Edward Hart, Brian Tiffin
 
    This file is part of GnuCOBOL.
@@ -58,13 +58,7 @@
 
 /* Force symbol exports, include decimal definitions */
 #define	COB_LIB_EXPIMP
-#ifdef	HAVE_GMP_H
-#include <gmp.h>
-#elif defined HAVE_MPIR_H
-#include <mpir.h>
-#else
-#error either HAVE_GMP_H or HAVE_MPIR_H needs to be defined
-#endif
+#include "gmp.h"
 #include "libcob.h"
 #include "coblocal.h"
 

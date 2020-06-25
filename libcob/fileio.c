@@ -2877,9 +2877,12 @@ cob_file_open (cob_file_api *a, cob_file *f, char *filename, const int mode, con
 	/* Note filename points to file_open_name */
 	/* cob_chk_file_mapping manipulates file_open_name directly */
 
-	int		ret;
+	int		ret, j, k;
+	int		p_fds[2],c_fds[2];
+	pid_t	s_pid;
 	FILE			*fp;
 	const char		*fmode;
+	char			*args[dMaxArgs];
 	cob_linage		*lingptr;
 	unsigned int		nonexistent;
 
@@ -2940,10 +2943,6 @@ cob_file_open (cob_file_api *a, cob_file *f, char *filename, const int mode, con
 	}
 	if (filename[0] == '|') {
 #if defined (HAVE_UNISTD_H) && !(defined (_WIN32))
-		pid_t	s_pid;
-		int		j, k;
-		int		p_fds[2], c_fds[2];
-		char* args[dMaxArgs];
 		if (mode != COB_OPEN_I_O) 
 			return COB_STATUS_37_PERMISSION_DENIED;
 		filename++;
@@ -3180,40 +3179,23 @@ cob_file_close (cob_file_api *a, cob_file *f, const int opt)
 		/* Close the file */
 		if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
 			if (f->flag_is_pipe) {
+				int	sts;
 				if (f->file_pid) {
-					if (f->file)
+					if (f->file) 
 						fclose (f->file);
 					if (f->fileout
 					 && f->fileout != f->file) 
 						fclose (f->fileout);
-#if defined (HAVE_UNISTD_H) && !(defined (_WIN32))
-					{
-						int	sts;
-						errno = 0;
-						kill (f->file_pid, 0);
-						if (errno == ESRCH) {
-							waitpid (f->file_pid, &sts, WNOHANG);
-						}
-						else {
-							cob_sleep_msec (50);
-							kill (f->file_pid, SIGKILL);
-							cob_sleep_msec (50);
-							waitpid (f->file_pid, &sts, 0);
-						}
-				}
-#elif defined (_WIN32)
-					{
-						char buff[COB_MINI_BUFF];
-						snprintf((char *)&buff, COB_MINI_MAX, "TASKKILL    /PID %d", f->file_pid);
-						system(buff);
-#if 0
-						snprintf((char *)&buff, COB_MINI_MAX, "TASKKILL /F /PID %d", f->file_pid);
-						system(buff);
-#endif
+					errno = 0;
+					kill (f->file_pid, 0);
+					if (errno == ESRCH) {
+						waitpid (f->file_pid, &sts, WNOHANG);
+					} else {
+						cob_sleep_msec(50);
+						kill (f->file_pid, SIGKILL);
+						cob_sleep_msec(50);
+						waitpid (f->file_pid, &sts, 0);
 					}
-#else
-					/* CHECKME: anything to do here? */
-#endif
 				} else {
 					pclose ((FILE *)f->file);
 				}

@@ -73,30 +73,21 @@ EXTRA_DIST = $(srcdir)/package.m4 $(TESTSUITE) $(TESTSUITE_MANUAL) \
 
 DISTCLEANFILES = atconfig
 
-# rule included in the check-target by automake
 check-local: prereq-testsuite
 	@GNUCOBOL_TEST_LOCAL=""  $(TESTSUITE) $(TESTSUITEFLAGS) || (rm -f testsuite.dir/at-job-fifo; exit 1)
 	@rm -f testsuite.dir/at-job-fifo
 
-# rule included in the "standard" target "installcheck" to run tests from the final install location, intended for post-install verification
-installcheck-local:
-	@echo " WARNING: currently no support for installcheck"
-#	TODO: needs additional work to handle exec_prefix and friends (datadir, ...)
-#	@GNUCOBOL_TEST_LOCAL="i" $(TESTSUITE) $(TESTSUITEFLAGS) || (rm -f testsuite.dir/at-job-fifo; exit 1)
-#	@rm -f testsuite.dir/at-job-fifo
-
-# special target to check with whatever is in PATH (uses, if exported COBC, COBCRUN, COBCRUN_DIRECT)
 localcheck: prereq-testsuite
 	@GNUCOBOL_TEST_LOCAL="1" $(TESTSUITE) $(TESTSUITEFLAGS) || (rm -f testsuite.dir/at-job-fifo; exit 1)
 	@rm -f testsuite.dir/at-job-fifo
-
+	
 prereq-check:
 	@echo testing for working diff && diff - "$(TESTSUITE)" < "$(TESTSUITE)" \
 		|| (echo "Error: no working 'diff' in PATH" && false)
-
+	
 prereq-testsuite: $(TESTSUITE) prereq-check
 	@rm -rf testsuite.dir
-
+	
 prereq-manual: $(TESTSUITE_MANUAL) prereq-check
 	@rm -rf testsuite_manual.dir
 
@@ -114,7 +105,7 @@ checkmanual: prereq-manual
 test:
 	@echo testing for perl && perl -v 1>/dev/null \
 		|| (echo "Error: no working 'perl' in PATH" && false)
-	@cd cobol85 && $(MAKE) $(AM_MAKEFLAGS) test
+	cd cobol85 && $(MAKE) $(AM_MAKEFLAGS) test
 
 checkall: check test
 

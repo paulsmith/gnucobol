@@ -2795,48 +2795,6 @@ AT_CHECK([$COBCRUN_DIRECT ./prog2], [1], [],
 AT_CLEANUP
 
 
-AT_SETUP([INDEXED file key-name])
-AT_KEYWORDS([runfile split key])
-
-# FIXME: separate both test parts
-
-AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. "test".
-       ENVIRONMENT DIVISION.
-       INPUT-OUTPUT SECTION.
-       FILE-CONTROL.
-           SELECT TEST-FILE ASSIGN "FILE"
-               ORGANIZATION IS INDEXED
-               ACCESS IS DYNAMIC
-               RECORD KEY IS KEY01 = QQINDEX.
-       DATA DIVISION.
-       FILE SECTION.
-       FD TEST-FILE.
-       01 TEST-REC.
-          03 QQDATA     PIC X(80).
-          03 QQINDEX    PIC XXX9999.
-          03 QQSEQUENCE PIC 9999.
-       PROCEDURE DIVISION.
-           OPEN OUTPUT TEST-FILE
-           MOVE 'TEST DATA 1' TO QQDATA
-           MOVE 'ABC0001'     TO QQINDEX
-           WRITE TEST-REC
-           MOVE 'TEST DATA 2' TO QQDATA
-           MOVE 'ABC0002'     TO QQINDEX
-           WRITE TEST-REC
-           CLOSE TEST-FILE
-           DISPLAY 'FINE' WITH NO ADVANCING
-           GOBACK.
-])
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
-
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [FINE], [])
-AT_CLEANUP
-
-
 AT_SETUP([INDEXED file sparse/split keys])
 AT_KEYWORDS([runfile split key sparse SUPPRESS])
 

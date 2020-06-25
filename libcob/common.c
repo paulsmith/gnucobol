@@ -72,13 +72,7 @@
 #define __GMP_LIBGMP_DLL 1
 #endif
 #endif
-#ifdef	HAVE_GMP_H
 #include <gmp.h>
-#elif defined HAVE_MPIR_H
-#include <mpir.h>
-#else
-#error either HAVE_GMP_H or HAVE_MPIR_H needs to be defined
-#endif
 
 #ifdef	WITH_DB
 #include <db.h>
@@ -7596,8 +7590,8 @@ print_info (void)
 			"MPIR", major, minor, patch, __MPIR_VERSION, __MPIR_VERSION_MINOR);
 	}
 	versbuff[55] = versbuff2[55] = 0; /* silence VS analyzer */
-	strncat (versbuff2, " - ", 4);
-	strncat (versbuff2, versbuff, 56);
+	strncat (versbuff2, " - ", 3);
+	strncat (versbuff2, versbuff, 55);
 	var_print (_("mathematical library"), 		versbuff2, "", 0);
 #else
 	var_print (_("mathematical library"), 		versbuff, "", 0);

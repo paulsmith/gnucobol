@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -54,13 +54,7 @@
 
 /* Force symbol exports, include decimal definitions */
 #define	COB_LIB_EXPIMP
-#ifdef	HAVE_GMP_H
-#include <gmp.h>
-#elif defined HAVE_MPIR_H
-#include <mpir.h>
-#else
-#error either HAVE_GMP_H or HAVE_MPIR_H needs to be defined
-#endif
+#include "gmp.h"
 #include "libcob.h"
 #include "coblocal.h"
 
@@ -373,13 +367,12 @@ cob_decimal_set (cob_decimal *dst, const cob_decimal *src)
 	dst->scale = src->scale;
 }
 
-/* Decimal print, note: currently (GC3.1) only called by display/dump
-   code from termio.c (cob_display) via cob_print_ieeedec) */
+/* Decimal print */
 static void
 cob_decimal_print (cob_decimal *d, FILE *fp)
 {
 	int	scale, len;
-	char		*mza;
+	char	wrk[256];
 
 	if (unlikely (d->scale == COB_DECIMAL_NAN)) {
 		fprintf (fp, "(Nan)");
@@ -402,20 +395,16 @@ cob_decimal_print (cob_decimal *d, FILE *fp)
 		mpz_tdiv_q_ui (cob_mpzt2, cob_mpzt2, 10UL);
 		scale--;
 	}
-	mza = mpz_get_str (NULL, 10, cob_mpzt2);
-	len = strlen (mza);
+	len = gmp_sprintf (wrk, "%Zd", cob_mpzt2);
 	if (len > 0
 	 && scale > 0
 	 && scale < len) {
-		fprintf (fp, "%.*s%c%.*s",
-			len-scale, mza, '.',
-			scale, mza + len - scale);
+		fprintf (fp, "%.*s%c%.*s",len-scale,wrk,'.',scale,wrk+len-scale);
 	} else if (scale == 0) {
-		fprintf (fp, "%s", mza);
+		fprintf (fp, "%s", wrk);
 	} else {
-		fprintf (fp, "%sE%d", mza, -scale);
+		fprintf (fp, "%sE%d", wrk, -scale);
 	}
-	cob_gmp_free (mza);
 }
 
 /* d->value *= 10^n, d->scale += n */
@@ -1571,9 +1560,6 @@ cob_decimal_set_field (cob_decimal *dec, cob_field *field)
 	}
 }
 
-/* note: currently (GC3.1) only called by display/dump
-   code from termio.c, with field type 
-   COB_TYPE_NUMERIC_FP_DEC64/COB_TYPE_NUMERIC_FP_DEC128 */
 void
 cob_print_ieeedec (const cob_field *f, FILE *fp)
 {
@@ -1597,12 +1583,8 @@ cob_print_ieeedec (const cob_field *f, FILE *fp)
 		memcpy ((void *)&uval.dval, f->data, sizeof(double));
 		cob_decimal_set_double (&cob_d3, uval.dval);
 		break;
-	/* LCOV_EXCL_START */
 	default:
-		cob_runtime_error (_("invalid internal call of %s"), "cob_print_ieeedec");
-		cob_runtime_error (_("Please report this!"));
-		cob_stop_run (1);
-	/* LCOV_EXCL_STOP */
+		return;
 	}
 	cob_decimal_print (&cob_d3, fp);
 }

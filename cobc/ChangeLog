@@ -1,6 +1,5 @@
 
 2020-06-23  Ron Norman <rjn@inglenet.com>
-
 	* parser.y: Changed to use common parsing for [NOT] EXCEPTION
 			Added [NOT] EXCEPTION to DELETE FILE
 	* codegen.c: Changes for EXCEPTION handling for DELETE FILE
@@ -19,20 +18,6 @@
 	  empty.
 	* codegen.c: minor refactoring of duplicated code.
 
-2020-06-14  Simon Sobisch <simonsobisch@gnu.org>
-
-	* cobc.c (process_run): use of new COBC_NAME + COBCRUN_NAME now defined in
-	  defaults.h, if available use the fullname of the current process instead
-	  of fixed "cobc" to get the path for cobcrun, extract some code to
-	  resolve_name_from_cobc
-	* cobc.c (main, process_run): fix compile from stdin with job-run
-	* field.c (validate_any_length_item): allow ANY LENGTH for PIC 1
-
-2020-06-09  Simon Sobisch <simonsobisch@gnu.org>
-
-	* cobc.c: don't do pointer arithemetic on string constant (fixing Bug #644
-	  warning on MacOS)
-
 2020-06-06  Ron Norman <rjn@inglenet.com>
 	* codegen.c: Changes to module entry to better handle
 			C mod calls COBOL mod calls C mod calls COBOL mod
@@ -48,7 +33,6 @@
 			then use output_emit_field 
 
 2020-05-06  Ron Norman <rjn@inglenet.com>
-
 	* cobc.c: Added -G to experiment with 'gdb' and COBOL source
 			This is experimental and not for production.
 	* codegen.c: Added code to emit #line with reference only to
@@ -56,25 +40,16 @@
 			'gdb' sort of works but not good enough yet
 
 2020-05-05  Ron Norman <rjn@inglenet.com>
-
 	* flag.def, cobc.c, codegen.c: removed -fif-cutoff completely
 
 2020-04-27  Ron Norman <rjn@inglenet.com>
-
 	* codeoptim.def,codeoptim.c: Add COB_A_INLINE to new routines 
 				to convert DISPLAY into binary values
 	* codegen.c,typeck.c: Additional refinements to computing 
 				integer expressions faster. Now includes BINARY data
 				fields even on little endian systems.
 
-2020-04-28  Simon Sobisch <simonsobisch@gnu.org>
-
-	* codegen.c (output_file_initialization): don't output key offset
-	  if it is part of a component; even if this has only a single part
-	  as components are not part of the record "KEYNAM = RECORD-FIELD"
-
 2020-04-26  Ron Norman <rjn@inglenet.com>
-
 	* codeoptim.def,codeoptim.c: New routines to convert DISPLAY into
 				binary values
 	* codegen.c: Use new get_numdisps/64/s64 routines
@@ -102,12 +77,6 @@
 				OPEN I-O is required for bi-directional pipe
 	* typeck.c: Remove ERROR for REWRITE of LINE SEQUENTIAL
 	            This has been supported for a while
-
-2020-04-03  Simon Sobisch <simonsobisch@gnu.org>
-
-	* typeck.c, tree.h: new field attribute flag_internal_register
-	* config.def, field.c, typeck.c: experimental numeric-pointer option
-	  (cb_numeric_pointer) to handle ACU's special POINTER handling
 
 2020-04-03  Ron Norman <rjn@inglenet.com>
 
@@ -218,10 +187,6 @@
 
 	* codegen.c: emit warning if ORANIZATION INDEXED used but not supported
 	* typeck.c: emit warning if XML or JSON used but not supported
-
-2020-03-09  Simon Sobisch <simonsobisch@gnu.org>
-
-	* codegen.c: FR #372 honor HAVE_GMP_H and HAVE_MPIR_H
 
 2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
 

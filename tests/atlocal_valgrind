@@ -5,7 +5,7 @@
 # with Valgrind.
 
 # Copyright (C) 2003-2012, 2014-2020 Free Software Foundation, Inc.
-# Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
+# Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
 #
@@ -22,23 +22,20 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
+COB_BIGENDIAN="@COB_BIGENDIAN@"
+COB_HAS_ISAM="@COB_HAS_ISAM@"
+COB_HAS_XML2="@COB_HAS_XML2@"
+COB_HAS_CJSON="@COB_HAS_CJSON@"
+COB_HAS_CURSES="@COB_HAS_CURSES@"
+COB_HAS_64_BIT_POINTER="@COB_HAS_64_BIT_POINTER@"
 
-TEMPLATE="${abs_srcdir}/testsuite.src"
-
-COBC="cobc@COB_EXE_EXT@"
-COBCRUN="cobcrun@COB_EXE_EXT@"
+COBC="${abs_top_builddir}/cobc/cobc@COB_EXE_EXT@"
+COBCRUN="${abs_top_builddir}/bin/cobcrun@COB_EXE_EXT@"
 COBCRUN_DIRECT="" # used for running created executables through tools
-
-# prepend PATH with the actual binaries to let the testsuite find them for
-# general check and version output, otherwise not needed
-#PATH="${abs_top_builddir}/libcob/.libs:${PATH}"
-PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${PATH}"
-export PATH
-ABS_COBC="${abs_top_builddir}/cobc/cobc@COB_EXE_EXT@"
-ABS_COBCRUN="${abs_top_builddir}/bin/cobcrun@COB_EXE_EXT@"
 
 # -- BEGIN OF VALGRIND SPECIFIC PARTS ---
 
+COBCRUN_WITHOUT_VG="$COBCRUN"
 #
 # To check with valgrind:
 # * ideally: reconfigure with `./configure --enable-debug & make`
@@ -87,14 +84,17 @@ COBCRUN_DIRECT="$MEMCHECK --log-file=$VG_COBCRUN_DIRECT_LOG ${COBCRUN_DIRECT}"
 
 # -- END OF VALGRIND SPECIFIC PARTS ---
 
-# be sure to use the English messages
-LC_ALL=C
-export LC_ALL
+TEMPLATE="${abs_srcdir}/testsuite.src"
 
 FLAGS="-debug -Wall ${COBOL_FLAGS}"
 COMPILE="${COBC} -x ${FLAGS}"
 COMPILE_ONLY="${COBC} -fsyntax-only ${FLAGS}"
 COMPILE_MODULE="${COBC} -m ${FLAGS}"
+
+COB_OBJECT_EXT="@COB_OBJECT_EXT@"
+COB_EXE_EXT="@COB_EXE_EXT@"
+
+PATHSEP=":"
 
 # Helper script to unify listings (replace version, date, time)
 UNIFY_LISTING="${abs_srcdir}/listings-sed.sh"
@@ -102,14 +102,12 @@ UNIFY_LISTING="${abs_srcdir}/listings-sed.sh"
 # test runner for manual tests, content may be changed by the user
 RUN_PROG_MANUAL="${abs_builddir}/run_prog_manual.sh"
 
-# unset option if not internally set
-_unset_option () {
-	if test "$1" != "COB_CONFIG_DIR" \
-	     -a "$1" != "COB_RUNTIME_CONFIG" \
-	     -a "$1" != "COB_LIBRARY_PATH"; then
-		unset $1
-	fi
-}
+# be sure to use the English messages
+LC_ALL=C
+export LC_ALL
+
+PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${abs_top_builddir}/libcob/.libs:${PATH}"
+export PATH
 
 # possible path conversion for running the testsuite in an environment
 # that doesn't match the one where the tested binaries were built
@@ -118,66 +116,56 @@ _unset_option () {
 _return_path () {
 	${abs_top_srcdir}/bin/return_path "$1"
 }
+# unset option if not internally set
+_unset_option () {
+	if test "$1" != "COB_CONFIG_DIR" \
+	     -a "$1" != "COB_RUNTIME_CONFIG"; then
+		unset $1
+	fi
+}
 
-# Fix for testcases where cobc translates path to win32 equivalents
-if test "x$MSYSTEM" != "x"; then
-	PATHSEP=";"
-else
-	PATHSEP='@PATH_SEPARATOR@';
-fi
-export PATHSEP
+# unset all environment variables that are used in libcob
+# for runtime configuration
+COB_RUNTIME_CONFIG="${abs_top_srcdir}/config/runtime_empty.cfg"
+for cobenv in `"${abs_top_builddir}/pre-inst-env" $COBCRUN_WITHOUT_VG --runtime-conf | grep COB_ | cut -d: -f2 | cut -d= -f1`; \
+	do _unset_option $cobenv; \
+done
 
-exec_prefix="@prefix@" # this is is likely referenced in the LIBS entries below
-
-COB_CFLAGS="-I${abs_top_srcdir} @COB_CFLAGS@"
-COB_LDFLAGS="@COB_LDFLAGS@"
-COB_LIBS="-L${abs_top_builddir}/libcob/.libs @COB_LIBS@"
+COB_CFLAGS="-I${abs_top_srcdir} -I${abs_top_srcdir}/libcob @COB_CFLAGS@"
+COB_LDFLAGS="-L${abs_top_builddir}/libcob/.libs @COB_LDFLAGS@"
+COB_LIBS="-L${abs_top_builddir}/libcob/.libs -lcob @LIBCOB_LIBS@"
 COB_CONFIG_DIR="${abs_top_srcdir}/config"
+COB_RUNTIME_CONFIG="${COB_CONFIG_DIR}/runtime_empty.cfg"
 COB_COPY_DIR="${abs_top_srcdir}/copy"
 LD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$LD_LIBRARY_PATH"
 DYLD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$DYLD_LIBRARY_PATH"
 SHLIB_PATH="${abs_top_builddir}/libcob/.libs:$SHLIB_PATH"
 LIBPATH="${abs_top_builddir}/libcob/.libs:$LIBPATH"
-COB_LIBRARY_PATH="${abs_top_builddir}/extras"
-
-export COB_CFLAGS COB_LDFLAGS COB_LIBS
-export COB_CONFIG_DIR COB_COPY_DIR
-export LD_LIBRARY_PATH DYLD_LIBRARY_PATH SHLIB_PATH LIBPATH
-export COB_LIBRARY_PATH
-COB_UNIX_LF=1
-export COB_UNIX_LF
-
-# unset all environment variables that are used in libcob
-# for runtime configuration
-COB_RUNTIME_CONFIG="${abs_top_srcdir}/config/runtime_empty.cfg"
-export COB_RUNTIME_CONFIG
-for cobenv in `"${abs_top_builddir}/pre-inst-env" ${COBCRUN} --runtime-conf | grep COB_ | cut -d: -f2 | cut -d= -f1`; \
-	do _unset_option $cobenv; \
-done
-
-
-COB_OBJECT_EXT="@COB_OBJECT_EXT@"
-COB_EXE_EXT="@COB_EXE_EXT@"
-COB_BIGENDIAN="@COB_BIGENDIAN@"
-COB_HAS_ISAM="@COB_HAS_ISAM@"
-COB_HAS_XML2="@COB_HAS_XML2@"
-COB_HAS_CJSON="@COB_HAS_CJSON@"
-COB_HAS_CURSES="@COB_HAS_CURSES@"
-COB_HAS_64_BIT_POINTER="@COB_HAS_64_BIT_POINTER@"
+COB_LIBRARY_PATH="${abs_top_builddir}/extras:$COB_LIBRARY_PATH"
+COB_UNIX_LF=YES
 if test "x$MSYSTEM" != "x" -o "$OSTYPE" = "cygwin"; then
 	# running MSYS builds as not-visible child processes result in
 	# "Redirection is not supported" (old PDcurses) and exit 127 (NCurses)
 	# --> disabling the tests for this feature
 	COB_HAS_CURSES="no"
+	# Fix for testcases where cobc translates path to win32 equivalents
+	if test "x$MSYSTEM" != "x"; then
+		PATHSEP=";"
+	fi
 fi
-export COB_HAS_ISAM COB_HAS_XML2 COB_HAS_CJSON COB_HAS_CURSES COB_HAS_64_BIT_POINTER
+
+
 export COBC COBCRUN COBCRUN_DIRECT RUN_PROG_MANUAL
-export COB_OBJECT_EXT COB_EXE_EXT
+export PATHSEP COB_OBJECT_EXT COB_EXE_EXT
+export COB_CFLAGS COB_LDFLAGS COB_LIBS
+export COB_CONFIG_DIR COB_RUNTIME_CONFIG COB_COPY_DIR
+export LD_LIBRARY_PATH DYLD_LIBRARY_PATH SHLIB_PATH LIBPATH
+export COB_LIBRARY_PATH
+export COB_UNIX_LF
+export COB_HAS_ISAM COB_HAS_XML2 COB_HAS_CJSON COB_HAS_CURSES COB_HAS_64_BIT_POINTER
 
-# to ensure that no external DB_HOME is polluted: unset
-DB_HOME="" && export DB_HOME
 
-# For the very rare cases where cobc/libcob may need to know if they're running in test mode:
+# For rare cases where cobc/libcob may need to know if they're running in test mode:
 case $0 in
 	*/testsuite) COB_IS_RUNNING_IN_TESTMODE=1 && export COB_IS_RUNNING_IN_TESTMODE;;
 	*)	unset COB_IS_RUNNING_IN_TESTMODE;;

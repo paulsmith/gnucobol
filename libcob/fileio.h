@@ -100,10 +100,6 @@
 #else	/* _WIN32 */
 
 #if	defined(HAVE_FDATASYNC)
-#if defined(HAVE_DECL_FDATASYNC) && HAVE_DECL_FDATASYNC == 0
-/* function available and working, declaration missing on MacOS... */
-int fdatasync(int fd);
-#endif
 #define	fdcobsync	fdatasync
 #else
 #define	fdcobsync	fsync

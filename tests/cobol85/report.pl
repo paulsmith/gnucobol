@@ -1,7 +1,7 @@
 #
 # gnucobol/tests/cobol85/report.pl
 #
-# Copyright (C) 2001-2012, 2016-2020 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2016-2019 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 #
 # This file is part of GnuCOBOL.
@@ -26,11 +26,6 @@ $SIG{INT}  = sub { die "\nInterrupted\n" };
 $SIG{QUIT} = sub { die "\nInterrupted\n" };
 $SIG{PIPE} = sub { die "\nInterrupted\n" };
 $SIG{TERM} = sub { die "\nInterrupted\n" };
-
-
-# use high resolution time, if available
-# Time::HiRes is only a core module since Perl 5.7.3
-BEGIN { eval "use Time::HiRes 'time';" }
 
 my $opt = shift;
 
@@ -104,6 +99,16 @@ if ($^O ne "MSWin32" && $^O ne "dos") {
 		"FOR /F %I IN ('DIR /A:D /B $REMOVE') DO RD /S /Q %I";
 	$REMOVE_COMMANDS = "$REMOVE_COMMANDS 1>NUL 2>&1";
 	$cobcrun_direct = "$cobcrun_direct.\\";
+}
+
+# for obsolete systems use duration in seconds, otherwise get nanos from system
+# (the better Time::HiRes is only a core module since Perl 5.7.3)
+sub time_since_epoch {
+	if ($^O ne "MSWin32" && $^O ne "dos") {
+		return `date +%s.%N`;
+	} else {
+		return time;
+	}
 }
 # temporary directory (used for fifos, currently not active)
 # my $tmpdir = $ENV{"TMPDIR"};
@@ -233,7 +238,7 @@ if (!defined $single_test) {
 } else {
 	*LOG_FH = *STDERR;
 }
-my $global_start = time;
+my $global_start = time_since_epoch ();
 
 my $in;
 
@@ -255,7 +260,7 @@ if (defined $single_test) {
 foreach $in (sort (glob("*.{CBL,SUB}"))) {
 	run_test ($in);
 }
-my $global_end = time;
+my $global_end = time_since_epoch ();
 
 print  LOG_FH ("--------    ----- ---- ---- ------- -------\n");
 printf LOG_FH ("Total       %5s %4s %4s %7s %7s\n\n",
@@ -273,7 +278,7 @@ printf LOG_TIME ("Total       %8.4f\n\n", ($global_end - $global_start));
 sub compile_lib {
 	my $in = $_[0];
 	print "$compile_module $in\n";
-	my $local_start = time;
+	my $local_start = time_since_epoch ();
 	$ret = system ("$TRAP  $compile_module $in");
 	if ($ret != 0) {
 		if (($ret >> 8) == 77) {
@@ -281,7 +286,7 @@ sub compile_lib {
 		}
 		print "Unexpected status $ret for module $in\n";
 	}
-	my $local_end = time;
+	my $local_end = time_since_epoch ();
 	printf LOG_TIME ("%-11s %8.4f\n", (substr $in, 4), ($local_end - $local_start));
 }
 
@@ -340,7 +345,7 @@ sub run_test {
 	my $deleted = 0;
 	my $inspect = 0;
 
-	my $local_start = time;
+	my $local_start = time_since_epoch ();
 	$ret = system ("$TRAP  $compile_current");
 	if ($ret != 0) {
 		if (($ret >> 8) == 77) {
@@ -348,7 +353,7 @@ sub run_test {
 		}
 		$compile_error++;
 		print LOG_FH ("$line_prefix  ***** compile error *****\n");
-		my $local_end = time;
+		my $local_end = time_since_epoch ();
 		printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 		return;
 	}
@@ -371,7 +376,7 @@ sub run_test {
 	if ($comp_only{$exe}) {
 		print LOG_FH ("$line_prefix     0    0    0       0       0 OK\n");
 		$total_ok++;
-		my $local_end = time;
+		my $local_end = time_since_epoch ();
 		printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 		return;
 	}
@@ -413,7 +418,7 @@ testrepeat:
 			die "Interrupted\n";
 		}
 		$execute_error++;
-		my $local_end = time;
+		my $local_end = time_since_epoch ();
 		printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 		print LOG_FH ("$line_prefix  ***** execute error $ret *****\n");
 		return;
@@ -565,7 +570,7 @@ testrepeat:
 		print "Reexecution with runtime DEBUG off ./DB103M\n";
 		goto testrepeat;
 	}
-	my $local_end = time;
+	my $local_end = time_since_epoch ();
 	printf LOG_TIME ("%-11s %8.4f\n", $in,  ($local_end - $local_start));
 	unlink "$exe.out" if (-s "$exe.out" == 0);
 }

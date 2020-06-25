@@ -1,26 +1,8 @@
 
-2020-05-06  Simon Sobisch <simonsobisch@gnu.org>
-
-	* atlocal.in: allow COBC, COBCRUN, COBCRUN_DIRECT to override
-	  for make localcheck (especially useful in case of installprefix)
-	* Makefile.am: added some comments and an explicit warning for
-	  installcheck target
-
-2020-05-04  Simon Sobisch <simonsobisch@gnu.org>
-
-	* atlocal.in: pass exec_prefix as it is likely referenced in the LIBS
-	  entries used (thanks to Robert Dubner)
-	* atlocal.in, atlocal_valgrind, atlocal_win: unified
-
 2020-04-02  Simon Sobisch <simonsobisch@gnu.org>
 
 	* run_prog_manual.sh.in, testsuite.src/run_manual_screen.at:
 	  pass program to run to the script instead of hard-wire of "./prog"
-
-2020-03-22  Simon Sobisch <simonsobisch@gnu.org>
-
-	* atlocal_win: use intermediate info.out instead of calling
-	  cobc --info multiple times
 
 2020-02-02  Simon Sobisch <simonsobisch@gnu.org>
 

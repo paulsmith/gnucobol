@@ -1,19 +1,4 @@
 
-2020-06-12  Simon Sobisch <simonsobisch@gnu.org>
-
-	* Makefile.am: added download with curl (new variable CURL_FLAGS),
-	  use this first, if it fails then fall back to wget
-
-2020-05-05  Simon Sobisch <simonsobisch@gnu.org>
-
-	* report.pl: use HiRes::Time if available, otherwise use the plain
-	  time (resolution: seconds) to create duration.txt - no use of the
-	  system's time command any more
-
-2020-05-04  Simon Sobisch <simonsobisch@gnu.org>
-
-	* Makefile.am: use of SED (configure-generated) instead of sed
-
 2020-03-11  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am (unpack-Z): improved portability
