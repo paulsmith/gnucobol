@@ -8223,7 +8223,7 @@ main (int argc, char **argv)
 	unsigned int		iparams;
 	unsigned int		local_level;
 	int			status;
-	int			statuses;
+	int			statuses = 0;
 	int			i;
 	const char		*run_name = NULL;
 

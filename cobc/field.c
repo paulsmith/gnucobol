@@ -1876,6 +1876,12 @@ validate_elementary_item (struct cb_field *f)
 		f->pic = cb_build_binary_picture ("BINARY-LONG", 9, 0);
 		f->flag_real_binary = 1;
 		break;
+	case CB_USAGE_POINTER:
+		if (cb_numeric_pointer) {
+			f->pic = cb_build_binary_picture ("BINARY-DOUBLE", 18, 0);
+			f->flag_real_binary = 1;
+		}
+		break;
 	case CB_USAGE_UNSIGNED_LONG:
 		f->usage = CB_USAGE_COMP_5;
 		f->pic = cb_build_binary_picture ("BINARY-DOUBLE", 18, 0);

@@ -51,19 +51,30 @@
 	* fisam.c: Fixed problem with READ PREVIOUS/DELETE/READ PREVIOUS
 				when reading thru a group of duplicate keys
 
+2020-05-10  Simon Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (get_line_and_col_from_field): refactored from
+	  get_line_and_col_from_num and get_cursor_from_program, now
+	  containing additional handing of non-numeric group fields
+	  for the position, fixing bug #632
+
 2020-04-28  Ron Norman <rjn@inglenet.com>
+
 	* common.h,move.c: cob_set_llint is now passed a value to do size
 				checking. It also now checks module->flag_binary_truncate
 				and truncates the data as needed
 
-2020-04-26  Ron Norman <rjn@inglenet.com>
-	* common.h,move.c,sysdefines.h: Updates for speeding up arithmetic
+2020-04-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c->fisam.c (indexed_keydesc): always use key component definition
+	  if available fixing broken 1-part "components" using wrong offset
 
 2020-04-26  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: For LINE SEQUENTIAL and OPEN I-O some platforms
 				(SUNOS for one) require that a fflush be done
 				between each read/write of the file
+	* common.h,move.c,sysdefines.h: Updates for speeding up arithmetic
 
 2020-04-17  Ron Norman <rjn@inglenet.com>
 
@@ -120,6 +131,7 @@
 	* common.h: definition of COB_A_NORETURN for newer HPUX (__HP_cc)
 
 2020-02-15  Ron Norman <rjn@inglenet.com>
+
 	* common.h, fileio.c, fileio.h, foci.c, fodbc.c, fsqlxfd.c:
 		Updates to support RELATIVE file for processing by
 		the OCI/ODBC I/O modules.
@@ -130,6 +142,7 @@
 		do not need to duplicate that logic
 
 2020-02-13  Ron Norman <rjn@inglenet.com>
+
 	* fsqlxfd.c: Call cob_xfd_to_ddl if 'create_table' was 'true'
 				and table.ddl is not present
 	* common.c,fileio.h,coblocal.h: Updates for 'create_table'
@@ -137,25 +150,30 @@
 	* fileio.c: Use cob_dictionary_path if defined
 
 2020-02-12  Ron Norman <rjn@inglenet.com>
+
 	* fsqlxfd.c: Adding cob_xfd_to_ddl routine
 	* common.h,fileio.h: Updates for cob_xfd_to_ddl
 	* foci.c, fodbc.c: Add checks for Table not defined
 
 2020-02-05  Ron Norman <rjn@inglenet.com>
+
 	* common.h: cob_file and cob_file_key updated
 	* fileio.c,fbdb.c: Corrections for using filedef.dd for BDB
 
 2020-01-28  Ron Norman <rjn@inglenet.com>
+
 	* fileio.c,fbdb.c,fsqlxfd.c: Adding casts to avoid C compile warnings
 	* fextfh.c,screenio.c,common.c: Adding casts to avoid C compile warnings
 
 2020-01-25  Ron Norman <rjn@inglenet.com>
+
 	* fileio.c: Skips reading records having SUPPRESS WHEN "string"
 	            and checks for duplicates on (RE)WRITE if there was
 				no WITH DUPLICATES because the underlying file 
 				needs to allow DUPLICATES
 
 2020-01-24  Ron Norman <rjn@inglenet.com>
+
 	* Makefile.am: --version-info changed to 5:0:0
 	* common.h: cob_file and cob_file_key updated
 				some #define replaced by enum
@@ -168,6 +186,7 @@
 	* flmdb.c: Changes to match updated cob_file
 
 2020-01-22  Ron Norman <rjn@inglenet.com>
+
 	* coblocal.h: Added cob_bdb_byteorder
 	* common.h: Added flags for BDB Byteorder
 	* common.c: Added bdb_byteorder to runtime config processing
@@ -176,12 +195,14 @@
 				and for the numeric duplicate key value
 
 2020-01-06  Ron Norman <rjn@inglenet.com>
+
 	* fileio.h,fsqlxfd.c,foci.c,fodbc.c:
 			Implemented READ locking options (RETRY, IGNORE, ADVANCING)
 			By adding clauses to SELECT statement
 			What is used varies depending on the type of Database
 
 2020-01-06  Ron Norman <rjn@inglenet.com>
+
 	* fileio.c: In IO_filename checks for table=sqltablename
 				and schema=directory holding XFD/DDL files 
 

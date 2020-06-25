@@ -190,7 +190,7 @@ clean-local:
 $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in Makefile.module.in
 	@echo "Building module directory $@ ..."
 	@mkdir -p ./$@
-	@echo "*SELECT-MODULE `echo $@ | sed 's/\(..\).*/\1/'`" > ./$@/EXEC85.conf
+	@echo "*SELECT-MODULE `echo $@ | $(SED) 's/\(..\).*/\1/'`" > ./$@/EXEC85.conf
 	@cat $(srcdir)/EXEC85.conf.in >> ./$@/EXEC85.conf
 #	setting NEWCOB_VAL to the full name for EXEC85
 	@if test -f "$(abs_builddir)/newcob.val"; then \
@@ -202,10 +202,10 @@ $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in Makefile.mod
 	@perl $(srcdir)/expand.pl $@/newcob.tmp $@
 #	@$(RM) ./$@/newcob.tmp ./$@/newcob.log ./$@/EXEC85.conf
 	@export CBL_LIST="`ls $@/*.CBL | cut -b4- | tr "\n" " "`"  && \
-	 sed -e 's/##MODULE##/'"$@"'/'            \
-	     -e 's|##COB85DIR##|'"$(COB85DIR)"'|' \
-	     -e 's|##TESTS##|'"` echo $$CBL_LIST | sed -e 's/\.CBL//g'`"'|' \
-	     -e 's|##TESTS_LOCAL##|'"`echo $$CBL_LIST | sed -e 's/\.CBL/-local/g'`"'|' \
+	 $(SED) -e 's/##MODULE##/'"$@"'/'            \
+	        -e 's|##COB85DIR##|'"$(COB85DIR)"'|' \
+	        -e 's|##TESTS##|'"` echo $$CBL_LIST | $(SED) -e 's/\.CBL//g'`"'|' \
+	        -e 's|##TESTS_LOCAL##|'"`echo $$CBL_LIST | $(SED) -e 's/\.CBL/-local/g'`"'|' \
 	    $(srcdir)/Makefile.module.in > $@/Makefile
 	@echo "Finished module directory $@."
 
@@ -217,15 +217,15 @@ EXEC85.cob: newcob.val
 	else \
 		NEWCOB_VAL=$(abs_srcdir)/newcob.val; \
 	fi; \
-	sed -e '/^\*END/,$$d'                                                        \
-	    -e '1,/^\*HEADER/d'                                                      \
-	    -e 's/^002500.*/           SELECT           POPULATION-FILE/'            \
-	    -e 's/^002700.*/           "NEWCOB_VAL" ORGANIZATION LINE SEQUENTIAL./'  \
-	    -e 's/^003000.*/           "newcob.tmp" ORGANIZATION LINE SEQUENTIAL./'  \
-	    -e 's/^003100.*//'                                                       \
-	    -e 's/^003400.*/           "unused"./'                                   \
-	    -e 's/^003700.*/           "newcob.log"./'                               \
-	    -e 's/^004000.*/           "EXEC85.conf" ORGANIZATION LINE SEQUENTIAL./' \
+	$(SED) -e '/^\*END/,$$d'                                                        \
+	       -e '1,/^\*HEADER/d'                                                      \
+	       -e 's/^002500.*/           SELECT           POPULATION-FILE/'            \
+	       -e 's/^002700.*/           "NEWCOB_VAL" ORGANIZATION LINE SEQUENTIAL./'  \
+	       -e 's/^003000.*/           "newcob.tmp" ORGANIZATION LINE SEQUENTIAL./'  \
+	       -e 's/^003100.*//'                                                       \
+	       -e 's/^003400.*/           "unused"./'                                   \
+	       -e 's/^003700.*/           "newcob.log"./'                               \
+	       -e 's/^004000.*/           "EXEC85.conf" ORGANIZATION LINE SEQUENTIAL./' \
 	    "$$NEWCOB_VAL" > EXEC85.cob || ($(RM) EXEC85.cob && false)
 
 

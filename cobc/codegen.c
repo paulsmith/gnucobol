@@ -266,10 +266,11 @@ static struct cb_field *
 cb_code_field (cb_tree x)
 {
 	if (likely(CB_REFERENCE_P (x))) {
-		if (unlikely(!CB_REFERENCE (x)->value)) {
-			return CB_FIELD (cb_ref (x));
+		cb_tree f = CB_REFERENCE (x)->value;
+		if (unlikely(!f)) {
+			f = cb_ref (x);
 		}
-		return CB_FIELD (CB_REFERENCE (x)->value);
+		return CB_FIELD (f);
 	}
 	if (CB_LIST_P (x)) {
 		return cb_code_field (CB_VALUE (x));

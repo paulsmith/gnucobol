@@ -19,24 +19,43 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <https://www.gnu.org/licenses/>.
 
+
+TEMPLATE="${abs_srcdir}/testsuite.src"
+
+# TODO: add missing parts for installcheck
+
 if test "$GNUCOBOL_ENV_SETUP" != "1" -a "$GNUCOBOL_TEST_LOCAL" != "1"; then
+	COBC="cobc@COB_EXE_EXT@"
+	COBCRUN="cobcrun@COB_EXE_EXT@"
+	COBCRUN_DIRECT="" # used for running created executables through tools
+	# prepend PATH with the actual binaries to let the testsuite find them for
+	# general check and version output, otherwise not needed
+	PATH="${abs_top_builddir}/libcob/.libs:${PATH}"
+	PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${PATH}"
+	export PATH
+else
+	if test "x${COBC}" = "x"; then
+		COBC="cobc@COB_EXE_EXT@"
+	fi
+	if test "x${COBCRUN}" = "x"; then
+		COBCRUN="cobcrun@COB_EXE_EXT@"
+	fi
+	if test "x${COBCRUN_DIRECT}" = "x"; then
+		COBCRUN_DIRECT=""
+	fi
+fi
+
+if test "$GNUCOBOL_TEST_LOCAL" != "1"; then
 	ABS_COBC="${abs_top_builddir}/cobc/cobc@COB_EXE_EXT@"
 	ABS_COBCRUN="${abs_top_builddir}/bin/cobcrun@COB_EXE_EXT@"
-	# prepend PATH with the actual binaries to let the testsuite find them for
-	# general check and version output, nomally not needed
-	PATH="${abs_top_builddir}/libcob/.libs:${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${PATH}"
-	export PATH
+else
+	ABS_COBC="$(which cobc)"
+	ABS_COBCRUN="$(which cobcrun)"
 fi
-COBC="cobc@COB_EXE_EXT@"
-COBCRUN="cobcrun@COB_EXE_EXT@"
-COBCRUN_DIRECT="" # used for running created executables through tools
 
 # be sure to use the English messages
 LC_ALL=C
 export LC_ALL
-
-
-TEMPLATE="${abs_srcdir}/testsuite.src"
 
 FLAGS="-debug -Wall ${COBOL_FLAGS}"
 COMPILE="${COBC} -x ${FLAGS}"
@@ -49,26 +68,65 @@ UNIFY_LISTING="${abs_srcdir}/listings-sed.sh"
 # test runner for manual tests, content may be changed by the user
 RUN_PROG_MANUAL="${abs_builddir}/run_prog_manual.sh"
 
-# unset option if not internally set
+# unset option if not internally set in this script
 _unset_option () {
 	if test "$1" != "COB_CONFIG_DIR" \
-	     -a "$1" != "COB_RUNTIME_CONFIG"; then
+	     -a "$1" != "COB_RUNTIME_CONFIG" \
+	     -a "$1" != "COB_LIBRARY_PATH" \
+	     -a "$1" != "COB_UNIX_LF"; then
 		unset $1
 	fi
 }
+
+# possible path conversion for running the testsuite in an environment
+# that doesn't match the one where the tested binaries were built
+# Note: not needed for running the testsuite with MSYS as this translates the path
+_return_path () {
+	echo "$1"
+}
+
+# Fix for testcases where cobc translates path to win32 equivalents
+if test "x$MSYSTEM" != "x"; then
+	PATHSEP=";"
+else
+	PATHSEP='@PATH_SEPARATOR@';
+fi
+export PATHSEP
+
+exec_prefix="@prefix@" # this is is likely referenced in the LIBS entries below
+
+# options that are also used in pre-inst-env (always add to both)
+# but not directly in the testsuite
+if test "$GNUCOBOL_ENV_SETUP" != "1" -a "$GNUCOBOL_TEST_LOCAL" != "1"; then
+	COB_CFLAGS="-I${abs_top_srcdir} @COB_CFLAGS@"
+	COB_LDFLAGS="@COB_LDFLAGS@"
+	COB_LIBS="-L${abs_top_builddir}/libcob/.libs @COB_LIBS@"
+	COB_CONFIG_DIR="${abs_top_srcdir}/config"
+	COB_COPY_DIR="${abs_top_srcdir}/copy"
+	LD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$LD_LIBRARY_PATH"
+	DYLD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$DYLD_LIBRARY_PATH"
+	SHLIB_PATH="${abs_top_builddir}/libcob/.libs:$SHLIB_PATH"
+	LIBPATH="${abs_top_builddir}/libcob/.libs:$LIBPATH"
+	COB_LIBRARY_PATH="${abs_top_builddir}/extras"
+
+	export COB_CFLAGS COB_LDFLAGS COB_LIBS
+	export COB_CONFIG_DIR COB_COPY_DIR
+	export LD_LIBRARY_PATH DYLD_LIBRARY_PATH SHLIB_PATH LIBPATH
+	export COB_LIBRARY_PATH
+fi
+COB_UNIX_LF=1
+export COB_UNIX_LF
 
 # unset all environment variables that are used in libcob
 # for runtime configuration
 COB_RUNTIME_CONFIG="${abs_top_srcdir}/config/runtime_empty.cfg"
 export COB_RUNTIME_CONFIG
-for cobenv in `"${abs_top_builddir}/pre-inst-env" $COBCRUN --runtime-conf | grep COB_ | cut -d: -f2 | cut -d= -f1`; \
+for cobenv in `"${abs_top_builddir}/pre-inst-env" ${COBCRUN} --runtime-conf | grep COB_ | cut -d: -f2 | cut -d= -f1`; \
 	do _unset_option $cobenv; \
 done
 
-# different flags checked in the testsuite
-COB_UNIX_LF=1
-export COB_UNIX_LF
 
+# different flags checked in the testsuite
 if test "$GNUCOBOL_TEST_LOCAL" != "1"; then
 	COB_OBJECT_EXT="@COB_OBJECT_EXT@"
 	COB_EXE_EXT="@COB_EXE_EXT@"
@@ -79,21 +137,25 @@ if test "$GNUCOBOL_TEST_LOCAL" != "1"; then
 	COB_HAS_CURSES="@COB_HAS_CURSES@"
 	COB_HAS_64_BIT_POINTER="@COB_HAS_64_BIT_POINTER@"
 else
-	COB_OBJECT_EXT="$($COBC --info | grep COB_OBJECT_EXT | cut -d: -f2 | cut -b2-)"
-	COB_EXE_EXT="$($COBC    --info | grep COB_EXE_EXT    | cut -d: -f2 | cut -b2-)"
+
+	# prevent multiple calls by caching the output
+	"${abs_top_builddir}/pre-inst-env" ${COBC} --info > info.out
+
+	COB_OBJECT_EXT="$(grep COB_OBJECT_EXT info.out | cut -d: -f2 | cut -b2-)"
+	COB_EXE_EXT="$(grep COB_EXE_EXT info.out | cut -d: -f2 | cut -b2-)"
 	
-	COB_HAS_64_BIT_POINTER=`$COBCRUN --info | grep "64bit-mode" | cut -d: -f2 | cut -b2-`
-	if test $($COBC --info | grep -i -c "ISAM.*disabled") = 0; then
+	COB_HAS_64_BIT_POINTER=`"${abs_top_builddir}/pre-inst-env" ${COBCRUN} --info | grep "64bit-mode" | cut -d: -f2 | cut -b2-`
+	if test $(grep -i -c "ISAM.*disabled" info.out) = 0; then
 		COB_HAS_ISAM="yes"
 	else
 		COB_HAS_ISAM="no"
 	fi
-	if test $($COBC --info | grep -i -c "XML library.*disabled") = 0; then
+	if test $(grep -i -c "XML library.*disabled" info.out) = 0; then
 		COB_HAS_XML2="yes"
 	else
 		COB_HAS_XML2="no"
 	fi
-	if test $($COBC --info | grep -i -c "JSON library.*disabled") = 0; then
+	if test $(grep -i -c "JSON library.*disabled" info.out) = 0; then
 		COB_HAS_CJSON="yes"
 	else
 		COB_HAS_CJSON="no"
@@ -109,44 +171,8 @@ export COB_HAS_ISAM COB_HAS_XML2 COB_HAS_CJSON COB_HAS_CURSES COB_HAS_64_BIT_POI
 export COBC COBCRUN COBCRUN_DIRECT RUN_PROG_MANUAL
 export COB_OBJECT_EXT COB_EXE_EXT
 
-COB_SCHEMA_DIR=.
-export COB_SCHEMA_DIR
-
-# possible path conversion for running the testsuite in an environment
-# that doesn't match the one where the tested binaries were built
-# Note: not needed for running the testsuite with MSYS as this translates the path
-#       if MSYS_NO_PATHCONV=1 is not set
-_return_path () {
-	echo "$1"
-}
-
-# options that are also used in pre-inst-env (always add to both)
-# but not directly in the testsuite
-if test "$GNUCOBOL_ENV_SETUP" != "1" -a "$GNUCOBOL_TEST_LOCAL" != "1"; then
-	COB_CFLAGS="-I${abs_top_srcdir} @COB_CFLAGS@"
-	COB_LDFLAGS="@COB_LDFLAGS@"
-	COB_LIBS="-L${abs_top_builddir}/libcob/.libs -lcob"
-	COB_CONFIG_DIR="${abs_top_srcdir}/config"
-	COB_COPY_DIR="${abs_top_srcdir}/copy"
-	LD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$LD_LIBRARY_PATH"
-	DYLD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$DYLD_LIBRARY_PATH"
-	SHLIB_PATH="${abs_top_builddir}/libcob/.libs:$SHLIB_PATH"
-	LIBPATH="${abs_top_builddir}/libcob/.libs:$LIBPATH"
-	COB_LIBRARY_PATH="${abs_top_builddir}/extras:$COB_LIBRARY_PATH"
-
-	export COB_CFLAGS COB_LDFLAGS COB_LIBS
-	export COB_CONFIG_DIR COB_COPY_DIR
-	export LD_LIBRARY_PATH DYLD_LIBRARY_PATH SHLIB_PATH LIBPATH
-	export COB_LIBRARY_PATH
-fi
-
-# Fix for testcases where cobc translates path to win32 equivalents
-if test "x$MSYSTEM" != "x"; then
-	PATHSEP=";"
-else
-	PATHSEP='@PATH_SEPARATOR@';
-fi
-export PATHSEP
+# to ensure that no external COB_SCHEMA_DIR is polluted: set to local
+COB_SCHEMA_DIR="." && export COB_SCHEMA_DIR
 
 # to ensure that no external DB_HOME is polluted: unset
 DB_HOME="" && export DB_HOME

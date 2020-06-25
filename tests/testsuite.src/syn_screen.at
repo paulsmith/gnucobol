@@ -49,7 +49,7 @@ AT_DATA([prog.cob], [
            DISPLAY "a" UPON CRT, "b" LINE 3 COL 3, "c" UPON CRT-UNDER
            DISPLAY scr, scr
 
-           ACCEPT a-field LINE 5 SIZE 3 AT COL 1 WITH AUTO WITH
+           ACCEPT a-field LINE 5 SIZE 3 AT COL 1 WITH AUTO
                REVERSE-VIDEO, BLINK
 
            *> invalid statements

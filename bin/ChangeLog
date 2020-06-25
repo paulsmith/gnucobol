@@ -1,4 +1,10 @@
 
+2020-07-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cob-config.in: extended with an actual help
+	* cob-config.1: now auto-generated like cobcrun.1
+	* Makefile.am (cob-config.1): target added with use of help2man
+
 2020-03-11  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: honor new conditional MAKE_HAS_PREREQ_ONLY

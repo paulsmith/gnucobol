@@ -97,7 +97,7 @@ pushd "%cob_dist_path%"
 echo.
 
 echo Copying docs...
-set "txt_doc_list=AUTHORS COPYING COPYING.LESSER COPYING.DOC NEWS README THANKS TODO HACKING"
+set "txt_doc_list=AUTHORS COPYING COPYING.LESSER COPYING.DOC NEWS README THANKS DEPENDENCIES HACKING TODO"
 for %%f in (%txt_doc_list%) do (
     copy  %cob_source_path%%%f .\%%f.TXT 1>nul
 )

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2018-2019 Free Software Foundation, Inc.
+   Copyright (C) 2018-2020 Free Software Foundation, Inc.
    Written by Edward Hart, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -309,13 +309,14 @@ get_name_with_hex_prefix (const cob_field * const name)
 }
 
 static char
-int_to_hex (const int n)
+int_to_hex (int n)
 {
 	if (n < 10) {
-		return '0' + n;
+		n = n + '0';
 	} else {
-		return 'a' + (n - 10);
+		n = n - 10 + 'a';
 	}
+	return (char)n;
 }
 
 static xmlChar *
