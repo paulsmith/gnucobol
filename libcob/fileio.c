@@ -2879,7 +2879,6 @@ cob_file_open (cob_file_api *a, cob_file *f, char *filename, const int mode, con
 
 	int		ret, j, k;
 	int		p_fds[2],c_fds[2];
-	pid_t	s_pid;
 	FILE			*fp;
 	const char		*fmode;
 	char			*args[dMaxArgs];
@@ -2943,6 +2942,7 @@ cob_file_open (cob_file_api *a, cob_file *f, char *filename, const int mode, con
 	}
 	if (filename[0] == '|') {
 #if defined (HAVE_UNISTD_H) && !(defined (_WIN32))
+		pid_t	s_pid;
 		if (mode != COB_OPEN_I_O) 
 			return COB_STATUS_37_PERMISSION_DENIED;
 		filename++;
@@ -3186,6 +3186,7 @@ cob_file_close (cob_file_api *a, cob_file *f, const int opt)
 					if (f->fileout
 					 && f->fileout != f->file) 
 						fclose (f->fileout);
+#if defined (HAVE_UNISTD_H) && !(defined (_WIN32))
 					errno = 0;
 					kill (f->file_pid, 0);
 					if (errno == ESRCH) {
@@ -3196,6 +3197,17 @@ cob_file_close (cob_file_api *a, cob_file *f, const int opt)
 						cob_sleep_msec(50);
 						waitpid (f->file_pid, &sts, 0);
 					}
+#elif defined (_WIN32)
+					{
+						char buff[COB_MINI_BUFF];
+						snprintf(&buff, COB_MINI_MAX, "TASKKILL    /PID %d", f->file_pid);
+						system(buff);
+#if 0
+						snprintf(&buff, COB_MINI_MAX, "TASKKILL /F /PID %d", f->file_pid);
+						system(buff);
+#endif
+					}
+#endif
 				} else {
 					pclose ((FILE *)f->file);
 				}

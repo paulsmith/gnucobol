@@ -1,4 +1,9 @@
 
+2020-06-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c (cob_file_close) [_WIN32]: pipe code compiles again, but still
+	  is not tested...
+
 2020-06-23  Ron Norman <rjn@inglenet.com>
 
 	* exception.def: Added COB_EC_DELETE_FILE
@@ -6,19 +11,23 @@
 	* fextfh.c: Prepare for cob_delete_file given 'override' option
 
 2020-06-20  Ron Norman <rjn@inglenet.com>
+
 	* common.h: add mapkey to cob_file
 	* fileio.c,fisam.c: Fix to handle old VBISAM that does not support 
 	            sparse indexes
 
 2020-06-20  Ron Norman <rjn@inglenet.com>
+
 	* fisam.c,fbdb.c: Fix to return status 21 instead of 22 when OPEN OUTPUT
 
 2020-06-18  Ron Norman <rjn@inglenet.com>
+
 	* coblocal.h,common.h: add flags for LS_INSTAB (Like MF INSERTTAB)
 	* common.c: Accept COB_MF_LS_INSTAB/mf_ls_instab in runtime.cfg
 	* fileio.c: Handle "ls_instab" option similar to MF INSERTTAB
 
 2020-06-16  Ron Norman <rjn@inglenet.com>
+
 	* call.c: added cob_get_dbl_param & cob_put_dbl_param
 	* common.h: added cob_get_dbl_param & cob_put_dbl_param
 
