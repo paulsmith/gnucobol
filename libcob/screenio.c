@@ -711,53 +711,83 @@ pass_cursor_to_program (void)
 		} else {
 			char	buff[23]; /* 10: make the compiler happy as "int" *could*
 								 have more digits than we "assume" */
-			if (cursor_field->size < 6) {
+			switch (cursor_field->size) {
+			case 4:
 				sline *= 100;
 				sline += scolumn;
 				sprintf (buff, "%4.4d", sline);
 				memcpy (cursor_field->data, buff, 4U);
-			} else {
+				break;
+			case 6:
 				sline *= 1000;
 				sline += scolumn;
 				sprintf (buff, "%6.6d", sline);
 				memcpy (cursor_field->data, buff, 6U);
+				break;
+			/* LCOV_EXCL_START */
+			default:
+				cob_fatal_error (COB_FERROR_CODEGEN);
+			/* LCOV_EXCL_STOP */
 			}
 		}
 	}
 }
+
+static int
+get_line_and_col_from_field (cob_field* pos, int* line, int* column)
+{
+	const int maxsize = pos->size;
+	int	max_line_column;
+	int	pos_val;
+
+	if (maxsize == 4) {
+		max_line_column = 100;
+	} else if (maxsize == 6) {
+		max_line_column = 1000;
+	} else {
+		max_line_column = 1; /* set to some value that don't crash */
+	}
+
+	if (COB_FIELD_IS_NUMERIC (pos)) {
+		pos_val = cob_get_int (pos);
+	} else {
+		char	buff[23]; /* 7: make the compiler happy as "int" *could*
+							 have more digits than we "assume" */
+		/* LCOV_EXCL_START */
+		if (unlikely (max_line_column == 1)) {
+			cob_fatal_error (COB_FERROR_CODEGEN);
+		}
+		/* LCOV_EXCL_STOP */
+		memcpy (buff, pos->data, maxsize);
+		buff[maxsize + 1] = 0;
+		if (unlikely (!sscanf (buff, "%d", &pos_val))) {
+			cob_fatal_error (COB_FERROR_CODEGEN);
+		}
+	}
+
+	*line = (pos_val / max_line_column);
+	*column = (pos_val % max_line_column);
+
+	return max_line_column;
+}
+
 /* set given parameters to the programs SPECIAL-NAMES CURSOR clause or
   -1 if not provided */
 static void
 get_cursor_from_program (int *line, int *column)
 {
 	if (COB_MODULE_PTR && COB_MODULE_PTR->cursor_pos) {
-		cob_field	*cursor_field = COB_MODULE_PTR->cursor_pos;
-		int cursor_pos;
-		if (COB_FIELD_IS_NUMERIC (cursor_field)) {
-			cursor_pos = cob_get_int (cursor_field);
-		} else {
-			char buff[32];
-			int maxsize = cursor_field->size;
-			/* LCOV_EXCL_START */
-			if (unlikely (maxsize != 4 && maxsize != 6)) {
-				cob_fatal_error (COB_FERROR_CODEGEN);
-			}
-			/* LCOV_EXCL_STOP */
-			memcpy (buff, cursor_field->data, maxsize);
-			buff[maxsize + 1] = 0;
-			if (unlikely (!sscanf (buff, "%d", &cursor_pos))) {
-				cob_fatal_error (COB_FERROR_CODEGEN);
-			}
+		int ret = get_line_and_col_from_field
+			(COB_MODULE_PTR->cursor_pos, line, column);
+		/* LCOV_EXCL_START */
+		if (unlikely (ret == 1)) {
+			cob_fatal_error (COB_FERROR_CODEGEN);
 		}
-		if (cursor_field->size == 4) {
-			*line = (cursor_pos / 100) - 1;
-			*column = (cursor_pos % 100) - 1;
-		} else {
-			*line = (cursor_pos / 1000) - 1;
-			*column = (cursor_pos % 1000) - 1;
-		}
+		/* LCOV_EXCL_STOP */
+		*line = *line - 1;
+		*column = *column - 1;
 	} else {
-		*column = *line = -1;
+		*line = *column = -1;
 	}
 }
 
@@ -1978,33 +2008,6 @@ cob_screen_iterate (cob_screen *s)
 }
 
 static void
-get_line_and_col_from_num (cob_field *pos, int *line, int *column)
-{
-	int	pos_val = cob_get_int (pos);
-	int	max_line_column;
-
-	/*
-	  This is used when only a LINE clause is specified, not an AT clause.
-	*/
-	if (pos->size < 4) {
-		*line = pos_val;
-		*column = 1;
-		return;
-	}
-
-	if (pos->size == 4) {
-		max_line_column = 100;
-	} else if (pos->size == 6) {
-		max_line_column = 1000;
-	} else {
-		/* Throw an exception? EC-SCREEN-IMP-LINE-VAR-LENGTH? */
-		max_line_column = 1; /* set to some value that don't crash */
-	}
-	*line = (pos_val / max_line_column);
-	*column = (pos_val % max_line_column);
-}
-
-static void
 get_line_column (cob_field *fline, cob_field *fcol, int *line, int *col)
 {
 	if (fline == NULL) {
@@ -2047,12 +2050,26 @@ extract_line_and_col_vals (cob_field *line, cob_field *column,
 			*scolumn = 0;
 			return;
 		} else {
-			/*
-			  line actually contains both the line and field
-			  numbers.
-			*/
-			get_line_and_col_from_num (line, &cobol_line,
-						   &cobol_col);
+			if (line->size < 4) {
+				/* this is used when only a LINE clause is specified,
+				   not an AT clause */
+				cobol_line = cob_get_int (line);
+				cobol_col = 1;
+			} else {
+				/* common case: line actually contains both the
+				   line and field numbers */
+				int ret = get_line_and_col_from_field
+					(line, &cobol_line, &cobol_col);
+				/* LCOV_EXCL_START */
+				if (unlikely (ret == 1)) {
+#if 0				/* Throw an exception? EC-SCREEN-IMP-LINE-VAR-LENGTH? */
+					cob_set_exception (COB_EC_SCREEN_IMP);
+#else
+					cob_fatal_error (COB_FERROR_CODEGEN);
+#endif
+				}
+				/* LCOV_EXCL_STOP */
+			}
 		}
 	} else {
 		get_line_column (line, column, &cobol_line, &cobol_col);

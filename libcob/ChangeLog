@@ -1,49 +1,116 @@
 
+2020-06-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c (cob_file_close) [_WIN32]: pipe code compiles again, but still
+	  is not tested...
+
 2020-06-23  Ron Norman <rjn@inglenet.com>
+
 	* exception.def: Added COB_EC_DELETE_FILE
 	* fileio.c: Set COB_EC_DELETE_FILE as required
 	* fextfh.c: Prepare for cob_delete_file given 'override' option
 
 2020-06-20  Ron Norman <rjn@inglenet.com>
+
 	* common.h: add mapkey to cob_file
 	* fileio.c,fisam.c: Fix to handle old VBISAM that does not support 
 	            sparse indexes
 
 2020-06-20  Ron Norman <rjn@inglenet.com>
+
 	* fisam.c,fbdb.c: Fix to return status 21 instead of 22 when OPEN OUTPUT
 
 2020-06-18  Ron Norman <rjn@inglenet.com>
+
 	* coblocal.h,common.h: add flags for LS_INSTAB (Like MF INSERTTAB)
 	* common.c: Accept COB_MF_LS_INSTAB/mf_ls_instab in runtime.cfg
 	* fileio.c: Handle "ls_instab" option similar to MF INSERTTAB
 
 2020-06-16  Ron Norman <rjn@inglenet.com>
+
 	* call.c: added cob_get_dbl_param & cob_put_dbl_param
 	* common.h: added cob_get_dbl_param & cob_put_dbl_param
+
+2020-06-14  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_external_addr): if size and name matches the errno
+	  register -> return its address so the COBOL program may directly
+	  access it - late part of FR #49
+	* call.c (insert), common.c (cob_init): ignore [_WIN32] if either
+	  [HAVE_CANONICALIZE_FILE_NAME] or [HAVE_REALPATH] is defined
 
 2020-06-12  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: Fixed problem with updating key definitions
 				from BDB data dictionary file
 				
+2020-06-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobgetopt.c: nearly redo the copy of GnuCOBOL's getopt implementation
+	  from gnulib's 2020 version (still without: libc parts, structure,
+	  more headers; undefine lock function calls, keep \n from msgids);
+	  most important user change: we honor environment POSIXLY_CORRECT now
+	* move.c (cob_move_display_to_binary, cob_move_binary_to_display):
+	  fix runtime error (overflow in assignment) recognized with bug #384
+
+2020-06-10  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c->fileio.h: define fdatasync if missing
+	  (fixing Bug #644 warning on MacOS)
+
+2020-06-09  Simon Sobisch <simonsobisch@gnu.org>
+
+	Bug #616 cannot redirect output of cobcrun --info
+	FR #385 more details for screenio in cobcrun --info
+	* cobcrun.c (get_screenio_and_mouse_info): new function,
+	  extracted and extended from print_info (showing longname);
+	  reasonable output for curses that isn't NCurses or PDCurses;
+	  all curses calls but version info only in verbose mode
+	* cobcrun.c (get_math_info): new function,
+	  extracted and adjusted from print_info
+	* cobcrun.c, common.h: (print_info) as delegate for
+	  new (print_info_detailed) which handles verbose option
+
+	* coblocal.h: adjusted GCC-version for definition of visibility attribute
+	  COB_HIDDEN and option to disable via COB_NO_VISIBILITY_ATTRIBUTE;
+	  not a solution (-> move to configure) but a workaround...
+	
+	Work on signal and call SYSTEM handling
+	* common.c (get_signal_name): extracted from (cob_sig_handler)
+	* common.c (cob_sys_system): don't abort if the command is too long
+	  and always remove trailing space/low-value before the size check;
+	  added a runtime warning if the command resulted in a signal and
+	  translate the status via WEXITSTATUS if available
+
 2020-05-16  Ron Norman <rjn@inglenet.com>
 
 	* fisam.c: Fixed problem with READ PREVIOUS/DELETE/READ PREVIOUS
 				when reading thru a group of duplicate keys
 
+2020-05-10  Simon Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (get_line_and_col_from_field): refactored from
+	  get_line_and_col_from_num and get_cursor_from_program, now
+	  containing additional handing of non-numeric group fields
+	  for the position, fixing bug #632
+
 2020-04-28  Ron Norman <rjn@inglenet.com>
+
 	* common.h,move.c: cob_set_llint is now passed a value to do size
 				checking. It also now checks module->flag_binary_truncate
 				and truncates the data as needed
 
-2020-04-26  Ron Norman <rjn@inglenet.com>
-	* common.h,move.c,sysdefines.h: Updates for speeding up arithmetic
+2020-04-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c->fisam.c (indexed_keydesc): always use key component definition
+	  if available fixing broken 1-part "components" using wrong offset
 
 2020-04-26  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c: For LINE SEQUENTIAL and OPEN I-O some platforms
 				(SUNOS for one) require that a fflush be done
 				between each read/write of the file
+	* common.h,move.c,sysdefines.h: Updates for speeding up arithmetic
 
 2020-04-17  Ron Norman <rjn@inglenet.com>
 
@@ -62,6 +129,11 @@
 	* common.h: Add fields for implementing LINE SEQUENTIAL pipes
 	* fileio.c: Add code for LINE SEQUENTIAL pipes
 
+2020-04-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (print_info) [mpir_version]: fixed string overflow warnings
+	* numeric.c (cob_decimal_print): use of mpz_get_str in favor of gmp_sprintf
+
 2020-04-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c: changed "FUNCTION/USING parameter" to "FUNCTION/USING argument"
@@ -79,6 +151,10 @@
 	  HELPSOURCES and HELP2MAN_OPTS
 	* Makefile.am: honor new conditional MAKE_HAS_PREREQ_ONLY
 
+2020-03-09  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c, intrinsic.c, numeric.c: FR #372 honor HAVE_GMP_H and HAVE_MPIR_H
+
 2020-03-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* fileio.c, common.h: define and use COB_FILE_MODE for _WIN32 and
@@ -91,6 +167,7 @@
 	* common.h: definition of COB_A_NORETURN for newer HPUX (__HP_cc)
 
 2020-02-15  Ron Norman <rjn@inglenet.com>
+
 	* common.h, fileio.c, fileio.h, foci.c, fodbc.c, fsqlxfd.c:
 		Updates to support RELATIVE file for processing by
 		the OCI/ODBC I/O modules.
@@ -101,6 +178,7 @@
 		do not need to duplicate that logic
 
 2020-02-13  Ron Norman <rjn@inglenet.com>
+
 	* fsqlxfd.c: Call cob_xfd_to_ddl if 'create_table' was 'true'
 				and table.ddl is not present
 	* common.c,fileio.h,coblocal.h: Updates for 'create_table'
@@ -108,25 +186,30 @@
 	* fileio.c: Use cob_dictionary_path if defined
 
 2020-02-12  Ron Norman <rjn@inglenet.com>
+
 	* fsqlxfd.c: Adding cob_xfd_to_ddl routine
 	* common.h,fileio.h: Updates for cob_xfd_to_ddl
 	* foci.c, fodbc.c: Add checks for Table not defined
 
 2020-02-05  Ron Norman <rjn@inglenet.com>
+
 	* common.h: cob_file and cob_file_key updated
 	* fileio.c,fbdb.c: Corrections for using filedef.dd for BDB
 
 2020-01-28  Ron Norman <rjn@inglenet.com>
+
 	* fileio.c,fbdb.c,fsqlxfd.c: Adding casts to avoid C compile warnings
 	* fextfh.c,screenio.c,common.c: Adding casts to avoid C compile warnings
 
 2020-01-25  Ron Norman <rjn@inglenet.com>
+
 	* fileio.c: Skips reading records having SUPPRESS WHEN "string"
 	            and checks for duplicates on (RE)WRITE if there was
 				no WITH DUPLICATES because the underlying file 
 				needs to allow DUPLICATES
 
 2020-01-24  Ron Norman <rjn@inglenet.com>
+
 	* Makefile.am: --version-info changed to 5:0:0
 	* common.h: cob_file and cob_file_key updated
 				some #define replaced by enum
@@ -139,6 +222,7 @@
 	* flmdb.c: Changes to match updated cob_file
 
 2020-01-22  Ron Norman <rjn@inglenet.com>
+
 	* coblocal.h: Added cob_bdb_byteorder
 	* common.h: Added flags for BDB Byteorder
 	* common.c: Added bdb_byteorder to runtime config processing
@@ -147,12 +231,14 @@
 				and for the numeric duplicate key value
 
 2020-01-06  Ron Norman <rjn@inglenet.com>
+
 	* fileio.h,fsqlxfd.c,foci.c,fodbc.c:
 			Implemented READ locking options (RETRY, IGNORE, ADVANCING)
 			By adding clauses to SELECT statement
 			What is used varies depending on the type of Database
 
 2020-01-06  Ron Norman <rjn@inglenet.com>
+
 	* fileio.c: In IO_filename checks for table=sqltablename
 				and schema=directory holding XFD/DDL files 
 

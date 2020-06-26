@@ -427,11 +427,13 @@ validate_using (cb_tree using_list)
 {
 	cb_tree		l;
 	cb_tree		x;
+	cb_tree		check_list;
 	struct cb_field	*f;
 
+	check_list = NULL;
 	for (l = using_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
-		if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
+		if (cb_try_ref (x) != cb_error_node) {
 			f = CB_FIELD (cb_ref (x));
 			if (!current_program->flag_chained) {
 				if (f->storage != CB_STORAGE_LINKAGE) {
@@ -450,6 +452,27 @@ validate_using (cb_tree using_list)
 			}
 			if (f->redefines) {
 				cb_error_x (x, _("'%s' REDEFINES field not allowed here"), f->name);
+			}
+			if (CB_PURPOSE_INT (l) == CB_CALL_BY_REFERENCE) {
+				check_list = cb_list_add (check_list, x);
+			}
+		}
+	}
+
+	if (check_list != NULL) {
+		for (l = check_list; l; l = CB_CHAIN (l)) {
+			cb_tree	l2 = CB_VALUE (l);
+			x = cb_ref (l2);
+			if (x != cb_error_node) {
+				for (l2 = check_list; l2 != l; l2 = CB_CHAIN (l2)) {
+					if (cb_ref (CB_VALUE (l2)) == x) {
+						cb_error_x (l,
+							_("duplicate USING BY REFERENCE item '%s'"),
+							cb_name (CB_VALUE (l)));
+						CB_VALUE (l) = cb_error_node;
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -496,7 +519,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	param_num = 1;
 	for (l = using_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
-		if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
+		if (cb_try_ref (x) != cb_error_node) {
 			f = CB_FIELD (cb_ref (x));
 			if (!current_program->flag_chained) {
 				f->flag_is_pdiv_parm = 1;

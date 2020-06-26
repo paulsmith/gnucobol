@@ -917,10 +917,12 @@ struct cb_field {
 	unsigned int flag_any_numeric	: 1;	/* Is ANY NUMERIC */
 	unsigned int flag_is_returning	: 1;	/* Is RETURNING item */
 	unsigned int flag_unbounded	: 1;	/* OCCURS UNBOUNDED */
-	unsigned int flag_constant	: 1;	/* Is 01 AS CONSTANT */
-	unsigned int flag_internal_constant	: 1;	/* Is an internally generated CONSTANT */
 	unsigned int flag_comp_1	: 1;	/* Is USAGE COMP-1 */
 	unsigned int flag_volatile	: 1;	/* VOLATILE */
+	unsigned int flag_constant	: 1;	/* Is 01 AS CONSTANT */
+	unsigned int flag_internal_constant	: 1;	/* Is an internally generated CONSTANT */
+
+	unsigned int flag_internal_register	: 1;	/* Is an internally generated register */
 
 	unsigned int flag_sql_binary	: 1;	/* Store field as BINARY */
 	unsigned int flag_sql_char	: 1;		/* Store field as CHAR */

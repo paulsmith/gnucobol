@@ -56,6 +56,7 @@ make check
 %defattr (-,root,root,-)
 %doc AUTHORS ChangeLog
 %doc NEWS README THANKS
+%doc DEPENDENCIES HACKING
 %{_bindir}/cobc
 %{_bindir}/cobcrun
 %{_bindir}/cob-config

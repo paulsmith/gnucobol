@@ -40,13 +40,21 @@ CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 
 MAINTAINERCLEANFILES = cobcrun.1
 
-HELPSOURCES = cobcrun.c $(top_srcdir)/configure.ac
+HELPSOURCES_COBCRUN = cobcrun.c $(top_srcdir)/configure.ac
+HELPSOURCES_COBCONFIG = cob-config.in $(top_srcdir)/configure.ac
 HELP2MAN_OPTS = --info-page=$(PACKAGE)
 
 if MAKE_HAS_PREREQ_ONLY
-cobcrun.1: $(HELPSOURCES) | $(COBCRUN)
+cobcrun.1: $(HELPSOURCES_COBCRUN) | $(COBCRUN)
 	"$(top_builddir)/pre-inst-env" $(HELP2MAN) --output=$@ $(HELP2MAN_OPTS) $(COBCRUN)
 else
-cobcrun.1: $(HELPSOURCES)
+cobcrun.1: $(HELPSOURCES_COBCRUN)
 	"$(top_builddir)/pre-inst-env" $(HELP2MAN) --output=$@ $(HELP2MAN_OPTS) $(COBCRUN)
+endif
+
+if MAKE_HAS_PREREQ_ONLY
+cob-config.1: $(HELPSOURCES_COBCONFIG) | ./cob-config
+	$(HELP2MAN) --output=$@ $(HELP2MAN_OPTS) ./cob-config
+else
+	$(HELP2MAN) --output=$@ $(HELP2MAN_OPTS) ./cob-config
 endif

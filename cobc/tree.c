@@ -447,7 +447,7 @@ cb_name_1 (char *s, cb_tree x, const int size)
 	struct cb_intrinsic	*cbit;
 	cb_tree			l;
 	int			i;
-	
+
 	orig = s;
 	if (!x) {
 		strncpy (s, "(void pointer)", size);

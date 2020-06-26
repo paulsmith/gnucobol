@@ -2004,12 +2004,12 @@ cobc_abort_terminate (int should_be_reported)
 static void
 cobc_sig_handler (int sig)
 {
-#if defined (SIGINT) ||defined (SIGQUIT) || defined (SIGTERM) || defined (SIGPIPE)
+#if defined (SIGINT) || defined (SIGQUIT) || defined (SIGTERM) || defined (SIGPIPE)
 	int ret = 0;
 #endif
 
 	cobc_abort_msg ();
-#if defined (SIGINT) ||defined (SIGQUIT) || defined (SIGTERM) || defined (SIGPIPE)
+#if defined (SIGINT) || defined (SIGQUIT) || defined (SIGTERM) || defined (SIGPIPE)
 #ifdef SIGINT
 	if (sig == SIGINT) ret = 1;
 #endif
@@ -2533,17 +2533,11 @@ process_command_line (const int argc, char **argv)
 	int			list_intrinsics = 0;
 	int			list_system_names = 0;
 	int			list_system_routines = 0;
-#if defined (_WIN32) || defined (__DJGPP__)
-	int 			argnum;
-#endif
 	enum cob_exception_id	i;
 	char			ext[COB_MINI_BUFF];
 	char			*conf_label;	/* we want a dynamic address for erroc.c, not a static one */
 	char			*conf_entry;
 	const char		*copt = NULL;	/* C optimization options */
-#if defined (_MSC_VER)
-	const char		*extension;
-#endif
 
 	int			conf_ret = 0;
 	int			error_all_warnings = 0;
@@ -2552,11 +2546,17 @@ process_command_line (const int argc, char **argv)
 	cb_warn_unsupported = COBC_WARN_AS_ERROR;
 
 #if defined (_WIN32) || defined (__DJGPP__)
-	/* Translate command line arguments from DOS/WIN to UNIX style */
-	argnum = 1;
-	while (++argnum <= argc) {
-		if (strrchr(argv[argnum - 1], '/') == argv[argnum - 1]) {
-			argv[argnum - 1][0] = '-';
+	if (!getenv ("POSIXLY_CORRECT")) {
+		/* Translate command line arguments from DOS/WIN to UNIX style */
+		int argnum = 0;
+		while (++argnum < argc) {
+			if (strrchr(argv[argnum], '/') == argv[argnum]) {
+				if (argv[argnum][1] == '?' && !argv[argnum][2]) {
+					argv[argnum] = "--help";
+					continue;
+				}
+				argv[argnum][0] = '-';
+			}
 		}
 	}
 #endif
@@ -3102,9 +3102,8 @@ process_command_line (const int argc, char **argv)
 				cobc_err_exit (COBC_INV_PAR, "-l");
 			}
 #ifdef	_MSC_VER
-			extension = file_extension (cob_optarg);
 			/* note: strcasecmp because of possible different specified extension */
-			if (!strcasecmp (extension, "lib")) {
+			if (!strcasecmp (file_extension (cob_optarg), "lib")) {
 				COBC_ADD_STR (cobc_libs, " \"", cob_optarg, "\"");
 			} else {
 				COBC_ADD_STR (cobc_libs, " \"", cob_optarg, ".lib\"");
@@ -3795,11 +3794,143 @@ line_contains (char* line_start, char* line_end, char* search_patterns)
 }
 #endif
 
+static char *
+resolve_name_from_cobc (const char *cobc_path)
+{
+	char *	cobcrun_path_malloced = NULL;
+
+	const char	*cobc_real_name;
+	size_t	cobc_name_length;
+	size_t	cobc_path_length;
+	int		i;
+
+	if (cobc_path == NULL) {
+		return NULL;
+	}
+
+	cobc_real_name = file_basename (cobc_path, NULL);
+	cobc_name_length = strlen (cobc_real_name);
+	cobc_path_length = (int)strlen (cobc_path);
+	/* note, we cannot subtract strlen (COB_EXE_EXT)
+	   as we may be called with/without it */
+	for (i = cobc_path_length - cobc_name_length; i >= 0; i--) {
+		if (!strncasecmp (cobc_real_name, cobc_path + i, cobc_name_length)) {
+			const size_t cobcrun_name_length = strlen (COBCRUN_NAME);
+			size_t length = cobc_path_length - cobc_name_length + cobcrun_name_length + 1;
+			cobcrun_path_malloced = cobc_malloc (length);
+			memcpy (cobcrun_path_malloced, cobc_path, i);
+			memcpy (cobcrun_path_malloced + i, COBCRUN_NAME, cobcrun_name_length);
+			length = cobc_path_length - i - cobc_name_length + 1;
+			memcpy (cobcrun_path_malloced + i + cobcrun_name_length, cobc_path + i + cobc_name_length, length);
+			break;
+		}
+	}
+	return cobcrun_path_malloced;
+}
+
+
+/* LCOV_EXCL_START */
+static const char *
+get_signal_name (int signal_value)
+{
+	switch (signal_value) {
+#ifdef	SIGINT
+	case SIGINT:
+		return "SIGINT";
+#endif
+#ifdef	SIGHUP
+	case SIGHUP:
+		return "SIGHUP";
+#endif
+#ifdef	SIGQUIT
+	case SIGQUIT:
+		return "SIGQUIT";
+#endif
+#ifdef	SIGTERM
+	case SIGTERM:
+		return "SIGTERM";
+#endif
+#ifdef	SIGPIPE
+	case SIGPIPE:
+		return "SIGPIPE";
+#endif
+#ifdef	SIGSEGV
+	case SIGSEGV:
+		return "SIGSEGV";
+#endif
+#ifdef	SIGBUS
+	case SIGBUS:
+		return "SIGBUS";
+#endif
+#ifdef	SIGFPE
+	case SIGFPE:
+		return "SIGFPE";
+#endif
+	default:
+		return _("unknown");
+	}
+}
+/* LCOV_EXCL_STOP */
+
+static COB_INLINE COB_A_INLINE void
+output_return (const int status)
+{
+	if (verbose_output) {
+		fputs (_("return status:"), stderr);
+		fprintf (stderr, "\t%d\n", status);
+		fflush (stderr);
+	}
+}
+
+/* do system call, with handling verbose options and return */
+static int
+call_system (const char* command)
+{
+	int status;
+
+	if (verbose_output) {
+		cobc_cmd_print (command);
+	}
+	if (verbose_output < 0) {
+		return 0;
+	}
+
+#if 0	/* Is there a need to flush whatever we may have in our streams? */
+	fflush (stdout);
+	fflush (stderr);
+#endif
+
+	status = system (command);
+
+#ifdef	WIFSIGNALED
+	if (WIFSIGNALED (status)) {
+		int signal_value = WTERMSIG (status);
+#if 0
+		if (signal == SIGINT || signal == SIGQUIT) {
+			save_temps = 0;
+			cobc_clean_up (1);
+			cob_raise (signal);
+		}
+#endif
+		cobc_err_msg (_("external process \"%s\" ended with signal %s (%d)"),
+			command, get_signal_name (signal_value), signal_value);
+	}
+#endif
+#ifdef WEXITSTATUS
+	if (WIFEXITED (status)) {
+		status = WEXITSTATUS (status);
+	}
+#endif
+
+	output_return (status);
+	return status;
+}
+
+
 /** -j run job after build */
 static int
 process_run (const char *name)
 {
-	int		ret, status;
 	size_t		curr_size;
 	const char	*buffer;
 
@@ -3813,14 +3944,62 @@ process_run (const char *name)
 		name = output_name;
 		/* ensure enough space (output name) */
 		cobc_chk_buff_size (strlen (output_name) + 18);
-	} else {
-		name = file_basename (name, NULL);
 	}
 
-	if (cb_compile_level == CB_LEVEL_MODULE ||
-	    cb_compile_level == CB_LEVEL_LIBRARY) {
-		curr_size = snprintf (cobc_buffer, cobc_buffer_size, "cobcrun%s %s",
-			COB_EXE_EXT, name);
+	if (cb_compile_level == CB_LEVEL_MODULE
+	 || cb_compile_level == CB_LEVEL_LIBRARY) {
+		const char *cobcrun_path = getenv ("COBCRUN");
+		char* cobcrun_path_malloced = NULL;
+
+		if (!cobcrun_path || !cobcrun_path[0]) {
+			char *cobc_path = getenv ("COBC");
+			char *cobc_path_malloced = NULL;
+
+			if (!cobc_path || !cobc_path[0]) {
+#if	defined(HAVE_CANONICALIZE_FILE_NAME)
+				/* Malloced path or NULL */
+				cobc_path_malloced = canonicalize_file_name (cb_saveargv[0]);
+#elif	defined(HAVE_REALPATH)
+				{
+					char *s = cobc_malloc ((size_t)COB_NORMAL_BUFF);
+					if (realpath (cb_saveargv[0], s) != NULL) {
+						cobc_path_malloced = cob_strdup (s);
+					}
+					cobc_free (s);
+				}
+#elif defined (_WIN32)
+				/* Malloced path or NULL */
+				cobc_path_malloced = _fullpath (NULL, cb_saveargv[0], 1);
+#endif
+				if (cobc_path_malloced) {
+					cobc_path = cobc_path_malloced;
+				} else {
+					cobc_path = NULL;
+				}
+			} else if (verbose_output > 1) {
+				fprintf (stderr, _("%s is resolved by environment as: %s"),
+					"COBC", cobc_path);
+				fputc ('\n', stderr);
+			}
+			cobcrun_path_malloced = resolve_name_from_cobc (cobc_path);
+			if (cobcrun_path_malloced) {
+				cobcrun_path = cobcrun_path_malloced;
+			} else {
+				cobcrun_path = COBCRUN_NAME COB_EXE_EXT;
+			}
+			if (cobc_path_malloced) {
+				cobc_free (cobc_path_malloced);
+			}
+		} else if (verbose_output > 1) {
+			fprintf (stderr, _("%s is resolved by environment as: %s"),
+				"COBCRUN", cobcrun_path);
+			fputc ('\n', stderr);
+		}
+		curr_size = snprintf (cobc_buffer, cobc_buffer_size, "%s %s",
+			cobcrun_path, name);
+		if (cobcrun_path_malloced) {
+			cobc_free (cobcrun_path_malloced);
+		}
 		/* strip period + COB_MODULE_EXT if specified */
 		if (output_name && curr_size < cobc_buffer_size) {
 			buffer = file_extension (output_name);
@@ -3830,10 +4009,12 @@ process_run (const char *name)
 		}
 	} else {  /* executable */
 		/* only add COB_EXE_EXT if it is not specified */
+		const char *exe_ext = COB_EXE_EXT;
+		exe_ext++; /* drop the "." */
 		buffer = file_extension (name);
 		/* only prefix with ./ if there is no directory portion in name */
 		if (strchr (name, SLASH_CHAR) == NULL) {
-			if (COB_EXE_EXT[0] && strcasecmp (buffer, COB_EXE_EXT + 1)) {
+			if (COB_EXE_EXT[0] && strcasecmp (buffer, exe_ext)) {
 				curr_size = snprintf (cobc_buffer, cobc_buffer_size, ".%c%s%s",
 					SLASH_CHAR, name, COB_EXE_EXT);
 			} else {
@@ -3841,7 +4022,7 @@ process_run (const char *name)
 					SLASH_CHAR, name);
 			}
 		} else {
-			if (COB_EXE_EXT[0] && strcasecmp (buffer, COB_EXE_EXT + 1)) {
+			if (COB_EXE_EXT[0] && strcasecmp (buffer, exe_ext)) {
 				curr_size = snprintf (cobc_buffer, cobc_buffer_size, "%s%s",
 					name, COB_EXE_EXT);
 			} else {
@@ -3863,28 +4044,7 @@ process_run (const char *name)
 		strncat (cobc_buffer, " ", cobc_buffer_size);
 		strncat (cobc_buffer, cobc_run_args, cobc_buffer_size);
 	}
-	if (verbose_output) {
-		cobc_cmd_print (cobc_buffer);
-	}
-	if (verbose_output < 0) {
-		return 0;
-	}
-	status = system (cobc_buffer);
-#ifdef WEXITSTATUS
-	if (WIFEXITED(status)) {
-		ret = WEXITSTATUS(status);
-	} else {
-		ret = status;
-	}
-#else
-	ret = status;
-#endif
-	if (verbose_output) {
-		fputs (_("return status:"), stderr);
-		fprintf (stderr, "\t%d\n", ret);
-		fflush (stderr);
-	}
-	return ret;
+	return call_system (cobc_buffer);
 }
 
 #ifdef	__OS400__
@@ -4062,19 +4222,7 @@ process (char *cmd)
 		if (cobc_gen_listing) {
 			strcat (buffptr, " OUTPUT(*PRINT)");
 		}
-		if (verbose_output) {
-			cobc_cmd_print (buffptr);
-		}
-		if (verbose_output >= 0) {
-			ret = system (buffptr);
-			if (verbose_output) {
-				fputs (_("return status:"), stderr);
-				fprintf (stderr, "\t%d\n", ret);
-				fflush (stderr);
-			}
-		} else {
-			ret = 0;
-		}
+		ret = call_system (buffptr);
 		if (comp_only || ret != 0) {
 			cobc_free (buffptr);
 			return ret;
@@ -4121,19 +4269,7 @@ process (char *cmd)
 	if (shared) {
 		strcat (buffptr, " EXPORT(*ALL)");
 	}
-	if (verbose_output) {
-		cobc_cmd_print (buffptr);
-	}
-	if (verbose_output >= 0) {
-		ret = system (buffptr);
-		if (verbose_output) {
-			fputs (_("return status:"), stderr);
-			fprintf (stderr, "\t%d\n", ret);
-			fflush (stderr);
-		}
-	} else {
-		ret = 0;
-	}
+	ret = call_system (buffptr);
 	cobc_free (buffptr);
 	return ret;
 }
@@ -4145,20 +4281,7 @@ process (char *cmd)
 static int
 process (const char *cmd)
 {
-	int ret;
-
-	if (verbose_output) {
-		cobc_cmd_print (cmd);
-	}
-	if (verbose_output < 0) {
-		return 0;
-	}
-	ret = system (cmd);
-	if (verbose_output) {
-		fputs (_("return status:"), stderr);
-		fprintf (stderr, "\t%d\n", ret);
-		fflush (stderr);
-	}
+	int ret = call_system (cmd);
 	return !!ret;
 }
 
@@ -4243,11 +4366,8 @@ process_filtered (const char *cmd, struct filename *fn)
 	/* close pipe and get return code of cl.exe */
 	ret = !!_pclose (pipe);
 
-	if (verbose_output) {
-		fputs (_("return status:"), stderr);
-		fprintf (stderr, "\t%d\n", ret);
-		fflush (stderr);
-	}
+
+	output_return (ret);
 	return ret;
 }
 
@@ -4278,35 +4398,12 @@ process (const char *cmd)
 		*p = 0;
 	}
 
-	if (verbose_output) {
-		cobc_cmd_print (buffptr);
-	}
-
-	ret = system (buffptr);
+	ret = call_system (buffptr);
 
 	if (unlikely(buffptr != cmd)) {
 		cobc_free (buffptr);
 	}
 
-#ifdef	WIFSIGNALED
-	if (WIFSIGNALED(ret)) {
-#ifdef	SIGINT
-		if (WTERMSIG(ret) == SIGINT) {
-			cob_raise (SIGINT);
-		}
-#endif
-#ifdef	SIGQUIT
-		if (WTERMSIG(ret) == SIGQUIT) {
-			cob_raise (SIGQUIT);
-		}
-#endif
-	}
-#endif
-	if (verbose_output) {
-		fputs (_("return status:"), stderr);
-		fprintf (stderr, "\t%d\n", ret);
-		fflush (stderr);
-	}
 	return !!ret;
 }
 #endif
@@ -4422,15 +4519,7 @@ preprocess (struct filename *fn)
 			snprintf (cobc_buffer, cobc_buffer_size,
 				 "cobxref %s -R", fn->listing_file);
 			cobc_buffer[cobc_buffer_size] = 0;
-			if (verbose_output) {
-				cobc_cmd_print (cobc_buffer);
-			}
-			ret = system (cobc_buffer);
-			if (verbose_output) {
-				fputs (_("return status:"), stderr);
-				fprintf (stderr, "\t%d\n", ret);
-				fflush (stderr);
-			}
+			ret = call_system (cobc_buffer);
 			if (ret) {
 				fputs (_("'cobxref' execution unsuccessful"),
 					stderr);
@@ -4442,7 +4531,7 @@ preprocess (struct filename *fn)
 				putc ('\n', stderr);
 				fflush (stderr);
 			}
-			if (cb_listing_outputfile) {
+			if (cb_listing_outputfile && verbose_output >= 0) {
 				if (strcmp (cb_listing_outputfile, COB_DASH) == 0) {
 					cb_src_list_file = stdout;
 				} else {
@@ -4465,11 +4554,7 @@ preprocess (struct filename *fn)
 		cb_listing_file = NULL;
 	}
 
-	if (verbose_output) {
-		fputs (_("return status:"), stderr);
-		fprintf (stderr, "\t%d\n", errorcount);
-		fflush (stderr);
-	}
+	output_return (errorcount);
 	return !!errorcount;
 }
 
@@ -6989,11 +7074,7 @@ process_translate (struct filename *fn)
 	/* Release flex buffers - After file close */
 	ylex_call_destroy ();
 
-	if (verbose_output) {
-		fputs (_("return status:"), stderr);
-		fprintf (stderr, "\t%d\n", ret);
-		fflush (stderr);
-	}
+	output_return (ret);
 
 	if (ret) {
 		/* If processing raised errors set syntax-only flag to not
@@ -7718,10 +7799,14 @@ process_link (struct filename *l)
 
 #ifdef	COB_STRIP_CMD
 	if (strip_output && ret == 0) {
+		const char *exe_ext = COB_EXE_EXT;
+		if (*exe_ext) {
+			exe_ext++; /* drop the "." */
+		}
 		cobc_chk_buff_size (strlen (COB_STRIP_CMD) + 3 + strlen (name) + strlen (COB_EXE_EXT));
 		/* only add COB_EXE_EXT if it is not specified */
 		exe_name = file_extension (name);
-		if (COB_EXE_EXT[0] && strcasecmp (exe_name, COB_EXE_EXT + 1)) {
+		if (strcasecmp (exe_name, exe_ext)) {
 			sprintf (cobc_buffer, "%s \"%s%s\"",
 				 COB_STRIP_CMD, name, COB_EXE_EXT);
 		} else {
@@ -8134,7 +8219,7 @@ main (int argc, char **argv)
 	unsigned int		iparams;
 	unsigned int		local_level;
 	int			status;
-	int			statuses;
+	int			statuses = 0;
 	int			i;
 	const char		*run_name = NULL;
 
@@ -8252,7 +8337,13 @@ main (int argc, char **argv)
 	for (fn = file_list; fn; fn = fn->next) {
 		iparams++;
 		if (iparams == 1 && cobc_flag_run) {
-			run_name = fn->source;
+			if (fn->file_is_stdin
+			 && cb_compile_level == CB_LEVEL_EXECUTABLE) {
+				run_name = COB_DASH_OUT;
+			} else {
+				run_name = file_basename (fn->source, NULL);
+			}
+			run_name = cobc_strdup (run_name);
 		}
 		if (iparams > 1 && cb_compile_level == CB_LEVEL_EXECUTABLE) {
 			/* only the first source has the compile_level and main flag set */
@@ -8315,8 +8406,11 @@ main (int argc, char **argv)
 	}
 
 	/* Run job after compile? Use first (or only) filename */
-	if ((statuses == 0) && cobc_flag_run && run_name) {
-		status = process_run (file_basename(run_name, NULL));
+	if (run_name) {
+		if ((statuses == 0) && cobc_flag_run) {
+			status = process_run (run_name);
+		}
+		cobc_free ((void *)run_name);
 	}
 
 	/* We have completed */

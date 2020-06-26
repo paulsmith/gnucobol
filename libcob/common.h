@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
    Edward Hart
 
@@ -24,7 +24,7 @@
 
 /* Only define cob_decimal if we have the necessary mpz_t from gmp.h/mpir.h
    (or can self-define it from mp.h) */
-#ifndef __GMP_H__
+#if !defined (__GMP_H__)
 #ifndef __GNU_MP__
 #define COB_WITHOUT_DECIMAL
 #else
@@ -1770,6 +1770,7 @@ struct cobjmp_buf {
 /*******************************/
 /* Functions in common.c */
 COB_EXPIMP void		print_info	(void);
+COB_EXPIMP void		print_info_detailed	(const int);
 COB_EXPIMP void		print_version	(void);
 COB_EXPIMP int		cob_load_config	(void);
 COB_EXPIMP void		print_runtime_conf	(void);

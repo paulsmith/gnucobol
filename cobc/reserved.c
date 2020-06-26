@@ -5035,7 +5035,7 @@ cb_list_reserved (void)
 
 	/* Build list of reserved words */
 	word_descriptions = cobc_malloc (num_reserved_words * sizeof (struct list_reserved_line));
-	j = -1;
+	j = -1;	/* planned integer overflow with the +1 below expected to be zero */
 	for (i = 0; i < num_reserved_words; ++i) {
 		do {
 			++j;

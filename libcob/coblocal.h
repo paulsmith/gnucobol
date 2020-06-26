@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2007-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2007-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -70,9 +70,11 @@
 #endif
 
 
-#if	defined(_WIN32) || defined(__CYGWIN__)
+#if	defined(_WIN32) || defined(__CYGWIN__) || defined(COB_NO_VISIBILITY_ATTRIBUTE)
 #define COB_HIDDEN	extern
-#elif	defined(__GNUC__) && __GNUC__ >= 4
+#elif	defined(__GNUC__) && \
+	(__GNUC__ > 4 ||  /* note: this check should be moved to configure... */ \
+	 (__GNUC__ == 4 && __GNUC_MINOR__ > 2))
 /* Also OK for icc which defines __GNUC__ */
 #define COB_HIDDEN	extern __attribute__ ((visibility("hidden")))
 #elif	defined(__SUNPRO_C) && (__SUNPRO_C >= 0x550)

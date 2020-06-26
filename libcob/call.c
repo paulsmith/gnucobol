@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2020 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -552,10 +552,7 @@ insert (const char *name, void *func, lt_dlhandle handle,
 	p->handle = handle;
 	p->module = module;
 	if (path) {
-#ifdef	_WIN32
-		/* Malloced path or NULL */
-		p->path = _fullpath (NULL, path, 1);
-#elif	defined(HAVE_CANONICALIZE_FILE_NAME)
+#if	defined(HAVE_CANONICALIZE_FILE_NAME)
 		/* Malloced path or NULL */
 		p->path = canonicalize_file_name (path);
 #elif	defined(HAVE_REALPATH)
@@ -566,6 +563,9 @@ insert (const char *name, void *func, lt_dlhandle handle,
 			p->path = cob_strdup (s);
 		}
 		cob_free (s);
+#elif	defined	(_WIN32)
+		/* Malloced path or NULL */
+		p->path = _fullpath (NULL, path, 1);
 #endif
 		if (!p->path) {
 			p->path = cob_strdup (path);

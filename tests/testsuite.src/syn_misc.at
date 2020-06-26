@@ -4866,6 +4866,53 @@ prog.cob:34: warning: LINKAGE item 'G' is not a PROCEDURE USING parameter
 AT_CLEANUP
 
 
+AT_SETUP([duplicate PROCEDURE DIVISION/ENTRY USING items])
+AT_KEYWORDS([misc DIVISION ENTRY REFERENCE])
+# see bug #635
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  p                    PIC 9.
+       01  o                    PIC X(5).
+       PROCEDURE DIVISION USING p p o.
+       ENTRY "sub" USING o p o.
+])
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:8: error: duplicate USING BY REFERENCE item 'p'
+prog.cob:9: error: duplicate USING BY REFERENCE item 'o'
+])
+AT_CLEANUP
+
+
+AT_SETUP([duplicate CALL USING BY REFERENCE items])
+AT_KEYWORDS([misc])
+# see bug #635
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  p                    PIC 99.
+       01  o                    PIC X(5).
+       PROCEDURE DIVISION.
+          CALL "prog2"  USING p p o 
+                              p.
+          CALL "prog3"  USING BY REFERENCE p
+                              BY CONTENT   p o
+                              BY REFERENCE p o(2:).
+])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:9: warning: duplicate USING BY REFERENCE item 'p'
+prog.cob:10: warning: duplicate USING BY REFERENCE item 'p'
+prog.cob:13: warning: duplicate USING BY REFERENCE item 'p'
+])
+AT_CLEANUP
+
+
 AT_SETUP([ADD / SUBTRACT TABLE])
 AT_KEYWORDS([misc])
 
@@ -5963,9 +6010,9 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:9: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
 prog.cob:18: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
-prog.cob:13: error: 'invalid-1' ANY LENGTH must be PIC X or PIC N
-prog.cob:14: error: 'invalid-2' ANY LENGTH must be PIC X or PIC N
-prog.cob:15: error: 'invalid-3' ANY LENGTH must be PIC X or PIC N
+prog.cob:13: error: 'invalid-1' ANY LENGTH must be PIC X, PIC N or PIC 1
+prog.cob:14: error: 'invalid-2' ANY LENGTH must be PIC X, PIC N or PIC 1
+prog.cob:15: error: 'invalid-3' ANY LENGTH must be PIC X, PIC N or PIC 1
 prog.cob:16: error: 'invalid-4' ANY NUMERIC must be PIC 9
 prog.cob:17: error: 'invalid-5' ANY LENGTH has invalid definition
 prog.cob:18: error: 'invalid-6' ANY LENGTH has invalid definition

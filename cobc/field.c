@@ -994,8 +994,9 @@ validate_any_length_item (struct cb_field *f)
 				  f->name);
 		}
 	} else if (f->pic->category != CB_CATEGORY_ALPHANUMERIC
-			&& f->pic->category != CB_CATEGORY_NATIONAL) {
-		cb_error_x (x, _("'%s' ANY LENGTH must be PIC X or PIC N"),
+			&& f->pic->category != CB_CATEGORY_NATIONAL
+			&& f->pic->category != CB_CATEGORY_BOOLEAN) {
+		cb_error_x (x, _("'%s' ANY LENGTH must be PIC X, PIC N or PIC 1"),
 			  f->name);
 	}
 	/*
@@ -1012,7 +1013,7 @@ validate_any_length_item (struct cb_field *f)
 		return 1;
 	}
 
-	/* TO-DO: Why do we increase the reference counter here and not in another place? */
+	/* CHECKME: Why do we increase the reference counter here and not in another place? */
 	f->count++;
 	return 0;
 }
@@ -1874,6 +1875,12 @@ validate_elementary_item (struct cb_field *f)
 		f->usage = CB_USAGE_COMP_5;
 		f->pic = cb_build_binary_picture ("BINARY-LONG", 9, 0);
 		f->flag_real_binary = 1;
+		break;
+	case CB_USAGE_POINTER:
+		if (cb_numeric_pointer) {
+			f->pic = cb_build_binary_picture ("BINARY-DOUBLE", 18, 0);
+			f->flag_real_binary = 1;
+		}
 		break;
 	case CB_USAGE_UNSIGNED_LONG:
 		f->usage = CB_USAGE_COMP_5;

@@ -142,7 +142,6 @@ AT_CLEANUP
 
 AT_SETUP([Compiler outputs (assembler)])
 AT_KEYWORDS([runmisc cobc])
-AT_SKIP_IF(true)
 
 AT_DATA([prog.cob],[
         IDENTIFICATION DIVISION.
@@ -559,7 +558,7 @@ AT_CHECK([$COBCRUN noprog], [1], [],
 [libcob: error: module 'noprog' not found
 ])
 AT_CHECK([$COBCRUN -q -M], [1], [],
-[cobcrun: option requires an argument -- M
+[cobcrun: option requires an argument -- 'M'
 ])
 # FIXME - The following doesn't seem to work correct,
 #         we expect an error about missing module name
@@ -652,7 +651,6 @@ AT_CLEANUP
 
 AT_SETUP([Run job after compilation from stdin])
 AT_KEYWORDS([runmisc cobcrun])
-AT_SKIP_IF(true)
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
