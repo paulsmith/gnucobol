@@ -1,4 +1,8 @@
 
+2020-06-26  Simon Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l: allow more characters in $DISPLAY
+
 2020-06-23  Ron Norman <rjn@inglenet.com>
 
 	* parser.y: Changed to use common parsing for [NOT] EXCEPTION

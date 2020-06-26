@@ -3,6 +3,10 @@
 
 	* fileio.c (cob_file_close) [_WIN32]: pipe code compiles again, but still
 	  is not tested...
+	* common.c (cob_sys_system): deactivated WEXITSTATUS for now as MicroFocus
+	  doesn't do this --> may be added later with a runtime configuration
+	* common.h, coblocal.h (cob_runtime_hint, cob_runtime_error,
+	  cob_runtime_warning): made runtime message functions available again
 
 2020-06-23  Ron Norman <rjn@inglenet.com>
 

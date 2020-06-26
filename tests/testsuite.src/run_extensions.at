@@ -5085,23 +5085,31 @@ AT_CLEANUP
 AT_SETUP([DISPLAY DIRECTIVE and $DISPLAY])
 AT_KEYWORDS([extensions])
 
+# note: as we do support inline comments here we do not
+#       allow the * to be part of a non-literal output
+
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
+       01 var1          pic x.
+       $DISPLAY  MF compile time text # A.0-B;C *> without comment
+       01 var2          pic x.
+       >> DISPLAY some.text-here
+       01 var3          pic x.
        PROCEDURE        DIVISION.
-       >> DISPLAY some text
        >> DISPLAY   other  text #2  *> comment
-       >> DISPLAY  "literal text  *> no comment"
-       $DISPLAY  MF compile time text  *> without comment
+       >> DISPLAY  "literal text...  *> no comment"
+       $DISPLAY  "MF compile time text"
            GOBACK.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0],
-[some text
+[MF compile time text # A.0-B;C
+some.text-here
 other  text #2
-literal text  *> no comment
+literal text...  *> no comment
 MF compile time text
 ])
 AT_CLEANUP

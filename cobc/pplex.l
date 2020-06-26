@@ -570,8 +570,7 @@ CONTROL_STATEMENT_STATE>{
 	strncat (display_msg, yytext + 1, (size_t)(PPLEX_BUFF_LEN - 1));
   }
 
-  [x21-\xFF]	|
-  [ #A-Z0-9\x80-\xFF]+ {
+  [ A-Z0-9\x80-\xFF.,;#/\\_+-<>]+ {
 	strncat (display_msg, yytext, (size_t)(PPLEX_BUFF_LEN - 1));
   }
 }

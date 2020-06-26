@@ -1779,6 +1779,9 @@ COB_EXPIMP cob_field_attr *cob_alloc_attr(int type, int digits, int scale, int f
 COB_EXPIMP void		cob_set_exception	(const int);
 COB_EXPIMP int		cob_last_exception_is	(const int);
 
+COB_EXPIMP void		cob_runtime_hint	(const char *, ...) COB_A_FORMAT12;
+COB_EXPIMP void		cob_runtime_error	(const char *, ...) COB_A_FORMAT12;
+COB_EXPIMP void		cob_runtime_warning	(const char *, ...) COB_A_FORMAT12;
 
 /* General functions */
 

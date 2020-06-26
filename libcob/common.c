@@ -4662,10 +4662,14 @@ cob_sys_system (const void *cmdline)
 				}
 #endif
 				cob_free (command);
+#if 0	/* possibly do this, but only if explicit asked for via a new runtime configuration
+		   as at least MicroFocus always returns all bytes here;
+		   from its docs it _looks_ like ACU only return the lower bytes ... */
 #ifdef WEXITSTATUS
 				if (WIFEXITED (status)) {
 					status = WEXITSTATUS (status);
 				}
+#endif
 #endif
 				return status;
 			}
