@@ -4811,7 +4811,7 @@ cob_file_set_key (
 	fl->keys[keyn].keyn = (unsigned char)keyn;
 	fl->keys[keyn].tf_ascending = COB_ASCENDING;
 	fl->keys[keyn].field = key;
-	if (key)
+	if (key != NULL)
 		fl->keys[keyn].offset = (unsigned int)(key->data - fl->record->data);
 	else
 		fl->keys[keyn].offset = 0;
@@ -4834,15 +4834,20 @@ cob_file_set_key (
 			}
 		}
 	}
-	fl->keys[keyn].count_components = (short)parts;
-	va_start (args, parts);
-	for (i=0; i < parts && i < COB_MAX_KEYCOMP; i++) {
-		kp = va_arg (args, cob_field *);
-		fl->keys[keyn].component[i] = kp;
-		if (i == 0)
-			fl->keys[keyn].offset = (unsigned int)(kp->data - fl->record->data);
+	if (parts > 0) {
+		fl->keys[keyn].count_components = (short)parts;
+		va_start (args, parts);
+		for (i=0; i < parts && i < COB_MAX_KEYCOMP; i++) {
+			kp = va_arg (args, cob_field *);
+			fl->keys[keyn].component[i] = kp;
+			if (i == 0)
+				fl->keys[keyn].offset = (unsigned int)(kp->data - fl->record->data);
+		}
+		va_end (args);
+	} else {
+		fl->keys[keyn].count_components = 1;
+		fl->keys[keyn].component[0] = key;
 	}
-	va_end (args);
 }
 
 /*

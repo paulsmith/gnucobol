@@ -7701,9 +7701,11 @@ print_info_detailed (const int verbose)
 #endif
 #if defined	(WITH_LMDB)
 #if defined(MDB_VERSION_MAJOR) && defined(MDB_VERSION_MINOR) && defined(MDB_VERSION_PATCH)
+	{ char versbuff[60];
 	snprintf (versbuff, 55, "%s, compiled %d.%d.%d",
 			"LMDB", MDB_VERSION_MAJOR, MDB_VERSION_MINOR, MDB_VERSION_PATCH);
 	var_print (_("indexed file handler"), 		versbuff, "", 0);
+	}
 #else
 	var_print (_("indexed file handler"), 		"LMDB", "", 0);
 #endif
@@ -7730,9 +7732,11 @@ print_info_detailed (const int verbose)
 #endif
 #if defined	(WITH_OCI)
 #if defined(OCI_MAJOR_VERSION) && defined(OCI_MINOR_VERSION)
+	{ char versbuff[60];
 	snprintf (versbuff, 55, "%s - %d.%d",
 			"OCI (Oracle)", OCI_MAJOR_VERSION, OCI_MINOR_VERSION);
 	var_print (_("indexed file handler"), 		versbuff, "", 0);
+	}
 #else
 	var_print (_("indexed file handler"),		"OCI (Oracle)", "", 0);
 #endif
