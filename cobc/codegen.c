@@ -11380,10 +11380,10 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	} else {
 		l = prog->entry_list;
 		name_hash = cob_get_name_hash (CB_LABEL (CB_PURPOSE (l))->name);
+		output_line ("cob_glob_ptr->cob_call_params = %u;", 0);
 		output_line ("goto %s%d;", CB_PREFIX_LABEL,
 			     CB_LABEL (CB_PURPOSE (l))->id);
 	}
-	output_line ("cob_glob_ptr->cob_call_params = %u;", 0);
 	output_newline ();
 
 	/* PROCEDURE DIVISION */
