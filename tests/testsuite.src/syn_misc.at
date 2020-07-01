@@ -939,7 +939,7 @@ AT_DATA([prog.cob], [
        PROCEDURE DIVISION.
            *> Ok
            INSPECT "abcde" TALLYING x FOR CHARACTERS CHARACTERS
-       
+
            *> Not ok
            INSPECT "abcde" TALLYING x FOR ALL LEADING
                TRAILING ALL ALL ALL TRAILING
@@ -4616,6 +4616,79 @@ prog.cob:43: error: syntax error, unexpected DELIMITED, expecting INTO
 AT_CLEANUP
 
 
+AT_SETUP([STRING / UNSTRING POINTER clause])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  valid-ptr     PIC 99.
+       01  valid-ptr-2   BINARY-LONG.
+       01  valid-ptr-3   PIC 99 COMP-3.
+
+       01  invalid-ptr   PIC 9.
+       01  invalid-ptr-2 PIC 99V99.
+       01  invalid-ptr-3 FLOAT-LONG.
+       01  invalid-ptr-4 PIC 99PP.
+       01  invalid-ptr-5 PIC VPP99.
+       01  invalid-ptr-6 PIC X(30).
+       01  invalid-ptr-7.
+           03  n         PIC 99.
+           03  n2        PIC 99.
+
+
+       01  x             PIC X(9).
+       01  y             PIC X(9).
+
+       PROCEDURE       DIVISION.
+           STRING "hello" INTO x POINTER valid-ptr
+           STRING "hello" INTO x POINTER valid-ptr-2
+           STRING "hello" INTO x POINTER valid-ptr-3
+
+           STRING "hello" INTO x POINTER invalid-ptr
+           STRING "hello" INTO x POINTER invalid-ptr-2
+           STRING "hello" INTO x POINTER invalid-ptr-3
+           STRING "hello" INTO x POINTER invalid-ptr-4
+           STRING "hello" INTO x POINTER invalid-ptr-5
+           STRING "hello" INTO x POINTER invalid-ptr-6
+           STRING "hello" INTO x POINTER invalid-ptr-7
+
+           UNSTRING y INTO x POINTER valid-ptr
+           UNSTRING y INTO x POINTER valid-ptr-2
+           UNSTRING y INTO x POINTER valid-ptr-3
+
+           UNSTRING y INTO x POINTER invalid-ptr
+           UNSTRING y INTO x POINTER invalid-ptr-2
+           UNSTRING y INTO x POINTER invalid-ptr-3
+           UNSTRING y INTO x POINTER invalid-ptr-4
+           UNSTRING y INTO x POINTER invalid-ptr-5
+           UNSTRING y INTO x POINTER invalid-ptr-6
+           UNSTRING y INTO x POINTER invalid-ptr-7
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:30: error: 'invalid-ptr' is too small to contain the number 10 (one plus the size of 'x')
+prog.cob:31: error: POINTER item 'invalid-ptr-2' must be an integer
+prog.cob:32: error: POINTER item 'invalid-ptr-3' must be numeric and an integer
+prog.cob:33: error: POINTER item 'invalid-ptr-4' may not have PICTURE with P in it
+prog.cob:34: error: POINTER item 'invalid-ptr-5' must be an integer
+prog.cob:35: error: POINTER item 'invalid-ptr-6' must be numeric and an integer
+prog.cob:36: error: 'invalid-ptr-7' is not an elementary item
+prog.cob:42: error: 'invalid-ptr' is too small to contain the number 10 (one plus the size of 'y')
+prog.cob:43: error: POINTER item 'invalid-ptr-2' must be an integer
+prog.cob:44: error: POINTER item 'invalid-ptr-3' must be numeric and an integer
+prog.cob:45: error: POINTER item 'invalid-ptr-4' may not have PICTURE with P in it
+prog.cob:46: error: POINTER item 'invalid-ptr-5' must be an integer
+prog.cob:47: error: POINTER item 'invalid-ptr-6' must be numeric and an integer
+prog.cob:48: error: 'invalid-ptr-7' is not an elementary item
+])
+AT_CLEANUP
+
+
 AT_SETUP([UNSTRING COUNT clause])
 AT_KEYWORDS([misc])
 
@@ -4947,7 +5020,7 @@ AT_DATA([prog.cob], [
        01  p                    PIC 99.
        01  o                    PIC X(5).
        PROCEDURE DIVISION.
-          CALL "prog2"  USING p p o 
+          CALL "prog2"  USING p p o
                               p.
           CALL "prog3"  USING BY REFERENCE p
                               BY CONTENT   p o
@@ -7155,7 +7228,7 @@ AT_DATA([prog.cob], [
                05  parm-char PIC X OCCURS 0 TO 100 TIMES
                         DEPENDING ON parm-size.
        >>END-IF
-       
+
        PROCEDURE DIVISION USING parm.
            DISPLAY "hi"
            .

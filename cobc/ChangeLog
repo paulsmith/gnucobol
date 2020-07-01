@@ -1,7 +1,9 @@
 
 2020-06-30  Edward Hart <edward.dan.hart@gmail.com>
 
-	* typeck.c: strengthened syntax checks on UNSTRING ... COUNT (bug #653).
+	* typeck.c (validate_move): refactored.
+	* typeck.c: strengthened syntax checks on (UN)STRING ... POINTER
+	  (bug #488) and UNSTRING ... COUNT (bug #653).
 
 2020-06-26  Simon Sobisch <simonsobisch@gnu.org>
 
