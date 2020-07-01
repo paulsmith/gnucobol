@@ -914,6 +914,8 @@ cb_check_data_incompat (cb_tree x)
 {
 	struct cb_field		*f;
 
+	/* TO-DO: Check for EC-DATA-INCOMPATIBLE checking */
+
 	if (!x || x == cb_error_node) {
 		return;
 	}
@@ -11974,6 +11976,59 @@ cb_emit_stop_thread (cb_tree handle)
 
 /* STRING statement */
 
+static int
+error_if_not_int_field_or_has_pic_p (const char *clause, cb_tree f)
+{
+	int		error = 0;
+	enum cb_usage	usage;
+	int		scale;
+
+	if (!f) {
+		return 0;
+	}
+
+	if (cb_validate_one (f)) {
+		return 1;
+	}
+
+	usage = CB_FIELD_PTR (f)->usage;
+	if (CB_TREE_CATEGORY (f) != CB_CATEGORY_NUMERIC
+	    || is_floating_point_usage (usage)) {
+		cb_error_x (f, _("%s item '%s' must be numeric and an integer"),
+			    clause, CB_NAME (f));
+		error = 1;
+	} else if (CB_FIELD_PTR (f)->pic) {
+		scale = CB_FIELD_PTR (f)->pic->scale;
+		if (scale > 0) {
+			cb_error_x (f, _("%s item '%s' must be an integer"),
+				    clause, CB_NAME (f));
+			error = 1;
+		} else if (scale < 0) {
+			cb_error_x (f, _("%s item '%s' may not have PICTURE with P in it"),
+				    clause, CB_NAME (f));
+			error = 1;
+		}
+	}
+
+	return error;
+}
+
+/* Validate POINTER clause for STRING and UNSTRING */
+static void
+validate_pointer_clause (cb_tree pointer, cb_tree pointee)
+{
+	struct cb_field	*pointer_field = CB_FIELD_PTR (pointer);
+
+	if (pointer_field->children) {
+		cb_error_x (pointer, _("'%s' is not an elementary item"),
+			    CB_NAME (pointer));
+		return;
+	}
+	if (error_if_not_int_field_or_has_pic_p ("POINTER", pointer)) {
+		return;
+	}
+}
+
 void
 cb_emit_string (cb_tree items, cb_tree into, cb_tree pointer)
 {
@@ -11986,10 +12041,14 @@ cb_emit_string (cb_tree items, cb_tree into, cb_tree pointer)
 	 || cb_validate_one (pointer)) {
 		return;
 	}
+
+	if (pointer) {
+		validate_pointer_clause (pointer, into);
+	}
+
 	start = items;
 	cb_emit (CB_BUILD_FUNCALL_2 ("cob_string_init", into, pointer));
 	while (start) {
-
 		/* Find next DELIMITED item */
 		for (end = start; end; end = CB_CHAIN (end)) {
 			if (CB_PAIR_P (CB_VALUE (end))) {
@@ -12049,6 +12108,10 @@ cb_emit_unstring (cb_tree name, cb_tree delimited, cb_tree into,
 	 || cb_validate_list (into)) {
 		return;
 	}
+	if (pointer) {
+		validate_pointer_clause (pointer, name);
+	}
+
 	cb_emit (CB_BUILD_FUNCALL_3 ("cob_unstring_init", name, pointer,
 		cb_int ((int)cb_list_length (delimited))));
 	cb_emit_list (delimited);
@@ -12077,7 +12140,8 @@ cb_build_unstring_into (cb_tree name, cb_tree delimiter, cb_tree count)
 	if (delimiter == NULL) {
 		delimiter = cb_int0;
 	}
-	if (count == NULL) {
+	if (count == NULL
+	    || error_if_not_int_field_or_has_pic_p ("COUNT", count)) {
 		count = cb_int0;
 	}
 	return CB_BUILD_FUNCALL_3 ("cob_unstring_into", name, delimiter, count);
@@ -12699,36 +12763,7 @@ syntax_check_ml_gen_input_rec (cb_tree from)
 static int
 syntax_check_ml_gen_count_in (cb_tree count)
 {
-	int		error = 0;
-	enum cb_usage	usage;
-	int		scale;
-
-	if (!count) {
-		return 0;
-	}
-
-	if (cb_validate_one (count)) {
-		return 1;
-	}
-
-	usage = CB_FIELD (cb_ref (count))->usage;
-	/* TO-DO: Does a function exist to check if this an integer? */
-	if (CB_TREE_CATEGORY (count) != CB_CATEGORY_NUMERIC
-	    || is_floating_point_usage (usage)) {
-		cb_error_x (count, _("COUNT IN item must be numeric and an integer"));
-		error = 1;
-	} else if (CB_FIELD (cb_ref (count))->pic) {
-		scale = CB_FIELD (cb_ref (count))->pic->scale;
-		if (scale > 0) {
-			cb_error_x (count, _("COUNT IN item must be an integer"));
-			error = 1;
-		} else if (scale < 0) {
-			cb_error_x (count, _("COUNT IN item may not have PICTURE with P in it"));
-			error = 1;
-		}
-	}
-
-	return error;
+	return error_if_not_int_field_or_has_pic_p ("COUNT IN", count);
 }
 
 static int
