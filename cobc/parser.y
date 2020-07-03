@@ -4805,7 +4805,7 @@ file_control_entry:
 				 current_program->file_list);
 	} else {
 		/* Create dummy file */
-		snprintf (buff, COB_MINI_BUFF, "SELECT on line %d",
+		snprintf (buff, COB_MINI_BUFF, _("SELECT on line %d"),
 			  cb_source_line);
 		current_file = build_file (cb_build_reference (buff));
 		CB_ADD_TO_CHAIN (CB_TREE (current_file),
