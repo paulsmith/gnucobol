@@ -3357,7 +3357,6 @@ validate_file_status (cb_tree fs)
 		return;
 	}
 
-	/* Check is alphanumeric */
 	category = cb_tree_category (CB_TREE (fs_field));
 	if (category == CB_CATEGORY_ALPHANUMERIC) {
 		/* ok */

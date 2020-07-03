@@ -3,7 +3,8 @@
 
 	* parser.y (file_status_clause): only ignore VSAM status, pending proper
 	  config option.
-	* typeck.c: implement syntax rules for FILE STATUS (bug #656).
+	* typeck.c: implement syntax rules for FILE STATUS (bug #656), with
+	  warning for PIC 99 status (FR #333).
 
 2020-06-30  Edward Hart <edward.dan.hart@gmail.com>
 
