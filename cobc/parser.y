@@ -4789,6 +4789,8 @@ _file_control_sequence:
 file_control_entry:
   SELECT flag_optional undefined_word
   {
+	char	buff[COB_MINI_BUFF];
+	  
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_INPUT_OUTPUT_SECTION,
 			       COBC_HD_FILE_CONTROL, 0);
@@ -4801,9 +4803,14 @@ file_control_entry:
 		/* Add file to current program list */
 		CB_ADD_TO_CHAIN (CB_TREE (current_file),
 				 current_program->file_list);
-	} else if (current_program->file_list) {
-		current_program->file_list
-			= CB_CHAIN (current_program->file_list);
+	} else {
+		/* Create dummy file */
+		snprintf (buff, COB_MINI_BUFF, "SELECT on line %d",
+			  cb_source_line);
+		current_file = build_file (cb_build_reference (buff));
+		CB_ADD_TO_CHAIN (CB_TREE (current_file),
+				 current_program->file_list);
+
 	}
 	key_type = NO_KEY;
   }

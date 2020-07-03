@@ -5,6 +5,8 @@
 	  config option.
 	* typeck.c: implement syntax rules for FILE STATUS (bug #656), with
 	  warning for PIC 99 status (FR #333).
+	* parser.y (file_control_entry): fixed bug #619: create dummy
+	 current_file for invalid SELECT.
 
 2020-06-30  Edward Hart <edward.dan.hart@gmail.com>
 

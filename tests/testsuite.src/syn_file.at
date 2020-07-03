@@ -72,6 +72,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:9: error: redefinition of 'file1'
 prog.cob:7: error: 'file1' previously defined here
+prog.cob:9: error: missing file description for FILE SELECT on line 9
 ])
 AT_CLEANUP
 
@@ -1799,6 +1800,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:8: error: syntax error, unexpected ASSIGN, expecting Identifier
 prog.cob:8: error: syntax error, unexpected Literal
+prog.cob:8: error: missing file description for FILE SELECT on line 8
 ])
 AT_CLEANUP
 
@@ -1823,99 +1825,6 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob:10: warning: VALUE OF is obsolete in GnuCOBOL
 prog.cob:12: warning: variable 'fid-file1' will be implicitly defined
-])
-AT_CLEANUP
-
-
-AT_SETUP([Undeclared FILE STATUS variable])
-AT_KEYWORDS([file])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. prog.
-       ENVIRONMENT DIVISION.
-       INPUT-OUTPUT SECTION.
-       FILE-CONTROL.
-       SELECT file1 ASSIGN DISK
-          STATUS fs.
-       DATA DIVISION.
-       FILE SECTION.
-       FD file1.
-       1  file1-rec pic x.
-       PROCEDURE DIVISION.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:8: error: 'fs' is not defined
-])
-AT_CLEANUP
-
-
-AT_SETUP([FILE STATUS field subordinate to FD])
-AT_KEYWORDS([file])
-
-AT_XFAIL_IF(true)
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. prog.
-       ENVIRONMENT DIVISION.
-       INPUT-OUTPUT SECTION.
-       FILE-CONTROL.
-       SELECT file1 ASSIGN DISK
-          STATUS fs.
-       DATA DIVISION.
-       FILE SECTION.
-       FD  file1.
-       01  file1-rec.
-           02    filler pic x.
-           02    fs pic xx.
-       PROCEDURE DIVISION.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: NOT DETECTED AT COMPILE TIME
-])
-AT_CLEANUP
-
-
-AT_SETUP([FILE STATUS not PIC XX])
-AT_KEYWORDS([file])
-
-AT_XFAIL_IF(true)
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. prog.
-
-       ENVIRONMENT DIVISION.
-       INPUT-OUTPUT SECTION.
-       FILE-CONTROL.
-           SELECT file1 ASSIGN DISK
-               STATUS fs-1.
-           SELECT file2 ASSIGN DISK
-               STATUS fs-2.
-
-       DATA DIVISION.
-       FILE SECTION.
-       FD  file1.
-       01  file1-rec PIC x.
-
-       FD  file2.
-       01  file2-rec PIC X.
-
-       WORKING-STORAGE SECTION.
-       01  fs-1 PIC XXX.
-       01  fs-2 PIC 99.
-
-       PROCEDURE DIVISION.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: NOT DETECTED AT COMPILE TIME
 ])
 AT_CLEANUP
 
@@ -3081,4 +2990,33 @@ K,2,Y,Y,0x2A,disk,dp_mgr,machine
 
 AT_CHECK([gcdiff -I# reference tspfilex.xd], [0], [], [])
 
+AT_CLEANUP
+
+
+AT_SETUP([Invalid file name in SELECT])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. HELLO.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT input ASSIGN "in.txt".
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD input.
+       01 input-rec PIC X.
+
+       PROCEDURE DIVISION.
+           CONTINUE
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:8: error: syntax error, unexpected INPUT, expecting Identifier
+prog.cob:12: error: syntax error, unexpected INPUT, expecting Identifier
+])
 AT_CLEANUP
