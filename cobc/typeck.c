@@ -3347,6 +3347,59 @@ cb_validate_crt_status (cb_tree ref, cb_tree field_tree) {
 }
 
 static void
+validate_file_status (cb_tree fs)
+{
+	struct cb_field	*fs_field = CB_FIELD_PTR (fs);
+	enum cb_category category;
+	
+	/* TO-DO: If not defined, implicitly define PIC XX */
+	if (CB_TREE (fs_field) == cb_error_node) {
+		return;
+	}
+
+	/* Check is alphanumeric */
+	category = cb_tree_category (CB_TREE (fs_field));
+	if (category == CB_CATEGORY_ALPHANUMERIC) {
+		/* ok */
+	} else if (category == CB_CATEGORY_NUMERIC) {
+		if (fs_field->pic
+		    && fs_field->pic->scale != 0) {
+			cb_error_x (fs, _("FILE STATUS '%s' may not be a decimal or have a PIC with a P"),
+				    CB_NAME (fs));
+		}
+		cb_warning_x (cb_warn_extra, fs, _("FILE STATUS '%s' is a numeric field, but I-O status codes are not numeric in general"),
+			      CB_NAME (fs));
+	} else {
+		cb_error_x (fs, _("FILE STATUS '%s' must be alphanumeric or numeric field"),
+			    CB_NAME (fs));
+		return;
+	}
+
+	if (fs_field->usage != CB_USAGE_DISPLAY) {
+		cb_error_x (fs, _("FILE STATUS '%s' must be USAGE DISPLAY"),
+			    CB_NAME (fs));
+	}
+
+	/* Check file status is two characters long */
+	if (fs_field->size != 2) {
+		cb_error_x (fs, _("FILE STATUS '%s' must be 2 characters long"),
+			    CB_NAME (fs));
+	}
+
+	if (fs_field->storage != CB_STORAGE_WORKING
+	    && fs_field->storage != CB_STORAGE_LOCAL
+	    && fs_field->storage != CB_STORAGE_LINKAGE) {
+		cb_error_x (fs, _("FILE STATUS '%s' must be in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE"),
+			    CB_NAME (fs));
+	}
+
+	if (fs_field->flag_odo_relative) {
+		cb_error_x (fs, _("FILE STATUS '%s' may not be located after an OCCURS DEPENDING field"),
+			    CB_NAME (fs));
+	}
+}
+
+static void
 create_implicit_assign_dynamic_var (struct cb_program * const prog,
 				    cb_tree assign)
 {
@@ -3646,24 +3699,9 @@ cb_validate_program_data (struct cb_program *prog)
 		    && cb_ref (file->key) != cb_error_node) {
 			validate_relative_key_field (file);
 		}
-#if 0 /* Simon: deemed to be not neccessary, see related bug #421 */
-		if (file->assign != NULL) {
-			if (CB_LITERAL_P (file->assign)) {
-				/* ASSIGN TO 'literal' */
-			} else if ((CB_REFERENCE_P (file->assign)
-				    && cb_ref (file->assign) != cb_error_node)
-				   || CB_FIELD_P (file->assign)) {
-				field = CB_FIELD_PTR (file->assign);
-				if (field->storage != CB_STORAGE_WORKING
-					field->storage != CB_STORAGE_FILE
-					field->storage != CB_STORAGE_LOCAL) {
-					cb_verify_x(file->assign, cb_select_working,
-						_("file %s: ASSIGN %s declared outside WORKING-STORAGE"),
-						file->name, field->name);
-				}
-			}
+		if (file->file_status) {
+			validate_file_status (file->file_status);
 		}
-#endif
 	}
 
 	/* check alphabets */

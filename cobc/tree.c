@@ -4321,6 +4321,8 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 			}
 		}
 	}
+	
+	/* Validate and set max and min record size */
 	for (p = records; p; p = p->sister) {
 		if (f->record_min > 0) {
 			if (p->size < f->record_min) {
@@ -4404,6 +4406,7 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 			   _("RECORD DELIMITER clause on file with fixed-length records"));
 	}
 
+	/* Apply SAME clause */
 	if (f->same_clause) {
 		for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
 			if (CB_FILE (CB_VALUE (l))->same_clause == f->same_clause) {
@@ -4429,6 +4432,7 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 			}
 		}
 	}
+	
 	/* Create record */
 	if (f->record_max == 0) {
 		f->record_max = 32;
@@ -4452,11 +4456,9 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 
 	for (p = records; p; p = p->sister) {
 		p->redefines = f->record;
-#if	1	/* RXWRXW - Global/External */
 		if (p->flag_is_global) {
 			f->record->flag_is_global = 1;
 		}
-#endif
 	}
 
 	if (f->code_set_items) {
