@@ -3349,14 +3349,20 @@ cb_validate_crt_status (cb_tree ref, cb_tree field_tree) {
 static void
 validate_file_status (cb_tree fs)
 {
-	struct cb_field	*fs_field = CB_FIELD_PTR (fs);
+	struct cb_field	*fs_field;
 	enum cb_category category;
 	
 	/* TO-DO: If not defined, implicitly define PIC XX */
-	if (CB_TREE (fs_field) == cb_error_node) {
+	if (fs == cb_error_node
+	    || cb_ref (fs) == cb_error_node) {
 		return;
 	}
 
+	if (!CB_FIELD_P (cb_ref (fs))) {
+		cb_error (_("FILE STATUS '%s' is not a field"), CB_NAME (fs));
+	}
+
+	fs_field = CB_FIELD_PTR (fs);
 	category = cb_tree_category (CB_TREE (fs_field));
 	if (category == CB_CATEGORY_ALPHANUMERIC) {
 		/* ok */
