@@ -1,5 +1,9 @@
 
-2020-07-03  Edward Hart <edwar.dan.hart@gmail.com>
+2020-07-05  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, config.def: added vsam-status config option.
+
+2020-07-03  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (file_status_clause): only ignore VSAM status, pending proper
 	  config option.

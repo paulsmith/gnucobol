@@ -519,6 +519,7 @@ test.conf: missing definitions:
 	no definition of 'assign-using-variable'
 	no definition of 'assign-ext-dyn'
 	no definition of 'assign-disk-from'
+	no definition of 'vsam-status'
 ])
 
 AT_CLEANUP

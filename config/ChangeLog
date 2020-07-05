@@ -1,4 +1,8 @@
 
+2020-07-05  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added option vsam-status.
+
 2020-03-31  Ron Norman <rjn@inglenet.com>
 
 	* general: added option align-record and align-opt

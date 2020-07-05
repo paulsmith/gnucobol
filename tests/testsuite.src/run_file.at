@@ -4099,9 +4099,7 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob:14: warning: VSAM STATUS ignored
-])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [Read all 00b02 keys sequentially
 Reading: 00b02

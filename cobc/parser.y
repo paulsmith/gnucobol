@@ -5286,8 +5286,8 @@ file_status_clause:
 	check_repeated ("STATUS", SYN_CLAUSE_4, &check_duplicate);
 	current_file->file_status = $4;
 	if ($5) {
-		/* TO-DO: Add compiler configuration */
-		cb_warning (cb_warn_extra, _("%s ignored"), "VSAM STATUS");
+		/* Ignore VSAM STATUS field */
+		cb_verify (cb_vsam_status, _("VSAM status"));
 	}
   }
 ;

@@ -1554,8 +1554,9 @@ AT_DATA([prog.cob], [
             STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob:16: warning: VSAM STATUS ignored
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob:16: error: VSAM status does not conform to COBOL 2014
 ])
 
 AT_CLEANUP
