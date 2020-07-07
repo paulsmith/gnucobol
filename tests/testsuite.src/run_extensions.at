@@ -971,7 +971,8 @@ AT_DATA([ALLOC.cob], [
         77  X   PIC  9(2) PACKED-DECIMAL.
         77  NUM-ELEMENTS PIC 9(4) BINARY.
         77  SIZE-NEEDED  PIC 9(8) BINARY.
-        77  old-size     pic 9(8) binary.
+        77  OLD-SIZE     PIC 9(8) BINARY.
+        77  DISP-SIZE    PIC 9(8).
         77  VPTR  POINTER.
         77  VPTR2 POINTER.
         77  VPTR3 POINTER.
@@ -1034,7 +1035,8 @@ AT_DATA([ALLOC.cob], [
            If VPTR = NULL Then      *> If first time, allocate the table
              COMPUTE SIZE-NEEDED = LENGTH OF OBJ +
                                  LENGTH OF VARTAB * NUM-ELEMENTS
-             display 'First allocation, using ' size-needed ' bytes.'
+             MOVE SIZE-NEEDED TO DISP-SIZE
+             DISPLAY 'First allocation, using ' DISP-SIZE ' bytes.'
              ALLOCATE SIZE-NEEDED CHARACTERS INITIALIZED RETURNING VPTR
 
              SET ADDRESS OF VARGRP TO VPTR
@@ -1061,7 +1063,8 @@ AT_DATA([ALLOC.cob], [
              COMPUTE SIZE-NEEDED = LENGTH OF OBJ +
                                    LENGTH OF VARTAB * NUM-ELEMENTS
 
-             display 'Re-allocation, using ' size-needed ' bytes.'
+             MOVE SIZE-NEEDED TO DISP-SIZE
+             display 'Re-allocation, using ' DISP-SIZE ' bytes.'
       *>     ALLOCATE SIZE-NEEDED CHARACTERS INITIALIZED RETURNING VPTR3
              if size-needed < 2097152
                 ALLOCATE SIZE-NEEDED CHARACTERS INITIALIZED
@@ -1090,12 +1093,12 @@ AT_DATA([ALLOC.cob], [
 AT_CHECK([$COMPILE -std=ibm-strict -w ALLOC.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./ALLOC], [0],
-[First allocation, using 00322 bytes.
+[First allocation, using 00000322 bytes.
 VARTAB(12) = "9999        0000"
 VARTAB(17) = "0000HI MOM  0000"
 BUFFER     = "         9999        0000                                         "
              "                                 0000HI MOM  0000                 "
-Re-allocation, using 00482 bytes.
+Re-allocation, using 00000482 bytes.
 VARTAB(12) = "9999        0000"
 VARTAB(17) = "0000HI MOM  0000"
 ], [])
