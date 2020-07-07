@@ -895,6 +895,9 @@ cob_json_generate (cob_field *out, cob_ml_tree *tree, cob_field *count)
 	}
 
  end:
+	if (printed_json) {
+		cJSON_free (printed_json);
+	}
 	if (json) {
 		cJSON_Delete (json);
 	}

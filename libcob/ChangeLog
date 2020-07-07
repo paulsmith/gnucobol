@@ -1,4 +1,8 @@
 
+2020-07-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* mlio.c: fixed memory issue.
+
 2020-07-07  Ron Norman <rjn@inglenet.com>
 
 	* call.c,common.h: Remove  cob_set_num_params

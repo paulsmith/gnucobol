@@ -8390,6 +8390,7 @@ main (int argc, char **argv)
 		if (status == 0) {
 			status = process_run (run_name);
 		}
+		cobc_free ((void *)run_name);
 	}
 	
 	if (cb_compile_level < CB_LEVEL_LIBRARY

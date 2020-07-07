@@ -289,7 +289,7 @@ static void *	copy_literal (cb_tree l);
 }
 
 <*>^[ ]?"#ASSIGN".*\n {
-	char	*text = cobc_strdup (yytext);
+	char	*text = cobc_parse_strdup (yytext);
 	cb_assign_type_default = (enum cb_assign_type)(text[1] - '0');
 }
 

@@ -1,4 +1,8 @@
 
+2020-07-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.c, scanner.l: fixed memory issues.
+
 2020-07-05  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, config.def: added vsam-status config option.
