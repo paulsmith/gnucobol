@@ -1854,19 +1854,6 @@ cob_get_num_params ( void )
 	return -1;
 }
 
-void
-cob_set_num_params ( int n )
-{
-	if (cobglobptr) {
-		cobglobptr->cob_call_params = n;
-		return;
-	}
-	/* note: same message in call.c */
-	cob_runtime_warning_external ("cob_set_num_params", 1,
-		_("cob_init() has not been called"));
-	return;
-}
-
 int
 cob_get_param_type (int n)
 {

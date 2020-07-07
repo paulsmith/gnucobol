@@ -2150,7 +2150,6 @@ COB_EXPIMP int		cob_call_cobol	(const char *, const int, ...);
 COB_EXPIMP int		cob_call_entry	(void *, const int, ...);
 COB_EXPIMP int		cob_get_name_line ( char *prog, int *line );
 COB_EXPIMP int		cob_get_num_params ( void );
-COB_EXPIMP void		cob_set_num_params ( int num_params );
 COB_EXPIMP int		cob_get_param_constant ( int num_param );
 COB_EXPIMP int		cob_get_param_digits( int num_param );
 COB_EXPIMP int		cob_get_param_scale( int num_param );
