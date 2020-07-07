@@ -970,8 +970,8 @@ AT_DATA([ALLOC.cob], [
         WORKING-STORAGE SECTION.
         77  X   PIC  9(2) PACKED-DECIMAL.
         77  NUM-ELEMENTS PIC 9(4) BINARY.
-        77  SIZE-NEEDED  PIC 9(4) BINARY.
-        77  old-size     pic 9(4) binary.
+        77  SIZE-NEEDED  PIC 9(8) BINARY.
+        77  old-size     pic 9(8) binary.
         77  VPTR  POINTER.
         77  VPTR2 POINTER.
         77  VPTR3 POINTER.

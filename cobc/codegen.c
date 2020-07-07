@@ -2287,6 +2287,7 @@ output_local_field_cache (struct cb_program *prog)
 {
 	struct field_list	*field;
 	struct cb_field		*f;
+	int		skip_cmt = 0;
 
 	if (!local_field_cache) {
 		return;
@@ -2296,6 +2297,7 @@ output_local_field_cache (struct cb_program *prog)
 					     &field_cache_cmp);
 	for (field = local_field_cache; field; field = field->next) {
 		f = field->f;
+		skip_cmt = 0;
 		if (!f->flag_local
 		    && !f->flag_external) {
 			if (prog->flag_recursive
@@ -2307,6 +2309,7 @@ output_local_field_cache (struct cb_program *prog)
 			    && f->flag_occurs 
 			    && f->occurs_max > 1) {
 				output_emit_field (cb_build_field_reference (f, NULL), NULL);
+				skip_cmt = 1;
 			} else {
 				output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD, f->id);
 				output_field (field->x);
@@ -2321,10 +2324,12 @@ output_local_field_cache (struct cb_program *prog)
 			output ("}");
 		}
 
-		if (field->f->flag_filler) {
-			output (";\t/* Implicit FILLER */");
-		} else {
-			output (";\t/* %s */", field->f->name);
+		if (!skip_cmt) {
+			if (field->f->flag_filler) {
+				output (";\t/* Implicit FILLER */");
+			} else {
+				output (";\t/* %s */", field->f->name);
+			}
 		}
 		output_newline ();
 		field->f->report_flag |= COB_REPORT_REF_EMITTED;

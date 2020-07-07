@@ -3622,7 +3622,7 @@ main (int argc, char **argv)
    cob_init(argc, argv);
 
    /* call COBOL program via 'entry point' */
-   cob_ret = cob_call_entry (callee, 1, p1);
+   cob_ret = cob_call_entry ((void*)callee, 1, p1);
 
    /* Clean up and terminate - This does not return */
    cob_stop_run (cob_ret);
