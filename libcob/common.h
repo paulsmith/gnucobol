@@ -2146,6 +2146,8 @@ COB_EXPIMP int		cob_func		(const char *, const int, void **);
 COB_EXPIMP void		*cob_savenv		(struct cobjmp_buf *);
 COB_EXPIMP void		*cob_savenv2		(struct cobjmp_buf *, const int);
 COB_EXPIMP void		cob_longjmp		(struct cobjmp_buf *);
+COB_EXPIMP int		cob_call_cobol	(const char *, const int, ...);
+COB_EXPIMP int		cob_call_entry	(void *, const int, ...);
 COB_EXPIMP int		cob_get_name_line ( char *prog, int *line );
 COB_EXPIMP int		cob_get_num_params ( void );
 COB_EXPIMP void		cob_set_num_params ( int num_params );

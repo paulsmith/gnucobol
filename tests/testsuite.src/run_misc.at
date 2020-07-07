@@ -3579,7 +3579,7 @@ AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([CALL in from C, cob_call_params explicitly set])
+AT_SETUP([CALL in from C])
 AT_KEYWORDS([runmisc])
 
 AT_DATA([callee.cob], [
@@ -3621,11 +3621,8 @@ main (int argc, char **argv)
    /* initialize the COBOL run-time library */
    cob_init(argc, argv);
 
-   /* setup for COBOL parameter handling */
-   cob_set_num_params (1);
-
-   /* call COBOL program */
-   cob_ret = callee (p1, NULL);
+   /* call COBOL program via 'entry point' */
+   cob_ret = cob_call_entry (callee, 1, p1);
 
    /* Clean up and terminate - This does not return */
    cob_stop_run (cob_ret);
@@ -3638,7 +3635,7 @@ AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [P1: A], [])
 AT_CLEANUP
 
 
-AT_SETUP([CALL in from C, cob_call_params unknown])
+AT_SETUP([CALL in from C, number of parameters unknown])
 AT_KEYWORDS([runmisc])
 
 AT_DATA([callee.cob], [
@@ -3682,8 +3679,11 @@ main (int argc, char **argv)
    /* initialize the COBOL run-time library */
    cob_init (argc, argv);
 
-   /* call COBOL program */
+   /* call COBOL program directly */
    cob_ret = callee (p1, p2);
+
+   /* call COBOL program by name */
+   cob_ret = cob_call_cobol ("callee", 2, p1, p2);
 
    /* Clean up and terminate - This does not return */
    cob_stop_run (cob_ret);
@@ -3691,7 +3691,7 @@ main (int argc, char **argv)
 ]])
 
 AT_CHECK([$COMPILE -o caller caller.c callee.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [OK], [])
+AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [OKOK], [])
 
 AT_CLEANUP
 
@@ -3752,8 +3752,8 @@ cprog (void *cb)
    char *p3 = "CALLBACK";
 
    p1 = p3;
-   cob_set_num_params (3);
-   ((int (*)(char *, int, char *))cb)(p1, p2, p3);
+   /* call COBOL program via 'entry point' */
+   cob_call_entry (cb, 3, p1, p2, p3);
    return 0;
 }
 ]])
@@ -3820,8 +3820,7 @@ cprog (void *cb)
    char *p3 = "CALLBACK";
 
    p1 = p3;
-   cob_set_num_params (3);
-   ((int (*)(char *, int, char *))cb)(p1, p2, p3);
+   cob_call_entry (cb, 3, p1, p2, p3);
    return 0;
 }
 ]])

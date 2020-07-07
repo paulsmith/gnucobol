@@ -1,4 +1,10 @@
 
+2020-07-07  Ron Norman <rjn@inglenet.com>
+
+	* call.c,common.h: Add new functions cob_call_cobol and cob_call_entry
+			for C modules to call COBOL modules using 'stdarg' type of
+				parameter passing.
+
 2020-06-25  Simon Sobisch <simonsobisch@gnu.org>
 
 	* fileio.c (cob_file_close) [_WIN32]: pipe code compiles again, but still
